@@ -298,9 +298,12 @@ class CephDriver(object):
                 LOG.info('strg list: %s' % strgs)
                 if strgs and is_first_osd:
                     fs_type = strgs[0]['file_system']
+                    osd_heartbeat_interval= strgs[0]['osd_heartbeat_interval']
+                    osd_heartbeat_grace= strgs[0]['osd_heartbeat_grace']
                     # validate fs type
                     if fs_type in ['xfs', 'ext3', 'ext4', 'btrfs']:
-                        config.add_osd_header(osd_type=fs_type)
+                        #config.add_osd_header(osd_type=fs_type)
+                        config.add_osd_header(osd_type=fs_type,osd_heartbeat_interval=osd_heartbeat_interval,osd_heartbeat_grace=osd_heartbeat_grace)
                     else:
                         config.add_osd_header()
                     is_first_osd = False

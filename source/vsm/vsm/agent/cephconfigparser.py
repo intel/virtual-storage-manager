@@ -395,7 +395,7 @@ class CephConfigParser(manager.Manager):
 
     def add_osd_header(self,
                        journal_size=0,
-                       osd_type='xfs'):
+                       osd_type='xfs',osd_heartbeat_interval=10,osd_heartbeat_grace=10):
         if self._parser.has_section('osd'):
             return
 
@@ -408,6 +408,8 @@ class CephConfigParser(manager.Manager):
         # NOTE add keyring to support lower version of OSD.
         # keyring = /etc/ceph/keyring.$name
         self._parser.set('osd', 'keyring', '/etc/ceph/keyring.$name')
+        self._parser.set('osd', 'osd heartbeat interval', str(osd_heartbeat_interval))
+        self._parser.set('osd', 'osd heartbeat grace', str(osd_heartbeat_grace))
         self._parser.set('osd', 'osd mkfs type', osd_type)
         mount_option = utils.get_fs_options(osd_type)[1]
         self._parser.set('osd', 'osd mount options %s' % osd_type, mount_option)

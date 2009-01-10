@@ -71,6 +71,8 @@ class ManifestParser(object):
                                'storage_group_near_full_threshold',
                                'storage_group_full_threshold',
                                'ceph_near_full_threshold',
+                               'osd_heartbeat_interval',
+                               'osd_heartbeat_grace',
                                'ceph_full_threshold'] 
 
         self._is_server_manifest = is_server_manifest
@@ -134,9 +136,11 @@ class ManifestParser(object):
             2. comments
             3. comments starts with spaces.
         """
+        print 'self._file_path==',self._file_path
         lines = open(self._file_path).readlines()
         self._lines = []
         for single_line in lines:
+            print 'line^^^^^^^^^^^^^^',single_line
             single_line = single_line.strip()
             if not single_line.startswith("#") and len(single_line):
                 self._lines.append(single_line)
@@ -216,6 +220,7 @@ class ManifestParser(object):
         """Return dict info of cluster."""
         def _get_cluster_value(ktype):
             rpos = self._check_single_key_word_exists(ktype)
+            print 'self.lines=%s-----and pos=%s----'%(self._lines,rpos)
             for pos in (rpos + 1, len(self._lines) - 1):
                 single_line = self._lines[pos]
                 if single_line.find("[") != -1:
@@ -230,7 +235,9 @@ class ManifestParser(object):
                'public_addr': _get_cluster_value('management_addr'),
                'secondary_public_addr':
                               _get_cluster_value('ceph_public_addr'),
-               'cluster_addr': _get_cluster_value('ceph_cluster_addr')}
+               'cluster_addr': _get_cluster_value('ceph_cluster_addr'),
+               'osd_heartbeat_interval': _get_cluster_value('osd_heartbeat_interval'),
+               'osd_heartbeat_grace': _get_cluster_value('osd_heartbeat_grace')}
 
         return ret
 
@@ -487,7 +494,6 @@ class ManifestParser(object):
         """Return the segments of cluster name."""
         #return self._get_segment("cluster")
         self._map['cluster'] = self._get_segment("cluster")
-
     def _dict_insert_settings_c(self):
         """ Return the segments of vsm settings."""
         name_dict = self._get_segment("settings")
@@ -550,7 +556,6 @@ class ManifestParser(object):
             info["secondary_public_addr"]
         self._map['cluster']['cluster_network'] = info["cluster_addr"]
         self._map['cluster']['file_system'] = info["file_system"]
-
     def _format_cluster_manifest_to_json(self):
         """Return the json format [dict]."""
         self._map = {}
