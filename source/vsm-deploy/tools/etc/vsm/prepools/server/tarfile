@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function gen_tar_file() {
+    local vsmapp_ip=$1
+    local install_file=$2
+
+    TEMP=`mktemp`; rm -rf $TEMP; mkdir -p $TEMP/prepools
+    cp -rf /etc/vsm/prepools/* $TEMP/prepools/
+    cp -rf /etc/ceph/ceph.conf $TEMP/prepools/lib/
+    cd $TEMP/prepools
+
+cat <<"EOF" > localrc
+AUTH_CINDER_USER=%AUTH_CINDER_USER%
+AUTH_CINDER_POOL=%AUTH_CINDER_POOL%
+AUTH_CINDER_UUID=%AUTH_CINDER_UUID%
+BACKEND_LIST=%BACKEND_LIST%
+TYPE_LIST=%TYPE_LIST%
+EOF
+
+    sed -i "s,%AUTH_CINDER_USER%,$AUTH_CINDER_USER,g" localrc
+    sed -i "s,%AUTH_CINDER_POOL%,$AUTH_CINDER_POOL,g" localrc
+    sed -i "s,%AUTH_CINDER_UUID%,$AUTH_CINDER_UUID,g" localrc
+
+    if [[ ${#BACKEND_LIST} -gt 0 ]]; then
+        sed -i "s/%BACKEND_LIST%/$BACKEND_LIST/g" localrc
+        sed -i "s/%TYPE_LIST%/$TYPE_LIST/g" localrc
+    else
+        sed -i "/BACKEND_LIST/d" localrc
+        sed -i "/TYPE_LIST/d" localrc
+    fi
+
+    cp -rf $install_file install
+    chmod +x install
+    rm -rf main
+    rm -rf server
+
+    #-----------------------------------
+    # Gent tar file run in OpenStack node.
+    #-----------------------------------
+
+    cd $TEMP
+    tar zcf prepools.tar.gz prepools
+    ssh $vsmapp_ip "mkdir -p $TEMP"
+    scp -pr prepools.tar.gz $vsmapp_ip:/$TEMP
+    ssh $vsmapp_ip "cd $TEMP; tar zxf prepools.tar.gz"
+    ssh $vsmapp_ip "cd $TEMP/prepools/; ./install"
+}

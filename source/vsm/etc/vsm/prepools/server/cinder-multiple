@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function _backend_list() {
+    local list=${BACKEND_LIST//\{/ }
+    list=${list//\},/ }
+    list=${list//\}/ }
+    list=${list//,/ }
+    echo $list
+}
+
+function cinder_multiple_prepare() {
+    for n in `_backend_list`; do
+        _create_pool ${n}
+    done
+    _del_user ${AUTH_CINDER_USER}
+}
+
+function _gen_rwx_str() {
+    local old_str=""
+    local temp_str=""
+    local cnt=0
+    local iter=0
+
+    for n in `_backend_list`; do
+        let ++cnt
+    done
+
+    for n in `_backend_list`; do
+        let ++iter
+        if [[ ! $iter -eq $cnt ]]; then
+            temp_str=" allow rwx pool=${n},"
+        else
+            temp_str=" allow rwx pool=${n}"
+        fi
+
+        str=${old_str}${temp_str}
+        old_str=$str
+    done
+    echo $old_str
+}
+
+function create_multiple_cinder() {
+    local file=/tmp/cinder.keyring
+    rm -rf $file
+    local str=""
+    cinder_multiple_prepare
+
+    if [[ ${#AUTH_GLANCE_POOL} -gt 0 ]]; then
+        _a="allow class-read object_prefix rbd_children,"
+        _b=" allow rwx pool=${AUTH_CINDER_POOL},"
+        _c=`_gen_rwx_str`
+        str=${_a}${_b}${_c}
+
+        ceph auth get-or-create ${AUTH_CINDER_USER} \
+            mon 'allow r' \
+            osd "$str"
+    else
+        _a="allow class-read object_prefix rbd_children,"
+        _b=`_gen_rwx_str`
+        str=${_a}${_b}
+
+        ceph auth get-or-create ${AUTH_CINDER_USER} \
+            mon 'allow r' \
+            osd "$str"
+    fi
+
+    ceph auth get-or-create ${AUTH_CINDER_USER} -o $file
+
+    mkdir -p $TOPDIR/files/cinder/
+    cp -rf /etc/ceph/ceph.conf $TOPDIR/files/cinder/
+    mv $file $TOPDIR/files/cinder/
+
+cat <<"EOF">>$TOPDIR/files/cinder/ceph.conf
+[%AUTH_CINDER_USER%]
+keyring=/etc/cinder/cinder.keyring
+EOF
+
+    sed -i "s,%AUTH_CINDER_USER%,$AUTH_CINDER_USER,g" $TOPDIR/files/cinder/ceph.conf
+}

@@ -1,0 +1,82 @@
+# Copyright 2011 Denali Systems, Inc.
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+"""
+Devices interface (1.1 extension).
+"""
+
+import urllib
+from vsmclient import base
+
+class Device(base.Resource):
+    """A device is an extra block level storage to the OpenStack instances."""
+    def __repr__(self):
+        return "<Device: %s>" % self.id
+
+    def delete(self):
+        """Delete this device."""
+        self.manager.delete(self)
+
+    def update(self, **kwargs):
+        """Update the display_name or display_description for this device."""
+        self.manager.update(self, **kwargs)
+
+    def force_delete(self):
+        """Delete the specified device ignoring its current state.
+
+        :param device: The UUID of the device to force-delete.
+        """
+        self.manager.force_delete(self)
+
+class DeviceManager(base.ManagerWithFind):
+    """
+    Manage :class:`Device` resources.
+    """
+    resource_class = Device
+
+    def get(self, device_id):
+        """
+        Get a device.
+
+        :param device_id: The ID of the device.
+        :rtype: :class:`Device`
+        """
+        return self._get("/devices/%s" % device_id, "device")
+
+    def list(self, detailed=False, search_opts=None):
+        """
+        Get a list of all devices.
+
+        :rtype: list of :class:`Device`
+        """
+        if search_opts is None:
+            search_opts = {}
+
+        qparams = {}
+
+        for opt, val in search_opts.iteritems():
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+
+        detail = ""
+        if detailed:
+            detail = "/detail"
+
+        ret = self._list("/devices%s%s" % (detail, query_string),
+                          "devices")
+        return ret
+

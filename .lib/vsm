@@ -1,0 +1,46 @@
+function _get_vsm_version() {
+    local version_file=$TOPDIR/$SOURCE_DIR/$VSM_DIR/vsm.spec
+    local str=`cat $version_file | grep Version | awk '{print $2}'`
+    echo $str
+}
+
+function _change_vsm_files() {
+    echo "" > $TEMP/$VSM_DIR/vsm.egg-info/requires.txt
+    echo "" > $TEMP/$VSM_DIR/tools/pip-requires
+    echo "" > $TEMP/$VSM_DIR/tools/test-requires
+}
+
+function _install_vsm_dep_package() {
+    yum install -y `cat $1 | grep BuildRequires | awk '{print $2}' | tr "\n" " "`
+    yum install -y rpm-build
+}
+
+function _setup_vsm_rpm() {
+    rm -rf $TEMP/*
+    local old_dir=`pwd`
+    local version=`_get_vsm_version`
+
+    cp -rf $TOPDIR/$SOURCE_DIR/$VSM_DIR $TEMP/
+    cd $TEMP/
+
+    _change_vsm_files
+
+    if [[ $VSM_DIR != vsm-$version ]]; then
+        mv $VSM_DIR vsm-$version
+    fi
+
+    [[ -e vsm-$version/build ]] && rm -rf vsm-$version/build
+
+    tar zcf vsm-${version}.tar.gz vsm-$version
+    cp -rf vsm-${version}.tar.gz ~/rpmbuild/SOURCES/
+    cp -rf vsm-$version/vsm.spec ~/rpmbuild/SPECS/
+    _install_vsm_dep_package vsm-$version/vsm.spec
+    cd ~/rpmbuild/SPECS/
+    rpmbuild -bb vsm.spec
+
+    cd $old_dir
+}
+
+function build_vsm_rpm() {
+    _setup_vsm_rpm
+}

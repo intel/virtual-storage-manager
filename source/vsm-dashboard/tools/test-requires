@@ -1,0 +1,9 @@
+# Testing Requirements
+coverage
+django-nose
+mox
+netaddr
+nose
+pep8
+pylint
+sphinx

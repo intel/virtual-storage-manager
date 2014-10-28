@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+#---------------------------------------------
+#command option
+#---------------------------------------------
+
+TOPDIR=$(cd $(dirname "$0") && pwd)
+rm -rf /tmp/vsmrepo
+
+echo "Test can connect to internet by wget."
+echo "Connect to www.google.com"
+wget -c www.google.com >/dev/null 2>&1 &
+
+if [[ ! -e index.html ]]; then
+    echo "Seems can not connected to internet."
+fi
+
+rm -rf index.html
+
+cat $TOPDIR/rpms_list | while read line; do
+    str=line
+    if [[ ! -e $TOPDIR/${str##*/} ]]; then
+        if [[ ! -e /tmp/vsmrepo/${str##*/} ]]; then
+            wget -c $line >/dev/null 2>&1 &
+        else
+            echo "Already find file ${str##*/} in /tmp/vsmrepo."
+        fi
+    else
+        echo "Already find file ${str##*/} in $TOPDIR."
+    fi
+done
+
+cnt=`ps aux | grep wget| grep -v grep | wc -l`
+while [[ $cnt -gt 0 ]]; do
+    sleep 3
+    echo "Still downloading packages."
+    echo "-------------------------------------------"
+    str=`ps uax | grep wget | grep -v grep | awk '{print $13}'`
+    echo "Downloading ${str##*/}"
+    cnt=`ps aux | grep wget| grep -v grep | wc -l`
+done
+
+mkdir -p /tmp//vsmrepo/
+mv $TOPDIR/*.rpm /tmp/vsmrepo/
+
+echo "Success ~~"
+echo "All the packages are downloaded in:"
+echo "/tmp/vsmrepo"

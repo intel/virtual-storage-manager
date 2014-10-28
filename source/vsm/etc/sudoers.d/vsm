@@ -1,0 +1,3 @@
+Defaults:vsm !requiretty
+
+vsm ALL = (root) NOPASSWD: /usr/bin/vsm-rootwrap /etc/vsm/rootwrap.conf *

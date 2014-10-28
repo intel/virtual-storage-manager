@@ -1,0 +1,40 @@
+#--------------------------------
+# Update installation info to
+# vsm-api.
+#--------------------------------
+
+VSM_API_TOKEN=
+VSM_API_URL=
+
+
+#--------------------------------
+# Present storage pool to Glance
+#--------------------------------
+
+AUTH_GLANCE_USER=client.glance
+AUTH_GLANCE_POOL=glance
+
+#--------------------------------
+# Cinder
+#--------------------------------
+
+AUTH_CINDER_USER=client.cinder-main
+AUTH_CINDER_POOL=cinder-main
+AUTH_CINDER_UUID=d3837ac3-5fd8-4cb7-ad6a-810020bdd21a
+
+#--------------------------------
+# Multi-backend
+#--------------------------------
+
+# NOTE The backend should follow
+# type-name-uuid
+BACKEND_LIST=
+
+#--------------------------------
+# Cinder-Backup
+#--------------------------------
+
+AUTH_BACKUP_USER=
+AUTH_BACKUP_KEY=
+AUTH_BACKUP_POOL=
+AUTH_BACKUP_UUID=

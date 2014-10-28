@@ -1,0 +1,52 @@
+function is_service_enabled() {
+    set +o xtrace
+    if [[ $# != 1 ]]; then
+        echo "************ERROR***********"
+        echo "You need input one service to check."
+        echo "For example: is_service_enabled repo."
+        exit 0
+    fi
+    local cnt=0
+    local _host=$1
+    for n in `hostname -I`; do
+        if [[ $_host == $n ]]; then
+            let cnt=cnt+1
+        fi
+    done
+
+    if [[ $_host == `hostname` ]]; then
+        let cnt=cnt+1
+    fi
+
+    echo $cnt
+
+}
+
+function get_id () {
+    export SERVICE_TOKEN=$ADMIN_TOKEN
+    export SERVICE_ENDPOINT=http://$KEYSTONE_HOST:35357/v2.0
+    echo `"$@" | awk '/ id / { print $4 }'`
+}
+
+function get_tenant {
+    set +o xtrace
+    var=$1;
+    pw=${!var}
+    export SERVICE_TOKEN=$ADMIN_TOKEN
+    export SERVICE_ENDPOINT=http://$KEYSTONE_HOST:35357/v2.0
+    echo $SERVICE_TOKEN
+    pw=`keystone tenant-list | grep $2 | awk '{print $2}'`
+    eval "$var=$pw"
+    set -o xtrace
+}
+
+function get_role {
+    set +o xtrace
+    var=$1;
+    pw=${!var}
+    export SERVICE_TOKEN=$ADMIN_TOKEN
+    export SERVICE_ENDPOINT=http://$KEYSTONE_HOST:35357/v2.0
+    pw=`keystone role-list | grep $2 | awk '{print $2}'`
+    eval "$var=$pw"
+    set -o xtrace
+}

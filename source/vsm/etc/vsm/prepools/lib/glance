@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function _set_default_glance() {
+    local key=`echo $@ | awk -F "=" '{print $1}'`
+    local value=`echo $@ | awk -F "=" '{print $2}'`
+    openstack-config --set /etc/glance/glance-api.conf DEFAULT $key $value
+}
+
+function configure_glance() {
+    local glance_file=/etc/glance/glance-api.conf
+    local ceph_file=/etc/glance/ceph.conf
+
+    # If we find the glance.conf, we change the configuration file.
+    # Otherwise, skip.
+    # NOTE: If do not find glance.conf file, do not report error.
+
+    if [[ -e $glance_file ]]; then
+        cp -rf $TOPDIR/files/glance/* /etc/glance/
+        _set_default_glance default_store=rbd
+        _set_default_glance rbd_store_ceph_conf=$ceph_file
+        _set_default_glance rbd_store_user=${AUTH_GLANCE_USER#*.}
+        _set_default_glance rbd_store_pool=${AUTH_GLANCE_POOL}
+        _set_default_glance rbd_store_chunk_size=8
+        _set_default_glance show_image_direct_url=True
+
+        chown -R glance:glance /etc/glance
+        if [[ `is_service_running openstack-glance-api` -gt 0 ]]; then
+            service openstack-glance-api restart
+        fi
+
+        if [[ `is_service_running openstack-glance-registry` -gt 0 ]]; then
+            service openstack-glance-registry restart
+        fi
+    fi
+}

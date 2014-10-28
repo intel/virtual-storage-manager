@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+# Determine OS Vendor, Release and Update
+# Tested with OS/X, Ubuntu, RedHat, CentOS, Fedora
+# Returns results in global variables:
+# os_VENDOR - vendor name
+# os_RELEASE - release
+# os_UPDATE - update
+# os_PACKAGE - package type
+# os_CODENAME - vendor's codename for release
+# get_os_version
+function get_os_version() {
+    # Figure out which vendor we are
+    if [[ -n "`which sw_vers 2>/dev/null`" ]]; then
+        # OS/X
+        os_VENDOR=`sw_vers -productName`
+        os_RELEASE=`sw_vers -productVersion`
+        os_UPDATE=${os_RELEASE##*.}
+        os_RELEASE=${os_RELEASE%.*}
+        os_PACKAGE=""
+        if [[ "$os_RELEASE" =~ "10.7" ]]; then
+            os_CODENAME="lion"
+        elif [[ "$os_RELEASE" =~ "10.6" ]]; then
+            os_CODENAME="snow leopard"
+        elif [[ "$os_RELEASE" =~ "10.5" ]]; then
+            os_CODENAME="leopard"
+        elif [[ "$os_RELEASE" =~ "10.4" ]]; then
+            os_CODENAME="tiger"
+        elif [[ "$os_RELEASE" =~ "10.3" ]]; then
+            os_CODENAME="panther"
+        else
+            os_CODENAME=""
+        fi
+    elif [[ -x $(which lsb_release 2>/dev/null) ]]; then
+        os_VENDOR=$(lsb_release -i -s)
+        os_RELEASE=$(lsb_release -r -s)
+        os_UPDATE=""
+        if [[ "Debian,Ubuntu" =~ $os_VENDOR ]]; then
+            os_PACKAGE="deb"
+        else
+            os_PACKAGE="rpm"
+        fi
+        os_CODENAME=$(lsb_release -c -s)
+    elif [[ -r /etc/redhat-release ]]; then
+        # Red Hat Enterprise Linux Server release 5.5 (Tikanga)
+        # CentOS release 5.5 (Final)
+        # CentOS Linux release 6.0 (Final)
+        # Fedora release 16 (Verne)
+        os_CODENAME=""
+        for r in "Red Hat" CentOS Fedora; do
+            os_VENDOR=$r
+            if [[ -n "`grep \"$r\" /etc/redhat-release`" ]]; then
+                ver=`sed -e 's/^.* \(.*\) (\(.*\)).*$/\1\|\2/' /etc/redhat-release`
+                os_CODENAME=${ver#*|}
+                os_RELEASE=${ver%|*}
+                os_UPDATE=${os_RELEASE##*.}
+                os_RELEASE=${os_RELEASE%.*}
+                break
+            fi
+            os_VENDOR=""
+        done
+        os_PACKAGE="rpm"
+    fi
+    export os_VENDOR os_RELEASE os_UPDATE os_PACKAGE os_CODENAME
+    echo $os_VENDOR $os_RELEASE $os_UPDATE $os_PACKAGE $os_CODENAME
+}
+
+# Translate the OS version values into common nomenclature
+# Sets ``DISTRO`` from the ``os_*`` values
+function get_distribution() {
+    get_os_version
+    if [[ "$os_VENDOR" =~ (Ubuntu) ]]; then
+        # 'Everyone' refers to Ubuntu releases by the code name adjective
+        DISTRO=$os_CODENAME
+    elif [[ "$os_VENDOR" =~ (Fedora) ]]; then
+        # For Fedora, just use 'f' and the release
+        DISTRO="f$os_RELEASE"
+    else
+        # Catch-all for now is Vendor + Release + Update
+        DISTRO="$os_VENDOR-$os_RELEASE.$os_UPDATE"
+    fi
+    export DISTRO
+    echo $DISTRO
+}
+
+function check_package() {
+    local os_ver=`get_os_version`
+    local cnt=`echo $os_ver | grep -i centos | wc -l`
+    if [[ $cnt -eq 0 ]];then
+        echo "ERROR: can not support ${os_ver}, Just CentOS."
+        return
+    fi
+
+    if [[ `rpm -qa | grep ceph | wc -l` -eq 0 ]]; then
+        echo "ERROR: can not find ceph packages. Have to install Ceph."
+        return
+    fi
+}

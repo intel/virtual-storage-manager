@@ -1,0 +1,12 @@
+#!/usr/bin/expect -f
+
+#openssl x509 -req -days 7000 -in server.csr -signkey server.key -out server.crt
+#Enter pass phrase for server.key:
+#Verifying - Enter pass phrase for server.key:
+spawn openssl x509 -req -days 7000 -in server.csr -signkey server.key -out server.crt
+
+expect "Enter pass phrase for server.key:"
+send "zaq12wsx\r"
+
+
+expect eof

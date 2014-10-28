@@ -1,0 +1,94 @@
+# Copyright 2012 OpenStack LLC.
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+""" App node Interface
+"""
+
+from vsmclient import base
+import urllib
+
+class AppNode(base.Resource):
+
+    def __repr__(self):
+        return "<App Node: %s>" % self.id
+
+    def update(self, **kwargs):
+        """update ssh_status and log_info"""
+        self.manager.update(self, **kwargs)
+
+    def delete(self):
+        """Delete this appnode."""
+        self.manager.delete(self)
+
+class AppNodeManager(base.ManagerWithFind):
+    """
+    Manage :class:`AppNode` resources.
+    """
+    resource_class = AppNode
+
+    def create(self, ips=None):
+
+        """
+        Create a list of  app nodes.
+        """
+        #validate ip_list
+        if not isinstance(ips, list):
+            ip_list = list()
+            ip_list.append(ips)
+        else:
+            ip_list = ips
+
+        body = {'appnodes':  ip_list}
+        return self._create('/appnodes', body, 'appnodes')
+
+    def list(self, detailed=False, search_opts=None):
+        """
+        Get a list of all appnodes.
+        :rtype: list of :class:`AppNode`
+        """
+        if search_opts is None:
+            search_opts = {}
+        qparams = {}
+        for opt, val in search_opts.iteritems():
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+
+        detail = ""
+        if detailed:
+            detail = "/detail"
+
+        ret = self._list("/appnodes%s%s" % (detail, query_string),
+                          "appnodes")
+        return ret
+
+    def delete(self, appnode):
+        """
+        Delete an app node.
+
+        :param appnode: The :class:`AppNode` to delete.
+        """
+        self._delete("/appnodes/%s" % base.getid(appnode))
+
+    def update(self, appnode, **kargs):
+        """
+        Update the ssh_status or log_info for an appnode.
+
+        """
+        if not kargs:
+            return
+
+        body = {"appnode": kargs}
+        self._update("/appnodes/%s" % base.getid(appnode), body)

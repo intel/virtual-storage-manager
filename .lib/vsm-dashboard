@@ -1,0 +1,46 @@
+function _get_vsm_dashboard_version() {
+    local version_file=$TOPDIR/$SOURCE_DIR/$VSMDASHBOARD_DIR/vsm-dashboard.spec
+    local str=`cat $version_file | grep Version | awk '{print $2}'`
+    echo $str
+}
+
+function _change_vsm_dashboard_files() {
+    echo "" > $TEMP/$VSMDASHBOARD_DIR/vsm_dashboard.egg-info/requires.txt
+    echo "" > $TEMP/$VSMDASHBOARD_DIR/tools/pip-requires
+    echo "" > $TEMP/$VSMDASHBOARD_DIR/tools/test-requires
+}
+
+function _install_vsm_dashboard_dep_package() {
+    yum install -y `cat $1 | grep BuildRequires | awk '{print $2}' | tr "\n" " "`
+    yum install -y rpm-build
+}
+
+function _setup_vsm_dashboard_rpm() {
+    rm -rf $TEMP/*
+    local old_dir=`pwd`
+    local version=`_get_vsm_dashboard_version`
+ 
+    cp -rf $TOPDIR/$SOURCE_DIR/$VSMDASHBOARD_DIR $TEMP/
+    cd $TEMP/
+
+    _change_vsm_dashboard_files
+
+    if [[ $VSMDASHBOARD_DIR != vsm-dashboard-$version ]]; then
+        mv $VSMDASHBOARD_DIR vsm-dashboard-$version
+    fi
+
+    [[ -e vsm-dashboard-$version/build ]] && rm -rf vsm-dashboard-$version/build
+
+    tar zcf vsm-dashboard-${version}.tar.gz vsm-dashboard-$version
+    cp -rf vsm-dashboard-${version}.tar.gz ~/rpmbuild/SOURCES/
+    cp -rf vsm-dashboard-$version/vsm-dashboard.spec ~/rpmbuild/SPECS/
+    _install_vsm_dashboard_dep_package vsm-dashboard-$version/vsm-dashboard.spec
+    cd ~/rpmbuild/SPECS/
+    rpmbuild -bb vsm-dashboard.spec
+
+    cd $old_dir
+}
+
+function build_vsm_dashboard_rpm() {
+    _setup_vsm_dashboard_rpm
+}

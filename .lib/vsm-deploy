@@ -1,0 +1,46 @@
+function _get_vsmdeploy_version() {
+    local version_file=$TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR/vsm-deploy.spec
+    local str=`cat $version_file | grep Version | awk '{print $2}'`
+    echo $str
+}
+
+function _install_vsmdeploy_dep_package() {
+    yum install -y rpm-build
+}
+
+function _setup_vsmdeploy_rpm() {
+    rm -rf $TEMP/*
+    local old_dir=`pwd`
+    local version=`_get_vsmdeploy_version`
+ 
+    cp -rf $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR $TEMP/
+
+    rm -rf $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR/tools/etc/vsm
+    cp -rf $TOPDIR/$SOURCE_DIR/$VSM_DIR/etc/vsm $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR/tools/etc/
+    rm -rf $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR/tools/etc/vsm-dashboard/*
+
+    local FROM_DIR=$TOPDIR/source/vsm-dashboard/vsm_dashboard/
+    local TO_DIR=$TOPDIR/source/vsm-deploy/tools/etc/vsm-dashboard/
+    cp -rf $FROM_DIR/local/local_settings.template $TO_DIR/
+    cp -rf $FROM_DIR/settings.py $TO_DIR/
+    cp -rf $FROM_DIR/../tools/vsm-dashboard.conf $TO_DIR/
+
+    cd $TEMP/
+
+    if [[ $VSM_DEPLOY_DIR != vsm-deploy-$version ]]; then
+        mv $VSM_DEPLOY_DIR vsm-deploy-$version
+    fi
+
+    tar zcf vsm-deploy-${version}.tar.gz vsm-deploy-$version
+    cp -rf vsm-deploy-${version}.tar.gz ~/rpmbuild/SOURCES/
+    cp -rf vsm-deploy-$version/vsm-deploy.spec ~/rpmbuild/SPECS/
+    _install_vsmdeploy_dep_package vsm-deploy-$version/vsm-deploy.spec
+    cd ~/rpmbuild/SPECS/
+    rpmbuild -bb vsm-deploy.spec
+
+    cd $old_dir
+}
+
+function build_vsmdeploy_rpm() {
+    _setup_vsmdeploy_rpm
+}

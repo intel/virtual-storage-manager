@@ -1,0 +1,12 @@
+[DEFAULT]
+rabbit_password = %RABBITMQ_PASSWORD%
+rabbit_host = %RABBITMQ_HOST%
+rabbit_port=%RABBITMQ_PORT%
+state_path = /opt/stack/data/vsm
+osapi_volume_extension = vsm.api.openstack.volume.contrib.standard_extensions
+rootwrap_config = /etc/vsm/rootwrap.conf
+api_paste_config = /etc/vsm/api-paste.ini
+sql_connection = mysql://%MYSQL_VSM_USER%:%MYSQL_VSM_PASSWORD%@%MYSQL_HOST%/vsm?charset=utf8
+verbose = True
+auth_strategy = keystone
+

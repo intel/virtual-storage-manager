@@ -1,0 +1,10 @@
+[vsm.scheduler.filters]
+CapabilitiesFilter = vsm.openstack.common.scheduler.filters.capabilities_filter:CapabilitiesFilter
+RetryFilter = vsm.scheduler.filters.retry_filter:RetryFilter
+CapacityFilter = vsm.scheduler.filters.capacity_filter:CapacityFilter
+JsonFilter = vsm.openstack.common.scheduler.filters.json_filter:JsonFilter
+AvailabilityZoneFilter = vsm.openstack.common.scheduler.filters.availability_zone_filter:AvailabilityZoneFilter
+
+[vsm.scheduler.weights]
+CapacityWeigher = vsm.scheduler.weights.capacity:CapacityWeigher
+

@@ -1,0 +1,85 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function usage() {
+    echo "clean-data [-f|--force]"
+    exit 0
+}
+
+function is_controller() {
+    ip_list=`hostname -I`
+    if [[ ! -e /etc/vsmdeploy/deployrc ]]; then
+        echo 0
+        return
+    fi
+
+    file=/etc/manifest/server.manifest
+    for ip in $ip_list; do
+        cnt=`cat /etc/vsmdeploy/deployrc | grep VSM_HOST | grep $ip | wc -l`
+        if [[ $cnt -gt 0 ]]; then
+            echo 1
+            return
+        fi
+    done
+    echo 0
+}
+
+function _clean_data_func() {
+    if [[ `is_controller` -gt 0 ]]; then
+        __clean-data
+    else
+        __clean-data >/dev/null 2>&1
+        __clean-data >/dev/null 2>&1
+        __clean-data >/dev/null 2>&1
+        __clean-data
+    fi
+}
+
+FORCE_REMOVE=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h) usage ;;
+    --help) usage 1;;
+    --force) FORCE_REMOVE=1 ;;
+    -f|--force) FORCE_REMOVE=1 ;;
+    *) shift ;;
+  esac
+  shift
+done
+
+if [[ $FORCE_REMOVE -gt 0 ]]; then
+    echo "cleaning...."
+    _clean_data_func
+else
+    echo "Force to clean ceph env? (y/n)"
+    read ans
+    while [[ $ans != "y" && $ans != "n" ]]; do
+        echo "Please input y/n"
+        read ans
+    done
+    if [[ $ans == "y" ]]; then
+        echo "clean...."
+        _clean_data_func
+    fi
+fi
+
+echo "Clean Over"
+
+if [[ `is_controller` -gt 0 ]]; then
+    echo "Controller setup successful"
+fi

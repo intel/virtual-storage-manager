@@ -1,0 +1,9 @@
+./vsmrepo
+./vsmrepo/*
+./vsmrepo.tar.gz
+.idea
+*~
+*pyc
+*pyo
+./update.sh
+*orig

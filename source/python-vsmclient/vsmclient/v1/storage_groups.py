@@ -1,0 +1,108 @@
+# Copyright 2011 Denali Systems, Inc.
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+"""
+StorageGroups interface (1.1 extension).
+"""
+
+import urllib
+from vsmclient import base
+
+class StorageGroup(base.Resource):
+    """A storage_group is an extra block level storage to the OpenStack instances."""
+    def __repr__(self):
+        return "<StorageGroup: %s>" % self.id
+
+    def delete(self):
+        """Delete this storage_group."""
+        self.manager.delete(self)
+
+    def update(self, **kwargs):
+        """Update the display_name or display_description for this storage_group."""
+        self.manager.update(self, **kwargs)
+
+    def force_delete(self):
+        """Delete the specified storage_group ignoring its current state.
+
+        :param storage_group: The UUID of the storage_group to force-delete.
+        """
+        self.manager.force_delete(self)
+
+class StorageGroupsManager(base.ManagerWithFind):
+    """
+    Manage :class:`StorageGroup` resources.
+    """
+    resource_class = StorageGroup
+
+    def create(self, body):
+
+        """
+        Create a storage_group.
+        """
+
+        #body = {'zone': {'name': name
+        #                   }}
+        return self._create('/storage_groups', body, 'storage_group')
+
+    def get(self, storage_group_id):
+        """
+        Get a storage_group.
+
+        :param storage_group_id: The ID of the storage_group.
+        :rtype: :class:`StorageGroup`
+        """
+        return self._get("/storage_groups/%s" % storage_group_id, "storage_group")
+
+    def list(self, detailed=False, search_opts=None):
+        """
+        Get a list of all storage_groups.
+
+        :rtype: list of :class:`StorageGroup`
+        """
+        if search_opts is None:
+            search_opts = {}
+
+        qparams = {}
+
+        for opt, val in search_opts.iteritems():
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+
+        detail = ""
+        if detailed:
+            detail = "/detail"
+
+        ret = self._list("/storage_groups%s%s" % (detail, query_string),
+                          "storage_groups")
+        return ret
+
+    def summary(self):
+        """
+        summary
+        """
+        url = "/storage_groups/summary"
+        return self._get(url, 'storage_group-summary')
+
+    def _action(self, action, storage_group, info=None, **kwargs):
+        """
+        Perform a storage_group "action."
+        """
+        body = {action: info}
+        self.run_hooks('modify_body_for_action', body, **kwargs)
+        url = '/storage_groups/%s/action' % base.getid(storage_group)
+        return self.api.client.post(url, body=body)
+

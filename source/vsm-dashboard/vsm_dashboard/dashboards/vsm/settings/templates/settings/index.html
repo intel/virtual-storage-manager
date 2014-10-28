@@ -1,0 +1,120 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Settings" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Settings") %}
+{% endblock page_header %}
+
+{% block main %}
+
+<div class="table_wrapper">
+  <form action="/dashboard/vsm/" method="POST"><div style='display:none'>{% csrf_token %}</div>
+
+  <table id="pools" class="table table-bordered table-striped datatable">
+    <thead>
+      <tr class='table_caption'>
+        <th class='table_header' colspan='8'>
+          <div class="table_actions clearfix">
+          </div>
+        </th>
+      </tr>
+      <tr>
+          <th  class="normal_column">Name</th>
+          <th  class="normal_column">Current Value</th>
+          <th  class="normal_column">New Value</th>
+          <th  class="normal_column">Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+{% for setting in settings %}
+      <tr id="settings__row__{{ setting.name }}" name="{{ setting.name }}">
+          <td class="sortable normal_column">{{ setting.verbose_name }}</td>
+          <td class="sortable normal_column">{{ setting.value }}</td>
+          <td class="sortable normal_column">
+              <input type="text" value="{{ setting.value }}" class="new_value"/>
+          </td>
+          <td class="sortable normal_column">
+              <a href="#" class="btn btn-primary update">Update</a>
+          </td>
+      </tr>
+
+{% endfor %}
+
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td colspan="8">
+          <span class="table_count"></span>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+  </form>
+</div>
+
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
+
+<script type="text/javascript">
+    $(".update").click(function(){
+        var setting_name = $(this).parent().parent().attr('name');
+        var setting_new_value = $(this).parent().parent().find('.new_value').val();
+        console.log(setting_new_value);
+        token = $("input[name=csrfmiddlewaretoken]").val();
+        modal_stack = $("#modal_wrapper .modal");
+        horizon.modals.modal_spinner(gettext("Working"));
+        horizon.ajax.queue({
+            data: JSON.stringify( {setting_name:setting_name, setting_value:setting_new_value} ),
+            type: "post",
+            dataType: "json",
+            url: "/dashboard/vsm/settings/update",
+            success: function (data) {
+                //prepare refresh status
+                if(data.status == "success"){
+                    console.log(data);
+                    location.reload();
+                }
+                else{
+                    horizon.alert('error', 'invalid parameter');
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                horizon.alert("error", "Network Error");
+                horizon.modals.spinner.modal('hide');
+            },
+            headers: {
+              "X-CSRFToken": token
+            },
+            complete: function(){
+                //
+                horizon.modals.spinner.modal('hide');
+            }
+        });
+    });
+</script>
+{% endblock %}
+

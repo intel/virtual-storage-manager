@@ -1,0 +1,17 @@
+function setup_iptables() {
+    local file=""
+    RABBITMQ_NODE_PORT=${RABBITMQ_NODE_PORT:-5673}
+
+    cp -rf $TOPDIR/.lib/iptables /etc/sysconfig/iptables
+    service iptables restart
+    service iptables save
+    service iptables restart
+
+    file=`mktemp`
+    echo "chcon -R -h -t httpd_sys_content_t /var/www/html/" >> $file
+    echo "chmod -R a+r /var/www/html/" >> $file
+    echo "setsebool -P httpd_can_network_connect 1 &" >> $file
+    chmod +x $file
+    $file >/dev/null 2>&1
+    rm -rf $file
+}

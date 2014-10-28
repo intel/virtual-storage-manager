@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function cinder_prepare() {
+#    _del_pool ${AUTH_CINDER_POOL}
+    _create_pool ${AUTH_CINDER_POOL}
+    _del_user ${AUTH_CINDER_USER}
+}
+
+function create_cinder() {
+    local file=/tmp/cinder.keyring
+    rm -rf $file
+    local str=""
+    cinder_prepare
+
+    if [[ ${#AUTH_GLANCE_POOL} -gt 0 ]]; then
+        _a="allow class-read object_prefix rbd_children,"
+        _b=" allow rwx pool=${AUTH_CINDER_POOL},"
+        _c=" allow rx pool=${AUTH_GLANCE_POOL}"
+        str=${_a}${_b}${_c}
+
+        ceph auth get-or-create ${AUTH_CINDER_USER} \
+            mon 'allow r' \
+            osd "$str"
+    else
+        _a="allow class-read object_prefix rbd_children,"
+        _b=" allow rwx pool=${AUTH_CINDER_POOL}"
+        str=${_a}${_b}
+
+        ceph auth get-or-create ${AUTH_CINDER_USER} \
+            mon 'allow r' \
+            osd "$str"
+    fi
+
+    ceph auth get-or-create ${AUTH_CINDER_USER} -o $file
+
+    mkdir -p $TOPDIR/files/cinder/
+    cp -rf /etc/ceph/ceph.conf $TOPDIR/files/cinder/
+    mv $file $TOPDIR/files/cinder/
+
+cat <<"EOF">>$TOPDIR/files/cinder/ceph.conf
+[%AUTH_CINDER_USER%]
+keyring=/etc/cinder/cinder.keyring
+EOF
+
+sed -i "s,%AUTH_CINDER_USER%,$AUTH_CINDER_USER,g" $TOPDIR/files/cinder/ceph.conf
+
+}

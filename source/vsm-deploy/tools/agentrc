@@ -1,0 +1,58 @@
+#---------------------------------------------
+# USER
+#---------------------------------------------
+
+STACK_USER=stack
+
+#---------------------------------------------
+# PIP
+#---------------------------------------------
+
+REPO_HOST=10.239.82.123
+
+#---------------------------------------------
+# MySQL
+#---------------------------------------------
+
+MYSQL_ROOT_PASSWORD=mysqlpassword
+MYSQL_HOST=10.239.82.123
+
+#---------------------------------------------
+# RabbitMQ
+#---------------------------------------------
+
+RABBITMQ_HOST=10.239.82.123
+RABBITMQ_USER=guest
+RABBITMQ_PASSWORD=rabbit_password
+RABBITMQ_NODENAME=deploy_rabbitmq
+RABBITMQ_PORT=5673
+
+
+#---------------------------------------------
+# Keystone
+#---------------------------------------------
+
+MYSQL_KEYSTONE_USER=keystone
+MYSQL_KEYSTONE_PASSWORD=keystone_password
+KEYSTONE_HOST=10.239.82.123
+ADMIN_PASSWORD=nova
+ADMIN_TOKEN=admin_token
+
+
+#---------------------------------------------
+# VSM
+#---------------------------------------------
+
+VSM_HOST=10.239.82.123
+MYSQL_VSM_USER=vsm
+MYSQL_VSM_PASSWORD=vsm_password
+KEYSTONE_VSM_SERVICE_PASSWORD=keystone_vsm_password
+VSM_RUNNING_SERVICE=vsm-agent,vsm-physical
+
+#---------------------------------------------
+# VSM-Dashboard
+#---------------------------------------------
+
+DASHBOARD_HOST=10.239.82.123
+MYSQL_DASHBOARD_USER=dashboard
+MYSQL_DASHBOARD_PASSWORD=dashboard_password

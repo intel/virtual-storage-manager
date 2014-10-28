@@ -1,0 +1,59 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2010 United States Government as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+from sqlalchemy import Boolean, Column, DateTime
+from sqlalchemy import Integer, MetaData, String
+from sqlalchemy import Table, Index, ForeignKey
+from sqlalchemy.engine.base import Engine 
+from migrate.changeset.constraint import ForeignKeyConstraint
+from sqlalchemy.engine import reflection
+from sqlalchemy import create_engine
+
+def upgrade(migrate_engine):
+    # Upgrade operations go here. Don't create your own engine;
+    # bind migrate_engine to your metadata
+    if migrate_engine.name == 'sqlite':
+        return
+
+    storage_pools = 'storage_pools'
+    storage_groups = 'storage_groups'
+    col = ''
+    insp = reflection.Inspector.from_engine(migrate_engine)
+    foreign_keys = insp.get_foreign_keys(storage_pools)
+    for key in foreign_keys:
+        if storage_groups == key['referred_table']:
+            sql_str = "ALTER TABLE %s DROP FOREIGN KEY %s;" % (storage_pools, key['name'])
+            ret = migrate_engine.execute(sql_str)
+              
+
+def downgrade(migrate_engine):
+    if migrate_engine.name == 'sqlite':
+        return
+    #meta = MetaData()
+    #meta.bind = migrate_engine
+
+    #storage_group = Table('storage_groups',
+    #                meta,
+    #                autoload=True)
+    #column_status = Column('status', String(255), default="OUT", nullable=False)
+
+    try:
+        #storage_group.drop_column(column_status)
+        pass
+    except Exception:
+        raise

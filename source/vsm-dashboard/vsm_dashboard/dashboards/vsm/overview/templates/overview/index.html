@@ -1,0 +1,99 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Cluster Status" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Dashboard") %}
+        <style>
+            #health_status {
+            }
+            #health_ok {
+                color: #00ff00;
+                font-weight: bold;
+            }
+            #health_warning {
+                color: #0000FF;
+                font-weight: bold;
+            }
+            #health_error {
+                color: #FF0000;
+                font-weight: bold;
+            }
+            .summary_group {
+                width: 820px;
+            }
+            .summary_group .summary {
+                float:left;
+                width: 270px;
+            }
+            .summary {
+                margin-bottom: 30px;
+                height: 182px;
+            }
+            .warn {
+                color: red;
+            }
+            .summary_title{
+                text-decoration: underline;
+            }
+            .summary a{
+                margin-top: 2px;
+                width: 200px;
+            }
+            #summary_cluster_summary {
+                height: 50px;
+            }
+            #summary_waring_summary {
+                height: 50px;
+            }
+        </style>
+{% endblock page_header %}
+
+{% block main %}
+    <div id="health_status">
+        {{ cluster_summary.render }}
+    </div>
+    <div class="summary_group">
+        {{ sg_summary.render }}
+        {{ monitor_summary.render }}
+        {{ vsm_summary.render }}
+    </div>
+
+    <div class="summary_group" >
+        {{ mds_summary.render }}
+        {{ osd_summary.render }}
+        {{ pg_summary.render }}
+    </div>
+<div class="summary_group" >
+    {{ cluster_health_summary.render }}
+    {{ warning_summary.render }}
+</div>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
+    <script src='{{ STATIC_URL }}dashboard/js/clustermgmt.js' type='text/javascript' charset='utf-8'></script>
+
+<script type="text/javascript">
+    $(".summary a").css("display", "block");
+</script>
+{% endblock %}
+

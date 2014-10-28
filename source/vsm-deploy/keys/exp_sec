@@ -1,0 +1,12 @@
+#!/usr/bin/expect -f
+
+#openssl rsa -in server.key.secure  -out server.key
+#Enter pass phrase for server.key.secure:
+#writing RSA key
+
+spawn openssl rsa -in server.key.secure  -out server.key
+
+expect "Enter pass phrase for server.key.secure:"
+send "zaq12wsx\r"
+
+expect eof

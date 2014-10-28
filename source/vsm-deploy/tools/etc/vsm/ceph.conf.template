@@ -1,0 +1,10 @@
+[global]
+auth_service_required = cephx
+filestore_xattr_use_omap = true
+auth_client_required = cephx
+auth_cluster_required = cephx
+mon_host = $monitor_ip_list
+mon_initial_members = $monitor_host_list
+fsid = $fsid
+public network = $public_network
+cluster network = $cluster_network

@@ -1,0 +1,606 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+#---------------------------------------------
+#command option
+#---------------------------------------------
+
+TOPDIR=$(cd $(dirname "$0") && pwd)
+
+#---------------------------------------------
+#first step : cp *vsm*.rpm to DIR/rpms/
+#---------------------------------------------
+DES_DIR=/usr/local/bin/tools/rpms
+
+rm -rf $DES_DIR
+rm -rf $TOPDIR/vsmrepo
+
+mkdir -p $DES_DIR
+mkdir -p $TOPDIR/vsmrepo
+
+cp -f $TOPDIR/rpms/*.rpm  $DES_DIR/
+
+#-----------------------------------------------
+#down file from web
+#------------------------------------------------
+function download() {
+    cat $TEMP_DOWNREPOS|awk '{print $1}' |while read line
+    do
+         wget -c $url$line  & 
+    done
+    cnt=`ps aux | grep wget | grep rpm | wc -l`
+    while [[ $cnt -gt 0 ]]; do
+        sleep 1
+        cnt=`ps aux |grep wget |grep rpm | wc -l`
+    done
+    mv -f *.rpm ./vsmrepo/ 
+    cat $TEMP_DOWNREPOS >>rpms_list
+}
+rm -f rpms_list
+
+TEMP_DOWNREPOS=$TOPDIR/temp_downrepo
+cat << EOF >$TEMP_DOWNREPOS
+apr-1.3.9-5.el6_2.x86_64.rpm 15469c9e0c08bd7695b882fd0ac7102a
+apr-util-1.3.9-3.el6_0.1.x86_64.rpm 52bb58a29d593da6c39c66863e287fed
+apr-util-ldap-1.3.9-3.el6_0.1.x86_64.rpm bb46c7edcd6233c07f6b629d13128d74
+augeas-libs-1.0.0-5.el6.x86_64.rpm 8b05ec01e9ca334684dd89199c2abf98
+boost-system-1.41.0-18.el6.x86_64.rpm 6a58821afd4463e4d61f372dd30829a6
+boost-thread-1.41.0-18.el6.x86_64.rpm 91f0d64fbb0e2bc895fe4609180bcdaa
+celt051-0.5.1.3-0.el6.x86_64.rpm b3d2c0d4fd992543832b755a7d698be8
+cloog-ppl-0.15.7-1.2.el6.x86_64.rpm fb0fd43ad45c05f78c67e39ed274df7e
+compat-readline5-5.2-17.1.el6.x86_64.rpm 062e07c76c6f91b59a3773570002a93e
+cpp-4.4.7-4.el6.x86_64.rpm 7f1d49c96cabeb4427c0ac1c388988cf
+createrepo-0.9.9-18.el6.noarch.rpm 702e97f7059b39b46437f1ed4dc3cbb2
+cyrus-sasl-md5-2.1.23-13.el6_3.1.x86_64.rpm d42adbbcac81f2bcf07a171064f0f980
+deltarpm-3.5-0.5.20090913git.el6.x86_64.rpm 1b1d34dc287a521a351d3b690235eaf4
+python-deltarpm-3.5-0.5.20090913git.el6.x86_64.rpm ae071b5b176a692b2820bb675d2e8456
+dnsmasq-2.48-13.el6.x86_64.rpm d26ae263a53ae2150ca157806c155841
+ebtables-2.0.9-6.el6.x86_64.rpm 8795431826cbd7c5bdcec9ec9ddcb137
+expect-5.44.1.15-5.el6_4.x86_64.rpm b51d31ab3f46dc11adab5d87d2f8adb5
+fuse-libs-2.8.3-4.el6.x86_64.rpm 722590134af52b849d292a05709b3a12
+gcc-4.4.7-4.el6.x86_64.rpm add75de177de4442108f7d46ee68d9e9
+gcc-c++-4.4.7-4.el6.x86_64.rpm 15e2f689023c2646325698abdc9e6360
+gd-2.0.35-11.el6.x86_64.rpm eb77be12285b84724fd30475782059b7
+git-1.7.1-3.el6_4.1.x86_64.rpm 29b1f77cf9a43fe7b3185368973757a2
+gnutls-utils-2.8.5-10.el6_4.2.x86_64.rpm c6e39f3baa03c6d0269c1c071b2b5236
+gpxe-roms-qemu-0.9.7-6.10.el6.noarch.rpm b035c9a9cccb5b6a832af454912b3904
+graphviz-2.26.0-10.el6.x86_64.rpm 74835261289468d783d461fff4ad3f66
+httpd-2.2.15-29.el6.centos.x86_64.rpm f7de6883d5c12e7565955fbccb1b64ef
+httpd-tools-2.2.15-29.el6.centos.x86_64.rpm f1a074ca31ca935ae339e501cafbb558
+iscsi-initiator-utils-6.2.0.873-10.el6.x86_64.rpm eb6cf6197aff3d3396a7227a5a6fb655
+keyutils-libs-devel-1.4-4.el6.x86_64.rpm 683904198a82cc57de0343e7c85b00f6
+krb5-devel-1.10.3-10.el6_4.6.x86_64.rpm 1176b4a61e5d6dd59aaf2ca3b347952e
+libcom_err-devel-1.41.12-18.el6.x86_64.rpm 0486236a046d371b7dd3f2f36169de19
+libgcrypt-devel-1.4.5-11.el6_4.x86_64.rpm 6da94d8c51c4896a749512a1e11dba3d
+libgpg-error-devel-1.7-4.el6.x86_64.rpm f4f0121624b1f5ed989d71c74a4fb008
+libicu-4.2.1-9.1.el6_2.x86_64.rpm 400a6d009ea66c59a491e63294de838f
+libselinux-devel-2.0.94-5.3.el6_4.1.x86_64.rpm 928d480cd89f1c18b93ad88ab40573ea
+libsepol-devel-2.0.41-4.el6.x86_64.rpm 3946be887f7c464040d42b96c1de47eb
+libstdc++-devel-4.4.7-4.el6.x86_64.rpm ea9006655439bad041f2e5c52fd62003
+libtool-ltdl-2.2.6-15.5.el6.x86_64.rpm ffc16c8deaeb64b75d607caad8825eb8
+libXaw-1.0.11-2.el6.x86_64.rpm 0d4051cbc43ab9e1af7ae96879dff62c
+libxml2-devel-2.7.6-14.el6.x86_64.rpm 846338c0d9b3b7ae318a3d39ebf6c540
+libXmu-1.1.1-2.el6.x86_64.rpm 41edac929c33f7145d361591eb3af1b6
+libXpm-3.5.10-2.el6.x86_64.rpm 0e517f5c38e9b16f7f6f78787b511c0f
+libxslt-devel-1.1.26-2.el6_3.1.x86_64.rpm 66fb652f393ce55a38fafc506154d7e7
+lzop-1.02-0.9.rc1.el6.x86_64.rpm c9ff00d092b11640c4f855f350d64b28
+memcached-1.4.4-3.el6.x86_64.rpm c439582f5b77f7cca085731f15dcb0aa
+mod_wsgi-3.2-3.el6.x86_64.rpm 6b1709ea0d62787b36836b3898dbe867
+mpfr-2.4.1-6.el6.x86_64.rpm c9b194bb693cae173c06a7dea19f3bd7
+MySQL-python-1.2.3-0.3.c1.1.el6.x86_64.rpm aed4415de5cb3e274baa91b13c4b1e54
+nc-1.84-22.el6.x86_64.rpm b9ca59431d8be52cb7462c8690199e19
+netcf-libs-0.1.9-4.el6.x86_64.rpm e5c34721a62de4a1e1ce958e7ebe2c1e
+openssl-devel-1.0.1e-15.el6.x86_64.rpm f0142fa8de8b7a768aa2d23e6dffd5a0
+perl-DBD-MySQL-4.013-3.el6.x86_64.rpm 63ead32b261c8c6d2f7a9fa9b7b41f7e
+perl-Error-0.17015-4.el6.noarch.rpm c2595c33aa054ed116e2960e3246d197
+perl-Git-1.7.1-3.el6_4.1.noarch.rpm 7c01f966de69cf2592c9c9ba406d563f
+ppl-0.10.2-11.el6.x86_64.rpm 248fd5af655e66af417992c726ffb45c
+PyPAM-0.5.0-12.el6.x86_64.rpm 83b7d21cd98ea4c5c68e89fd4f5ff762
+python-babel-0.9.4-5.1.el6.noarch.rpm 01049224be1b08fe66ae8301591f7b9f
+python-decorator-3.0.1-3.1.el6.noarch.rpm 66df1ddfa1a1296416a4f3c40adfba3d
+python-devel-2.6.6-51.el6.x86_64.rpm 335d8edb923714b0ed031573c9c2a842
+python-imaging-1.1.6-19.el6.x86_64.rpm bf0f99210eef291d6c1f4a4c790fd167
+python-markupsafe-0.9.2-4.el6.x86_64.rpm 2108d310ce44ec7cd95847e46c7cab15
+python-memcached-1.43-6.el6.noarch.rpm 98390bf906db9888ed7fbd8a46d540b9
+python-paste-1.7.4-2.el6.noarch.rpm 87bafdd4de6d3644d8294b3182bd464e
+python-pygments-1.1.1-1.el6.noarch.rpm 59ddf516ec600fa638ff8e5bcc33bfe9
+python-routes-1.10.3-2.el6.noarch.rpm d02be54ffb042d9af101f4ad87f9c135
+python-setuptools-0.6.10-3.el6.noarch.rpm e00e7bd03739b7a1d67160ae42bfd365
+python-simplejson-2.0.9-3.1.el6.x86_64.rpm 31bc7886bed7f6ad351b4ef33d2586dc
+python-suds-0.4.1-3.el6.noarch.rpm 36b2d57cb8790efcecdbda0ece1f45cb
+python-tempita-0.4-2.el6.noarch.rpm ef172efb9929f8834545a45fe698ddfb
+radvd-1.6-1.el6.x86_64.rpm c8389f4c269abae67e13982a01556280
+redhat-rpm-config-9.0.3-42.el6.centos.noarch.rpm 9674309036717fb44162e6ff0c7beb05
+rpm-build-4.8.0-37.el6.x86_64.rpm 2ae4e22ebb3bc3a99732da86d1c36fbb
+seabios-0.6.1.2-28.el6.x86_64.rpm 5327c6b029370a2800a8676b38072bd7
+sgabios-bin-0-0.3.20110621svn.el6.noarch.rpm fc7a72ac763a0e42fbb5efd459428a50
+sqlite-devel-3.6.20-1.el6.x86_64.rpm 3678968c1a5c2e3d222311d7d4e6088e
+tcl-8.5.7-6.el6.x86_64.rpm ec7273f515bc57101259a287d108d2f0
+tk-8.5.7-5.el6.x86_64.rpm 300679a9741fcbe7ebf814a23a5a63d5
+tree-1.5.3-2.el6.x86_64.rpm fca40cee468317dbbc36feba98539eb1
+unixODBC-2.2.14-12.el6_3.x86_64.rpm 8183e8419d7704811737a02524894528
+usbredir-0.5.1-1.el6.x86_64.rpm c5ec2a91932ec62ad23fea9a177ff950
+vgabios-0.6b-3.7.el6.noarch.rpm 26a95baecf6bfc42ec5eb7a59674011a
+xfsprogs-3.1.1-14.el6.x86_64.rpm f42b9613621b8541eafb746e794af56c
+yajl-1.0.7-3.el6.x86_64.rpm 098dd299dc27b5e5859eae1c626cb655
+zlib-devel-1.2.3-29.el6.x86_64.rpm 672d2228175e81fa7f5e27162bc5f8b4
+EOF
+url=http://mirror.centos.org/centos/6/os/x86_64/Packages/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+openstack-dashboard-2013.1.1-1.el6.noarch.rpm 13e6c2911f4128d5ce7146a9d01444fc
+openstack-keystone-2013.1.3-1.el6.noarch.rpm 2eaa5c4acc3707aef9441f9df3880591
+openstack-utils-2013.1-8.el6.noarch.rpm 9d5353b1911d541308e3e531dd54c660
+python-cinderclient-1.0.4-1.el6.noarch.rpm 3e3c5745ec5df18661b565a0fe0386ea
+python-django-appconf-0.5-3.el6.noarch.rpm 11c4b56e6d7568001eaf041603aca052
+python-django-horizon-2013.1.1-1.el6.noarch.rpm 0c70d17ed0e3af4b643947a08dcb8078
+python-django-openstack-auth-1.0.7-1.el6.noarch.rpm 2633f34fdecd734b89a112a70e64cc3c
+python-glanceclient-0.9.0-2.el6.noarch.rpm dd7be86a1f32c943e9e2ceab5fa279a8
+python-keystone-2013.1.3-1.el6.noarch.rpm 9bd4a5243ed03f664f198fe3abc93922
+python-keystoneclient-0.2.3-7.el6.noarch.rpm 7e929767d7cb78979fbcec1841ffcba8
+python-novaclient-2.13.0-1.el6.noarch.rpm 9600169f45fdf334124ebf8e8e43bf43
+python-oslo-config-1.1.0-1.el6.noarch.rpm 025b1a675c1aae4bfec4f8739c3512ab
+python-quantumclient-2.2.1-2.el6.noarch.rpm 721c177904e66808d535c4c7d259fc41
+python-swiftclient-1.4.0-1.el6.noarch.rpm a3712ab9456e38d87d1fd97605fb830d
+python-webob-1.2.3-4.el6.noarch.rpm a9083ecfce9b366d7e1315d56069ab62
+EOF
+url=http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+c-ares19-1.9.1-4.el6.3.x86_64.rpm e36e9115a56c3dcc69a291f2ba14ed5a
+c-ares19-devel-1.9.1-4.el6.3.x86_64.rpm 28b5b7c2842d01cc8791f494843eece3
+erlang-appmon-R14B-04.2.el6.x86_64.rpm e4c57f13f0c7955f62954aa4ca33b127
+erlang-asn1-R14B-04.2.el6.x86_64.rpm 728ed8e25c091005002e74e234fd2901
+erlang-common_test-R14B-04.2.el6.x86_64.rpm c2adfe74ae8761041bc3a06a8cc89bad
+erlang-compiler-R14B-04.2.el6.x86_64.rpm dcf58059a6426f06115fab8a6aedae89
+erlang-cosEventDomain-R14B-04.2.el6.x86_64.rpm 6c08767f1de0558f9c132ba50ab63237
+erlang-cosEvent-R14B-04.2.el6.x86_64.rpm cd47af672e726a25e1b151e96640a371
+erlang-cosFileTransfer-R14B-04.2.el6.x86_64.rpm c7e02c6e6c39eadc837abc97f3ee43fb
+erlang-cosNotification-R14B-04.2.el6.x86_64.rpm 41337d93407976f30c1ae94a42727566
+erlang-cosProperty-R14B-04.2.el6.x86_64.rpm fa1500b897c66b143cc87c45d7b64447
+erlang-cosTime-R14B-04.2.el6.x86_64.rpm efde56a1a7b366cd02e32b56769bf2cb
+erlang-cosTransactions-R14B-04.2.el6.x86_64.rpm 00904c676583ee7ae517f020190f1575
+erlang-crypto-R14B-04.2.el6.x86_64.rpm 4f977fa00c062f1296ad0a6d44cb993a
+erlang-debugger-R14B-04.2.el6.x86_64.rpm 710259874e65bdb0683af9061e2a98b5
+erlang-dialyzer-R14B-04.2.el6.x86_64.rpm 421fff486a94ea2bec45ff0d2855efc6
+erlang-diameter-R14B-04.2.el6.x86_64.rpm 69d3360478d81b9c007f6d877319018f
+erlang-docbuilder-R14B-04.2.el6.x86_64.rpm 1630cf393cc55fbf7bf414d5a0419db9
+erlang-edoc-R14B-04.2.el6.x86_64.rpm 3707b3124e91fba0807691742b939ad1
+erlang-erl_docgen-R14B-04.2.el6.x86_64.rpm d08fd39ec1de0489adbdbbf590decff1
+erlang-erl_interface-R14B-04.2.el6.x86_64.rpm 1ecab866dc9946f338665c28068edd74
+erlang-erts-R14B-04.2.el6.x86_64.rpm 6d49a22b37e031dad89906e9603fcba0
+erlang-et-R14B-04.2.el6.x86_64.rpm 4bda154429bfe18bbd871ca78555b261
+erlang-eunit-R14B-04.2.el6.x86_64.rpm 08a3658f32cc862f1fdfea0cf432636e
+erlang-examples-R14B-04.2.el6.x86_64.rpm 8f75c11c15ef3ed149fd1fc11e754f49
+erlang-gs-R14B-04.2.el6.x86_64.rpm 2cb15d5c6ffb0f6c3a5b91916238a305
+erlang-hipe-R14B-04.2.el6.x86_64.rpm 7eeca2b93a0ea7c9ccafbe4b3c4fed97
+erlang-ic-R14B-04.2.el6.x86_64.rpm 5b4ec4b8f587a06aa42f24e9f70f1244
+erlang-inets-R14B-04.2.el6.x86_64.rpm 12681e5c00c219fa994197f662fd6460
+erlang-inviso-R14B-04.2.el6.x86_64.rpm e2225fdae85e2680ee7e5b5f18b3220d
+erlang-jinterface-R14B-04.2.el6.x86_64.rpm 756f906b46093b150d617d58da800a62
+erlang-kernel-R14B-04.2.el6.x86_64.rpm c898856122b4401697ac5bdbea808a2d
+erlang-megaco-R14B-04.2.el6.x86_64.rpm 9f7ade5b3be3b4e5d28b44d4aeb23d8d
+erlang-mnesia-R14B-04.2.el6.x86_64.rpm 8517c705e92bf4b08da82934d53b6a4c
+erlang-observer-R14B-04.2.el6.x86_64.rpm 8532fdf65c8de95dea320aee8fb92393
+erlang-odbc-R14B-04.2.el6.x86_64.rpm b2dda5d732e45ab421837e2eef3be522
+erlang-orber-R14B-04.2.el6.x86_64.rpm dcecc736b1b6ef7e16c95ed223c0b058
+erlang-os_mon-R14B-04.2.el6.x86_64.rpm 71a29db49aa92a3a8bde1899bf2bbcfb
+erlang-otp_mibs-R14B-04.2.el6.x86_64.rpm 7f610e021588fcabe915a962062e6ada
+erlang-parsetools-R14B-04.2.el6.x86_64.rpm 41d446a3423e41daa63f4b96470fbdbc
+erlang-percept-R14B-04.2.el6.x86_64.rpm 7dc61669c9dc82fe01c2e0b2d35aeafc
+erlang-pman-R14B-04.2.el6.x86_64.rpm 7bee6bb2a5cbdb84835ade59d451da1f
+erlang-public_key-R14B-04.2.el6.x86_64.rpm 46cb0a987e7f5eba50ed1bfc55f02321
+erlang-R14B-04.2.el6.x86_64.rpm e47072d8a2033226aab69cddc1698c6c
+erlang-reltool-R14B-04.2.el6.x86_64.rpm 23e5a3465afe67922d11d545053e8900
+erlang-runtime_tools-R14B-04.2.el6.x86_64.rpm b42f29bb498248c471c2ce1656ab1115
+erlang-sasl-R14B-04.2.el6.x86_64.rpm 46ff247aa2a45fcb33766db3cb051653
+erlang-snmp-R14B-04.2.el6.x86_64.rpm 3e54b3064d566c3fe0af60bfc8fbf704
+erlang-ssh-R14B-04.2.el6.x86_64.rpm cebb67c0248d5718f31c16a915dc0d84
+erlang-ssl-R14B-04.2.el6.x86_64.rpm d06fc302dd83abb2b37f319eb11fa3f8
+erlang-stdlib-R14B-04.2.el6.x86_64.rpm 445ad57a84aadcdd41e808a7952ca8f6
+erlang-syntax_tools-R14B-04.2.el6.x86_64.rpm 4e82e606a90c873450c5eaa19768085e
+erlang-test_server-R14B-04.2.el6.x86_64.rpm d5b7810c910a004c680ba09b0df26f38
+erlang-toolbar-R14B-04.2.el6.x86_64.rpm 34b0d5ea923980b5a168ac602b582d81
+erlang-tools-R14B-04.2.el6.x86_64.rpm 4f968d2c6a41f33f6053c0eba112643d
+erlang-tv-R14B-04.2.el6.x86_64.rpm 5bda90e5598ac42ba57a0f47d9e47eb6
+erlang-typer-R14B-04.2.el6.x86_64.rpm c307d2d5d539d1d42a21959a732ac2ef
+erlang-webtool-R14B-04.2.el6.x86_64.rpm 1e10743966f171f7576e0df9bdf25416
+erlang-wx-R14B-04.2.el6.x86_64.rpm 7a4235f6a6170e73dcd889361c662b0c
+erlang-xmerl-R14B-04.2.el6.x86_64.rpm 687ed4edde803fb53c9d1a517014a3e5
+fcgi-2.4.0-10.el6.x86_64.rpm 6620df1d3b79c68b34be7d87e6d649dd
+gdisk-0.8.4-1.el6.x86_64.rpm 06b4ee0f1a44348e507a0dc05ab24d68
+gperftools-devel-2.0-11.el6.3.x86_64.rpm 03f90a08ef0edb4300d37ef37beb9a1e
+gperftools-libs-2.0-11.el6.3.x86_64.rpm 9b012c68b14b56c81cf4e9bdb4679ec7
+gyp-0.1-0.6.1010svn.el6.noarch.rpm d434506e5374d9b3521a195a9e9665ec
+http-parser-2.0-4.20121128gitcd01361.el6.x86_64.rpm 53d371b9613253f14fe18a8c50f75c32
+http-parser-devel-2.0-4.20121128gitcd01361.el6.x86_64.rpm 5bb1d192b4553504bbb09169d10507d7
+leveldb-1.7.0-2.el6.x86_64.rpm 196efc005fdf75eafb79b8a2970c4b25
+leveldb-devel-1.7.0-2.el6.x86_64.rpm b7161d3c2faceabfe888e0989438aa77
+libunwind-1.1-2.el6.x86_64.rpm c5f4c3f9330e0e57f59ca0b36b77962b
+libuv-0.10.12-1.el6.x86_64.rpm 00e12776536e708bb4bb5f50d8e71c33
+libuv-devel-0.10.12-1.el6.x86_64.rpm e252d950081bb7bc73c6343dc7f8e480
+mod_python-3.3.1-15.el6.x86_64.rpm a582fa5fbd2cb4d8ac3972d8b9ada1ea
+mx-3.1.1-6.el6.x86_64.rpm 67649b17c25bfb54aaa4b875d61d3c60
+node-gyp-0.10.6-1.el6.noarch.rpm 1d8938cff2dfe1fbd2b45301e102eaa6
+nodejs-0.10.13-1.el6.x86_64.rpm 7d286d5d698c36753175cbe64d8887b5
+nodejs-abbrev-1.0.4-6.el6.noarch.rpm d60aea71463556ada5da9d4ee21e4e22
+nodejs-ansi-0.2.0-1.el6.noarch.rpm 3e62b4faa7ecc70eefdf9cd446a9387e
+nodejs-archy-0.0.2-8.el6.noarch.rpm e914ce564f2ae6f4d17a4164dd509fb8
+nodejs-asn1-0.1.11-3.el6.noarch.rpm 40610a712dbd05eb968bf13a8f67d57c
+nodejs-assert-plus-0.1.3-2.el6.noarch.rpm d55f0265e53f5c51acd958dfd423c625
+nodejs-async-0.2.9-2.el6.noarch.rpm 67f8baee64dbeae444247687c104fffd
+nodejs-aws-sign-0.3.0-1.el6.noarch.rpm bdd5251d3396820a5d59d733d296a324
+nodejs-block-stream-0.0.6-7.el6.noarch.rpm 8c264f18e363e034100b300a1ec39fd2
+nodejs-boom-0.4.2-2.el6.noarch.rpm e83bf5547e25d3ec5ecaafc465901ab4
+nodejs-child-process-close-0.1.1-2.el6.noarch.rpm 371a67597527af6526837c66fc1806ec
+nodejs-chmodr-0.1.0-4.el6.noarch.rpm 4916148146a33fafa2a06256b927e9cd
+nodejs-chownr-0.0.1-9.el6.noarch.rpm e00579ee49f4fe8b851317aa3ea78319
+nodejs-cmd-shim-1.1.0-3.el6.noarch.rpm 8832b184a8667e6adc01e3829bcb124a
+nodejs-combined-stream-0.0.4-3.el6.noarch.rpm db6165fac8f32a74c98fb9276b0a46fa
+nodejs-config-chain-1.1.7-1.el6.noarch.rpm 0de2c56e3d5a77df6dd0c8bd26e8e007
+nodejs-cookie-jar-0.3.0-1.el6.noarch.rpm ad4d9ee6ebb12710dc822409d1e63388
+nodejs-couch-login-0.1.17-1.el6.noarch.rpm b70c754d19714345ccb5060e1995f265
+nodejs-cryptiles-0.2.1-1.el6.noarch.rpm caed25558237ea5093405d0a19d59fa0
+nodejs-ctype-0.5.3-3.el6.noarch.rpm 04208b8d71801a49d38d3f7eb6bcb975
+nodejs-delayed-stream-0.0.5-5.el6.noarch.rpm 1937cd972a4aae7cf96eef189c378751
+nodejs-devel-0.10.13-1.el6.x86_64.rpm ce9994a0e87f55bdca8c72d67358c664
+nodejs-editor-0.0.4-2.el6.noarch.rpm 26eed7611b8a5e3daedfe82ca6c5b3a4
+nodejs-forever-agent-0.5.0-1.el6.noarch.rpm ae291fd923789d221703915ec4133e42
+nodejs-form-data-0.0.10-1.el6.noarch.rpm 87b082ca1a9b213a2b904271dc2c0dfc
+nodejs-fstream-0.1.23-1.el6.noarch.rpm 2e4f4ea219dbd34ac16b2fdc399b8887
+nodejs-fstream-ignore-0.0.7-1.el6.noarch.rpm 83e86ffbf336ac5812c143c73a968957
+nodejs-fstream-npm-0.1.5-1.el6.noarch.rpm eea43408005b34d89d7cd7430ab7a116
+nodejs-github-url-from-git-1.1.1-2.el6.noarch.rpm 81429831e10670c6ed01743e4dfeff24
+nodejs-glob-3.2.3-1.el6.noarch.rpm 6ca213774d0f69b934def9c836af1d70
+nodejs-graceful-fs-2.0.0-2.el6.noarch.rpm e760f3a30eadbf6902774bed115f0883
+nodejs-hawk-0.15.0-1.el6.noarch.rpm bdfb7b46adbb04a6afce7c4d5fd9dfa3
+nodejs-hoek-0.9.1-1.el6.noarch.rpm c2d883b0f8b1addda0a01aebd758a98d
+nodejs-http-signature-0.10.0-3.el6.noarch.rpm 78341cdc8da46076eed4100af32bdc70
+nodejs-inherits1-1.0.0-11.el6.noarch.rpm 9e5b3ee60721c4405a938889004c7c2d
+nodejs-inherits-2.0.0-3.el6.noarch.rpm c457e9661b4320ce732401e8b7d35d17
+nodejs-ini-1.1.0-3.el6.noarch.rpm 11910ec1fe36baf3a6aa3674679fd776
+nodejs-init-package-json-0.0.10-1.el6.noarch.rpm f47d497760e66f737572ff0100584be6
+nodejs-json-stringify-safe-5.0.0-1.el6.noarch.rpm cc5174de33520b572aa471b409fa76ab
+nodejs-lockfile-0.4.0-1.el6.noarch.rpm 59384096afef1a8086b311ac16b10f15
+nodejs-lru-cache-2.3.0-3.el6.noarch.rpm b0731c4a196d662d6c017e902f5656a7
+nodejs-mime-1.2.9-3.el6.noarch.rpm 2807fc19d312bbddf17ea854aa635cb3
+nodejs-minimatch-0.2.12-2.el6.noarch.rpm a65be00f13f5b52a918e202f01af660e
+nodejs-mkdirp-0.3.5-3.el6.noarch.rpm 02c879e5c24e280137d71b94a85ef033
+nodejs-mute-stream-0.0.3-6.el6.noarch.rpm 3e2037ff19b4192b847fa35c2f862c5f
+nodejs-node-uuid-1.4.0-4.el6.noarch.rpm 2e01feec03c1a2456f3f9341692ac6de
+nodejs-nopt-2.1.1-3.el6.noarch.rpm aa3126946c2b6dcf95f1a9986c5b0702
+nodejs-normalize-package-data-0.2.0-1.el6.noarch.rpm 36ae4cff9d7f959ccd56087b76f98a13
+nodejs-npmconf-0.1.1-1.el6.noarch.rpm 50cce64bd47eb413cf12125a74f1e2b3
+nodejs-npmlog-0.0.4-1.el6.noarch.rpm 57801dddf7944fb476b808abbe78e9ee
+nodejs-npm-registry-client-0.2.27-1.el6.noarch.rpm 24d63568be79261c59ee996f882dd664
+nodejs-npm-user-validate-0.0.3-1.el6.noarch.rpm 2e7f436c3d2876dcd27717a0cfe7773a
+nodejs-oauth-sign-0.3.0-1.el6.noarch.rpm f23afc59f826aabe0968cd4cb6b7e8b4
+nodejs-once-1.1.1-5.el6.noarch.rpm 3a91d50201fbba1e4c8831b6479d67ba
+nodejs-opener-1.3.0-7.el6.noarch.rpm 852f20f3d3885acbe4ccc11b0e71aa59
+nodejs-osenv-0.0.3-5.el6.noarch.rpm 5965460cf20c16cc1647df25aa9812c5
+nodejs-packaging-3-1.el6.noarch.rpm 590bbd33620055526bf045e840fd9ab3
+nodejs-promzard-0.2.0-6.el6.noarch.rpm 39d8315b67f8dd32d2983c867d25005c
+nodejs-proto-list-1.2.2-5.el6.noarch.rpm 3730a12d250c94dacf59c578ccafa74c
+nodejs-qs-0.6.5-2.el6.noarch.rpm d1d29ea47235211a127698776f88946e
+nodejs-read-1.0.4-8.el6.noarch.rpm a189fd27e3b9a5ce5ee53048adc123d1
+nodejs-read-installed-0.2.2-1.el6.noarch.rpm cd2ea48489828c05368c686159c7f521
+nodejs-read-package-json-1.1.0-2.el6.noarch.rpm af17b875d51ef441debbc0380d63eae3
+nodejs-request-2.21.0-1.el6.noarch.rpm 4336da7130d1ffa9be74f83cd17ea0eb
+nodejs-retry-0.6.0-5.el6.noarch.rpm cc97539cc85b1315d122f26df2c5186b
+nodejs-rimraf-2.2.0-1.el6.noarch.rpm 53f8add5c17fa68ec9b4cb9831f80a05
+nodejs-semver-2.0.10-1.el6.noarch.rpm 795524723c87edd1e91031bd790550a4
+nodejs-sha-1.0.1-4.el6.noarch.rpm a2008af4005d36ab63544e9f3de67cf8
+nodejs-sigmund-1.0.0-5.el6.noarch.rpm 7a8cfc425f870c70f753d8ca51dd7d6d
+nodejs-slide-1.1.4-1.el6.noarch.rpm 1bba118a69a6666e95af74f3359c352b
+nodejs-sntp-0.2.4-1.el6.noarch.rpm 9d70ee75efdb3a23128f32c599434081
+nodejs-tar-0.1.17-3.el6.noarch.rpm f106e8dcae8e23aa78c030008ccb69aa
+nodejs-tunnel-agent-0.3.0-1.el6.noarch.rpm 3be37759fe9bdc01ef4a421bdc6da788
+nodejs-uid-number-0.0.3-7.el6.noarch.rpm 3c66376ebd444a6349c3e0fa83908546
+nodejs-which-1.0.5-8.el6.noarch.rpm b5573f997727ba0b17520c0c31e3d8a6
+npm-1.3.3-1.el6.noarch.rpm 0cee0373f1402f68a6808d0ecd5c6f5c
+pylint-0.21.1-2.el6.noarch.rpm 9bb48ff2dfaec8349f02e3a34ddfd986
+pyparsing-1.5.6-1.el6.noarch.rpm 69c6acb7691fe355e6c45789df61d3e5
+python-amqplib-0.6.1-2.el6.noarch.rpm 5e84cd82710e8b6417c82fe211ab6dfe
+python-anyjson-0.3.1-1.el6.noarch.rpm 5865428fa29f2128d9bec39a8b88fa21
+python-argparse-1.2.1-2.el6.noarch.rpm 68d75eb21ff03c204e9f9ef3cba74c3e
+python-backports-1.0-3.el6.x86_64.rpm 35980f3d8c146761887a4e7cb435b118
+python-backports-ssl_match_hostname-3.4.0.2-1.el6.noarch.rpm 99edfec68309822283ff87f9bdea65dc
+python-chardet-2.0.1-1.el6.noarch.rpm f0fc0c2101908be26abe81ec094b754f
+python-cliff-1.3-1.el6.noarch.rpm e85d23d6c48fa6617a2bc89847bdffbb
+python-cmd2-0.6.4-7.el6.noarch.rpm b0bd8694ffa86ddae762e44f6abdb9f9
+python-django-compressor-1.2-4.el6.noarch.rpm d14904005982c71a8f33340082d4146b
+python-eventlet-0.9.17-2.el6.noarch.rpm 980d47de954df40a01ddda4143a5903b
+python-flask-0.9-5.el6.noarch.rpm 7360173f5d0bde9fe6280d49634128ad
+python-greenlet-0.3.1-12.el6.x86_64.rpm 372a18da8b48d29fb908f9a0c9234afe
+python-httplib2-0.7.7-1.el6.noarch.rpm b9c866a1e698ec5f830084b61f09aace
+python-importlib-1.0.2-1.el6.noarch.rpm d18a6101124df676ebf5bab26ac890d6
+python-iso8601-0.1.4-2.el6.noarch.rpm 605056c412cb46ac11bf630f1ce5bb48
+python-jinja2-26-2.6-2.el6.noarch.rpm 423d1e3053d0f5b7168bf286690c891f
+python-jsonschema-0.2-1.el6.noarch.rpm 24479ab99b8e77c05856b98bf9434976
+python-keyring-0.7-1.el6.noarch.rpm f42bdbd788a9561e7b16a11ec7238e14
+python-kombu-1.1.3-1.el6.noarch.rpm a57fb5593d91c22d81bb52f6e11c72a3
+python-lockfile-0.8-3.el6.noarch.rpm 9ed1610a9d4b23c8734ccfa529ded8d3
+python-logilab-astng-0.20.1-1.el6.noarch.rpm ee8bb5c6135a895b386fddc35fe7991c
+python-logilab-common-0.50.3-1.el6.noarch.rpm 566a6f3f6c1558455d5b758ef3ba6df1
+python-mox-0.5.3-2.el6.noarch.rpm 842496ecaaf7f922c4edb6b5e9de9706
+python-ordereddict-1.1-2.el6.noarch.rpm d0b5d5717adac363823f77036292c2d5
+python-passlib-1.5.3-1.el6.noarch.rpm a5f3afe88903f058283aa52bea0fdb48
+python-paste-deploy1.5-1.5.0-5.el6.noarch.rpm 64a519750a628fe5c3d0081364b3b020
+python-pbr-0.5.11-2.el6.noarch.rpm 9643e96b1062a8d9ae71f2df81820369
+python-pip-1.3.1-4.el6.noarch.rpm 498a8b24337fca4e81dbb75a8de5eb9f
+python-prettytable-0.6.1-1.el6.noarch.rpm fee3e8cf89ce113ae7815b069fe779e4
+python-requests-1.1.0-4.el6.noarch.rpm 357ba393303a64ba7ab93f78586a25ad
+python-routes1.12-1.12.3-4.el6.noarch.rpm 880cd2e98f138bdf5e46baca285c41e7
+python-six-1.4.1-1.el6.noarch.rpm 28737b058c1b559529d3bc49862c2a11
+python-sqlalchemy0.7-0.7.8-1.el6.x86_64.rpm 839b06aeb5b0283c2263a0af3291ced0
+python-stevedore-0.8-1.el6.noarch.rpm feb023a43a9edaf51d7df72c7ee2170f
+python-urllib3-1.5-7.el6.noarch.rpm 366712332d952a243586a6f0174092d6
+python-versiontools-1.9.1-3.el6.noarch.rpm 2ae3e073d6fa7d27a57bd7c34dec4f06
+python-virtualenv-1.9.1-1.el6.noarch.rpm f6a2e2179cc629b54645a346b8b4dae9
+python-warlock-0.4.0-2.el6.noarch.rpm a9029af9fa73cacd5e7d7853c5dab54c
+python-werkzeug-0.8.3-2.el6.noarch.rpm 2d87d205cfc776ba791d096abc62df00
+rabbitmq-server-2.6.1-1.el6.noarch.rpm 13303d4f2c4ab18c1539104e2a41c5fd
+snappy-1.0.4-3.el6.x86_64.rpm f2e95139b396d422201eabb9cb72d6f4
+snappy-devel-1.0.4-3.el6.x86_64.rpm 271d158a47ab71358f564362135d1e4a
+socat-1.7.2.2-1.el6.x86_64.rpm 1e488b062779fcae1e75ccc3cdc1427c
+v8-3.14.5.10-1.el6.x86_64.rpm ab604cd8dc6157cab8026128ba57f5fa
+v8-devel-3.14.5.10-1.el6.x86_64.rpm 07f5668c7eb1ae3431f6853d45b034ad
+wxBase-2.8.12-1.el6.x86_64.rpm f5a0a964934eca76418f7ca03ca93ef7
+wxGTK-2.8.12-1.el6.x86_64.rpm 1715747c42a3a547d08f90e43b338ccb
+wxGTK-gl-2.8.12-1.el6.x86_64.rpm 94bd49cfba99081df468db7c5830fd3c
+EOF
+
+url=ftp://174.34.157.218/fedora/epel/6/x86_64/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+libaio-0.3.107-10.el6.x86_64.rpm fb4ff373d938a161c7bb92beff08ed75
+libaio-devel-0.3.107-10.el6.x86_64.rpm a3e170cd7f456782589a9aae55635933
+python-docutils-0.6-1.el6.noarch.rpm aaa6e9232bd65d28b9463f3bf2bdbc72
+python-jinja2-2.2.1-1.el6.x86_64.rpm ba440e61fd106e20530b7e491a1e94b0
+python-sphinx-0.6.6-2.el6.noarch.rpm baf7e77d8e6cc3ef256f2e280cc2544c
+EOF
+url=ftp://ftp.pbone.net/mirror/ftp.scientificlinux.org/linux/scientific/6.0/x86_64/os/Packages/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+libvirt-0.10.2.6-5.el6.centos.alt.x86_64.rpm 22748464c8b59fefc2f76b02d4b69067
+xen-libs-4.2.2-23.el6.centos.alt.x86_64.rpm 912ad236f0a4bdc7b7046121f9939d96
+xen-licenses-4.2.2-23.el6.centos.alt.x86_64.rpm 8f4afbc31bff6ed2257dde7a80e42fd0
+EOF
+url=http://dev.centos.org/centos/6/xen-c6/x86_64/RPMS/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+libvirt-client-0.10.2.6-5.el6.centos.alt.x86_64.rpm 2b9323bd658db1c536fd17263b2100cf
+libvirt-daemon-0.10.2.6-5.el6.centos.alt.x86_64.rpm 67d0547ecf47a3d473698679768ebe8d
+libvirt-daemon-config-network-0.10.2.6-5.el6.centos.alt.x86_64.rpm ce03701fab71bf7932429cf924b33484
+libvirt-daemon-config-nwfilter-0.10.2.6-5.el6.centos.alt.x86_64.rpm 311e9c5043ecfca5c6838da9f7b956ec
+libvirt-daemon-driver-interface-0.10.2.6-5.el6.centos.alt.x86_64.rpm 1c7908b2f4d0f7d49643bf35aceb7344
+libvirt-daemon-driver-libxl-0.10.2.6-5.el6.centos.alt.x86_64.rpm 5bd595f5841857d1f93136fcf72f9b29
+libvirt-daemon-driver-lxc-0.10.2.6-5.el6.centos.alt.x86_64.rpm 57f010cd9d52b645f943bf2f90e54d1f
+libvirt-daemon-driver-network-0.10.2.6-5.el6.centos.alt.x86_64.rpm 53c8cbbececcdff1c6b45467905baf46
+libvirt-daemon-driver-nodedev-0.10.2.6-5.el6.centos.alt.x86_64.rpm 55242712c518e9cd6e0cb5114bb41141
+libvirt-daemon-driver-nwfilter-0.10.2.6-5.el6.centos.alt.x86_64.rpm 5910518064f1bdbabeed5b1edaa3c405
+libvirt-daemon-driver-qemu-0.10.2.6-5.el6.centos.alt.x86_64.rpm 12e313f8a41d309f76b4f4bbff3f6e0c
+libvirt-daemon-driver-secret-0.10.2.6-5.el6.centos.alt.x86_64.rpm 83f267f0231316cb270d66685eef0df9
+libvirt-daemon-driver-storage-0.10.2.6-5.el6.centos.alt.x86_64.rpm a31536e29c8a7cb79ca2fe28b466965d
+libvirt-daemon-driver-xen-0.10.2.6-5.el6.centos.alt.x86_64.rpm 6df026da6088f864287388a67adac8ac
+EOF
+url=ftp://centos.biologie.uni-muenchen.de/centos/6.5/xen4/x86_64/Packages/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+MariaDB-5.5.36-centos6-x86_64-client.rpm d813e099c64558d1c1ebc236ad23906e
+MariaDB-5.5.36-centos6-x86_64-common.rpm 5a078c0666a2047078fac2830dd814aa
+MariaDB-5.5.36-centos6-x86_64-compat.rpm 868bffc1d02b6e73cc4961ab2ce9399f
+MariaDB-5.5.36-centos6-x86_64-devel.rpm cf09134b2c82be1ad52b926bd245566e
+MariaDB-5.5.36-centos6-x86_64-server.rpm 68fd02b77dfc9a006b6d93dd6d348257
+EOF
+url=http://yum.mariadb.org/5.5.36/centos6-amd64/rpms/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+ceph-0.72.2-0.el6.x86_64.rpm 00687cabaed15fe00f1d3128d92faf9e
+ceph-devel-0.72.2-0.el6.x86_64.rpm 915079c0c2c433092657c27a1cf6c4ea
+cephfs-java-0.72.2-0.el6.x86_64.rpm 4072b1a0e3153d2fb31f3b0b870143cd
+ceph-fuse-0.72.2-0.el6.x86_64.rpm 11b12495f9fe5bec42229d84ca81e9eb
+ceph-radosgw-0.72.2-0.el6.x86_64.rpm 227f8bafc4825276864c0f67ce66cc30
+ceph-test-0.72.2-0.el6.x86_64.rpm 11be6bf9b487c3934033dc8f3ebcbaed
+libcephfs1-0.72.2-0.el6.x86_64.rpm 10dad1e84f8e1f7f6fdd2076a52de87c
+libcephfs_jni1-0.72.2-0.el6.x86_64.rpm 3b9fc0bf692f5a8b5632c585bb9ad4ea
+librados2-0.72.2-0.el6.x86_64.rpm e16cdf8495882f376565f8d06826ecea
+librbd1-0.72.2-0.el6.x86_64.rpm eb6e4a3c998286431dd1a259aaff787f
+python-ceph-0.72.2-0.el6.x86_64.rpm da93b966ca6dc94094a3e83606ce0c9e
+rbd-fuse-0.72.2-0.el6.x86_64.rpm b7b2cf3112633c11d06d322364db5ead
+rest-bench-0.72.2-0.el6.x86_64.rpm 43ea3b9f019febf08911f34b02545f07
+EOF
+url=http://ceph.com/rpm/el6/x86_64/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+glusterfs-api-3.4.0.57rhs-1.el6_5.x86_64.rpm 7a1acafc5e469399e79fcc38c54a28ed
+glusterfs-libs-3.4.0.57rhs-1.el6_5.x86_64.rpm 6b9bb7e781a8e9f7e183567f9e60fba4
+spice-server-0.12.4-6.el6_5.1.x86_64.rpm 21cdbb9715ef7a794e2ba519d2dbfe38
+EOF
+url=http://mirror.cogentco.com/pub/linux/centos/6.5/updates/x86_64/Packages/
+download ;
+
+cat <<EOF >$TEMP_DOWNREPOS
+qemu-img-0.12.1.2-2.415.el6.3ceph.x86_64.rpm f89a8f3de3f7b86abffe597d43293bb6
+qemu-kvm-0.12.1.2-2.415.el6.3ceph.x86_64.rpm e83ad1a846b4e7a95bbcdf36540979da
+qemu-kvm-tools-0.12.1.2-2.415.el6.3ceph.x86_64.rpm 971cde40d1e50b4d45bad17d6a5fee1f
+EOF
+url=http://ceph.com/packages/ceph-extras/rpm/centos6.4/x86_64/
+download ;
+
+#-----------------------------------------------------------------------------------
+#some files need down one by one 
+#-----------------------------------------------------------------------------------
+wget -c http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6/Django14-1.4.5-1.el6.noarch.rpm
+
+wget -c ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/devel:/languages:/python/SLE_11_SP3/x86_64/python-setuptools-git-1.0b1-15.4.x86_64.rpm
+
+wget -c http://ceph.com/packages/ceph-extras/rpm/rhel6.3/x86_64/qemu-kvm-debuginfo-0.12.1.2-2.415.el6.3ceph.x86_64.rpm
+
+wget -c ftp://ftp.univie.ac.at/systems/linux/fedora/epel/6/x86_64/python-psutil-0.6.1-1.el6.x86_64.rpm
+wget -c http://ceph.com/rpm-testing/el6/noarch/ceph-release-1-0.el6.noarch.rpm
+
+wget -c http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6/python-migrate-0.7.2-8.el6.noarch.rpm
+
+echo "Django14-1.4.5-1.el6.noarch.rpm 7e8f7a9afaadcfeea2bd89f9b60e2aef" >>rpms_list
+echo "ceph-release-1-0.el6.noarch.rpm d1ae28f161ba25725b36429105479d74" >>rpms_list
+echo "qemu-kvm-debuginfo-0.12.1.2-2.415.el6.3ceph.x86_64.rpm 3d92d0118cfaea4b0467d94577e9cffb" >>rpms_list
+echo "python-setuptools-git-1.0b1-15.4.x86_64.rpm 78f4d59e983878234428cdf695a2eaca" >>rpms_list
+echo "python-psutil-0.6.1-1.el6.x86_64.rpm 4b2d7a8e456553708caadff14e8593e4" >>rpms_list
+
+process=$(ps aux |grep wget |grep -v grep|wc -l)
+
+mv -f *.rpm vsmrepo/
+rm -f $TEMP_DOWNRRPOS
+echo "python-migrate-0.7.2-8.el6.noarch.rpm 875ea2d6f44a070c8d9918d5378da706" >>rpms_list
+
+mv -f *.rpm vsmrepo/
+rm -f temp_downrepo
+
+#-----------------------------------------------------------------------------------
+# MD5 CHECK
+#-----------------------------------------------------------------------------------
+
+ls vsmrepo/ >temp_repos_list
+rm -f temp
+cat temp_repos_list |while read line
+do
+      md=$(md5sum vsmrepo/$line|awk '{print $1}')
+      echo $line $md >>temp
+done
+echo "MD5 check result:"
+echo "different files list:"
+cat temp rpms_list |sort |uniq -u |awk '{print $1}'|sort |uniq -d
+rm -f temp
+
+cat temp rpms_list |sort |uniq -u |awk '{print $1}'|sort |uniq -d >temp_MD5
+
+LIST_MD5=specal_md5
+cat << EOF >$LIST_MD5
+libaio-devel-0.3.107-10.el6.x86_64.rpm
+openstack-utils-2013.1-8.el6.noarch.rpm
+python-cmd2-0.6.4-7.el6.noarch.rpm
+python-docutils-0.6-1.el6.noarch.rpm
+python-sphinx-0.6.6-2.el6.noarch.rpm
+python-swiftclient-1.4.0-1.el6.noarch.rpm
+EOF
+
+MD5_dif=`cat temp_MD5 |wc -l`
+
+if [[ MD5_dif -gt 0 ]];then
+    echo "some files MD5 check  failed: "
+    cat temp_MD5 $LIST_MD5 |sort |uniq -u
+fi
+
+sleep 2
+
+rm -f $TOPDOR/temp_repo_list
+rm -f $TOPDIR/rmps_list
+rm -f temp_MD5
+rm -f specal_md5
+rm -f temp
+#--------------------------------------------------------------
+#build and deploy vsmrepo package
+#--------------------------------------------------------------
+cp -f ./rpms/*.rpm ./vsmrepo
+
+set -e
+
+set -o xtrace
+TEMP=`mktemp`;
+rm -rfv $TEMP >/dev/null;
+mkdir -p $TEMP;
+echo '%debug_package %{nil}' >> ~/.rpmmacros
+
+#---------------------------------------------
+# Load Function
+#---------------------------------------------
+
+source $TOPDIR/tools/lib/createrepo
+source $TOPDIR/tools/lib/dir
+#---------------------------------------------
+# Update vsmrepo
+#---------------------------------------------
+
+__create_repo_by_rpms
+
+#---------------------------------------------
+# build vsmrepo
+#---------------------------------------------
+
+SOURCE_DIR=source
+
+[[ -e ~/rpmbuild ]] && rm -rf ~/rpmbuild
+
+create_dir
+find $TOPDIR -name "*.pyc" | xargs -i rm -rf {}
+find $TOPDIR -name "*.pyo" | xargs -i rm -rf {}
+
+mkdir -p /etc/yum.repos.d/saved
+if [[ `ls /etc/yum.repos.d/ | grep repo | wc -l` -gt 0 ]]; then
+    cp -rf /etc/yum.repos.d/*.repo /etc/yum.repos.d/saved
+    rm -rf /etc/yum.repos.d/*.repo
+fi
+
+cat <<"__EOF__" > /etc/yum.repos.d/vsmrepo.repo
+[vsmrepo]
+name=vsmrepo
+baseurl=file://%TOPDIR%/vsmrepo/
+gpgcheck=0
+enabled=1
+proxy=_none_
+__EOF__
+sed -i "s,%TOPDIR%,$TOPDIR,g" /etc/yum.repos.d/vsmrepo.repo
+
+yum clean all
+yum makecache
+
+#---------------------------------------------
+# Create USER
+#---------------------------------------------
+
+#---------------------------------------------
+# Repo
+#---------------------------------------------
+
+# Update vsmrepo
+#---------------------------------------------
+
+#__create_repo_by_rpms
+
+#---------------------------------------------
+# Create USER
+#---------------------------------------------
+
+HOST_IP=`hostname -I | awk '{print $1}'`
+REPO_HOST=${REPO_HOST:-$HOST_IP}
+
+setup_repo
+
+rm -rf $TEMP
+
+set +o xtrace
+

@@ -1,0 +1,141 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+MYSQL_ROOT_PASSWORD=""
+NAME=""
+PLUGIN=""
+PLUGIN_PATH=""
+PG_NUM=3
+PLUGIN_KV_PAIR=""
+
+function get_mysql_root_password() {
+    if [[ $MYSQL_ROOT_PASSWORD == "" ]]; then
+        if [[ -e /etc/vsmdeploy/deployrc ]]; then
+            str=`cat /etc/vsmdeploy/deployrc | grep MYSQL_ROOT_PASSWORD | awk -F = '{print $2}'`
+            MYSQL_ROOT_PASSWORD=$str
+        else
+            echo "You have installed and set MySQL ROOT password before."
+            echo "You can use --mysql parameter."
+            exit 0
+        fi
+    fi
+}
+
+#---------------------------------------------
+# Usage
+#---------------------------------------------
+
+function usage() {
+    cat << EOF
+Usage: ec-profile
+Project:VSM
+       You can create or delete ec_profile in DB.
+examples:
+    create:
+        ec-profile -c --name profile1 --plugin jerasure --path /usr/lib64/ceph/erasure-code --pg-num 3 --kv-pair '{"k":2,"m":1,"technique":"reed_sol_van"' 
+    delete:
+        ec-profile -d --name profile1 
+EOF
+cat << EOF
+Options:
+  --help | -h
+    Print usage information.
+
+  -c | create 
+    Create an erasure code profile in DB
+
+  -d | delete 
+    Delete an erasure code profile in DB 
+
+  -p 
+    MySQL root user password. 
+    If you don't use this parameter, it will use the MySQL root password in /etc/vsmdeploy/deployrc.
+
+  --name 
+    Erasure code profile's name
+
+  --plugin
+    Plugin type, such as jerasure
+
+  --path
+    The path of plugin
+
+  --pg-num
+    The pg_num
+
+  --kv-pair
+    The key/value pair. This parameter must be JSON Format String.
+    The key/value strings should not have spaces.
+
+EOF
+    exit 0
+}
+
+function create() {
+    get_mysql_root_password
+    ret=`mysql -uroot -p$MYSQL_ROOT_PASSWORD -Ns -e \
+    "use vsm;insert into ec_profiles(name, plugin, plugin_path, pg_num, plugin_kv_pair, deleted)
+    values('$NAME', '$PLUGIN', '$PLUGIN_PATH', $PG_NUM, '$PLUGIN_KV_PAIR', 0);"`
+    if [[ $? == 1 ]] ;then
+        echo "created failed!"
+    else
+        echo "created successfully!"
+    fi
+    exit 0
+}
+
+function delete() {
+    get_mysql_root_password
+    ret=`mysql -uroot -p$MYSQL_ROOT_PASSWORD -Ns -e \
+    "use vsm; delete from ec_profiles where name='$NAME';"`  
+    if [[ $? == 1 ]] ;then
+        echo "deleted failed!"
+    else
+        echo "deleted successfully!"
+    fi
+    exit 0
+}
+
+do_create=do_delete=n
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h | --help) usage ;;
+        -c| create)  do_create=y ;;
+        -d| delete)  do_delete=y ;;
+        -p) shift; MYSQL_ROOT_PASSWORD=$1 ;;
+        --name) shift; NAME=$1 ;;
+        --plugin) shift; PLUGIN=$1 ;;
+        --path) shift; PLUGIN_PATH=$1 ;;
+        --pg-num) shift; PG_NUM=$1 ;;
+        --kv-pair) shift; PLUGIN_KV_PAIR=$1 ;;
+        *) shift ;;
+    esac
+    shift
+done
+
+if [[ $do_create == "y" ]]; then
+    create
+    exit 0
+fi
+
+if [[ $do_delete == "y" ]]; then
+    delete
+    exit 0
+fi 
+

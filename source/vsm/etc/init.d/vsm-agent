@@ -1,0 +1,101 @@
+#!/bin/sh
+#
+# vsm-agent  VSM Storage Agent Service
+#
+# chkconfig:   - 98 02
+# description: VSM Storage Agent Service works on Ceph Storage System.
+### END INIT INFO
+
+. /etc/rc.d/init.d/functions
+sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=osd.$id --keyring=$osd_keyring osd crush create-or-move -- $id ${osd_weight:-${defaultweight:-1}} $osd_location ||:",g' /etc/init.d/ceph;
+prog=vsm-agent
+exec="/usr/bin/$prog"
+config="/etc/vsm/vsm.conf"
+pidfile="/var/run/vsm/$prog.pid"
+logfile=/var/log/vsm/vsm-agent.log
+
+[ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+
+lockfile=/var/lock/subsys/$prog
+
+
+start() {
+    [ -x $exec ] || exit 5
+    [ -f $config ] || exit 6
+    echo -n $"Starting $prog: "
+    daemon --user vsm --pidfile $pidfile "$exec --config-file $config --log-file $logfile &>/dev/null & echo \$! > $pidfile"
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc -p $pidfile $prog
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+clean() {
+    rm -rf $pidfile
+    rm -rf $lockfile
+}
+restart() {
+    stop
+    start
+}
+
+reload() {
+    restart
+}
+
+force_reload() {
+    restart
+}
+
+rh_status() {
+    status -p $pidfile $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    clean)
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload)
+        rh_status_q || exit 7
+        $1
+        ;;
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload}"
+        exit 2
+esac
+exit $?

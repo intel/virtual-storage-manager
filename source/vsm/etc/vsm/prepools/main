@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+set -e
+set -o xtrace
+
+TOPDIR=$(cd $(dirname "$0") && pwd)
+
+#------------------------------------------
+# Usage: ./main ip pool,type
+#------------------------------------------
+has_segma=`echo $2 | grep "," | wc -l`
+if [[ $# -eq 2 && $has_segma -gt 0 ]]; then
+    source $TOPDIR/server/multiple
+    setup_multiple $@
+    exit 0
+fi
+
+#------------------------------------------
+# Usage: ./main ip pool
+#------------------------------------------
+if [[ $# -eq 2 && $has_segma -eq 0 ]]; then
+    source $TOPDIR/server/single
+    setup_single $@
+    exit 0
+fi
+
+#------------------------------------------
+# Usage: ./main ip pool,type pool,type
+#------------------------------------------
+if [[ $# -gt 2 && $has_segma -gt 0 ]]; then
+    source $TOPDIR/server/multiple
+    setup_multiple $@
+    exit 0
+fi
+
+#------------------------------------------
+# Report error.
+#------------------------------------------
+echo "The number of parameter can't less than 2."
+echo "Usage: ./main openstack_ip pool_name"
+echo "Usage: ./main openstack_ip pool_name,pool_type pool_name,pool_type"
+exit 0
+
+set +o xtrace

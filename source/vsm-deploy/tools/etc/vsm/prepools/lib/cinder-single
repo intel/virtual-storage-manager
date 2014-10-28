@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function _set_default_cinder() {
+    local key=`echo $@ | awk -F "=" '{print $1}'`
+    local value=`echo $@ | awk -F "=" '{print $2}'`
+    openstack-config --set /etc/cinder/cinder.conf DEFAULT $key $value
+}
+
+function _del_other_section() {
+    local sec_list=`cat /etc/cinder/cinder.conf | grep "\[" | grep -v "^#"`
+    local cnt=0
+    local sec_name=""
+
+    for n in $sec_list; do
+        cnt=`echo $n | grep -v DEFAULT | wc -l`
+        if [[ $cnt -gt 0 ]]; then
+            sec_name=${n//[/ }
+            sec_name=${sec_name//]/ }
+            openstack-config --del /etc/cinder/cinder.conf $sec_name
+        fi
+    done
+    openstack-config --del /etc/cinder/cinder.conf DEFAULT enabled_backends
+}
+
+function configure_cinder() {
+    local cinder_file=/etc/cinder/cinder.conf
+    local ceph_file=/etc/cinder/ceph.conf
+
+    # If we find the cinder.conf, we change the configuration file.
+    # Otherwise, skip.
+    # NOTE: If do not find cinder.conf file, do not report error.
+
+    if [[ -e $cinder_file ]]; then
+        cp -rf $TOPDIR/files/cinder/* /etc/cinder/
+        _del_other_section
+        _set_default_cinder volume_driver=cinder.volume.drivers.rbd.RBDDriver
+        _set_default_cinder rbd_pool=${AUTH_CINDER_POOL}
+        _set_default_cinder rbd_ceph_conf=$ceph_file
+        _set_default_cinder rbd_flatten_volume_from_snapshot=false
+        _set_default_cinder rbd_max_clone_depth=5
+        _set_default_cinder glance_api_version=2
+        _set_default_cinder rbd_user=${AUTH_CINDER_USER#*.}
+        _set_default_cinder rbd_secret_uuid=${AUTH_CINDER_UUID}
+
+        chown -R cinder:cinder /etc/cinder
+        if [[ `is_service_running openstack-cinder-api` -gt 0 ]]; then
+            service openstack-cinder-api restart
+        fi
+
+        if [[ `is_service_running openstack-cinder-volume` -gt 0 ]]; then
+            service openstack-cinder-volume restart
+        fi
+    fi
+}

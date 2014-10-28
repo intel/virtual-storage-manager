@@ -1,0 +1,29 @@
+function nic_ip() {
+    local nic=$1
+    if [[ $# != 1 ]]; then
+        echo "************ERROR***********"
+        echo "You must input one nic or bridge name."
+        exit 0
+    fi
+
+    local NIC_IP=`ifconfig $nic | grep "inet addr" \
+         | awk '{print $2}' | awk -F ":" '{print $2}'`
+    echo $NIC_IP
+}
+
+function ping_ip() {
+    local ip=$1
+    if [[ $# != 1 ]]; then
+        echo "************ERROR***********"
+        echo "Need one ip address or hostname."
+        exit 0
+    fi
+
+    PING_TIME=${PING_TIME:-5}
+    cnt=`ping -c $PING_TIME $ip | grep Unreachable | wc -l`
+    if [[ $cnt -gt 0 ]]; then
+        return 0
+    else
+        return 1
+    fi
+}

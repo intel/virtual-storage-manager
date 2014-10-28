@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+# list all the secret user defined in libvirt.
+# The ourput format will be:
+# uuid auth_name auth_key
+function _list_secret_user() {
+    local secret_list=` virsh secret-list | \
+                        grep -v "UUID" | \
+                        grep -v "\---" | \
+                        grep -v "^$" | \
+                        awk '{print $1}'`
+    local cnt=`echo $secret_list | wc -l`
+    if [[ $cnt -gt 0 ]]; then
+        for n in $secret_list; do
+            local auth_name=`virsh secret-dumpxml $n | \
+                       grep name | \
+                       awk '{print $1}'`
+            auth_name=${auth_name##*>}
+            local uuid=$n
+            local auth_key=`virsh secret-get-value $n`
+            echo "$uuid $auth_name $auth_key"
+        done
+    fi
+}
+
+# Define a secret by information from ceph:
+#       `username: such as client.cinder`
+#       `auth_key: AQCp4yBTgDouMBAAesMjz0rwnoMKYI4Bbe7vXw`
+# Different with usual usage, we provide UUID for secret.xml.
+function _define_secret_user() {
+    local auth_user=$1
+    local auth_key=$2
+    local auth_uuid=$3
+    local file=`mktemp`
+    cat <<"____EOF">$file
+    <secret ephemeral='no' private='no'>
+        <uuid>%AUTH_UUID%</uuid>
+        <usage type='ceph'>
+                <name>%AUTH_USER% secret</name>
+        </usage>
+    </secret>
+____EOF
+    sed -i "s,%AUTH_UUID%,$auth_uuid,g" $file
+    sed -i "s,%AUTH_USER%,$auth_user,g" $file
+    local uuid=`virsh secret-define --file $file | awk '{print $2}'`
+    virsh secret-set-value --secret $uuid --base64 $auth_key
+    echo "$uuid $auth_name $auth_key"
+    rm -rf $file
+}
+
+# Parameters needed:
+# auth_user: such as client.cinder
+# auth_key:  AQCp4yBTgDouMBAAesMjz0rwnoMKYI4Bbe7vXw
+# auth_uuid: used by secret.xml file.
+function add_auth_user() {
+    local auth_user=$1
+    local auth_key=$2
+    local auth_uuid=$3
+    local secret_list=`_list_secret_user`
+    local cnt_key=`echo $secret_list | grep $auth_user | grep $auth_key | wc -l`
+    if [[ $cnt_key -gt 0 ]]; then
+        echo "ERROR: (${auth_user}, ${auth_key}, ${auth_uuid})" \
+              "Already exists in OpenStack env."
+        return
+    else
+        _define_secret_user $auth_user $auth_key $auth_uuid
+    fi
+}

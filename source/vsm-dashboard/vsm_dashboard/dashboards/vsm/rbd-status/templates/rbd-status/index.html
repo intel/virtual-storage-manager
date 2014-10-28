@@ -1,0 +1,64 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "RBD Status" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=cluster.title %}
+        <style>
+            .page{
+                float:right;
+            }
+
+        </style>
+{% endblock page_header %}
+
+{% block main %}
+    {{ table.render }}
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
+    <script src='{{ STATIC_URL }}dashboard/js/clustermgmt.js' type='text/javascript' charset='utf-8'></script>
+    <script type="text/javascript">
+        function searchToObject(){
+            var pairs = window.location.search.substring(1).split("&");
+            var obj = {};
+            var pair, i;
+            for(i in pairs){
+                if(paris[i] === "")continue;
+                pair = pairs[i].split("=");
+                obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+            }
+            return obj;
+        }
+        var back = "";
+        if(window.location.search){
+            //document.body.scrollTop = 9999;
+            //var search = searchToObject();
+            back = "<a href='javascript:history.back(-1)'>back</a>&nbsp;&nbsp;";
+        }
+        var marker = $('#rbd_list tbody tr').last().find('td').first().html();
+        var next_page_url = location.pathname + "?marker=" + marker;
+        $("tfoot tr td").append("<div class='page'>"+back+"<a href='"+next_page_url+"'>next</a></div>");
+    </script>
+
+{% endblock %}
+

@@ -1,0 +1,51 @@
+Metadata-Version: 1.0
+Name: vsm-dashboard
+Version: 20.14.2
+Summary: The OpenStack Dashboard.
+Home-page: https://github.com/openstack/horizon/
+Author: OpenStack
+Author-email: horizon@lists.launchpad.net
+License: Apache 2.0
+Description: ====================================
+        Horizon Customization Demo Dashboard
+        ====================================
+
+        This Django project demonstrates how the `Horizon`_ app can be used to
+        construct customized dashboards (for OpenStack or anything else).
+
+        The ``horizon`` module is pulled down from GitHub during setup
+        (see setup instructions below) and added to the virtual environment.
+
+        .. _Horizon: http://github.com/openstack/horizon
+
+        Setup Instructions
+        ==================
+
+        The following should get you started::
+
+            $ git clone https://github.com/gabrielhurley/horizon_demo.git
+            $ cd horizon_demo
+            $ python tools/install_venv.py
+            $ cp vsm_dashboard/local/local_settings.py.example vsm_dashboard/local/local_settings.py
+
+        Edit the ``local_settings.py`` file as needed.
+
+        When you're ready to run the development server::
+
+            $ ./run_tests.sh --runserver
+
+        Using Fake Test Data
+        ====================
+
+        If you want a more interesting visualization demo, you can uncomment line
+        24 of ``dashboards/visualizations/flocking/views.py`` to load fake instance
+        data instead of using data from a real Nova endpoint.
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Framework :: Django
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Environment :: OpenStack

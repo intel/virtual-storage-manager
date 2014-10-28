@@ -1,0 +1,221 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function _backend_list() {
+    local list=${BACKEND_LIST//\{/ }
+    list=${list//\},/ }
+    list=${list//\}/ }
+    list=${list//,/ }
+    echo $list
+}
+
+function _type_list() {
+    local list=${TYPE_LIST//\{/ }
+    list=${list//\},/ }
+    list=${list//\}/ }
+    list=${list//,/ }
+    echo $list
+}
+
+function _get_type() {
+    local iter=$1
+    local cnt=0
+    for n in `_type_list`; do
+        let ++cnt
+        if [[ $cnt -eq $iter ]]; then
+            echo $n
+        fi
+    done
+}
+
+function _cinder_rc() {
+cat <<"EOF">$TOPDIR/cinderrc
+export OS_USERNAME=%USER%
+export OS_TENANT_NAME=%TENANT_NAME%
+export OS_PASSWORD=%PASSWORD%
+export OS_AUTH_URL=http://%KEYSTONE_HOST%:35357/v2.0/
+export PS1='[\u@\h \W(keystone_admin)]\$ '
+EOF
+    local USER=`_admin_user`
+    local TENANT_NAME=`_tenant_name`
+    local PASSWORD=`_password`
+    local KEYSTONE_HOST=`_keystone_ip`
+    local file=$TOPDIR/cinderrc
+
+    sed -i "s,%USER%,$USER,g" $file
+    sed -i "s,%TENANT_NAME%,$TENANT_NAME,g" $file
+    sed -i "s,%PASSWORD%,$PASSWORD,g" $file
+    sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" $file
+    source $file
+}
+
+function _tenant_name() {
+    local file=/etc/cinder/api-paste.ini
+    local name=`cat $file | grep admin_tenant_name | awk -F '=' '{print $2}'`
+    echo $name
+}
+
+function _keystone_ip() {
+    local file=/etc/cinder/api-paste.ini
+    local ip=`cat $file | grep auth_host | awk -F '=' '{print $2}'`
+    echo $ip
+}
+
+function _password() {
+    local file=/etc/cinder/api-paste.ini
+    local password=`cat $file | grep admin_password | awk -F '=' '{print $2}'`
+    echo $password
+}
+
+function _admin_user() {
+    local file=/etc/cinder/api-paste.ini
+    local user=`cat $file | grep admin_user | awk -F '=' '{print $2}'`
+    echo $user
+}
+
+function __is_type_exists() {
+    local types=$1
+    local cnt=`cinder type-list | awk '{print $4}' | grep "^$types$" | wc -l`
+    echo $cnt
+}
+
+function _add_type() {
+    local types=$1
+    local cnt=`__is_type_exists $types`
+    if [[ $cnt -eq 0 ]];then
+        cinder type-create $types
+    fi
+}
+
+function _add_type_key() {
+    local types=$1
+    local backend_name=$2
+    local cnt=`cinder extra-specs-list | awk '{print $6}' | grep $backend_name | wc -l`
+    if [[ $cnt -eq 0 ]]; then
+        cinder type-key $types set volume_backend_name=$backend_name
+    fi
+}
+
+function _set_multiple_default_cinder() {
+    local key=`echo $@ | awk -F "=" '{print $1}'`
+    local value=`echo $@ | awk -F "=" '{print $2}'`
+    openstack-config --set /etc/cinder/cinder.conf DEFAULT $key $value
+}
+
+function __set_section() {
+    local sec_name=$1
+    local key=`echo $2 | awk -F "=" '{print $1}'`
+    local value=`echo $2 | awk -F "=" '{print $2}'`
+    openstack-config --set /etc/cinder/cinder.conf $sec_name $key $value
+}
+
+function _set_backend_cinder() {
+    local backend_name=$1
+    local ceph_file=/etc/cinder/ceph.conf
+    __set_section $backend_name volume_driver=cinder.volume.drivers.rbd.RBDDriver
+    __set_section $backend_name rbd_pool=${backend_name}
+    __set_section $backend_name volume_backend_name=${backend_name}
+    __set_section $backend_name rbd_ceph_conf=${ceph_file}
+    __set_section $backend_name rbd_flatten_volume_from_snapshot=false
+    __set_section $backend_name rbd_max_clone_depth=5
+    __set_section $backend_name glance_api_version=2
+    __set_section $backend_name rbd_user=${AUTH_CINDER_USER#*.}
+    __set_section $backend_name rbd_secret_uuid=${AUTH_CINDER_UUID}
+}
+
+function _del_other_multiple_section() {
+    local sec_list=`cat /etc/cinder/cinder.conf | grep "\[" | grep -v "^#"`
+    local cnt=0
+    local sec_name=""
+
+    for n in $sec_list; do
+        cnt=`echo $n | grep -v DEFAULT | wc -l`
+        if [[ $cnt -gt 0 ]]; then
+            sec_name=${n//[/ }
+            sec_name=${sec_name//]/ }
+            openstack-config --del /etc/cinder/cinder.conf $sec_name
+        fi
+    done
+    openstack-config --del /etc/cinder/cinder.conf DEFAULT enabled_backends
+}
+
+function _del_default_cinder() {
+    local sec_name="DEFAULT"
+    local key=`echo $@ | awk -F "=" '{print $1}'`
+    openstack-config --del /etc/cinder/cinder.conf $sec_name $key
+}
+
+function _has_this_pool() {
+    local ret=`cat /etc/cinder/cinder.conf  | grep "^\["`
+    local cnt=0
+
+    for pname in $cnt; do
+        pname=${pname//\[/}
+        pname=${pname//\]/}
+        if [[ $pname == $1 ]]; then
+            let ++cnt
+        fi
+    done
+    echo $cnt
+}
+
+function configure_multiple_cinder() {
+    local cinder_file=/etc/cinder/cinder.conf
+    local ceph_file=/etc/cinder/ceph.conf
+    local cnt=0
+    local old_str=""
+    _del_other_multiple_section
+
+    _cinder_rc
+    # If we find the cinder.conf, we change the configuration file.
+    # Otherwise, skip.
+    # NOTE: If do not find cinder.conf file, do not report error.
+
+    if [[ -e $cinder_file ]]; then
+        cp -rf $TOPDIR/files/cinder/* /etc/cinder/
+        _del_default_cinder volume_driver=cinder.volume.drivers.rbd.RBDDriver
+        _del_default_cinder rbd_pool=${AUTH_CINDER_POOL}
+        _del_default_cinder rbd_ceph_conf=$ceph_file
+        _del_default_cinder rbd_flatten_volume_from_snapshot=false
+        _del_default_cinder rbd_max_clone_depth=5
+        _del_default_cinder glance_api_version=2
+        _del_default_cinder rbd_user=${AUTH_CINDER_USER#*.}
+        _del_default_cinder rbd_secret_uuid=${AUTH_CINDER_UUID}
+
+        _set_multiple_default_cinder enabled_backends=${BACKEND_LIST}
+        _set_multiple_default_cinder scheduler_driver=cinder.scheduler.filter_scheduler.FilterScheduler
+
+        cnt=0
+        for n in `_backend_list`; do
+           let ++cnt
+           _set_backend_cinder $n
+           types=`_get_type $cnt`
+           _add_type $types
+           _add_type_key $types $n
+        done
+
+        chown -R cinder:cinder /etc/cinder
+        if [[ `is_service_running openstack-cinder-api` -gt 0 ]]; then
+            service openstack-cinder-api restart
+        fi
+
+        if [[ `is_service_running openstack-cinder-volume` -gt 0 ]]; then
+            service openstack-cinder-volume restart
+        fi
+    fi
+}

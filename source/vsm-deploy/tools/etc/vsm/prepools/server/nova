@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function create_nova() {
+    mkdir -p $TOPDIR/files/nova/
+    cp -rf $TOPDIR/files/cinder/cinder.keyring $TOPDIR/files/nova/nova.keyring
+    cp -rf /etc/ceph/ceph.conf $TOPDIR/files/nova/
+
+cat <<"EOF">>$TOPDIR/files/nova/ceph.conf
+[%AUTH_CINDER_USER%]
+keyring=/etc/nova/nova.keyring
+EOF
+
+sed -i "s,%AUTH_CINDER_USER%,$AUTH_CINDER_USER,g" $TOPDIR/files/nova/ceph.conf
+
+}

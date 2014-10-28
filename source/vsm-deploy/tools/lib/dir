@@ -1,0 +1,8 @@
+function create_dir() {
+    mkdir -p ~/rpmbuild/BUILD
+    mkdir -p ~/rpmbuild/BUILDROOT
+    mkdir -p ~/rpmbuild/RPMS
+    mkdir -p ~/rpmbuild/SOURCES
+    mkdir -p ~/rpmbuild/SPECS
+    mkdir -p ~/rpmbuild/SRPMS
+}

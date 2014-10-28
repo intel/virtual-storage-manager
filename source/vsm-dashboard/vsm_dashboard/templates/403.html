@@ -1,0 +1,42 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %} - {% trans "Forbidden" %}{% endblock %}
+
+{% block content %}
+  <div id="right_content">
+    <div id="page_head">
+      <h2 id="page_heading">{% trans "Forbidden" %}</h2>
+      <p id="page_description">{% trans "You do not have the required privileges to access this content.
+      If you believe this message to be in error, please contact your project manager." %}</p>
+    </div>
+  </div>
+{% endblock %}
+
+{% block sidebar %}
+  <div id="sidebar">
+    <ul id="navigation">
+      {% block nav_home %}
+      <li><h3><a href="/dashboard/vsm">{% trans "Overview" %}</a></h3></li>
+      {% endblock %}
+
+    </ul>
+  </div> <!-- end sidebar -->
+{% endblock %}

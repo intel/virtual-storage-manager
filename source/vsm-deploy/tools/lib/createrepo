@@ -1,0 +1,96 @@
+function __create_repo_by_rpms() {
+    local old_dir=`pwd`
+    cd $TOPDIR/
+    mkdir -p /tmp/debs/
+    find . -name "*.rpm" | xargs -i cp -rf {} /tmp/debs/
+    rm -rf /mnt/vsmrepo
+    mkdir -p /mnt/vsmrepo
+
+    local home=/mnt
+    mkdir -p $home/vsmrepo/x86_64/
+    mv /tmp/debs/* $home/vsmrepo/x86_64/
+    createrepo $home/vsmrepo/
+    rm -rf ./vsmrepo
+    mv $home/vsmrepo $TOPDIR/
+    cd $old_dir
+}
+
+function setup_http() {
+    mkdir -p ~/repo
+    if [[ `ls /etc/yum.repos.d/ | grep repo | wc -l` -gt 0 ]]; then
+        cp -rf /etc/yum.repos.d/*.repo ~/repo
+        rm -rf /etc/yum.repos.d/*.repo
+    fi
+
+    cat <<"__EOF__" > /etc/yum.repos.d/vsmrepo.repo
+[vsmrepo]
+name=vsmrepo
+baseurl=file://%TOPDIR%/vsmrepo/
+gpgcheck=0
+enabled=1
+proxy=_none_
+__EOF__
+
+    sed -i "s,%TOPDIR%,$TOPDIR,g" /etc/yum.repos.d/vsmrepo.repo
+    echo $TOPDIR
+    cat /etc/yum.repos.d/vsmrepo.repo
+    cnt=`rpm -qa | grep httpd | wc -l`
+
+    cnt=`rpm -qa | grep httpd | wc -l`
+    if [[ ! $cnt -eq 2 ]]; then
+        echo "************ERROR***********"
+        echo "Have not find httpd package."
+        echo "Do you install it by yum."
+        echo "Check yum configuration."
+        exit 0
+    fi
+
+    service httpd restart
+    echo "" > /etc/httpd/conf.d/welcome.conf
+
+    chmod -R a+r /var/www/html/
+}
+
+function setup_yum_repo() {
+    local vsm_files=$TOPDIR/vsmrepo
+    if [[ ! -e $vsm_files ]]; then
+        vsm_files=$TOPDIR/vsmrepo
+        if [[ ! -e $vsm_files ]]; then
+            echo "************ERROR***********"
+            echo "Can not find Vsm Yum Repo dir."
+            echo "Please create it by:"
+            exit 0
+        fi
+    fi
+
+    [[ -e /var/www/html ]] && rm -rf /var/www/html/vsmrepo
+    cp -rf $vsm_files /var/www/html/
+    chmod -R a+r /var/www/html/
+
+    mkdir -p ~/repo
+    if [[ `ls /etc/yum.repos.d/ | grep repo | wc -l` -gt 0 ]]; then
+        cp -rf /etc/yum.repos.d/*.repo ~/repo
+        rm -rf /etc/yum.repos.d/*.repo
+    fi
+
+    cat <<"__EOF__" > /etc/yum.repos.d/vsmrepo.repo
+[vsmrepo]
+name=vsmrepo
+baseurl=http://%REPO_HOST%/vsmrepo/
+gpgcheck=0
+enabled=1
+proxy=_none_
+__EOF__
+
+    sed -i "s,%REPO_HOST%,$REPO_HOST,g" /etc/yum.repos.d/vsmrepo.repo
+    echo $REPO_HOST
+    cat /etc/yum.repos.d/vsmrepo.repo
+
+    yum clean all
+    yum makecache
+}
+
+function setup_repo() {
+    setup_http
+    setup_yum_repo
+}

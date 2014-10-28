@@ -1,0 +1,39 @@
+#---------------------------------------------
+# Create USER
+#---------------------------------------------
+
+function _create_user() {
+    if ! getent group $STACK_USER >/dev/null; then
+        echo "Creating a group called $STACK_USER"
+        groupadd $STACK_USER
+    fi
+
+    if ! getent passwd $STACK_USER >/dev/null; then
+        sed -i "/requiretty$/d" /etc/sudoers
+        echo "Creating a user called $STACK_USER"
+        mkdir -p /home/$STACK_USER
+        useradd -g $STACK_USER -s /bin/bash -d /home/$STACK_USER -m $STACK_USER
+        echo "Giving stack user passwordless sudo privileges"
+        grep -q "^#includedir.*/etc/sudoers.d" /etc/sudoers ||
+            echo "#includedir /etc/sudoers.d" >> /etc/sudoers
+        ( umask 226 && echo "$STACK_USER ALL=(ALL) NOPASSWD:ALL" \
+            > /etc/sudoers.d/50_stack_sh )
+    fi
+}
+
+function create_stack_user() {
+    cnt=`ps aux | grep install.sh | grep sudo | grep $STACK_USER| wc -l`
+    if [[  $cnt -gt 0 ]]; then
+        echo "$STACK_USER will install vsm."
+        echo "Coming....."
+    else
+        if [[ $EUID -eq 0 ]]; then
+            echo "You are running this script as root."
+            echo "We will install it by $STACK_USER."
+            _create_user
+            chown -R $STACK_USER:$STACK_USER $TOPDIR
+            su $STACK_USER -c "sudo $TOPDIR/install.sh"
+            exit 0
+        fi
+    fi
+}

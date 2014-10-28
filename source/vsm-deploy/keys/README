@@ -1,0 +1,17 @@
+Steps
+======
+
+yum install -y mod_ssl
+
+1. # cat /etc/httpd/conf.d/ssl.conf
+
+SSLCertificateKeyFile /opt/keys/server.key
+Listen 443
+SSLEngine on
+SSLCertificateFile /opt/keys/server.crt
+
+2. # cat /etc/httpd/mod.d/ssl.load
+LoadModule ssl_module modules/mod_ssl.so
+
+3. Comment lines with 80 on /etc/http/conf/httpd.conf
+

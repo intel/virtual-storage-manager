@@ -1,0 +1,62 @@
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+from vsmclient import base
+from vsmclient import exceptions
+from vsmclient.v1 import vsms
+from tests import utils
+from tests.v1 import fakes
+
+cs = fakes.FakeClient()
+
+class BaseTest(utils.TestCase):
+
+    def test_resource_repr(self):
+        r = base.Resource(None, dict(foo="bar", baz="spam"))
+        self.assertEqual(repr(r), "<Resource baz=spam, foo=bar>")
+
+    def test_getid(self):
+        self.assertEqual(base.getid(4), 4)
+
+        class TmpObject(object):
+            id = 4
+        self.assertEqual(base.getid(TmpObject), 4)
+
+    def test_eq(self):
+        # Two resources of the same type with the same id: equal
+        r1 = base.Resource(None, {'id': 1, 'name': 'hi'})
+        r2 = base.Resource(None, {'id': 1, 'name': 'hello'})
+        self.assertEqual(r1, r2)
+
+        # Two resoruces of different types: never equal
+        r1 = base.Resource(None, {'id': 1})
+        r2 = vsms.Volume(None, {'id': 1})
+        self.assertNotEqual(r1, r2)
+
+        # Two resources with no ID: equal if their info is equal
+        r1 = base.Resource(None, {'name': 'joe', 'age': 12})
+        r2 = base.Resource(None, {'name': 'joe', 'age': 12})
+        self.assertEqual(r1, r2)
+
+    def test_findall_invalid_attribute(self):
+        # Make sure findall with an invalid attribute doesn't cause errors.
+        # The following should not raise an exception.
+        cs.vsms.findall(vegetable='carrot')
+
+        # However, find() should raise an error
+        self.assertRaises(exceptions.NotFound,
+                          cs.vsms.find,
+                          vegetable='carrot')
