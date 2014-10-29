@@ -43,8 +43,13 @@ b) Additional libraries used with VSM have their own licensing; refer to NOTICE 
 Installation & Usage
 --------------------
 
-Please refer to INSTALL to know how to install VSM, and [wiki page](https://github.com/01org/virtual-storage-manager/wiki/Getting-Started-with-VSM) to know 
-how to get started.
+Please refer to INSTALL to know how to install VSM, and [wiki page](https://github.com/01org/virtual-storage-manager/wiki/Getting-Started-with-VSM) to know how to get started.
+
+Contributing
+------------
+
+Please refer to [wiki page](https://github.com/01org/virtual-storage-manager/wiki/VSM-Development) to know how to 
+get involved.
 
 
 Resources
@@ -66,4 +71,3 @@ Other related projects
 
 
 = END =
-
