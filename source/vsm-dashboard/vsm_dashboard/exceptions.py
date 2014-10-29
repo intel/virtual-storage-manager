@@ -1,10 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2012 United States Government as represented by the
-# Administrator of the National Aeronautics and Space Administration.
-# All Rights Reserved.
-#
-# Copyright 2012 Nebula, Inc.
+# Copyright 2014 Intel Corporation, All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -19,42 +15,18 @@
 #    under the License.
 
 from vsmclient import exceptions as vsmclient
-from glanceclient.common import exceptions as glanceclient
 from keystoneclient import exceptions as keystoneclient
-from novaclient import exceptions as novaclient
-from quantumclient.common import exceptions as quantumclient
-from swiftclient import client as swiftclient
 
 UNAUTHORIZED = (keystoneclient.Unauthorized,
                 keystoneclient.Forbidden,
                 vsmclient.Unauthorized,
-                vsmclient.Forbidden,
-                novaclient.Unauthorized,
-                novaclient.Forbidden,
-                glanceclient.Unauthorized,
-                quantumclient.Unauthorized,
-                quantumclient.Forbidden)
+                vsmclient.Forbidden)
 
 NOT_FOUND = (keystoneclient.NotFound,
-             vsmclient.NotFound,
-             novaclient.NotFound,
-             glanceclient.NotFound,
-             quantumclient.NetworkNotFoundClient,
-             quantumclient.PortNotFoundClient)
+             vsmclient.NotFound)
 
 # NOTE(gabriel): This is very broad, and may need to be dialed in.
 RECOVERABLE = (keystoneclient.ClientException,
                # AuthorizationFailure is raised when Keystone is "unavailable".
                keystoneclient.AuthorizationFailure,
-               vsmclient.ClientException,
-               novaclient.ClientException,
-               glanceclient.ClientException,
-               # NOTE(amotoki): Quantum exceptions other than the first one
-               # are recoverable in many cases (e.g., NetworkInUse is not
-               # raised once VMs which use the network are terminated).
-               quantumclient.QuantumClientException,
-               quantumclient.NetworkInUseClient,
-               quantumclient.PortInUseClient,
-               quantumclient.AlreadyAttachedClient,
-               quantumclient.StateInvalidClient,
-               swiftclient.ClientException)
+               vsmclient.ClientException)

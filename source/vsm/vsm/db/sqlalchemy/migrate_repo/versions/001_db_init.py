@@ -1,7 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2010 United States Government as represented by the
-# Administrator of the National Aeronautics and Space Administration.
+# Copyright 2014 Intel Inc.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -45,7 +44,7 @@ def upgrade(migrate_engine):
         Column('free_disk_gb', Integer(), nullable=True),
         Column('current_workload', Integer(), nullable=True),
         Column('cpu_info',
-               Text(convert_unicode=False, assert_unicode=None,
+               Text(convert_unicode=False,
                     unicode_error=None, _warn_on_bytestring=False),
                nullable=True),
         Column('cpu_utilization', Float(), default=0.0, nullable=True),

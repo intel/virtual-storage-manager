@@ -36,7 +36,6 @@ BuildRequires:    python-suds
 BuildRequires:    python-paramiko
 BuildRequires:    python-babel
 BuildRequires:    python-iso8601
-BuildRequires:    python-setuptools-git
 BuildRequires:    python-keystoneclient
 BuildRequires:    python-oslo-config
 BuildRequires:    numpy
@@ -67,7 +66,6 @@ Requires:    python-suds
 Requires:    python-paramiko
 Requires:    python-babel
 Requires:    python-iso8601
-Requires:    python-setuptools-git
 Requires:    python-keystoneclient
 Requires:    python-oslo-config
 Requires:    numpy
