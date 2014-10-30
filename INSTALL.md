@@ -8,41 +8,41 @@
 
 **Keywords:** Ceph, Virtual Storage Management
 
-Prepare
+Preparation
 ===================================
-Before you get ready to install VSM. You should read Prepare carefully to prepare your environment. Sections here are very helpful for you to understand the deploy concept.
+Before you get ready to install VSM, you should prepare your environment. The sections here are very helpful for you to understand the deployment concepts.
 
-**Note**For stable of Ceph System, and VSM cluster, you should prepare at least three nodes to install VSM cluster. Otherwise, create Ceph cluster may raise error by VSM.
+**Note**For a stable Ceph System, and VSM cluster, you should prepare at least three nodes to install VSM cluster. Otherwise, when VSM creates the Ceph cluster, VSM may raise an error.
 
 #Roles
-There are two roles on VSM cluster.
+There are two roles for the VSM cluster.
 ## Controller Node
 Controller node is used to run mysql, rabbitmq, web ui services for vsm cluster.
 ## Storage Node
 Storage node is used to run vsm-agent service which will manage the ceph and physical resources.
 
 #Network
-There are three kinds of network defined in VSM.
+There are three kinds of networka defined in VSM.
 ## Management Network
-Management Network is used to manage hole VSM cluster. So, every node in VSM cluster should have this kind of network.
+Management Network is used to manage the whole VSM cluster. So, every node in VSM cluster should have this kind of network.
 ## Ceph Public Network
-Ceph Public Network is used by ceph system to manage ceph system, such as contact with monitors.
+Ceph Public Network is used by ceph to manage ceph client and server IO operations. 
 ## Ceph Cluster Network
-Ceph Cluster Network is used by ceph to transfer data between OSDs.
+Ceph Cluster Network is used by ceph to transfer data between OSDs for replication and rebalancing.
 
 ##Recommendations
-Controller node at least should contains:
+Controller node should contain at least:
 
     - Management Network
 
-Storage Node should contains:
+Storage Node should contain:
 
     - Management Network
     - Ceph Public Network
     - Ceph Cluster Network
 
 ###Sample 1
-**Controller node** contains networks below:
+**Controller node** contains the networks listed below:
 
     - 172.169.32.0/21 # accessing internet.
     - 192.168.123.0/24
@@ -59,7 +59,7 @@ Then we may assign these networks as below:
     - Ceph public netwok: 192.168.124.0/24
     - Ceph cluster network: 192.168.125.0/24
 
-The configuration for VSM in `cluster_manifest` file should be:
+The configuration for VSM in the `cluster_manifest` file should be:
 
     [management_addr]
     192.168.123.0/24
@@ -70,9 +70,9 @@ The configuration for VSM in `cluster_manifest` file should be:
     [ceph_cluster_addr]
     192.168.125.0/24
 
-**Note** Here we do not use the public network for accessing internet in VSM cluster, so, there are not settings it.
+**Note** Here we do not use the public network for accessing the internet in our VSM cluster, so, there are no settings for this.
 
-**cluster_manifest** Do not worry about this file, we will talk  about it later.
+**cluster_manifest** Do not worry about this file right now, we will talk  about it later.
 
 ### Sample 2
 But how about when all the node just have two NICs. Such as controller node and storage node just have:
@@ -98,7 +98,7 @@ The configuration for VSM in `cluster_manifest` file should be:
     192.168.125.0/24
 
 ### Sammple 3
-It's quite common when there are just one NICs for demo environments. Such as all nodes just has:
+It's quite common to have just one NIC for demo environments. Such as all nodes just have:
 
     - 192.168.124.0/24
 
@@ -108,7 +108,7 @@ We may assign this network as below:
     - Ceph public network: 192.168.124.0/24
     - Ceph cluster network: 192.168.124.0/24
 
-So all the network just use the same network. The configurations in VSM `cluster_manifest` file should be:
+So all the network just use the same network. The configurations in VSM `cluster_manifest` file would then be:
 
     [management_addr]
     192.168.124.0/24
@@ -120,7 +120,7 @@ So all the network just use the same network. The configurations in VSM `cluster
     192.168.124.0/24
 
 #Operating System
-From now on, we are developing/testing based on CentOS 6.5 Linux system. For successfuly installation of VSM, it's better to install system with **CentOS-6.5 Basic Server**.
+We are developing/testing based on CentOS 6.5 Linux system. For successful installation of VSM, it's best to install system with **CentOS-6.5 Basic Server**.
 
 After install of CentOS system, do not run:
 
@@ -267,14 +267,14 @@ Add out public repo, make sure you can access internet. Add a public repo file `
     gpgcheck=0
     enabled=1
 
-**Note** There are not extra spaces at the begining of each line in `public.repo` file. If it does, delete begining extra spaces. Download packages from internet sometimes may be quit slow. Maybe you can set `keepcache=1` in /etc/yum.conf, then you can find all the downloaded RPM packages under /var/cache/yum directory. Then you can use these packages to build a offline repo for VSM.
+**Note** There are no extra spaces at the beginning of each line in `public.repo` file. If they exist, delete the beginning extra spaces. Downloading packages from the internet sometimes may be quit slow. You could for example set `keepcache=1` in /etc/yum.conf, then you can find all the downloaded RPM packages under /var/cache/yum directory. Then you can use these packages to build a offline repo for VSM.
 
 Then rum:
 
     yum makecache
 
 ## VSM RPM Build
-After you setup the repo, and make sure it works, then begin to build the RPMs from source code.
+After you setup the repo, and make sure it works, then begin you can build the RPMs from source code.
 
     cd $source_code_path
     ./buildrpm
@@ -291,7 +291,7 @@ You can use `yum localinstall` to install vsm packages by:
         vsm-2014.10-0.7.1.el6.noarch.rpm \
         vsm-deploy-2014.10-0.7.1.el6.x86_64.rpm
 
-**Note**: vsm-dashboard will use httpd service to setup Web UI. Sometimes it will conflicts with OpenStack dashboard, so try to install OpenStack dashboard and VSM dashboard into different nodes.
+**Note**: vsm-dashboard will use the httpd service to setup Web UI. Sometimes it will conflicts with OpenStack dashboard, so try to install OpenStack dashboard and VSM dashboard into different nodes.
 
 
 # Installation
@@ -376,14 +376,14 @@ Here is one sample configuration `iptables`, take it as references.
 
 ##Hosts file
 
-VSM will sync /etc/hosts file from controller node. So take attention to your controller node's /etc/hosts file. You should follow below rules:
+VSM will sync /etc/hosts file from the controller node. Make sure your controller node's /etc/hosts file follows these rules:
 
     - All the ip address should be listed in /etc/hosts file for very node.
     - Lines with `localhost`, `127.0.0.1` and `::1` should not contains truely hostname.
 
 Take the right version as an example to set your /etc/hosts file in controller-node.
 
-### Right verion
+### Right version
 
     127.0.0.1       localhost localhost.localdomain localhost4 localhost4.localdomain4
     ::1             localhost localhost.localdomain localhost6 localhost6.localdomain6
@@ -457,7 +457,7 @@ mainly focus on the validity of the three IP addresses, and modify them accordin
 
     vsm-controller
 
-**Note**After this command, it will generate a configuration file located in /etc/vsmdeploy/deployrc owned by root. If you want to used the old version of /etc/vsmdeploy/deployrc, you may run `vsm-controller -f /etc/vsmdeploy/deployrc`.
+**Note**After this command, it will generate a configuration file located in /etc/vsmdeploy/deployrc owned by root. If you want to use the old version of /etc/vsmdeploy/deployrc, you may run `vsm-controller -f /etc/vsmdeploy/deployrc`.
 
 **Warning** Do not set proxy env during installation.
 
@@ -476,7 +476,7 @@ Update `vsm_controller_ip` to the vsm controller's IP address under subnet `mana
 
 **step 2*
 
-Generate the `auth_key` by running the following command on vsm controller node:
+Generate the `auth_key` by running the following command on the vsm controller node:
 
     [root@test1-control manifest]# agent-token
     9291376733ec4662929eadcf9eda3b44-e38aeba41c884fc88321ac84028792e4
@@ -505,7 +505,7 @@ to be:
 Then delete the redundant lines with %osd-by-path%, if you have less disks.
 
 **step 4**
-Actually, use disk-by-path is better to use disk path. Use command below to find the truly by-path:
+Using disk-by-path is better to use for the disk path. Use the command below to find the true by-path:
 
     ls -al /dev/disk/by-path/* | grep `disk-path` | awk '{print $9,$11}'
 
@@ -514,11 +514,11 @@ Suc as:
     ls -al /dev/disk/by-path/* | grep sdb | awk '{print $9,$11}'
     /dev/disk/by-path/pci-0000:00:0c.0-virtio-pci-virtio3 ../../sdb
 
-Then replace the /dev/sdb with `/dev/disk/by-path/pci-0000:00:0c.0-virtio-pci-virtio3` in `/etc/manifest/server.manifest` file. Also do this steps for all the other disks listed in this file.
+Then replace the /dev/sdb with `/dev/disk/by-path/pci-0000:00:0c.0-virtio-pci-virtio3` in `/etc/manifest/server.manifest` file. Also do these steps for all the other disks listed in this file.
 
-**Warning** It may cause error when you add a disk withou by-path. So, If you can not find the by-path for a normal disk, you'd better not to used. Or if you use it to create cluster, when it fails, please delete from `/etc/manifest/server.manifest` file.
+**Warning** It may cause an error when you add a disk without by-path. So, If you can not find the by-path for a normal disk, you should not use it. Or if you use it to create cluster, when it fails, please delete from `/etc/manifest/server.manifest` file.
 
-After that the disk list maybe changed to as below:
+After that the disk list may be changed to as below:
 
     [10krpm_sas]
     #format [sas_device]  [journal_device]
@@ -527,9 +527,9 @@ After that the disk list maybe changed to as below:
     /dev/disk/by-path/pci-0000:00:10.0-virtio-pci-virtio7   /dev/disk/by-path/pci-0000:00:11.0-virtio-pci-virtio8
 
 **step 5**
-If you have several kinds of storage medium, and you want these disks into diferent storage groups in VSM. You may flow operations below. Otherwise, you may skip this step and just put all the disks into [10krpm_sas] section.
+If you have several kinds of storage medium, and you want these disks into different storage groups in VSM. You may follow the operations below. Otherwise, you may skip this step and just put all the disks into [10krpm_sas] section.
 
-If you want to add disks into other sections in `/etc/manifest/server.manifest` file. Such as beyong [10krpm_sas] section. Take [ssd] as an example:
+You may want to add disks into other sections in `/etc/manifest/server.manifest` file. Such as beyong [10krpm_sas] section. Take [ssd] as an example:
 
 1> Add storage class in `/etc/manifest/cluster.manifest` in controller node.
 
@@ -560,7 +560,7 @@ to setup storage node.
 
 #Login the webUI
 
-After the command is finish executing, to check if you have setup the controller correctly, do the following step:
+After the command is finished executing, to check if you have setup the controller correctly, do the following steps:
 
 1.  Access http://vsm controller IP/dashboard/vsm.(for example http://192.168.123.4/dashboard/vsm)
 2.  User name: admin
@@ -568,4 +568,4 @@ After the command is finish executing, to check if you have setup the controller
 
         cat /etc/vsmdeploy/deployrc |grep ADMIN_PASSWORD
 
-4.  Then you can switch to `Create Cluster` Panel, and push create cluster button to create a ceph cluster. Good Luck!
+4.  Then you can switch to `Create Cluster` Panel, and push the create cluster button to create a ceph cluster. Good Luck!
