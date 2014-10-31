@@ -20,30 +20,6 @@ VSM has been developed in Python using OpenStack Horizon as the starting point f
 has a familiar look and feel for both software developers and OpenStack administrators. 
 
 
-Important Notice and Contact Information
-----------------------------------------
-
-a) VSM - Virtual Storage Manager
-=============================
-
-Virtual Storage Manager (VSM) is software that Intel has developed to help manage Ceph clusters.  VSM simplifies 
-the creation and day-to-day management of Ceph cluster for cloud and datacenter storage administrators. 
-
-VSM enables OEMs and system integrators to ensure consistent cluster configuration through the use of pre-defined,
-standard cluster configurations, and as a result improves ease of cluster installation and operational reliability,
-and reduces maintenance and support costs.
-
-VSM supports the creation of clusters containing a mix of hard disk drives (HDDs), Solid State storage, and SSD-cached
-HDDs, and simplifies management of the Ceph cluster using a system to organize servers and storage devices according
-to performance characteristics, intended use, and failure domain.
-
-The VSM web-based user interface provides the operator with the ability to monitor overall cluster status, manage
-cluster hardware and storage capacity, inspect detailed operation status of Ceph subsystems, and attach Ceph pools
-to OpenStack Cinder.
-
-VSM has been developed in Python using OpenStack Horizon as the starting point for the application framework, and 
-has a familiar look and feel for both software developers and OpenStack administrators. 
-
 
 Important Notice and Contact Information
 ----------------------------------------
@@ -115,6 +91,7 @@ Installation & Usage
 --------------------
 
 Please refer to INSTALL.md to know how to install VSM, and [wiki page](https://github.com/01org/virtual-storage-manager/wiki/Getting-Started-with-VSM) to know how to get started.
+
 
 Contributing
 ------------
