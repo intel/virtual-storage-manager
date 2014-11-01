@@ -129,7 +129,7 @@ After install of CentOS system, do not run:
 Otherwise you may get conflicts between yum packages when you install VSM.
 
 #Build RPM
-After you download the source code from github. The first step is to build VSM RPMs.
+After you download the source code from github. The first step is to build VSM RPMs. If you already have VSM RPMs, please directly jump to [VSM RPM Install](#RPM_Install).
 
 ## Setup Yum Repo
 ###Step 1
@@ -273,7 +273,7 @@ Then rum:
 
     yum makecache
 
-## VSM RPM Build
+##<a name="RPM_Install"></a> VSM RPM Build
 After you setup the repo, and make sure it works, then begin you can build the RPMs from source code.
 
     cd $source_code_path
