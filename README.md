@@ -20,14 +20,14 @@ VSM has been developed in Python using OpenStack Horizon as the starting point f
 has a familiar look and feel for both software developers and OpenStack administrators. 
 
 
+
 Important Notice and Contact Information
 ----------------------------------------
 
-a) VSM is not a product, and it does not have a full-time support team. Before you use this tool, please understand 
-the need to invest enough effort to learn how to use it effectively and to address possible bugs.
+a) Open source VSM does not have a full-time support team and so would not be generally suitable for production use unless you can support it or have support from a third party. Before you use VSM, please understand the need to invest enough effort to learn how to use it effectively and to address possible bugs.
 
 b) To help VSM develop further, please become an active member of the community and consider giving back by making 
-contributions.
+contributions. We intend to make all open source VSM feature proposals public, and do all development publicly.
 
 For other questions, contact yaguang.wang@intel.com or ferber.dan@intel.com
 
@@ -65,9 +65,3 @@ Mailing list: (http://vsm-discuss.33411.n7.nabble.com/)
 *Other names and brands may be claimed as the property of others.
 
 
-Other related projects
-----------------------
-
-
-
-= END =
