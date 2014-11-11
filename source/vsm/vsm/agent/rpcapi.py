@@ -47,11 +47,9 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return ret
 
     def update_pool_info(self, ctxt, body=None):
-        LOG.info("DEBUG in update_pool_info of rpcapi")
         res = self.cast(ctxt, self.make_msg('update_pool_info', body=body))
 
     def update_recipe_info(self, ctxt, body=None):
-        LOG.info("DEBUG in update_recipe_info of rpcapi")
         res = self.call(ctxt, self.make_msg('update_recipe_info', body=body))
         return res
 

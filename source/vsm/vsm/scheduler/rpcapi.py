@@ -48,87 +48,71 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return self.call(ctxt, self.make_msg('create_storage_pool', body=body))
 
     def list_storage_pool(self, ctxt):
-        LOG.info('in scheduler/rpcapi.py list_storage_pool')
         ret = self.call(ctxt, self.make_msg('list_storage_pool'))
         return ret
 
     def present_storage_pools(self, ctxt, body=None):
-        LOG.info('in scheduler/rpcapi.py present_storage_pools')
         ret = self.cast(ctxt, self.make_msg('present_storage_pools', body=body))
         return ret
 
     def get_storage_group_list(self, ctxt):
-        LOG.info('in scheduler/rpcapi.py get_storage_group_list')
         ret = self.call(ctxt, self.make_msg('get_storage_group_list'))
         return ret
 
     def get_server_list(self, ctxt):
-        LOG.info('in scheduler/rpcapi.py get_server_list')
         ret = self.call(ctxt, self.make_msg('get_server_list'))
         return ret
 
     def add_servers(self, ctxt, body=None):
-        LOG.info('in scheduler/rpcapi.py add_servers %s' % body)
         #NOTE change this procedure to rpc.cast method()
         ret = self.cast(ctxt, self.make_msg('add_servers', body=body))
         return ret
 
     def remove_servers(self, ctxt, body=None):
-        LOG.info('in scheduler/rpcapi.py remove_servers %s' % body)
         ret = self.cast(ctxt, self.make_msg('remove_servers', body=body))
         return ret
 
     def start_server(self, ctxt, body=None):
-        LOG.info('in scheduler/rpcapi.py start_server %s' % body)
         ret = self.cast(ctxt, self.make_msg('start_server', body=body))
         return ret
 
     def stop_server(self, ctxt, body=None):
-        LOG.info('in scheduler/rpcapi.py stop_server %s' % body)
         ret = self.cast(ctxt, self.make_msg('stop_server', body=body))
         return ret
 
     def get_cluster_list(self, ctxt):
-        LOG.info('in scheduler/rpcapi.py get_cluster_list')
         ret = self.call(ctxt, self.make_msg('get_cluster_list'))
         return ret
 
     def create_cluster(self, context, server_list):
-        LOG.info('in scheduler/rpcapi.py create_cluster')
         ret = self.cast(context,
                         self.make_msg('create_cluster',
                                       server_list=server_list))
         return ret
 
     def get_zone_list(self, ctxt):
-        LOG.info('in scheduler/rpcapi.py get_zone_list')
         ret = self.call(ctxt, self.make_msg('get_zone_list'))
         return ret
 
     # TO_BE_CHANGED
     def create_zone(self, ctxt, attrs):
-        LOG.info('in scheduler/rpcapi.py create_zone')
         ret = self.call(ctxt, self.make_msg('create_zone'), attrs=attrs)
         return ret
 
     def add_new_zone(self, ctxt, values):
-        LOG.info("In scheduler/rpcapi.py add_new_zone")
         ret = self.call(ctxt, self.make_msg('add_new_zone', values=values))
 
     def osd_remove(self, ctxt, body):
-        LOG.info("In scheduler/rpcapi.py osd_remove")
         ret = self.call(ctxt, self.make_msg('osd_remove', osd_id=body), \
                         version='1.0', timeout=6000)
         return ret
 
     def osd_restart(self, ctxt, body):
-        LOG.info("In scheduler/rpcapi.py osd_restart")
         ret = self.call(ctxt, self.make_msg('osd_restart', osd_id=body), \
                         version='1.0', timeout=6000)
         return ret
 
     def osd_restore(self, ctxt, body):
-        LOG.info("In scheduler/rpcapi.py osd_restore")
         ret = self.call(ctxt, self.make_msg('osd_restore', osd_id=body), \
                         version='1.0', timeout=6000)
         return ret

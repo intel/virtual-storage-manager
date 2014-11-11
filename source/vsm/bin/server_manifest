@@ -161,7 +161,7 @@ class ManifestChecker(object):
         print js_list
         for js in js_list:
             if js.find('by-path') == -1:
-                error('We defined to use by-path in VSM!')
+                print "[WARNING]: do not using by-path path"
 
             if self.__check_is_mounted(js):
                 error('You should not mount journal devices.!')

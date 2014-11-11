@@ -73,27 +73,22 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return ret
 
     def add_servers(self, ctxt, attrs):
-        LOG.info('in conductor/rpcapi.py add_servers')
         ret = self.call(ctxt, self.make_msg('add_servers'), attrs=attrs)
         return ret
 
     def get_cluster_list(self, ctxt):
-        LOG.info('in conductor/rpcapi.py get_cluster_list')
         ret = self.call(ctxt, self.make_msg('cluster_get_all'))
         return ret
 
     def create_cluster(self, ctxt, attrs):
-        LOG.info('in conductor/rpcapi.py create_cluster')
         ret = self.call(ctxt, self.make_msg('create_cluster'), attrs=attrs)
         return ret
 
     def get_zone_list(self, ctxt):
-        LOG.info('in conductor/rpcapi.py get_zone_list')
         ret = self.call(ctxt, self.make_msg('get_zone_list'))
         return ret
 
     def create_zone(self, ctxt, values):
-        LOG.info('in conductor/rpcapi.py create_zone')
         ret = self.call(ctxt, self.make_msg('create_zone', values=values))
         return ret
 

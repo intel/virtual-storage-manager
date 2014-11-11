@@ -34,7 +34,6 @@ class API(object):
         self.agent_rpcapi = rpcapi.AgentAPI()
 
     def test_service(self, context):
-        LOG.info(' agent/api.py test_service()')
         return self.agent_rpcapi.test_service(context)
 
     def present_storage_pools(self, context, body=None):
@@ -42,5 +41,4 @@ class API(object):
         return self.agent_rpcapi.present_storage_pools(context, body)
 
     def add_new_zone(self, context, zone_name, host):
-        LOG.info("agent/api.py add_new_zone()")
         return self.agent_rpcapi.add_new_zone(context, zone_name, host)

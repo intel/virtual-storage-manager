@@ -16,5 +16,5 @@
 # under the License.
 
 
-old_str=`cat /etc/manifest/server.manifest| grep ".*-.*" | grep -v by`
+old_str=`cat /etc/manifest/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
 sed -i "s,$old_str,$1,g" /etc/manifest/server.manifest

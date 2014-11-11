@@ -83,7 +83,7 @@ class ResetStatus(tables.BatchAction):
     classes = ("reset-status-action", "")
 
     def allowed(self, request, instance=None):
-        return True
+        return (instance["status"] in ("running", "stopping", "removing", "adding", "starting")) or ("ERROR" in instance["status"])
 
     def action(self, request, obj_id):
         LOG.error("RESET_STATUS")

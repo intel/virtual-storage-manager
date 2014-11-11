@@ -97,7 +97,10 @@ class Parser(object):
             elif line.find('=') != -1:
                 pair = line.split('=')
                 key = pair[0].strip()
-                val = pair[1].strip()
+                if len(pair) == 2:
+                    val = pair[1].strip()
+                if len(pair) == 3:
+                    val = pair[1] + "=" + pair[2]
                 options[key] = val
 
         self._sections[sec_name] = options
@@ -319,13 +322,14 @@ class CephConfigParser(manager.Manager):
         # NOTE
         self._parser.set('global', 'fsid', str(uuid.uuid1()))
 
-    def add_mds_header(self, keyring="/etc/ceph/keyring.$name" ):
+    def add_mds_header(self, keyring='false'):
         if self._parser.has_section('mds'):
             return
 
         self._parser.add_section('mds')
         # NOTE : settings for mds.
-        self._parser.set('mds', 'keyring', keyring)
+        #self._parser.set('mds', 'keyring', keyring)
+        self._parser.set('mds', 'mds standby replay', keyring)
 
     def add_mon_header(self, clock_drift=200):
         if self._parser.has_section('mon'):

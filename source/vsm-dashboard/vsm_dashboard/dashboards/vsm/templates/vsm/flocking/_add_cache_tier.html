@@ -18,11 +18,11 @@
 {% extends "horizon/common/_modal_form.html" %}
 {% load i18n %}
 
-{% block form_id %}create_ec_pool_form{% endblock %}
-{% block form_action %}{% url horizon:vsm:poolsmanagement:create_ec_pool %}{% endblock %}
+{% block form_id %}add_cache_tier_form{% endblock %}
+{% block form_action %}{% url horizon:vsm:poolsmanagement:add_cache_tier%}{% endblock %}
 
-{% block modal-header %}{% trans "Create Erasure Coded Pool" %}{% endblock %}
-{% block modal_id %}create_ec_pool_modal{% endblock %}
+{% block modal-header %}{% trans "Add Cache Tier" %}{% endblock %}
+{% block modal_id %}add_cache_tier_modal{% endblock %}
 
 {% block modal-body %}
 <div class="left">
@@ -32,11 +32,11 @@
 </div>
 <div class="right">
     <h3>{% trans "Description" %}:</h3>
-    <p>{% trans "From here you can create an erasure coded pool" %}</p>
+    <p>{% trans "From here you can create cache tiers" %}</p>
 </div>
 {% endblock %}
 
 {% block modal-footer %}
-  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create Erasure Coded Pool" %}" />
+  <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create Cache Tier" %}" />
   <a href="{% url horizon:vsm:poolsmanagement:index %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
 {% endblock %}

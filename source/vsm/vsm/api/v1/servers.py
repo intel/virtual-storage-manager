@@ -156,7 +156,7 @@ class ServersController(wsgi.Controller):
         return webob.Response(status_int=202)
 
     def reset_status(self, req, body=None):
-        LOG.info('JIYOU reset_status body %s ' % body)
+        LOG.debug('reset_status = %s' % body)
         context = req.environ['vsm.context']
         init_node_id = body.get('servers', None)
         if not init_node_id:
@@ -176,7 +176,6 @@ class ServersController(wsgi.Controller):
         self.conductor_api.init_node_update_status_by_id(context,
             init_node_id, 'Active')
 
-        LOG.info('JIYOU init_node id = %s' % init_node_id)
         return {'status': 'ok'}
         return webob.Response(status_int=202)
 

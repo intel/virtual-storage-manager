@@ -3480,7 +3480,6 @@ def sp_usage_create(context, pools, session=None):
             pools.append(pref['pool_id'])
     pools = list(set(pools))
 
-    LOG.info(' sp_usage_create pools new present = %s' % pools)
 
     pool_info_list = []
     pool_name_list = []
@@ -3513,7 +3512,6 @@ def sp_usage_create(context, pools, session=None):
             ref.update(kargs)
             continue
 
-        LOG.info(' SET THE INITIAL STATUS = %s' % kargs)
 
         with session.begin(subtransactions=True):
             sp_usage_ref = models.StoragePoolUsage()

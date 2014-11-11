@@ -88,6 +88,10 @@ class CephDriver(object):
                             'size', size, run_as_root=True)
             utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
                             'crush_ruleset', rule, run_as_root=True)
+        #set quota
+        if body.get('quota'):
+            max_bytes = 1024 * 1024 * 1024 * body.get('quota')
+            utils.execute('ceph', 'osd', 'pool', 'set-quota', 'max_bytes', max_bytes)  
         #update db
         pool_list = self.get_pool_status()
         for pool in pool_list:
@@ -100,7 +104,9 @@ class CephDriver(object):
                     'size': pool.get('size'),
                     'min_size': pool.get('min_size'),
                     'crush_ruleset': pool.get('crush_ruleset'),
-                    'crash_replay_interval': pool.get('crash_replay_interval')
+                    'crash_replay_interval': pool.get('crash_replay_interval'),
+                    'ec_status': pool.get('erasure_code_profile'),
+                    'quota': body['quota'] if body.get('quota') else 0 
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
@@ -1015,12 +1021,13 @@ class CephDriver(object):
         # Generate new keyring.
         mds_path = '/var/lib/ceph/mds/ceph-%s' % mds_id
         utils.execute('mkdir', '-p', mds_path, run_as_root=True)
-        mds_key = '/etc/ceph/keyring.mds.%s' % mds_id
+        #mds_key = '/etc/ceph/keyring.mds.%s' % mds_id
+        mds_key = os.path.join(mds_path,'keyring')
         out = utils.execute('ceph', 'auth',
                       'get-or-create', 'mds.%d' % mds_id,
-                      'mds', "'allow '",
-                      'osd', "'allow *'",
-                      'mon', "'allow rwx'",
+                      'mds', "allow",
+                      'osd', "allow *",
+                      'mon', "allow rwx",
                       run_as_root=True)[0]
         utils.write_file_as_root(mds_key, out, 'w')
 

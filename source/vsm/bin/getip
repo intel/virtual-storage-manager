@@ -33,9 +33,15 @@ class GetIp(object):
         self._cluster_addr = self._parser.get_cluster_dict()
 
     def get_ip_list(self):
-        addlist = socket.getaddrinfo(socket.gethostname(), None)
-        for item in addlist:
-            self.ip_list.append(item[4][0])
+        try:
+            addlist = socket.getaddrinfo(socket.gethostname(), None)
+            for item in addlist:
+                self.ip_list.append(item[4][0])
+        except:
+            addlist = os.popen('hostname -I').read().split()
+            for item in addlist:
+                self.ip_list.append(item)
+
         #get ip from fcntl
         #get ip from "hostname -I"
         ip = os.popen('hostname -I').read().split()

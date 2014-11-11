@@ -190,3 +190,65 @@ class CreateErasureCodedPool(forms.SelfHandlingForm):
             exceptions.handle(request,
                               _('Unable to create storage pool.'),
                               redirect=redirect)
+
+class AddCacheTier(forms.SelfHandlingForm):
+
+    failure_url = 'horizon:vsm:poolsmanagement:index'
+    cache_tier_pool = forms.ChoiceField(label=_('Cache Tier Pool'))
+    storage_tier_pool = forms.ChoiceField(label=_('Storage Tier Pool'))
+    cache_mode = forms.ChoiceField(label=_('Cache Mode'))
+    hit_set_type = forms.ChoiceField(label=_('Hit Set Type'))
+    hit_set_count = forms.CharField(label=_("Hit set count"))
+    hit_set_period = forms.CharField(label=_("Hit set period(s)"))
+    target_max_mem = forms.CharField(label=_("Target maximum memory(MB)"))
+    target_dirty_ratio = forms.CharField(label=_("Target dirty ratio"))
+    target_full_ratio = forms.CharField(label=_("Target full ratio"))
+    target_max_capacity = forms.CharField(label=_("Target maximum capacity(GB)"))
+    target_max_objects = forms.CharField(label=_("Target maximum objects"))
+    target_minimum_flush_age = forms.CharField(label=_("Target minimum flush age(m)"))
+    target_minimum_evict_age = forms.CharField(label=_("Target minimum evict age(m)"))
+
+    def __init__(self, request, *args, **kwargs):
+        super(AddCacheTier, self).__init__(request, *args, **kwargs)
+        cache_tier_pool_list = [('',"Select a Cache Tier Pool")]
+        storage_tier_pool_list = [('',"Select a Storage Tier Pool")]
+        cache_mode_list = [('',"Select Cache Tier Mode"), (1, "Writeback"), (2, "Read-only")]
+        self.fields['cache_tier_pool'].choices = cache_tier_pool_list
+        self.fields['storage_tier_pool'].choices = storage_tier_pool_list
+        self.fields['cache_mode'].choices = cache_mode_list
+
+    def handle(self, request, data):
+        return True
+        try:
+            body = {
+                'pool': {
+                    'name': data['name'],
+                    'storageGroupId': data['storage_group'],
+                    'tag': data['tag'],
+                    'clusterId': '0',
+                    'createdBy': 'VSM',
+                    'ecProfileId': data['ec_profile'],
+                    'ecFailureDomain': data['ec_failure_domain'],
+                    'enablePoolQuota': data['enable_pool_quota'],
+                    'poolQuota': data['pool_quota'],
+                    }
+            }
+            rsp, ret = vsm_api.create_storage_pool(request,body=body)
+
+            res = str(ret['message']).strip( )
+            if res.startswith('pool') and res.endswith('created'):
+                messages.success(request,
+                                 _('Successfully created storage pool: %s')
+                                 % data['name'])
+            else:
+                messages.error(request,
+                               _('%s Failed to create storage pool!')
+                               % ret['message'])
+
+            return ret
+        except:
+            redirect = reverse("horizon:vsm:poolsmanagement:index")
+            exceptions.handle(request,
+                              _('Unable to create storage pool.'),
+                              redirect=redirect)
+

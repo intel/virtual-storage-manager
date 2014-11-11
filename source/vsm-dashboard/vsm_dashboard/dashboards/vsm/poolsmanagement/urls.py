@@ -17,9 +17,12 @@
 from django.conf.urls.defaults import patterns, url
 from .views import IndexView,CreateView
 from .views import CreateErasureCodedPoolView
+from .views import AddCacheTierView
+
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^create/$', CreateView.as_view(), name='create'),
-    url(r'^create_ec_pool/$', CreateErasureCodedPoolView.as_view(), name='create_ec_pool'))
+    url(r'^create_ec_pool/$', CreateErasureCodedPoolView.as_view(), name='create_ec_pool'),
+    url(r'^add_cache_tier/$', AddCacheTierView.as_view(), name='add_cache_tier'))
 

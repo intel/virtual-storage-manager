@@ -290,6 +290,7 @@ class AgentManager(manager.Manager):
             self._set_net_add_seq(values)
             values['service_id'] = self._service_id
             values['data_drives_number'] = self._drive_num_count
+            values['type'] = self._node_info['role']
             values['deleted'] = False
             if self._restore_node_status(init_node_ref):
                 LOG.debug('Restore server %s status.' % init_node_ref['host'])
@@ -963,11 +964,13 @@ class AgentManager(manager.Manager):
                     self._conductor_rpcapi.create_storage_pool(context, values)
 
         for pool in ceph_list:
+            values = {}
             if pool.get('pg_num') > pool.get('pg_placement_num'):
                 self.ceph_driver.set_pool_pgp_num(context, pool['pool_name'], pool['pg_num'])
-                values = {
-                            'pgp_num': pool['pg_num']
-                         } 
+                values['pgp_num'] = pool['pg_num']
+            if pool.get('erasure_code_profile'):
+                values['ec_status'] = pool['erasure_code_profile']
+            if values:
                 db.pool_update_by_pool_id(context, pool['pool'], values) 
 
         # If both in ceph/db. Update info in db.

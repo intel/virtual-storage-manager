@@ -615,7 +615,10 @@ class StoragePool(BASE, VsmBase):
     read_bytes_sec = Column(Integer)
     write_bytes_sec = Column(Integer)
     op_per_sec = Column(Integer)
-
+    ec_status = Column(String(length=255))
+    cache_tier_status = Column(String(length=255))
+    quota = Column(Integer, default=0)
+    
 class InitNode(BASE, VsmBase):
     """This table init nodes."""
 

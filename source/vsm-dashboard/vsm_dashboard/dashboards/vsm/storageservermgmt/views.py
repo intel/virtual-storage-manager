@@ -85,7 +85,9 @@ class AddServersView(ServersActionViewBase):
     #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
 
     def get_data(self):
-        servers = get_server_list(self.request, lambda x: x['status'] == "available")
+        servers = get_server_list(self.request, lambda x: x['status'] == "available" or 
+                                 ((x['type'].strip() == "monitor" or x['type'].strip() == "monitor,") \
+                                  and x['status'] == "Active"))
         zone_list = get_zone_list(self.request)
 
         for server in servers:

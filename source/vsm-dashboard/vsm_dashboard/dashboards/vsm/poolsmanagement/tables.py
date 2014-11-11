@@ -44,6 +44,12 @@ class CreateErasureCodedPool(tables.LinkAction):
     url = "horizon:vsm:poolsmanagement:create_ec_pool"
     classes = ("ajax-modal", "btn-create")
 
+class AddCacheTier(tables.LinkAction):
+    name = "add cache tier"
+    verbose_name = _("Add Cache Tier")
+    url = "horizon:vsm:poolsmanagement:add_cache_tier"
+    classes = ("ajax-modal", "btn-create")
+
 class DeleteStoragePool(tables.DeleteAction):
     data_type_singular = _("StoragePool")
     data_type_plural = _("StoragePools")

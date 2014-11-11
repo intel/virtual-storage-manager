@@ -322,10 +322,14 @@ class SchedulerManager(manager.Manager):
                                                host=ser['host'])
 
                 self._add_success(context, ser['id'], "monitor")
-            except rpc_exc.Timeout, rpc_exc.RemoteError:
+            except rpc_exc.Timeout:
                 error_num += 1
                 self._conductor_api.init_node_update_status_by_id(context,
-                    ser['id'], 'ERROR: add_monitor rpc error')
+                    ser['id'], 'ERROR: add_monitor timeout error')
+            except rpc_exc.RemoteError:
+                error_num += 1
+                self._conductor_api.init_node_update_status_by_id(context,
+                    ser['id'], 'ERROR: add_monitor remote error')
             except:
                 error_num += 1
                 self._conductor_api.init_node_update_status_by_id(context,
@@ -390,10 +394,14 @@ class SchedulerManager(manager.Manager):
                                      ser['id'],
                                      "monitor",
                                      is_unavail=is_unavail)
-            except rpc_exc.Timeout, rpc_exc.RemoteError:
+            except rpc_exc.Timeout:
                 error_num += 1
                 self._conductor_api.init_node_update_status_by_id(context,
-                    ser['id'], 'ERROR: remove_monitor rpc error')
+                    ser['id'], 'ERROR: remove_monitor rpc timeout error')
+            except rpc_exc.RemoteError:
+                error_num += 1
+                self._conductor_api.init_node_update_status_by_id(context,
+                    ser['id'], 'ERROR: remove_monitor rpc remote error')
             except:
                 error_num += 1
                 self._conductor_api.init_node_update_status_by_id(context,
@@ -429,9 +437,12 @@ class SchedulerManager(manager.Manager):
         try:
             active_monitor = self._get_active_node(context, server_list)
             self._agent_rpcapi.add_mds(context, host=active_monitor['host'])
-        except rpc_exc.Timeout, rpc_exc.RemoteError:
+        except rpc_exc.Timeout:
             self._update_server_list_status(context,
                 server_list, 'rpc timeout error: check network')
+        except rpc_exc.RemoteError:
+            self._update_server_list_status(context,
+                server_list, 'rpc remote error')
         except:
             self._update_server_list_status(context,
                 server_list, 'ERROR: add_mds')
@@ -470,10 +481,14 @@ class SchedulerManager(manager.Manager):
 
                 LOG.info("add storage success")
                 self._add_success(context, ser['id'], "storage")
-            except rpc_exc.Timeout, rpc_exc.RemoteError:
+            except rpc_exc.Timeout:
                 self._update_server_list_status(context,
                                                 new_storage_list,
                                                 'ERROR: add_osd rpc timeout')
+            except rpc_exc.RemoteError:
+                self._update_server_list_status(context,
+                                                new_storage_list,
+                                                'ERROR: add_osd rpc remote error')
             except:
                 self._update_server_list_status(context,
                                                 new_storage_list,
@@ -503,9 +518,12 @@ class SchedulerManager(manager.Manager):
                                      ser['id'],
                                      "storage",
                                      is_unavail=is_unavail)
-            except rpc_exc.Timeout, rpc_exc.RemoteError:
+            except rpc_exc.Timeout:
                 self._update_server_list_status(context, server_list,
-                    'ERROR: remove_osd rpc network')
+                    'ERROR: remove_osd rpc timeout error')
+            except rpc_exc.RemoteError:
+                self._update_server_list_status(context, server_list,
+                    'ERROR: remove_osd rpc remote error')
             except:
                 self._update_server_list_status(context, server_list,
                     'ERROR')
@@ -530,10 +548,14 @@ class SchedulerManager(manager.Manager):
                                      ser['id'],
                                      "storage",
                                      is_unavail=is_unavail)
-        except rpc_exc.Timeout, rpc_exc.RemoteError:
+        except rpc_exc.Timeout:
             for ser in remove_storage_list:
                 self._conductor_api.init_node_update_status_by_id(context,
-                    ser['id'], 'ERROR: remove_mds rpc network')
+                    ser['id'], 'ERROR: remove_mds rpc timeout error')
+        except rpc_exc.RemoteError:
+            for ser in remove_storage_list:
+                self._conductor_api.init_node_update_status_by_id(context,
+                    ser['id'], 'ERROR: remove_mds rpc remote error')
         except:
             for ser in remove_storage_list:
                 self._conductor_api.init_node_update_status_by_id(context,
@@ -613,32 +635,8 @@ class SchedulerManager(manager.Manager):
                      }
             db.storage_group_update(context, storage_group['id'], values)
 
-    def _error_catch(self, func, context, server_list, *args, **kwargs):
-        try:
-            func(*args, **kwargs)
-        except rpc_exc.Timeout:
-            self._update_server_list_status(context,
-                                            server_list,
-                                            'rpc timeout error: check network')
-        except rpc_exc.RemoteError:
-            self._update_server_list_status(context,
-                                            server_list,
-                                            'rpc remote error: check network')
-        except:
-            self._update_server_list_status(context,
-                                            server_list,
-                                            'ERROR')
-            raise
-
-    def add_servers(self, context, body=None):
-        self._error_catch(self._add_servers,
-                     context,
-                     body,
-                     context,
-                     body)
-
     @utils.single_lock
-    def _add_servers(self, context, body=None):
+    def add_servers(self, context, body=None):
         """Add the servers into ceph cluster.
 
            It's notable that, the type of body['servers']
@@ -671,10 +669,13 @@ class SchedulerManager(manager.Manager):
                                                               ser['host'])
             # It need to change the role defined in
             # server.manifest
-            if ser['is_monitor'] == False:
-                if ser_ref['type'].find('monitor') != -1:
-                    values = {'type': 'storage'}
-                    db.init_node_update(context, ser_ref['id'], values)
+            #if ser['is_monitor'] == False:
+            #    if ser_ref['type'].find('monitor') != -1:
+            #        values = {'type': 'storage'}
+            #        db.init_node_update(context, ser_ref['id'], values)
+            if ser['is_monitor'] == True:
+                if ser_ref['type'].find('monitor') != -1 and ser_ref['status'] == 'Active':
+                    ser['is_monitor'] = False
 
         self._update_server_list_status(context, server_list, 'running')
         _update_ssh_key()
@@ -688,15 +689,8 @@ class SchedulerManager(manager.Manager):
         self._judge_drive_ext_threshold(context)
         return True
 
-    def remove_servers(self, context, body=None):
-        self._error_catch(self._remove_servers,
-                     context,
-                     body,
-                     context,
-                     body)
-
     @utils.single_lock
-    def _remove_servers(self, context, body=None):
+    def remove_servers(self, context, body=None):
         """
                 [
                     {u'remove_storage': True,
@@ -726,27 +720,34 @@ class SchedulerManager(manager.Manager):
             if ser['mds'] == 'yes':
                 need_change_mds = True
 
-        LOG.info("start to remove monitor")
-        self.remove_monitors(context, server_list)
+        try:
+            LOG.info("start to remove monitor")
+            self.remove_monitors(context, server_list)
 
-        LOG.info("start to remove storage")
-        self.remove_osd(context, server_list)
+            LOG.info("start to remove storage")
+            self.remove_osd(context, server_list)
 
-        if need_change_mds:
-            LOG.info("start to remove mds")
-            self.remove_mds(context, server_list)
-            self.add_mds(context, server_list)
-        return True
-
-    def stop_server(self, context, body=None):
-        self._error_catch(self._stop_server,
-                     context,
-                     body,
-                     context,
-                     body)
+            if need_change_mds:
+                LOG.info("start to remove mds")
+                self.remove_mds(context, server_list)
+                self.add_mds(context, server_list)
+            return True
+        except rpc_exc.Timeout:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'rpc timeout error: check network')
+        except rpc_exc.RemoteError:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'rpc remote error: check network')
+        except:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'ERROR')
+            raise
 
     @utils.single_lock
-    def _stop_server(self, context, body=None):
+    def stop_server(self, context, body=None):
         """Noout and stop all osd service, then stop the server.
            body = {u'servers': [{u'cluster_id': 1, u'id': u'1'},
                         {u'cluster_id': 1, u'id': u'2'}]}
@@ -766,28 +767,34 @@ class SchedulerManager(manager.Manager):
         for item in server_list:
             res = db.init_node_get(context, item['id'])
             self._start_stop(context, item['id'])
-            res = self._agent_rpcapi.stop_server(context,
-                                                 item['id'],
-                                                 res['host'])
+            try:
+                self._agent_rpcapi.stop_server(context,
+                                               item['id'],
+                                               res['host'])
 
-            self._agent_rpcapi.update_osd_state(context,
-                                                active_monitor['host'])
+                self._agent_rpcapi.update_osd_state(context,
+                                      active_monitor['host'])
 
-        LOG.info('need_change_mds = %s' % need_change_mds)
+            except rpc_exc.Timeout:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'rpc timeout error: check network')
+            except rpc_exc.RemoteError:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'rpc remote error: check network')
+            except:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'ERROR')
+                raise
 
         if need_change_mds:
             self.add_mds(context, server_list)
         return True
 
-    def start_server(self, context, body=None):
-        self._error_catch(self._start_server,
-                     context,
-                     body,
-                     context,
-                     body)
-
     @utils.single_lock
-    def _start_server(self, context, body=None):
+    def start_server(self, context, body=None):
         """Start all osd service, then start the server.
            body = {u'servers': [{u'cluster_id': 1, u'id': u'1'},
                         {u'cluster_id': 1, u'id': u'2'}]}
@@ -796,20 +803,25 @@ class SchedulerManager(manager.Manager):
         server_list = body['servers']
         active_monitor = self._get_active_monitor(context)
         for item in server_list:
-            #host = self._get_monitor_by_cluster_id(context, item['cluster_id'])
             res = db.init_node_get(context, item['id'])
-            if not res:
-                LOG.error("No available node for node id %s" % \
-                         item['id'])
-                try:
-                    raise StorageServerStartFailed
-                except Exception, e:
-                    LOG.error("%s: %s " %(e.code, e.message))
+            self._start_start(context, item['id'])
+            try:
+                self._agent_rpcapi.start_server(context, item['id'], res['host'])
+                self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+            except rpc_exc.Timeout:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'rpc timeout error: check network')
+            except rpc_exc.RemoteError:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'rpc remote error: check network')
+            except:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'ERROR')
                 raise
 
-            self._start_start(context, item['id'])
-            res = self._agent_rpcapi.start_server(context, item['id'], res['host'])
-            self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
         return True
 
     def get_cluster_list(self, context):
@@ -1119,9 +1131,12 @@ class SchedulerManager(manager.Manager):
             try:
                 self._agent_rpcapi.osd_remove(context, osd_id, init_node['host'])
                 self._agent_rpcapi.update_osd_state(context, init_node['host'])
-            except rpc_exc.Timeout, rpc_exc.RemoteError:
+            except rpc_exc.Timeout:
                 self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_remove rpc network')
+                    init_node['id'], 'ERROR: osd_remove rpc timeout')
+            except rpc_exc.RemoteError:
+                self._conductor_api.init_node_update_status_by_id(context,
+                    init_node['id'], 'ERROR: osd_remove rpc remote')
             except:
                 self._conductor_api.init_node_update_status_by_id(context,
                     init_node['id'], 'ERROR: osd_remove')
@@ -1139,9 +1154,12 @@ class SchedulerManager(manager.Manager):
             try:
                 self._agent_rpcapi.osd_restart(context, osd_id, init_node['host'])
                 self._agent_rpcapi.update_osd_state(context, init_node['host'])
-            except rpc_exc.Timeout, rpc_exc.RemoteError:
+            except rpc_exc.Timeout:
                 self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_restart rpc network')
+                    init_node['id'], 'ERROR: osd_restart rpc timeout')
+            except rpc_exc.RemoteError:
+                self._conductor_api.init_node_update_status_by_id(context,
+                    init_node['id'], 'ERROR: osd_restart rpc remote error')
             except:
                 self._conductor_api.init_node_update_status_by_id(context,
                     init_node['id'], 'ERROR: osd_restart')
@@ -1160,9 +1178,12 @@ class SchedulerManager(manager.Manager):
             try:
                 self._agent_rpcapi.osd_restore(context, osd_id, init_node['host'])
                 self._agent_rpcapi.update_osd_state(context, init_node['host'])
-            except rpc_exc.Timeout, rpc_exc.RemoteError:
+            except rpc_exc.Timeout:
                 self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_restore rpc network')
+                    init_node['id'], 'ERROR: osd_restore rpc timeout error')
+            except rpc_exc.RemoteError:
+                self._conductor_api.init_node_update_status_by_id(context,
+                    init_node['id'], 'ERROR: osd_restore rpc remote error')
             except:
                 self._conductor_api.init_node_update_status_by_id(context,
                     init_node['id'], 'ERROR: osd_restore')
