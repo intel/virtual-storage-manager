@@ -1,6 +1,7 @@
 ./vsmrepo
 ./vsmrepo/*
 ./vsmrepo.tar.gz
+vsmrepo/
 .idea
 *~
 *pyc
