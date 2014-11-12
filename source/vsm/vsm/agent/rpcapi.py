@@ -385,3 +385,17 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         server_list=server_list),
                         topic)
         return res
+
+    def add_cache_tier(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('add_cache_tier',
+                                      body=body),
+                        topic)
+
+    def remove_cache_tier(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('remove_cache_tier',
+                                      body=body),
+                        topic)

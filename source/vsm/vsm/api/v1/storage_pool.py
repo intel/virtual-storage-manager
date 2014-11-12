@@ -348,6 +348,43 @@ class StoragePoolController(wsgi.Controller):
         return self.scheduler_api.create_storage_pool(context, body_info)
 
     @wsgi.serializers(xml=StoragePoolsTemplate)
+    def add_cache_tier(self, req, body=None):
+        """add a cache tier."""
+        LOG.info(body)
+
+        #{'cache_tier':
+        #    {'storage_pool_id': 3,
+        #    'cache_pool_id': 4,
+        #    'cache_mode': 'writeback',
+        #    }
+        #}
+
+        if not self.is_valid_body(body, 'cache_tier'):
+            raise exc.HTTPUnprocessableEntity()
+
+        context = req.environ['vsm.context']
+        cache_tier_body = body['cache_tier']
+        return self.scheduler_api.add_cache_tier(context, cache_tier_body)
+
+    @wsgi.serializers(xml=StoragePoolsTemplate)
+    def remove_cache_tier(self, req, body=None):
+        """add a cache tier."""
+        LOG.info(body)
+
+        #{'cache_tier':
+        #    {
+        #    'cache_pool_id': 4,
+        #    }
+        #}
+
+        if not self.is_valid_body(body, 'cache_tier'):
+            raise exc.HTTPUnprocessableEntity()
+
+        context = req.environ['vsm.context']
+        cache_tier_body = body['cache_tier']
+        return self.scheduler_api.remove_cache_tier(context, cache_tier_body)
+
+    @wsgi.serializers(xml=StoragePoolsTemplate)
     def get_storage_group_list(self, req):
         """storage_group_list."""
         context = req.environ['vsm.context']

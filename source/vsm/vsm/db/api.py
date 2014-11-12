@@ -828,6 +828,9 @@ def pool_get_all(context):
     """get all pools"""
     return IMPL.pool_get_all(context)
 
+def pool_get(context, pool_id):
+    return IMPL.pool_get(context, pool_id)
+
 def pool_get_by_name(context, pool_name, cluster_id):
     return IMPL.pool_get_by_name(context, pool_name, cluster_id)
 

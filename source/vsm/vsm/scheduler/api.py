@@ -83,3 +83,6 @@ class API(object):
 
     def health_status(self, context):
         return self.scheduler_rpcapi.health_status(context)
+
+    def add_cache_tier(self, context, body=None):
+        return self.scheduler_rpcapi.add_cache_tier(context, body)

@@ -1712,6 +1712,37 @@ class CephDriver(object):
             'is_ceph_active': is_active
         })
 
+    def add_cache_tier(self, storage_pool, cache_pool, cache_mode, options={}):
+        LOG.info("add cache tier start")
+
+        utils.execute("ceph", "osd", "tier", "add", storage_pool, \
+                      cache_pool, run_as_root=True)
+        utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
+                      cache_mode, run_as_root=True)
+        if cache_mode == "writeback":
+            utils.execute("ceph", "osd", "tier", "set-overlay", storage_pool, \
+                          cache_pool, run_as_root=True)
+
+        self._configure_cache_tier(options)
+        LOG.info("add cache tier end")
+
+    def _configure_cache_tier(self, options):
+        pass
+
+    def remove_cache_tier(self, storage_pool, cache_pool, cache_mode):
+        if cache_mode == "writeback":
+            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
+                          "forward", run_as_root=True)
+            utils.execute("rados", "-p", cache_pool, "cache-flush-evict-all", \
+                          run_as_root=True)
+            utils.execute("ceph", "osd", "tier", "remove-overlay", storage_pool, \
+                          run_as_root=True)
+        else:
+            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
+                          "none", run_as_root=True)
+        utils.execute("ceph", "osd", "tier", "remove", storage_pool, \
+                      cache_pool, run_as_root=True)
+
 class DbDriver(object):
     """Executes commands relating to TestDBs."""
     def __init__(self, execute=utils.execute, *args, **kwargs):
@@ -2251,31 +2282,4 @@ rule value_performance {
 """
         self._write_to_crushmap(string)
 
-    def add_cache_tier(self, storage_pool, cache_pool, cache_mode, options):
-        utils.execute("ceph", "osd", "tier", "add", storage_pool, \
-                      cache_pool, run_as_root=True)
-        utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
-                      cache_mode, run_as_root=True)
-        if cache_mode == "writeback":
-            utils.execute("ceph", "osd", "tier", "set-overlay", storage_pool,\
-                          cache_pool, run_as_root=True)
-
-        self._configure_cache_tier(options)
-
-    def _configure_cache_tier(self, options):
-        pass
-
-    def remove_cache_tier(self, storage_pool, cache_pool, cache_mode):
-        if cache_mode == "writeback":
-            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
-                          "forward", run_as_root=True)
-            utils.execute("rados", "-p", cache_pool, "cache-flush-evict-all", \
-                          run_as_root=True)
-            utils.execute("ceph", "osd", "tier", "remove-overlay", storage_pool, \
-                          run_as_root=True)
-        else:
-            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
-                          "none", run_as_root=True)
-        utils.execute("ceph", "osd", "tier", "remove", storage_pool, \
-                      cache_pool, run_as_root=True)
 

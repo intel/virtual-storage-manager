@@ -194,19 +194,19 @@ class CreateErasureCodedPool(forms.SelfHandlingForm):
 class AddCacheTier(forms.SelfHandlingForm):
 
     failure_url = 'horizon:vsm:poolsmanagement:index'
-    cache_tier_pool = forms.ChoiceField(label=_('Cache Tier Pool'))
-    storage_tier_pool = forms.ChoiceField(label=_('Storage Tier Pool'))
-    cache_mode = forms.ChoiceField(label=_('Cache Mode'))
-    hit_set_type = forms.ChoiceField(label=_('Hit Set Type'))
-    hit_set_count = forms.CharField(label=_("Hit set count"))
-    hit_set_period = forms.CharField(label=_("Hit set period(s)"))
-    target_max_mem = forms.CharField(label=_("Target maximum memory(MB)"))
-    target_dirty_ratio = forms.CharField(label=_("Target dirty ratio"))
-    target_full_ratio = forms.CharField(label=_("Target full ratio"))
-    target_max_capacity = forms.CharField(label=_("Target maximum capacity(GB)"))
-    target_max_objects = forms.CharField(label=_("Target maximum objects"))
-    target_minimum_flush_age = forms.CharField(label=_("Target minimum flush age(m)"))
-    target_minimum_evict_age = forms.CharField(label=_("Target minimum evict age(m)"))
+    cache_tier_pool = forms.ChoiceField(label=_('Cache Tier Pool'), required=False)
+    storage_tier_pool = forms.ChoiceField(label=_('Storage Tier Pool'), required=False)
+    cache_mode = forms.ChoiceField(label=_('Cache Mode'), required=False)
+    hit_set_type = forms.ChoiceField(label=_('Hit Set Type'), required=False)
+    hit_set_count = forms.CharField(label=_("Hit set count"), required=False)
+    hit_set_period = forms.CharField(label=_("Hit set period(s)"), required=False)
+    target_max_mem = forms.CharField(label=_("Target maximum memory(MB)"), required=False)
+    target_dirty_ratio = forms.CharField(label=_("Target dirty ratio"), required=False)
+    target_full_ratio = forms.CharField(label=_("Target full ratio"), required=False)
+    target_max_capacity = forms.CharField(label=_("Target maximum capacity(GB)"), required=False)
+    target_max_objects = forms.CharField(label=_("Target maximum objects"), required=False)
+    target_minimum_flush_age = forms.CharField(label=_("Target minimum flush age(m)"), required=False)
+    target_minimum_evict_age = forms.CharField(label=_("Target minimum evict age(m)"), required=False)
 
     def __init__(self, request, *args, **kwargs):
         super(AddCacheTier, self).__init__(request, *args, **kwargs)
@@ -218,37 +218,26 @@ class AddCacheTier(forms.SelfHandlingForm):
         self.fields['cache_mode'].choices = cache_mode_list
 
     def handle(self, request, data):
-        return True
+
         try:
             body = {
-                'pool': {
-                    'name': data['name'],
-                    'storageGroupId': data['storage_group'],
-                    'tag': data['tag'],
-                    'clusterId': '0',
-                    'createdBy': 'VSM',
-                    'ecProfileId': data['ec_profile'],
-                    'ecFailureDomain': data['ec_failure_domain'],
-                    'enablePoolQuota': data['enable_pool_quota'],
-                    'poolQuota': data['pool_quota'],
+                'cache_tier': {
+                    'storage_pool_id': 4,
+                    'cache_pool_id': 3,
+                    'cache_mode': 'writeback'
                     }
             }
-            rsp, ret = vsm_api.create_storage_pool(request,body=body)
 
-            res = str(ret['message']).strip( )
-            if res.startswith('pool') and res.endswith('created'):
-                messages.success(request,
-                                 _('Successfully created storage pool: %s')
-                                 % data['name'])
-            else:
-                messages.error(request,
-                               _('%s Failed to create storage pool!')
-                               % ret['message'])
 
-            return ret
+
+            ret = vsm_api.add_cache_tier(request,body=body)
+
+            messages.success(request,
+                                 _('Successfully add cache tier: '))
+            return True
         except:
             redirect = reverse("horizon:vsm:poolsmanagement:index")
             exceptions.handle(request,
-                              _('Unable to create storage pool.'),
+                              _('Unable to add a cache tier.'),
                               redirect=redirect)
 

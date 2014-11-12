@@ -1309,3 +1309,13 @@ class AgentManager(manager.Manager):
         return self.ceph_driver.inital_ceph_osd_db_conf(context,
                                                         server_list,
                                                         file_system)
+
+    def add_cache_tier(self, context, body):
+        storage_pool = db.pool_get(context, body.get("storage_pool_id"))
+        cache_pool = db.pool_get(context, body.get("cache_pool_id"))
+        cache_mode = body.get("cache_mode")
+        return self.ceph_driver.add_cache_tier(storage_pool['name'], cache_pool['name'], cache_mode)
+
+    def remove_cache_tier(self, context, body):
+        cache_pool = body.get("cache_pool")
+        return self.ceph_driver.remove_cache_tier(storage_pool, cache_pool, cache_mode)

@@ -56,6 +56,12 @@ class Pool(APIResourceWrapper):
 def create_storage_pool(request, body):
     return vsmclient(request).vsms.create_storage_pool(body)
 
+def add_cache_tier(request, body):
+    return vsmclient(request).storage_pools.add_cache_tier(body)
+
+def remove_cache_tier(request, body):
+    return vsmclient(request).storage_pools.remove_cache_tier(body)
+
 def get_storage_group_list(request):
     return vsmclient(request).vsms.get_storage_group_list()
 

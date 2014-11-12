@@ -1210,3 +1210,17 @@ class SchedulerManager(manager.Manager):
             if v.find('ERROR') == -1:
                 return v
         return 'CRITICAL_ERROR'
+
+    def _get_active_server(self, context):
+
+        server_list = db.init_node_get_all(context)
+        active_server_list = [x for x in server_list if x['status'] == "Active"]
+        idx = random.randint(0, len(active_server_list)-1)
+        return active_server_list[idx]
+
+    def add_cache_tier(self, context, body):
+        active_server = self._get_active_server(context)
+        self._agent_rpcapi.add_cache_tier(context, body, active_server['host'])
+
+    def remove_cache_tier(self, context, body):
+        self._agent_rpcapi.remove_cache_tier(context, body)

@@ -47,6 +47,12 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def create_storage_pool(self, ctxt, body=None):
         return self.call(ctxt, self.make_msg('create_storage_pool', body=body))
 
+    def add_cache_tier(self, ctxt, body=None):
+        return self.call(ctxt, self.make_msg('add_cache_tier', body=body))
+
+    def remove_cache_tier(self, ctxt, body=None):
+        return self.call(ctxt, self.make_msg('remove_cache_tier', body=body))
+
     def list_storage_pool(self, ctxt):
         ret = self.call(ctxt, self.make_msg('list_storage_pool'))
         return ret

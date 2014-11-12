@@ -79,6 +79,14 @@ class StoragePoolManager(base.ManagerWithFind):
                           "pool")
         return ret
 
+    def add_cache_tier(self, cache_tier_body):
+        url = '/storage_pools/add_cache_tier'
+        resp, body = self.api.client.post(url, body=cache_tier_body)
+
+    def remove_cache_tier(self, cache_tier_body):
+        url = '/storage_pools/remove_cache_tier'
+        resp, body = self.api.client.post(url, body=cache_tier_body)
+
     def restart(self, osd):
         self._action('restart', osd)
 
