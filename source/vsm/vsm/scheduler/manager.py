@@ -1223,4 +1223,5 @@ class SchedulerManager(manager.Manager):
         self._agent_rpcapi.add_cache_tier(context, body, active_server['host'])
 
     def remove_cache_tier(self, context, body):
-        self._agent_rpcapi.remove_cache_tier(context, body)
+        active_server = self._get_active_server(context)
+        self._agent_rpcapi.remove_cache_tier(context, body,active_server['host'])

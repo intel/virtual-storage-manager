@@ -43,6 +43,7 @@ class ViewBuilder(common.ViewBuilder):
             "pool": {
                 "id": pool["id"],
                 "poolId": pool["pool_id"],
+                "pool_id": pool["pool_id"],
                 "name": pool["name"],
                 "storageGroup": self._get_storage_group(pool),
                 "ruleset": pool.get('ruleset'),
@@ -70,6 +71,9 @@ class ViewBuilder(common.ViewBuilder):
                 "num_read_kb": pool.get('num_read_kb'),
                 "num_write": pool.get('num_write'),
                 "num_write_kb": pool.get('num_write_kb'),
+                "erasure_code_stauts": pool.get('ec_status'),
+                "cache_tier_status": pool.get('cache_tier_status'),
+                "quota": pool.get('quota')
             }
         }
         try:

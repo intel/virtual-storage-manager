@@ -27,6 +27,7 @@ from vsm_dashboard.dashboards.vsm.poolsmanagement import utils
 from .form import CreatePool
 from .form import CreateErasureCodedPool
 from .form import AddCacheTier
+from .form import RemoveCacheTier
 from .tables import ListPoolTable
 
 LOG = logging.getLogger(__name__)
@@ -62,4 +63,9 @@ class CreateErasureCodedPoolView(forms.ModalFormView):
 class AddCacheTierView(forms.ModalFormView):
     form_class = AddCacheTier
     template_name = 'vsm/flocking/add_cache_tier.html'
+    success_url = reverse_lazy('horizon:vsm:poolsmanagement:index')
+
+class RemoveCacheTierView(forms.ModalFormView):
+    form_class = RemoveCacheTier
+    template_name = 'vsm/flocking/remove_cache_tier.html'
     success_url = reverse_lazy('horizon:vsm:poolsmanagement:index')

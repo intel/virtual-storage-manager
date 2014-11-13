@@ -1712,36 +1712,62 @@ class CephDriver(object):
             'is_ceph_active': is_active
         })
 
-    def add_cache_tier(self, storage_pool, cache_pool, cache_mode, options={}):
+    def add_cache_tier(self, context, body):
+        storage_pool_name = db.pool_get(context, body.get("storage_pool_id")).get('name')
+        cache_pool_name = db.pool_get(context, body.get("cache_pool_id")).get('name')
+        cache_mode = body.get("cache_mode")
         LOG.info("add cache tier start")
+        LOG.info("storage pool %s cache pool %s " % (storage_pool_name, cache_pool_name))
 
-        utils.execute("ceph", "osd", "tier", "add", storage_pool, \
-                      cache_pool, run_as_root=True)
-        utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
+        utils.execute("ceph", "osd", "tier", "add", storage_pool_name, \
+                      cache_pool_name, run_as_root=True)
+        utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool_name, \
                       cache_mode, run_as_root=True)
         if cache_mode == "writeback":
-            utils.execute("ceph", "osd", "tier", "set-overlay", storage_pool, \
-                          cache_pool, run_as_root=True)
+            utils.execute("ceph", "osd", "tier", "set-overlay", storage_pool_name, \
+                          cache_pool_name, run_as_root=True)
 
+        db.pool_update(context, body.get("storage_pool_id"), {"cache_tier_status": "Storage pool for:%s" % cache_pool_name})
+        db.pool_update(context, body.get("cache_pool_id"), {
+            "cache_tier_status": "Cache pool for:%s" % storage_pool_name,
+            "cache_mode": cache_mode})
+
+        options = body.get("options")
         self._configure_cache_tier(options)
         LOG.info("add cache tier end")
+
+        return True
 
     def _configure_cache_tier(self, options):
         pass
 
-    def remove_cache_tier(self, storage_pool, cache_pool, cache_mode):
+    def remove_cache_tier(self, context, body):
+        LOG.info("Remove Cache Tier")
+        LOG.info(body)
+        cache_pool = db.pool_get(context, body.get("cache_pool_id"))
+        cache_pool_name = cache_pool.get("name")
+        storage_pool_name = cache_pool.get("cache_tier_status").split(":")[1].strip()
+        LOG.info(cache_pool['name'])
+        LOG.info(cache_pool['cache_mode'])
+        cache_mode = cache_pool.get("cache_mode")
+        LOG.info(cache_mode)
         if cache_mode == "writeback":
-            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
+            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool_name, \
                           "forward", run_as_root=True)
-            utils.execute("rados", "-p", cache_pool, "cache-flush-evict-all", \
+            utils.execute("rados", "-p", cache_pool_name, "cache-flush-evict-all", \
                           run_as_root=True)
-            utils.execute("ceph", "osd", "tier", "remove-overlay", storage_pool, \
+            utils.execute("ceph", "osd", "tier", "remove-overlay", storage_pool_name, \
                           run_as_root=True)
         else:
-            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool, \
+            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool_name, \
                           "none", run_as_root=True)
-        utils.execute("ceph", "osd", "tier", "remove", storage_pool, \
-                      cache_pool, run_as_root=True)
+        utils.execute("ceph", "osd", "tier", "remove", storage_pool_name, \
+                      cache_pool_name, run_as_root=True)
+        db.pool_update(context, cache_pool.pool_id, {"cache_tier_status": ""})
+        # TODO cluster id
+        db.pool_update_by_name(context, storage_pool_name, 1, {"cache_tier_status": ""})
+        return True
+
 
 class DbDriver(object):
     """Executes commands relating to TestDBs."""

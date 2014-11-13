@@ -50,6 +50,12 @@ class AddCacheTier(tables.LinkAction):
     url = "horizon:vsm:poolsmanagement:add_cache_tier"
     classes = ("ajax-modal", "btn-create")
 
+class RemoveCacheTier(tables.LinkAction):
+    name = "remove cache tier"
+    verbose_name = _("Remove Cache Tier")
+    url = "horizon:vsm:poolsmanagement:remove_cache_tier"
+    classes = ("ajax-modal", "btn-create")
+
 class DeleteStoragePool(tables.DeleteAction):
     data_type_singular = _("StoragePool")
     data_type_plural = _("StoragePools")
@@ -78,6 +84,9 @@ class ListPoolTable(tables.DataTable):
     storageType = tables.Column("storageGroup", verbose_name=_("Storage Group"))
     pgNum = tables.Column("pgNum", verbose_name=_("Placement Group Count"))
     size = tables.Column("size", verbose_name=_("Size"))
+    quota = tables.Column("quota", verbose_name=_("Quota (GB)"))
+    cache_tier_status = tables.Column("cache_tier_status", verbose_name=_("Cache Tier Status"))
+    erasure_code_status = tables.Column("erasure_code_status", verbose_name=_("Erasure Code Status"))
     status = tables.Column("status", verbose_name=_("Status"))
     createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
     tag = tables.Column("tag", verbose_name=_("Tag"))
@@ -86,7 +95,7 @@ class ListPoolTable(tables.DataTable):
     class Meta:
         name = "pools"
         verbose_name = _("Storage Pools")
-        table_actions = (CreateStoragePool, CreateErasureCodedPool)
+        table_actions = (AddCacheTier, RemoveCacheTier, CreateStoragePool, CreateErasureCodedPool)
         multi_select = False
 
     def get_object_id(self, datum):

@@ -86,3 +86,6 @@ class API(object):
 
     def add_cache_tier(self, context, body=None):
         return self.scheduler_rpcapi.add_cache_tier(context, body)
+
+    def remove_cache_tier(self, context, body=None):
+        return self.scheduler_rpcapi.remove_cache_tier(context, body)

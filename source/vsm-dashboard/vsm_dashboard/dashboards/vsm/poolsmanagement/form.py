@@ -212,10 +212,15 @@ class AddCacheTier(forms.SelfHandlingForm):
         super(AddCacheTier, self).__init__(request, *args, **kwargs)
         cache_tier_pool_list = [('',"Select a Cache Tier Pool")]
         storage_tier_pool_list = [('',"Select a Storage Tier Pool")]
-        cache_mode_list = [('',"Select Cache Tier Mode"), (1, "Writeback"), (2, "Read-only")]
+        cache_mode_list = [('',"Select Cache Tier Mode"), ('writeback', "Writeback"), ('readonly', "Read-only")]
+        hit_set_type_list = [('',"Select Hit Set type"), ('bloom', "bloom")]
+        pools = vsm_api.pool_status(request)
+        cache_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if pool.cache_tier_status == ""]
+        storage_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if pool.cache_tier_status == ""]
         self.fields['cache_tier_pool'].choices = cache_tier_pool_list
         self.fields['storage_tier_pool'].choices = storage_tier_pool_list
         self.fields['cache_mode'].choices = cache_mode_list
+        self.fields['hit_set_type'].choices = hit_set_type_list
 
     def handle(self, request, data):
 
@@ -239,5 +244,37 @@ class AddCacheTier(forms.SelfHandlingForm):
             redirect = reverse("horizon:vsm:poolsmanagement:index")
             exceptions.handle(request,
                               _('Unable to add a cache tier.'),
+                              redirect=redirect)
+
+class RemoveCacheTier(forms.SelfHandlingForm):
+
+    failure_url = 'horizon:vsm:poolsmanagement:index'
+    cache_tier_pool = forms.ChoiceField(label=_('Cache Tier Pool'), required=False)
+
+    def __init__(self, request, *args, **kwargs):
+        super(RemoveCacheTier, self).__init__(request, *args, **kwargs)
+        cache_tier_pool_list = [('',"Select a Cache Tier Pool")]
+        pools = vsm_api.pool_status(request)
+        cache_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if pool.cache_tier_status.startswith("Cache pool for")]
+        self.fields['cache_tier_pool'].choices = cache_tier_pool_list
+
+    def handle(self, request, data):
+
+        try:
+            body = {
+                'cache_tier': {
+                    'cache_pool_id': data['cache_tier_pool'],
+                    }
+            }
+
+            ret = vsm_api.remove_cache_tier(request,body=body)
+
+            messages.success(request,
+                                 _('Successfully remove cache tier: '))
+            return True
+        except:
+            redirect = reverse("horizon:vsm:poolsmanagement:index")
+            exceptions.handle(request,
+                              _('Unable to remove cache tier.'),
                               redirect=redirect)
 
