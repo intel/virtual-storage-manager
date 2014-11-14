@@ -255,7 +255,7 @@ class RemoveCacheTier(forms.SelfHandlingForm):
         super(RemoveCacheTier, self).__init__(request, *args, **kwargs)
         cache_tier_pool_list = [('',"Select a Cache Tier Pool")]
         pools = vsm_api.pool_status(request)
-        cache_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if pool.cache_tier_status.startswith("Cache pool for")]
+        cache_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if str(pool.cache_tier_status).startswith("Cache pool for")]
         self.fields['cache_tier_pool'].choices = cache_tier_pool_list
 
     def handle(self, request, data):

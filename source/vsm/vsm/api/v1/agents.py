@@ -209,6 +209,45 @@ class AgentsController(wsgi.Controller):
 
         return True
 
+    def _write_cache_tier_defaults(self):
+        if not self._cluster_info.get('cache_tier_defaults', None):
+            return True
+        cache_tier_defaults = self._cluster_info['cache_tier_defaults']
+        LOG.info("CLUSTER INFO")
+        LOG.info(cache_tier_defaults)
+        name_list = []
+        sets = db.vsm_settings_get_all(self._context)
+        db_list = [s.name for s in sets]
+        for setting in cache_tier_defaults:
+            LOG.info(setting)
+            name = setting.get('name', None)
+            value = setting.get('default_value', None)
+            if not name in db_list:
+                try:
+                    if not value.isdigit():
+                        value = float(value)
+                except ValueError:
+                    value = None
+                except AttributeError:
+                    value = None
+                if not value:
+                    LOG.warn('The default value of %s should be digit. Load default value ...' % name)
+                    value = FLAGS.get(name, None)
+                    if not value:
+                        LOG.warn('Failed to load the default value of %s.' % name)
+                        try:
+                            raise exception.GetNoneError
+                        except exception.GetNoneError as e:
+                            LOG.error("%s:%s" %(e.code, e.message))
+                        ret = False
+                        continue
+                setting['value'] = value
+                ref = db.vsm_settings_update_or_create(self._context, setting)
+                name_list.append(name)
+
+
+
+
     def _write_vsm_settings(self):
         """Writing vsm settings into DB.
 
@@ -352,11 +391,13 @@ class AgentsController(wsgi.Controller):
         write_openstack_ip = self._write_openstack_ip()
         write_settings = self._write_vsm_settings()
         write_ec_profiles = self._write_ec_profiles()
+        write_cache_tier_defaults = self._write_cache_tier_defaults()
 
         self._have_write_cluter_into_db = \
             write_cluster_ret and write_zone_ret \
             and write_storage_groups and write_openstack_ip \
-            and write_settings and write_ec_profiles
+            and write_settings and write_ec_profiles \
+            and write_cache_tier_defaults
 
     def __init__(self, ext_mgr):
         self.ext_mgr = ext_mgr
