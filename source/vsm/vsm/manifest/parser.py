@@ -498,6 +498,15 @@ class ManifestParser(object):
                        'default_value': name_dict['second'][idx]}
             self._map['settings'].append(setting)
 
+    def _dict_insert_cache_tier_defaults_c(self):
+        """ Return the segments of cache_tier default value."""
+        name_dict = self._get_segment("cache_tier_defaults")
+        self._map['cache_tier_defaults'] = []
+        for idx in range(0, len(name_dict['first'])):
+            setting = {'name': name_dict['first'][idx],
+                       'default_value': name_dict['second'][idx]}
+            self._map['cache_tier_defaults'].append(setting)
+
     def _dict_insert_server_list_c(self):
         """Insert server_list into json format dict"""
         name_dict = self._get_segment('server_list')
@@ -553,6 +562,7 @@ class ManifestParser(object):
         self._dict_insert_ntp_keys()
         self._dict_insert_openstack_ip_c()
         self._dict_insert_settings_c()
+        self._dict_insert_cache_tier_defaults_c()
         self._dict_insert_ec_profiles_c()
         self._dict_insert_periodic_parameters_c()
         self._trans_between_db()
