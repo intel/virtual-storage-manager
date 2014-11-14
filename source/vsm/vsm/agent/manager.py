@@ -295,7 +295,8 @@ class AgentManager(manager.Manager):
             if self._restore_node_status(init_node_ref):
                 LOG.debug('Restore server %s status.' % init_node_ref['host'])
                 values['status'] = init_node_ref['pre_status']
-                values['pre_status'] = init_node_ref['status']
+                if init_node_ref['status'].strip() != 'unavailable':
+                    values['pre_status'] = init_node_ref['status']
             db.init_node_update(self._context, init_node_ref['id'], values)
 
         self._set_ssh_chanel()
