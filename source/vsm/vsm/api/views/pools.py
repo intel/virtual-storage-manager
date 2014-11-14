@@ -71,7 +71,7 @@ class ViewBuilder(common.ViewBuilder):
                 "num_read_kb": pool.get('num_read_kb'),
                 "num_write": pool.get('num_write'),
                 "num_write_kb": pool.get('num_write_kb'),
-                "erasure_code_stauts": pool.get('ec_status'),
+                "erasure_code_status": pool.get('ec_status') if pool.get('ec_status') != 'default' else None,
                 "cache_tier_status": pool.get('cache_tier_status'),
                 "quota": pool.get('quota')
             }

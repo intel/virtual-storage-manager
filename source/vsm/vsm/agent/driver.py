@@ -1763,9 +1763,9 @@ class CephDriver(object):
                           "none", run_as_root=True)
         utils.execute("ceph", "osd", "tier", "remove", storage_pool_name, \
                       cache_pool_name, run_as_root=True)
-        db.pool_update(context, cache_pool.pool_id, {"cache_tier_status": ""})
+        db.pool_update(context, cache_pool.pool_id, {"cache_tier_status": None})
         # TODO cluster id
-        db.pool_update_by_name(context, storage_pool_name, 1, {"cache_tier_status": ""})
+        db.pool_update_by_name(context, storage_pool_name, 1, {"cache_tier_status": None})
         return True
 
 
