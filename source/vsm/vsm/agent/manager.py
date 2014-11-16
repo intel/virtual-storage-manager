@@ -656,6 +656,18 @@ class AgentManager(manager.Manager):
             LOG.info('Not monitor node, skip start montior service.')
             return {'status': 'ok'}
 
+        # copy montior keyring to each directory.
+        utils.execute('mkdir',
+                      '-p',
+                      '/var/lib/ceph/mon/ceph%s/' % mon_id,
+                      run_as_root=True)
+
+        utils.execute('cp',
+                      '-rf',
+                      '/etc/ceph/ceph.mon.keyring',
+                      '/var/lib/ceph/mon/ceph%s/keyring' % mon_id,
+                      run_as_root=True)
+
         # Get monitor id, begin to start monitor service.
         utils.write_file_as_root('/var/lib/ceph/tmp/ceph%s.mon.keyring' % mon_id,
                                  monitor_keyring,

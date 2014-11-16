@@ -1,0 +1,2 @@
+password=`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'`
+host_list=`mysql -uroot -p$password -Ns -e "use vsm; update init_nodes set status='available';"`

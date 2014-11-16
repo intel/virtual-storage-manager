@@ -1010,49 +1010,60 @@ class SchedulerManager(manager.Manager):
             _update("ERROR: mount disk")
 
         # Generate monitor keyring file.
-        _update("start montior")
-        monitor_keyring = utils.gen_mon_keyring()
-        def __write_monitor_keyring(host):
-            self._agent_rpcapi.write_monitor_keyring(context,
-                                                     monitor_keyring,
-                                                     host)
+        try:
+            _update("start montior")
+            monitor_keyring = utils.gen_mon_keyring()
+            def __write_monitor_keyring(host):
+                self._agent_rpcapi.write_monitor_keyring(context,
+                                                         monitor_keyring,
+                                                         host)
 
-        thd_list = []
-        for ser in server_list:
-            thd = utils.MultiThread(__write_monitor_keyring, host=ser['host'])
-            thd_list.append(thd)
-        utils.start_threads(thd_list)
-        _update("start monitor success")
+            thd_list = []
+            for ser in server_list:
+                thd = utils.MultiThread(__write_monitor_keyring, host=ser['host'])
+                thd_list.append(thd)
+            utils.start_threads(thd_list)
+            _update("start monitor success")
+        except:
+            _update("ERROR: start monitor")
 
-        self._track_monitors(context, server_list)
+        try:
+            _update("Create keyring")
+            self._track_monitors(context, server_list)
 
-        # Here we use our self-define dir for ceph-monitor services.
-        # So we need to create the key ring by command.
-        self._agent_rpcapi.create_keyring(context,
-                host=monitor_node['host'])
+            # Here we use our self-define dir for ceph-monitor services.
+            # So we need to create the key ring by command.
+            self._agent_rpcapi.create_keyring(context,
+                    host=monitor_node['host'])
 
-        self._agent_rpcapi.upload_keyring_admin_into_db(context,
-                host=monitor_node['host'])
+            self._agent_rpcapi.upload_keyring_admin_into_db(context,
+                    host=monitor_node['host'])
 
-        for ser in server_list:
-            self._agent_rpcapi.update_keyring_admin_from_db(context,
-                    host=ser['host'])
+            for ser in server_list:
+                self._agent_rpcapi.update_keyring_admin_from_db(context,
+                        host=ser['host'])
+            _update("Success: keyring")
+        except:
+            _update("ERROR: keyring")
 
-        self._agent_rpcapi.prepare_osds(context,
-                                        server_list,
-                                        host=monitor_node['host'])
+        try:
+            self._agent_rpcapi.prepare_osds(context,
+                                            server_list,
+                                            host=monitor_node['host'])
 
-        # Begin to start osd service.
-        _update('Start osds')
-        def __start_osd(host):
-            self._agent_rpcapi.start_osd(context, host)
+            # Begin to start osd service.
+            _update('Start osds')
+            def __start_osd(host):
+                self._agent_rpcapi.start_osd(context, host)
 
-        thd_list = []
-        for ser in server_list:
-            thd = utils.MultiThread(__start_osd, host=ser['host'])
-            thd_list.append(thd)
-        utils.start_threads(thd_list)
-        _update('OSD success')
+            thd_list = []
+            for ser in server_list:
+                thd = utils.MultiThread(__start_osd, host=ser['host'])
+                thd_list.append(thd)
+            utils.start_threads(thd_list)
+            _update('OSD success')
+        except:
+            _update("ERROR: start osd")
 
         # add mds service
         try:
