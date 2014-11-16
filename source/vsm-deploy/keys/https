@@ -15,6 +15,7 @@ function _generate_keys() {
         cp -rf /usr/local/bin/keys/$n /tmp/__keys
     done
 
+    mkdir -p /tmp/__keys
     cd /tmp/__keys/
 
     for n in `ls`; do
