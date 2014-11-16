@@ -36,10 +36,10 @@ function _generate_keys() {
 
     # then we begin to set http configurations.
     cat <<"____EOF" >/etc/httpd/conf.d/ssl.conf
-SSLCertificateKeyFile /etc/keys/server.key
+SSLCertificateKeyFile /etc/httpd/conf.d/keys/server.key
 Listen 443
 SSLEngine on
-SSLCertificateFile /opt/keys/server.crt
+SSLCertificateFile /etc/httpd/conf.d/keys/server.crt
 LoadModule ssl_module modules/mod_ssl.so
 ____EOF
 
