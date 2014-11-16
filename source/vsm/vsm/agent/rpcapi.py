@@ -380,6 +380,13 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         topic)
         return res
 
+    def create_keyring(self, context, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('create_keyring'),
+                        topic)
+        return res
+
     def prepare_osds(self, context, server_list, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         res = self.call(context,

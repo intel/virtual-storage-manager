@@ -1026,11 +1026,22 @@ class SchedulerManager(manager.Manager):
 
         self._track_monitors(context, server_list)
 
+        # Here we use our self-define dir for ceph-monitor services.
+        # So we need to create the key ring by command.
+        self._agent_rpcapi.create_keyring(context,
+                host=monitor_node['host'])
+
+        self._agent_rpcapi.upload_keyring_admin_into_db(context,
+                host=monitor_node['host'])
+
+        for ser in server_list:
+            self._agent_rpcapi.update_keyring_admin_from_db(context,
+                    host=ser['host'])
+
         self._agent_rpcapi.prepare_osds(context,
                                         server_list,
                                         host=monitor_node['host'])
-        self._agent_rpcapi.upload_keyring_admin_into_db(context,
-                host=monitor_node['host'])
+
         # Begin to start osd service.
         _update('Start osds')
         def __start_osd(host):

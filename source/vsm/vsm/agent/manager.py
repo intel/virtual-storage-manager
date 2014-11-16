@@ -653,11 +653,11 @@ class AgentManager(manager.Manager):
         mon_id = self._get_mon_id()
 
         if not mon_id:
-            LOG.info('Not monitor node, skip to start montior service.')
+            LOG.info('Not monitor node, skip start montior service.')
             return {'status': 'ok'}
 
         # Get monitor id, begin to start monitor service.
-        utils.write_file_as_root('/var/lib/ceph/tmp/ceph-%s.mon.keyring' % mon_id,
+        utils.write_file_as_root('/var/lib/ceph/tmp/ceph%s.mon.keyring' % mon_id,
                                  monitor_keyring,
                                  'w')
 
@@ -666,15 +666,20 @@ class AgentManager(manager.Manager):
                       '--mkfs',
                       '-i', mon_id,
                       '--keyring',
-                      '/var/lib/ceph/tmp/ceph-%s.mon.keyring' % mon_id,
+                      '/var/lib/ceph/tmp/ceph%s.mon.keyring' % mon_id,
+                      run_as_root=True)
+
+        utils.execute('mkdir',
+                      '-p',
+                      '/var/lib/ceph/mon/ceph%s' % mon_id,
                       run_as_root=True)
 
         utils.execute('touch',
-                      '/var/lib/ceph/mon/ceph-%s/done' % mon_id,
+                      '/var/lib/ceph/mon/ceph%s/done' % mon_id,
                       run_as_root=True)
 
         utils.execute('touch',
-                      '/var/lib/ceph/mon/ceph-%s/sysvinit' % mon_id,
+                      '/var/lib/ceph/mon/ceph%s/sysvinit' % mon_id,
                       run_as_root=True)
 
         utils.execute('service',
@@ -690,6 +695,10 @@ class AgentManager(manager.Manager):
         Return if monitors are in quorum?
         """
         return self.ceph_driver.track_monitors(self._get_mon_id())
+
+    def create_keyring(self, context):
+        """Create admin.keyring and bootstrap-type keyrings."""
+        return self.ceph_driver.create_keyring(self._get_mon_id())
 
     def _get_osd_id(self, host=FLAGS.host):
         # Get monitor id
