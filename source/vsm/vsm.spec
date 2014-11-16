@@ -73,6 +73,8 @@ Requires:    ceph
 Requires:    btrfs-progs
 Requires:    xfsprogs
 Requires:    python-psutil
+Requires:    mod_ssl
+
 %description
 Intel VSM Storage System.
 
