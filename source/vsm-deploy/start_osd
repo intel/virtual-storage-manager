@@ -16,6 +16,6 @@
 # under the License.
 
 ceph-osd -i $1 --mkfs --mkkey
-ceph auth add osd.$1 osd 'allow *' mon 'allow profile osd' -i /var/lib/ceph/osd/ceph-$1/keyring
+ceph auth add osd.$1 osd 'allow *' mon 'allow profile osd' -i /var/lib/ceph/osd/osd$1/keyring
 ceph osd crush add osd.$1 1.0 `hostname`
 service ceph start osd.$1

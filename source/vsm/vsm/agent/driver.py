@@ -252,7 +252,7 @@ class CephDriver(object):
                     self._create_osd_state(context,
                                            strg,
                                            osd_cnt)
-                    mount_point = '%sceph-%s' % \
+                    mount_point = '%sosd%s' % \
                         (FLAGS.osd_data_path, osd_cnt)
                     utils.ensure_tree(mount_point)
 
@@ -1115,6 +1115,68 @@ class CephDriver(object):
                             'mon_status',
                             run_as_root=True)[0]
         return json.loads(out)
+
+    def create_keyring(self, mon_id):
+        """Create keyring file:
+            ceph.client.admin.keyring
+            bootstrap-osd/keyring
+            bootstrap-mds/keyrong
+        """
+        # Firstly begin to create ceph.client.admin.keyring
+        utils.execute('ceph',
+                      '--cluster=ceph',
+                      '--name=mon.',
+                      '--keyring=/var/lib/ceph/mon/ceph{mon_id}/keyring'.format(
+                          mon_id=mon_id,
+                          ),
+                      'auth',
+                      'get-or-create',
+                      'client.admin',
+                      'mon', 'allow *',
+                      'osd', 'allow *',
+                      'mds', 'allow',
+                      '-o',
+                      '/etc/ceph/ceph.client.admin.keyring',
+                      run_as_root=True)
+        utils.execute('cp',
+                      '-rf',
+                      '/etc/ceph/ceph.client.admin.keyring',
+                      '/etc/ceph/keyring.admin',
+                      run_as_root=True)
+
+        # Begin to create bootstrap keyrings.
+        utils.execute('mkdir'
+                      '-p',
+                      '/var/lib/ceph/bootstrap-osd',
+                      run_as_root=True)
+
+        utils.execute('ceph',
+                      '--cluster=ceph',
+                      'auth',
+                      'get-or-create',
+                      'client.bootstrap-osd',
+                      'mon',
+                      'allow profile bootstrap-osd',
+                      '-o',
+                      '/var/lib/ceph/bootstrap-osd/ceph.keyring',
+                      run_as_root=True)
+
+        # Begin to create bootstrap-mds
+        utils.execute('mkdir'
+                      '-p',
+                      '/var/lib/ceph/bootstrap-mds',
+                      run_as_root=True)
+
+        utils.execute('ceph',
+                      '--cluster=ceph',
+                      'auth',
+                      'get-or-create',
+                      'client.bootstrap-mds',
+                      'mon',
+                      'allow profile bootstrap-mds',
+                      '-o',
+                      '/var/lib/ceph/bootstrap-mds/ceph.keyring',
+                      run_as_root=True)
 
     def stop_server(self, context, node_id):
         """Stop server.
