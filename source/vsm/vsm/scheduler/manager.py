@@ -1051,9 +1051,16 @@ class SchedulerManager(manager.Manager):
             self._agent_rpcapi.upload_keyring_admin_into_db(context,
                     host=monitor_node['host'])
 
-            for ser in server_list:
+            def _update_keyring_from_db(host):
                 self._agent_rpcapi.update_keyring_admin_from_db(context,
                         host=ser['host'])
+
+            thd_list = []
+            for ser in server_list:
+                thd = utils.MultiThread(_update_keyring_from_db,
+                                        host=ser['host'])
+                thd_list.append(thd)
+            utils.start_threads(thd_list)
             _update("Success: keyring")
         except:
             _update("ERROR: keyring")
