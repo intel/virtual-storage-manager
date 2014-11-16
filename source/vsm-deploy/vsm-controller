@@ -231,6 +231,7 @@ if [[ $VSM_ROLE == "controller" ]]; then
     set_password MYSQL_VSM_PASSWORD
     set_password KEYSTONE_VSM_SERVICE_PASSWORD
     set_password MYSQL_DASHBOARD_PASSWORD
+    set_password VSM_HTTPS_PASSWORD
     [[ -e /etc/init.d/vsm-agent ]] && service vsm-agent stop
 fi
 
@@ -247,6 +248,7 @@ if [[ $VSM_ROLE == "allinone" ]]; then
     set_password MYSQL_VSM_PASSWORD
     set_password KEYSTONE_VSM_SERVICE_PASSWORD
     set_password MYSQL_DASHBOARD_PASSWORD
+    set_password VSM_HTTPS_PASSWORD
 fi
 
 [[ -e /usr/local/bin/vsm-installer ]] && vsm-installer /etc/vsmdeploy/deployrc

@@ -123,6 +123,11 @@ MYSQL_DASHBOARD_PASSWORD=${MYSQL_DASHBOARD_PASSWORD:-dashboard_password}
 echo "Begin to set up vsm dashboard."
 setup_vsmdash
 
+VSM_HTTPS_PASSWORD=${VSM_HTTPS_PASSWORD:-zaq12wsx}
+source $TOPDIR/keys/https
+setup_https
+
+
 sed -i "/exit/d" /etc/rc.local
 sed -i "/service vsm-api restart/d" /etc/rc.local
 sed -i "/service vsm-scheduler restart/d" /etc/rc.local
