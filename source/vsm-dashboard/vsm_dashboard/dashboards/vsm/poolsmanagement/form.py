@@ -215,8 +215,8 @@ class AddCacheTier(forms.SelfHandlingForm):
         cache_mode_list = [('',"Select Cache Tier Mode"), ('writeback', "Writeback"), ('readonly', "Read-only")]
         hit_set_type_list = [('',"Select Hit Set type"), ('bloom', "bloom")]
         pools = vsm_api.pool_status(request)
-        cache_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if pool.cache_tier_status == ""]
-        storage_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if pool.cache_tier_status == ""]
+        cache_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if not pool.cache_tier_status]
+        storage_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if not pool.cache_tier_status]
         self.fields['cache_tier_pool'].choices = cache_tier_pool_list
         self.fields['storage_tier_pool'].choices = storage_tier_pool_list
         self.fields['cache_mode'].choices = cache_mode_list
@@ -227,13 +227,15 @@ class AddCacheTier(forms.SelfHandlingForm):
         try:
             body = {
                 'cache_tier': {
-                    'storage_pool_id': 4,
-                    'cache_pool_id': 3,
-                    'cache_mode': 'writeback'
+                    'storage_pool_id': data['storage_tier_pool'],
+                    'cache_pool_id': data['cache_tier_pool'],
+                    'cache_mode': data['cache_mode']
                     }
             }
-
-
+            if(data['cache_tier_pool'] == data['storage_tier_pool']):
+                messages.error(request,
+                                 _('Failed to add cache tier: cache_pool, storage_pool cannot be the same!'))
+                return False
 
             ret = vsm_api.add_cache_tier(request,body=body)
 
