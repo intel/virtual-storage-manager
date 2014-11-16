@@ -27,7 +27,9 @@ function _generate_keys() {
     cp -rf server.key server.key.secure
     ./exp_sec
     ./exp_csr
-    ./exp_crt
+    openssl x509 -req -days 7000 -in server.csr -signkey server.key -out server.crt
+
+    # ./exp_crt
     mkdir -p /etc/httpd/conf.d/keys/
     rm -rf /etc/httpd/conf.d/keys/*
     cp -rf * /etc/httpd/conf.d/keys/
@@ -41,7 +43,7 @@ SSLCertificateFile /opt/keys/server.crt
 LoadModule ssl_module modules/mod_ssl.so
 ____EOF
 
-    sed -i "s,^Listen 80,^#Listen 80,g" /etc/httpd/conf/httpd.conf
+    sed -i "s,Listen 80,#Listen 80,g" /etc/httpd/conf/httpd.conf
     service httpd restart
 
     rm -rf /tmp/__keys
