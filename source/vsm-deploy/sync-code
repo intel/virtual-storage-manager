@@ -16,6 +16,7 @@
 # under the License.
 
 
+set -o xtrace
 rm -rf /opt/stack/data/vsm/*
 
 password=`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'`
@@ -24,13 +25,13 @@ host_list=`mysql -uroot -p$password -Ns -e "use vsm; select host from init_nodes
 #------------------------------------------------------------
 # Sync code
 #------------------------------------------------------------
-
-cd /opt/vsmceph
+old_dir=`pwd`
+cd $old_dir
 fcon=`cat *.patch  | grep "^diff" | grep py | grep vsm | awk '{print $4}' | sort -u`
 tdir="/usr/lib/python2.6/site-packages/"
 for n in $fcon; do
     file=${n#*vsm}
-    fnew="/opt/vsmceph/source/vsm/$file"
+    fnew="${old_dir}/source/vsm/$file"
     fold="${tdir}/${file}"
     echo $file $fnew $fold
     if [[ ! -e $fnew ]]; then
@@ -43,12 +44,13 @@ for n in $fcon; do
     cp -rf $fnew $fold
 done
 
-cd /opt/vsmceph
+cd $old_dir
+
 fcon=`git diff  | grep "^diff" | grep py | grep vsm | awk '{print $4}' | sort -u`
 tdir="/usr/lib/python2.6/site-packages/"
 for n in $fcon; do
     file=${n#*vsm}
-    fnew="/opt/vsmceph/source/vsm/$file"
+    fnew="${old_dir}/source/vsm/$file"
     fold="${tdir}/${file}"
     echo $file $fnew $fold
     if [[ ! -e $fnew ]]; then
@@ -60,3 +62,5 @@ for n in $fcon; do
     done
     cp -rf $fnew $fold
 done
+
+set +o xtrace

@@ -1145,7 +1145,7 @@ class CephDriver(object):
                       run_as_root=True)
 
         # Begin to create bootstrap keyrings.
-        utils.execute('mkdir'
+        utils.execute('mkdir',
                       '-p',
                       '/var/lib/ceph/bootstrap-osd',
                       run_as_root=True)
@@ -1162,7 +1162,7 @@ class CephDriver(object):
                       run_as_root=True)
 
         # Begin to create bootstrap-mds
-        utils.execute('mkdir'
+        utils.execute('mkdir',
                       '-p',
                       '/var/lib/ceph/bootstrap-mds',
                       run_as_root=True)
