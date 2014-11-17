@@ -1795,13 +1795,22 @@ class CephDriver(object):
             "cache_mode": cache_mode})
 
         options = body.get("options")
-        self._configure_cache_tier(options)
+        self._configure_cache_tier(cache_pool_name, options)
         LOG.info("add cache tier end")
 
         return True
 
-    def _configure_cache_tier(self, options):
-        pass
+    def _configure_cache_tier(self, cache_pool_name, options):
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "hit_set_type", options["hit_set_type"], run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "hit_set_count", options["hit_set_count"], run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "hit_set_period", options["hit_set_period_s"], run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_bytes", int(options["target_max_mem_mb"]) * 1000000, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_target_dirty_ratio", options["target_dirty_ratio"], run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_target_full_ratio", options["target_full_ratio"], run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_bytes", int(options["target_max_capacity_gb"]) * 1000000000, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_objects", options["target_max_objects"], run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_min_flush_age", options["target_min_flush_age_m"], run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_min_evict_age", options["target_min_evict_age_m"], run_as_root=True)
 
     def remove_cache_tier(self, context, body):
         LOG.info("Remove Cache Tier")
