@@ -8,6 +8,9 @@ function __create_repo_by_rpms() {
     find . -name "*.rpm" | grep "vsmclient" | xargs -i rm -rf {}
     mkdir -p $TOPDIR/vsmrepo
     find ~/rpmbuild/RPMS -name "*.rpm" | grep vsm | xargs -i cp -rf {} $TOPDIR/vsmrepo/
+    rm -rf $TOPDIR/vsmrepo/repodata
+    cd $TOPDIR/vsmrepo
+    createrepo . 
     cd $old_dir
 }
 

@@ -10,8 +10,8 @@
 # ./exp_crt                                        generate certificate file
 
 function _generate_keys() {
-    mkdir -p __keys
-    for n in `exp_key exp_sec exp_csr exp_crt`; do
+    mkdir -p /tmp/__keys
+    for n in exp_key exp_sec exp_csr exp_crt; do
         cp -rf /usr/local/bin/keys/$n /tmp/__keys
     done
 
