@@ -263,7 +263,7 @@ global_opts = [
                default='/etc/ceph/ceph.conf',
                help='ceph config file path.'),
     cfg.StrOpt('keyring_admin',
-               default='/etc/ceph/ceph.client.admin.keyring',
+               default='/etc/ceph/keyring.admin',
                help='key ring file path.'),
     cfg.StrOpt('monitor_data_path',
                default='/var/lib/ceph/mon/',

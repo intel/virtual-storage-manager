@@ -481,11 +481,6 @@ class AgentManager(manager.Manager):
         if keyring_admin:
             LOG.info(' get keyring from DB.')
             utils.write_file_as_root(FLAGS.keyring_admin, keyring_admin, "w")
-            utils.execute('cp',
-                          '-rf',
-                          FLAGS.keyring_admin,
-                          '/etc/ceph/keyring.admin',
-                          run_as_root=True)
             return True
         else:
             LOG.info('Can not get keyring, seend info not in DB.')

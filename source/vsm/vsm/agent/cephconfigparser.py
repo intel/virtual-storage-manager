@@ -318,8 +318,11 @@ class CephConfigParser(manager.Manager):
                              '.' + str(cnfth))
 
         # Must add fsid for create cluster in newer version of ceph.
-        # Do not set keyring file path here.
-        # NOTE
+        # In order to support lower version of vsm.
+        # We set keyring path here.
+        # keyring = /etc/ceph/keyring.admin
+        self._parser.set('global', 'keyring', '/etc/ceph/keyring.admin')
+        # Have to setup fsid.
         self._parser.set('global', 'fsid', str(uuid.uuid1()))
 
     def add_mds_header(self, keyring='false'):
@@ -398,7 +401,9 @@ class CephConfigParser(manager.Manager):
         self._parser.set('osd', 'filestore xattr use omap', 'true')
         osd_data = "/var/lib/ceph/osd/osd$id"
         self._parser.set('osd', 'osd data', osd_data)
-        # NOTE Do not add keyring here.
+        # NOTE add keyring to support lower version of OSD.
+        # keyring = /etc/ceph/keyring.$name
+        self._parser.set('osd', 'keyring', '/etc/ceph/keyring.$name')
         self._parser.set('osd', 'osd mkfs type', osd_type)
         mount_option = utils.get_fs_options(osd_type)[1]
         self._parser.set('osd', 'osd mount options %s' % osd_type, mount_option)
