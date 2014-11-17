@@ -101,6 +101,10 @@ class OsdManager(base.ManagerWithFind):
     def restore(self, osd):
         self._action('restore', osd)
 
+    def refresh(self):
+        url = "/osds/refresh"
+        return self.api.client.post(url)
+
     def summary(self):
         """
         summary

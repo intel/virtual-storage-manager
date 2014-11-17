@@ -136,6 +136,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
         mapper.resource("osds", "osds",
                         controller=self.resources['osds'],
                         collection={"summary": "get",
+                                    "refresh": "post",
                                     "detail": "get"},
                         member={'action':'POST'})
 
