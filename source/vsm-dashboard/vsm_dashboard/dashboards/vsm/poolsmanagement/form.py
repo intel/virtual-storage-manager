@@ -194,19 +194,19 @@ class CreateErasureCodedPool(forms.SelfHandlingForm):
 class AddCacheTier(forms.SelfHandlingForm):
 
     failure_url = 'horizon:vsm:poolsmanagement:index'
-    cache_tier_pool = forms.ChoiceField(label=_('Cache Tier Pool'), required=False)
-    storage_tier_pool = forms.ChoiceField(label=_('Storage Tier Pool'), required=False)
-    cache_mode = forms.ChoiceField(label=_('Cache Mode'), required=False)
-    hit_set_type = forms.ChoiceField(label=_('Hit Set Type'), required=False)
-    hit_set_count = forms.CharField(label=_("Hit set count"), required=False)
-    hit_set_period = forms.CharField(label=_("Hit set period(s)"), required=False)
-    target_max_mem = forms.CharField(label=_("Target maximum memory(MB)"), required=False)
-    target_dirty_ratio = forms.CharField(label=_("Target dirty ratio"), required=False)
-    target_full_ratio = forms.CharField(label=_("Target full ratio"), required=False)
-    target_max_capacity = forms.CharField(label=_("Target maximum capacity(GB)"), required=False)
-    target_max_objects = forms.CharField(label=_("Target maximum objects"), required=False)
-    target_minimum_flush_age = forms.CharField(label=_("Target minimum flush age(m)"), required=False)
-    target_minimum_evict_age = forms.CharField(label=_("Target minimum evict age(m)"), required=False)
+    cache_tier_pool = forms.ChoiceField(label=_('Cache Tier Pool'))
+    storage_tier_pool = forms.ChoiceField(label=_('Storage Tier Pool'))
+    cache_mode = forms.ChoiceField(label=_('Cache Mode'))
+    hit_set_type = forms.ChoiceField(label=_('Hit Set Type'))
+    hit_set_count = forms.CharField(label=_("Hit set count"))
+    hit_set_period_s = forms.CharField(label=_("Hit set period(s)"))
+    target_max_mem_mb = forms.CharField(label=_("Target maximum memory(MB)"))
+    target_dirty_ratio = forms.CharField(label=_("Target dirty ratio"))
+    target_full_ratio = forms.CharField(label=_("Target full ratio"))
+    target_max_capacity_gb = forms.CharField(label=_("Target maximum capacity(GB)"))
+    target_max_objects = forms.CharField(label=_("Target maximum objects"))
+    target_min_flush_age_m = forms.CharField(label=_("Target minimum flush age(m)"))
+    target_min_evict_age_m = forms.CharField(label=_("Target minimum evict age(m)"))
 
     def __init__(self, request, *args, **kwargs):
         super(AddCacheTier, self).__init__(request, *args, **kwargs)
@@ -221,6 +221,17 @@ class AddCacheTier(forms.SelfHandlingForm):
         self.fields['storage_tier_pool'].choices = storage_tier_pool_list
         self.fields['cache_mode'].choices = cache_mode_list
         self.fields['hit_set_type'].choices = hit_set_type_list
+        settings = vsm_api.get_settings(request)
+        setting_dict = dict([(setting.name, setting.value) for setting in settings])
+        self.fields['hit_set_count'].initial = setting_dict["ct_hit_set_count"]
+        self.fields['hit_set_period_s'].initial = setting_dict["ct_hit_set_period_s"]
+        self.fields['target_max_mem_mb'].initial = setting_dict["ct_target_max_mem_mb"]
+        self.fields['target_dirty_ratio'].initial = setting_dict["ct_target_dirty_ratio"]
+        self.fields['target_full_ratio'].initial = setting_dict["ct_target_full_ratio"]
+        self.fields['target_max_capacity_gb'].initial = setting_dict["ct_target_max_capacity_gb"]
+        self.fields['target_max_objects'].initial = setting_dict["ct_target_max_objects"]
+        self.fields['target_min_flush_age_m'].initial = setting_dict["ct_target_min_flush_age_m"]
+        self.fields['target_min_evict_age_m'].initial = setting_dict["ct_target_min_evict_age_m"]
 
     def handle(self, request, data):
 
@@ -229,7 +240,19 @@ class AddCacheTier(forms.SelfHandlingForm):
                 'cache_tier': {
                     'storage_pool_id': data['storage_tier_pool'],
                     'cache_pool_id': data['cache_tier_pool'],
-                    'cache_mode': data['cache_mode']
+                    'cache_mode': data['cache_mode'],
+                    'options': {
+                        'hit_set_type': data['hit_set_type'],
+                        'hit_set_count': data['hit_set_count'],
+                        'hit_set_period_s': data['hit_set_period_s'],
+                        'target_max_mem_mb': data['target_max_mem_mb'],
+                        'target_dirty_ratio': data['target_dirty_ratio'],
+                        'target_full_ratio': data['target_full_ratio'],
+                        'target_max_capacity_gb': data['target_max_capacity_gb'],
+                        'target_max_objects': data['target_max_objects'],
+                        'target_min_flush_age_m': data['target_min_flush_age_m'],
+                        'target_min_evict_age_m': data['target_min_evict_age_m']
+                        }
                     }
             }
             if(data['cache_tier_pool'] == data['storage_tier_pool']):
