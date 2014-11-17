@@ -57,6 +57,7 @@ install -p -D -m 755 preinstall %{buildroot}%{_usr}/local/bin/preinstall
 install -p -D -m 755 rpms_list %{buildroot}%{_usr}/local/bin/rpms_list
 install -p -D -m 755 start_osd %{buildroot}%{_usr}/local/bin/start_osd
 install -p -D -m 755 ec-profile %{buildroot}%{_usr}/local/bin/ec-profile
+install -p -D -m 755 reset_status %{buildroot}%{_usr}/local/bin/reset_status
 
 cp -rf keys  %{buildroot}%{_usr}/local/bin/
 cp -rf tools %{buildroot}%{_usr}/local/bin/
@@ -84,6 +85,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/rpms_list
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/start_osd
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/ec-profile
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/reset_status
 
 %dir %{_usr}/local/bin/keys
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/keys/*

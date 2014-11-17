@@ -1128,7 +1128,7 @@ class CephDriver(object):
         utils.execute('ceph',
                       '--cluster=ceph',
                       '--name=mon.',
-                      '--keyring=/var/lib/ceph/mon/ceph{mon_id}/keyring'.format(
+                      '--keyring=/var/lib/ceph/mon/mon{mon_id}/keyring'.format(
                           mon_id=mon_id,
                           ),
                       'auth',
@@ -1140,6 +1140,7 @@ class CephDriver(object):
                       '-o',
                       '/etc/ceph/ceph.client.admin.keyring',
                       run_as_root=True)
+
         utils.execute('cp',
                       '-rf',
                       '/etc/ceph/ceph.client.admin.keyring',

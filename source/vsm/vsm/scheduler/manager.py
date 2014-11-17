@@ -1053,7 +1053,7 @@ class SchedulerManager(manager.Manager):
 
             def _update_keyring_from_db(host):
                 self._agent_rpcapi.update_keyring_admin_from_db(context,
-                        host=ser['host'])
+                        host=host)
 
             thd_list = []
             for ser in server_list:

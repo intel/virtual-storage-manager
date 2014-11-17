@@ -481,9 +481,11 @@ class AgentManager(manager.Manager):
         if keyring_admin:
             LOG.info(' get keyring from DB.')
             utils.write_file_as_root(FLAGS.keyring_admin, keyring_admin, "w")
-            #fd = open(FLAGS.keyring_admin, 'w')
-            #fd.write(keyring_admin)
-            #fd.close()
+            utils.execute('cp',
+                          '-rf',
+                          FLAGS.keyring_admin,
+                          '/etc/ceph/keyring.admin',
+                          run_as_root=True)
             return True
         else:
             LOG.info('Can not get keyring, seend info not in DB.')
@@ -658,22 +660,41 @@ class AgentManager(manager.Manager):
             LOG.info('Not monitor node, skip start montior service.')
             return {'status': 'ok'}
 
+        """
+        Steps to start monitor service.
+        cp -rf /etc/ceph/ceph.mon.keyring /var/lib/ceph/tmp/ceph$1.mon.keyring
+        ceph-mon --cluster ceph \
+                 --mkfs -i $1 \
+                 --keyring /var/lib/ceph/tmp/ceph$1.mon.keyring
+
+        mkdir -p  /var/lib/ceph/mon/mon$1
+        cp -rf /etc/ceph/ceph.mon.keyring /var/lib/ceph/mon/mon$1/keyring
+        echo "" > /var/lib/ceph/mon/mon$1/done
+        echo "" > /var/lib/ceph/mon/mon$1/sysvinit
+        service ceph -c /etc/ceph/ceph.conf start mon.$1
+        """
+
         # copy montior keyring to each directory.
         utils.execute('mkdir',
                       '-p',
-                      '/var/lib/ceph/mon/ceph%s/' % mon_id,
+                      '/var/lib/ceph/mon/mon%s/' % mon_id,
+                      run_as_root=True)
+        utils.execute('mkdir',
+                      '-p',
+                      '/var/lib/ceph/tmp/',
                       run_as_root=True)
 
         utils.execute('cp',
                       '-rf',
                       '/etc/ceph/ceph.mon.keyring',
-                      '/var/lib/ceph/mon/ceph%s/keyring' % mon_id,
+                      '/var/lib/ceph/tmp/ceph%s.mon.keyring' % mon_id,
                       run_as_root=True)
 
-        # Get monitor id, begin to start monitor service.
-        utils.write_file_as_root('/var/lib/ceph/tmp/ceph%s.mon.keyring' % mon_id,
-                                 monitor_keyring,
-                                 'w')
+        utils.execute('cp',
+                      '-rf',
+                      '/etc/ceph/ceph.mon.keyring',
+                      '/var/lib/ceph/tmp/ceph%s.mon.keyring' % mon_id,
+                      run_as_root=True)
 
         utils.execute('ceph-mon',
                       '--cluster', 'ceph',
@@ -685,15 +706,15 @@ class AgentManager(manager.Manager):
 
         utils.execute('mkdir',
                       '-p',
-                      '/var/lib/ceph/mon/ceph%s' % mon_id,
+                      '/var/lib/ceph/mon/mon%s' % mon_id,
                       run_as_root=True)
 
         utils.execute('touch',
-                      '/var/lib/ceph/mon/ceph%s/done' % mon_id,
+                      '/var/lib/ceph/mon/mon%s/done' % mon_id,
                       run_as_root=True)
 
         utils.execute('touch',
-                      '/var/lib/ceph/mon/ceph%s/sysvinit' % mon_id,
+                      '/var/lib/ceph/mon/mon%s/sysvinit' % mon_id,
                       run_as_root=True)
 
         utils.execute('service',
