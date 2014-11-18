@@ -70,6 +70,7 @@ function _clean_agent() {
     rm -rf /var/lib/ceph/mon/*
     rm -rf /var/lib/ceph/mds/*
     rm -rf /var/log/vsm/*
+    rm -rf /var/run/ceph/*
     cp -rf /usr/local/bin/tools/etc/vsm/* /etc/vsm/
     cp -rf /etc/vsm/vsm.conf.sample /etc/vsm/vsm.conf
     #service vsm-agent restart
