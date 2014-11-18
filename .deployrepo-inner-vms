@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -e
+
+TOPDIR=$(cd $(dirname "$0") && pwd)
+if [[ ! -d $TOPDIR/vsmrepo ]]; then
+    echo "Error, You should download the tar.gz file"
+    echo "And untar the file for build&deploy repo."
+    echo "Steps: below"
+    echo "wget --no-proxy http://10.239.82.94/vsmrepo-167.tar.gz"
+    echo "tar zxf vsmrepo-167.tar.gz"
+    echo "rm -rf vsmrepo-167.tar.gz"
+    exit 0
+fi
+
+set -o xtrace
+#---------------------------------------------
+# Setup Variable.
+#---------------------------------------------
+TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
+
+source $TOPDIR/.lib/repo
+source $TOPDIR/.lib/setiptables
+
+#---------------------------------------------
+# Create USER
+#---------------------------------------------
+
+setup_iptables
+
+#---------------------------------------------
+# Repo
+#---------------------------------------------
+
+HOST_IP=`hostname -I | awk '{print $1}'`
+REPO_HOST=${REPO_HOST:-$HOST_IP}
+
+setup_repo
+
+set +o xtrace

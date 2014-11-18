@@ -533,8 +533,8 @@ class CephDriver(object):
         LOG.info('>>> step2 start')
         #osd_pth = '%sceph-%s' % (FLAGS.osd_data_path, osd_id)
         #osd_keyring_pth = "%s/keyring" % osd_pth
-        osd_keyring_pth = "/etc/ceph/keyring.osd.%s" % osd_id
         osd_pth = '/var/lib/ceph/osd/osd%s' % osd_id
+        osd_keyring_pth = "%s/keyring" % osd_pth
         utils.ensure_tree(osd_pth)
 
         # step 3
@@ -1446,8 +1446,7 @@ class CephDriver(object):
 
         utils.execute("ceph", "auth", "del", "osd.%s" % osd_inner_id,
                         run_as_root=True)
-        #osd_keyring_pth = "%s/keyring" % osd_pth
-        osd_keyring_pth = "/etc/ceph/keyring.osd.%s" % osd_inner_id
+        osd_keyring_pth = "%s/keyring" % osd_pth
         utils.execute("ceph", "auth", "add", "osd.%s" % osd_inner_id,
                       "osd", "allow *", "mon", "allow rwx",
                       "-i", osd_keyring_pth,
