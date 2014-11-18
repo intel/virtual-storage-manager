@@ -295,6 +295,13 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                       topic, version='1.0', timeout=6000)
         return res
 
+    def osd_refresh(self, context, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('osd_refresh'),
+                        topic, version='1.0', timeout=6000)
+        return res
+
     def cluster_id(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         res = self.call(context,

@@ -148,6 +148,15 @@ class Controller(wsgi.Controller):
 
         return self._view_builder.detail(req, osds)
 
+    def refresh(self, req):
+        """
+        :param req:
+        :return:
+        refresh osd status
+        """
+        context = req.environ['vsm.context']
+        self.scheduler_api.osd_refresh(context)
+
     #TODO scheduler exe
     @wsgi.response(204)
     def delete(self, req, id):

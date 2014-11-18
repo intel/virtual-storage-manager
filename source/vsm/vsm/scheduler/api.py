@@ -81,6 +81,9 @@ class API(object):
     def osd_restore(self, context, body=None):
         return self.scheduler_rpcapi.osd_restore(context, body)
 
+    def osd_refresh(self, context):
+        return self.scheduler_rpcapi.osd_refresh(context)
+
     def health_status(self, context):
         return self.scheduler_rpcapi.health_status(context)
 

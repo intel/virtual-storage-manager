@@ -821,6 +821,11 @@ class AgentManager(manager.Manager):
         self.ceph_driver.osd_restore(context, osd_id)
         return True
 
+    def osd_refresh(self, context):
+        LOG.info("refresh osd status")
+        self.update_osd_state(context)
+        return True
+
     def _get_cluster_id(self, context):
         init_node = db.init_node_get_by_host(context, FLAGS.host)
         return init_node['cluster_id']
