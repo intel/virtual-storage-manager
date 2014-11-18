@@ -334,8 +334,8 @@ class CephConfigParser(manager.Manager):
         #self._parser.set('mds', 'keyring', keyring)
         #mds data = /var/lib/ceph/mds/ceph-$id
         #keyring = /var/lib/ceph/mds/ceph-$id/keyring
-        self._parser.set('mds data', '/var/lib/ceph/mds/ceph-$id')
-        self._parser.set('keyring', '/var/lib/ceph/mds/ceph-$id/keyring')
+        self._parser.set('mds', 'mds data', '/var/lib/ceph/mds/ceph-$id')
+        self._parser.set('mds', 'keyring', '/var/lib/ceph/mds/ceph-$id/keyring')
         self._parser.set('mds', 'mds standby replay', keyring)
 
     def add_mon_header(self, clock_drift=200):
