@@ -1,7 +1,7 @@
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name:           vsm-dashboard
-Version:	    2014.10
+Version:	    2014.11
 Release:	    0.8.0%{?dist}
 Url:            http://intel.com/itflex
 License:        Apache 2.0

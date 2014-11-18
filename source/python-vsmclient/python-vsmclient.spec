@@ -1,5 +1,5 @@
 Name:             python-vsmclient
-Version:          2014.10
+Version:          2014.11
 Release:          0.8.0%{?dist}
 Summary:          Python API and CLI for  vsm
 
