@@ -45,3 +45,15 @@ pg_count_factor 100
 ##the key/value strings should not have spaces
 #profile_name1  /usr/lib64/ceph/erasure-code  jerasure  3  {"k":2,"m":1,"technique":"reed_sol_van"}
 #profile_name2  /usr/lib64/ceph/erasure-code  jerasure  6  {"k":4,"m":2,"technique":"reed_sol_van"}
+
+[cache_tier_defaults]
+ct_hit_set_count 1
+ct_hit_set_period_s 3600
+ct_target_max_mem_mb 1000000
+ct_target_dirty_ratio 0.4
+ct_target_full_ratio 0.8
+ct_target_max_capacity_gb 1000
+ct_target_max_objects 1000000
+ct_target_min_flush_age_m 10
+ct_target_min_evict_age_m 20
+
