@@ -169,6 +169,8 @@ class AgentManager(manager.Manager):
                                     device_dict['journal'],
                                     device_dict['service_id'])
                         if not device_ref:
+                            device_dict['used_capacity_kb'] = 0
+                            device_dict['avail_capacity_kb'] = 0
                             db.device_create(self._context, device_dict)
                     except exception.UpdateDBError, e:
                         LOG.error('%s:%s' % (e.code, e.message))
