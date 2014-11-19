@@ -32,7 +32,9 @@ function _del_other_section() {
         if [[ $cnt -gt 0 ]]; then
             sec_name=${n//[/ }
             sec_name=${sec_name//]/ }
-            openstack-config --del /etc/cinder/cinder.conf $sec_name
+            if [[ `echo $sec_name | grep vsm | wc -l` -gt 0 ]]; then
+                openstack-config --del /etc/cinder/cinder.conf $sec_name
+            fi
         fi
     done
     openstack-config --del /etc/cinder/cinder.conf DEFAULT enabled_backends

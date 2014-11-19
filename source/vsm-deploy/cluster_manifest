@@ -1,0 +1,229 @@
+#!/usr/bin/env python
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2014 Intel
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+import os
+import json
+import sys
+from vsm.manifest.parser import ManifestParser
+from vsm import utils
+from vsm import ipcalc
+
+def error(msg):
+    print '----------------ERROR---------------'
+    print 'Errors below is caused by your manifest file'
+    print 'Please check your manifest file!'
+    print '------------------------------------'
+    if isinstance(msg, list):
+        for n in msg:
+            print n
+    else:
+        print msg
+    print '------------------------------------'
+    sys.exit(1)
+
+class ManifestChecker(object):
+    def __init__(self, file_path):
+        self._file_path = file_path
+        self._smp = ManifestParser(file_path, False)
+        self._lan_list = []
+        self._info = self._smp.format_to_json()
+        self._is_network_ok()
+        self._check_storage_class()
+
+    def __is_address_ok(self, address):
+        parted = address.split('/')
+        if len(parted) != 2:
+            info_list = [ 'There are some error in LAN address!',
+                          'address should like *.*.*.*/*',
+                           'Your address is %s' % address]
+            error(info_list)
+
+        front = parted[0]
+        parted = front.split('.')
+        if len(parted) != 4:
+            info_list = ['There are some errors in LAN address!',
+                         'address should like *.*.*.*/*',
+                         'Your address is %s' % address ]
+            error(info_list)
+
+    def __find_class(self, class_type):
+        stg_list = self._info['storage_group']
+        find_it = False
+        for stg in stg_list:
+            if class_type == stg['storage_class']:
+                find_it = True
+                break
+
+        if find_it == False:
+            info = 'Can not find storage_class %s in storage_group' % \
+                  class_type
+            error(info)
+
+    def _check_storage_class(self):
+        class_list = self._info['storage_class']
+        for class_type in class_list:
+            self.__find_class(class_type)
+
+        stg_list = self._info['storage_group']
+        for stg in stg_list:
+            find_it = False
+            for cst in class_list:
+                if cst == stg['storage_class']:
+                    find_it = True
+
+            if find_it == False:
+                info = 'Can not find storage_class %s in storage_group'
+                error(info)
+
+    def _is_in_lan(self, ip, ip_mask):
+        """Decide three networks:
+                public addresss,
+                secondary public address,
+                cluster address
+        """
+        if ip in ipcalc.Network(ip_mask):
+            return True
+        else:
+            return False
+
+    def __in_lan(self, ip):
+        primary_public_network = \
+            self._info['cluster']['primary_public_network']
+        secondary_public_network = \
+            self._info['cluster']['secondary_public_network']
+        cluster_network = self._info['cluster']['cluster_network']
+
+        self._lan_list = [primary_public_network,
+                          secondary_public_network,
+                          cluster_network]
+
+        if self._is_in_lan(ip, primary_public_network):
+            return True
+        if self._is_in_lan(ip, secondary_public_network):
+            return True
+        if self._is_in_lan(ip, cluster_network):
+            return True
+
+    def _is_network_ok(self):
+        primary_public_network = \
+            self._info['cluster']['primary_public_network']
+        secondary_public_network = \
+            self._info['cluster']['secondary_public_network']
+        cluster_network = self._info['cluster']['cluster_network']
+
+        self._lan_list = [primary_public_network,
+                          secondary_public_network,
+                          cluster_network]
+
+        if len(cluster_network) == 0:
+            error('Error: cluster_network not found')
+
+        if len(secondary_public_network) == 0:
+            error('Error: secondary_public_network not found')
+
+        if len(primary_public_network) == 0:
+            error('Error: primary_public_network not found!')
+
+        if primary_public_network == secondary_public_network or\
+            secondary_public_network == cluster_network or\
+            cluster_network == primary_public_network:
+            info_list = [
+            'Warning: There are some networks be the same.',
+            'primary_public_network = %s' % primary_public_network,
+            'secondary_public_network = %s' % secondary_public_network,
+            'cluster_network = %s' % cluster_network]
+            for info in info_list:
+                print info
+
+        self.__is_address_ok(primary_public_network)
+        self.__is_address_ok(secondary_public_network)
+        self.__is_address_ok(cluster_network)
+
+        out = utils.execute('hostname', '-I')
+        ip_list = out[0].strip().split()
+
+        for ip in ip_list:
+            if self.__in_lan(ip):
+                return True
+        error('Can not find ip in lan list.')
+
+    def format_to_json(self):
+        return json.dumps(self._info, sort_keys=True, indent=2)
+
+def check_storage_group(file_path):
+    ret = open(file_path).readlines()
+    find_it = False
+    for line in ret:
+        line = line.strip()
+        if line.startswith('#'):
+            continue
+
+        if len(line) < 4:
+            print 'Small line, skiped'
+            continue
+
+        if line.find('[') != -1 and\
+           line.find(']') != -1 and\
+           line.find('storage_group') != -1:
+            find_it = True
+            continue
+
+        if find_it and line.find('[') != -1 and line.find(']') != -1:
+            print line
+            break
+
+        if find_it:
+            parts = line.split()
+            if len(parts) != 3:
+                info_list = [
+                'Error: storage group defined',
+                'The format should be: a "ab_c_d" storage_class',
+                'Your defined is %s' % line,
+                'Split into parts will be %s' % parts]
+                error(info_list)
+
+def check_sections(file_path):
+    cluster_names = ['storage_class', 'zone',
+                     'storage_group', 'cluster',
+                     'server_list']
+
+    ret = open(file_path).readlines()
+    cnt = 0
+    for line in ret:
+        line = line.strip()
+        if line.startswith('#'):
+            continue
+
+        if line.find('[') != -1 and line.find(']') != -1:
+            for x in cluster_names:
+                if line.find(x) != -1:
+                    cnt = cnt + 1
+
+if __name__ == '__main__':
+    fpath = '/etc/manifest/cluster.manifest'
+    check_storage_group(fpath)
+    check_sections(fpath)
+
+    if os.path.exists(fpath) == False:
+        error('%s is not exists.' % fpath)
+    # False stands for cluster.manifest.
+    smp = ManifestChecker(fpath)
+    print '--------------------------------------'
+    print 'Check Success ~~'
+    print smp.format_to_json()
+    print 'Check Success ~~'
+    print '--------------------------------------'

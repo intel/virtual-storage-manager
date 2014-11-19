@@ -1581,7 +1581,7 @@ class MultiThread(threading.Thread):
     def run(self): #pylint: disable=W0221
         try:
             ret = self._func(*self._args, **self._kwargs)
-            LOG.info('Thread run func = %s, ret = %s' % \
+            LOG.debug('Thread run func = %s, ret = %s' % \
                 (self._func, ret))
         except:
             raise

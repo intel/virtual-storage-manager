@@ -1,0 +1,148 @@
+#!/usr/bin/env python
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+import socket
+import re
+import os
+import socket
+import fcntl
+import struct
+from vsm import ipcalc
+
+class GetIp(object):
+    """Get the ip that matches the ip define in cluster.manifest."""
+    def __init__(self):
+        self.ip_list = [] #self.get_ip_list()
+        self.get_ip_list()
+        #print self.ip_list
+        self._parser = ParseManifest()
+        self._cluster_addr = self._parser.get_cluster_dict()
+
+    def get_ip_list(self):
+        try:
+            addlist = socket.getaddrinfo(socket.gethostname(), None)
+            for item in addlist:
+                self.ip_list.append(item[4][0])
+        except:
+            addlist = os.popen('hostname -I').read().split()
+            for item in addlist:
+                self.ip_list.append(item)
+
+        #get ip from fcntl
+        #get ip from "hostname -I"
+        ip = os.popen('hostname -I').read().split()
+        self.ip_list = list(set(self.ip_list + ip))
+
+    def get_local_ip(self, ifname):
+        soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        inet = fcntl.ioctl(soc.fileno(), 0x8915, struct.pack('256s', ifname[:15]))
+        res = socket.inet_ntoa(inet[20:24])
+        return res
+
+    def _is_in_lan(self, ip, ip_mask):
+        """Decide three networks:
+                public addresss,
+                secondary public address,
+                cluster address
+        """
+        if ip in ipcalc.Network(ip_mask):
+            return True
+        else:
+            return False
+
+    def _match_ip(self, ip_mask):
+        for item in self.ip_list:
+            res = self._is_in_lan(item, ip_mask)
+            if res:
+                return item
+
+    def get_controller_ip(self):
+        """Get the controller ip that matches the public_addr,
+           otherwise secondary ip, cluster ip
+        """
+        ip_mask = self._cluster_addr.get('public_addr')
+        ip = self._match_ip(ip_mask)
+        if ip:
+            return ip
+        else:
+            print("There is no ip that matches management address")
+            raise
+
+class ParseManifest(object):
+    """Parse cluster address in cluster.manifest"""
+
+    def __init__(self, fpath="/etc/manifest/cluster.manifest"):
+        self._file_path = fpath
+        self._read_lines()
+
+    def _read_lines(self):
+        """Read self._file_path and return the lines needed.
+
+        Need to do filter operations:
+            1. lines full with spaces
+            2. comments
+            3. comments starts with spaces.
+        """
+        lines = open(self._file_path).readlines()
+        self._lines = []
+        for single_line in lines:
+            single_line = single_line.strip()
+            if not single_line.startswith("#") and len(single_line):
+                self._lines.append(single_line)
+
+    def _check_single_key_word_exists(self, name):
+        """Check name exists in this file."""
+        # Find the right position of the key word.
+        right_pos = -1
+        for pos, val in enumerate(self._lines):
+            if val.find(name) != -1:
+                right_pos = pos
+                break
+
+        # If not find, do not raise error to support server_list.
+        if right_pos == -1:
+            print "Error, can not find %s" % name
+            return len(self._lines)
+
+        return right_pos
+
+    def get_cluster_dict(self):
+        """Return dict info of cluster."""
+        def _get_cluster_value(ktype):
+            rpos = self._check_single_key_word_exists(ktype)
+            for pos in (rpos + 1, len(self._lines) - 1):
+                single_line = self._lines[pos]
+                if single_line.find("[") != -1:
+                    break
+
+                seg_list = single_line.split()
+                if len(seg_list) == 1:
+                    return seg_list[0]
+
+        ret = {'cluster_name': _get_cluster_value('cluster'),
+               'file_system': _get_cluster_value('file_system'),
+               'public_addr': _get_cluster_value('management_addr'),
+               'secondary_public_addr':
+                              _get_cluster_value('ceph_public_addr'),
+               'cluster_addr': _get_cluster_value('ceph_cluster_addr')}
+
+        return ret
+
+if __name__ == '__main__':
+    iper = GetIp()
+    res = iper.get_controller_ip()
+    print res

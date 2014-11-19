@@ -1,0 +1,8 @@
+rpm_dash=`rpm -qa | grep vsm-dashboard`
+rpm_dash=${rpm_dash##*board-}
+rpm_dash=${rpm_dash%%.el6*}
+
+vsm-manage db sync
+VSM_VERSION=$rpm_dash
+sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" %{_datadir}/vsm-dashboard/vsm_dashboard/dashboards/vsm/overview/summarys.py
+
