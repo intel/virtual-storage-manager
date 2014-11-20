@@ -84,6 +84,9 @@ class API(object):
     def osd_refresh(self, context):
         return self.scheduler_rpcapi.osd_refresh(context)
 
+    def cluster_refresh(self, context):
+        return self.scheduler_rpcapi.cluster_refresh(context)
+
     def health_status(self, context):
         return self.scheduler_rpcapi.health_status(context)
 

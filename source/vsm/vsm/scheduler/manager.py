@@ -1226,6 +1226,12 @@ class SchedulerManager(manager.Manager):
         active_server = self._get_active_server(context)
         return self._agent_rpcapi.osd_refresh(context, active_server['host'])
 
+    @utils.single_lock
+    def cluster_refresh(self, context):
+        LOG.info('refresh cluster status')
+        active_server = self._get_active_server(context)
+        return self._agent_rpcapi.cluster_refresh(context, active_server['host'])
+
     def health_status(self, context):
         record = {}
         def _thd_fun(host):

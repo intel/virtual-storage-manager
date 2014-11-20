@@ -138,6 +138,15 @@ class ClusterController(wsgi.Controller):
         vb = summary_view.ViewBuilder()
         return vb.basic(sum, 'cluster')
 
+    def refresh(self, req):
+        """
+        :param req:
+        :return:
+        refresh cluster status
+        """
+        context = req.environ['vsm.context']
+        self.scheduler_api.cluster_refresh(context)
+
 def create_resource(ext_mgr):
     return wsgi.Resource(ClusterController(ext_mgr))
 

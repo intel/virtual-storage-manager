@@ -128,6 +128,11 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         version='1.0', timeout=6000)
         return ret
 
+    def cluster_refresh(self, ctxt):
+        ret = self.call(ctxt, self.make_msg('cluster_refresh'),
+                        version='1.0', timeout=6000)
+        return ret
+
     def health_status(self, context):
         ret = self.call(context,
                         self.make_msg('health_status'),
