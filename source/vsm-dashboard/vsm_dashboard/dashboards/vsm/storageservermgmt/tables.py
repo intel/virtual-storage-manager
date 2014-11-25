@@ -78,7 +78,7 @@ class ResetStatus(tables.BatchAction):
     name = "reset"
     action_present = _("Reset")
     action_past = _("Status Rested")
-    data_type_singular = _("Sever Status")
+    data_type_singular = _("Server Status")
     data_type_plural = _("Servers Status")
     classes = ("reset-status-action", "")
 
