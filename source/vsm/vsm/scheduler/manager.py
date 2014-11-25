@@ -1161,14 +1161,17 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.osd_remove(context, osd_id, init_node['host'])
                 self._agent_rpcapi.update_osd_state(context, init_node['host'])
             except rpc_exc.Timeout:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_remove rpc timeout')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_remove rpc timeout')
+                LOG.error('ERROR: osd_remove rpc timeout')
             except rpc_exc.RemoteError:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_remove rpc remote')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_remove rpc remote')
+                LOG.error('ERROR: osd_remove rpc remote')
             except:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_remove')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_remove')
+                LOG.error('ERROR: osd_remove')
                 raise
         else:
             return False
@@ -1184,14 +1187,17 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.osd_restart(context, osd_id, init_node['host'])
                 self._agent_rpcapi.update_osd_state(context, init_node['host'])
             except rpc_exc.Timeout:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_restart rpc timeout')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart rpc timeout')
+                LOG.error('ERROR: osd_restart rpc timeout')
             except rpc_exc.RemoteError:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_restart rpc remote error')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart rpc remote error')
+                LOG.error('ERROR: osd_restart rpc remote error')
             except:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_restart')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart')
+                LOG.error('ERROR: osd_restart')
                 raise
         else:
             return False
@@ -1208,14 +1214,18 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.osd_restore(context, osd_id, init_node['host'])
                 self._agent_rpcapi.update_osd_state(context, init_node['host'])
             except rpc_exc.Timeout:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_restore rpc timeout error')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restore rpc timeout error')
+                LOG.error('ERROR: osd_restore rpc timeout error')
+                 
             except rpc_exc.RemoteError:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_restore rpc remote error')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restore rpc remote error')
+                LOG.error('ERROR: osd_restore rpc remote error')
             except:
-                self._conductor_api.init_node_update_status_by_id(context,
-                    init_node['id'], 'ERROR: osd_restore')
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restore')
+                LOG.error('ERROR: osd_restore') 
                 raise
         else:
             return False
