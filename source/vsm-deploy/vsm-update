@@ -35,3 +35,5 @@ set_password VSM_HTTPS_PASSWORD
 VSM_HTTPS_PASSWORD=${VSM_HTTPS_PASSWORD:-zaq12wsx}
 source $TOPDIR/keys/https
 setup_https
+
+restart-all
