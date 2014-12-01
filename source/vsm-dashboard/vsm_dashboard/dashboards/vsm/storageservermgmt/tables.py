@@ -90,37 +90,37 @@ class ResetStatus(tables.BatchAction):
         vsmapi.servers.reset_status(request, [obj_id])
 
 class AddServersAction(tables.LinkAction):
-    name = "add servers"
+    name = "add_servers"
     verbose_name = _("Add Servers")
     url = "horizon:vsm:storageservermgmt:addserversview"
     classes = ("ajax-modal", "btn-create")
 
 class RemoveServersAction(tables.LinkAction):
-    name = "remove servers"
+    name = "remove_servers"
     verbose_name = _("Remove Servers")
     url = "horizon:vsm:storageservermgmt:removeserversview"
     classes = ("ajax-modal", "btn-create")
 
 class AddMonitorsAction(tables.LinkAction):
-    name = "add monitors"
+    name = "add_monitors"
     verbose_name = _("Add Monitors")
     url = "horizon:vsm:storageservermgmt:addmonitorsview"
     classes = ("ajax-modal", "btn-create")
 
 class RemoveMonitorsAction(tables.LinkAction):
-    name = "remove monitors"
+    name = "remove_monitors"
     verbose_name = _("Remove Monitors")
     url = "horizon:vsm:storageservermgmt:removemonitorsview"
     classes = ("ajax-modal", "btn-create")
 
 class StartServersAction(tables.LinkAction):
-    name = "start servers"
+    name = "start_servers"
     verbose_name = _("Start Servers")
     url = "horizon:vsm:storageservermgmt:startserversview"
     classes = ("ajax-modal", "btn-create")
 
 class StopServersAction(tables.LinkAction):
-    name = "stop servers"
+    name = "stop_servers"
     verbose_name = _("Stop Servers")
     url = "horizon:vsm:storageservermgmt:stopserversview"
     classes = ("ajax-modal", "btn-create")
