@@ -74,7 +74,7 @@ function create() {
         echo "You should set an input file use -f parameter."
         exit 0
     fi
-    VALUES=`cat cache_tier.conf|awk '{if(NR>9){print $0}else{print "(\""$1"\", "$2", "$2", 0),"}}'`
+    VALUES=`cat $INPUT_FILE|awk NF|awk '{print "(\""$1"\", "$2", "$2", 0),"}'`
     VALUES=${VALUES%?}
     get_mysql_root_password
     ret=`mysql -uroot -p$MYSQL_ROOT_PASSWORD -Ns -e \
