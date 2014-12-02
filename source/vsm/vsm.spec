@@ -226,6 +226,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/rootwrap.conf
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/policy.json
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/logging.conf
+%config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/cache-tier.conf
 %dir %{_sysconfdir}/vsm/rootwrap.d
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/rootwrap.d/vsm.filters
 
