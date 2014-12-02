@@ -128,6 +128,7 @@ install -d -m 755 %{buildroot}%{_sysconfdir}/sudoers.d
 install -p -D -m 640 etc/vsm/vsm.conf.sample %{buildroot}%{_sysconfdir}/vsm/vsm.conf
 install -p -D -m 640 etc/vsm/ceph.conf.template %{buildroot}%{_sysconfdir}/vsm/ceph.conf.template
 install -p -D -m 640 etc/vsm/rootwrap.conf %{buildroot}%{_sysconfdir}/vsm/rootwrap.conf
+install -p -D -m 640 etc/vsm/cache-tier.conf %{buildroot}%{_sysconfdir}/vsm/cache-tier.conf
 install -p -D -m 640 etc/vsm/api-paste.ini %{buildroot}%{_sysconfdir}/vsm/api-paste.ini
 install -p -D -m 640 etc/vsm/policy.json %{buildroot}%{_sysconfdir}/vsm/policy.json
 install -p -D -m 640 etc/vsm/logging_sample.conf %{buildroot}%{_sysconfdir}/vsm/logging.conf

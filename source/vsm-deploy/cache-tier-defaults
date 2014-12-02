@@ -17,6 +17,7 @@
 
 
 MYSQL_ROOT_PASSWORD=""
+INPUT_FILE=""
 
 function get_mysql_root_password() {
     if [[ $MYSQL_ROOT_PASSWORD == "" ]]; then
@@ -42,7 +43,7 @@ Project:VSM
        You can create or delete cache-tier-defaults in DB.
 examples:
     create:
-        cache-tier-defaults -c
+        cache-tier-defaults -c -f /etc/vsm/cache-tier.conf
     delete:
         cache-tier-defaults -d
 EOF
@@ -52,10 +53,13 @@ Options:
     Print usage information.
 
   -c | create 
-    Create an erasure code profile in DB
+    Create cache tier defaults in DB
 
   -d | delete 
-    Delete an erasure code profile in DB 
+    Delete cache tier defaults in DB 
+ 
+  -f | input file
+    Input file
 
   -p 
     MySQL root user password. 
@@ -66,18 +70,15 @@ EOF
 }
 
 function create() {
+    if [[ $INPUT_FILE == "" ]]; then
+        echo "You should set an input file use -f parameter."
+        exit 0
+    fi
+    VALUES=`cat cache_tier.conf|awk '{if(NR>9){print $0}else{print "(\""$1"\", "$2", "$2", 0),"}}'`
+    VALUES=${VALUES%?}
     get_mysql_root_password
     ret=`mysql -uroot -p$MYSQL_ROOT_PASSWORD -Ns -e \
-    'use vsm;insert into vsm_settings (name, value, default_value, deleted) values
-    ("ct_hit_set_count", 1, 1, 0),
-    ("ct_hit_set_period_s", 3600, 3600, 0),
-    ("ct_target_max_mem_mb", 1000000, 1000000, 0),
-    ("ct_target_dirty_ratio", 0.4, 0.4, 0),
-    ("ct_target_full_ratio", 0.8, 0.8, 0),
-    ("ct_target_max_capacity_gb", 1000, 1000, 0),
-    ("ct_target_max_objects", 1000000, 1000000, 0),
-    ("ct_target_min_flush_age_m", 10, 10, 0),
-    ("ct_target_min_evict_age_m", 20, 20, 0)'`
+    "use vsm;insert into vsm_settings (name, value, default_value, deleted) values $VALUES"`
     if [[ $? == 1 ]] ;then
         echo "created failed!"
     else
@@ -113,6 +114,7 @@ while [ $# -gt 0 ]; do
         -c| create)  do_create=y ;;
         -d| delete)  do_delete=y ;;
         -p) shift; MYSQL_ROOT_PASSWORD=$1 ;;
+        -f) shift; INPUT_FILE=$1 ;;
         *) shift ;;
     esac
     shift
