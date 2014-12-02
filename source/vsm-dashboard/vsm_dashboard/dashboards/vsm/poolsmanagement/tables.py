@@ -84,7 +84,7 @@ class ListPoolTable(tables.DataTable):
     storageType = tables.Column("storageGroup", verbose_name=_("Storage Group"))
     pgNum = tables.Column("pgNum", verbose_name=_("Placement Group Count"))
     size = tables.Column("size", verbose_name=_("Size"))
-    quota = tables.Column("quota", verbose_name=_("Quota (GB)"))
+    quota = tables.Column("empty", verbose_name=_("Quota (GB)"), empty_value=lambda x: "-" if x["quota"] in (0, None) else x["quota"])
     cache_tier_status = tables.Column("cache_tier_status", verbose_name=_("Cache Tier Status"))
     erasure_code_status = tables.Column("erasure_code_status", verbose_name=_("Erasure Code Status"))
     status = tables.Column("status", verbose_name=_("Status"))
