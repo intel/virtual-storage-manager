@@ -121,14 +121,15 @@ class StorageGroupSummary(SummaryRenderer):
 
 class VsmSummary(SummaryRenderer):
     # TODO
-    verbose_name = "VSM Status" + " Version: %VSM_VERSION%"
+    #verbose_name = "VSM Status" + " Version: %VSM_VERSION%"
+    verbose_name = "VSM Status"
     name = "vsm_summary"
 
     def get_summary(self):
         vsm_summary = vsmapi.vsm_summary(self.request)
         data = SortedDict()
+        data["Version"] = "%VSM_VERSION%"
         data["Uptime"] = get_time_delta2(vsm_summary.created_at)
-        #data["Version"] = vsm_summary.version
         return data
         try:
             if not vsm_summary.is_ceph_active:
