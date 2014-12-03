@@ -41,7 +41,8 @@ class CreatePool(forms.SelfHandlingForm):
                             'invalid': _("The string may only contain"
                                          " ASCII characters and numbers.")},
                             validators=[validate_pool_name])
-    storage_group = forms.ChoiceField(label=_('Storage Group'))
+    storage_group = forms.ChoiceField(label=_('Primary Storage Group'))
+    replicated_storage_group = forms.ChoiceField(label=_('Replicated Storage Group'), required=False)
     replication_factor = forms.IntegerField(label=_("Replication Factor"),
                                         min_value=1,
                                         help_text=_('The replication'
@@ -61,16 +62,19 @@ class CreatePool(forms.SelfHandlingForm):
     def __init__(self, request, *args, **kwargs):
         super(CreatePool, self).__init__(request, *args, **kwargs)
         storage_group_list = [('', _("Select a storage group"))]
+        replicated_storage_group_list = [('', _("Default: Same as Primary"))]
         try:
             rsp, group_list= vsm_api.get_storage_group_list(self.request)
             for key in group_list:
                 storage_group_list.append((key, group_list[key]))
+                replicated_storage_group_list.append((key, group_list[key]))
         except:
             msg = _('Failed to get storage_group_list.')
             redirect = reverse(self.failure_url)
             exceptions.handle(request, msg, redirect=redirect)
             return False
         self.fields['storage_group'].choices = storage_group_list
+        self.fields['replicated_storage_group'].choices = replicated_storage_group_list
 
     def handle(self, request, data):
         try:
@@ -78,6 +82,7 @@ class CreatePool(forms.SelfHandlingForm):
                     'pool': {
                         'name': data['name'],
                         'storageGroupId': data['storage_group'],
+                        'replicatedStorageGroupId': data['replicated_storage_group'],
                         'replicationFactor': data['replication_factor'],
                         'tag': data['tag'],
                         'clusterId': '0',
