@@ -361,7 +361,7 @@ global_opts = [
     cfg.BoolOpt('no_snapshot_gb_quota',
                 default=False,
                 help='Whether snapshots count against GigaByte quota'),
-    cfg.BoolOpt('default_zone',
+    cfg.StrOpt('default_zone',
                 default='zone_one',
                 help='The default one zone name'), ]
 
