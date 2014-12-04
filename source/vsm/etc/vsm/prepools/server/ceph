@@ -18,7 +18,8 @@
 
 function _create_pool() {
     local pool_name=$1
-    local cnt=`ceph osd lspools| grep $1 | wc -l`
+    local temp_pool=${pool_name:4}
+    local cnt=`ceph osd lspools| grep $temp_pool | wc -l`
     if [[ $cnt -eq 0 ]]; then
         rados mkpool $pool_name
     fi
