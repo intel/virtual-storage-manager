@@ -34,7 +34,7 @@ class UpdateRow(tables.Row):
 
 class CreateStoragePool(tables.LinkAction):
     name = "create pool"
-    verbose_name = _("Create Pool")
+    verbose_name = _("Create Replicated Pool")
     url = "horizon:vsm:poolsmanagement:create"
     classes = ("ajax-modal", "btn-create")
 

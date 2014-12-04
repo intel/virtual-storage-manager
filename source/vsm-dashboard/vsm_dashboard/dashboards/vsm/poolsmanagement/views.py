@@ -38,6 +38,7 @@ class IndexView(tables.DataTableView):
 
     def get_data(self):
         pools = []
+
         try:
             rsp, body = vsmapi.pools_list(self.request, all_pools=True)
             if body:
