@@ -152,7 +152,7 @@ class ManifestParser(object):
 
         # If not find, do not raise error to support server_list.
         if right_pos == -1:
-            LOG.warn("[warning] can not find %s" % name)
+            LOG.info("[warning] can not find %s" % name)
             return len(self._lines)
 
         return right_pos

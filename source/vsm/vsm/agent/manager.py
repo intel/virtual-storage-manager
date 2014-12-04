@@ -1304,7 +1304,7 @@ class AgentManager(manager.Manager):
 
     def update_ceph_status(self, context):
         all_pool = db.pool_get_all(context)
-        if len(all_pool) < 3:
+        if len(all_pool) < 1:
             return 'NotCreateCluster'
 
         def __get_ceph_status():
