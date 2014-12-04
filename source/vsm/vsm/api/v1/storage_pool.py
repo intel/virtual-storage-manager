@@ -262,6 +262,7 @@ class StoragePoolController(wsgi.Controller):
         #    'name': 'test',
         #    'enablePoolQuota': False,
         #    'storageGroupId': '1',
+        #    'u'replicatedStorageGroupId': '1',
         #    'clusterId': '0',
         #    'tag': 'abc',
         #    'createdBy': 'VSM',
@@ -316,6 +317,7 @@ class StoragePoolController(wsgi.Controller):
                 raise exc.HTTPBadRequest(explanation=msg)
 
             size = pool_dict['replicationFactor']
+            replica_storage_group_id = pool_dict['replicatedStorageGroupId']
             try:
                 size = int(str(size))
                 if size < 1:
@@ -337,6 +339,7 @@ class StoragePoolController(wsgi.Controller):
             body_info = {'name': name, #+ "-vsm" + vsm_id,
                         'cluster_id':cluster_id,
                         'storage_group_id':storage_group_id,
+                        'replica_storage_group_id':replica_storage_group_id,
                         'crush_ruleset':crush_ruleset,
                         'pg_num':pg_num,
                         'pgp_num':pg_num,

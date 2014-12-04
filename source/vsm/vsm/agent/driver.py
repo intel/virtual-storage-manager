@@ -78,6 +78,8 @@ class CephDriver(object):
             res = utils.execute('ceph', 'osd', 'pool', 'create', pool_name, pg_num, \
                             pgp_num, 'erasure', profile_ref['name'], rule_name, \
                             run_as_root=True) 
+        else if body.get('replica_storage_group_id'):
+            pass    
         else:
             rule = str(body['crush_ruleset'])
             size = str(body['size'])
@@ -1847,37 +1849,6 @@ class DbDriver(object):
     def init_host(self, host):
         pass
 
-    def update_pool_info_0(self, context):
-        LOG.info("DEBUG in update_pool_info() in DbDriver()")
-        res = db.pool_get_all(context)
-        pool_list = []
-        for x in res:
-            pool_list.append(int(x.pool_id))
-            LOG.info('x.id = %s' % x.pool_id)
-
-        #str0 = "0 data,1 metadata,2 rbd,3 testpool_after_periodic"
-        str0 = os.popen("ssh root@10.239.82.125 \'ceph osd lspools\' ").read()
-        str = str0[0:-2]
-        items = str.split(',')
-        LOG.info("DEBUG items %s pool_list %s" % (items, pool_list))
-        for i in items:
-            x = i.split()
-            values = {}
-            pool_id = int(x[0])
-            LOG.info('DEBUG x[0] %s' % pool_id)
-            if pool_id in pool_list:
-                pool_id = x[0]
-                values['name'] = x[1]
-                db.pool_update(context, pool_id, values)
-            else:
-                values['pool_id'] = pool_id
-                values['name'] = x[1]
-                values['recipe_id'] = pool_id
-                values['status'] = 'running'
-                db.pool_create(context, values)
-
-        return res
-   
     def update_recipe_info(self, context):
         LOG.info("DEBUG in update_recipe_info() in DbDriver()")
         res = db.recipe_get_all(context)
