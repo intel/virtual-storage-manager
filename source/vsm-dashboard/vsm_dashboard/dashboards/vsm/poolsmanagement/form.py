@@ -65,6 +65,7 @@ class CreatePool(forms.SelfHandlingForm):
                                'invalid': _("The string may only contain"
                                             " numbers.")},
                            initial=0,
+                           max_value=8589934591,
                            required=True
                            )
     #add by luohj over
@@ -150,6 +151,7 @@ class CreateErasureCodedPool(forms.SelfHandlingForm):
                            error_messages={
                                'invalid': _("The string may only contain"
                                             " numbers.")},
+                           max_value=8589934591,
                            initial=0,
                            required=True
                            )

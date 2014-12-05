@@ -617,7 +617,7 @@ class StoragePool(BASE, VsmBase):
     op_per_sec = Column(Integer)
     ec_status = Column(String(length=255))
     cache_tier_status = Column(String(length=255))
-    quota = Column(Integer, default=0)
+    quota = Column(Integer, default=None)
     cache_mode = Column(String(length=255))
 
 class InitNode(BASE, VsmBase):

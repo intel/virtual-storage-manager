@@ -348,6 +348,11 @@ class StoragePoolController(wsgi.Controller):
                         'created_by':created_by,
                         'tag':tag}
 
+        body_info.update({
+            "quota": pool_dict.get("poolQuota"),
+            "enable_quota": pool_dict.get("enablePoolQuota"),
+        })
+
         return self.scheduler_api.create_storage_pool(context, body_info)
 
     @wsgi.serializers(xml=StoragePoolsTemplate)

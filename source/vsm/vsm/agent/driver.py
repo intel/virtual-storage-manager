@@ -91,9 +91,9 @@ class CephDriver(object):
             utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
                             'crush_ruleset', rule, run_as_root=True)
         #set quota
-        if body.get('quota'):
-            max_bytes = 1024 * 1024 * 1024 * body.get('quota')
-            utils.execute('ceph', 'osd', 'pool', 'set-quota', 'max_bytes', max_bytes)  
+        if body.get('enable_quota', False):
+            max_bytes = 1024 * 1024 * 1024 * int(body.get('quota', 0))
+            utils.execute('ceph', 'osd', 'pool', 'set-quota', pool_name, 'max_bytes', max_bytes)
         #update db
         pool_list = self.get_pool_status()
         for pool in pool_list:
@@ -108,7 +108,7 @@ class CephDriver(object):
                     'crush_ruleset': pool.get('crush_ruleset'),
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
-                    'quota': body['quota'] if body.get('quota') else 0 
+                    'quota': body.get('quota')
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
