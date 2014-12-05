@@ -78,7 +78,7 @@ class CephDriver(object):
             res = utils.execute('ceph', 'osd', 'pool', 'create', pool_name, pg_num, \
                             pgp_num, 'erasure', profile_ref['name'], rule_name, \
                             run_as_root=True) 
-        else if body.get('replica_storage_group_id'):
+        elif body.get('replica_storage_group_id'):
             pass    
         else:
             rule = str(body['crush_ruleset'])
