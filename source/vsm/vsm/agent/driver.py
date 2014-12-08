@@ -53,8 +53,14 @@ class CephDriver(object):
         except:
             pass
 
+    def _get_new_ruleset(self):
+        args = ['ceph', 'osd', 'crush', 'rule', 'dump']
+        ruleset_list = self._run_cmd_to_json(args)
+        return len(ruleset_list)
+
     def create_storage_pool(self, context, body):
         pool_name = body["name"]
+        primary_storage_group = replica_storage_group = ""
         if body.get("ec_profile_id"):
             profile_ref = db.ec_profile_get(context, body['ec_profile_id'])
             pgp_num = pg_num = profile_ref['pg_num'] 
@@ -79,7 +85,63 @@ class CephDriver(object):
                             pgp_num, 'erasure', profile_ref['name'], rule_name, \
                             run_as_root=True) 
         elif body.get('replica_storage_group_id'):
-            pass    
+            try:
+                utils.execute('ceph', 'osd', 'getcrushmap', '-o', FLAGS.crushmap_bin,
+                                run_as_root=True)
+                utils.execute('crushtool', '-d', FLAGS.crushmap_bin, '-o', FLAGS.crushmap_src, 
+                                run_as_root=True)
+                ruleset = self._get_new_ruleset()
+                storage_group_list = db.storage_group_get_all(context)
+                storage_group_id = int(body['storage_group_id'])
+                replica_storage_group_id = int(body['replica_storage_group_id'])
+                pg_num = str(body['pg_num'])
+                for x in storage_group_list:
+                    if x['id'] == storage_group_id and \
+                        x['id'] == replica_storage_group_id:
+                        primary_storage_group = replica_storage_group = x['name']
+                    elif x['id'] == storage_group_id:
+                        primary_storage_group = x['name']
+                    elif x['id'] == replica_storage_group_id:
+                        replica_storage_group = x['name']
+                    else:
+                        continue
+                if not (primary_storage_group and replica_storage_group):        
+                    LOG.error("Can't find primary_storage_group_id or replica_storage_group_id")
+                    raise 
+                    return False
+
+                type = "host" 
+                #TODO min_size and max_size
+                rule_str = "rule " + pool_name + "_replica {"
+                rule_str += "    ruleset " + str(ruleset)
+                rule_str += "    type replicated" 
+                rule_str += "    min_size 0"
+                rule_str += "    max_size 10"
+                rule_str += "    step take " + primary_storage_group
+                rule_str += "    step chooseleaf firstn 0 type " + type
+                rule_str += "    step emit"
+                rule_str += "    step take " + replica_storage_group
+                rule_str += "    step chooseleaf firstn -1 type " + type
+                rule_str += "    step emit"
+                rule_str += "}"
+
+                utils.execute('chown', '-R', 'vsm:vsm', '/etc/vsm/',
+                        run_as_root=True) 
+                if utils.append_to_file(FLAGS.crushmap_src, rule_str):
+                    utils.execute('crushtool', '-c', FLAGS.crushmap_src, '-o', FLAGS.crushmap_bin, \
+                                    run_as_root=True) 
+                    utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
+                                    run_as_root=True)
+                    utils.execute('ceph', 'osd', 'pool', 'create', pool_name, \
+                                pg_num, pg_num, 'replicated', str(ruleset), run_as_root=True)
+                    res = True
+                else:
+                    LOG.error("Failed while writing crushmap!")
+                    return False 
+            except:
+                LOG.error("create replica storage pool error!")
+                raise
+                return False  
         else:
             rule = str(body['crush_ruleset'])
             size = str(body['size'])
@@ -93,7 +155,8 @@ class CephDriver(object):
         #set quota
         if body.get('enable_quota', False):
             max_bytes = 1024 * 1024 * 1024 * int(body.get('quota', 0))
-            utils.execute('ceph', 'osd', 'pool', 'set-quota', pool_name, 'max_bytes', max_bytes)
+            utils.execute('ceph', 'osd', 'pool', 'set-quota', 'max_bytes', max_bytes,\
+                            run_as_root=True)  
         #update db
         pool_list = self.get_pool_status()
         for pool in pool_list:
@@ -108,7 +171,8 @@ class CephDriver(object):
                     'crush_ruleset': pool.get('crush_ruleset'),
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
-                    'quota': body.get('quota')
+                    'replica_storage_group': replica_storage_group if replica_storage_group else None, 
+                    'quota': body['quota'] if body.get('quota') else 0 
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')

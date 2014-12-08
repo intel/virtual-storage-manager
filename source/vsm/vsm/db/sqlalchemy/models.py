@@ -619,6 +619,7 @@ class StoragePool(BASE, VsmBase):
     cache_tier_status = Column(String(length=255))
     quota = Column(Integer, default=None)
     cache_mode = Column(String(length=255))
+    replica_storage_group =Column(String(length=255))
 
 class InitNode(BASE, VsmBase):
     """This table init nodes."""
