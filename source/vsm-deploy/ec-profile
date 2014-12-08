@@ -47,7 +47,7 @@ Project:VSM
        You can create or delete ec_profile in DB.
 examples:
     create:
-        ec-profile -c --name profile1 --plugin jerasure --path /usr/lib64/ceph/erasure-code --pg-num 3 --kv-pair '{"k":2,"m":1,"technique":"reed_sol_van"' 
+        ec-profile -c --name profile1 --plugin jerasure --path /usr/lib64/ceph/erasure-code --pg-num 3 --kv-pair '{"k":2,"m":1,"technique":"reed_sol_van"}' 
     delete:
         ec-profile -d --name profile1 
 EOF
