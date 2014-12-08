@@ -118,10 +118,10 @@ class CephDriver(object):
                 rule_str += "    min_size 0"
                 rule_str += "    max_size 10"
                 rule_str += "    step take " + primary_storage_group
-                rule_str += "    step chooseleaf firstn 0 type " + type
+                rule_str += "    step chooseleaf firstn 1 type " + type
                 rule_str += "    step emit"
                 rule_str += "    step take " + replica_storage_group
-                rule_str += "    step chooseleaf firstn -1 type " + type
+                rule_str += "    step chooseleaf firstn " + str(body['size'] - 1) + " type " + type
                 rule_str += "    step emit"
                 rule_str += "}"
 
