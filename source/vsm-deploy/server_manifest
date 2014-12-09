@@ -160,8 +160,8 @@ class ManifestChecker(object):
     def __check_journal_devices(self, js_list):
         print js_list
         for js in js_list:
-            if js.find('by-path') == -1:
-                print "[WARNING]: do not using by-path path"
+            #if js.find('by-path') == -1:
+            #    print "[WARNING]: do not using by-path path"
 
             if self.__check_is_mounted(js):
                 error('You should not mount journal devices.!')
