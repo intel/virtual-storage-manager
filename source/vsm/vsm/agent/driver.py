@@ -1610,6 +1610,11 @@ class CephDriver(object):
             json_data = json.loads(out)
         return json_data
 
+    def get_osds_total_num(self):
+        args = ['ceph', 'osd', 'ls']
+        osd_list = self._run_cmd_to_json(args)
+        return len(osd_list)
+ 
     def get_crushmap_nodes(self):
         args = ['ceph', 'osd', 'tree']
         node_dict = self._run_cmd_to_json(args)

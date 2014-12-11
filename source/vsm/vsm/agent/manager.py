@@ -610,6 +610,9 @@ class AgentManager(manager.Manager):
     def get_ceph_health(self, context):
         return self.ceph_driver.get_ceph_health(context)
 
+    def get_osds_total_num(self, context):
+        return self.ceph_driver.get_osds_total_num()
+
     def clean_ceph_data(self, context):
         cluster_ref = db.cluster_get(context, self._cluster_id)
         file_system = cluster_ref['file_system']
@@ -947,6 +950,7 @@ class AgentManager(manager.Manager):
                     pg_count_factor = int(setting['value'])
 
             pg_num = pg_count_factor * osd_num//replication_num
+
         except ZeroDivisionError,e:
             raise ZeroDivisionError
         if pg_num < 1:
@@ -989,7 +993,15 @@ class AgentManager(manager.Manager):
                     #reset pgs
                     if 20 * osd_num_per_group > pool.get('pg_num'):
                         pg_num = self._compute_pg_num(context, osd_num_per_group, pool.get('size'))   
-                        if pg_num > pool.get('pg_num'):
+
+                        osds_total_num = self.ceph_driver.get_osds_total_num()
+                        LOG.info("There are %s osds in ceph." % osds_total_num)
+                        step_max_pg_num = osds_total_num * 32
+                        max_pg_num = step_max_pg_num + pool.get('pg_num')
+                        if pg_num > max_pg_num:
+                            pgp_num = pg_num = max_pg_num 
+                            self.set_pool_pg_pgp_num(context, pool_name, pg_num, pgp_num)
+                        elif pg_num > pool.get('pg_num'):
                             pgp_num = pg_num
                             self.set_pool_pg_pgp_num(context, pool_name, pg_num, pgp_num)
                         else:
