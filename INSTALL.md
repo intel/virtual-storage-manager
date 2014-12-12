@@ -59,7 +59,7 @@ Then we may assign these networks as below:
     - Ceph public netwok: 192.168.124.0/24
     - Ceph cluster network: 192.168.125.0/24
 
-The configuration for VSM in the `cluster_manifest` file should be:
+The configuration for VSM in the `cluster.manifest` file should be:
 
     [management_addr]
     192.168.123.0/24
@@ -72,7 +72,7 @@ The configuration for VSM in the `cluster_manifest` file should be:
 
 **Note** Here we do not use the public network for accessing the internet in our VSM cluster, so, there are no settings for this.
 
-**cluster_manifest** Do not worry about this file right now, we will talk  about it later.
+**cluster.manifest** Do not worry about this file right now, we will talk  about it later.
 
 ### Sample 2
 But how about when all the node just have two NICs. Such as controller node and storage node just have:
@@ -86,7 +86,7 @@ We may assign these two networks as below:
     - Ceph public network: 192.168.124.0/24
     - Ceph cluster network: 192.168.125.0/24
 
-The configuration for VSM in `cluster_manifest` file should be:
+The configuration for VSM in `cluster.manifest` file should be:
 
     [management_addr]
     192.168.124.0/24
@@ -108,7 +108,7 @@ We may assign this network as below:
     - Ceph public network: 192.168.124.0/24
     - Ceph cluster network: 192.168.124.0/24
 
-So all the network just use the same network. The configurations in VSM `cluster_manifest` file would then be:
+So all the network just use the same network. The configurations in VSM `cluster.manifest` file would then be:
 
     [management_addr]
     192.168.124.0/24
@@ -319,6 +319,45 @@ For every node, no matter controller node or storage node. Do steps below:
     
         preinstall
 
+As an discovered incompatibility issue on python-django-horizon module, the module should be downgrade to lower version 2013.1.1-1. 
+
+### For fresh new install
+*   Remove installed python-django-horizon package
+  *   # rpm –e python-django-horizon
+
+*   Download rpm packages from [vsm-dependencies github repository](https://github.com/01org/vsm-dependencies/tree/master/repo ), below packages are required to be downloaded from this web site:
+  *   Python-django-horizon, python-quantumclient, python-swiftclient, python-cinderclient, python-glanceclient, python-nova client
+
+*   Reinstall python-django-horizon package (in this order)
+  *   # rpm –ivh python-quantumclient-2.2.1-2.el6.noarch.rpm
+  *   # rpm -ivh python-swiftclient-1.4.0-1.el6.noarch.rpm
+  *   # rpm –ivh python-cinderclient-1.0.4-1.el6.noarch.rpm
+  *   # rpm –ivh python-glanceclient-0.9.0-2.el6.noarch.rpm
+  *   # rpm –ivh python-novaclient-2.13.0-1.el6.noarch.rpm
+  *   # rpm –ivh python-django-horizon-2013.1.1-1.el6.noarch.rpm
+
+
+### For existing broken install
+*   Remove installed vsm-dashboard and python-django-horizon package
+  *   # rpm –e vsm-dashboard
+  *   # rpm –e python-django-horizon
+
+*   Download rpm packages from [vsm-dependencies github repository](https://github.com/01org/vsm-dependencies/tree/master/repo ), below packages are required to be downloaded from this web site:
+  *   Python-django-horizon, python-quantumclient, python-swiftclient, python-cinderclient, python-glanceclient, python-nova client
+
+*   Reinstall python-django-horizon package (in this order)
+  *   # rpm –ivh python-quantumclient-2.2.1-2.el6.noarch.rpm
+  *   # rpm -ivh python-swiftclient-1.4.0-1.el6.noarch.rpm
+  *   # rpm –ivh python-cinderclient-1.0.4-1.el6.noarch.rpm
+  *   # rpm –ivh python-glanceclient-0.9.0-2.el6.noarch.rpm
+  *   # rpm –ivh python-novaclient-2.13.0-1.el6.noarch.rpm
+  *   # rpm –ivh python-django-horizon-2013.1.1-1.el6.noarch.rpm
+*   Reinstall vsm-dashboard, this is exactly the same one from v0.8 release package
+  *   # rpm –ivh vsm-dashboard-2014.11-0.8.0.el6.noarch.rpm
+
+*   Reboot vsm controller node
+
+
 ## Firewall and SELinux
 ### Solution 1
 1>  Disable SELinux in the file /etc/selinux/config
@@ -462,7 +501,7 @@ mainly focus on the validity of the three IP addresses, and modify them accordin
 **Warning** Do not set proxy env during installation.
 
 ## Setup storage node
-### server_manifest
+### server.manifest
 **step 1**
 For vsm storage nodes, edit the file `/etc/manifest/server.manifest` and modify it as described below:
 
@@ -486,7 +525,7 @@ Then run command below for every storage node:
     replace-str 9291376733ec4662929eadcf9eda3b44-e38aeba41c884fc88321ac84028792e4
 
 **step 3**
-Change disks in `/etc/manifest/server_manifest` file appending on your disks. Such as, change lines below:
+Change disks in `/etc/manifest/server.manifest` file appending on your disks. Such as, change lines below:
 
     [10krpm_sas]
     #format [sas_device]  [journal_device] 
