@@ -753,7 +753,7 @@ class AgentManager(manager.Manager):
 
             utils.execute('ceph', 'osd', 'crush',
                           'move', ser['host'],
-                          'root=default', run_as_root=True)
+                          'root=vsm', run_as_root=True)
             for osd in self._get_osd_id(ser['host']):
                 LOG.info('osd = %s for %s' % (osd, ser['host']))
                 utils.execute('ceph',
