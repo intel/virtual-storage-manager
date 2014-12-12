@@ -750,13 +750,13 @@ class AgentManager(manager.Manager):
 
     def prepare_osds(self, context, server_list):
         for ser in server_list:
-            utils.execute('ceph', 'osd', 'crush',
-                          'add-bucket', ser['host'],
-                          'host', run_as_root=True)
+            #utils.execute('ceph', 'osd', 'crush',
+            #              'add-bucket', ser['host'],
+            #              'host', run_as_root=True)
 
-            utils.execute('ceph', 'osd', 'crush',
-                          'move', ser['host'],
-                          'root=vsm', run_as_root=True)
+            #utils.execute('ceph', 'osd', 'crush',
+            #              'move', ser['host'],
+            #              'root=default', run_as_root=True)
             for osd in self._get_osd_id(ser['host']):
                 LOG.info('osd = %s for %s' % (osd, ser['host']))
                 utils.execute('ceph',
