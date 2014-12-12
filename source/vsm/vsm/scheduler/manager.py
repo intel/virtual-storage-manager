@@ -580,7 +580,7 @@ class SchedulerManager(manager.Manager):
             thd_list.append(thd)
         utils.start_threads(thd_list)
 
-    def _compute_pg_num(self, context, osd_num, replication_num):
+    def _compute_pg_num(self, context, host, osd_num, replication_num):
         """compute pg_num"""
         try:
             pg_count_factor = 100
@@ -590,6 +590,7 @@ class SchedulerManager(manager.Manager):
                     pg_count_factor = int(setting['value'])
 
             pg_num = pg_count_factor * osd_num//replication_num
+
         except ZeroDivisionError,e:
             raise ZeroDivisionError
         if pg_num < 1:
@@ -607,13 +608,28 @@ class SchedulerManager(manager.Manager):
             if osd_num >= 2 * storage_group['drive_extended_threshold']:
                 pools = db.pool_get_by_ruleset(context, storage_group['rule_id'])
                 for pool in pools:
-                    pg_num = self._compute_pg_num(context, osd_num, pool['size'])
-                    if pg_num > pool['pg_num']:
+                    pg_num = self._compute_pg_num(context, active_monitor['host'],\
+                                                    osd_num, pool['size'])
+                    osds_total_num = self._agent_rpcapi.get_osds_total_num(context,\
+                                                active_monitor['host'])
+                    LOG.info("There are %s osds in ceph." % osds_total_num)
+                    step_max_pg_num = osds_total_num * 32
+                    max_pg_num = step_max_pg_num + pool.get('pg_num')
+                    if pg_num > max_pg_num:
+                        pg_num = max_pg_num
                         update_pool_state_tag = True
                         update_db_tag = True;
                         self._agent_rpcapi.set_pool_pg_pgp_num(context, \
                                            active_monitor['host'], \
                                            pool['name'], pg_num, pg_num)
+
+                    elif pg_num > pool.get('pg_num'):
+                        update_pool_state_tag = True
+                        update_db_tag = True;
+                        self._agent_rpcapi.set_pool_pg_pgp_num(context, \
+                                           active_monitor['host'], \
+                                           pool['name'], pg_num, pg_num)
+
                 if update_db_tag:
                     #update db
                     values = {

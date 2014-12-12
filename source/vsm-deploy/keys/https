@@ -35,13 +35,16 @@ function _generate_keys() {
     cp -rf * /etc/httpd/conf.d/keys/
 
     # then we begin to set http configurations.
-    cat <<"____EOF" >/etc/httpd/conf.d/ssl.conf
-SSLCertificateKeyFile /etc/httpd/conf.d/keys/server.key
-Listen 443
-SSLEngine on
-SSLCertificateFile /etc/httpd/conf.d/keys/server.crt
-LoadModule ssl_module modules/mod_ssl.so
-____EOF
+#    cat <<"____EOF" >/etc/httpd/conf.d/ssl.conf
+#SSLCertificateKeyFile /etc/httpd/conf.d/keys/server.key
+#Listen 443
+#SSLEngine on
+#SSLCertificateFile /etc/httpd/conf.d/keys/server.crt
+#LoadModule ssl_module modules/mod_ssl.so
+#____EOF
+
+    sed -i "s,SSLCertificateFile /etc/pki/tls/certs/localhost.crt,SSLCertificateFile /etc/httpd/conf.d/keys/server.crt,g" /etc/httpd/conf.d/ssl.conf
+    sed -i "s,SSLCertificateKeyFile /etc/pki/tls/private/localhost.key,SSLCertificateKeyFile /etc/httpd/conf.d/keys/server.key,g" /etc/httpd/conf.d/ssl.conf
 
     sed -i "s,Listen 80,#Listen 80,g" /etc/httpd/conf/httpd.conf
     service httpd restart
