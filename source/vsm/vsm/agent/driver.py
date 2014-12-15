@@ -1851,8 +1851,12 @@ class CephDriver(object):
         LOG.info("add cache tier start")
         LOG.info("storage pool %s cache pool %s " % (storage_pool_name, cache_pool_name))
 
-        utils.execute("ceph", "osd", "tier", "add", storage_pool_name, \
-                      cache_pool_name, run_as_root=True)
+        if body.get("force_nonempty"):
+            utils.execute("ceph", "osd", "tier", "add", storage_pool_name, \
+                      cache_pool_name, "--force-nonempty",  run_as_root=True)
+        else:
+            utils.execute("ceph", "osd", "tier", "add", storage_pool_name, \
+                          cache_pool_name, run_as_root=True)
         utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool_name, \
                       cache_mode, run_as_root=True)
         if cache_mode == "writeback":
