@@ -564,7 +564,7 @@ class ManifestParser(object):
         self._dict_insert_settings_c()
         self._dict_insert_cache_tier_defaults_c()
         self._dict_insert_ec_profiles_c()
-        self._dict_insert_periodic_parameters_c()
+        #self._dict_insert_periodic_parameters_c()
         self._trans_between_db()
         return self._map
 
