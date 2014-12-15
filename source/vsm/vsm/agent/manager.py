@@ -395,7 +395,7 @@ class AgentManager(manager.Manager):
         except:
             LOG.info('Can not load ceph.conf now.')
         def _update_ceph_period():
-            for i in range(5):
+            for i in range(1):
                 try:
                     self.update_ceph_status(self._context)
                     time.sleep(10)
@@ -1302,6 +1302,7 @@ class AgentManager(manager.Manager):
             except exception.ExeCmdError, e:
                 LOG.error("%s:%s" % (e.code, e.message))
 
+    @periodic_task(service_topic=FLAGS.agent_topic, spacing=_get_interval_time('ceph_status'))
     def update_ceph_status(self, context):
         all_pool = db.pool_get_all(context)
         if len(all_pool) < 1:#luohj
