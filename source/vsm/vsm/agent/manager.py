@@ -395,7 +395,7 @@ class AgentManager(manager.Manager):
         except:
             LOG.info('Can not load ceph.conf now.')
         def _update_ceph_period():
-            while True:
+            for i in range(5):
                 try:
                     self.update_ceph_status(self._context)
                     time.sleep(10)
@@ -1119,7 +1119,8 @@ class AgentManager(manager.Manager):
                     LOG.info('pool %s does not exist in the existing pool list.' % pid)
 
     #@require_active_host
-    @periodic_task(run_immediately=True, service_topic=FLAGS.agent_topic)
+    @periodic_task(run_immediately=True, service_topic=FLAGS.agent_topic, 
+                   spacing=_get_interval_time('ceph_status'))
     def update_mon_health(self, context):
         ceph_status = self.ceph_driver.get_ceph_status()
         LOG.debug(ceph_status)
@@ -1198,8 +1199,7 @@ class AgentManager(manager.Manager):
                     if typ.find('cluster') != -1:
                         db.summary_update(context, cluster_id, 'ceph', val)
 
-    @periodic_task(spacing=FLAGS.server_ping_time,\
-                   service_topic=FLAGS.agent_topic)
+    @periodic_task(service_topic=FLAGS.agent_topic, spacing=FLAGS.server_ping_time)
     def update_server_status(self, context):
         """Update server status in every 5 seconds."""
         def _try_connect(host):
