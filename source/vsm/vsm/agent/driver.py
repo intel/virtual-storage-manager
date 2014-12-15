@@ -155,7 +155,7 @@ class CephDriver(object):
         #set quota
         if body.get('enable_quota', False):
             max_bytes = 1024 * 1024 * 1024 * int(body.get('quota', 0))
-            utils.execute('ceph', 'osd', 'pool', 'set-quota', 'max_bytes', max_bytes,\
+            utils.execute('ceph', 'osd', 'pool', 'set-quota', pool_name, 'max_bytes', max_bytes,\
                             run_as_root=True)  
         #update db
         pool_list = self.get_pool_status()
@@ -172,7 +172,7 @@ class CephDriver(object):
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
                     'replica_storage_group': replica_storage_group if replica_storage_group else None, 
-                    'quota': body['quota'] if body.get('quota') else 0 
+                    'quota': body.get('quota')
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
