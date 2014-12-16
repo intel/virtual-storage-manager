@@ -133,7 +133,9 @@ class CephDriver(object):
                     utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
                                     run_as_root=True)
                     utils.execute('ceph', 'osd', 'pool', 'create', pool_name, \
-                                pg_num, pg_num, 'replicated', str(ruleset), run_as_root=True)
+                                pg_num, pg_num, 'replicated', run_as_root=True)
+                    utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
+                                'crush_ruleset', ruleset, run_as_root=True)
                     res = True
                 else:
                     LOG.error("Failed while writing crushmap!")
