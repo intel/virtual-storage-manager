@@ -196,7 +196,7 @@ class CephDriver(object):
         for pinfo in pool_infos:
             pool_type = pinfo['type'] + "-" + pinfo['name']
             # We use "vsm-" key words to delete unused pools to openstack.
-            temp_str = "vsm-" + pinfo['name'] + "," + pool_type
+            temp_str = pinfo['name'] + "," + pool_type
             pools_str = pools_str + " " + temp_str
 
         LOG.info('pools_str = %s' % pools_str)
