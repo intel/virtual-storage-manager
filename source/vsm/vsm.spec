@@ -184,8 +184,8 @@ install -p -D -m 755 bin/vsm-backup %{buildroot}%{_bindir}/vsm-backup
 install -p -D -m 755 bin/vsm-restore %{buildroot}%{_bindir}/vsm-restore
 install -p -D -m 755 bin/cluster_manifest %{buildroot}%{_usr}/local/bin/cluster_manifest
 install -p -D -m 755 bin/server_manifest  %{buildroot}%{_usr}/local/bin/server_manifest
-install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_bindir}/local/bin/refresh-osd-status
-install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_bindir}/local/bin/refresh-cluster-status
+install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/local/bin/refresh-osd-status
+install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/local/bin/refresh-cluster-status
 install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/local/bin/getip
 
 
