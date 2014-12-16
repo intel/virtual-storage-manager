@@ -23,6 +23,7 @@ function gen_tar_file() {
     TEMP=`mktemp`; rm -rf $TEMP; mkdir -p $TEMP/prepools
     cp -rf /etc/vsm/prepools/* $TEMP/prepools/
     cp -rf /etc/ceph/ceph.conf $TEMP/prepools/lib/
+    sed -i "s,keyring = /etc/ceph/keyring.admin,,g" $TEMP/prepools/lib/ceph.conf 
     cd $TEMP/prepools
 
 cat <<"EOF" > localrc

@@ -51,6 +51,7 @@ function create_cinder() {
 
     mkdir -p $TOPDIR/files/cinder/
     cp -rf /etc/ceph/ceph.conf $TOPDIR/files/cinder/
+    sed -i "s,keyring = /etc/ceph/keyring.admin,,g" $TOPDIR/files/cinder/ceph.conf
     mv $file $TOPDIR/files/cinder/
 
 cat <<"EOF">>$TOPDIR/files/cinder/ceph.conf
