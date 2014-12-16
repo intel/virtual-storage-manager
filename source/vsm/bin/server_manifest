@@ -285,6 +285,7 @@ class ManifestChecker(object):
             print ip_list
             print self._lan_list
             if self.__in_lan(ip):
+                self.__is_address_ok(ip)
                 ip_in_lan_cnt = ip_in_lan_cnt + 1
 
         if ip_in_lan_cnt != len(self._lan_list):
@@ -302,7 +303,7 @@ class ManifestChecker(object):
             if cnt == 'n':
                 error(info_list)
 
-        self.__is_address_ok(ip)
+        #self.self.__is_address_ok(ip)
 
     def format_to_json(self):
         return json.dumps(self._info, sort_keys=True, indent=2)
