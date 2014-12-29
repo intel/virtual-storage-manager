@@ -177,6 +177,10 @@ class ManifestChecker(object):
             if line.startswith('#'):
                 continue
 
+            if find_it and line.find('[') != -1 and line.find(']') != -1:
+                print line
+                break
+
             if len(line) < 2:
                 print 'Small line, skiped'
                 continue
@@ -187,9 +191,6 @@ class ManifestChecker(object):
                 find_it = True
                 continue
 
-            if find_it and line.find('[') != -1 and line.find(']') != -1:
-                print line
-                break
 
             if find_it:
                 lines.append(line)
