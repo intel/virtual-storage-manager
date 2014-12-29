@@ -2,7 +2,7 @@
 
 Name:             vsm-deploy
 Version:          2014.12
-Release:          0.9.0%{?dist}
+Release:          0.9.1%{?dist}
 Summary:          VSM-Deploy
 
 Group:            Deploy/VSM
