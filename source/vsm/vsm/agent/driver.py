@@ -2330,36 +2330,44 @@ class CreateCrushMapDriver(object):
         for storage_group in sorted_storage_groups:
             storage_group_name = storage_group["name"]
             rule_id = storage_group["rule_id"]
-            if storage_group_name.find("value_") == -1:
-                string = ""
-                string = string + "\nrule " + storage_group_name + " {\n"
-                string = string + "    ruleset " + str(rule_id) + "\n"
-                string = string + sting_common
-                string = string + "    step take " + storage_group_name + "\n"
-                string = string + string_choose
-                self._write_to_crushmap(string)
-            else:
-                string = ""
-                string = string + "\nrule " + storage_group_name + " {\n"
-                string = string + "    ruleset " + str(rule_id) + "\n"
-                string = string + "    type replicated\n    min_size 0\n"
-                string = string + "    max_size 10\n"
-                string = string + "    step take " + storage_group_name + "\n"
+            string = ""
+            string = string + "\nrule " + storage_group_name + " {\n"
+            string = string + "    ruleset " + str(rule_id) + "\n"
+            string = string + sting_common
+            string = string + "    step take " + storage_group_name + "\n"
+            string = string + string_choose
+            self._write_to_crushmap(string)
 
-                if zone_tag:
-                    string = string + "    step chooseleaf firstn 1 type zone\n"
-                else:
-                    string = string + "    step chooseleaf firstn 1 type host\n"
-                string = string + "    step emit\n"
-                string = string + "    step take " + \
-                        storage_group_name.replace('value_', '') + "\n"
+            #if storage_group_name.find("value_") == -1:
+            #    string = ""
+            #    string = string + "\nrule " + storage_group_name + " {\n"
+            #    string = string + "    ruleset " + str(rule_id) + "\n"
+            #    string = string + sting_common
+            #    string = string + "    step take " + storage_group_name + "\n"
+            #    string = string + string_choose
+            #    self._write_to_crushmap(string)
+            #else:
+            #    string = ""
+            #    string = string + "\nrule " + storage_group_name + " {\n"
+            #    string = string + "    ruleset " + str(rule_id) + "\n"
+            #    string = string + "    type replicated\n    min_size 0\n"
+            #    string = string + "    max_size 10\n"
+            #    string = string + "    step take " + storage_group_name + "\n"
 
-                if zone_tag:
-                    string = string + "    step chooseleaf firstn -1 type zone\n"
-                else:
-                    string = string + "    step chooseleaf firstn -1 type host\n"
-                string = string + "    step emit\n}\n" 
-                self._write_to_crushmap(string)
+            #    if zone_tag:
+            #        string = string + "    step chooseleaf firstn 1 type zone\n"
+            #    else:
+            #        string = string + "    step chooseleaf firstn 1 type host\n"
+            #    string = string + "    step emit\n"
+            #    string = string + "    step take " + \
+            #            storage_group_name.replace('value_', '') + "\n"
+
+            #    if zone_tag:
+            #        string = string + "    step chooseleaf firstn -1 type zone\n"
+            #    else:
+            #        string = string + "    step chooseleaf firstn -1 type host\n"
+            #    string = string + "    step emit\n}\n" 
+            #    self._write_to_crushmap(string)
         return True
 
     def _gen_rule(self):
