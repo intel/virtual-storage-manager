@@ -1,8 +1,8 @@
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:             vsm-deploy
-Version:          2014.11
-Release:          0.8.0%{?dist}
+Version:          2014.12
+Release:          0.9.0%{?dist}
 Summary:          VSM-Deploy
 
 Group:            Deploy/VSM

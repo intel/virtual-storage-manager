@@ -53,8 +53,14 @@ class CephDriver(object):
         except:
             pass
 
+    def _get_new_ruleset(self):
+        args = ['ceph', 'osd', 'crush', 'rule', 'dump']
+        ruleset_list = self._run_cmd_to_json(args)
+        return len(ruleset_list)
+
     def create_storage_pool(self, context, body):
         pool_name = body["name"]
+        primary_storage_group = replica_storage_group = ""
         if body.get("ec_profile_id"):
             profile_ref = db.ec_profile_get(context, body['ec_profile_id'])
             pgp_num = pg_num = profile_ref['pg_num'] 
@@ -78,6 +84,64 @@ class CephDriver(object):
             res = utils.execute('ceph', 'osd', 'pool', 'create', pool_name, pg_num, \
                             pgp_num, 'erasure', profile_ref['name'], rule_name, \
                             run_as_root=True) 
+        elif body.get('replica_storage_group_id'):
+            try:
+                utils.execute('ceph', 'osd', 'getcrushmap', '-o', FLAGS.crushmap_bin,
+                                run_as_root=True)
+                utils.execute('crushtool', '-d', FLAGS.crushmap_bin, '-o', FLAGS.crushmap_src, 
+                                run_as_root=True)
+                ruleset = self._get_new_ruleset()
+                storage_group_list = db.storage_group_get_all(context)
+                storage_group_id = int(body['storage_group_id'])
+                replica_storage_group_id = int(body['replica_storage_group_id'])
+                pg_num = str(body['pg_num'])
+                for x in storage_group_list:
+                    if x['id'] == storage_group_id and \
+                        x['id'] == replica_storage_group_id:
+                        primary_storage_group = replica_storage_group = x['name']
+                    elif x['id'] == storage_group_id:
+                        primary_storage_group = x['name']
+                    elif x['id'] == replica_storage_group_id:
+                        replica_storage_group = x['name']
+                    else:
+                        continue
+                if not (primary_storage_group and replica_storage_group):        
+                    LOG.error("Can't find primary_storage_group_id or replica_storage_group_id")
+                    raise 
+                    return False
+
+                type = "host" 
+                #TODO min_size and max_size
+                rule_str = "rule " + pool_name + "_replica {"
+                rule_str += "    ruleset " + str(ruleset)
+                rule_str += "    type replicated" 
+                rule_str += "    min_size 0"
+                rule_str += "    max_size 10"
+                rule_str += "    step take " + primary_storage_group
+                rule_str += "    step chooseleaf firstn 1 type " + type
+                rule_str += "    step emit"
+                rule_str += "    step take " + replica_storage_group
+                rule_str += "    step chooseleaf firstn " + str(body['size'] - 1) + " type " + type
+                rule_str += "    step emit"
+                rule_str += "}"
+
+                utils.execute('chown', '-R', 'vsm:vsm', '/etc/vsm/',
+                        run_as_root=True) 
+                if utils.append_to_file(FLAGS.crushmap_src, rule_str):
+                    utils.execute('crushtool', '-c', FLAGS.crushmap_src, '-o', FLAGS.crushmap_bin, \
+                                    run_as_root=True) 
+                    utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
+                                    run_as_root=True)
+                    utils.execute('ceph', 'osd', 'pool', 'create', pool_name, \
+                                pg_num, pg_num, 'replicated', str(ruleset), run_as_root=True)
+                    res = True
+                else:
+                    LOG.error("Failed while writing crushmap!")
+                    return False 
+            except:
+                LOG.error("create replica storage pool error!")
+                raise
+                return False  
         else:
             rule = str(body['crush_ruleset'])
             size = str(body['size'])
@@ -89,9 +153,10 @@ class CephDriver(object):
             utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
                             'crush_ruleset', rule, run_as_root=True)
         #set quota
-        if body.get('quota'):
-            max_bytes = 1024 * 1024 * 1024 * body.get('quota')
-            utils.execute('ceph', 'osd', 'pool', 'set-quota', 'max_bytes', max_bytes)  
+        if body.get('enable_quota', False):
+            max_bytes = 1024 * 1024 * 1024 * int(body.get('quota', 0))
+            utils.execute('ceph', 'osd', 'pool', 'set-quota', 'max_bytes', max_bytes,\
+                            run_as_root=True)  
         #update db
         pool_list = self.get_pool_status()
         for pool in pool_list:
@@ -106,6 +171,7 @@ class CephDriver(object):
                     'crush_ruleset': pool.get('crush_ruleset'),
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
+                    'replica_storage_group': replica_storage_group if replica_storage_group else None, 
                     'quota': body['quota'] if body.get('quota') else 0 
                 }
                 values['created_by'] = body.get('created_by')
@@ -1544,6 +1610,11 @@ class CephDriver(object):
             json_data = json.loads(out)
         return json_data
 
+    def get_osds_total_num(self):
+        args = ['ceph', 'osd', 'ls']
+        osd_list = self._run_cmd_to_json(args)
+        return len(osd_list)
+ 
     def get_crushmap_nodes(self):
         args = ['ceph', 'osd', 'tree']
         node_dict = self._run_cmd_to_json(args)
@@ -1847,37 +1918,6 @@ class DbDriver(object):
     def init_host(self, host):
         pass
 
-    def update_pool_info_0(self, context):
-        LOG.info("DEBUG in update_pool_info() in DbDriver()")
-        res = db.pool_get_all(context)
-        pool_list = []
-        for x in res:
-            pool_list.append(int(x.pool_id))
-            LOG.info('x.id = %s' % x.pool_id)
-
-        #str0 = "0 data,1 metadata,2 rbd,3 testpool_after_periodic"
-        str0 = os.popen("ssh root@10.239.82.125 \'ceph osd lspools\' ").read()
-        str = str0[0:-2]
-        items = str.split(',')
-        LOG.info("DEBUG items %s pool_list %s" % (items, pool_list))
-        for i in items:
-            x = i.split()
-            values = {}
-            pool_id = int(x[0])
-            LOG.info('DEBUG x[0] %s' % pool_id)
-            if pool_id in pool_list:
-                pool_id = x[0]
-                values['name'] = x[1]
-                db.pool_update(context, pool_id, values)
-            else:
-                values['pool_id'] = pool_id
-                values['name'] = x[1]
-                values['recipe_id'] = pool_id
-                values['status'] = 'running'
-                db.pool_create(context, values)
-
-        return res
-   
     def update_recipe_info(self, context):
         LOG.info("DEBUG in update_recipe_info() in DbDriver()")
         res = db.recipe_get_all(context)

@@ -321,7 +321,7 @@ class CephConfigParser(manager.Manager):
         # In order to support lower version of vsm.
         # We set keyring path here.
         # keyring = /etc/ceph/keyring.admin
-        self._parser.set('global', 'keyring', '/etc/ceph/keyring.admin')
+        #self._parser.set('global', 'keyring', '/etc/ceph/keyring.admin')
         # Have to setup fsid.
         self._parser.set('global', 'fsid', str(uuid.uuid1()))
 
@@ -335,7 +335,7 @@ class CephConfigParser(manager.Manager):
         #mds data = /var/lib/ceph/mds/ceph-$id
         #keyring = /var/lib/ceph/mds/ceph-$id/keyring
         self._parser.set('mds', 'mds data', '/var/lib/ceph/mds/ceph-$id')
-        self._parser.set('mds', 'keyring', '/var/lib/ceph/mds/ceph-$id/keyring')
+        #self._parser.set('mds', 'keyring', '/var/lib/ceph/mds/ceph-$id/keyring')
         self._parser.set('mds', 'mds standby replay', keyring)
 
     def add_mon_header(self, clock_drift=200):
@@ -407,7 +407,7 @@ class CephConfigParser(manager.Manager):
         self._parser.set('osd', 'osd data', osd_data)
         # NOTE add keyring to support lower version of OSD.
         # keyring = /etc/ceph/keyring.$name
-        self._parser.set('osd', 'keyring', '/etc/ceph/keyring.$name')
+        #self._parser.set('osd', 'keyring', '/etc/ceph/keyring.$name')
         self._parser.set('osd', 'osd mkfs type', osd_type)
         mount_option = utils.get_fs_options(osd_type)[1]
         self._parser.set('osd', 'osd mount options %s' % osd_type, mount_option)

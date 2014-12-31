@@ -1612,3 +1612,14 @@ def get_fs_options(fs_type):
         return ['-f', 'noatime,nodiratime']
     if fs_type == 'xfs':
         return ['-f', 'rw,noatime']
+
+def append_to_file(file_path, msg):
+    try:
+        with open(file_path, 'a') as fd:
+            fd.write(msg)
+        return True
+    except IOError as e:
+        LOG.error(e)
+        return False
+
+    
