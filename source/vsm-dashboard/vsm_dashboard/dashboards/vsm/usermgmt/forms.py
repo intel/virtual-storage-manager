@@ -103,7 +103,7 @@ class CreateUserForm(BaseUserForm):
 
             LOG.error(api.keystone.user_get(request, ret.id))
             messages.success(request,
-                     _('Successfully created storage pool: %s')
+                     _('Successfully created user: %s')
                      % data['name'])
             return ret
         except:

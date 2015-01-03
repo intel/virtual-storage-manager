@@ -133,7 +133,9 @@ class CephDriver(object):
                     utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
                                     run_as_root=True)
                     utils.execute('ceph', 'osd', 'pool', 'create', pool_name, \
-                                pg_num, pg_num, 'replicated', str(ruleset), run_as_root=True)
+                                pg_num, pg_num, 'replicated', run_as_root=True)
+                    utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
+                                'crush_ruleset', ruleset, run_as_root=True)
                     res = True
                 else:
                     LOG.error("Failed while writing crushmap!")
@@ -155,7 +157,7 @@ class CephDriver(object):
         #set quota
         if body.get('enable_quota', False):
             max_bytes = 1024 * 1024 * 1024 * int(body.get('quota', 0))
-            utils.execute('ceph', 'osd', 'pool', 'set-quota', 'max_bytes', max_bytes,\
+            utils.execute('ceph', 'osd', 'pool', 'set-quota', pool_name, 'max_bytes', max_bytes,\
                             run_as_root=True)  
         #update db
         pool_list = self.get_pool_status()
@@ -172,7 +174,7 @@ class CephDriver(object):
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
                     'replica_storage_group': replica_storage_group if replica_storage_group else None, 
-                    'quota': body['quota'] if body.get('quota') else 0 
+                    'quota': body.get('quota')
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
@@ -194,7 +196,7 @@ class CephDriver(object):
         for pinfo in pool_infos:
             pool_type = pinfo['type'] + "-" + pinfo['name']
             # We use "vsm-" key words to delete unused pools to openstack.
-            temp_str = "vsm-" + pinfo['name'] + "," + pool_type
+            temp_str = pinfo['name'] + "," + pool_type
             pools_str = pools_str + " " + temp_str
 
         LOG.info('pools_str = %s' % pools_str)
@@ -1851,8 +1853,12 @@ class CephDriver(object):
         LOG.info("add cache tier start")
         LOG.info("storage pool %s cache pool %s " % (storage_pool_name, cache_pool_name))
 
-        utils.execute("ceph", "osd", "tier", "add", storage_pool_name, \
-                      cache_pool_name, run_as_root=True)
+        if body.get("force_nonempty"):
+            utils.execute("ceph", "osd", "tier", "add", storage_pool_name, \
+                      cache_pool_name, "--force-nonempty",  run_as_root=True)
+        else:
+            utils.execute("ceph", "osd", "tier", "add", storage_pool_name, \
+                          cache_pool_name, run_as_root=True)
         utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool_name, \
                       cache_mode, run_as_root=True)
         if cache_mode == "writeback":
@@ -2324,36 +2330,44 @@ class CreateCrushMapDriver(object):
         for storage_group in sorted_storage_groups:
             storage_group_name = storage_group["name"]
             rule_id = storage_group["rule_id"]
-            if storage_group_name.find("value_") == -1:
-                string = ""
-                string = string + "\nrule " + storage_group_name + " {\n"
-                string = string + "    ruleset " + str(rule_id) + "\n"
-                string = string + sting_common
-                string = string + "    step take " + storage_group_name + "\n"
-                string = string + string_choose
-                self._write_to_crushmap(string)
-            else:
-                string = ""
-                string = string + "\nrule " + storage_group_name + " {\n"
-                string = string + "    ruleset " + str(rule_id) + "\n"
-                string = string + "    type replicated\n    min_size 0\n"
-                string = string + "    max_size 10\n"
-                string = string + "    step take " + storage_group_name + "\n"
+            string = ""
+            string = string + "\nrule " + storage_group_name + " {\n"
+            string = string + "    ruleset " + str(rule_id) + "\n"
+            string = string + sting_common
+            string = string + "    step take " + storage_group_name + "\n"
+            string = string + string_choose
+            self._write_to_crushmap(string)
 
-                if zone_tag:
-                    string = string + "    step chooseleaf firstn 1 type zone\n"
-                else:
-                    string = string + "    step chooseleaf firstn 1 type host\n"
-                string = string + "    step emit\n"
-                string = string + "    step take " + \
-                        storage_group_name.replace('value_', '') + "\n"
+            #if storage_group_name.find("value_") == -1:
+            #    string = ""
+            #    string = string + "\nrule " + storage_group_name + " {\n"
+            #    string = string + "    ruleset " + str(rule_id) + "\n"
+            #    string = string + sting_common
+            #    string = string + "    step take " + storage_group_name + "\n"
+            #    string = string + string_choose
+            #    self._write_to_crushmap(string)
+            #else:
+            #    string = ""
+            #    string = string + "\nrule " + storage_group_name + " {\n"
+            #    string = string + "    ruleset " + str(rule_id) + "\n"
+            #    string = string + "    type replicated\n    min_size 0\n"
+            #    string = string + "    max_size 10\n"
+            #    string = string + "    step take " + storage_group_name + "\n"
 
-                if zone_tag:
-                    string = string + "    step chooseleaf firstn -1 type zone\n"
-                else:
-                    string = string + "    step chooseleaf firstn -1 type host\n"
-                string = string + "    step emit\n}\n" 
-                self._write_to_crushmap(string)
+            #    if zone_tag:
+            #        string = string + "    step chooseleaf firstn 1 type zone\n"
+            #    else:
+            #        string = string + "    step chooseleaf firstn 1 type host\n"
+            #    string = string + "    step emit\n"
+            #    string = string + "    step take " + \
+            #            storage_group_name.replace('value_', '') + "\n"
+
+            #    if zone_tag:
+            #        string = string + "    step chooseleaf firstn -1 type zone\n"
+            #    else:
+            #        string = string + "    step chooseleaf firstn -1 type host\n"
+            #    string = string + "    step emit\n}\n" 
+            #    self._write_to_crushmap(string)
         return True
 
     def _gen_rule(self):

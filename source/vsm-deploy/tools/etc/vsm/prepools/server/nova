@@ -20,6 +20,7 @@ function create_nova() {
     mkdir -p $TOPDIR/files/nova/
     cp -rf $TOPDIR/files/cinder/cinder.keyring $TOPDIR/files/nova/nova.keyring
     cp -rf /etc/ceph/ceph.conf $TOPDIR/files/nova/
+    sed -i "s,keyring = /etc/ceph/keyring.admin,,g" $TOPDIR/files/nova/ceph.conf
 
 cat <<"EOF">>$TOPDIR/files/nova/ceph.conf
 [%AUTH_CINDER_USER%]

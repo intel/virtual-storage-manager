@@ -1,0 +1,25 @@
+#!/bin/env python
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+from vsmclient.v1 import client as vsm_client
+
+# load vsm config
+CONF_FILE = "/etc/vsmdeploy/deployrc"
+conf_str = open(CONF_FILE, "r").read()
+CONF_DICT = dict([x.strip().split("=",1) for x in conf_str.split("\n") if "=" in x])
+
+vsmclient = None
+
+def get_vsmclient():
+    global vsmclient
+    if not vsmclient:
+        vsmclient = vsm_client.Client('vsm',
+                          CONF_DICT['KEYSTONE_VSM_SERVICE_PASSWORD'],
+                          'service',
+                          "http://%s:5000/v2.0" % CONF_DICT['VSM_HOST'],
+                         )
+    return vsmclient
+
+def osd_refresh():
+    return get_vsmclient().osds.refresh()
+
+osd_refresh()

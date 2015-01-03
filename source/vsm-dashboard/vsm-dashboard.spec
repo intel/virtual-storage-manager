@@ -2,7 +2,7 @@
 
 Name:           vsm-dashboard
 Version:	    2014.12
-Release:	    0.9.0%{?dist}
+Release:	    0.9.1%{?dist}
 Url:            http://intel.com/itflex
 License:        Apache 2.0
 Group:          Development/Languages/Python

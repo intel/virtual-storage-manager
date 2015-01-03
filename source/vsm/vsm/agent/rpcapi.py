@@ -349,15 +349,18 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 
     def start_monitor(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
-        return self.call(context, self.make_msg('start_monitor'), topic)
+        return self.call(context, self.make_msg('start_monitor'), topic,
+                        version='1.0', timeout=6000)
 
     def start_mds(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
-        return self.call(context, self.make_msg('start_mds'), topic)
+        return self.call(context, self.make_msg('start_mds'), topic,
+                        version='1.0', timeout=6000)
 
     def start_osd(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
-        return self.call(context, self.make_msg('start_osd'), topic)
+        return self.call(context, self.make_msg('start_osd'), topic,
+                        version='1.0', timeout=6000)
 
     def inital_ceph_osd_db_conf(self, context, server_list, host):
         topic = rpc.queue_get_for(context, self.topic, host)
@@ -378,7 +381,8 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 
     def stop_mds(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
-        return self.call(context, self.make_msg('stop_mds'), topic)
+        return self.call(context, self.make_msg('stop_mds'), topic,
+                        version='1.0', timeout=6000)
 
     def health_status(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
@@ -389,20 +393,23 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return self.call(context,
                          self.make_msg('write_monitor_keyring',
                                         monitor_keyring=monitor_keyring),
-                         topic)
+                         topic,
+                         version='1.0', timeout=6000)
 
     def track_monitors(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         res = self.call(context,
                         self.make_msg('track_monitors'),
-                        topic)
+                        topic,
+                        version='1.0', timeout=6000)
         return res
 
     def create_keyring(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         res = self.call(context,
                         self.make_msg('create_keyring'),
-                        topic)
+                        topic,
+                        version='1.0', timeout=6000)
         return res
 
     def prepare_osds(self, context, server_list, host):
@@ -410,7 +417,8 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         res = self.call(context,
                         self.make_msg('prepare_osds',
                         server_list=server_list),
-                        topic)
+                        topic,
+                        version='1.0', timeout=6000)
         return res
 
     def add_cache_tier(self, context, body, host):
@@ -418,11 +426,13 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         res = self.call(context,
                         self.make_msg('add_cache_tier',
                                       body=body),
-                        topic)
+                        topic,
+                        version='1.0', timeout=6000)
 
     def remove_cache_tier(self, context, body, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         res = self.call(context,
                         self.make_msg('remove_cache_tier',
                                       body=body),
-                        topic)
+                        topic,
+                        version='1.0', timeout=6000)

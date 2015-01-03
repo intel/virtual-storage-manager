@@ -217,6 +217,7 @@ class AddCacheTier(forms.SelfHandlingForm):
     cache_tier_pool = forms.ChoiceField(label=_('Cache Tier Pool'))
     storage_tier_pool = forms.ChoiceField(label=_('Storage Tier Pool'))
     cache_mode = forms.ChoiceField(label=_('Cache Mode'))
+    force_nonempty = forms.BooleanField(label="FORCE NONEMPTY",required=False,initial=False)
     hit_set_type = forms.ChoiceField(label=_('Hit Set Type'))
     hit_set_count = forms.CharField(label=_("Hit set count"))
     hit_set_period_s = forms.CharField(label=_("Hit set period(s)"))
@@ -261,6 +262,7 @@ class AddCacheTier(forms.SelfHandlingForm):
                     'storage_pool_id': data['storage_tier_pool'],
                     'cache_pool_id': data['cache_tier_pool'],
                     'cache_mode': data['cache_mode'],
+                    'force_nonempty': data['force_nonempty'],
                     'options': {
                         'hit_set_type': data['hit_set_type'],
                         'hit_set_count': data['hit_set_count'],
