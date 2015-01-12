@@ -994,9 +994,10 @@ class AgentManager(manager.Manager):
                     if 20 * osd_num_per_group > pool.get('pg_num'):
                         pg_num = self._compute_pg_num(context, osd_num_per_group, pool.get('size'))   
 
-                        osds_total_num = self.ceph_driver.get_osds_total_num()
-                        LOG.info("There are %s osds in ceph." % osds_total_num)
-                        step_max_pg_num = osds_total_num * 32
+                        #osds_total_num = self.ceph_driver.get_osds_total_num()
+                        #LOG.info("There are %s osds in ceph." % osds_total_num)
+                        LOG.info("storage group id %s has %s osds" % (storage_group['id'], osd_num_per_group))
+                        step_max_pg_num = osd_num_per_group * 32
                         max_pg_num = step_max_pg_num + pool.get('pg_num')
                         if pg_num > max_pg_num:
                             pgp_num = pg_num = max_pg_num 
