@@ -234,7 +234,7 @@ class AddCacheTier(forms.SelfHandlingForm):
         cache_tier_pool_list = [('',"Select a Cache Tier Pool")]
         storage_tier_pool_list = [('',"Select a Storage Tier Pool")]
         cache_mode_list = [('',"Select Cache Tier Mode"), ('writeback', "Writeback"), ('readonly', "Read-only")]
-        hit_set_type_list = [('',"Select Hit Set type"), ('bloom', "bloom")]
+        hit_set_type_list = [('bloom', "bloom")]
         pools = vsm_api.pool_status(request)
         cache_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if not pool.cache_tier_status]
         storage_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if not pool.cache_tier_status]
