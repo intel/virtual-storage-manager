@@ -997,6 +997,9 @@ class AgentManager(manager.Manager):
                         #osds_total_num = self.ceph_driver.get_osds_total_num()
                         #LOG.info("There are %s osds in ceph." % osds_total_num)
                         LOG.info("storage group id %s has %s osds" % (storage_group['id'], osd_num_per_group))
+                        if osd_num_per_group > 64:
+                            osd_num_per_group = 64
+                            LOG.info("osd_num_per_group > 64, use osd_num_per_group=64")
                         step_max_pg_num = osd_num_per_group * 32
                         max_pg_num = step_max_pg_num + pool.get('pg_num')
                         if pg_num > max_pg_num:
