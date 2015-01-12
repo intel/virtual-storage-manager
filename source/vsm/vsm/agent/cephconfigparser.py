@@ -307,7 +307,7 @@ class CephConfigParser(manager.Manager):
         self._parser.set('global',
                          'mon osd down out interval',
                          str(down_out_interval))
-        if pg_num:
+        #if pg_num:
             #self._parser.set('global', 'osd pool default pg num', str(pg_num))
             #self._parser.set('global', 'osd pool default pgp num', str(pg_num))
         if cfth:
