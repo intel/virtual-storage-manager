@@ -1,6 +1,6 @@
-Metadata-Version: 0.5
+Metadata-Version: 1.0
 Name: python-vsmclient
-Version: 0.5
+Version: 1.0
 Summary: Client library for OpenStack Vsm API.
 Home-page: https://github.com/openstack/python-vsmclient
 Author: OpenStack Contributors
