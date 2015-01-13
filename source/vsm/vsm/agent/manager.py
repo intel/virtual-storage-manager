@@ -1034,6 +1034,7 @@ class AgentManager(manager.Manager):
             if pool.get('pg_num') > pool.get('pg_placement_num'):
                 self.ceph_driver.set_pool_pgp_num(context, pool['pool_name'], pool['pg_num'])
                 values['pgp_num'] = pool['pg_num']
+                values['pg_num'] = pool['pg_num']
             if pool.get('erasure_code_profile'):
                 values['ec_status'] = pool['erasure_code_profile']
             if values:
