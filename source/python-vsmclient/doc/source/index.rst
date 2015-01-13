@@ -23,38 +23,3 @@ In order to use the CLI, you must provide your OpenStack username, password, ten
     export OS_AUTH_URL=http://auth.example.com:5000/v2.0
 
 Once you've configured your authentication parameters, you can run ``vsm help`` to see a complete listing of available commands.
-
-
-Release Notes
-=============
-1.0.4
------
-* Added suport for backup-service commands
-.. _1163546: http://bugs.launchpad.net/python-vsmclient/+bug/1163546
-.. _1161857: http://bugs.launchpad.net/python-vsmclient/+bug/1161857
-.. _1160898: http://bugs.launchpad.net/python-vsmclient/+bug/1160898
-.. _1161857: http://bugs.launchpad.net/python-vsmclient/+bug/1161857
-.. _1156994: http://bugs.launchpad.net/python-vsmclient/+bug/1156994
-
-1.0.3
------
-
-* Added support for V2 Vsm API
-* Corected upload-volume-to-image help messaging
-* Align handling of metadata args for all methods
-* Update OSLO version
-* Correct parsing of volume metadata
-* Enable force delete of volumes and snapshots in error state
-* Implement clone volume API call
-* Add list-extensions call to vsmclient
-* Add bootable column to list output
-* Add retries to vsmclient operations
-* Add Type/Extra-Specs support
-* Add volume and snapshot rename commands
-.. _1155655: http://bugs.launchpad.net/python-vsmclient/+bug/1155655
-.. _1130730: http://bugs.launchpad.net/python-vsmclient/+bug/1130730
-.. _1068521: http://bugs.launchpad.net/python-vsmclient/+bug/1068521
-.. _1052161: http://bugs.launchpad.net/python-vsmclient/+bug/1052161
-.. _1071003: http://bugs.launchpad.net/python-vsmclient/+bug/1071003
-.. _1065275: http://bugs.launchpad.net/python-vsmclient/+bug/1065275
-.. _1053432: http://bugs.launchpad.net/python-vsmclient/+bug/1053432

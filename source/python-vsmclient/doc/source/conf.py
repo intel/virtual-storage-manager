@@ -59,7 +59,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'python-vsmclient'
-copyright = u'Rackspace, based on work by Jacob Kaplan-Moss'
+copyright = u'Intel, based on work by python-cinderclient'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -194,7 +194,7 @@ htmlhelp_basename = 'python-vsmclientdoc'
 # .
 latex_documents = [
     ('index', 'python-vsmclient.tex', u'python-vsmclient Documentation',
-    u'Rackspace - based on work by Jacob Kaplan-Moss', 'manual'),
+    u'Intel - based on work by python-cinderclient', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
