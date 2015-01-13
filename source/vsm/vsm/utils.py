@@ -191,6 +191,7 @@ def execute(*cmd, **kwargs):
                     (stdout, stderr) = result
                     # only raise exception for ceph related commands
                     if cmd_str.lower().find('ceph') != -1 and \
+                       cmd_str.lower().find('pgrep') == -1 and \
                        cmd_str.find('--connect-timeout') == -1:
                         LOG.info('---------CMD-------------')
                         LOG.info('Running cmd = %s' % cmd_str)
