@@ -1555,7 +1555,7 @@ class CephDriver(object):
     def set_pool_pg_pgp_num(self, context, pool, pg_num, pgp_num):
         self.set_pool_pg_num(context, pool, pg_num)
         #need to wait for the last set pg_num
-        time.sleep(20)
+        time.sleep(120)
         self.set_pool_pgp_num(context, pool, pgp_num)
         
     def set_pool_pg_num(self, context, pool, pg_num):
