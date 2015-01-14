@@ -36,6 +36,7 @@ function create_glance() {
 
     mkdir -p $TOPDIR/files/glance/
     cp -rf /etc/ceph/ceph.conf $TOPDIR/files/glance/
+    sed -i "s,keyring = /etc/ceph/keyring.admin,,g" $TOPDIR/files/glance/ceph.conf
     mv $file $TOPDIR/files/glance/
 
 cat <<"EOF">>$TOPDIR/files/glance/ceph.conf
