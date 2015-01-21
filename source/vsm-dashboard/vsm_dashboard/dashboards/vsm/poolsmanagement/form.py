@@ -27,8 +27,12 @@ import logging
 
 from vsm_dashboard.api import vsm as vsm_api
 from vsm_dashboard.utils.validators import validate_pool_name
+from vsm_dashboard.utils.validators import StorageGroupValidator
 
 LOG = logging.getLogger(__name__)
+
+
+
 
 class CreatePool(forms.SelfHandlingForm):
 
@@ -41,8 +45,10 @@ class CreatePool(forms.SelfHandlingForm):
                             'invalid': _("The string may only contain"
                                          " ASCII characters and numbers.")},
                             validators=[validate_pool_name])
-    storage_group = forms.ChoiceField(label=_('Primary Storage Group'))
-    replicated_storage_group = forms.ChoiceField(label=_('Replicated Storage Group'), required=False)
+    storage_group = forms.ChoiceField(label=_('Primary Storage Group'), validators=[StorageGroupValidator()])
+    replicated_storage_group = forms.ChoiceField(label=_('Replicated Storage Group'), required=False,
+                                                 validators=[StorageGroupValidator(replicated=True)],
+                                                 error_messages={'invalid': "You should choose \"Default: same as Primary\", if you want to use same storage group"})
     replication_factor = forms.IntegerField(label=_("Replication Factor"),
                                         min_value=1,
                                         help_text=_('The replication'
