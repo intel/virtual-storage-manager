@@ -37,7 +37,7 @@ expect "Organizational Unit Name*:"
 send "storage\r"
 
 expect "Common Name*:"
-send "vsm\r"
+send "%HOSTNAME%\r"
 
 expect "Email Address*:"
 send "ceph@storage.com\r"

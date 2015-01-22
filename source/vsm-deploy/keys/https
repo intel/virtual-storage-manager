@@ -54,7 +54,8 @@ function _generate_keys() {
 
 function setup_https() {
     old_dir=`pwd`
-
+    host_name=`hostname` 
+    sed -i "s,%HOSTNAME%,$host_name,g" /usr/local/bin/keys/exp_csr
     _generate_keys
 
     cd $old_dir
