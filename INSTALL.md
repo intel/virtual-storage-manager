@@ -2,9 +2,9 @@
   Virtual Storage Manager for Ceph
 ==========================================================
 
-**Version:** 0.7
+**Version:** 1.0
 
-**Source:** 2014-10
+**Source:** 2015-01
 
 **Keywords:** Ceph, Virtual Storage Management
 
@@ -311,7 +311,7 @@ So we configure the network as below in VSM:
 
 **Note**You should set network appending on your netowrk environment or check network settings mentioned before.
 
-## Dependcies
+## Dependencies
 For every node, no matter controller node or storage node. Do steps below:
 
     - Firstly, assume you've build & install VSM RPM packages as mentioned before.
@@ -360,7 +360,7 @@ As an discovered incompatibility issue on python-django-horizon module, the modu
 
 ## Firewall and SELinux
 ### Solution 1
-1>  Disable SELinux in the file /etc/selinux/config
+1>  Disable SELinux in the file /etc/selinux/config, *a reboot is required after the change*.
 
     SELINUX=disabled
 
@@ -607,4 +607,21 @@ After the command is finished executing, to check if you have setup the controll
 
         cat /etc/vsmdeploy/deployrc |grep ADMIN_PASSWORD
 
-4.  Then you can switch to `Create Cluster` Panel, and push the create cluster button to create a ceph cluster. Good Luck!
+4.  Then you can switch to `Create Cluster` Panel, and push the create cluster button to create a ceph cluster. 
+
+#Frequently Asked Questions
+
+**	Q: Executing "agent-token" is hang.**
+	
+	A: Please check http proxy setting to make sure no http_proxy variable is set in enviornment.
+
+
+**	Q: Receive "An error occurred authenticating. Please try again later." on controller web ui after fresh installation.**
+
+	A: Firstly, please make sure right password is entered, the password can be get from /etc/vsmdeploy/deployrc in "ADMIN_PASSWORD" field. Also make 	sure firewall and SELinux settings are right. special reminder: a reboot 	is required after changing SELinux settings.
+
+
+**	Q: Receive keyring error on cluster creation.**
+	
+	A: The root cause is vsm controller is already updated token, but not applied the token into all agents.
+
