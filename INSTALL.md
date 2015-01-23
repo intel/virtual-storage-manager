@@ -1,4 +1,3 @@
-
   Virtual Storage Manager for Ceph
 ==========================================================
 
@@ -568,4 +567,3 @@ After the command is finished executing, and to check if you have setup the cont
 **  Q: Can't replace node if ceph cluster contains only 3 nodes.**
 
 	A: This is an expected safe guard, 3 node is minimal to meet availability requirements.
-
