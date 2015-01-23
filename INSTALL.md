@@ -2,9 +2,9 @@
   Virtual Storage Manager for Ceph
 ==========================================================
 
-**Version:** 0.8
+**Version:** 1.1
 
-**Source:** 2014-11
+**Source:** 2015-01
 
 **Keywords:** Ceph, Virtual Storage Management
 
@@ -12,23 +12,23 @@ Preparation
 ===================================
 Before you get ready to install VSM, you should prepare your environment. The sections here are very helpful for understanding the deployment concepts.
 
-**Note**For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes before it will create a Ceph cluster. 
+**Note**: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes before it will create a Ceph cluster. 
 
 #Roles
 There are two roles for the VSM cluster.
 ## Controller Node
-The controller node is used to run mysql, rabbitmq, web ui services for the VSM cluster.
+The controller node is used to run mariadb, rabbitmq, web ui services for the VSM cluster.
 ## Storage Node
 The storage or agent node is used to run the vsm-agent service which manages the Ceph and physical storage resources.
 
 #Network
-There are three kinds of networks defined in VSM.
+There are three kinds of networks defined in VSM, and the three networks are OK to be the same one. 
 ## Management Network
-Management Network is used to manage the whole VSM cluster. Every node in the VSM cluster should have this.
+Management Network is used to manage the VSM cluster, and interchange data between vsm controller and agents.
 ## Ceph Public Network
-Ceph Public Network is used by Ceph to manage Ceph client to server IO operations. 
+Ceph Public Network is used to serve IO operations between ceph nodes and clients.
 ## Ceph Cluster Network
-Ceph Cluster Network is used by Ceph to transfer data between OSDs for replication and rebalancing.
+Ceph Cluster Network is used to interchange data between ceph nodes like Monitors and OSDs for replication and rebalancing.
 
 ##Recommendations
 Controller node should contain at least:
@@ -44,7 +44,6 @@ Storage Node should contain:
 ###Sample 1
 **Controller node** contains the networks listed below:
 
-    - 172.169.32.0/21 # accessing internet.
     - 192.168.123.0/24
 
 **Storage node** contains networks below:
@@ -70,9 +69,7 @@ The configuration for VSM in the `cluster.manifest` file should be:
     [ceph_cluster_addr]
     192.168.125.0/24
 
-**Note** Here we do not use the public network for accessing the internet in our VSM cluster.
-
-**cluster.manifest** Do not worry about this file right now. It is discussed later, in the storage node setup. 
+**cluster.manifest**: Do not worry about this file right now, we will elaborate it later in storage node setup step. 
 
 ### Sample 2
 But how about when all the nodes just have two NICs. Such as a controller node and storage node having:
@@ -98,7 +95,7 @@ The configuration for VSM in `cluster.manifest` file should be:
     192.168.125.0/24
 
 ### Sammple 3
-It's quite common to have just one NIC for demo environments. Thenall nodes just have:
+It's quite common to have just one NIC in demo environment, then all nodes just have:
 
     - 192.168.124.0/24 
 
@@ -108,7 +105,7 @@ We may assign this network as below:
     - Ceph public network: 192.168.124.0/24
     - Ceph cluster network: 192.168.124.0/24
 
-So all of the networks just use the same network. The configurations in VSM `cluster.manifest` file would then be:
+So all of the networks use the same network, The configurations in `cluster.manifest` file would be:
 
     [management_addr]
     192.168.124.0/24
@@ -122,156 +119,28 @@ So all of the networks just use the same network. The configurations in VSM `clu
 #Operating System
 We have done our development and testing based on CentOS 6.5 Linux system. For successful installation of VSM, it's best to install system with **CentOS-6.5 Basic Server**.
 
-After install of a clean CentOS 6.5 Basic Server option system, do not run:
+After install of a clean CentOS 6.5 Basic Server operating system, do not run:
 
     yum update
 
 Otherwise you may get conflicts between yum packages when you install VSM.
 
+#Install Dependencies
+VSM depends on a few third party packages, resolving those dependencies is often a headache. To mitigate the trouble, we is maintaining another repository called [vsm-dependencies](https://github.com/01org/vsm-dependencies), which includes the rpm package list and corresponding binary packages. User can get those packages through command as following:
+
+	wget https://github.com/01org/vsm-dependencies/archive/<version>.zip
+
+where <version> is the vsm version like 1.1.
+
+After got the zip file, just unpack it and install included rpm packages as following:
+	
+	unzip <version>.zip
+	cd <version>/repo
+	yum localinstall -y *.rpm
+
+
 #Build RPMs
 After you download the source code from the VSM github, the first step is to build the VSM RPMs. If you already have VSM RPMs, you can jump to [VSM RPM Install](#RPM_Install).
-
-## Setup Yum Repo
-###Step 1
-Mount CentOS-6.5-DVD1.iso as your repo.
-
-    mount -o loop CentOS-6.5-x86_64-bin-DVD1.iso /media/CentOS/
-
-Then add a repo file `dvd.repo` in /etc/yum.repos.d/:
-
-    [dvdrepo]
-    name=CentOS-DVD
-    baseurl=file:///media/CentOS/
-    gpgcheck=0
-    enabled=1
-    proxy=_none_
-
-Then run:
-
-    yum makecache
-
-###Step 2
-Add a public repo, and make sure you can access internet. Add the public repo file `public.repo`:
-
-    [theforeman-plugin-source]
-    name=theforeman-plugins
-    baseurl=http://yum.theforeman.org/plugins/1.5/el6/source
-    gpgcheck=0
-    enabled=1
-
-    [theforman-plugins-x86_64]
-    name=theforman-plugins-x86_64
-    baseurl=http://yum.theforeman.org/plugins/1.5/el6/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [theforeman-release-source]
-    name=theforeman-release-source
-    baseurl=http://yum.theforeman.org/releases/1.5/el6/source
-    gpgcheck=0
-    enabled=1
-
-    [theforeman-release-x86_64]
-    name=theforeman-release-x86_64
-    baseurl=http://yum.theforeman.org/releases/1.5/el6/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-products-x86_64]
-    name=puppetlabs-products-x86_64
-    baseurl=http://yum.puppetlabs.com/el/6/products/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-dependencies]
-    name=puppetlabs-dependencies
-    baseurl=http://yum.puppetlabs.com/el/6/dependencies/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-devel]
-    name=puppetlabs-devel
-    baseurl=http://yum.puppetlabs.com/el/6/devel/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-products-srpms]
-    name=puppetlabs-products-srpms
-    baseurl=http://yum.puppetlabs.com/el/6/products/SRPMS
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-dependencies-srpms]
-    name=puppetlabs-dependencies-srpms
-    baseurl=http://yum.puppetlabs.com/el/6/dependencies/SRPMS
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-devel-srpms]
-    name=puppetlabs-devel-srpms
-    baseurl=http://yum.puppetlabs.com/el/6/devel/SRPMS
-    gpgcheck=0
-    enabled=1
-
-    [openstack-icehouse]
-    name=openstack-icehouse
-    baseurl=http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-    gpgcheck=0
-    enabled=1
-
-    [ceph]
-    name=ceph
-    baseurl=http://ceph.com/rpm/el6/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [ceph-extras]
-    name=ceph-extras
-    baseurl=http://ceph.com/packages/ceph-extras/rpm/centos6/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [epel]
-    name=epel
-    baseurl=http://mirror.steadfast.net/epel/6/x86_64/
-    gpgcheck=0
-    enabled=1
-
-    [rpmfind]
-    name=rpmfind
-    baseurl=http://rpmfind.net/linux/centos/6.5/os/x86_64/
-    gpgcheck=0
-    enabled=1
-
-    [nac-net]
-    name=nac-net
-    baseurl=http://centos.mirror.nac.net/6.5/os/x86_64/
-    gpgcheck=0
-    enabled=1
-
-    [cs.vt]
-    name=cs-vt
-    baseurl=http://mirror.cs.vt.edu/pub/CentOS/6.5/updates/x86_64/
-    gpgcheck=0
-    enabled=1
-
-    [download-fedoraproject]
-    name=download-fedoraporject
-    baseurl=http://download.fedoraproject.org/pub/epel/6/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [maridaDB]
-    name=maridaDB
-    baseurl=http://yum.mariadb.org/5.5.36/centos6-amd64/
-    gpgcheck=0
-    enabled=1
-
-**Note** There are no extra spaces at the beginning of each line in `public.repo` file. If they exist, delete these beginning extra spaces. Downloading packages from the internet sometimes may take awhile. You could for example set `keepcache=1` in /etc/yum.conf, and then you can find all of the downloaded RPM packages under the /var/cache/yum directory. Then you can use these packages to build an offline repo for VSM.
-
-Then rum:
-
-    yum makecache
 
 ##<a name="RPM_Install"></a> VSM RPM Build
 After you setup the repo, and make sure it works, you can build the RPMs from source code.
@@ -286,10 +155,7 @@ After building, all the rpms are located in $source_code_path/vsmrepo directory.
 You can use `yum localinstall` to install vsm packages by:
 
     cd vsmrepo
-    yum localinstall python-vsmclient-2014.11-0.8.0.el6.noarch.rpm \
-    		vsm-dashboard-2014.11-0.8.0.el6.noarch.rpm \
-   		 vsm-2014.11-0.8.0.el6.noarch.rpm \
-    		vsm-deploy-2014.11-0.8.0.el6.x86_64.rpm
+    yum localinstall -y *.rpm
 
 **Note**: vsm-dashboard will use the httpd service to setup the Web UI. Sometimes it conflicts with the OpenStack dashboard, so try to install the OpenStack dashboard and the VSM dashboard onto different nodes.
 
@@ -318,44 +184,6 @@ For every node, regardless of if it’s a controller node or a storage node, do 
     - After that, install the required services for VSM.
     
         preinstall
-
-There is an incompatibility issue with python-django-horizon module, whereby the module should be downgraded to the lower version 2013.1.1-1. 
-
-### For a brand new install:
-*   Remove the installed python-django-horizon package
-  *   # rpm –e python-django-horizon
-
-*   Download these rpm packages from [vsm-dependencies github repository](https://github.com/01org/vsm-dependencies/tree/master/repo ), the packages below are required to be downloaded from this web site:
-  *   Python-django-horizon, python-quantumclient, python-swiftclient, python-cinderclient, python-glanceclient, python-nova client
-
-*   Reinstall python-django-horizon package (in this order)
-  *   # rpm –ivh python-quantumclient-2.2.1-2.el6.noarch.rpm
-  *   # rpm -ivh python-swiftclient-1.4.0-1.el6.noarch.rpm
-  *   # rpm –ivh python-cinderclient-1.0.4-1.el6.noarch.rpm
-  *   # rpm –ivh python-glanceclient-0.9.0-2.el6.noarch.rpm
-  *   # rpm –ivh python-novaclient-2.13.0-1.el6.noarch.rpm
-  *   # rpm –ivh python-django-horizon-2013.1.1-1.el6.noarch.rpm
-
-
-### For existing broken install (where you previously installed and ran vsm-controller and it failed)
-*   Remove installed vsm-dashboard and python-django-horizon packages
-  *   # rpm –e vsm-dashboard
-  *   # rpm –e python-django-horizon
-
-*   Download these rpm packages from [vsm-dependencies github repository](https://github.com/01org/vsm-dependencies/tree/master/repo ), below packages are required to be downloaded from this web site:
-  *   Python-django-horizon, python-quantumclient, python-swiftclient, python-cinderclient, python-glanceclient, python-nova client
-
-*   Reinstall python-django-horizon package (in this order)
-  *   # rpm –ivh python-quantumclient-2.2.1-2.el6.noarch.rpm
-  *   # rpm -ivh python-swiftclient-1.4.0-1.el6.noarch.rpm
-  *   # rpm –ivh python-cinderclient-1.0.4-1.el6.noarch.rpm
-  *   # rpm –ivh python-glanceclient-0.9.0-2.el6.noarch.rpm
-  *   # rpm –ivh python-novaclient-2.13.0-1.el6.noarch.rpm
-  *   # rpm –ivh python-django-horizon-2013.1.1-1.el6.noarch.rpm
-*   Reinstall vsm-dashboard, this is exactly the same one from v0.8 release package
-  *   # rpm –ivh vsm-dashboard-2014.11-0.8.0.el6.noarch.rpm
-
-*   Reboot the vsm controller node
 
 
 ## Firewall and SELinux
