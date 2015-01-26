@@ -625,3 +625,16 @@ After the command is finished executing, to check if you have setup the controll
 	
 	A: The root cause is vsm controller is already updated token, but not applied the token into all agents.
 
+**  Q: Negative update time is showing on RBD list page.**
+	
+	A: Before create ceph cluster, please make sure all ceph nodes are time synchronized, it might be archieved through one NTP server.
+
+**  Q: vsm-agent process causes one disk is saturated with i/o load.**
+
+	A: An known case causes i/o saturation is, if multiple OSDs are defined on the same physical device, which is normally used in demo case.
+
+**  Q: Can't replace node if ceph cluster contains only 3 nodes.**
+
+	A: This is an expected safe guard, 3 node is minimal to meet availability requirements.
+
+
