@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/bin/bash
 
 # Copyright 2014 Intel Corporation, All Rights Reserved.
@@ -116,3 +117,123 @@ set +o xtrace
 # Jan 21 2015 Zhu Boxiang <boxiangx.zhu@intel.com> - 2015.1.21-1
 # Initial release
 #
+=======
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+set -e
+set -o xtrace
+
+TOPDIR=$(cd $(dirname "$0") && pwd)
+TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
+HOSTNAME=`hostname`
+
+rm -rf "/tmp/vsm-check"
+mkdir -p "/tmp/vsm-check"
+
+HOST_LIST=""
+if [ -f "/etc/vsmdeploy/deployrc" ]; then
+	password=`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'`
+	HOST_LIST=`mysql -uroot -p$password -Ns -e "use vsm; select host from init_nodes;"`
+#	echo $host_list > $TOPDIR/storage-node.lst
+fi
+
+#---------------------------------------------
+# Usage
+#---------------------------------------------
+
+function usage() {
+    cat << EOF
+Usage: vsm-check
+
+Simple check:
+    Only running in controller node: vsm-check -d /tmp/vsm-check --pkgs --manifests --net --services 
+    If only vsm-check command, then check all.
+
+Options:
+  --help | -h
+    Print usage information.
+  --directory | -d
+    The directory to save the vsm installed checking result(Default: /tmp/vsm-check).
+  --infos | -i
+    Get the os and ceph basic infos.
+  --nets | -n
+    Check the nets between the controller and the storage node.
+  --pkgs | -p
+    Check the required packages in controller or storage node.
+  --manifests | -m
+    Check the manifests in controller or storage node.
+  --services | -s
+    Check the required services.
+EOF
+    exit 0
+}
+
+for n in `ls $TOPDIR/tools/lib/check`; do
+    source $TOPDIR/tools/lib/check/$n
+done
+
+function check_all() {
+	get_infos
+	check_nets
+	check_pkgs
+	check_manifests
+	check_services
+}
+
+#---------------------------------------------
+# Read Parameters.
+#---------------------------------------------
+
+# RESULT_FILE="/tmp/vsm-check/check_vsm_result"
+RESULT_DIC="/tmp/vsm-check"
+CONT_RESULT_FILE_NAME="$HOSTNAME""_result"
+
+parameter_count=$#
+parameters=$*
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h) usage ;;
+    --help) usage ;;
+    -d|--directory)
+        shift;
+        if [ ! -d $1 ]; then
+        	mkdir -p $1
+        fi
+        RESULT_DIC=$1 ;;
+    -i| --infos) get_infos ;;
+    -n| --nets) check_nets ;;
+    -p| --pkgs) check_pkgs ;;
+    -m| --manifests) check_manifests ;;
+    -s| --services) check_services ;;
+    *) shift ;;
+  esac
+  shift
+done
+
+if [[ $parameter_count -eq 0 || ($parameter_count -eq 2 && $parameters =~ "-d" || $parameters =~ "--directory") ]]; then
+	check_all
+fi
+
+set +o xtrace
+
+# change_log
+# Jan 21 2015 Zhu Boxiang <boxiangx.zhu@intel.com> - 2015.1.21-1
+# Initial release
+#
+>>>>>>> adding the vsm-checker tools
