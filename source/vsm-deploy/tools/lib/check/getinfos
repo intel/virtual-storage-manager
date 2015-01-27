@@ -1,0 +1,149 @@
+
+function date_info() {
+	if [ -z $1 ]; then
+		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+		echo "[date]" >> $path
+		date >> $path
+	else
+		path="$RESULT_DIC"/"$1""_result"
+		echo "[date]" >> $path
+		ssh $1 2>/dev/null date >> $path
+	fi
+	echo -e "" >> $path
+}
+
+function ip_info() {
+	if [ -z $1 ]; then
+		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+		echo "[ip]" >> $path
+		LC_ALL=C ifconfig|grep "inet addr:"|grep -v "127.0.0.1"|cut -d: -f2|awk '{print $1}' >> $path
+	else
+		path="$RESULT_DIC"/"$1""_result"
+		echo "[ip]" >> $path
+		ssh $1 2>/dev/null LC_ALL=C ifconfig|grep "inet addr:"|grep -v "127.0.0.1"|cut -d: -f2|awk '{print $1}' >> $path
+	fi
+	echo -e "" >> $path
+}
+
+function os_info() {
+	if [ -z $1 ];then
+		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+		echo "[os]" >> $path
+		head -n 1 /etc/issue >> $path
+		uname -a >> $path
+	else
+		path="$RESULT_DIC"/"$1""_result"
+		echo "[os]" >> $path
+		ssh $1 2>/dev/null head -n 1 /etc/issue >> $path
+		ssh $1 2>/dev/null head -n 1 /etc/issue >> $path
+	fi
+	echo -e "" >> $path
+}
+
+function hostname_info() {
+	if [ -z $1 ]; then
+		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+		echo "[hostname]" >> $path
+		hostname >> $path
+	else
+		path="$RESULT_DIC"/"$1""_result"
+		echo "[hostname]" >> $path
+		ssh $1 2>/dev/null hostname >> $path
+	fi
+	echo -e "" >> $path
+}
+
+function mem_info() {
+	if [ -z $1 ]; then
+		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+		echo "[memory(MB)]" >> $path
+		mem_total=`free -m | grep Mem | awk '{print  $2}'`
+		mem_free=`free -m | grep Mem | awk '{print  $4}'`
+		mem_used=`free -m | grep Mem | awk '{print  $3}'`
+	else
+		path="$RESULT_DIC"/"$1""_result"
+		echo "[memory(MB)]" >> $path
+		mem_total=`ssh $1 2>/dev/null free -m | grep Mem | awk '{print  $2}'`
+		mem_free=`ssh $1 2>/dev/null free -m | grep Mem | awk '{print  $4}'`
+		mem_used=`ssh $1 2>/dev/null free -m | grep Mem | awk '{print  $3}'`
+	fi
+	echo -e "mem_total: $mem_total\nmem_free : $mem_free\nmem_used : $mem_used\n" >> $path
+}
+
+function load_info() {
+	if [ -z $1 ]; then
+		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+		echo "[load average]" >> $path
+		la_1=`uptime |awk '{print $10}'`
+		la_5=`uptime |awk '{print $11}'`
+		la_15=`uptime |awk '{print $12}'`
+	else
+		path="$RESULT_DIC"/"$1""_result"
+		echo "[load average]" >> $path
+		la_1=`ssh $1 2>/dev/null uptime |awk '{print $10}'`
+		la_5=`ssh $1 2>/dev/null uptime |awk '{print $11}'`
+		la_15=`ssh $1 2>/dev/null uptime |awk '{print $12}'`
+	fi
+	echo -e "01min_load_avg: `echo ${la_1:0:4}`\n05min_load_avg: `echo ${la_5:0:4}`\n15min_load_avg: `echo ${la_15:0:4}`\n" >> $path
+}
+
+function cpu_info() {
+	if [ -z $1 ]; then
+		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+		echo "[cpu]" >> $path
+		cpu_num=`cat /proc/cpuinfo |grep processor|wc -l`
+		model_name=`cat /proc/cpuinfo |grep "model name"|head -1`
+		cpu_model_name=`echo ${model_name#*": "}`
+		echo -e "numbers: $cpu_num\nmodel name: $cpu_model_name" >> $path
+#		awk '$1=="cpu"{Total=$2+$3+$4+$5+$6+$7;print "Used: " (Total-$5)*100/Total"%"}' </proc/stat >> $path
+	else
+		path="$RESULT_DIC"/"$1""_result"
+		echo "[cpu]" >> $path
+		cpu_num=`ssh $1 2>/dev/null cat /proc/cpuinfo |grep processor|wc -l`
+		model_name=`ssh $1 2>/dev/null cat /proc/cpuinfo |grep "model name"|head -1`
+		cpu_model_name=`echo ${model_name#*": "}`
+		echo -e "numbers: $cpu_num\nmodel name: $cpu_model_name" >> $path
+#		ssh $1 2>/dev/null "awk '$1==""cpu""{Total=$2+$3+$4+$5+$6+$7;print ""Used: "" (Total-$5)*100/Total""%""}' </proc/stat" >> $path
+	fi
+	echo -e "" >> $path
+}
+
+function disk_info() {
+	if [ -z $1 ]; then
+		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+		echo "[disk]" >> $path
+		df -h >> $path
+	else
+		path="$RESULT_DIC"/"$1""_result"
+		echo "[disk]" >> $path
+		ssh $1 2>/dev/null df -h >> $path
+	fi
+	echo -e "" >> $path
+}
+
+
+function _get_controller_infos() {
+	echo "====================     Get Infos Result    ====================" >> "$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+	date_info; ip_info; hostname_info; os_info
+	mem_info; cpu_info; load_info; disk_info
+	
+	echo -e "\n"
+}
+
+function _get_storage_node_infos() {
+	echo "====================     Get Infos Result    ====================" >> "$RESULT_DIC"/"$1""_result"
+	date_info $1; ip_info $1; hostname_info $1; os_info $1
+	mem_info $1; cpu_info $1; load_info $1; disk_info $1
+	
+	echo -e "\n"
+}
+
+function get_infos() {
+	_get_controller_infos
+	for host in $HOST_LIST
+	do
+		_get_storage_node_infos $host
+	done
+		
+}
+

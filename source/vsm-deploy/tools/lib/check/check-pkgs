@@ -1,0 +1,89 @@
+
+parse_rpm() #@ USAGE: parse_rpm name-version-release.arch.rpm
+{
+	rpm=$1
+	pkg=${rpm%%.rpm}
+	arch=${pkg##*.}
+	full_name=${pkg%.*}
+	release=${full_name##*-}
+	name_version=${full_name%-*}
+	version=${name_version##*-}
+	name=${name_version%-*}
+	echo "name=$name version=$version release=$release arch=$arch"
+}
+
+get_rpm_name() #@ USAGE get_rpm_name name-version-release.arch.rpm
+{
+	local name
+	rpm=$1
+	name1=${rpm%-*}
+	name=${name1%-*}
+	echo $name
+}
+
+
+function _check_pkgs() {
+	founds=0
+	missings=0
+	multiples=0
+	for rpm in `cat $TOPDIR/rpm.lst`; do
+#	parse_rpm $rpm
+		name=$(get_rpm_name $rpm)
+		
+		fullname=${rpm%.rpm}
+		rpms=""
+		if [ -n $2 ]; then
+			rpms=`rpm -qa|grep -i $name` || $rpms
+		else
+			rpms=`ssh $2 rpm -qa|grep -i $name` || $rpms
+		fi
+		if [ $fullname == "$rpms" ]; then
+			founds=$((founds+1))
+			echo "[found]:          $fullname" >> $1
+		elif [ "$rpms" == "" ]; then
+			missings=$((missings+1))
+			echo -e "[missing]:        $fullname" >> $1
+		else
+			# traverse the multiple lines to see if any exact match
+			found=0
+			for item in $rpms; do
+				if [ "$item" == "$fullname" ]; then
+					found=1
+					founds=$((founds+1))
+					echo "[found]:          $item" >> $1
+					break
+				fi
+			done
+			
+			if [ $found == 0 ]; then
+				multiples=$((multiples+1))
+				echo "[multiple]:      $fullname" >> $1
+				for item in $rpms; do
+					echo "-->:              $item" >> $1
+				done
+			fi
+		fi
+#	yum remove -y $name
+	done
+	
+	echo -e "found=$founds, missing=$missings, multiple=$multiples\n" >> $1
+}
+
+function check_pkgs() {
+	path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+	echo "====================     Check Packages Result    ====================" >> $path
+	_check_pkgs $path
+	
+	for host in $HOST_LIST
+	do
+		path="$RESULT_DIC"/"$host""_result"
+		echo "====================     Check Packages Result    ====================" >> $path
+		_check_pkgs $path $host
+	done
+}
+
+
+# change_log
+# Jan 21 2015 Zhu Boxiang <boxiangx.zhu@intel.com> - 2015.1.21-1
+# Initial release
+#
