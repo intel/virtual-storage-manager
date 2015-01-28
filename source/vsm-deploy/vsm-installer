@@ -44,7 +44,7 @@ source $TOPDIR/tools/lib/services
 source $TOPDIR/tools/lib/mysql
 source $TOPDIR/tools/lib/ntp
 
-for n in `ls $TOPDIR/tools/lib/ | grep -v services | grep -v manifest`; do
+for n in `ls $TOPDIR/tools/lib/ | grep -v services | grep -v manifest| grep -v check`; do
     source $TOPDIR/tools/lib/$n
 done
 cluster_manifest
