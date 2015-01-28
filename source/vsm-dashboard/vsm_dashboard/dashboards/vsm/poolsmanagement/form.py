@@ -230,7 +230,6 @@ class AddCacheTier(forms.SelfHandlingForm):
     target_max_mem_mb = forms.CharField(label=_("Target maximum memory(MB)"))
     target_dirty_ratio = forms.CharField(label=_("Target dirty ratio"))
     target_full_ratio = forms.CharField(label=_("Target full ratio"))
-    target_max_capacity_gb = forms.CharField(label=_("Target maximum capacity(GB)"))
     target_max_objects = forms.CharField(label=_("Target maximum objects"))
     target_min_flush_age_m = forms.CharField(label=_("Target minimum flush age(m)"))
     target_min_evict_age_m = forms.CharField(label=_("Target minimum evict age(m)"))
@@ -255,7 +254,6 @@ class AddCacheTier(forms.SelfHandlingForm):
         self.fields['target_max_mem_mb'].initial = setting_dict["ct_target_max_mem_mb"]
         self.fields['target_dirty_ratio'].initial = setting_dict["ct_target_dirty_ratio"]
         self.fields['target_full_ratio'].initial = setting_dict["ct_target_full_ratio"]
-        self.fields['target_max_capacity_gb'].initial = setting_dict["ct_target_max_capacity_gb"]
         self.fields['target_max_objects'].initial = setting_dict["ct_target_max_objects"]
         self.fields['target_min_flush_age_m'].initial = setting_dict["ct_target_min_flush_age_m"]
         self.fields['target_min_evict_age_m'].initial = setting_dict["ct_target_min_evict_age_m"]
@@ -276,7 +274,6 @@ class AddCacheTier(forms.SelfHandlingForm):
                         'target_max_mem_mb': data['target_max_mem_mb'],
                         'target_dirty_ratio': data['target_dirty_ratio'],
                         'target_full_ratio': data['target_full_ratio'],
-                        'target_max_capacity_gb': data['target_max_capacity_gb'],
                         'target_max_objects': data['target_max_objects'],
                         'target_min_flush_age_m': data['target_min_flush_age_m'],
                         'target_min_evict_age_m': data['target_min_evict_age_m']

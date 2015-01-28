@@ -1883,7 +1883,6 @@ class CephDriver(object):
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_bytes", int(options["target_max_mem_mb"]) * 1000000, run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_target_dirty_ratio", options["target_dirty_ratio"], run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_target_full_ratio", options["target_full_ratio"], run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_bytes", int(options["target_max_capacity_gb"]) * 1000000000, run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_objects", options["target_max_objects"], run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_min_flush_age", options["target_min_flush_age_m"], run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_min_evict_age", options["target_min_evict_age_m"], run_as_root=True)
