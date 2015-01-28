@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2014 Intel
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+"""
+Use socket to transfer msg.
+"""
+
+import json
+import urllib2
+import sys
+
+class GenAuthToken(object):
+    """Generate token from vsm-api WSGI service."""
+
+    def __init__(self, host='localhost', password='admin'):
+        """Initialized the url requestion and RUL."""
+        self._host = host
+        self._password = password
+        self._auth_url = "http://%s:5000/v2.0/tokens" % self._host
+        self._token = None
+        self._vsm_url = None
+
+    def get_token(self):
+        """Get auth info from keystone."""
+        auth_data = {"auth": {"tenantName": 'admin',
+                           "passwordCredentials":{ "username": 'admin',
+                           "password": self._password}}}
+
+        auth_request = urllib2.Request(self._auth_url)
+        auth_request.add_header("content-type", "application/json")
+        auth_request.add_header('Accept', 'application/json')
+        auth_request.add_header('User-Agent', 'python-mikeyp')
+        auth_request.add_data(json.dumps(auth_data))
+        auth_response = urllib2.urlopen(auth_request)
+        response_data = json.loads(auth_response.read())
+
+        self._token = response_data['access']['token']['id']
+
+        service_list = response_data['access']['serviceCatalog']
+        for s in service_list:
+            if s['type'] == 'vsm' and s['name'] == 'vsm':
+                self._vsm_url = s['endpoints'][0]['publicURL']
+                break
+
+        url_id = self._vsm_url.split('/')[-1]
+        return self._token + "-" + url_id
+
+if __name__ == '__main__':
+    # read AGENT_PASSWORD from /etc/vsmdeploy/deployrc
+    pwd = None
+    host = None
+    fd = open('/etc/vsmdeploy/deployrc').readlines()
+    for line in fd:
+        if line.find('ADMIN_PASSWORD') != -1:
+            temp = line.split('=')
+            pwd = temp[-1].strip()
+        if line.find('KEYSTONE_HOST') != -1:
+            temp = line.split('=')
+            host = temp[-1].strip()
+
+    # If not found, print Error info.
+    if (not pwd) or (not host):
+        msg = "No AGENT_PASSWORD/KEYSTONE_HOST" + \
+              " in /etc/vsmdeploy/deployrc [ FAILED ]"
+        print msg
+        sys.exit(1)
+
+    token = GenAuthToken(host, pwd)
+    res = token.get_token()
+    print res
