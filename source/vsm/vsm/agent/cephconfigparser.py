@@ -239,7 +239,7 @@ class CephConfigParser(manager.Manager):
         for sec in parser.sections():
             if sec.find('osd.') != -1:
                 osd_id = sec.split('.')[1]
-                mount_path = os.path.join(FLAGS.osd_data_path, osd_id)
+                mount_path = os.path.join(FLAGS.osd_data_path, "osd%s" % osd_id)
                 mount_disk = parser.get(sec, 'devs')
                 mount_host = parser.get(sec, 'host')
                 if FLAGS.host == mount_host:
