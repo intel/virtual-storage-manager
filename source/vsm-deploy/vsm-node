@@ -97,7 +97,7 @@ done
 source $TOPDIR/tools/lib/services
 source $TOPDIR/tools/lib/mysql
 
-for n in `ls $TOPDIR/tools/lib/ | grep -v services | grep -v manifest`; do
+for n in `ls $TOPDIR/tools/lib/ | grep -v services | grep -v manifest | grep -v check`; do
     source $TOPDIR/tools/lib/$n
 done
 
