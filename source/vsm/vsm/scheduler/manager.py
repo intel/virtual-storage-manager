@@ -679,16 +679,16 @@ class SchedulerManager(manager.Manager):
 
         server_list = body['servers']
         for ser in server_list:
-            ser_ref = db.init_node_get(context, ser['id'])
+            ser_ref = db.init_node_get(context, int(ser['id']))
             ser['host'] = ser_ref['host']
             ser['cluster_id'] = self._agent_rpcapi.cluster_id(context,
                                                               ser['host'])
             # It need to change the role defined in
             # server.manifest
-            #if ser['is_monitor'] == False:
-            #    if ser_ref['type'].find('monitor') != -1:
-            #        values = {'type': 'storage'}
-            #        db.init_node_update(context, ser_ref['id'], values)
+            if ser['is_monitor'] == False:
+                if ser_ref['type'].find('monitor') != -1 and ser_ref['status'] == 'available':
+                    values = {'type': 'storage'}
+                    db.init_node_update(context, ser_ref['id'], values)
             if ser['is_monitor'] == True:
                 if ser_ref['type'].find('monitor') != -1 and ser_ref['status'] == 'Active':
                     ser['is_monitor'] = False
