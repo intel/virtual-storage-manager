@@ -259,11 +259,21 @@ class CephDriver(object):
                 cfth = setting['value']
             elif setting['name'] == 'pg_count_factor':
                 pg_count_factor = int(setting['value'])
+            elif setting['name'] == 'heartbeat_interval':
+                heartbeat_interval = setting['value']
+            elif setting['name'] == 'osd_heartbeat_interval':
+                osd_heartbeat_interval = setting['value']
+            elif setting['name'] == 'osd_heartbeat_grace':
+                osd_heartbeat_grace = setting['value']
+            
 
         pg_num = osd_num * pg_count_factor / 2
         config.add_global(pg_num=pg_num, \
                           cnfth=cnfth, \
-                          cfth=cfth)
+                          cfth=cfth,
+                          heartbeat_interval=heartbeat_interval,
+                          osd_heartbeat_interval=osd_heartbeat_interval,
+                          osd_heartbeat_grace=osd_heartbeat_grace)
 
         is_first_mon = True
         is_first_osd = True

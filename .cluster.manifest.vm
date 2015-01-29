@@ -1,33 +1,35 @@
 [storage_class]
+#7200_rpm_sata
 10krpm_sas
-7200_rpm_sata
-ssd
+#ssd_test
 #ssd_cached_7200rpm_sata
 #ssd_cached_10krpm_sas
+#7200RPM_SATA_OBJECT
+#7200RPM_SATA_BLOCK
 
 [storage_group]
 #format: [storage group name]  [user friendly storage group name] [storage class]
-performance       Performance_Disk       10krpm_sas
-capacity          Economy_Disk           7200_rpm_sata
-high_performance  High_Performance       ssd
+performance       High_Performance_Disk  10krpm_sas
+#high_performance  High_Performance_SSD   ssd
+#capacity          Economy_Disk           7200_rpm_sata
 #value_performance High_Performance_Disk_with_ssd_cached_Acceleration ssd_cached_10krpm_sas
 #value_capacity    Capacity_Disk_with_ssd_cached_Acceleration ssd_cached_7200rpm_sata
 
 
 [cluster]
-cd10000
+cluster_a
 
 [file_system]
 xfs
 
 [management_addr]
-192.168.20.0/24
+192.168.123.0/24
 
 [ceph_public_addr]
-field_public_addr
+192.168.124.0/24
 
 [ceph_cluster_addr]
-192.168.40.0/24
+192.168.125.0/24
 
 [settings]
 storage_group_near_full_threshold  65
@@ -35,9 +37,9 @@ storage_group_full_threshold  85
 ceph_near_full_threshold  75 
 ceph_full_threshold  90 
 pg_count_factor 100
-heartbeat_interval 5
-osd_heartbeat_interval 6
-osd_heartbeat_grace 20
+heartbeat_interval 10
+osd_heartbeat_interval 12
+osd_heartbeat_grace 40
 
 [ec_profiles]
 #format: [profile-name] [path-to-plugin] [plugin-name] [pg_num value] [json format key/value]
@@ -51,6 +53,7 @@ ct_hit_set_period_s 3600
 ct_target_max_mem_mb 1000000
 ct_target_dirty_ratio 0.4
 ct_target_full_ratio 0.8
+ct_target_max_capacity_gb 1000
 ct_target_max_objects 1000000
 ct_target_min_flush_age_m 10
 ct_target_min_evict_age_m 20
