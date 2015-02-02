@@ -453,3 +453,32 @@ After the command is finished executing, and to check if you have setup the cont
         cat /etc/vsmdeploy/deployrc |grep ADMIN_PASSWORD
 
 4.  Then you can switch to the `Create Cluster` Panel, and push the create cluster button to create a ceph cluster. Good Luck!
+#Frequently Asked Questions
+
+**	Q: Executing "agent-token" is hang.**
+	
+	A: Please check http proxy setting to make sure no http_proxy variable is set in enviornment.
+
+
+**	Q: Receive "An error occurred authenticating. Please try again later." on controller web ui after fresh installation.**
+
+	A: Firstly, please make sure right password is entered, the password can be get from /etc/vsmdeploy/deployrc in "ADMIN_PASSWORD" field. Also make 	sure firewall and SELinux settings are right. special reminder: a reboot 	is required after changing SELinux settings.
+
+
+**	Q: Receive keyring error on cluster creation.**
+	
+	A: The root cause is vsm controller is already updated token, but not applied the token into all agents.
+
+**  Q: Negative update time is showing on RBD list page.**
+	
+	A: Before create ceph cluster, please make sure all ceph nodes are time synchronized, it might be archieved through one NTP server.
+
+**  Q: vsm-agent process causes one disk is saturated with i/o load.**
+
+	A: An known case causes i/o saturation is, if multiple OSDs are defined on the same physical device, which is normally used in demo case.
+
+**  Q: Can't replace node if ceph cluster contains only 3 nodes.**
+
+	A: This is an expected safe guard, 3 node is minimal to meet availability requirements.
+
+

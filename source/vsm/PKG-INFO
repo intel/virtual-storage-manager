@@ -1,6 +1,6 @@
-Metadata-Version: 0.5
+Metadata-Version: 1.0
 Name: vsm
-Version: 2014.4
+Version: 1.0
 Summary: block storage service
 Home-page: http://www.openstack.org/
 Author: OpenStack
