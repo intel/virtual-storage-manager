@@ -21,10 +21,10 @@ cd10000
 xfs
 
 [osd_heartbeat_interval]
-12
+10
 
 [osd_heartbeat_grace]
-13
+10
 
 [management_addr]
 192.168.20.0/24
