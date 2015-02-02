@@ -20,20 +20,14 @@ cluster_a
 [file_system]
 xfs
 
-[osd_heartbeat_interval]
-12
-
-[osd_heartbeat_grace]
-13
-
 [management_addr]
-192.168.123.0/24
+192.168.20.0/24
 
 [ceph_public_addr]
-192.168.124.0/24
+field_public_addr
 
 [ceph_cluster_addr]
-192.168.125.0/24
+192.168.40.0/24
 
 [settings]
 storage_group_near_full_threshold  65
