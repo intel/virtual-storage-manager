@@ -53,10 +53,8 @@ class SpotInfoListParser(object):
         self._lines = []
         for single_line in lines:
             single_line = single_line.replace('\n',' ')
-            #print "@@@@@@@@@@@",single_line
             if not single_line.startswith("#") and len(single_line):
                 self._lines.append(single_line)
-        #print "self._lines========",self._lines
 
     def _check_single_key_word_exists(self, name):
 
@@ -81,14 +79,14 @@ class SpotInfoListParser(object):
 
         rpos = self._check_single_key_word_exists(ktype)
         value_list=[]
-        #print 'rpos=====',rpos,'&&&&&',len(self._lines)
         for pos in range(rpos + 1, len(self._lines)):
             single_line = self._lines[pos]
-            #print '********',single_line
             if single_line.find("[")!=-1:
-                #print 'break------',single_line
                 break
-            value_list.append(single_line)
+            if single_line.startswith("@"):
+                value_list.append(single_line.split("=",1))
+            elif single_line.startswith("/"):
+                value_list.append(str(single_line))
         return value_list
 
     def format_to_json(self):
@@ -116,7 +114,7 @@ if __name__ == '__main__':
     temp_dir='/opt/vsm_reportor_%s'%(datetime.datetime.now().strftime("%Y%m%d%H%S"))
     print "All the infomation will be in %s"%temp_dir
     (status, output) = commands.getstatusoutput('mkdir -p %s '%temp_dir)
-    (status, output) = commands.getstatusoutput('get_storage')
+    (status, output) = commands.getstatusoutput('./get_storage')
     lines = open("/tmp/ceph_nodes").readlines()
     storage_nodes=[]
     mon_nodes=[]
@@ -130,63 +128,82 @@ if __name__ == '__main__':
     ceph_nodes=list(set(ceph_nodes))
     #['vsm_check_result','vsm_controller_node','storage_nodes','os_info_all_nodes','ceph_cluster_monitor','database']
 
+    controller_dir='%s/vsm_controller'%(temp_dir)
+    (status, output) = commands.getstatusoutput('mkdir -p %s '%(controller_dir))
+    storage_dir='%s/storage_hosts'%(temp_dir)
+    db_dir='%s/database'%(temp_dir)
+    #print "value====",value
+    (status, output) = commands.getstatusoutput('mkdir -p %s '%(db_dir))
+    for node in storage_nodes:
+        cmd_str='mkdir -p %s/%s '%(storage_dir,node)
+        (status, output) = commands.getstatusoutput(cmd_str)
+        if status!=0:
+            print "error cmd ---",cmd_str
+            print "error info --",output
+    cluster_monitor_dir='%s/ceph_cluster_monitor'%(temp_dir)
+    (status, output) = commands.getstatusoutput('mkdir -p %s '%(cluster_monitor_dir))
+    cmd_str="mkdir -p %s/os"%controller_dir
+    (status, output) = commands.getstatusoutput(cmd_str)
+    for node in ceph_nodes:
+        cmd_str="mkdir -p %s/%s/os"%(storage_dir,node)
+        (status, output) = commands.getstatusoutput(cmd_str)
+    vsmcheck_dir='%s/vsm_check_result'%(temp_dir)
+    (status, output) = commands.getstatusoutput('mkdir -p %s '%(vsmcheck_dir))
+
     if cfg_dict.has_key("vsm_controller_node"):
         print "---------------vsm_controller_node-----------------"
         for value in cfg_dict["vsm_controller_node"]:
-            controller_dir='%s/vsm_controller'%(temp_dir)
-            (status, output) = commands.getstatusoutput('mkdir -p %s '%(controller_dir))
-            if value.startswith("/"):
+            if type(value)==str:
                 cmd_str='cp %s  %s'%(value,controller_dir)
-                (status, output) = commands.getstatusoutput(cmd_str)
-                if status!=0:
-                    print "error cmd ---",cmd_str
-                    print "error info --",output
-            else:pass
+            elif type(value)==list:
+                cmd_str='%s > %s/%s'%(value[1],controller_dir,value[0][1:])
+            (status, output) = commands.getstatusoutput(cmd_str)
+            if status!=0:
+                print "error cmd ---",cmd_str
+                print "error info --",output
         print "---------------finished"
 
     if cfg_dict.has_key("storage_nodes"):
         print "---------------storage_nodes-----------------"
         for value in cfg_dict["storage_nodes"]:
-            storage_dir='%s/storage_hosts'%(temp_dir)
-            for node in storage_nodes:
-                cmd_str='mkdir -p %s/%s '%(storage_dir,node)
-                (status, output) = commands.getstatusoutput(cmd_str)
-                if status!=0:
-                    print "error cmd ---",cmd_str
-                    print "error info --",output
-            if value.startswith("/"):
+            if type(value)==str:
                 for node in storage_nodes:
                     cmd_str='scp %s:%s  %s/%s/'%(node,value,storage_dir,node)
                     (status, output) = commands.getstatusoutput(cmd_str)
                     if status!=0:
                         print "error cmd ---",cmd_str
                         print "error info --",output
-            else:pass
+            elif type(value)==list:
+                for node in storage_nodes:
+                    cmd_str="""ssh %s " %s >/tmp/%s " """%(node,value[1],value[0][1:])
+                    (status, output) = commands.getstatusoutput(cmd_str)
+                    cmd_str="""scp  %s:/tmp/%s %s/ """%(node,value[0][1:],cluster_monitor_dir)
+                    (status, output) = commands.getstatusoutput(cmd_str)
+                    if status!=0:
+                        print "error cmd ---",cmd_str
+                        print "error info --",output
         print "---------------finished"
 
     if cfg_dict.has_key("ceph_cluster_monitor"):
         print "---------------ceph_cluster_monitor-----------------"
         for value in cfg_dict["ceph_cluster_monitor"]:
-            cluster_monitor_dir='%s/ceph_cluster_monitor'%(temp_dir)
-            (status, output) = commands.getstatusoutput('mkdir -p %s '%(cluster_monitor_dir))
-            if not value.startswith("/"):
-                valuelist=value.split(";")
-                if len(valuelist)!=2:continue
-                if valuelist[0].find("crushmap")!=-1:
-                    cmd_str="""ssh %s "ceph osd getcrushmap -o /tmp/%s " """%(mon_nodes[0],valuelist[1])
+            if type(value)==list:
+                if len(value)!=2:continue
+                if value[0].find("crushmap")!=-1:
+                    cmd_str="""ssh %s "ceph osd getcrushmap -o /tmp/%s " """%(mon_nodes[0],value[0][1:])
                 else:
-                    cmd_str="""ssh %s " %s >/tmp/%s " """%(mon_nodes[0],valuelist[0],valuelist[1])
+                    cmd_str="""ssh %s " %s >/tmp/%s " """%(mon_nodes[0],value[1],value[0][1:])
                 (status, output) = commands.getstatusoutput(cmd_str)
                 if status!=0:
                      print "error cmd ---",cmd_str
                      print "error info --",output
-                time.sleep(10)
-                cmd_str="""scp  %s:/tmp/%s %s/ """%(mon_nodes[0],valuelist[1],cluster_monitor_dir)
+                time.sleep(5)
+                cmd_str="""scp  %s:/tmp/%s %s/ """%(mon_nodes[0],value[0][1:],cluster_monitor_dir)
                 (status, output) = commands.getstatusoutput(cmd_str)
                 if status!=0: 
                     print "error cmd ---",cmd_str
                     print "error info --",output
-            else:
+            elif type(value)==str:
                 cmd_str="""scp  %s:%s %s/ """%(mon_nodes[0],value,cluster_monitor_dir)    
                 (status, output) = commands.getstatusoutput(cmd_str)
                 if status!=0:
@@ -197,16 +214,13 @@ if __name__ == '__main__':
     if cfg_dict.has_key("database"):
         print "---------------database-----------------"
         for value in cfg_dict["database"]:
-            db_dir='%s/database'%(temp_dir)
-            #print "value====",value
-            (status, output) = commands.getstatusoutput('mkdir -p %s '%(db_dir))
-            if value.find("vsm-backup.sql")>=0:
-                cmd_str="""mysqldump -uroot -p`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'` --opt --events --all-databases > %s/vsm-backup.sql"""%db_dir
+            if type(value)==list and  value[1].find("vsm-backup.sql")>=0:
+                cmd_str="""mysqldump -uroot -p`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'` --opt --events --all-databases > %s/%s"""%(db_dir,value[0][1:])
                 (status, output) = commands.getstatusoutput(cmd_str)
                 if status!=0:
                      print "error cmd ---",cmd_str
                      print "error info --",output
-            elif value.startswith("/"):
+            elif type(value)==str:
                 cmd_str= "cp %s %s"%(value,db_dir)
                 (status, output) = commands.getstatusoutput(cmd_str)
                 if status!=0:
@@ -216,57 +230,52 @@ if __name__ == '__main__':
 
     if cfg_dict.has_key("vsm_check_result"):
         print "---------------vsm_check_result-----------------"
-        vsmcheck_dir='%s/vsm_check_result'%(temp_dir)
-        (status, output) = commands.getstatusoutput('mkdir -p %s '%(vsmcheck_dir))
         for value in cfg_dict["vsm_check_result"]:
-            if  value.startswith("vsm-check"):
-                (status, output) = commands.getstatusoutput("""%s -d %s/ """%(value,vsmcheck_dir))
-                for i in range(20):
-                    check_status= [os.path.exists("%s/%s_result"%(vsmcheck_dir,node)) for node in ceph_nodes]
-                    for node_status in check_status:
-                        if not node_status:
-                            print "wait---",20-i
-                            time.sleep(10)
-                            continue
-                        break
+            if   type(value)==list and value[1].startswith("vsm-check"):
+                cmd_str="""%s -d %s/ """%(value[1],vsmcheck_dir)
+                (status, output) = commands.getstatusoutput(cmd_str)
+                if status!=0:
+                    print "error cmd ---",cmd_str
+                    print "error info --",output
                     break
+                for i in range(20):
+                    time.sleep(10)
+                    check_status= [os.path.exists("%s/%s_result"%(vsmcheck_dir,node)) for node in ceph_nodes]
+                    if False in check_status:
+                        print "wait---",20-i
+                    else:
+                        break
             else:pass
 
         for node in ceph_nodes:
-            cmd_str="mv %s/%s_result %s/%s/vsm-check"%(vsmcheck_dir,node,storage_dir,node)
+            cmd_str="mv %s/%s_result %s/%s/os/vsm-check"%(vsmcheck_dir,node,storage_dir,node)
             (status, output) = commands.getstatusoutput(cmd_str)
-        cmd_str="mv %s/*_result %s/vsm-check"%(vsmcheck_dir,controller_dir)
+        cmd_str="mv %s/*_result %s/os/vsm-check"%(vsmcheck_dir,controller_dir)
         (status, output) = commands.getstatusoutput(cmd_str)
         print "---------------finished"
 
     if cfg_dict.has_key("os_info_all_nodes"):
         print "----------------os_info_all_nodes----------------"
         for value in cfg_dict["os_info_all_nodes"]:
-            cmd_str="mkdir -p %s/os"%controller_dir
-            (status, output) = commands.getstatusoutput(cmd_str)
-            for node in ceph_nodes:
-                cmd_str="mkdir -p %s/%s/os"%(storage_dir,node)
-                (status, output) = commands.getstatusoutput(cmd_str)
-            if not value.startswith("/"):
-                valuelist=value.split(";")
-                if len(valuelist)!=2:continue
+            if type(value)==list:
+                if len(value)!=2:continue
                 for node in ceph_nodes:
-                    cmd_str="""ssh %s " %s >/tmp/%s " """%(node,valuelist[0],valuelist[1])
+                    cmd_str="""ssh %s " %s >/tmp/%s " """%(node,value[1],value[0][1:])
                     (status, output) = commands.getstatusoutput(cmd_str)
                     if status!=0: 
                         print "error cmd ---",cmd_str
                         print "error info --",output
-                    cmd_str="""scp  %s:/tmp/%s %s/%s/os/ """%(node,valuelist[1],storage_dir,node)
+                    cmd_str="""scp  %s:/tmp/%s %s/%s/os/ """%(node,value[0][1:],storage_dir,node)
                     (status, output) = commands.getstatusoutput(cmd_str)
                     if status!=0: 
                         print "error cmd ---",cmd_str
                         print "error info --",output
-                cmd_str=""" %s >%s/os/%s """%(valuelist[0],controller_dir,valuelist[1])
+                cmd_str=""" %s >%s/os/%s """%(value[1],controller_dir,value[0][1:])
                 (status, output) = commands.getstatusoutput(cmd_str)
                 if status!=0: 
                     print "error cmd ---",cmd_str
                     print "error info --",output
-            else:
+            elif type(value)==str:
                 for node in ceph_nodes:
                     cmd_str="""scp  %s:%s %s/%s/os/ """%(node,value,storage_dir,node)
                     (status, output) = commands.getstatusoutput(cmd_str)
@@ -277,3 +286,4 @@ if __name__ == '__main__':
                     print "error info --",output
         print "---------------finished"
         print "Please send this information to us.Thanks!"
+

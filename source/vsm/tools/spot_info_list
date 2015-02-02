@@ -8,7 +8,7 @@
 /var/log/rabbitmq/*.log
 [database]
 /var/log/mysql/*.log
-vsm-backup.sql
+@dbbakup.sql=vsm-backup.sql
 #mysqldump -uroot -p`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'` --opt --events --all-databases
 [storage_nodes]
 /var/log/vsm/*.log
@@ -16,30 +16,29 @@ vsm-backup.sql
 /var/log/ceph/*.log 
 /etc/manifest/server.manifest
 [os_info_all_nodes]
-head -n 1 /etc/issue;issue
-uname -a;uname
-rpm -qa |grep vsm;vsm_version
-rpm -qa;rpm_list
+@issue=head -n 1 /etc/issue
+@uname=uname -a
+@vsm_version=rpm -qa |grep vsm
+@rpm_list=rpm -qa
 /etc/hosts
-hostname -I;ipaddress
-ifconfig;ifconfiginfo
-hostname;host_name
-echo http_proxy=$http_proxy;proxy1
-echo https_proxy;proxy2
-echo ftp_proxy;proxy3
-iptables -L;iptableinfo
+@ipaddress=hostname -I
+@ifconfiginfo=ifconfig
+@host_name=hostname
+@http_proxy=echo http_proxy=$http_proxy
+@https_proxy=echo https_proxy
+@ftp_proxy=echo ftp_proxy
+@iptableinfo=iptables -L
 /etc/selinux/config
-chkconfig --list;chkconfig_list
-free -m;freeinfo
-df -h;dfinfo
+@chkconfig_list=chkconfig --list
+@freeinfo=free -m
+@dfinfo=df -h
 /proc/cpuinfo
-
 [ceph_cluster_monitor]
 /etc/ceph/ceph.conf
-ceph osd getcrushmap -o;crushmap 
-ceph osd dump;osdmap
-ceph mon dump;monmap
-ceph mds dump;mdsmap
-
+@crushmap=ceph osd getcrushmap -o
+@osdmap=ceph osd dump
+@monmap=ceph mon dump
+@mdsmap=ceph mds dump
 [vsm_check_result]
-vsm-check
+@os=vsm-check
+
