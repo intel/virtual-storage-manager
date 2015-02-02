@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2014 Intel
@@ -30,7 +29,7 @@ class SpotInfoListParser(object):
     """To parse spot report info config file
     """
 
-    def __init__(self,fpath='/usr/local/bin/spot_info_list'):
+    def __init__(self,fpath='spot_info_list'):
 
         """Set the file path, and which file to parser."""
 
