@@ -885,8 +885,8 @@ class AgentManager(manager.Manager):
             values = {}
             values['osd_name'] = osd_name
             values['state'] = osd_status
-            self._conductor_rpcapi.\
-                osd_state_update(context, values)
+            self._conductor_rpcapi.osd_state_update_or_create(context, values, create=False)
+                #osd_state_update(context, values)
 
     #@require_active_host
     @periodic_task(run_immediately=True, service_topic=FLAGS.agent_topic,
