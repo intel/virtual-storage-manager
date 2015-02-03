@@ -942,6 +942,18 @@ class SchedulerManager(manager.Manager):
         utils.start_threads(thread_list)
 
     @utils.single_lock
+    def intergrate_cluster(self, context, server_list):
+        """ intergrate an exsiting cluster
+        :param context:
+        :param server_list:
+        :return:
+        """
+        LOG.info('intergrate cluster by refreshing cluster status')
+        active_server = self._set_active_server(context,server_list)
+        #TODO db.update_mount_points()
+        return self._agent_rpcapi.cluster_refresh(context, active_server['host'])
+
+    @utils.single_lock
     def create_cluster(self, context, server_list):
         """Add the servers into ceph cluster.
 
@@ -1301,6 +1313,18 @@ class SchedulerManager(manager.Manager):
 
         server_list = db.init_node_get_all(context)
         active_server_list = [x for x in server_list if x['status'] == "Active"]
+        idx = random.randint(0, len(active_server_list)-1)
+        return active_server_list[idx]
+
+    def _set_active_server(self, context):
+        values = {}
+        values['status'] ='Active'
+        server_list = db.init_node_get_all(context)
+        server_id_list = [x.id for x in server_list ]
+        #TODO modify to batch updating
+        for server_id in server_id_list:
+            db.init_node_update(context, server_id, values)
+        active_server_list = server_list
         idx = random.randint(0, len(active_server_list)-1)
         return active_server_list[idx]
 
