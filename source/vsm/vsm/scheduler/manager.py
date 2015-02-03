@@ -1321,6 +1321,18 @@ class SchedulerManager(manager.Manager):
         idx = random.randint(0, len(active_server_list)-1)
         return active_server_list[idx]
 
+    def _set_active_server(self, context):
+        values = {}
+        values['status'] ='Active'
+        server_list = db.init_node_get_all(context)
+        server_id_list = [x.id for x in server_list ]
+        #TODO modify to batch updating
+        for server_id in server_id_list:
+            db.init_node_update(context, server_id, values)
+        active_server_list = server_list
+        idx = random.randint(0, len(active_server_list)-1)
+        return active_server_list[idx]
+
     def add_cache_tier(self, context, body):
         active_server = self._get_active_server(context)
         self._agent_rpcapi.add_cache_tier(context, body, active_server['host'])
