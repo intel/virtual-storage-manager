@@ -930,9 +930,9 @@ class SchedulerManager(manager.Manager):
         :return:
         """
         LOG.info('intergrate cluster by refreshing cluster status')
-        active_server = self._set_active_server(context,server_list)
+        active_server = self._set_active_server(context)
         #TODO db.update_mount_points()
-        return self._agent_rpcapi.cluster_refresh(context, active_server['host'])
+        return self._agent_rpcapi.intergrate_cluster_from_ceph(context, active_server['host'])
 
     @utils.single_lock
     def create_cluster(self, context, server_list):
@@ -1306,7 +1306,9 @@ class SchedulerManager(manager.Manager):
         for server_id in server_id_list:
             db.init_node_update(context, server_id, values)
         active_server_list = server_list
+        LOG.info('active_server_list===%s'%active_server_list)
         idx = random.randint(0, len(active_server_list)-1)
+        LOG.info('idx===%s'%idx)
         return active_server_list[idx]
 
     def add_cache_tier(self, context, body):

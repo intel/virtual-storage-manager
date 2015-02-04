@@ -63,7 +63,7 @@ class API(object):
     def create_cluster(self, context, server_list):
         return self.scheduler_rpcapi.create_cluster(context, server_list)
 
-    def intergrate_cluster(self, context, server_list):
+    def intergrate_cluster(self, context, server_list=[]):
         return self.scheduler_rpcapi.intergrate_cluster(context, server_list)
 
     def get_zone_list(self, context):

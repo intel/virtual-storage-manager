@@ -111,13 +111,13 @@ class ClusterController(wsgi.Controller):
         self.scheduler_api.create_cluster(context, server_list)
         return webob.Response(status_int=202)
 
-    def intergrate(self, req, body):
+    def intergrate(self, req,body):
         """
         intergrate an existing ceph cluster
         """
-        LOG.info("CEPH_LOG cluster intergrate body: %s" % body)
+        LOG.info("CEPH_LOG cluster intergrate body" )
         context = req.environ['vsm.context']
-        server_list = body['cluster']['servers']
+        #server_list = body['cluster']['servers']
         LOG.info('Begin to call scheduler.intergrate_cluster')
         self.scheduler_api.intergrate_cluster(context)
 
