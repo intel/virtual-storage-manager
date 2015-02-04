@@ -109,7 +109,8 @@ class APIRouter(vsm.api.openstack.APIRouter):
         mapper.resource("clusters", "clusters",
                         controller=self.resources['clusters'],
                         collection={'summary': 'get',
-                                    'refresh': 'post'},
+                                    'refresh': 'post',
+                                    'intergrate': 'post'},
                         member={'action': 'post'})
 
         self.resources['servers'] = servers.create_resource(ext_mgr)
