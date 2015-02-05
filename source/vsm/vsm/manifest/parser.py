@@ -71,9 +71,9 @@ class ManifestParser(object):
                                'storage_group_near_full_threshold',
                                'storage_group_full_threshold',
                                'ceph_near_full_threshold',
-                               'osd_heartbeat_interval',
+                               #'osd_heartbeat_interval',
                                #'osd_heartbeat_grace',
-                               #'ceph_full_threshold'
+                               'ceph_full_threshold'
                                 ]
 
         self._is_server_manifest = is_server_manifest
