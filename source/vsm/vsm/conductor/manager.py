@@ -466,8 +466,8 @@ class ConductorManager(manager.Manager):
         devices = db.device_get_all_by_service_id(context,
                                                   init_node['service_id'])
         file_system = init_node.cluster.file_system
-        osd_heartbeat_interval=init_node.cluster.osd_heartbeat_interval
-        osd_heartbeat_grace=init_node.cluster.osd_heartbeat_grace
+        #osd_heartbeat_interval=init_node.cluster.osd_heartbeat_interval
+        #osd_heartbeat_grace=init_node.cluster.osd_heartbeat_grace
 
         lst = []
         for device in devices:
@@ -475,8 +475,8 @@ class ConductorManager(manager.Manager):
             d['host'] = init_node['host']
             d['cluster_id'] = init_node['cluster_id']
             d['file_system'] = file_system
-            d['osd_heartbeat_grace']=osd_heartbeat_grace
-            d['osd_heartbeat_interval']=osd_heartbeat_interval
+            #d['osd_heartbeat_grace']=osd_heartbeat_grace
+            #d['osd_heartbeat_interval']=osd_heartbeat_interval
             d['primary_public_ip'] = init_node['primary_public_ip']
             d['secondary_public_ip'] = init_node['secondary_public_ip']
             d['cluster_ip'] = init_node['cluster_ip']
