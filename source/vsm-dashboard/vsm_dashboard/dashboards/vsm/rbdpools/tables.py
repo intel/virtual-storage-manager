@@ -107,7 +107,7 @@ class ListPoolTable(tables.DataTable):
 
     id = tables.Column("id", verbose_name=_("ID"))
     name = tables.Column("name", verbose_name=_("Name"))
-    storageType = tables.Column("storageGroup", verbose_name=_("Storage Group"))
+    storageType = tables.Column("storageGroup", verbose_name=_("Primary Storage Group"))
     pgNum = tables.Column("pgNum", verbose_name=_("Placement Group Count"))
     size = tables.Column("size", verbose_name=_("Size"))
     status = tables.Column("status", verbose_name=_("Status"))
