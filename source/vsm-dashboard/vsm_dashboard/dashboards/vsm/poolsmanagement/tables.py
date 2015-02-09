@@ -81,7 +81,8 @@ class ListPoolTable(tables.DataTable):
 
     poolId = tables.Column("poolId", verbose_name=_("ID"))
     name = tables.Column("name", verbose_name=_("Name"))
-    storageType = tables.Column("storageGroup", verbose_name=_("Storage Group"))
+    storageType = tables.Column("storageGroup", verbose_name=_("Primary Storage Group"))
+    replicaStorageType = tables.Column("replica_storage_group", verbose_name=_("Replica Storage Group"))
     pgNum = tables.Column("pgNum", verbose_name=_("Placement Group Count"))
     size = tables.Column("size", verbose_name=_("Size"))
     quota = tables.Column("empty", verbose_name=_("Quota (GB)"), empty_value=lambda x: "-" if x["quota"] in (0, None) else x["quota"])
