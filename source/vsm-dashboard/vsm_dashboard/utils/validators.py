@@ -16,6 +16,9 @@
 from django.core.validators import RegexValidator
 import re
 from django.utils.translation import ugettext_lazy as _
+from django.core.validators import BaseValidator
+from django.core.exceptions import ValidationError
+
 
 _user_name_re = re.compile("^[A-Za-z0-9\@\.\_]+$")
 validate_user_name = RegexValidator(_user_name_re, _("Enter a valid User name! "), "invalid")
@@ -30,3 +33,16 @@ validate_pool_name = RegexValidator(_pool_name_re, _("Enter a valid Pool name! "
 
 _storage_group_name_re = re.compile("^[A-Za-z0-9\.\_]+$")
 validate_storage_group_name = RegexValidator(_storage_group_name_re, _("Enter a valid Zone name! "), "invalid")
+
+class StorageGroupValidator(BaseValidator):
+    storage_group = None
+    def __init__(self, replicated=False):
+        self.replicated = replicated
+
+    def __call__(self, value):
+        if not self.replicated:
+            StorageGroupValidator.storage_group = value
+            return True
+        if StorageGroupValidator.storage_group == value:
+            raise ValidationError("You should choose \"Default same as Primary\"", "invalid")
+        return True

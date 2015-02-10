@@ -294,6 +294,9 @@ class CephConfigParser(manager.Manager):
                    pg_num=None,
                    cnfth=None,
                    cfth=None,
+                   heartbeat_interval=None,
+                   osd_heartbeat_interval=None,
+                   osd_heartbeat_grace=None, 
                    is_cephx=True,
                    max_file=131072,
                    down_out_interval=90):
@@ -307,15 +310,21 @@ class CephConfigParser(manager.Manager):
         self._parser.set('global',
                          'mon osd down out interval',
                          str(down_out_interval))
-        if pg_num:
-            self._parser.set('global', 'osd pool default pg num', str(pg_num))
-            self._parser.set('global', 'osd pool default pgp num', str(pg_num))
+        #if pg_num:
+            #self._parser.set('global', 'osd pool default pg num', str(pg_num))
+            #self._parser.set('global', 'osd pool default pgp num', str(pg_num))
         if cfth:
             self._parser.set('global', 'mon osd full ratio', '.' + str(cfth))
         if cnfth:
             self._parser.set('global',
                              'mon osd nearfull ratio',
                              '.' + str(cnfth))
+        if heartbeat_interval:
+            self._parser.set('global', 'heartbeat interval', str(heartbeat_interval))
+        if osd_heartbeat_interval:
+            self._parser.set('global', 'osd heartbeat interval', str(osd_heartbeat_interval))
+        if osd_heartbeat_grace:
+            self._parser.set('global', 'osd heartbeat grace', str(osd_heartbeat_grace))
 
         # Must add fsid for create cluster in newer version of ceph.
         # In order to support lower version of vsm.

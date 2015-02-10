@@ -46,6 +46,7 @@ class ViewBuilder(common.ViewBuilder):
                 "pool_id": pool["pool_id"],
                 "name": pool["name"],
                 "storageGroup": self._get_storage_group(pool),
+                "replica_storage_group": pool.get('replica_storage_group'),
                 "ruleset": pool.get('ruleset'),
                 "status": pool.get('status'),
                 "recipeId": pool.get('recipe_id'),

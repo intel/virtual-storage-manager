@@ -1,37 +1,33 @@
 [storage_class]
-#7200_rpm_sata
 10krpm_sas
-#ssd_test
+7200_rpm_sata
+ssd
 #ssd_cached_7200rpm_sata
 #ssd_cached_10krpm_sas
-#7200RPM_SATA_OBJECT
-#7200RPM_SATA_BLOCK
 
 [storage_group]
-#format: [storage group name]  ["user friendly storage group name"] [storage class]
-#high_performance_test  High_Performance_SSD_test   ssd_test
-#capacity          "Economy_Disk"           7200_rpm_sata
-performance       High_Performance_Disk  10krpm_sas
-#value_performance "High_Performance_Disk_with_ssd_cached_Acceleration" ssd_cached_10krpm_sas
-#value_capacity    "Capacity_Disk_with_ssd_cached_Acceleration" ssd_cached_7200rpm_sata
-#capacity_object  Capacity_Object  7200RPM_SATA_OBJECT
-#capacity_block   Capacity_Block   7200RPM_SATA_BLOCK
+#format: [storage group name]  [user friendly storage group name] [storage class]
+performance       Performance_Disk       10krpm_sas
+capacity          Economy_Disk           7200_rpm_sata
+high_performance  High_Performance       ssd
+#value_performance High_Performance_Disk_with_ssd_cached_Acceleration ssd_cached_10krpm_sas
+#value_capacity    Capacity_Disk_with_ssd_cached_Acceleration ssd_cached_7200rpm_sata
 
 
 [cluster]
-cluster_a
+cd10000
 
 [file_system]
 xfs
 
 [management_addr]
-192.168.123.0/24
+192.168.20.0/24
 
 [ceph_public_addr]
-192.168.124.0/24
+field_public_addr
 
 [ceph_cluster_addr]
-192.168.125.0/24
+192.168.40.0/24
 
 [settings]
 storage_group_near_full_threshold  65
@@ -39,11 +35,14 @@ storage_group_full_threshold  85
 ceph_near_full_threshold  75 
 ceph_full_threshold  90 
 pg_count_factor 100
+heartbeat_interval 5
+osd_heartbeat_interval 6
+osd_heartbeat_grace 20
 
 [ec_profiles]
 #format: [profile-name] [path-to-plugin] [plugin-name] [pg_num value] [json format key/value]
-##the key/value strings should not have spaces
-#profile_name1  /usr/lib64/ceph/erasure-code  jerasure  3  {"k":2,"m":1,"technique":"reed_sol_van"}
+#the key/value strings should not have spaces
+default_profile  /usr/lib64/ceph/erasure-code  jerasure  3  {"k":2,"m":1,"technique":"reed_sol_van"}
 #profile_name2  /usr/lib64/ceph/erasure-code  jerasure  6  {"k":4,"m":2,"technique":"reed_sol_van"}
 
 [cache_tier_defaults]
@@ -52,7 +51,6 @@ ct_hit_set_period_s 3600
 ct_target_max_mem_mb 1000000
 ct_target_dirty_ratio 0.4
 ct_target_full_ratio 0.8
-ct_target_max_capacity_gb 1000
 ct_target_max_objects 1000000
 ct_target_min_flush_age_m 10
 ct_target_min_evict_age_m 20

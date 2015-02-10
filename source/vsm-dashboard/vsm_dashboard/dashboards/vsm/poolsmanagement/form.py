@@ -27,8 +27,12 @@ import logging
 
 from vsm_dashboard.api import vsm as vsm_api
 from vsm_dashboard.utils.validators import validate_pool_name
+from vsm_dashboard.utils.validators import StorageGroupValidator
 
 LOG = logging.getLogger(__name__)
+
+
+
 
 class CreatePool(forms.SelfHandlingForm):
 
@@ -41,8 +45,10 @@ class CreatePool(forms.SelfHandlingForm):
                             'invalid': _("The string may only contain"
                                          " ASCII characters and numbers.")},
                             validators=[validate_pool_name])
-    storage_group = forms.ChoiceField(label=_('Primary Storage Group'))
-    replicated_storage_group = forms.ChoiceField(label=_('Replicated Storage Group'), required=False)
+    storage_group = forms.ChoiceField(label=_('Primary Storage Group'), validators=[StorageGroupValidator()])
+    replicated_storage_group = forms.ChoiceField(label=_('Replicated Storage Group'), required=False,
+                                                 validators=[StorageGroupValidator(replicated=True)],
+                                                 error_messages={'invalid': "You should choose \"Default: same as Primary\", if you want to use same storage group"})
     replication_factor = forms.IntegerField(label=_("Replication Factor"),
                                         min_value=1,
                                         help_text=_('The replication'
@@ -224,7 +230,6 @@ class AddCacheTier(forms.SelfHandlingForm):
     target_max_mem_mb = forms.CharField(label=_("Target maximum memory(MB)"))
     target_dirty_ratio = forms.CharField(label=_("Target dirty ratio"))
     target_full_ratio = forms.CharField(label=_("Target full ratio"))
-    target_max_capacity_gb = forms.CharField(label=_("Target maximum capacity(GB)"))
     target_max_objects = forms.CharField(label=_("Target maximum objects"))
     target_min_flush_age_m = forms.CharField(label=_("Target minimum flush age(m)"))
     target_min_evict_age_m = forms.CharField(label=_("Target minimum evict age(m)"))
@@ -234,7 +239,7 @@ class AddCacheTier(forms.SelfHandlingForm):
         cache_tier_pool_list = [('',"Select a Cache Tier Pool")]
         storage_tier_pool_list = [('',"Select a Storage Tier Pool")]
         cache_mode_list = [('',"Select Cache Tier Mode"), ('writeback', "Writeback"), ('readonly', "Read-only")]
-        hit_set_type_list = [('',"Select Hit Set type"), ('bloom', "bloom")]
+        hit_set_type_list = [('bloom', "bloom")]
         pools = vsm_api.pool_status(request)
         cache_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if not pool.cache_tier_status]
         storage_tier_pool_list += [(pool.pool_id, pool.name) for pool in pools if not pool.cache_tier_status]
@@ -249,7 +254,6 @@ class AddCacheTier(forms.SelfHandlingForm):
         self.fields['target_max_mem_mb'].initial = setting_dict["ct_target_max_mem_mb"]
         self.fields['target_dirty_ratio'].initial = setting_dict["ct_target_dirty_ratio"]
         self.fields['target_full_ratio'].initial = setting_dict["ct_target_full_ratio"]
-        self.fields['target_max_capacity_gb'].initial = setting_dict["ct_target_max_capacity_gb"]
         self.fields['target_max_objects'].initial = setting_dict["ct_target_max_objects"]
         self.fields['target_min_flush_age_m'].initial = setting_dict["ct_target_min_flush_age_m"]
         self.fields['target_min_evict_age_m'].initial = setting_dict["ct_target_min_evict_age_m"]
@@ -270,7 +274,6 @@ class AddCacheTier(forms.SelfHandlingForm):
                         'target_max_mem_mb': data['target_max_mem_mb'],
                         'target_dirty_ratio': data['target_dirty_ratio'],
                         'target_full_ratio': data['target_full_ratio'],
-                        'target_max_capacity_gb': data['target_max_capacity_gb'],
                         'target_max_objects': data['target_max_objects'],
                         'target_min_flush_age_m': data['target_min_flush_age_m'],
                         'target_min_evict_age_m': data['target_min_evict_age_m']

@@ -546,6 +546,7 @@ class AgentManager(manager.Manager):
         _try_pass(self.update_rbd_status)
         _try_pass(self.update_pool_stats)
         _try_pass(self.update_mds_status)
+        _try_pass(self.update_pg_and_pgp)
         _try_pass(self.update_pg_status)
         _try_pass(self.update_pool_usage)
         _try_pass(self.update_mon_health)
@@ -958,6 +959,42 @@ class AgentManager(manager.Manager):
             raise
         return pg_num
 
+    @periodic_task(run_immediately=True,
+                   service_topic=FLAGS.agent_topic,
+                   spacing=FLAGS.reset_pg_heart_beat)
+    def update_pg_and_pgp(self, context):
+        db_pools = db.pool_get_all(context)
+        for pool in db_pools:
+            storage_group = db.storage_group_get_by_rule_id(context, \
+                                                    pool['crush_ruleset'])
+            if storage_group:
+                osd_num_per_group = db.osd_state_count_by_storage_group_id(context, storage_group['id'])
+                #reset pgs
+                if 20 * osd_num_per_group > pool['pg_num']:
+                    pg_num = self._compute_pg_num(context, osd_num_per_group, pool['size'])   
+                    LOG.info("storage group id %s has %s osds" % (storage_group['id'], osd_num_per_group))
+                    if osd_num_per_group > 64:
+                        osd_num_per_group = 64
+                        LOG.info("osd_num_per_group > 64, use osd_num_per_group=64")
+                    step_max_pg_num = osd_num_per_group * 32
+                    max_pg_num = step_max_pg_num + pool['pg_num']
+                    if pg_num > max_pg_num:
+                        pgp_num = pg_num = max_pg_num 
+                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                    elif pg_num > pool['pg_num']:
+                        pgp_num = pg_num
+                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                    else:
+                        continue
+
+        ceph_pools = self.ceph_driver.get_pool_status()
+        for pool in ceph_pools:
+            values = {
+                'pg_num': pool.get('pg_num'),
+                'pgp_num': pool.get('pg_placement_num') 
+                }
+            db.pool_update_by_pool_id(context, pool['pool'], values) 
+
     #@require_active_host
     @periodic_task(run_immediately=True,
                    service_topic=FLAGS.agent_topic,
@@ -987,31 +1024,11 @@ class AgentManager(manager.Manager):
                 if pool['pool_name'] == pool_name:
                     storage_group = db.storage_group_get_by_rule_id(context, \
                                                     pool.get('crush_ruleset'))
-                    osd_num_per_group = db.osd_state_count_by_storage_group_id(context, storage_group['id'])
-                    pg_num = pool.get('pg_num')
-                    pgp_num = pool.get('pg_placement_num')
-                    #reset pgs
-                    if 20 * osd_num_per_group > pool.get('pg_num'):
-                        pg_num = self._compute_pg_num(context, osd_num_per_group, pool.get('size'))   
-
-                        osds_total_num = self.ceph_driver.get_osds_total_num()
-                        LOG.info("There are %s osds in ceph." % osds_total_num)
-                        step_max_pg_num = osds_total_num * 32
-                        max_pg_num = step_max_pg_num + pool.get('pg_num')
-                        if pg_num > max_pg_num:
-                            pgp_num = pg_num = max_pg_num 
-                            self.set_pool_pg_pgp_num(context, pool_name, pg_num, pgp_num)
-                        elif pg_num > pool.get('pg_num'):
-                            pgp_num = pg_num
-                            self.set_pool_pg_pgp_num(context, pool_name, pg_num, pgp_num)
-                        else:
-                            pg_num = pool.get('pg_num')
-
                     values = {
                         'pool_id': pool.get('pool'),
                         'name': pool.get('pool_name'),
-                        'pg_num': pg_num, 
-                        'pgp_num': pgp_num,
+                        'pg_num': pool.get('pg_num'),
+                        'pgp_num': pool.get('pg_placement_num'),
                         'size': pool.get('size'),
                         'min_size': pool.get('min_size'),
                         'crush_ruleset': pool.get('crush_ruleset'),
@@ -1021,7 +1038,8 @@ class AgentManager(manager.Manager):
                     values['cluster_id'] = cluster_id
                     values['tag'] = 'SYSTEM'
                     values['status'] = 'running'
-                    values['primary_storage_group_id'] = storage_group['id']
+                    if storage_group:
+                        values['primary_storage_group_id'] = storage_group['id']
                     LOG.debug('Pool %s in ceph, not in db, add it.' % values)
                     self._conductor_rpcapi.create_storage_pool(context, values)
 
@@ -1029,6 +1047,7 @@ class AgentManager(manager.Manager):
             values = {}
             if pool.get('pg_num') > pool.get('pg_placement_num'):
                 self.ceph_driver.set_pool_pgp_num(context, pool['pool_name'], pool['pg_num'])
+                values['pg_num'] = pool['pg_num']
                 values['pgp_num'] = pool['pg_num']
             if pool.get('erasure_code_profile'):
                 values['ec_status'] = pool['erasure_code_profile']
@@ -1041,7 +1060,7 @@ class AgentManager(manager.Manager):
             if p['pool_name'] in db_names:
                 upd_pools.append(p)
 
-        for p in upd_pools:
+        for pool in upd_pools:
             values = {
                'pool_id': pool.get('pool'),
                'name': pool.get('pool_name'),

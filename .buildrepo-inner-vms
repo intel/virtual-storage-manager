@@ -9,7 +9,7 @@ rm -rf $TOPDIR/vsmrepo-167.tar.gz
 rm -rf $TOPDIR/vsmrepo
 cd $TOPDIR
 
-wget --no-proxy http://10.239.82.94/vsmrepo.tar.gz
+wget --no-proxy http://10.239.82.96/vsmrepo.tar.gz
 tar zxf vsmrepo.tar.gz
 rm -rf vsmrepo.tar.gz
 

@@ -136,6 +136,8 @@ class CephDriver(object):
                                 pg_num, pg_num, 'replicated', run_as_root=True)
                     utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
                                 'crush_ruleset', ruleset, run_as_root=True)
+                    utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
+                                'size', str(body['size']), run_as_root=True)
                     res = True
                 else:
                     LOG.error("Failed while writing crushmap!")
@@ -259,11 +261,21 @@ class CephDriver(object):
                 cfth = setting['value']
             elif setting['name'] == 'pg_count_factor':
                 pg_count_factor = int(setting['value'])
+            elif setting['name'] == 'heartbeat_interval':
+                heartbeat_interval = setting['value']
+            elif setting['name'] == 'osd_heartbeat_interval':
+                osd_heartbeat_interval = setting['value']
+            elif setting['name'] == 'osd_heartbeat_grace':
+                osd_heartbeat_grace = setting['value']
+            
 
         pg_num = osd_num * pg_count_factor / 2
         config.add_global(pg_num=pg_num, \
                           cnfth=cnfth, \
-                          cfth=cfth)
+                          cfth=cfth,
+                          heartbeat_interval=heartbeat_interval,
+                          osd_heartbeat_interval=osd_heartbeat_interval,
+                          osd_heartbeat_grace=osd_heartbeat_grace)
 
         is_first_mon = True
         is_first_osd = True
@@ -1555,7 +1567,7 @@ class CephDriver(object):
     def set_pool_pg_pgp_num(self, context, pool, pg_num, pgp_num):
         self.set_pool_pg_num(context, pool, pg_num)
         #need to wait for the last set pg_num
-        time.sleep(20)
+        time.sleep(120)
         self.set_pool_pgp_num(context, pool, pgp_num)
         
     def set_pool_pg_num(self, context, pool, pg_num):
@@ -1883,7 +1895,6 @@ class CephDriver(object):
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_bytes", int(options["target_max_mem_mb"]) * 1000000, run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_target_dirty_ratio", options["target_dirty_ratio"], run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_target_full_ratio", options["target_full_ratio"], run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_bytes", int(options["target_max_capacity_gb"]) * 1000000000, run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "target_max_objects", options["target_max_objects"], run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_min_flush_age", options["target_min_flush_age_m"], run_as_root=True)
         utils.execute("ceph", "osd", "pool", "set", cache_pool_name, "cache_min_evict_age", options["target_min_evict_age_m"], run_as_root=True)

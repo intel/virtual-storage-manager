@@ -1,8 +1,8 @@
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 
 Name:             vsm
-Version:          2014.12
-Release:          0.9.1%{?dist}
+Version:          2015.01
+Release:          1.0%{?dist}
 Summary:          VSM
 
 Group:            Storage/System
@@ -180,6 +180,7 @@ install -p -D -m 755 bin/vsm-assist %{buildroot}%{_bindir}/vsm-assist
 install -p -D -m 755 bin/presentpool %{buildroot}%{_bindir}/presentpool
 install -p -D -m 755 bin/rbd_ls %{buildroot}%{_bindir}/rbd_ls
 install -p -D -m 755 bin/agent-token %{buildroot}%{_bindir}/agent-token
+install -p -D -m 755 bin/admin-token %{buildroot}%{_bindir}/admin-token
 install -p -D -m 755 bin/vsm-backup %{buildroot}%{_bindir}/vsm-backup
 install -p -D -m 755 bin/vsm-restore %{buildroot}%{_bindir}/vsm-restore
 install -p -D -m 755 bin/cluster_manifest %{buildroot}%{_usr}/local/bin/cluster_manifest
@@ -257,6 +258,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/presentpool
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/rbd_ls
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/agent-token
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/admin-token
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-backup
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-restore
 

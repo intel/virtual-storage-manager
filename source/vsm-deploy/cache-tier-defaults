@@ -92,7 +92,7 @@ function delete() {
     ret=`mysql -uroot -p$MYSQL_ROOT_PASSWORD -Ns -e \
     'use vsm; delete from vsm_settings where name in ("ct_hit_set_count", "ct_hit_set_period_s",
     "ct_target_max_mem_mb", "ct_target_dirty_ratio", "ct_target_full_ratio",
-    "ct_target_max_capacity_gb", "ct_target_max_objects", "ct_target_min_flush_age_m", "ct_target_min_evict_age_m");'`  
+    "ct_target_max_objects", "ct_target_min_flush_age_m", "ct_target_min_evict_age_m");'`  
     if [[ $? == 1 ]] ;then
         echo "deleted failed!"
     else

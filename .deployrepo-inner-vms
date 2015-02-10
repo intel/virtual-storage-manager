@@ -7,7 +7,7 @@ if [[ ! -d $TOPDIR/vsmrepo ]]; then
     echo "Error, You should download the tar.gz file"
     echo "And untar the file for build&deploy repo."
     echo "Steps: below"
-    echo "wget --no-proxy http://10.239.82.94/vsmrepo.tar.gz"
+    echo "wget --no-proxy http://10.239.82.96/vsmrepo.tar.gz"
     echo "tar zxf vsmrepo.tar.gz"
     echo "rm -rf vsmrepo.tar.gz"
     exit 0
