@@ -128,8 +128,8 @@ After install of a clean CentOS 6.5 Basic Server option system, do not run:
 
 Otherwise you may get conflicts between yum packages when you install VSM.
 
-#Build RPMs
-After you download the source code from the VSM github, the first step is to build the VSM RPMs. If you already have VSM RPMs, you can jump to [VSM RPM Install](#RPM_Install).
+#Build RPMs from Source, or use Prebuilt RPMs
+After you download the source code or prebuilt RPMs from the VSM github, you will need to do the following steps. 
 
 ## Setup Yum Repo
 ###Step 1
@@ -153,66 +153,6 @@ Then run:
 ###Step 2
 Add a public repo, and make sure you can access internet. Add the public repo file `public.repo`:
 
-    [theforeman-plugin-source]
-    name=theforeman-plugins
-    baseurl=http://yum.theforeman.org/plugins/1.5/el6/source
-    gpgcheck=0
-    enabled=1
-
-    [theforman-plugins-x86_64]
-    name=theforman-plugins-x86_64
-    baseurl=http://yum.theforeman.org/plugins/1.5/el6/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [theforeman-release-source]
-    name=theforeman-release-source
-    baseurl=http://yum.theforeman.org/releases/1.5/el6/source
-    gpgcheck=0
-    enabled=1
-
-    [theforeman-release-x86_64]
-    name=theforeman-release-x86_64
-    baseurl=http://yum.theforeman.org/releases/1.5/el6/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-products-x86_64]
-    name=puppetlabs-products-x86_64
-    baseurl=http://yum.puppetlabs.com/el/6/products/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-dependencies]
-    name=puppetlabs-dependencies
-    baseurl=http://yum.puppetlabs.com/el/6/dependencies/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-devel]
-    name=puppetlabs-devel
-    baseurl=http://yum.puppetlabs.com/el/6/devel/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-products-srpms]
-    name=puppetlabs-products-srpms
-    baseurl=http://yum.puppetlabs.com/el/6/products/SRPMS
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-dependencies-srpms]
-    name=puppetlabs-dependencies-srpms
-    baseurl=http://yum.puppetlabs.com/el/6/dependencies/SRPMS
-    gpgcheck=0
-    enabled=1
-
-    [puppetlabs-devel-srpms]
-    name=puppetlabs-devel-srpms
-    baseurl=http://yum.puppetlabs.com/el/6/devel/SRPMS
-    gpgcheck=0
-    enabled=1
-
     [openstack-icehouse]
     name=openstack-icehouse
     baseurl=http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
@@ -222,18 +162,6 @@ Add a public repo, and make sure you can access internet. Add the public repo fi
     [ceph]
     name=ceph
     baseurl=http://ceph.com/rpm-firefly/el6/x86_64/
-    gpgcheck=0
-    enabled=1
-
-    [ceph-extras]
-    name=ceph-extras
-    baseurl=http://ceph.com/packages/ceph-extras/rpm/centos6/x86_64
-    gpgcheck=0
-    enabled=1
-
-    [epel]
-    name=epel
-    baseurl=http://mirror.steadfast.net/epel/6/x86_64/
     gpgcheck=0
     enabled=1
 
@@ -268,7 +196,9 @@ Then rum:
     yum makecache
 
 ##<a name="RPM_Install"></a> VSM RPM Build
-After you setup the repo, and make sure it works, you can build the RPMs from source code.
+After you setup the repo, and make sure it works, you can build the RPMs from source code, or use the prebuilt VSM RPMs
+###Step 3
+Build the VSM RPMs from source. If you downloaded and want to use the prebuilt VSM RPMs, then skip this buildrpm step and go to the VSM RPM Install step. 
 
     cd $source_code_path
     ./buildrpm
@@ -277,13 +207,12 @@ After building, all the rpms are located in $source_code_path/vsmrepo directory.
 
 ## VSM RPM Install
 
+Go to the directory that you placed your VSM RPMs in, or the /vsmrepo directory if you just built them from source. 
+
 You can use `yum localinstall` to install vsm packages by:
 
     cd vsmrepo
-    yum localinstall python-vsmclient-2014.11-0.8.0.el6.noarch.rpm \
-    		vsm-dashboard-2014.11-0.8.0.el6.noarch.rpm \
-   		 vsm-2014.11-0.8.0.el6.noarch.rpm \
-    		vsm-deploy-2014.11-0.8.0.el6.x86_64.rpm
+    yum localinstall python-vsmclient-2014.12-0.9.1.el6.noarch.rpm \        vsm-dashboard-2014.12-0.9.1.el6.noarch.rpm \     	 vsm-2014.12-0.9.1.el6.noarch.rpm \        vsm-deploy-2014.12-0.9.1.el6.x86_64.rpm
 
 **Note**: vsm-dashboard will use the httpd service to setup the Web UI. Sometimes it conflicts with the OpenStack dashboard, so try to install the OpenStack dashboard and the VSM dashboard onto different nodes.
 
@@ -313,28 +242,11 @@ For every node, regardless of if it’s a controller node or a storage node, do 
     
         preinstall
 
-There is an incompatibility issue with python-django-horizon module, whereby the module should be downgraded to the lower version 2013.1.1-1. 
+There is an incompatibility issue with python-django-horizon module, whereby the module should be downgraded to the lower version 2013.1.1-1. Please complete the following steps. 
 
-### For a brand new install:
-*   Remove the installed python-django-horizon package
-  *   # rpm –e python-django-horizon
-
-*   Download these rpm packages from [vsm-dependencies github repository](https://github.com/01org/vsm-dependencies/tree/master/repo ), the packages below are required to be downloaded from this web site:
-  *   Python-django-horizon, python-quantumclient, python-swiftclient, python-cinderclient, python-glanceclient, python-nova client
-
-*   Reinstall python-django-horizon package (in this order)
-  *   # rpm –ivh python-quantumclient-2.2.1-2.el6.noarch.rpm
-  *   # rpm -ivh python-swiftclient-1.4.0-1.el6.noarch.rpm
-  *   # rpm –ivh python-cinderclient-1.0.4-1.el6.noarch.rpm
-  *   # rpm –ivh python-glanceclient-0.9.0-2.el6.noarch.rpm
-  *   # rpm –ivh python-novaclient-2.13.0-1.el6.noarch.rpm
-  *   # rpm –ivh python-django-horizon-2013.1.1-1.el6.noarch.rpm
-
-
-### For existing broken install (where you previously installed and ran vsm-controller and it failed)
 *   Remove installed vsm-dashboard and python-django-horizon packages
-  *   # rpm –e vsm-dashboard
-  *   # rpm –e python-django-horizon
+  *   # rpm –e vsm-dashboard-2014.12-0.9.1.el6.noarch
+  *   # rpm –e python-django-horizon-2014.1.3-1.el6.noarch
 
 *   Download these rpm packages from [vsm-dependencies github repository](https://github.com/01org/vsm-dependencies/tree/master/repo ), below packages are required to be downloaded from this web site:
   *   Python-django-horizon, python-quantumclient, python-swiftclient, python-cinderclient, python-glanceclient, python-nova client
@@ -346,8 +258,8 @@ There is an incompatibility issue with python-django-horizon module, whereby the
   *   # rpm –ivh python-glanceclient-0.9.0-2.el6.noarch.rpm
   *   # rpm –ivh python-novaclient-2.13.0-1.el6.noarch.rpm
   *   # rpm –ivh python-django-horizon-2013.1.1-1.el6.noarch.rpm
-*   Reinstall vsm-dashboard, this is exactly the same one from v0.8 release package
-  *   # rpm –ivh vsm-dashboard-2014.11-0.8.0.el6.noarch.rpm
+*   Reinstall vsm-dashboard, this is exactly the same one from v0.9.1 release package
+  *   # rpm –ivh vsm-dashboard-2014.12-0.9.1.el6.noarch.rpm
 
 *   Reboot the vsm controller node
 
@@ -612,7 +524,7 @@ to complete setup of the storage node.
 
 After the command is finished executing, and to check if you have setup the controller correctly, do the following steps:
 
-1.  Access http://vsm controller IP/dashboard/vsm.(for example http://192.168.123.4/dashboard/vsm)
+1.  Access https://vsm controller IP/dashboard/vsm.(for example https://192.168.123.4/dashboard/vsm)
 2.  User name: admin
 3.  Password can be obtained from: /etc/vsmdeploy/deployrc, the ADMIN_PASSWORD field
 
