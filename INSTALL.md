@@ -221,7 +221,7 @@ Add a public repo, and make sure you can access internet. Add the public repo fi
 
     [ceph]
     name=ceph
-    baseurl=http://ceph.com/rpm/el6/x86_64
+    baseurl=http://ceph.com/rpm-firefly/el6/x86_64/
     gpgcheck=0
     enabled=1
 
@@ -237,23 +237,18 @@ Add a public repo, and make sure you can access internet. Add the public repo fi
     gpgcheck=0
     enabled=1
 
-    [rpmfind]
-    name=rpmfind
-    baseurl=http://rpmfind.net/linux/centos/6.5/os/x86_64/
+    [centos6]
+    name=centos6
+    baseurl=http://mirror.centos.org/centos/6/os/x86_64/
     gpgcheck=0
     enabled=1
 
-    [nac-net]
-    name=nac-net
-    baseurl=http://centos.mirror.nac.net/6.5/os/x86_64/
+    [centos6-updates]
+    name=centos6-updates
+    baseurl=http://mirror.centos.org/centos/6.6/updates/x86_64/
     gpgcheck=0
     enabled=1
 
-    [cs.vt]
-    name=cs-vt
-    baseurl=http://mirror.cs.vt.edu/pub/CentOS/6.5/updates/x86_64/
-    gpgcheck=0
-    enabled=1
 
     [download-fedoraproject]
     name=download-fedoraporject
