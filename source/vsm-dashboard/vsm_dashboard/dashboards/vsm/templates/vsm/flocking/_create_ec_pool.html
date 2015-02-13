@@ -19,7 +19,7 @@
 {% load i18n %}
 
 {% block form_id %}create_ec_pool_form{% endblock %}
-{% block form_action %}{% url horizon:vsm:poolsmanagement:create_ec_pool %}{% endblock %}
+{% block form_action %}{% url 'horizon:vsm:poolsmanagement:create_ec_pool' %}{% endblock %}
 
 {% block modal-header %}{% trans "Create Erasure Coded Pool" %}{% endblock %}
 {% block modal_id %}create_ec_pool_modal{% endblock %}
@@ -38,5 +38,5 @@
 
 {% block modal-footer %}
   <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create Erasure Coded Pool" %}" />
-  <a href="{% url horizon:vsm:poolsmanagement:index %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+  <a href="{% url 'horizon:vsm:poolsmanagement:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
 {% endblock %}

@@ -19,7 +19,7 @@
 {% load i18n %}
 
 {% block form_id %}create_storage_pool_form{% endblock %}
-{% block form_action %}{% url horizon:vsm:storageservermgmt:removehosts %}{% endblock %}
+{% block form_action %}{% url 'horizon:vsm:storageservermgmt:removehosts' %}{% endblock %}
 
 {% block modal-header %}{% trans "Remove Servers" %}{% endblock %}
 {% block modal_id %}create_storage_pool_modal{% endblock %}
@@ -31,6 +31,6 @@
 
 {% block modal-footer %}
   <input class="btn btn-primary pull-right remove-server-commit" type="submit" value="{% trans "Remove Servers" %}" />
-  <a href="{% url horizon:vsm:storageservermgmt:index %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+  <a href="{% url 'horizon:vsm:storageservermgmt:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
 {% endblock %}
 
