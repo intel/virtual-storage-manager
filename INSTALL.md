@@ -520,6 +520,9 @@ After the configuration of `/etc/manifest/server.manifest`, you may run:
 
 to complete setup of the storage node.
 
+5> Starting order matters, please keep vsm controller is started first, then vsm agent nodes. This order is still required to follow at rebooting nodes.
+
+
 #Login the webUI
 
 After the command is finished executing, and to check if you have setup the controller correctly, do the following steps:
