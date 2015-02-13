@@ -112,7 +112,11 @@ class ClusterController(wsgi.Controller):
         self.scheduler_api.create_cluster(context, server_list)
         return webob.Response(status_int=202)
 
+<<<<<<< HEAD
     def import_ceph_conf(self, req, body=None):
+=======
+    def intergrate(self, req,body=None):
+>>>>>>> add "intergrate cluster" button to dashboard
         """
         import_ceph_conf to db and ceph nodes
         """

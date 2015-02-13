@@ -27,7 +27,6 @@ from horizon import views
 from vsm_dashboard.api import vsm as vsmapi
 from .tables import ListServerTable
 from .tables import CreateClusterTable
-#from .form import ShouanForm
 from django.http import HttpResponse
 
 
