@@ -15,7 +15,7 @@
 # under the License.
 
 from django.core.urlresolvers import reverse
-from django.utils.translation import force_unicode, ugettext_lazy as _
+from django.utils.translation import force_text, ugettext_lazy as _
 
 from horizon import exceptions
 from horizon import forms
