@@ -1,0 +1,62 @@
+
+function __check_cluster_manifest() {
+	path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
+	echo "====================     Check Manifests Result    ====================" >> $path
+	echo "-----check cluseter manifest-----" >> $path
+	if [ -f "/etc/vsm/cluster.manifest" ] && [ -f "/usr/local/bin/cluster_manifest" ]; then
+		cluster_manifest >> "$RESULT_DIC"/"check-manifest"/"cluster_manifest_result" 2>/dev/null
+		if [ `cat "/tmp/vsm-check/check-manifest/cluster_manifest_result" |grep "error"|wc -l` != 0 ]; then
+			echo -e "There are some error in the cluster_manifest, please see details in the */check-manifest/cluster_manifest_result\n" >> $path
+		else
+			echo -e "The cluster_manifest is OK\n" >> $path
+		fi
+	else
+		if [ ! -f "/etc/vsm/cluster.manifest" ]; then
+			echo -e "No cluster.manifest in the /etc/vsm in $HOSTNAME\n" >> $path
+		fi
+		if [ ! -f "/usr/local/bin/cluster_manifest" ]; then
+			echo -e "No cluster_manifest in the /usr/local/bin in $HOSTNAME\n" >> $path
+		fi
+	fi
+}
+
+function __check_server_manifest() {
+	path="$RESULT_DIC"/"$1""_result"
+	echo "====================     Check Manifests Result    ====================" >> $path
+	echo "-----check server manifest-----" >> $path
+	if [ `ssh $1 "ls /etc/vsm/|grep \"server.manifest\"|wc -l" 2>/dev/null` == 1 ] && [ `ssh $1 "ls /usr/local/bin/|grep \"server_manifest\"|wc -l" 2>/dev/null` == 1 ]; then
+		ssh $1 2>/dev/null server_manifest|grep "" >> "$RESULT_DIC"/"check-manifest"/"server_manifest_result_$1"
+		if [ `cat "$RESULT_DIC"/"check-manifest"/"server_manifest_result_$1" |grep "error"|wc -l` != 0  ]; then
+			echo -e "There are some error in the server_manifest in $1, please see details in the */check-manifest/server_manifest_result_$1\n" >> $path
+		else
+			echo -e "The server_manifest is OK\n" >> $path
+		fi
+	else
+		if [ `ssh $1 "ls /etc/vsm/|grep \"server.manifest\"|wc -l" 2>/dev/null` != 1 ]; then
+			echo -e "No server.manifest in the /etc/vsm in $1\n" >> $path
+		fi
+		if [ `ssh $1 "ls /usr/local/bin/|grep \"server_manifest\"|wc -l" 2>/dev/null` != 1 ]; then
+			echo -e "No server_manifest in the /usr/local/bin in $1\n" >> $path
+		fi
+	fi
+}
+
+
+function check_manifests() {
+	if [ ! -d "$RESULT_DIC"/"check-manifest" ]; then
+		mkdir -p "$RESULT_DIC"/"check-manifest"
+	fi
+
+	__check_cluster_manifest
+
+	for host in $HOST_LIST
+	do
+		__check_server_manifest $host
+	done
+}
+
+# change_log
+# Jan 21 2015 Zhu Boxiang <boxiangx.zhu@intel.com> - 2015.1.21-1
+# Initial release
+#
+

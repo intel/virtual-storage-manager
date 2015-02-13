@@ -52,7 +52,7 @@ class IndexView(tables.DataTableView):
             exceptions.handle(self.request,
                               _('Unable to retrieve osds. '))
         if _osds:
-            logging.error("resp osds in view: %s" % _osds)
+            logging.debug("resp osds in view: %s" % _osds)
         osds = []
         for _osd in _osds:
             osd = {

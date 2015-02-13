@@ -131,9 +131,9 @@ class HTTPClient(object):
 
         self.http_log_req((url, method,), kwargs)
 
-        print ' in client.py'
-        print url
-        print method
+        #print ' in client.py'
+        #print url
+        #print method
 
         resp = requests.request(
             method,
@@ -141,8 +141,10 @@ class HTTPClient(object):
             verify=self.verify_cert,
             **kwargs)
 
-        print ' resp'
-        print resp
+        #print ' resp'
+        #print resp
+        #print ' resp'
+        #print resp
         self.http_log_resp(resp)
 
         if resp.text:
@@ -161,7 +163,7 @@ class HTTPClient(object):
         return resp, body
 
     def _cs_request(self, url, method, **kwargs):
-        print ' in _cs_request() in client.py'
+        #print ' in _cs_request() in client.py'
         auth_attempts = 0
         attempts = 0
         backoff = 1
@@ -175,7 +177,7 @@ class HTTPClient(object):
             try:
                 resp, body = self.request(self.management_url + url, method,
                                           **kwargs)
-                print ' in _cs_request in client.py after respo'
+                #print ' in _cs_request in client.py after respo'
                 return resp, body
             except exceptions.BadRequest as e:
                 if attempts > self.retries:
@@ -207,17 +209,17 @@ class HTTPClient(object):
             backoff *= 2
 
     def get(self, url, **kwargs):
-        print ' get fun'
+        #print ' get fun'
         ret = self._cs_request(url, 'GET', **kwargs)
-        print ' after _cs_request in def get() in client.opy'
+        #print ' after _cs_request in def get() in client.opy'
         return ret
 
     def post(self, url, **kwargs):
-        print ' post fun'
+        #print ' post fun'
         return self._cs_request(url, 'POST', **kwargs)
 
     def put(self, url, **kwargs):
-        print ' put fun'
+        #print ' put fun'
         return self._cs_request(url, 'PUT', **kwargs)
 
     def delete(self, url, **kwargs):
@@ -233,10 +235,10 @@ class HTTPClient(object):
                 self.auth_url = url
                 self.service_catalog = \
                     service_catalog.ServiceCatalog(body)
-                print ' in _extract_service_catalog'
-                print self.service_catalog
-                print self.service_type
-                print self.service_name
+                #print ' in _extract_service_catalog'
+                #print self.service_catalog
+                #print self.service_type
+                #print self.service_name
                 if extract_token:
                     self.auth_token = self.service_catalog.get_token()
 

@@ -1,0 +1,5 @@
+#!/bin/bash
+mysql -uroot -p`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'` vsm >/tmp/ceph_nodes<<EOF
+select concat(host,":",type) as cephnodes from init_nodes where deleted=0;
+EOF
+

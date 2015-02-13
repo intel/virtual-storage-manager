@@ -53,22 +53,22 @@ class Manager(utils.HookableMixin):
         self.api = api
 
     def _list(self, url, response_key, obj_class=None, body=None):
-        print '-> _list() in base.py'
+        #print '-> _list() in base.py'
         resp = None
         if body:
             resp, body = self.api.client.post(url, body=body)
         else:
             resp, body = self.api.client.get(url)
-        print 
+        #print
         if obj_class is None:
             obj_class = self.resource_class
 
-        print ' response_key = in _list in base.py'
-        print response_key
-        print body 
+        #print ' response_key = in _list in base.py'
+        #print response_key
+        #print body
         data = body[response_key]
-        print ' data = ? in _list in base.py'
-        print data
+        #print ' data = ? in _list in base.py'
+        #print data
         # NOTE(ja): keystone returns values as list as {'values': [ ... ]}
         #           unlike other services which just return the list...
         if isinstance(data, dict):
@@ -76,14 +76,14 @@ class Manager(utils.HookableMixin):
                 data = data['values']
             except KeyError:
                 pass
-        print ' data = ? in _list in base.py'
-        print data
-        print obj_class
+        #print ' data = ? in _list in base.py'
+        #print data
+        #print obj_class
         with self.completion_cache('human_id', obj_class, mode="w"):
             with self.completion_cache('uuid', obj_class, mode="w"):
                 return [obj_class(self, res, loaded=True)
                         for res in data if res]
-        print '-> END of _list() in base.py'
+        #print '-> END of _list() in base.py'
 
     @contextlib.contextmanager
     def completion_cache(self, cache_type, obj_class, mode):
@@ -145,7 +145,7 @@ class Manager(utils.HookableMixin):
 
     def _get(self, url, response_key=None):
         resp, body = self.api.client.get(url)
-        print 'get return body %s' % body
+        #print 'get return body %s' % body
         if response_key:
             return self.resource_class(self, body[response_key], loaded=True)
         else:

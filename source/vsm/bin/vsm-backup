@@ -33,6 +33,6 @@ rm -rf /opt/backup-vsm
 
 echo "--------------------------------------------------------"
 echo "Backup over."
-echo "All the things are backuped in /opt/backup-vsm directory."
-echo "You should copy/backup this folder for restoring."
+echo "All the things are backuped in /opt/backup-vsm.tar.gz file."
+echo "You should copy/backup this file for restoring."
 echo "--------------------------------------------------------"

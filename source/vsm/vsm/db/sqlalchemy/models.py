@@ -558,6 +558,7 @@ class Cluster(BASE, VsmBase):
     info_dict = Column(Text, nullable=True)
     ceph_conf = Column(String(length=10485760), nullable=True)
 
+
 class StoragePool(BASE, VsmBase):
     """This table store the storage pools."""
 

@@ -61,6 +61,9 @@ install -p -D -m 755 cache-tier-defaults %{buildroot}%{_usr}/local/bin/cache-tie
 install -p -D -m 755 reset_status %{buildroot}%{_usr}/local/bin/reset_status
 install -p -D -m 755 vsm-update %{buildroot}%{_usr}/local/bin/vsm-update
 
+install -p -D -m 755 rpm.lst %{buildroot}%{_usr}/local/bin/rpm.lst
+install -p -D -m 755 vsm-checker %{buildroot}%{_usr}/local/bin/vsm-checker
+
 cp -rf keys  %{buildroot}%{_usr}/local/bin/
 cp -rf tools %{buildroot}%{_usr}/local/bin/
 
@@ -90,6 +93,9 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/cache-tier-defaults
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/reset_status
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-update
+
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/rpm.lst
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-checker
 
 %dir %{_usr}/local/bin/keys
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/keys/*

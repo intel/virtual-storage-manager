@@ -20,7 +20,6 @@ BuildRequires:    python-simplejson
 Requires:         python-httplib2
 Requires:         python-prettytable
 Requires:         python-setuptools
-Requires:         python-argparse
 
 %description
 This is a client for the  vsm API. There's a Python API (the

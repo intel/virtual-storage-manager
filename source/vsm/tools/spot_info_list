@@ -1,0 +1,44 @@
+[vsm_controller_node]
+/etc/vsmdeploy/deployrc
+/etc/manifest/cluster.manifest
+/var/log/vsm/*.log
+/var/log/httpd/*_log
+/var/log/messages
+/var/log/keystone/*.log
+/var/log/rabbitmq/*.log
+[database]
+/var/log/mysql/*.log
+@dbbakup.sql=vsm-backup.sql
+#mysqldump -uroot -p`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'` --opt --events --all-databases
+[storage_nodes]
+/var/log/vsm/*.log
+/var/log/messages
+/var/log/ceph/*.log 
+/etc/manifest/server.manifest
+[os_info_all_nodes]
+@issue=head -n 1 /etc/issue
+@uname=uname -a
+@vsm_version=rpm -qa |grep vsm
+@rpm_list=rpm -qa
+/etc/hosts
+@ipaddress=hostname -I
+@ifconfiginfo=ifconfig
+@host_name=hostname
+@http_proxy=echo http_proxy=$http_proxy
+@https_proxy=echo https_proxy
+@ftp_proxy=echo ftp_proxy
+@iptableinfo=iptables -L
+/etc/selinux/config
+@chkconfig_list=chkconfig --list
+@freeinfo=free -m
+@dfinfo=df -h
+/proc/cpuinfo
+[ceph_cluster_monitor]
+/etc/ceph/ceph.conf
+@crushmap=ceph osd getcrushmap -o
+@osdmap=ceph osd dump
+@monmap=ceph mon dump
+@mdsmap=ceph mds dump
+[vsm_check_result]
+@os=vsm-check
+
