@@ -27,10 +27,15 @@ from horizon import views
 from vsm_dashboard.api import vsm as vsmapi
 from .tables import ListServerTable
 from .tables import CreateClusterTable
+from .form import ShouanForm
 from django.http import HttpResponse
+
 
 import json
 LOG = logging.getLogger(__name__)
+
+
+
 
 class ModalEditTableMixin(object):
     def get_template_names(self):
@@ -148,8 +153,9 @@ class CreateClusterView(ModalEditTableMixin, tables.DataTableView):
 
         return servers
 
-def ClusterAction(request, action):
 
+
+def ClusterAction(request, action):
     post_data = request.raw_post_data
     data = json.loads(post_data)
 
@@ -157,10 +163,14 @@ def ClusterAction(request, action):
         status = "error"
         msg = "No server selected"
     else:
-        vsmapi.create_cluster(request, data)
         if action == "create":
+            vsmapi.create_cluster(request, data)
             status = "info"
             msg = "Began to Create Cluster"
+        elif action == "intergrate":
+            vsmapi.intergrate_cluster(request, data)
+            status = "info"
+            msg = "Began to Intergrate Cluster"
         else:
             status = "info"
             msg = "Began to Create Cluster"
