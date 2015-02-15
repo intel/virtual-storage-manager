@@ -47,19 +47,19 @@ class CreateZoneForm(forms.SelfHandlingForm):
         data['cluster_id'] = 1
         #try:
         if True:
-            LOG.error("DEBUG in zones, %s" % str(data))
+            LOG.debug("DEBUG in zones, %s" % str(data))
             body = {
                     'zone': {
                         'name': data['name'],
                         'cluster_id': data['cluster_id']
                     }
             }
-            LOG.error("DEBUG in handle body %s" % str(body))
+            LOG.debug("DEBUG in handle body %s" % str(body))
             rsp, ret = vsm_api.create_zone(request, opts=body)
 
-            LOG.error("DEBUG in handle retsadsa %s" % ret)
+            LOG.debug("DEBUG in handle retsadsa %s" % ret)
             res = str(ret['message']).strip( )
-            LOG.error("DEBUG in handle return, %s" % res)
+            LOG.debug("DEBUG in handle return, %s" % res)
             messages.success(request,
                      _('Successfully created zone: %s')
                      % data['name'])

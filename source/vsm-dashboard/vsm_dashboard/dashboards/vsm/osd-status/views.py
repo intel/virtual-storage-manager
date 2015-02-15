@@ -53,11 +53,11 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
         default_sort_keys = ['osd_name']
         marker = self.request.GET.get('marker', "")
 
-        LOG.error("<CEPH_LOG VSM OSD SUMMARY")
-        LOG.error(vsmapi.osd_summary(self.request))
-        LOG.error(">CEPH_LOG VSM OSD SUMMARY")
-        LOG.error(vsmapi.osd_status(self.request))
-        LOG.error("CEPH_LOG VSM OSD SUMMARY")
+        LOG.info("CEPH_LOG VSM OSD SUMMARY:%s"%vsmapi.osd_summary(self.request))
+        #LOG.error(vsmapi.osd_summary(self.request))
+        #LOG.error(">CEPH_LOG VSM OSD SUMMARY")
+        #LOG.error(vsmapi.osd_status(self.request))
+        #LOG.error("CEPH_LOG VSM OSD SUMMARY")
         try:
             _osd_status = vsmapi.osd_status(self.request, paginate_opts={
                 "limit": default_limit,
@@ -73,9 +73,9 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
 
         osd_status = []
         for _osd in _osd_status:
-            LOG.error("DEVICE")
-            LOG.error(_osd.device.keys())
-            LOG.error(">DEVICE")
+            LOG.info("DEVICE:%s"%_osd.device.keys())
+            #LOG.error(_osd.device.keys())
+            #LOG.error(">DEVICE")
             osd = {
                 "id":_osd.id,
                 "osd_name": _osd.osd_name,

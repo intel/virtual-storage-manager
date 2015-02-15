@@ -52,7 +52,7 @@ class IndexView(tables.DataTableView):
         return zone_list
 
 class CreateView(forms.ModalFormView):
-    LOG.error("DEBUG in CreateView")
+    LOG.debug("DEBUG in CreateView")
     form_class = CreateZoneForm
     template_name = 'vsm/flocking/createzone.html'
     success_url = reverse_lazy('horizon:vsm:zonemgmt:index')
