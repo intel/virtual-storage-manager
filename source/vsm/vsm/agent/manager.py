@@ -352,7 +352,7 @@ class AgentManager(manager.Manager):
         try:
             sys_info.wait_disk_ready(fpath)
         except exception.PathNotExist, e:
-            LOG.info("Can't find authorized_keys!")
+            LOG.error("Can't find authorized_keys!")
             LOG.error('%s:%s' %(e.code, e.message))
 
         utils.execute('chmod', '0700', fpath, run_as_root=True)

@@ -46,10 +46,10 @@ class IndexView(tables.DataTableView):
 
         admin_tenant = get_admin_tenant(self.request)
         _user_list = api.keystone.user_list(self.request, admin_tenant.id)
-        LOG.error("USER LIST")
-        LOG.error(dir(self.request.user))
-        LOG.error(self.request.user.roles)
-        LOG.error(api.keystone.role_list(self.request))
+        LOG.info("USER LIST")
+        #LOG.error(dir(self.request.user))
+        #LOG.error(self.request.user.roles)
+        #LOG.error(api.keystone.role_list(self.request))
         if self.request.user.username != "admin":
             _user_list = [x for x in _user_list if x.id == self.request.user.id]
 
@@ -60,7 +60,7 @@ class IndexView(tables.DataTableView):
                     "enabled": _user.enabled,
                     "name": _user.name,}
             user_list.append(user)
-        LOG.error("CEPH_LOG> user list: %s" % user_list)
+        LOG.info("CEPH_LOG user list: %s" % user_list)
 
         return user_list
 

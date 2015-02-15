@@ -46,7 +46,7 @@ class AddOpenstackIPForm(forms.SelfHandlingForm):
         # TODO deliver a cluster id in data
         data['cluster_id'] = 1
         try:
-            LOG.error("CEPH_LOG in ADD ip, %s" % str(data))
+            LOG.info("CEPH_LOG in ADD ip, %s" % str(data))
             appnodes = vsm_api.appnode_list(request)
             for appnode in appnodes:
                 if data['ip'] == appnode.ip:
@@ -56,7 +56,7 @@ class AddOpenstackIPForm(forms.SelfHandlingForm):
                     'appnodes': [data['ip'],]
             }
             ips = [data['ip'],]
-            LOG.error("CEPH_LOG in handle body %s" % str(body))
+            LOG.info("CEPH_LOG in handle body %s" % str(body))
             ret = vsm_api.add_appnodes(request, ips)
 
             messages.success(request,

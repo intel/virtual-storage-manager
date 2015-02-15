@@ -70,7 +70,7 @@ class ServerManager(base.ManagerWithFind):
 
         :rtype: list of :class:`Server`
         """
-        print ' comes to list'
+        #print ' comes to list'
         if search_opts is None:
             search_opts = {}
 

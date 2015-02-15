@@ -35,8 +35,8 @@ class PresentPoolAction(tables.BatchAction):
     classes = ("btn-presentpools",)
 
     def allowed(self, request, datum):
-        LOG.error("CEPH_LOG PRESENTPOOL: ALLOW <")
-        LOG.error("CEPH_LOG PRESENTPOOL: datum %s" % datum)
+        #LOG.error("CEPH_LOG PRESENTPOOL: ALLOW <")
+        LOG.info("CEPH_LOG PRESENTPOOL: datum %s" % datum)
         if datum:
             for data in self.table.data:
                 if not (data['status'] in ("running", "whatever")):
@@ -58,15 +58,16 @@ class PresentPoolAction(tables.BatchAction):
             if datum['id'] in [str(p.pool_id) for p in pool_usages]:
                 raise ValueError("Pool %s already Connected to Openstack" % datum['name'])
 
-        LOG.error("CEPH_LOG PRESENTPOOL: ALLOW >")
+        #LOG.error("CEPH_LOG PRESENTPOOL: ALLOW >")
         return True
 
     def action(self, request, obj_id):
-        LOG.error("CEPH_LOG PRESENTPOOL: ACTION")
-        LOG.error(obj_id)
+        LOG.info("CEPH_LOG PRESENTPOOL: ACTION obj_id:%s"%obj_id)
+        #LOG.error(obj_id)
         data = self.table.get_object_by_id(obj_id)
-        LOG.error(data)
-        LOG.error("CEPH_LOG PRESENTPOOL: ACTION >")
+        LOG.info("CEPH_LOG PRESENTPOOL: ACTION data:%s"%data)
+        #LOG.error(data)
+        #LOG.error("CEPH_LOG PRESENTPOOL: ACTION >")
         vsmapi.present_pool(request, [obj_id,])
         messages.success(request, "Present Pool %s Success" % data['name'])
 
@@ -77,8 +78,8 @@ class PresentPoolAction(tables.LinkAction):
     classes = ("ajax-modal", "btn-create")
 
     def allowed(self, request, datum):
-        LOG.error("CEPH_LOG PRESENTPOOL: ALLOW <")
-        LOG.error("CEPH_LOG PRESENTPOOL: datum %s" % datum)
+        #LOG.error("CEPH_LOG PRESENTPOOL: ALLOW <")
+        LOG.info("CEPH_LOG PRESENTPOOL: datum %s" % datum)
         if datum:
             for data in self.table.data:
                 if not (data['status'] in ("running", "whatever")):
@@ -100,7 +101,7 @@ class PresentPoolAction(tables.LinkAction):
             if datum['id'] in [str(p.pool_id) for p in pool_usages]:
                 raise ValueError("Pool %s already Connected to Openstack" % datum['name'])
 
-        LOG.error("CEPH_LOG PRESENTPOOL: ALLOW >")
+        #LOG.error("CEPH_LOG PRESENTPOOL: ALLOW >")
         return True
 
 class ListPoolTable(tables.DataTable):

@@ -52,9 +52,9 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
         #_monitors= vsmapi.get_monitor_list(self.request,)
         try:
             _monitor_status = vsmapi.monitor_status(self.request,)
-            LOG.error("<MONITOR STATUS")
-            LOG.error(_monitor_status)
-            LOG.error(">MONITOR STATUS")
+            LOG.info("MONITOR STATUS: %s "%_monitor_status)
+            #LOG.error(_monitor_status)
+            #LOG.error("")
             if _monitor_status:
                 logging.debug("resp body in view: %s" % _monitor_status)
         except:

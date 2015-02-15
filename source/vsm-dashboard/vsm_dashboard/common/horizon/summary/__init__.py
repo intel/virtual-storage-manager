@@ -30,8 +30,8 @@ class SummaryRenderer(View):
             datas = self.get_summary()
         except Exception,e:
             datas = {}
-            LOG.error("CRITICAL: ")
-            LOG.error(e)
+            LOG.error("CRITICAL: %s"%e)
+            #LOG.error(e)
 
         try:
             summary_list = self.get_summary_list()

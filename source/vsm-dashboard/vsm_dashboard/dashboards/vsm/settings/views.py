@@ -63,7 +63,7 @@ def SettingsAction(request, action):
                 status = 'failed'
                 msg = "Update Failed"
         else:
-            LOG.error("DEBUG in server action %s" % data)
+            LOG.error("error in server action %s" % data)
             status = "error"
             msg = "Invalid params"
 
