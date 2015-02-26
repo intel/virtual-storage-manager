@@ -47,7 +47,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
-    -m| --manifest) MANIFEST_PATH=$1 ;;
+    -m| --manifest) MANIFEST_PATH=$2 ;;
     -v| --version) dependence_version=$2 ;;
     --ip) new_feature=true ;;
     *) shift ;;
