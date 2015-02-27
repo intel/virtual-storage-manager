@@ -73,7 +73,7 @@ class Controller(wsgi.Controller):
     def __init__(self, ext_mgr):
         super(Controller, self).__init__()
 
-    def summary(self, req):
+    def summary(self, req, cluster_id = None):
         LOG.info('vsm-summary.')
         context = req.environ['vsm.context']
 
@@ -81,11 +81,19 @@ class Controller(wsgi.Controller):
         #has been hardcoded. In furture, client should pass
         # the cluster id by url.
         try:
-            vsm_sum = db.summary_get_by_cluster_id_and_type(context, 1, 'vsm')
+            if cluster_id:
+                vsm_sum = db.summary_get_by_cluster_id_and_type(context, cluster_id, 'vsm')
+            else:
+                vsm_sum = db.summary_get_by_type_first(context, 'vsm')
+            #vsm_sum = db.summary_get_by_cluster_id_and_type(context, 1, 'vsm')
         except exception.SummaryNotFound:
             vsm_sum = None
         try:
-            ceph_sum = db.summary_get_by_cluster_id_and_type(context, 1, 'ceph')
+            if cluster_id:
+                ceph_sum = db.summary_get_by_cluster_id_and_type(context, cluster_id, 'ceph')
+            else:
+                ceph_sum = db.summary_get_by_type_first(context, 'ceph')
+            #ceph_sum = db.summary_get_by_cluster_id_and_type(context, 1, 'ceph')
         except exception.SummaryNotFound:
             ceph_sum = None
 

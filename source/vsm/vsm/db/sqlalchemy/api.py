@@ -2526,7 +2526,7 @@ def pool_get_by_db_id(context, pool_id, session=None):
     return result
 
 @require_admin_context
-def pool_get_by_name(context, pool_name, cluster_id, session=None):
+def pool_update_by_name(context, pool_name, cluster_id, session=None):
     return model_query(context, models.StoragePool, session=session).\
         filter_by(name=pool_name).\
         filter_by(cluster_id=cluster_id).\
@@ -3603,6 +3603,13 @@ def summary_get_by_cluster_id_and_type(context, cluster_id, stype,
     #    raise exception.SummaryNotFound(type=stype)
 
     return result
+
+def summary_get_by_type_first(context, stype, session=None):
+    validate_summary_type(stype)
+    return model_query(
+        context, models.Summary, read_deleted='no', session=session).\
+        filter_by(summary_type=stype).\
+        first()
 
 def summary_create(context, values, session=None):
 
