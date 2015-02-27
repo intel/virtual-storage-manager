@@ -131,14 +131,14 @@ class Controller(wsgi.Controller):
 
         db.monitor_destroy(context, mon.get('name'))
 
-    def summary(self, req):
+    def summary(self, req, cluster_id=None):
         LOG.info('mon-summary.')
         context = req.environ['vsm.context']
-
-        #TODO: as we have only one cluster for now, the cluster_id
-        #has been hardcoded. In furture, client should pass
-        # the cluster id by url.
-        sum = db.summary_get_by_cluster_id_and_type(context, 1, 'mon')
+        if cluster_id:
+            sum = db.summary_get_by_cluster_id_and_type(context, cluster_id, 'mon')
+        else:
+            sum = db.summary_get_by_type_first(context, 'mon')
+        #sum = db.summary_get_by_cluster_id_and_type(context, 1, 'mon')
         return sum_views.ViewBuilder().basic(sum, 'monitor')
 
 def create_resource(ext_mgr):

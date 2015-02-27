@@ -83,10 +83,9 @@ class SchedulerManager(manager.Manager):
         LOG.info('scheduler/manager.py present_storage_pools')
         return self._agent_rpcapi.present_storage_pools(context, body)
 
-    def create_storage_pool(self, context, body=None):
+    def create_storage_pool(self, context, body=None,cluster_id = None):
         LOG.info('scheduler/manager.py create_storage_pool')
-        active_monitor = self._get_active_monitor(context)
-
+        active_monitor = self._get_active_monitor(context, cluster_id)
         LOG.info('sync call to host = %s' % active_monitor['host'])
         body['cluster_id'] = active_monitor['cluster_id']
 
@@ -94,7 +93,7 @@ class SchedulerManager(manager.Manager):
                                        body['name'],
                                        body['cluster_id'])
         if not pool_ref:
-            self._agent_rpcapi.create_storage_pool(context, body)
+            self._agent_rpcapi.create_storage_pool(context, body)#TODO need to specify host?
             #pool_id = self._agent_rpcapi.get_pool_id_by_name(context,
             #                body['name'], active_monitor['host'])
             #body['pool_id'] = pool_id
@@ -248,7 +247,7 @@ class SchedulerManager(manager.Manager):
         self._conductor_api.init_node_update(context, host_id,
              {"status": status})
 
-    def _get_active_monitor(self, context, beyond_list=None):
+    def _get_active_monitor(self, context, beyond_list=None, cluster_id = None):
         def __is_in(host):
             if not beyond_list:
                 return False
@@ -257,8 +256,10 @@ class SchedulerManager(manager.Manager):
                 if ser['host'] == host:
                     return True
             return False
-
-        server_list = db.init_node_get_all(context)
+        if cluster_id:
+            server_list = db.init_node_get_by_cluster_id(context, cluster_id)
+        else:
+            server_list = db.init_node_get_all(context)
 
         active_monitor_list = []
         for monitor_node in server_list:
@@ -287,8 +288,8 @@ class SchedulerManager(manager.Manager):
             LOG.info("no monitor will be add")
             return True
 
-        active_monitor = self._get_active_monitor(context)
-        LOG.info("active_monitor:%s" % active_monitor)
+        #active_monitor = self._get_active_monitor(context)
+        #LOG.info("active_monitor:%s" % active_monitor)
 
         error_num = 0
         for ser in new_monitor_list:
@@ -453,7 +454,7 @@ class SchedulerManager(manager.Manager):
         LOG.info("new_storage_list  %s" % new_storage_list)
 
         # select an active monitor
-        active_monitor = self._get_active_monitor(context)
+        #active_monitor = self._get_active_monitor(context)
 
         for ser in new_storage_list:
             try:
@@ -477,6 +478,8 @@ class SchedulerManager(manager.Manager):
                                            ser['host'])
 
                 #update osd status, capacity, weight
+                cluster_id = self.self._agent_rpcapi.cluster_id(context,ser['host'])
+                active_monitor = self._get_active_monitor(context, cluster_id)
                 self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
 
                 LOG.info("add storage success")
@@ -534,12 +537,14 @@ class SchedulerManager(manager.Manager):
         remove_storage_list = [x for x in server_list if x['mds'] == 'yes']
         LOG.info('removing mds %s ' % remove_storage_list)
 
-        active_monitor = self._get_active_monitor(context)
-        LOG.info('active_monitor = %s' % active_monitor['host'])
+        #active_monitor = self._get_active_monitor(context)
+        #LOG.info('active_monitor = %s' % active_monitor['host'])
         try:
             for ser in remove_storage_list:
                 self._start_remove(context, ser['id'])
                 # remove storage
+                cluster_id = self.self._agent_rpcapi.cluster_id(context,ser['host'])
+                active_monitor = self._get_active_monitor(context, cluster_id)
                 self._agent_rpcapi.remove_mds(context,
                                               ser['id'],
                                               active_monitor['host'])
@@ -785,7 +790,7 @@ class SchedulerManager(manager.Manager):
             if ser_ref['mds'] == 'yes':
                 need_change_mds = True
 
-        active_monitor = self._get_active_monitor(context)
+        #active_monitor = self._get_active_monitor(context)
         LOG.info("stop_server of scheduer manager %s" % server_list)
         for item in server_list:
             res = db.init_node_get(context, item['id'])
@@ -794,7 +799,8 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.stop_server(context,
                                                item['id'],
                                                res['host'])
-
+                cluster_id = self.self._agent_rpcapi.cluster_id(context,res['host'])
+                active_monitor = self._get_active_monitor(context, cluster_id)
                 self._agent_rpcapi.update_osd_state(context,
                                       active_monitor['host'])
 
@@ -824,12 +830,14 @@ class SchedulerManager(manager.Manager):
         """
         LOG.info("DEBUG in start server in scheduler manager.")
         server_list = body['servers']
-        active_monitor = self._get_active_monitor(context)
+        #active_monitor = self._get_active_monitor(context)
         for item in server_list:
             res = db.init_node_get(context, item['id'])
             self._start_start(context, item['id'])
             try:
                 self._agent_rpcapi.start_server(context, item['id'], res['host'])
+                cluster_id = self.self._agent_rpcapi.cluster_id(context,res['host'])
+                active_monitor = self._get_active_monitor(context, cluster_id)
                 self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
             except rpc_exc.Timeout:
                 self._update_server_list_status(context,

@@ -1163,6 +1163,9 @@ def summary_update(context, cluster_id, stype, values):
 
 def summary_get_by_cluster_id_and_type(context, cluster_id, stype):
     return IMPL.summary_get_by_cluster_id_and_type(context, cluster_id, stype)
+
+def summary_get_by_type_first(context, stype):
+    return IMPL.summary_get_by_type_first(context, stype)
 #endregion
 
 #region monitor api
