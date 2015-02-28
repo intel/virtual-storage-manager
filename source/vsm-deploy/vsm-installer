@@ -59,7 +59,7 @@ cluster_manifest
 # Repo
 #---------------------------------------------
 
-HOST_IP=`nic_ip eth0`
+HOST_IP=`nic_ip ${NET_DEV}`
 REPO_HOST=${REPO_HOST:-$HOST_IP}
 STACK_USER=${STACK_USER:-stack}
 
