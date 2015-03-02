@@ -1,0 +1,18 @@
+The file aims to teach you how to use the auto-deploy.
+
+Note: The servers should be set mutual trust
+
+The steps as blow:
+1. change the file hostrc, set the storage_ip_list and the controller_ip.
+   
+2. Under the tool/manifest folder, if you have 3 storage nodes,
+   you must create 3 folders for storage and 1 folder for controller.
+   
+3. put the vsm rpm packages under the vsmrepo folder if you don't make vsm from the source.
+
+4. you can put the dependence folder named vsmrepo uder the tool folder, too. If you don't do it,
+   it will try to connect the internet to download these dependence packages.
+
+5. run the command "bash +x install.sh --help", it will show the usage information.
+
+

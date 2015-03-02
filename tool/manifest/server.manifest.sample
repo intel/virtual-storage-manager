@@ -1,0 +1,32 @@
+[vsm_controller_ip]
+controller_ip
+
+[role]
+storage
+monitor
+
+[auth_key]
+token-tenant
+
+[ssd]
+#format [ssd_device]  [journal_device] 
+
+[7200_rpm_sata]
+#format [sata_device]  [journal_device]
+
+[10krpm_sas]
+#format [sas_device]  [journal_device] 
+%osd-by-path-1%   %journal-by-path-1%
+%osd-by-path-2%   %journal-by-path-2%
+%osd-by-path-3%   %journal-by-path-3%
+%osd-by-path-4%   %journal-by-path-4%
+%osd-by-path-5%   %journal-by-path-5%
+%osd-by-path-6%   %journal-by-path-6%
+%osd-by-path-7%   %journal-by-path-7%
+
+[ssd_cached_7200rpm_sata]
+#format [intel_cache_device]  [journal_device] 
+
+[ssd_cached_10krpm_sas]
+#format [intel_cache_device]  [journal_device]
+
