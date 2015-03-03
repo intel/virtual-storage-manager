@@ -2526,7 +2526,7 @@ def pool_get_by_db_id(context, pool_id, session=None):
     return result
 
 @require_admin_context
-def pool_update_by_name(context, pool_name, cluster_id, session=None):
+def pool_get_by_name(context, pool_name, cluster_id, session=None):
     return model_query(context, models.StoragePool, session=session).\
         filter_by(name=pool_name).\
         filter_by(cluster_id=cluster_id).\
@@ -3246,8 +3246,9 @@ def osd_state_count_by_storage_group_id(context, storage_group_id):
     return result
 
 def osd_state_count_service_id_by_storage_group_id(context, storage_group_id):
-    result = model_query(context, models.OsdState.service_id, \
+    result = model_query(context, models.OsdState.service_id,models.OsdState.storage_group_id, \
                          base_model=models.OsdState,read_deleted="no").\
+                         filter_by(storage_group_id=storage_group_id).\
                          distinct().\
                          count()
     return result 
