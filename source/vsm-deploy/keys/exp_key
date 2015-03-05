@@ -6,9 +6,9 @@
 spawn openssl genrsa -des3 -out server.key 1024
 
 expect "Enter pass phrase for server.key:"
-send "zaq12wsx\r"
+send "%PASSWORD%\r"
 
 expect "Verifying - Enter pass phrase for server.key:"
-send "zaq12wsx\r"
+send "%PASSWORD%\r"
 
 expect eof

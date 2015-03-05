@@ -6,7 +6,7 @@
 spawn openssl x509 -req -days 7000 -in server.csr -signkey server.key -out server.crt
 
 expect "Enter pass phrase for server.key:"
-send "zaq12wsx\r"
+send "%PASSWORD%\r"
 
 
 expect eof

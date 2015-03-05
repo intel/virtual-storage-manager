@@ -13,13 +13,13 @@
 
 #Please enter the following 'extra' attributes
 #to be sent with your certificate request
-#A challenge password []:zaq12wsx
+#A challenge password []:%PASSWORD%
 #An optional company name []:intel
 
 spawn openssl req -new -key server.key -out server.csr
 
 expect "Enter pass phrase for server.key:"
-send "zaq12wsx\r"
+send "%PASSWORD%\r"
 
 expect "Country Name*:"
 send "CC\r"
@@ -43,7 +43,7 @@ expect "Email Address*:"
 send "ceph@storage.com\r"
 
 expect "A challenge password*:"
-send "zaq12wsx\r"
+send "%PASSWORD%\r"
 
 expect "An optional company name*:"
 send "cephsystem\r"
