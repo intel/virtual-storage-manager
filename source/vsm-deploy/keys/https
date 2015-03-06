@@ -19,7 +19,7 @@ function _generate_keys() {
     cd /tmp/__keys/
 
     for n in `ls`; do
-        sed -i "s,zaq12wsx,$VSM_HTTPS_PASSWORD,g" $n
+        sed -i "s,%PASSWORD%,$VSM_HTTPS_PASSWORD,g" $n
     done
 
     # Here we generate keys.

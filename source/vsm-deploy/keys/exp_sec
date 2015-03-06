@@ -7,6 +7,6 @@
 spawn openssl rsa -in server.key.secure  -out server.key
 
 expect "Enter pass phrase for server.key.secure:"
-send "zaq12wsx\r"
+send "%PASSWORD%\r"
 
 expect eof
