@@ -3246,11 +3246,15 @@ def osd_state_count_by_storage_group_id(context, storage_group_id):
     return result
 
 def osd_state_count_service_id_by_storage_group_id(context, storage_group_id):
-    result = model_query(context, models.OsdState.service_id,models.OsdState.storage_group_id, \
-                         base_model=models.OsdState,read_deleted="no").\
-                         filter_by(storage_group_id=storage_group_id).\
-                         distinct().\
-                         count()
+    #result = model_query(context, models.OsdState.service_id,models.OsdState.storage_group_id, \
+    #                    base_model=models.OsdState,read_deleted="no").\
+    #                    filter_by(storage_group_id=storage_group_id).\
+    #                    distinct().\
+    #                    count()
+    result = model_query(context, models.OsdState.service_id, \
+                     base_model=models.OsdState,read_deleted="no").\
+                     distinct().\
+                     count()
     return result 
 
 def device_update_or_create(context, values):
