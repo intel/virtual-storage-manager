@@ -63,7 +63,7 @@ class CreateStorageGroupForm(forms.SelfHandlingForm):
         data['cluster_id'] = 1
         #try:
         if True:
-            LOG.error("DEBUG in storage groups, %s" % str(data))
+            LOG.debug("DEBUG in storage groups, %s" % str(data))
             body = {
                     'storage_group': {
                         'name': data['name'],
@@ -72,9 +72,9 @@ class CreateStorageGroupForm(forms.SelfHandlingForm):
                         'cluster_id': data['cluster_id']
                     }
             }
-            LOG.error("DEBUG in handle body %s" % str(body))
+            LOG.debug("DEBUG in handle body %s" % str(body))
             rsp = vsm_api.storage_group_create(request, body=body)
-            LOG.error("DEBUG in storage groups" + str(rsp))
+            LOG.debug("DEBUG in storage groups" + str(rsp))
 
             messages.success(request,
                      _('Successfully created Storage Group: %s')

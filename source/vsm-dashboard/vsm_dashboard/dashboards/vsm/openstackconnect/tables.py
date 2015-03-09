@@ -50,13 +50,13 @@ class DelOpenstackIPAction(tables.DeleteAction):
 
     def allowed(self, request, datum):
         return False # disable delete
-        LOG.error("CEPH_LOG DELOPENSTACKIP: ALLOW")
-        LOG.error(datum)
+        LOG.info("CEPH_LOG DELOPENSTACKIP: ALLOW %s"%datum)
+        #LOG.error(datum)
         return True
 
     def delete(self, request, obj_id):
-        LOG.error("CEPH_LOG DELOPENSTACKIP: DELETE")
-        LOG.error(obj_id)
+        LOG.info("CEPH_LOG DELOPENSTACKIP: DELETE %s"%obj_id)
+        #LOG.error(obj_id)
         vsmapi.del_appnode(request, obj_id)
 
 class EditOpenstackIPAction(tables.LinkAction):

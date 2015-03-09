@@ -54,7 +54,7 @@ class IndexView(tables.DataTableView):
         return storage_group_status
 
 class CreateView(forms.ModalFormView):
-    LOG.error("DEBUG in CreateView")
+    LOG.debug("DEBUG in CreateView")
     form_class = CreateStorageGroupForm
     template_name = 'vsm/flocking/createstoragegroup.html'
     success_url = reverse_lazy('horizon:vsm:storage-group-management:index')

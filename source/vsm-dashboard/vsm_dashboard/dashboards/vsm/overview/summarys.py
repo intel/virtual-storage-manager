@@ -32,9 +32,9 @@ class MonitorSummary(SummaryRenderer):
 
     def get_summary(self):
         monitor_summary = vsmapi.monitor_summary(self.request)
-        LOG.error("(monitor_summary)")
-        LOG.error(dir(monitor_summary))
-        LOG.error("(monitor_summary)")
+        LOG.debug("dir monitor_summary:%s"%(dir(monitor_summary)))
+        #LOG.error(dir(monitor_summary))
+        #LOG.error("(monitor_summary)")
         data = SortedDict()
         data["Monmap Epoch"] = monitor_summary.monmap_epoch
         data["Monitors"] = monitor_summary.monitors
@@ -51,9 +51,9 @@ class OsdSummary(SummaryRenderer):
 
     def get_summary(self):
         osd_summary = vsmapi.osd_summary(self.request)
-        LOG.error("(osd_summary)")
-        LOG.error(dir(osd_summary))
-        LOG.error("(osd_summary)")
+        LOG.debug("dir osd_summary:%s"%(dir(osd_summary)))
+        #LOG.error(dir(osd_summary))
+        #LOG.error("(osd_summary)")
         data = SortedDict()
         data["Osdmap Epoch"] = osd_summary.epoch
         data["Total OSDs"] = osd_summary.num_osds
@@ -72,9 +72,9 @@ class MdsSummary(SummaryRenderer):
 
     def get_summary(self):
         mds_summary = vsmapi.mds_summary(self.request)
-        LOG.error("(mds_summary)")
-        LOG.error(dir(mds_summary))
-        LOG.error("(mds_summary)")
+        LOG.debug("dir mds_summary:%s"%(dir(mds_summary)))
+        #LOG.error(dir(mds_summary))
+        #LOG.error("(mds_summary)")
         data = SortedDict()
         data["MDS Epoch"] = mds_summary.epoch
         data["Up"] = mds_summary.num_up_mdses
@@ -148,9 +148,9 @@ class PGSummary(SummaryRenderer):
 
     def get_summary(self):
         pg_summary = vsmapi.placement_group_summary(self.request)
-        LOG.error('<pg_summary')
-        LOG.error(pg_summary)
-        LOG.error('pg_summary>')
+        LOG.info('pg_summary:%s'%pg_summary)
+        #LOG.error(pg_summary)
+        #LOG.error('pg_summary>')
         data = SortedDict()
         data["PGmap Version"] = pg_summary.version
         data["Total PGs"] = pg_summary.num_pgs
@@ -167,10 +167,10 @@ class PGSummaryDashboard(SummaryRenderer):
 
     def get_summary(self):
         pg_summary = vsmapi.placement_group_summary(self.request)
-        LOG.error('<pg_summary')
-        LOG.error(pg_summary)
-        LOG.error(dir(pg_summary))
-        LOG.error('pg_summary>')
+        #LOG.error('<pg_summary')
+        #LOG.error(pg_summary)
+        #LOG.error(dir(pg_summary))
+        #LOG.error('pg_summary>')
         data = SortedDict()
         data["PGmap Version"] = pg_summary.version
         data["Total PGs"] = pg_summary.num_pgs
