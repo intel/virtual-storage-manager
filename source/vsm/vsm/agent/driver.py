@@ -1926,7 +1926,11 @@ class CephDriver(object):
                       cache_pool_name, run_as_root=True)
         db.pool_update(context, cache_pool.pool_id, {"cache_tier_status": None})
         # TODO cluster id
-        db.pool_update_by_name(context, storage_pool_name, 1, {"cache_tier_status": None})
+        if body.haskey('cluster_id') and body['cluster_id']:
+            cluster_id = body['cluster_id']
+        else:
+            cluster_id = db.cluster_get_all(context)[0]['id']
+        db.pool_update_by_name(context, storage_pool_name, cluster_id, {"cache_tier_status": None})
         return True
 
 

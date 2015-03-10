@@ -3246,10 +3246,15 @@ def osd_state_count_by_storage_group_id(context, storage_group_id):
     return result
 
 def osd_state_count_service_id_by_storage_group_id(context, storage_group_id):
+    #result = model_query(context, models.OsdState.service_id,models.OsdState.storage_group_id, \
+    #                    base_model=models.OsdState,read_deleted="no").\
+    #                    filter_by(storage_group_id=storage_group_id).\
+    #                    distinct().\
+    #                    count()
     result = model_query(context, models.OsdState.service_id, \
-                         base_model=models.OsdState,read_deleted="no").\
-                         distinct().\
-                         count()
+                     base_model=models.OsdState,read_deleted="no").\
+                     distinct().\
+                     count()
     return result 
 
 def device_update_or_create(context, values):
@@ -3603,6 +3608,13 @@ def summary_get_by_cluster_id_and_type(context, cluster_id, stype,
     #    raise exception.SummaryNotFound(type=stype)
 
     return result
+
+def summary_get_by_type_first(context, stype, session=None):
+    validate_summary_type(stype)
+    return model_query(
+        context, models.Summary, read_deleted='no', session=session).\
+        filter_by(summary_type=stype).\
+        first()
 
 def summary_create(context, values, session=None):
 

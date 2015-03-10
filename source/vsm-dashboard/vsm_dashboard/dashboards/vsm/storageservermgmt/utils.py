@@ -142,10 +142,10 @@ def get_server_list(request, filters=[]):
 
             servers.append(server)
 
-        LOG.error("get server_list filter type: %s" % type(filters))
+        LOG.info("get server_list filter type: %s" % type(filters))
         if hasattr(filters, "__call__"):
             filters = [filters]
-        LOG.error("get server_list filters: %s" % str(filters))
+        LOG.info("get server_list filters: %s" % str(filters))
         if hasattr(filters, "__iter__"):
             for f in filters:
                 servers = filter(f, servers)

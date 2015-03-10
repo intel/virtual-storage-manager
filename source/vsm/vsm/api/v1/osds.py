@@ -193,14 +193,14 @@ class Controller(wsgi.Controller):
         self.scheduler_api.osd_restore(context, id)
         return webob.Response(status_int=202)
 
-    def summary(self, req):
+    def summary(self, req, cluster_id = None):
         #LOG.info('osd-summary body %s ' % body)
         context = req.environ['vsm.context']
-
-        #TODO: as we have only one cluster for now, the cluster_id
-        #has been hardcoded. In furture, client should pass
-        # the cluster id by url.
-        sum = db.summary_get_by_cluster_id_and_type(context, 1, 'osd')
+        if cluster_id:
+            sum = db.summary_get_by_cluster_id_and_type(context, cluster_id, 'osd')
+        else:
+            sum = db.summary_get_by_type_first(context, 'osd')
+        #sum = db.summary_get_by_cluster_id_and_type(context, 1, 'osd')
 
         vb = summary_view.ViewBuilder()
         return vb.basic(sum, 'osd')

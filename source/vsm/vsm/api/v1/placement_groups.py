@@ -136,11 +136,14 @@ class Controller(wsgi.Controller):
 
         return self._view_builder.detail(req, placement_groups)
 
-    def summary(self, req, body=None):
+    def summary(self, req, body = None,  cluster_id = None):
         LOG.info('CEPH_LOG placement_group-summary body %s ' % body)
         context = req.environ['vsm.context']
-        sum = db.summary_get_by_cluster_id_and_type(context, 1, 'pg')
-
+        if cluster_id:
+            sum = db.summary_get_by_cluster_id_and_type(context, cluster_id, 'pg')
+        else:
+            sum = db.summary_get_by_type_first(context, 'pg')
+        #sum = db.summary_get_by_cluster_id_and_type(context, 1, 'pg')
         vb = summary_view.ViewBuilder()
         return vb.basic(sum, 'placement_group')
 

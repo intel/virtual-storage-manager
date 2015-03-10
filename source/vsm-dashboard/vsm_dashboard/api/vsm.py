@@ -125,7 +125,7 @@ def stop_server(request, servers=None):
     """Stop servers.
        servers = [{'id': 1}, {'id': 2}]
     """
-    LOG.error("DEBUG in stop server of dashboard api")
+    LOG.debug("DEBUG in stop server of dashboard api")
     return vsmclient(request).servers.stop(servers)
 
 #zone api

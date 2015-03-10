@@ -228,7 +228,7 @@ def ServersAction(request, action):
             status = "info"
             msg = "Began to Start Servers"
         elif action == "stop":
-            LOG.error("DEBUG in server action %s" % data)
+            LOG.debug("DEBUG in server action %s" % data)
             vsmapi.stop_server(request, data)
             status = "info"
             msg = "Began to Stop Servers"
