@@ -872,10 +872,12 @@ class AgentManager(manager.Manager):
             device = db.device_get_by_name(context,config_dict.get(osd_name)["devs"])
             values['device_id'] = device["id"]
 
-            values['cluster_id'] = 1
+            cluster_id = node['cluster_id']
+            values['cluster_id'] = cluster_id
             values['weight'] = 1.0
             values['storage_group_id'] = 1
-            values['zone_id'] = 1
+
+            values['zone_id'] = node['zone_id']
             values['operation_status'] = 'Present'
             self._conductor_rpcapi.\
                 osd_state_update_or_create(context, values)
