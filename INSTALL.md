@@ -178,7 +178,7 @@ Add a public repo, and make sure you can access internet. Add the public repo fi
     enabled=1
 
     [download-fedoraproject]
-    name=download-fedoraporject
+    name=download-fedoraproject
     baseurl=http://download.fedoraproject.org/pub/epel/6/x86_64
     gpgcheck=0
     enabled=1
@@ -212,7 +212,10 @@ Go to the directory that you placed your VSM RPMs in, or the /vsmrepo directory 
 You can use `yum localinstall` to install vsm packages by:
 
     cd vsmrepo
-    yum localinstall python-vsmclient-2014.12-0.9.1.el6.noarch.rpm \        vsm-dashboard-2014.12-0.9.1.el6.noarch.rpm \     	 vsm-2014.12-0.9.1.el6.noarch.rpm \        vsm-deploy-2014.12-0.9.1.el6.x86_64.rpm
+    yum localinstall python-vsmclient-2014.12-0.9.1.el6.noarch.rpm \
+        vsm-dashboard-2014.12-0.9.1.el6.noarch.rpm \
+     	 vsm-2014.12-0.9.1.el6.noarch.rpm \
+        vsm-deploy-2014.12-0.9.1.el6.x86_64.rpm
 
 **Note**: vsm-dashboard will use the httpd service to setup the Web UI. Sometimes it conflicts with the OpenStack dashboard, so try to install the OpenStack dashboard and the VSM dashboard onto different nodes.
 
