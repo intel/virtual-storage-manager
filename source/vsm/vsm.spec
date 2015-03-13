@@ -189,6 +189,9 @@ install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/local/bin/refres
 install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/local/bin/refresh-cluster-status
 install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/local/bin/getip
 
+install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/local/bin/get_storage
+install -p -D -m 755 tools/spot_info_list %{buildroot}%{_usr}/local/bin/spot_info_list
+install -p -D -m 755 tools/vsm-reporter.py %{buildroot}%{_usr}/local/bin/vsm-reporter
 
 %pre
 getent group vsm >/dev/null || groupadd -r vsm --gid 165
@@ -268,6 +271,11 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/server_manifest
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/refresh-osd-status
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/refresh-cluster-status
+
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/get_storage
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/spot_info_list
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-reporter
+
 #-----------------------------
 # Prepools
 #-----------------------------
