@@ -264,13 +264,16 @@ class ManifestChecker(object):
         self._lan_list = [primary_public_network,
                           secondary_public_network,
                           cluster_network]
-
-        if self._is_in_lan(ip, primary_public_network):
-            return True
-        if self._is_in_lan(ip, secondary_public_network):
-            return True
-        if self._is_in_lan(ip, cluster_network):
-            return True
+        lan_list = primary_public_network.split(',') + \
+                          secondary_public_network.split(',') + \
+                          cluster_network.split(',')
+        for _lan in lan_list:
+            if self._is_in_lan(ip, _lan):
+                return True
+            # if self._is_in_lan(ip, secondary_public_network):
+            #     return True
+            # if self._is_in_lan(ip, cluster_network):
+            #     return True
 
         return False
 
