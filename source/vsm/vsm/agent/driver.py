@@ -740,7 +740,7 @@ class CephDriver(object):
         #changed by ly
         # step 6
         LOG.info('>> add mon step 6 ')
-        host = ":".join([host_ip, port])
+        host = ":".join([host_ip.split(',')[0], port])
         self._add_ceph_mon_to_config(context, ser['host'], host_ip, mon_id=mon_id)
         #utils.execute("ceph-mon", "-i", mon_id, "--public-addr", host,
         #                run_as_root=True)

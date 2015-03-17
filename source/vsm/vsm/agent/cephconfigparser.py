@@ -391,7 +391,10 @@ class CephConfigParser(manager.Manager):
 
         self._parser.add_section(sec)
         self._parser.set(sec, 'host', hostname)
-        self._parser.set(sec, 'mon addr', '%s:%s' % (ip, str(6789)))
+        ips = ip.split(',')
+        ip_strs = ['%s:%s' % (i, str(6789)) for i in ips]
+        ip_str = ','.join(ip_strs)
+        self._parser.set(sec, 'mon addr', ip_str)
 
     def add_mds(self, hostname, ip, mds_id):
         sec = 'mds.%s' % mds_id

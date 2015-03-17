@@ -294,7 +294,6 @@ class ManifestChecker(object):
                 ip_in_lan.append(ip)
         ip_in_lan_cnt = len(set(ip_in_lan))
 
-
         if ip_in_lan_cnt != len(set(self._lan_list)):
             info_list = ['Controller ip is not in LAN defined in',
                         'controller node /etc/manifest/cluster.manifest',
