@@ -3247,7 +3247,7 @@ def osd_state_count_by_storage_group_id(context, storage_group_id):
 
 def osd_state_count_service_id_by_storage_group_id(context, storage_group_id):
     result = model_query(context, models.OsdState.service_id, \
-                         base_model=models.OsdState,read_deleted="no").\
+                         base_model=models.OsdState,read_deleted="no").filter_by(storage_group_id=storage_group_id).\
                          distinct().\
                          count()
     return result 
