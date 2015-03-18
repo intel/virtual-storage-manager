@@ -30,12 +30,12 @@ class TextRenderer(View):
             data = self.get_text()
         except Exception,e:
             data = {}
-            LOG.error("CRITICAL: ")
-            LOG.error(e)
+            LOG.error("CRITICAL:%s "%e)
+            #LOG.error(e)
 
         context = template.Context({
                                     "name": self.name, 
                                     "text": data,
                                    })
-        LOG.error("Text render context:%s " % context)
+        LOG.debug("Text render context:%s " % context)
         return text_template.render(context)

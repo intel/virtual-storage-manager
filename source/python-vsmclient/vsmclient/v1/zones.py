@@ -112,7 +112,7 @@ class ZoneManager(base.ManagerWithFind):
 
         #body = {'zone': {'name': name
         #                   }}
-        LOG.error("DEBUG in vsmclient zones %s" % str(body))
+        LOG.debug("DEBUG in vsmclient create zones %s" % str(body))
         return self._create('/zones', body, 'zone')
 
     def get(self, vsm_id):
@@ -130,7 +130,7 @@ class ZoneManager(base.ManagerWithFind):
 
         :rtype: list of :class:`Zone`
         """
-        print ' comes to list'
+        #print ' comes to list'
         if search_opts is None:
             search_opts = {}
 

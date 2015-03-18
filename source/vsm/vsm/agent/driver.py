@@ -740,7 +740,7 @@ class CephDriver(object):
         #changed by ly
         # step 6
         LOG.info('>> add mon step 6 ')
-        host = ":".join([host_ip, port])
+        host = ":".join([host_ip.split(',')[0], port])
         self._add_ceph_mon_to_config(context, ser['host'], host_ip, mon_id=mon_id)
         #utils.execute("ceph-mon", "-i", mon_id, "--public-addr", host,
         #                run_as_root=True)
@@ -1926,7 +1926,11 @@ class CephDriver(object):
                       cache_pool_name, run_as_root=True)
         db.pool_update(context, cache_pool.pool_id, {"cache_tier_status": None})
         # TODO cluster id
-        db.pool_update_by_name(context, storage_pool_name, 1, {"cache_tier_status": None})
+        if body.haskey('cluster_id') and body['cluster_id']:
+            cluster_id = body['cluster_id']
+        else:
+            cluster_id = db.cluster_get_all(context)[0]['id']
+        db.pool_update_by_name(context, storage_pool_name, cluster_id, {"cache_tier_status": None})
         return True
 
 

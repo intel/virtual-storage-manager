@@ -109,16 +109,18 @@ class AgentManager(manager.Manager):
             if right_ref:
                 break
 
-            lan_list = [cluster_ref['primary_public_network'],
+            lan_list_1 = [cluster_ref['primary_public_network'],
                        cluster_ref['secondary_public_network'],
                        cluster_ref['cluster_network']]
-
+            lan_list = cluster_ref['primary_public_network'].split(',') + \
+                        cluster_ref['secondary_public_network'].split(',') + \
+                        cluster_ref['cluster_network'].split(',')
             LOG.info('Get vlan list = %s' % lan_list)
 
             for lan in lan_list:
                 if utils.is_in_lan(controller_ip, lan):
                     right_ref = cluster_ref
-                    self._lan_list = lan_list
+                    self._lan_list = lan_list_1
                     break
 
         if not right_ref:
@@ -132,9 +134,15 @@ class AgentManager(manager.Manager):
                      'secondary_public_ip',
                      'cluster_ip']
         for pos,lan in enumerate(self._lan_list):
+            lan_list = lan.split(",")
+            ip_list = []
             for ip in self._node_info['ip'].split(','):
-                if utils.is_in_lan(ip, lan):
-                    ip_dict[name_list[pos]] = ip
+                for lan_single in lan_list:
+                    if utils.is_in_lan(ip, lan_single):
+                        ip_list.append(ip)
+                if ip_list:
+                    ip_dict[name_list[pos]] = ','.join(ip_list)
+                        #break
 
         LOG.info('ip_dict = %s', ip_dict)
 
@@ -183,20 +191,23 @@ class AgentManager(manager.Manager):
         ip = values.get('primary_public_ip', None)
         if not ip:
             return False
-        if len(ip.split('.')) != 4:
-            return False
+        for ip_single in ip.split(','):
+            if len(ip_single.split('.')) != 4:
+                return False
 
         ip = values.get('secondary_public_ip', None)
         if not ip:
             return False
-        if len(ip.split('.')) != 4:
-            return False
+        for ip_single in ip.split(','):
+            if len(ip_single.split('.')) != 4:
+                return False
 
         ip = values.get('cluster_ip', None)
         if not ip:
             return False
-        if len(ip.split('.')) != 4:
-            return False
+        for ip_single in ip.split(','):
+            if len(ip_single.split('.')) != 4:
+                return False
         return True
 
     def _restore_node_status(self, init_node):
@@ -352,7 +363,7 @@ class AgentManager(manager.Manager):
         try:
             sys_info.wait_disk_ready(fpath)
         except exception.PathNotExist, e:
-            LOG.info("Can't find authorized_keys!")
+            LOG.error("Can't find authorized_keys!")
             LOG.error('%s:%s' %(e.code, e.message))
 
         utils.execute('chmod', '0700', fpath, run_as_root=True)
@@ -364,7 +375,8 @@ class AgentManager(manager.Manager):
             pri_ip = node['primary_public_ip']
             sed_ip = node['secondary_public_ip']
             thr_ip = node['cluster_ip']
-            ip_list = [pri_ip, sed_ip, thr_ip]
+            #ip_list = [pri_ip, sed_ip, thr_ip]
+            ip_list = pri_ip.split(',')+sed_ip.split(',')+thr_ip.split(',')
             ip_list = [x for x in ip_list if x]
             LOG.info('host = %s ip = %s' % (hname, ip_list))
 

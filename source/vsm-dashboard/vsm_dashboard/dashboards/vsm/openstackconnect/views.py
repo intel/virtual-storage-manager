@@ -67,18 +67,18 @@ class UpdateView(forms.ModalFormView):
     success_url = reverse_lazy('horizon:vsm:openstackconnect:index')
 
     def get_object(self):
-        LOG.error("CEPH_LOG UPDATE VIEW")
-        LOG.error(self.kwargs)
+        LOG.info("CEPH_LOG UPDATE VIEW:%s"%self.kwargs)
+        #LOG.error(self.kwargs)
         if not hasattr(self, "_object"):
             try:
                 appnodes = vsmapi.appnode_list(self.request)
-                LOG.error(appnodes)
+                #LOG.error(appnodes)
                 for appnode in appnodes:
-                    LOG.error("appnode.id")
-                    LOG.error(type(appnode.id))
-                    LOG.error(type(self.kwargs['appnode_id']))
+                    #LOG.error("appnode.id")
+                    #LOG.error(type(appnode.id))
+                    #LOG.error(type(self.kwargs['appnode_id']))
                     if str(appnode.id) == self.kwargs['appnode_id']:
-                        LOG.error("CEPH_LOG GET IT")
+                        #LOG.error("CEPH_LOG GET IT")
                         self._object = appnode
 
             except:
@@ -94,8 +94,8 @@ class UpdateView(forms.ModalFormView):
         return context
 
     def get_initial(self):
-        LOG.error("CEPH_LOG UPDATE VIEW GET INITIAL")
-        LOG.error(self.kwargs)
+        LOG.info("CEPH_LOG UPDATE VIEW GET INITIAL:%s"%self.kwargs)
+        #LOG.error(self.kwargs)
         appnode = self.get_object()
         return {'id': appnode.id,
                 'ip': appnode.ip}

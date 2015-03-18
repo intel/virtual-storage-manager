@@ -66,7 +66,7 @@ class ConductorManager(manager.Manager):
 
     def create_storage_pool(self, context, body):
         #TO BE DONE
-        body['cluster_id'] = 1
+        body['cluster_id'] = db.cluster_get_all(context)[0]['id']#1
         res = db.pool_create(context, body)
         return res
 
@@ -129,8 +129,12 @@ class ConductorManager(manager.Manager):
                 ser['status'] = ret
         return server_list
 
-    def _set_error(self, context):
-        summary = db.summary_get_by_cluster_id_and_type(context, 1, 'cluster')
+    def _set_error(self, context, cluster_id = None):
+        if cluster_id:
+            summary = db.summary_get_by_cluster_id_and_type(context, cluster_id, 'cluster')
+        else:
+            summary = db.summary_get_by_type_first(context, 'cluster')
+        #summary = db.summary_get_by_cluster_id_and_type(context, 1, 'cluster')
         if summary:
             sum_data = json.loads(summary['summary_data'])
             h_list = sum_data.get('health_list')

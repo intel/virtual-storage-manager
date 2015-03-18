@@ -64,7 +64,7 @@ class CreatePool(forms.SelfHandlingForm):
                             #             " ASCII characters and numbers.")},
                             #validators=[validators.validate_slug]
                             )
-    # add by luohj begin
+
     enable_pool_quota = forms.BooleanField(label="Enable Pool Quota",required=False,initial=False)
     pool_quota = forms.IntegerField(label=_("Pool Quota (GB)"),
                            error_messages={
@@ -74,7 +74,7 @@ class CreatePool(forms.SelfHandlingForm):
                            max_value=8589934591,
                            required=True
                            )
-    #add by luohj over
+
     def __init__(self, request, *args, **kwargs):
         super(CreatePool, self).__init__(request, *args, **kwargs)
         storage_group_list = [('', _("Select a storage group"))]
@@ -103,10 +103,10 @@ class CreatePool(forms.SelfHandlingForm):
                         'tag': data['tag'],
                         'clusterId': '0',
                         'createdBy': 'VSM',
-                        #add by luohj begin
+
                         'enablePoolQuota': data['enable_pool_quota'],
                         'poolQuota': data['pool_quota'],
-                        #add by luohj over
+
                     }
             }
             rsp, ret = vsm_api.create_storage_pool(request,body=body)

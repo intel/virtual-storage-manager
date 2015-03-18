@@ -180,10 +180,13 @@ class Controller(wsgi.Controller):
         self.scheduler_api.mds_restore(context, mds)
         return webob.Response(status_int=202)
 
-    def summary(self, req, body=None):
+    def summary(self, req, body=None,cluster_id=None):
         LOG.info('CEPH_LOG mds-summary body %s ' % body)
         context = req.environ['vsm.context']
-        mds = db.summary_get_by_cluster_id_and_type(context, 1, 'mds')
+        if cluster_id:
+            mds = db.summary_get_by_cluster_id_and_type(context, cluster_id, 'mds')
+        else:
+            mds = db.summary_get_by_type_first(context, 'mds')
         vb = summary_view.ViewBuilder()
         return vb.basic(mds, 'mds')
 
