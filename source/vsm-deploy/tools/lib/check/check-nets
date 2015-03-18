@@ -6,7 +6,7 @@ function __check_iptables_status() {
 	if [ -z $1 ]; then
 		path="$RESULT_DIC"/"$CONT_RESULT_FILE_NAME"
 		echo "====================     Check Net Result    ====================" >> $path
-		iptables_status_value=`service iptables status|grep "not running"|wc -l`
+		iptables_status_value=`systemctl status firewalld.service|grep "inactive"|wc -l`
 		if [ $iptables_status_value == "0" ]; then
 			echo -e "[warning]: iptables is running in $HOSTNAME" >> $path
 		else
@@ -15,7 +15,7 @@ function __check_iptables_status() {
 	else
 		path="$RESULT_DIC"/"$1""_result"
 		echo "====================     Check Net Result    ====================" >> $path
-		iptables_status_value=`ssh $1 "service iptables status|grep \"not running\"|wc -l" 2>/dev/null`
+		iptables_status_value=`ssh $1 "systemctl status firewalld.service|grep \"inactive\"|wc -l" 2>/dev/null`
 		if [ $iptables_status_value == "0" ]; then
 			echo -e "[warning]: iptables is running in $1" >> $path
 		else

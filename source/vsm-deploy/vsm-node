@@ -24,7 +24,7 @@ UserKnownHostsFile /dev/null
 ConnectTimeout 15
 StrictHostKeyChecking no
 EOF
-service sshd restart
+systemctl restart sshd.service
 
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
@@ -66,13 +66,13 @@ function remove() {
     rm -rf /etc/init.d/vsm-*
     rm -rf /etc/init.d/*keystone*
 
-    chkconfig mysqld off
-    chkconfig rabbitmq-server off
-    chkconfig openstack-keystone off
+    systemctl disable mysqld.service
+    systemctl disable rabbitmq-server.service
+    systemctl disable openstack-keystone.service
     for n in `ls /etc/init.d | grep vsm`; do
-        chkconfig $n off
+        systemctl disable $n.service
     done
-    chkconfig httpd off
+    systemctl disable httpd.service
 
     exit 0
 }
@@ -127,17 +127,17 @@ cp -rf $TOPDIR/tools/etc/sudoers.d/vsm  /etc/sudoers.d/
 # Start services.
 #---------------------------------------------
 
-service vsm-agent restart
-chkconfig vsm-agent on
+systemctl restart vsm-agent.service
+systemctl enable vsm-agent.service
 sed -i '/exit/d' /etc/rc.local
-echo "service vsm-agent restart" >> /etc/rc.local
-echo "service vsm-physical restart" >> /etc/rc.local
+echo "systemctl restart vsm-agent.service" >> /etc/rc.local
+echo "systemctl restart vsm-physical.service" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 chmod +x /etc/vsm/prepools/main
 echo "..."
 sleep 5
-service vsm-physical restart
-chkconfig vsm-physical on
+systemctl restart vsm-physical.service
+systemctl enable vsm-physical.service
 echo "The End!"
 
 set +o xtrace

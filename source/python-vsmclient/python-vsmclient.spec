@@ -13,7 +13,6 @@ Source0:          %{name}-%{version}.tar.gz
 #
 BuildArch:        noarch
 BuildRequires:    python-setuptools
-BuildRequires:    python-argparse
 BuildRequires:    python-prettytable
 BuildRequires:    python-requests
 BuildRequires:    python-simplejson

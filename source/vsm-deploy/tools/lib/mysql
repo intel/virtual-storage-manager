@@ -19,15 +19,15 @@ function _install_and_configure_mysql() {
     if  rpm -q mysql-libs > /dev/null; then
         rpm -e mysql-libs --nodeps > /dev/null
     fi
-    service mysql restart
+    systemctl restart mariadb.service
     if [[ `cat /etc/my.cnf | grep "firsttime" | wc -l` -eq 0 ]]; then
         mysqladmin -uroot password $MYSQL_ROOT_PASSWORD
         echo "#firsttime" >> /etc/my.cnf
         echo "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" > ~/.mysql_password
     fi
     sed -i 's/127.0.0.1/0.0.0.0/g' /etc/my.cnf
-    service mysql restart
-    chkconfig mysql on
+    systemctl restart mariadb.service
+    systemctl enable mariadb.service
 }
 
 function mysql_cmd() {
@@ -52,7 +52,7 @@ function _configure_root_right() {
     mysql_local_root_cmd "flush privileges;"
     mysql_local_root_cmd "use mysql; delete from user where user=''; flush privileges;"
     mysql_local_root_cmd "use mysql; delete from user where password=''; flush privileges;"
-    service mysql restart
+    systemctl restart mariadb.service
 }
 
 function setup_mysql() {

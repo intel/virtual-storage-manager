@@ -19,7 +19,7 @@
 {% load i18n %}
 
 {% block form_id %}create_storage_pool_form{% endblock %}
-{% block form_action %}{% url horizon:vsm:usermgmt:create %}{% endblock %}
+{% block form_action %}{% url 'horizon:vsm:usermgmt:create' %}{% endblock %}
 
 {% block modal-header %}{% trans "Create User" %}{% endblock %}
 {% block modal_id %}create_storage_pool_modal{% endblock %}
@@ -40,5 +40,5 @@
 
 {% block modal-footer %}
   <input class="btn btn-primary pull-right" type="submit" value="{% trans "Create User" %}" />
-  <a href="{% url horizon:vsm:usermgmt:index %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+  <a href="{% url 'horizon:vsm:usermgmt:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
 {% endblock %}
