@@ -63,7 +63,7 @@ Options:
 
   -p 
     MySQL root user password. 
-    If you don't use this parameter, it will use the MySQL root password in /etc/vsmdeploy/deployrc.
+    If you don\'t use this parameter, it will use the MySQL root password in /etc/vsmdeploy/deployrc.
 
 EOF
     exit 0

@@ -56,13 +56,14 @@ logfile=/var/log/keystone/keystone.log
 # Clear front installation & configuration
 #---------------------------------------------------
 
-service openstack-keystone stop
+systemctl stop openstack-keystone.service
 
 [[ -d /etc/keystone ]] && rm -rf /etc/keystone/*
 mkdir -p /etc/keystone/
 cp -rf $TOPDIR/tools/etc/keystone/* /etc/keystone/
 
 chown -R keystone /etc/keystone
+chmod 755 $TOPDIR/tools/script/openstack-db
 
 chmod +x $TOPDIR/tools/script/openstack-db
 $TOPDIR/tools/script/openstack-db --drop --yes --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
@@ -82,8 +83,8 @@ sed -i "s,#token_format =.*,token_format = UUID,g" $file
 #---------------------------------------------------
 
 keystone-manage --config-file /etc/keystone/keystone.conf db_sync
-service openstack-keystone restart
-chkconfig openstack-keystone on
+systemctl restart openstack-keystone.service
+systemctl enable openstack-keystone.service
 
 #---------------------------------------------------
 # Wait the service to startup

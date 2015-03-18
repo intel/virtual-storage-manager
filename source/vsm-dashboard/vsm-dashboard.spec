@@ -15,14 +15,14 @@ BuildRequires:  python-devel
 BuildRequires:  python-setuptools
 BuildRequires:  MySQL-python
 BuildRequires:  python-django-compressor
-BuildRequires:  Django14
+BuildRequires:  python-django
 BuildRequires:  python-django-openstack-auth
 BuildRequires:  python-netaddr
 BuildRequires:  python-keystoneclient
 BuildRequires:  pytz
 BuildRequires:  python-lockfile
 
-Requires:    Django14
+Requires:    python-django
 Requires:    apr
 Requires:    apr-util
 Requires:    apr-util-ldap
@@ -30,7 +30,6 @@ Requires:    httpd
 Requires:    httpd-tools
 Requires:    mod_wsgi
 Requires:    pyparsing
-Requires:    python-argparse
 Requires:    python-backports
 Requires:    python-backports-ssl_match_hostname
 Requires:    python-chardet
@@ -130,7 +129,7 @@ sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" %{_datadir}/vsm-dashboard/vsm_dashboard/
 %dir %{_sysconfdir}/httpd/conf.d
 %config(noreplace) %attr(-, root, apache) %{_sysconfdir}/httpd/conf.d/vsm-dashboard.conf
 
-%dir %{_bindir}
+#%dir %{_bindir}
 %config(noreplace) %attr(-, root, apache) %{_bindir}/lessc
 
 %dir %attr(0755, apache, apache) %{_libdir}/less

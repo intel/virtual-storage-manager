@@ -92,12 +92,12 @@ function remove() {
     rm -rf /etc/init.d/vsm-*
     rm -rf /etc/init.d/*keystone*
 
-    chkconfig mysql off
-    chkconfig rabbitmq-server off
+    systemctl disable mariadb.service
+    systemctl disable rabbitmq-server.service
     for n in `ls /etc/init.d | grep vsm`; do
-        chkconfig $n off
+        systemctl disable $n.service
     done
-    chkconfig httpd off
+    systemctl disable httpd.service
     yum remove -y vsm-deploy
     exit 0
 }
@@ -232,7 +232,7 @@ if [[ $VSM_ROLE == "controller" ]]; then
     set_password KEYSTONE_VSM_SERVICE_PASSWORD
     set_password MYSQL_DASHBOARD_PASSWORD
     set_password VSM_HTTPS_PASSWORD
-    [[ -e /etc/init.d/vsm-agent ]] && service vsm-agent stop
+    [[ -e /etc/init.d/vsm-agent ]] && systemctl stop vsm-agent.service
 fi
 
 if [[ $VSM_ROLE == "allinone" ]]; then

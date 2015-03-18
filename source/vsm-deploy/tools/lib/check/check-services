@@ -40,7 +40,7 @@ function __check_storage_node_services() {
 }
 
 function check_mysql_status() {
-	mysql_status_value=`service mysql status|grep running|wc -l`+`service mysql status|grep "not running"|wc -l`
+	mysql_status_value=`systemctl status mariadb.service|grep running|wc -l`+`systemctl status mariadb.service|grep "not running"|wc -l`
 	if [ $mysql_status_value == "1+0" ]; then
 		echo "[info]: mysql is running" >> $1
 	else
@@ -50,7 +50,7 @@ function check_mysql_status() {
 }
 
 function check_rabbitmq_status() {
-	rabbitmq_status_value=`service rabbitmq-server status|grep running|wc -l`+`service rabbitmq-server status|grep "not running"|wc -l`
+	rabbitmq_status_value=`systemctl status rabbitmq-server.service|grep running|wc -l`+`systemctl status rabbitmq-server.service|grep "not running"|wc -l`
 	if [ $rabbitmq_status_value == "1+0" ]; then
 		echo "[info]: rabbitmq-server is running" >> $1
 	else
@@ -60,7 +60,7 @@ function check_rabbitmq_status() {
 }
 
 function check_keystone_status() {
-	keystone_status_value=`service openstack-keystone status|grep running|wc -l`+`service openstack-keystone status|grep "not running"|wc -l`
+	keystone_status_value=`systemctl status openstack-keystone.service|grep running|wc -l`+`systemctl status openstack-keystone.service|grep "not running"|wc -l`
 	if [ $keystone_status_value == "1+0" ]; then
 		echo "[info]: openstack-keystone is running" >> $1
 	else
@@ -70,7 +70,7 @@ function check_keystone_status() {
 }
 
 function check_vsm_api_status() {
-	vsm_api_status_value=`service vsm-api status|grep running|wc -l`+`service vsm-api status|grep "not running"|wc -l`
+	vsm_api_status_value=`systemctl status vsm-api.service|grep running|wc -l`+`systemctl status vsm-api.service|grep "not running"|wc -l`
 	if [ $vsm_api_status_value == "1+0" ]; then
 		echo "[info]: vsm-api is running" >> $1
 	else
@@ -80,7 +80,7 @@ function check_vsm_api_status() {
 }
 
 function check_vsm_conductor_status() {
-	vsm_conductor_status_value=`service vsm-conductor status|grep running|wc -l`+`service vsm-conductor status|grep "not running"|wc -l`
+	vsm_conductor_status_value=`systemctl status vsm-conductor.service|grep running|wc -l`+`systemctl status vsm-conductor.service|grep "not running"|wc -l`
 	if [ $vsm_conductor_status_value == "1+0" ]; then
 		echo "[info]: vsm-conductor is running" >> $1
 	else
@@ -90,7 +90,7 @@ function check_vsm_conductor_status() {
 }
 
 function check_vsm_scheduler_status() {
-	vsm_scheduler_status=`service vsm-scheduler status|grep running|wc -l`+`service vsm-scheduler status|grep "not running"|wc -l`
+	vsm_scheduler_status=`systemctl status vsm-scheduler.service|grep running|wc -l`+`systemctl status vsm-scheduler.service|grep "not running"|wc -l`
 	if [ $vsm_scheduler_status == "1+0" ]; then
 		echo "[info]: vsm-scheduler is running" >> $1
 	else
@@ -100,7 +100,7 @@ function check_vsm_scheduler_status() {
 }
 
 function check_http_status() {
-	http_status_value=`service httpd status|grep running|wc -l`+`service httpd status|grep "not running"|wc -l`
+	http_status_value=`systemctl status httpd.service|grep running|wc -l`+`systemctl status httpd.service|grep "not running"|wc -l`
 	if [ $http_status_value == "1+0" ]; then
 		echo "[info]: httpd is running" >> $1
 	else
@@ -110,7 +110,7 @@ function check_http_status() {
 }
 
 function check_vsm_agent_status() {
-	vsm_agent_status_value=`ssh "$1" "service vsm-agent status|grep running|wc -l" 2>/dev/null`+`ssh "$1" "service vsm-agent status|grep \"not running\"|wc -l" 2>/dev/null`
+	vsm_agent_status_value=`ssh "$1" "systemctl status vsm-agent.service|grep running|wc -l" 2>/dev/null`+`ssh "$1" "systemctl status vsm-agent.service|grep \"not running\"|wc -l" 2>/dev/null`
 	if [ $vsm_agent_status_value == "1+0" ]; then
 		echo "[info]: vsm-agent is running" >> $2
 	else
@@ -120,7 +120,7 @@ function check_vsm_agent_status() {
 }
 
 function check_vsm_physical_status() {
-	vsm_physical_status_value=`ssh "$1" "service vsm-physical status|grep running|wc -l" 2>/dev/null`+`ssh "$1" "service vsm-physical status|grep \"not running\"|wc -l" 2>/dev/null`
+	vsm_physical_status_value=`ssh "$1" "systemctl status vsm-physical.service|grep running|wc -l" 2>/dev/null`+`ssh "$1" "systemctl status vsm-physical.service|grep \"not running\"|wc -l" 2>/dev/null`
 	if [ $vsm_physical_status_value == "1+0" ]; then
 		echo "[info]: vsm-physical is running" >> $2
 	else
