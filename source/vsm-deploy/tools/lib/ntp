@@ -28,7 +28,7 @@ function _gen_ntp_keys() {
     fi
 }
 function _install_and_configure_ntp() {
-    service ntpd stop
+    systemctl stop ntpd.service
     local file=/etc/ntp.conf
     local line=""
 
@@ -43,8 +43,8 @@ function _install_and_configure_ntp() {
     echo "keys /etc/ntp/keys" >> $file
     echo "trustedkey 1 2 3 4 5 6 7 8 9 10" >> $file
 
-    service ntpd restart
-    chkconfig ntpd on
+    systemctl restart ntpd.service
+    systemctl enable ntpd.service
 }
 
 function setup_ntp() {

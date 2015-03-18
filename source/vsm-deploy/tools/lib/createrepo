@@ -45,7 +45,7 @@ __EOF__
         exit 0
     fi
 
-    service httpd restart
+    systemctl restart httpd.service
     echo "" > /etc/httpd/conf.d/welcome.conf
 
     chmod -R a+r /var/www/html/
