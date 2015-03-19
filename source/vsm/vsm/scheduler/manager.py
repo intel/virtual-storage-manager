@@ -263,7 +263,7 @@ class SchedulerManager(manager.Manager):
 
         active_monitor_list = []
         for monitor_node in server_list:
-            LOG.info("monitor_node:%s" % monitor_node)
+            #LOG.info("monitor_node:%s" % monitor_node)
             if monitor_node['status'] == "Active" \
                and monitor_node['type'].find('monitor') != -1:
                 if not __is_in(monitor_node['host']):
@@ -278,6 +278,7 @@ class SchedulerManager(manager.Manager):
 
         # select an active monitor
         idx = random.randint(0, len(active_monitor_list)-1)
+        LOG.info("monitor_node:%s" % active_monitor_list[idx])
         return active_monitor_list[idx]
 
     def add_monitor(self, context, server_list):
@@ -425,13 +426,14 @@ class SchedulerManager(manager.Manager):
 
         active_monitor_list = []
         for monitor_node in server_list:
-            LOG.info("monitor_node:%s" % monitor_node)
+            #LOG.info("monitor_node:%s" % monitor_node)
             if monitor_node['status'] == "Active":
                 if not __is_in(monitor_node['host']):
                     active_monitor_list.append(monitor_node)
 
         # select an active monitor
         idx = random.randint(0, len(active_monitor_list)-1)
+        LOG.info("monitor_node:%s" % active_monitor_list[idx])
         return active_monitor_list[idx]
 
     def add_mds(self, context, server_list):
