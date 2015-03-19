@@ -30,7 +30,7 @@ class SummaryRenderer(View):
             datas = self.get_summary()
         except Exception,e:
             datas = {}
-            LOG.error("CRITICAL: %s"%e)
+            #LOG.info("CRITICAL: %s"%e)
             #LOG.error(e)
 
         try:
