@@ -478,7 +478,7 @@ class SchedulerManager(manager.Manager):
                                            ser['host'])
 
                 #update osd status, capacity, weight
-                cluster_id = self.self._agent_rpcapi.cluster_id(context,ser['host'])
+                cluster_id = ser['cluster_id']
                 active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
                 self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
 
