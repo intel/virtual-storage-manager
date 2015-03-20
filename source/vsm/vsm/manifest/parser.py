@@ -25,7 +25,7 @@ from vsm import exception
 from vsm import flags
 from vsm import db
 from vsm import context
-from vsm.openstack.common import log as logging
+import logging
 
 LOG = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
@@ -88,6 +88,11 @@ class ManifestParser(object):
         self._check_key_words_exists()
         self._name_dicts = {}
         self._map = {}
+
+        # set logging handler
+        self._logging_handler = logging.StreamHandler()
+        LOG.setLevel(logging.DEBUG)
+        LOG.addHandler(self._logging_handler)
 
     @classmethod
     def parse_cluster_manifest(cls,
