@@ -13,6 +13,8 @@
  *  limitations under the License.
  */
 
+
+
 var Hogan = {};
 
 (function (Hogan, useArrayBuffer) {
@@ -216,6 +218,7 @@ var Hogan = {};
       rQuot = /\"/g,
       hChars =/[&<>\"\']/;
 
+
   function coerceToString(val) {
     return String((val === null || val === undefined) ? '' : val);
   }
@@ -237,6 +240,9 @@ var Hogan = {};
   };
 
 })(typeof exports !== 'undefined' ? exports : Hogan);
+
+
+
 
 (function (Hogan) {
   // Setup regex  assignments

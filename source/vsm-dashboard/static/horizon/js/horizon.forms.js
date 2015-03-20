@@ -1,20 +1,3 @@
-
-/* Copyright 2014 Intel Corporation, All Rights Reserved.
-
- Licensed under the Apache License, Version 2.0 (the"License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing,
- software distributed under the License is distributed on an
- "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- KIND, either express or implied. See the License for the
- specific language governing permissions and limitations
- under the License.
- */
-
 /* Namespace for core functionality related to Forms. */
 horizon.forms = {
   handle_snapshot_source: function() {
@@ -22,10 +5,76 @@ horizon.forms = {
       var $option = $(this).find("option:selected");
       var $form = $(this).closest('form');
       var $volName = $form.find('input#id_name');
-      $volName.val($option.data("display_name"));
+      if ($volName.val() == "") {
+        $volName.val($option.data("name"));
+      }
       var $volSize = $form.find('input#id_size');
-      $volSize.val($option.data("size"));
+      var volSize = parseInt($volSize.val(), 10) || -1;
+      var dataSize = parseInt($option.data("size"), 10) || -1;
+      if (volSize < dataSize) {
+        $volSize.val(dataSize);
+      }
     });
+  },
+
+  handle_volume_source: function() {
+    $("div.table_wrapper, #modal_wrapper").on("change", "select#id_volume_source", function(evt) {
+      var $option = $(this).find("option:selected");
+      var $form = $(this).closest('form');
+      var $volName = $form.find('input#id_name');
+      if ($volName.val() == "") {
+        $volName.val($option.data("name"));
+      }
+      var $volSize = $form.find('input#id_size');
+      var volSize = parseInt($volSize.val(), 10) || -1;
+      var dataSize = parseInt($option.data("size"), 10) || -1;
+      if (volSize < dataSize) {
+        $volSize.val(dataSize);
+      }
+    });
+  },
+
+  handle_image_source: function() {
+    $("div.table_wrapper, #modal_wrapper").on("change", "select#id_image_source", function(evt) {
+      var $option = $(this).find("option:selected");
+      var $form = $(this).closest('form');
+      var $volName = $form.find('input#id_name');
+      if ($volName.val() == "") {
+        $volName.val($option.data("name"));
+      }
+      var $volSize = $form.find('input#id_size');
+      var volSize = parseInt($volSize.val(), 10) || -1;
+      var dataSize = parseInt($option.data("size"), 10) || -1;
+      var minDiskSize = parseInt($option.data("min_disk"), 10) || -1;
+      var defaultVolSize = dataSize;
+      if (minDiskSize > defaultVolSize) {
+        defaultVolSize = minDiskSize;
+      }
+      if (volSize < defaultVolSize) {
+        $volSize.val(defaultVolSize);
+      }
+    });
+  },
+
+  datepicker: function() {
+    var startDate = $('input#id_start').datepicker()
+      .on('changeDate', function(ev) {
+        if (ev.date.valueOf() > endDate.date.valueOf()) {
+          var newDate = new Date(ev.date);
+          newDate.setDate(newDate.getDate() + 1);
+          endDate.setValue(newDate);
+          $('input#id_end')[0].focus();
+        }
+        startDate.hide();
+      }).data('datepicker');
+
+    var endDate = $('input#id_end').datepicker({
+      onRender: function(date) {
+        return date.valueOf() < startDate.date.valueOf() ? 'disabled' : '';
+      }
+    }).on('changeDate', function(ev) {
+        endDate.hide();
+      }).data('datepicker');
   }
 };
 
@@ -33,9 +82,9 @@ horizon.forms.bind_add_item_handlers = function (el) {
   var $selects = $(el).find('select[data-add-item-url]');
   $selects.each(function () {
     var $this = $(this);
-        $button = $("<a href='" + $this.attr("data-add-item-url") + "' " +
-                    "data-add-to-field='" + $this.attr("id") + "' " +
-                    "class='btn ajax-add ajax-modal btn-inline'>+</a>");
+    $button = $("<a href='" + $this.attr("data-add-item-url") + "' " +
+      "data-add-to-field='" + $this.attr("id") + "' " +
+      "class='btn ajax-add ajax-modal btn-inline'>+</a>");
     $this.after($button);
   });
 };
@@ -60,8 +109,6 @@ horizon.forms.init_examples = function (el) {
   var $el = $(el);
 
   // FIXME(gabriel): These should be moved into the forms themselves as help text, etc.
-  // Generic examples.
-  $el.find("#id_description").attr("placeholder", gettext("Additional information here..."));
 
   // Update/create image form.
   $el.find("#create_image_form input#id_copy_from").attr("placeholder", "http://example.com/image.iso");
@@ -84,6 +131,9 @@ horizon.addInitFunction(function () {
   horizon.modals.addModalInitFunction(horizon.forms.init_examples);
 
   horizon.forms.handle_snapshot_source();
+  horizon.forms.handle_volume_source();
+  horizon.forms.handle_image_source();
+  horizon.forms.datepicker();
 
   // Bind event handlers to confirm dangerous actions.
   $("body").on("click", "form button.btn-danger", function (evt) {
@@ -96,17 +146,17 @@ horizon.addInitFunction(function () {
   // Bind handler for swapping labels on "switchable" fields.
   $(document).on("change", 'select.switchable', function (evt) {
     var $fieldset = $(evt.target).closest('fieldset'),
-        $switchables = $fieldset.find('.switchable');
+      $switchables = $fieldset.find('.switchable');
 
     $switchables.each(function (index, switchable) {
       var $switchable = $(switchable),
-          slug = $switchable.data('slug'),
-          visible = $switchable.is(':visible'),
-          val = $switchable.val();
+        slug = $switchable.data('slug'),
+        visible = $switchable.is(':visible'),
+        val = $switchable.val();
 
       $fieldset.find('.switched[data-switch-on*="' + slug + '"]').each(function(index, input){
         var $input = $(input),
-            data = $input.data(slug + "-" + val);
+          data = $input.data(slug + "-" + val);
 
         if (typeof data === "undefined" || !visible) {
           $input.closest('.form-field').hide();
@@ -123,6 +173,29 @@ horizon.addInitFunction(function () {
   // Queue up the for new modals, too.
   horizon.modals.addModalInitFunction(function (modal) {
     $(modal).find('select.switchable').trigger('change');
+  });
+
+  // Handle field toggles for the Create Volume source type field
+  function update_volume_source_displayed_fields (field) {
+    var $this = $(field),
+      base_type = $this.val();
+
+    $this.find("option").each(function () {
+      if (this.value !== base_type) {
+        $("#id_" + this.value).closest(".control-group").hide();
+      } else {
+        $("#id_" + this.value).closest(".control-group").show();
+      }
+    });
+  }
+
+  $(document).on('change', '#id_volume_source_type', function (evt) {
+    update_volume_source_displayed_fields(this);
+  });
+
+  $('#id_volume_source_type').change();
+  horizon.modals.addModalInitFunction(function (modal) {
+    $(modal).find("#id_volume_source_type").change();
   });
 
   /* Help tooltips */
@@ -145,6 +218,13 @@ horizon.addInitFunction(function () {
   $(document).on('mousedown keydown', '.form-field select', function (evt) {
     $(this).tooltip('hide');
   });
+  // Hide the tooltip after escape button pressed
+  $(document).on('keydown.esc_btn', function (evt) {
+    if (evt.keyCode === 27) {
+      $('.tooltip').hide();
+    }
+  });
+
   // Hide the help text for js-capable browsers
   $('span.help-block').hide();
 });

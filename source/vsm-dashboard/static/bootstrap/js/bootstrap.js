@@ -67,6 +67,7 @@
  * limitations under the License.
  * ========================================================== */
 
+
 !function( $ ){
 
   "use strict"
@@ -117,6 +118,7 @@
 
   }
 
+
  /* ALERT PLUGIN DEFINITION
   * ======================= */
 
@@ -130,6 +132,7 @@
   }
 
   $.fn.alert.Constructor = Alert
+
 
  /* ALERT DATA-API
   * ============== */
@@ -204,6 +207,7 @@
 
   }
 
+
  /* BUTTON PLUGIN DEFINITION
   * ======================== */
 
@@ -223,6 +227,7 @@
   }
 
   $.fn.button.Constructor = Button
+
 
  /* BUTTON DATA-API
   * =============== */
@@ -253,6 +258,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ========================================================== */
+
 
 !function( $ ){
 
@@ -354,6 +360,7 @@
 
   }
 
+
  /* CAROUSEL PLUGIN DEFINITION
   * ========================== */
 
@@ -374,6 +381,7 @@
   }
 
   $.fn.carousel.Constructor = Carousel
+
 
  /* CAROUSEL DATA-API
   * ================= */
@@ -508,6 +516,7 @@
 
   $.fn.collapse.Constructor = Collapse
 
+
  /* COLLAPSIBLE DATA-API
   * ==================== */
 
@@ -540,6 +549,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ============================================================ */
+
 
 !function( $ ){
 
@@ -588,6 +598,7 @@
     $(toggle).parent().removeClass('open')
   }
 
+
   /* DROPDOWN PLUGIN DEFINITION
    * ========================== */
 
@@ -601,6 +612,7 @@
   }
 
   $.fn.dropdown.Constructor = Dropdown
+
 
   /* APPLY TO STANDARD DROPDOWN ELEMENTS
    * =================================== */
@@ -628,6 +640,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ========================================================= */
+
 
 !function( $ ){
 
@@ -705,6 +718,7 @@
 
   }
 
+
  /* MODAL PRIVATE METHODS
   * ===================== */
 
@@ -779,6 +793,7 @@
     }
   }
 
+
  /* MODAL PLUGIN DEFINITION
   * ======================= */
 
@@ -800,6 +815,7 @@
   }
 
   $.fn.modal.Constructor = Modal
+
 
  /* MODAL DATA-API
   * ============== */
@@ -1058,6 +1074,7 @@
 
   }
 
+
  /* TOOLTIP PLUGIN DEFINITION
   * ========================= */
 
@@ -1101,6 +1118,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * =========================================================== */
+
 
 !function( $ ) {
 
@@ -1153,6 +1171,7 @@
     }
 
   })
+
 
  /* POPOVER PLUGIN DEFINITION
   * ======================= */
@@ -1268,6 +1287,7 @@
 
   }
 
+
  /* SCROLLSPY PLUGIN DEFINITION
   * =========================== */
 
@@ -1286,6 +1306,7 @@
   $.fn.scrollspy.defaults = {
     offset: 10
   }
+
 
  /* SCROLLSPY DATA-API
   * ================== */
@@ -1315,6 +1336,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * ======================================================== */
+
 
 !function( $ ){
 
@@ -1399,6 +1421,7 @@
     }
   }
 
+
  /* TAB PLUGIN DEFINITION
   * ===================== */
 
@@ -1412,6 +1435,7 @@
   }
 
   $.fn.tab.Constructor = Tab
+
 
  /* TAB DATA-API
   * ============ */
@@ -1657,6 +1681,7 @@
 
   }
 
+
   /* TYPEAHEAD PLUGIN DEFINITION
    * =========================== */
 
@@ -1678,6 +1703,7 @@
   }
 
   $.fn.typeahead.Constructor = Typeahead
+
 
  /* TYPEAHEAD DATA-API
   * ================== */
