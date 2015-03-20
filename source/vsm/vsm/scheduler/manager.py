@@ -85,7 +85,7 @@ class SchedulerManager(manager.Manager):
 
     def create_storage_pool(self, context, body=None,cluster_id = None):
         LOG.info('scheduler/manager.py create_storage_pool')
-        active_monitor = self._get_active_monitor(context, cluster_id)
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
         LOG.info('sync call to host = %s' % active_monitor['host'])
         body['cluster_id'] = active_monitor['cluster_id']
 
@@ -263,7 +263,7 @@ class SchedulerManager(manager.Manager):
 
         active_monitor_list = []
         for monitor_node in server_list:
-            LOG.info("monitor_node:%s" % monitor_node)
+            #LOG.info("monitor_node:%s" % monitor_node)
             if monitor_node['status'] == "Active" \
                and monitor_node['type'].find('monitor') != -1:
                 if not __is_in(monitor_node['host']):
@@ -278,6 +278,7 @@ class SchedulerManager(manager.Manager):
 
         # select an active monitor
         idx = random.randint(0, len(active_monitor_list)-1)
+        LOG.info("monitor_node:%s" % active_monitor_list[idx])
         return active_monitor_list[idx]
 
     def add_monitor(self, context, server_list):
@@ -425,13 +426,14 @@ class SchedulerManager(manager.Manager):
 
         active_monitor_list = []
         for monitor_node in server_list:
-            LOG.info("monitor_node:%s" % monitor_node)
+            #LOG.info("monitor_node:%s" % monitor_node)
             if monitor_node['status'] == "Active":
                 if not __is_in(monitor_node['host']):
                     active_monitor_list.append(monitor_node)
 
         # select an active monitor
         idx = random.randint(0, len(active_monitor_list)-1)
+        LOG.info("monitor_node:%s" % active_monitor_list[idx])
         return active_monitor_list[idx]
 
     def add_mds(self, context, server_list):
@@ -478,8 +480,8 @@ class SchedulerManager(manager.Manager):
                                            ser['host'])
 
                 #update osd status, capacity, weight
-                cluster_id = self.self._agent_rpcapi.cluster_id(context,ser['host'])
-                active_monitor = self._get_active_monitor(context, cluster_id)
+                cluster_id = ser['cluster_id']
+                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
                 self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
 
                 LOG.info("add storage success")
@@ -504,13 +506,15 @@ class SchedulerManager(manager.Manager):
         remove_storage_list = [x for x in server_list if x['remove_storage']]
         LOG.info('removing storages %s ' % remove_storage_list)
 
-        active_monitor = self._get_active_monitor(context)
-        LOG.info('active_monitor = %s' % active_monitor['host'])
+        #active_monitor = self._get_active_monitor(context)
+        #LOG.info('active_monitor = %s' % active_monitor['host'])
 
         for ser in remove_storage_list:
             try:
                 self._start_remove(context, ser['id'])
                 # remove storage
+                cluster_id = ser['cluster_id']
+                active_monitor = self._get_active_monitor(context,cluster_id=cluster_id)
                 self._agent_rpcapi.remove_osd(context,
                                               ser['id'],
                                               active_monitor['host'])
@@ -543,8 +547,8 @@ class SchedulerManager(manager.Manager):
             for ser in remove_storage_list:
                 self._start_remove(context, ser['id'])
                 # remove storage
-                cluster_id = self.self._agent_rpcapi.cluster_id(context,ser['host'])
-                active_monitor = self._get_active_monitor(context, cluster_id)
+                cluster_id = ser['cluster_id']
+                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
                 self._agent_rpcapi.remove_mds(context,
                                               ser['id'],
                                               active_monitor['host'])
@@ -799,8 +803,8 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.stop_server(context,
                                                item['id'],
                                                res['host'])
-                cluster_id = self.self._agent_rpcapi.cluster_id(context,res['host'])
-                active_monitor = self._get_active_monitor(context, cluster_id)
+                cluster_id = res['cluster_id']
+                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
                 self._agent_rpcapi.update_osd_state(context,
                                       active_monitor['host'])
 
@@ -836,8 +840,8 @@ class SchedulerManager(manager.Manager):
             self._start_start(context, item['id'])
             try:
                 self._agent_rpcapi.start_server(context, item['id'], res['host'])
-                cluster_id = self.self._agent_rpcapi.cluster_id(context,res['host'])
-                active_monitor = self._get_active_monitor(context, cluster_id)
+                cluster_id = res['cluster_id']
+                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
                 self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
             except rpc_exc.Timeout:
                 self._update_server_list_status(context,
