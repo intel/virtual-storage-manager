@@ -366,7 +366,6 @@ Take the correct version as an example to set your /etc/hosts file to on the con
     192.168.124.59 test1-storage3
     192.168.125.77 test1-storage3
 
-**Note**Although 192.168.122.0/24 network is not used by VSM, you should include it in the /etc/hosts file.
 
 ### Wrong version
 
@@ -390,11 +389,12 @@ Take the correct version as an example to set your /etc/hosts file to on the con
 **Error**:
 
     - You cannot put `hostname` in lines with localhost.
-    - Not all of the IP address are listed for test1-storage1 and test1-storage2.
+    - Not all of the IP addresses for test1-storage1 and test1-storage2 are listed.
 
 
 ## Setup controller node
-====================
+
+
 ###Edit and check the file /etc/manifest/cluster.manifest
 
 **modify three IP addresses**
