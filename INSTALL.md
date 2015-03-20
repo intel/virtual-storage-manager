@@ -8,6 +8,20 @@
 
 **Keywords:** Ceph, Virtual Storage Management
 
+
+Prewords
+===================================
+To make VSM manage and monitor a ceph cluster, the cluster must be created from scratch by VSM. 
+
+In this version, below versions are supported:
+
+	- Operating System: CentOS 6.5
+	- Ceph:				Firefly
+	- Openstack:		Havana/Icehouse
+
+
+If there is a existing ceph cluster, VSM can't work with it, you'd remove it and recreate with VSM, or approach other tools.
+
 Preparation
 ===================================
 Before you get ready to install VSM, you should prepare your environment. The sections here are very helpful for understanding the deployment concepts.
