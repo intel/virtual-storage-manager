@@ -226,10 +226,10 @@ Go to the directory that you placed your VSM RPMs in, or the /vsmrepo directory 
 You can use `yum localinstall` to install vsm packages by:
 
     cd vsmrepo
-    yum localinstall python-vsmclient-2014.12-0.9.1.el6.noarch.rpm \
-        vsm-dashboard-2014.12-0.9.1.el6.noarch.rpm \
-     	 vsm-2014.12-0.9.1.el6.noarch.rpm \
-        vsm-deploy-2014.12-0.9.1.el6.x86_64.rpm
+    yum localinstall python-vsmclient-2015.01-1.0.el6.noarch.rpm \
+        vsm-dashboard-2015.01-1.0.el6.noarch.rpm \
+     	 vsm-2015.01-1.0.el6.noarch.rpm \
+        vsm-deploy-2015.01-1.0.el6.x86_64.rpm
 
 **Note**: vsm-dashboard will use the httpd service to setup the Web UI. Sometimes it conflicts with the OpenStack dashboard, so try to install the OpenStack dashboard and the VSM dashboard onto different nodes.
 
@@ -262,7 +262,7 @@ For every node, regardless of if it’s a controller node or a storage node, do 
 There is an incompatibility issue with python-django-horizon module, whereby the module should be downgraded to the lower version 2013.1.1-1. Please complete the following steps. 
 
 *   Remove installed vsm-dashboard and python-django-horizon packages
-  *   # rpm –e vsm-dashboard-2014.12-0.9.1.el6.noarch
+  *   # rpm –e vsm-dashboard-2015.01-1.0.el6.noarch
   *   # rpm –e python-django-horizon-2014.1.3-1.el6.noarch
 
 *   Download these rpm packages from [vsm-dependencies github repository](https://github.com/01org/vsm-dependencies/tree/master/repo ), below packages are required to be downloaded from this web site:
@@ -275,8 +275,8 @@ There is an incompatibility issue with python-django-horizon module, whereby the
   *   # rpm –ivh python-glanceclient-0.9.0-2.el6.noarch.rpm
   *   # rpm –ivh python-novaclient-2.13.0-1.el6.noarch.rpm
   *   # rpm –ivh python-django-horizon-2013.1.1-1.el6.noarch.rpm
-*   Reinstall vsm-dashboard, this is exactly the same one from v0.9.1 release package
-  *   # rpm –ivh vsm-dashboard-2014.12-0.9.1.el6.noarch.rpm
+*   Reinstall vsm-dashboard, this is exactly the same one from v1.0 release package
+  *   # rpm –ivh vsm-dashboard-2015.01-1.0.el6.noarch.rpm
 
 *   Reboot the vsm controller node
 
