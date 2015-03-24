@@ -5,15 +5,15 @@
 
 **Version:** 1.1
 
-**Source:** 2015-01
+**Source:** 2015-03
 
 **Keywords:** Ceph, Virtual Storage Management
 
 Preparation
 ===================================
-Before you get ready to install VSM, you should prepare your environment. The sections here are very helpful for understanding the deployment concepts.
+Before you get ready to install VSM, you should prepare your environment. The sections here are helpful for understanding the deployment concepts.
 
-**Note**: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes before it will create a Ceph cluster. 
+**Note**: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster. 
 
 
 #Roles
@@ -386,9 +386,9 @@ to be:
 
     [10krpm_sas]
     #format [sas_device]  [journal_device] 
-    /dev/sdb /dev/sdc1
-    /dev/sdd /dev/sdc2
-    /dev/sde /dev/sdf
+    /dev/sdb1 /dev/sdc1
+    /dev/sdd1 /dev/sdc2
+    /dev/sde1 /dev/sdf
 
 Then delete the redundant lines with %osd-by-path%, if you have fewer disks.
 
