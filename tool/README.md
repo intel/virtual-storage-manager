@@ -41,8 +41,6 @@ Options:
     The directory to store the server.manifest and cluster.manifest.
   --version [master] | -v [master]
     The version of vsm dependences to download(Default=master).
-  --ip [storage ip]
-    For future.
 
 
 

@@ -34,14 +34,11 @@ Options:
     The directory to store the server.manifest and cluster.manifest.
   --version [master] | -v [master]
     The version of vsm dependences to download(Default=master).
-  --ip [storage ip]
-    For future.
 EOF
     exit 0
 }
 
 MANIFEST_PATH=""
-new_feature=false
 dependence_version="master"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -49,7 +46,6 @@ while [ $# -gt 0 ]; do
     --help) usage ;;
     -m| --manifest) MANIFEST_PATH=$2 ;;
     -v| --version) dependence_version=$2 ;;
-    --ip) new_feature=true ;;
     *) shift ;;
   esac
   shift
@@ -147,9 +143,7 @@ echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
 #-------------------------------------------------------------------------------
 
 if [ ! -d /opt/vsmrepo ] && [ ! -d vsmrepo ]; then
-    export https_proxy="http://proxy-mu.intel.com:911"
     wget https://github.com/01org/vsm-dependencies/archive/"$dependence_version".zip
-    export http_proxy=""
     unzip $dependence_version
     mv vsm-dependencies-$dependence_version/repo vsmrepo
     rm -rf vsm-dependencies-$dependence_version
