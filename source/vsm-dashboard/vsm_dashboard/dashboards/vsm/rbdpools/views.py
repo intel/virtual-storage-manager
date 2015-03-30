@@ -114,6 +114,8 @@ class PresentPoolsView(ModalEditTableMixin, tables.DataTableView):
 
         pools = [x for x in pools if x['tag'] != "SYSTEM"]
         pools = [x for x in pools if x['attach_status'] == "no"]
+        pools = [x for x in pools if x['tag'] != "SYSTEM" and not x['erasure_code_status']
+             and not str(x['cache_tier_status']).startswith("Cache pool for")]
         return pools
 
 class CreateView(forms.ModalFormView):
