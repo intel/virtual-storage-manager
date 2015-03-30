@@ -23,8 +23,11 @@ function _generate_keys() {
     done
 
     # Here we generate keys.
+    chmod +x exp_key
     ./exp_key
     cp -rf server.key server.key.secure
+    chmod +x exp_sec
+    chmod +x exp_csr
     ./exp_sec
     ./exp_csr
     openssl x509 -req -days 7000 -in server.csr -signkey server.key -out server.crt

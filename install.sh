@@ -88,12 +88,12 @@ fi
 
 echo "+++++++++++++++start checking packages+++++++++++++++"
 
-if [ ! -d ../vsmrepo ]; then
+if [ ! -d vsmrepo ]; then
     echo "You should have the vsmrepo folder, please check and try again"
     exit 1
 fi
 
-cd ../vsmrepo
+cd vsmrepo
 is_python_vsmclient=`ls|grep python-vsmclient*.rpm|wc -l`
 is_vsm=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
 is_vsm_dashboard=`ls|grep vsm-dashboard*.rpm|wc -l`
@@ -142,21 +142,21 @@ echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
 #            downloading the dependences
 #-------------------------------------------------------------------------------
 
-if [ ! -d /opt/vsmrepo ] && [ ! -d vsmrepo ]; then
+if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
     wget https://github.com/01org/vsm-dependencies/archive/"$dependence_version".zip
     unzip $dependence_version
-    mv vsm-dependencies-$dependence_version/repo vsmrepo
+    mv vsm-dependencies-$dependence_version/repo vsm-dep-repo
     rm -rf vsm-dependencies-$dependence_version
     rm -rf $dependence_version
 fi
 
 if [ $is_controller -eq 0 ]; then
-    ssh root@$controller_ip "rm -rf /opt/vsmrepo"
-    scp -r vsmrepo root@$controller_ip:/opt
+    ssh root@$controller_ip "rm -rf /opt/vsm-dep-repo"
+    scp -r vsm-dep-repo root@$controller_ip:/opt
 else
-    if [ -d vsmrepo ]; then
-        rm -rf /opt/vsmrepo
-        cp -rf vsmrepo /opt
+    if [ -d vsm-dep-repo ]; then
+        rm -rf /opt/vsm-dep-repo
+        cp -rf vsm-dep-repo /opt
     fi
 fi
 
@@ -169,23 +169,23 @@ echo "+++++++++++++++start setting the repo+++++++++++++++"
 
 rm -rf vsm.repo
 cat <<"EOF" >vsm.repo
-[vsmrepo]
-name=vsmrepo
-baseurl=file:///opt/vsmrepo
+[vsm-dep-repo]
+name=vsm-dep-repo
+baseurl=file:///opt/vsm-dep-repo
 gpgcheck=0
 enabled=1
 proxy=_none_
 EOF
 
-oldurl="file:///opt/vsmrepo"
-newurl="http://$controller_ip/vsmrepo"
+oldurl="file:///opt/vsm-dep-repo"
+newurl="http://$controller_ip/vsm-dep-repo"
 if [ $is_controller -eq 0 ]; then
     scp vsm.repo root@$controller_ip:/etc/yum.repos.d
-    ssh root@$controller_ip "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsmrepo; cp -rf /opt/vsmrepo /var/www/html"
+    ssh root@$controller_ip "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html"
     ssh root@$controller_ip "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
 else
     cp vsm.repo /etc/yum.repos.d
-    yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsmrepo; cp -rf /opt/vsmrepo /var/www/html
+    yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html
     sed -i "s,$oldurl,$newurl,g" /etc/yum.repos.d/vsm.repo
     yum makecache
 fi
@@ -213,7 +213,7 @@ echo "+++++++++++++++install vsm rpm and dependences+++++++++++++++"
 
 function install_vsm_dependences() {
     ssh root@$1 "mkdir -p /opt/vsm_install"
-    scp ../vsmrepo/python-vsmclient*.rpm ../vsmrepo/vsm*.rpm root@$1:/opt/vsm_install
+    scp vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm root@$1:/opt/vsm_install
     ssh root@$1 "cd /opt/vsm_install; yum -y localinstall python-vsmclient*.rpm vsm*.rpm"
     ssh root@$1 "preinstall"
     ssh root@$1 "cd /opt; rm -rf /opt/vsm_install"
@@ -222,7 +222,7 @@ function install_vsm_dependences() {
 if [ $is_controller -eq 0 ]; then
     install_vsm_dependences $controller_ip
 else
-    yum -y localinstall ../vsmrepo/python-vsmclient*.rpm ../vsmrepo/vsm*.rpm
+    yum -y localinstall vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm
     preinstall
 fi
 
