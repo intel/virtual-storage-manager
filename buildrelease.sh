@@ -24,24 +24,24 @@ function usage() {
 Usage: packvsm
 
 Pack vsm:
-    The tool can help you to pack all into a folder to setup vsm.
-    Please run such as bash +x packvsm
+    The tool can help to pull all necessary documents, binaries into one place,
+    and maintain an expected folder structure for following release package generation.
 
 Options:
   --help | -h
     Print usage information.
-  --name | -n
-    The folder name.
+  --version | -v
+    The version of release vsm.
 EOF
     exit 0
 }
 
-FOLDER_NAME="vsm-package"
+VERSION="1.1"
 while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
-    -n| --name) FOLDER_NAME=$2 ;;
+    -v| --version) VERSION=$2 ;;
     *) shift ;;
   esac
   shift
@@ -52,24 +52,25 @@ set -o xtrace
 
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
+DATE=`date "+%Y%m%d"`
 
-mkdir -p release/$FOLDER_NAME
+mkdir -p release/$VERSION-$DATE
 
 bash +x buildrpm
 
-cp README.md release/$FOLDER_NAME/README
-cp INSTALL.md release/$FOLDER_NAME
-cp install.sh release/$FOLDER_NAME
-cp LICENSE release/$FOLDER_NAME
-cp NOTICE release/$FOLDER_NAME
-cp CHANGELOG release/$FOLDER_NAME
-cp hostrc release/$FOLDER_NAME
-cp -r manifest release/$FOLDER_NAME
-cp -r vsmrepo release/$FOLDER_NAME
+sudo cp README.md release/$VERSION-$DATE/README
+sudo cp INSTALL.md release/$VERSION-$DATE
+sudo cp install.sh release/$VERSION-$DATE
+sudo cp LICENSE release/$VERSION-$DATE
+sudo cp NOTICE release/$VERSION-$DATE
+sudo cp CHANGELOG release/$VERSION-$DATE
+sudo cp hostrc release/$VERSION-$DATE
+sudo cp -r manifest release/$VERSION-$DATE
+sudo cp -r vsmrepo release/$VERSION-$DATE
 
 cd release
-tar -czvf $FOLDER_NAME.tar.gz $FOLDER_NAME
-rm -rf $FOLDER_NAME
+tar -czvf $VERSION-$DATE.tar.gz $VERSION-$DATE
+rm -rf $VERSION-$DATE
 cd $TOPDIR
 
 set +o xtrace

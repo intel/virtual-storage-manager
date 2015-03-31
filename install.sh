@@ -116,8 +116,8 @@ echo "+++++++++++++++finish checking packages+++++++++++++++"
 echo "+++++++++++++++start setting the iptables and selinux+++++++++++++++"
 
 function set_iptables_selinux() {
-    ssh root@$1 "service iptables stop"
-    ssh root@$1 "chkconfig iptables off"
+    ssh root@$1 "sudo service iptables stop"
+    ssh root@$1 "sudo chkconfig iptables off"
     ssh root@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
 #    ssh root@$1 "setenforce 0"
 }
@@ -125,8 +125,8 @@ function set_iptables_selinux() {
 if [ $is_controller -eq 0 ]; then
     set_iptables_selinux $controller_ip
 else
-    service iptables stop
-    chkconfig iptables off
+    sudo service iptables stop
+    sudo chkconfig iptables off
     sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
 #    setenforce 0
 fi
@@ -252,7 +252,7 @@ fi
 function setup_controller() {
     ssh root@$controller_ip "rm -rf /etc/manifest/cluster_manifest"
     scp $MANIFEST_PATH/$controller_ip/cluster.manifest root@$controller_ip:/etc/manifest
-    ssh root@$controller_ip "chown root:vsm /etc/manifest/cluster.manifest; chmod 755 /etc/manifest/cluster.manifest"
+    ssh root@$controller_ip "sudo chown root:vsm /etc/manifest/cluster.manifest; sudo chmod 755 /etc/manifest/cluster.manifest"
     is_cluster_manifest_error=`ssh root@$controller_ip "cluster_manifest|grep error|wc -l"`
     if [ $is_cluster_manifest_error -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
@@ -267,8 +267,8 @@ if [ $is_controller -eq 0 ]; then
 else
     rm -rf /etc/manifest/cluster.manifest
     cp $MANIFEST_PATH/$controller_ip/cluster.manifest /etc/manifest
-    chown root:vsm /etc/manifest/cluster.manifest
-    chmod 755 /etc/manifest/cluster.manifest
+    sudo chown root:vsm /etc/manifest/cluster.manifest
+    sudo chmod 755 /etc/manifest/cluster.manifest
     if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
@@ -336,5 +336,5 @@ set +o xtrace
 # Feb 12 2015 Zhu Boxiang <boxiangx.zhu@intel.com> - 2015.2.12-1
 # Initial release
 # 
-# 
+#
 # 
