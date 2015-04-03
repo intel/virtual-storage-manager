@@ -64,6 +64,7 @@ cp -rf $TOPDIR/tools/etc/keystone/* /etc/keystone/
 
 chown -R keystone /etc/keystone
 
+chmod +x $TOPDIR/tools/script/openstack-db
 $TOPDIR/tools/script/openstack-db --drop --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
 $TOPDIR/tools/script/openstack-db --init --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
 

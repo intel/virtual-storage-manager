@@ -88,12 +88,12 @@ fi
 
 echo "+++++++++++++++start checking packages+++++++++++++++"
 
-if [ ! -d ../vsmrepo ]; then
+if [ ! -d vsmrepo ]; then
     echo "You should have the vsmrepo folder, please check and try again"
     exit 1
 fi
 
-cd ../vsmrepo
+cd vsmrepo
 is_python_vsmclient=`ls|grep python-vsmclient*.rpm|wc -l`
 is_vsm=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
 is_vsm_dashboard=`ls|grep vsm-dashboard*.rpm|wc -l`
@@ -116,19 +116,19 @@ echo "+++++++++++++++finish checking packages+++++++++++++++"
 echo "+++++++++++++++start setting the iptables and selinux+++++++++++++++"
 
 function set_iptables_selinux() {
-    ssh root@$1 "service iptables stop"
-    ssh root@$1 "chkconfig iptables off"
-    ssh root@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
-    ssh root@$1 "setenforce 0"
+    ssh vsm@$1 "sudo service iptables stop"
+    ssh vsm@$1 "sudo chkconfig iptables off"
+    ssh vsm@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
+#    ssh vsm@$1 "setenforce 0"
 }
 
 if [ $is_controller -eq 0 ]; then
     set_iptables_selinux $controller_ip
 else
-    service iptables stop
-    chkconfig iptables off
+    sudo service iptables stop
+    sudo chkconfig iptables off
     sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
-    setenforce 0
+#    setenforce 0
 fi
 
 for ip in $storage_ip_list; do
@@ -142,21 +142,21 @@ echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
 #            downloading the dependences
 #-------------------------------------------------------------------------------
 
-if [ ! -d /opt/vsmrepo ] && [ ! -d vsmrepo ]; then
+if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
     wget https://github.com/01org/vsm-dependencies/archive/"$dependence_version".zip
     unzip $dependence_version
-    mv vsm-dependencies-$dependence_version/repo vsmrepo
+    mv vsm-dependencies-$dependence_version/repo vsm-dep-repo
     rm -rf vsm-dependencies-$dependence_version
     rm -rf $dependence_version
 fi
 
 if [ $is_controller -eq 0 ]; then
-    ssh root@$controller_ip "rm -rf /opt/vsmrepo"
-    scp -r vsmrepo root@$controller_ip:/opt
+    ssh vsm@$controller_ip "rm -rf /opt/vsm-dep-repo"
+    scp -r vsm-dep-repo vsm@$controller_ip:/opt
 else
-    if [ -d vsmrepo ]; then
-        rm -rf /opt/vsmrepo
-        cp -rf vsmrepo /opt
+    if [ -d vsm-dep-repo ]; then
+        rm -rf /opt/vsm-dep-repo
+        cp -rf vsm-dep-repo /opt
     fi
 fi
 
@@ -169,23 +169,23 @@ echo "+++++++++++++++start setting the repo+++++++++++++++"
 
 rm -rf vsm.repo
 cat <<"EOF" >vsm.repo
-[vsmrepo]
-name=vsmrepo
-baseurl=file:///opt/vsmrepo
+[vsm-dep-repo]
+name=vsm-dep-repo
+baseurl=file:///opt/vsm-dep-repo
 gpgcheck=0
 enabled=1
 proxy=_none_
 EOF
 
-oldurl="file:///opt/vsmrepo"
-newurl="http://$controller_ip/vsmrepo"
+oldurl="file:///opt/vsm-dep-repo"
+newurl="http://$controller_ip/vsm-dep-repo"
 if [ $is_controller -eq 0 ]; then
-    scp vsm.repo root@$controller_ip:/etc/yum.repos.d
-    ssh root@$controller_ip "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsmrepo; cp -rf /opt/vsmrepo /var/www/html"
-    ssh root@$controller_ip "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
+    scp vsm.repo vsm@$controller_ip:/etc/yum.repos.d
+    ssh vsm@$controller_ip "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html"
+    ssh vsm@$controller_ip "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
 else
     cp vsm.repo /etc/yum.repos.d
-    yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsmrepo; cp -rf /opt/vsmrepo /var/www/html
+    yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html
     sed -i "s,$oldurl,$newurl,g" /etc/yum.repos.d/vsm.repo
     yum makecache
 fi
@@ -193,9 +193,9 @@ fi
 sed -i "s,$oldurl,$newurl,g" vsm.repo
 
 function set_repo() {
-    ssh root@$1 "rm -rf /etc/yum.repos.d/vsm.repo"
-    scp vsm.repo root@$1:/etc/yum.repos.d
-    ssh root@$1 "yum makecache"
+    ssh vsm@$1 "rm -rf /etc/yum.repos.d/vsm.repo"
+    scp vsm.repo vsm@$1:/etc/yum.repos.d
+    ssh vsm@$1 "yum makecache"
 }
 
 for ip in $storage_ip_list; do
@@ -211,23 +211,31 @@ echo "+++++++++++++++finish setting the repo+++++++++++++++"
 
 echo "+++++++++++++++install vsm rpm and dependences+++++++++++++++"
 
-function install_vsm_dependences() {
-    ssh root@$1 "mkdir -p /opt/vsm_install"
-    scp ../vsmrepo/python-vsmclient*.rpm ../vsmrepo/vsm*.rpm root@$1:/opt/vsm_install
-    ssh root@$1 "cd /opt/vsm_install; yum -y localinstall python-vsmclient*.rpm vsm*.rpm"
-    ssh root@$1 "preinstall"
-    ssh root@$1 "cd /opt; rm -rf /opt/vsm_install"
+function install_vsm_controller() {
+    ssh vsm@$1 "mkdir -p /opt/vsm_install"
+    scp vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm vsm@$1:/opt/vsm_install
+    ssh vsm@$1 "cd /opt/vsm_install; yum -y localinstall python-vsmclient*.rpm vsm*.rpm"
+    ssh vsm@$1 "preinstall"
+    ssh vsm@$1 "cd /opt; rm -rf /opt/vsm_install"
+}
+
+function install_vsm_storage() {
+    ssh vsm@$1 "mkdir -p /opt/vsm_install"
+    scp vsmrepo/vsm*.rpm vsm@$1:/opt/vsm_install
+    ssh vsm@$1 "cd /opt/vsm_install; rm -rf vsm-dashboard*; yum -y localinstall vsm*.rpm"
+    ssh vsm@$1 "preinstall"
+    ssh vsm@$1 "cd /opt; rm -rf /opt/vsm_install"
 }
 
 if [ $is_controller -eq 0 ]; then
-    install_vsm_dependences $controller_ip
+    install_vsm_controller $controller_ip
 else
-    yum -y localinstall ../vsmrepo/python-vsmclient*.rpm ../vsmrepo/vsm*.rpm
+    yum -y localinstall vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm
     preinstall
 fi
 
 for ip in $storage_ip_list; do
-    install_vsm_dependences $ip
+    install_vsm_storage $ip
 done
 
 echo "+++++++++++++++finish install vsm rpm and dependences+++++++++++++++"
@@ -242,15 +250,15 @@ if [ -z $MANIFEST_PATH ]; then
 fi
 
 function setup_controller() {
-    ssh root@$controller_ip "rm -rf /etc/manifest/cluster_manifest"
-    scp $MANIFEST_PATH/$controller_ip/cluster.manifest root@$controller_ip:/etc/manifest
-    ssh root@$controller_ip "chown root:vsm /etc/manifest/cluster.manifest; chmod 755 /etc/manifest/cluster.manifest"
-    is_cluster_manifest_error=`ssh root@$controller_ip "cluster_manifest|grep error|wc -l"`
+    ssh vsm@$controller_ip "rm -rf /etc/manifest/cluster_manifest"
+    scp $MANIFEST_PATH/$controller_ip/cluster.manifest vsm@$controller_ip:/etc/manifest
+    ssh vsm@$controller_ip "sudo chown root:vsm /etc/manifest/cluster.manifest; sudo chmod 755 /etc/manifest/cluster.manifest"
+    is_cluster_manifest_error=`ssh vsm@$controller_ip "cluster_manifest|grep error|wc -l"`
     if [ $is_cluster_manifest_error -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        ssh root@$controller_ip "vsm-controller"
+        ssh vsm@$controller_ip "vsm-controller"
     fi
 }
 
@@ -259,8 +267,8 @@ if [ $is_controller -eq 0 ]; then
 else
     rm -rf /etc/manifest/cluster.manifest
     cp $MANIFEST_PATH/$controller_ip/cluster.manifest /etc/manifest
-    chown root:vsm /etc/manifest/cluster.manifest
-    chmod 755 /etc/manifest/cluster.manifest
+    sudo chown root:vsm /etc/manifest/cluster.manifest
+    sudo chmod 755 /etc/manifest/cluster.manifest
     if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
@@ -287,24 +295,24 @@ fi
 success=""
 failure=""
 if [ $is_controller -eq 0 ]; then
-    token=`ssh root@$controller_ip "agent-token"`
+    token=`ssh vsm@$controller_ip "agent-token"`
 else
     token=`agent-token`
 fi
 
 function setup_storage() {
-    ssh root@$1 "rm -rf /etc/manifest/server.manifest"
+    ssh vsm@$1 "rm -rf /etc/manifest/server.manifest"
     sed -i "s/token-tenant/$token/g" $MANIFEST_PATH/$1/server.manifest
     old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
     sed -i "s/$old_str/$token/g" $MANIFEST_PATH/$1/server.manifest
-    scp $MANIFEST_PATH/$1/server.manifest root@$1:/etc/manifest
-    ssh root@$1 "chown root:vsm /etc/manifest/server.manifest; chmod 755 /etc/manifest/server.manifest"
-    is_server_manifest_error=`ssh root@$1 "server_manifest|grep error|wc -l"`
+    scp $MANIFEST_PATH/$1/server.manifest vsm@$1:/etc/manifest
+    ssh vsm@$1 "chown root:vsm /etc/manifest/server.manifest; chmod 755 /etc/manifest/server.manifest"
+    is_server_manifest_error=`ssh vsm@$1 "server_manifest|grep ERROR|wc -l"`
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
         failure=$failure"$1 "
     else
-        ssh root@$1 "vsm-node"
+        ssh vsm@$1 "vsm-node"
         success=$success"$1 "
     fi
 }
@@ -328,5 +336,5 @@ set +o xtrace
 # Feb 12 2015 Zhu Boxiang <boxiangx.zhu@intel.com> - 2015.2.12-1
 # Initial release
 # 
-# 
+#
 # 
