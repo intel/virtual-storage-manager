@@ -41,7 +41,6 @@ horizon.modals.create = function (title, body, confirm, cancel) {
 horizon.modals.success = function (data, textStatus, jqXHR) {
   var modal;
   $('#modal_wrapper').append(data);
-  $('.modal span.help-block').hide();
   modal = $('.modal:last');
   modal.modal();
   $(modal).trigger("new_modal", modal);
@@ -54,10 +53,121 @@ horizon.modals.modal_spinner = function (text) {
   horizon.modals.spinner = $(template.render({text: text}));
   horizon.modals.spinner.appendTo("#modal_wrapper");
   horizon.modals.spinner.modal({backdrop: 'static'});
-  horizon.modals.spinner.spin(horizon.conf.spinner_options.modal);
+  horizon.modals.spinner.find(".modal-body").spin(horizon.conf.spinner_options.modal);
 };
 
+horizon.modals.init_wizard = function () {
+  // If workflow is in wizard mode, initialize wizard.
+  var _max_visited_step = 0;
+  var _validate_steps = function (start, end) {
+    var $form = $('.workflow > form'),
+      response = {};
+
+    if (typeof end === 'undefined') {
+      end = start;
+    }
+
+    // Clear old errors.
+    $form.find('td.actions div.alert-danger').remove();
+    $form.find('.form-group.error').each(function () {
+      var $group = $(this);
+      $group.removeClass('error');
+      $group.find('span.help-block.error').remove();
+    });
+
+    // Send the data for validation.
+    $.ajax({
+      type: 'POST',
+      url: $form.attr('action'),
+      headers: {
+        'X-Horizon-Validate-Step-Start': start,
+        'X-Horizon-Validate-Step-End': end
+      },
+      data: $form.serialize(),
+      dataType: 'json',
+      async: false,
+      success: function (data) { response = data; }
+    });
+
+    // Handle errors.
+    if (response.has_errors) {
+      var first_field = true;
+
+      $.each(response.errors, function (step_slug, step_errors) {
+        var step_id = response.workflow_slug + '__' + step_slug,
+          $fieldset = $form.find('#' + step_id);
+        $.each(step_errors, function (field, errors) {
+          var $field;
+          if (field === '__all__') {
+            // Add global errors.
+            $.each(errors, function (index, error) {
+              $fieldset.find('td.actions').prepend(
+                '<div class="alert alert-message alert-danger">' +
+                error + '</div>');
+            });
+            $fieldset.find('input,  select, textarea').first().focus();
+            return;
+          }
+          // Add field errors.
+          $field = $fieldset.find('[name="' + field + '"]');
+          $field.closest('.form-group').addClass('error');
+          $.each(errors, function (index, error) {
+            $field.before(
+              '<span class="help-block error">' +
+              error + '</span>');
+          });
+          // Focus the first invalid field.
+          if (first_field) {
+            $field.focus();
+            first_field = false;
+          }
+        });
+      });
+
+      return false;
+    }
+  };
+
+  $('.workflow.wizard').bootstrapWizard({
+    tabClass: 'wizard-tabs',
+    nextSelector: '.button-next',
+    previousSelector: '.button-previous',
+    onTabShow: function (tab, navigation, index) {
+      var $navs = navigation.find('li');
+      var total = $navs.length;
+      var current = index;
+      var $footer = $('.modal-footer');
+      _max_visited_step = Math.max(_max_visited_step, current);
+      if (current + 1 >= total) {
+        $footer.find('.button-next').hide();
+        $footer.find('.button-final').show();
+      } else {
+        $footer.find('.button-next').show();
+        $footer.find('.button-final').hide();
+      }
+      $navs.each(function(i) {
+        $this = $(this);
+        if (i <= _max_visited_step) {
+          $this.addClass('done');
+        } else {
+          $this.removeClass('done');
+        }
+      });
+    },
+    onNext: function ($tab, $nav, index) {
+      return _validate_steps(index - 1);
+    },
+    onTabClick: function ($tab, $nav, current, index) {
+      // Validate if moving forward, but move backwards without validation
+      return (index <= current ||
+              _validate_steps(current, index - 1) !== false);
+    }
+  });
+};
+
+
 horizon.addInitFunction(function() {
+
   // Bind handler for initializing new modals.
   $('#modal_wrapper').on('new_modal', function (evt, modal) {
     horizon.modals.initModal(modal);
@@ -72,12 +182,28 @@ horizon.addInitFunction(function() {
   // AJAX form submissions from modals. Makes validation happen in-modal.
   $(document).on('submit', '.modal form', function (evt) {
     var $form = $(this),
+      form = this,
       $button = $form.find(".modal-footer .btn-primary"),
       update_field_id = $form.attr("data-add-to-field"),
-      headers = {};
-    if ($form.attr("enctype") === "multipart/form-data") {
-      // AJAX-upload for files is not currently supported.
-      return;
+      headers = {},
+      modalFileUpload = $form.attr("enctype") === "multipart/form-data",
+      formData, ajaxOpts, featureFileList, featureFormData;
+
+    if (modalFileUpload) {
+      featureFileList = $("<input type='file'/>").get(0).files !== undefined;
+      featureFormData = window.FormData !== undefined;
+
+      if (!featureFileList || !featureFormData) {
+        // Test whether browser supports HTML5 FileList and FormData interfaces,
+        // which make XHR file upload possible. If not, it doesn't
+        // support setting custom headers in AJAX requests either, so
+        // modal forms won't work in them (namely, IE9).
+        return;
+      } else {
+        formData = new window.FormData(form);
+      }
+    } else {
+      formData = $form.serialize();
     }
     evt.preventDefault();
 
@@ -88,13 +214,14 @@ horizon.addInitFunction(function() {
       headers["X-Horizon-Add-To-Field"] = update_field_id;
     }
 
-    $.ajax({
+    ajaxOpts = {
       type: "POST",
       url: $form.attr('action'),
       headers: headers,
-      data: $form.serialize(),
+      data: formData,
       beforeSend: function () {
         $("#modal_wrapper .modal").last().modal("hide");
+        $('.ajax-modal, .dropdown-toggle').attr('disabled', true);
         horizon.modals.modal_spinner(gettext("Working"));
       },
       complete: function () {
@@ -106,6 +233,9 @@ horizon.addInitFunction(function() {
         var redirect_header = jqXHR.getResponseHeader("X-Horizon-Location"),
           add_to_field_header = jqXHR.getResponseHeader("X-Horizon-Add-To-Field"),
           json_data, field_to_update;
+        if (redirect_header === null) {
+            $('.ajax-modal, .dropdown-toggle').removeAttr("disabled");
+        }
         $form.closest(".modal").modal("hide");
         if (redirect_header) {
           location.href = redirect_header;
@@ -124,15 +254,22 @@ horizon.addInitFunction(function() {
         if (jqXHR.getResponseHeader('logout')) {
           location.href = jqXHR.getResponseHeader("X-Horizon-Location");
         } else {
+          $('.ajax-modal, .dropdown-toggle').removeAttr("disabled");
           $form.closest(".modal").modal("hide");
-          horizon.alert("error", gettext("There was an error submitting the form. Please try again."));
+          horizon.alert("danger", gettext("There was an error submitting the form. Please try again."));
         }
       }
-    });
+    };
+
+    if (modalFileUpload) {
+      ajaxOpts.contentType = false;  // tell jQuery not to process the data
+      ajaxOpts.processData = false;  // tell jQuery not to set contentType
+    }
+    $.ajax(ajaxOpts);
   });
 
   // Position modal so it's in-view even when scrolled down.
-  $(document).on('show', '.modal', function (evt) {
+  $(document).on('show.bs.modal', '.modal', function (evt) {
     // Filter out indirect triggers of "show" from (for example) tabs.
     if ($(evt.target).hasClass("modal")) {
       var scrollShift = $('body').scrollTop() || $('html').scrollTop(),
@@ -155,116 +292,8 @@ horizon.addInitFunction(function() {
     $(modal).find(":text, select, textarea").filter(":visible:first").focus();
   });
 
-  // If workflow id wizard mode, initialize wizard.
-  horizon.modals.addModalInitFunction(function (modal) {
-    var _max_visited_step = 0;
-    var _validate_steps = function (start, end) {
-      var $form = $('.workflow > form'),
-        response = {};
-
-      if (typeof end === 'undefined') {
-        end = start;
-      }
-
-      // Clear old errors.
-      $form.find('td.actions div.alert-error').remove();
-      $form.find('.control-group.error').each(function () {
-        var $group = $(this);
-        $group.removeClass('error');
-        $group.find('span.help-inline.error').remove();
-      });
-
-      // Send the data for validation.
-      $.ajax({
-        type: 'POST',
-        url: $form.attr('action'),
-        headers: {
-          'X-Horizon-Validate-Step-Start': start,
-          'X-Horizon-Validate-Step-End': end
-        },
-        data: $form.serialize(),
-        dataType: 'json',
-        async: false,
-        success: function (data) { response = data; }
-      });
-
-      // Handle errors.
-      if (response.has_errors) {
-        var first_field = true;
-
-        $.each(response.errors, function (step_slug, step_errors) {
-          var step_id = response.workflow_slug + '__' + step_slug,
-            $fieldset = $form.find('#' + step_id);
-          $.each(step_errors, function (field, errors) {
-            var $field;
-            if (field === '__all__') {
-              // Add global errors.
-              $.each(errors, function (index, error) {
-                $fieldset.find('td.actions').prepend(
-                  '<div class="alert alert-message alert-error">' +
-                  error + '</div>');
-              });
-              $fieldset.find('input,  select, textarea').first().focus();
-              return;
-            }
-            // Add field errors.
-            $field = $fieldset.find('[name="' + field + '"]');
-            $field.closest('.control-group').addClass('error');
-            $.each(errors, function (index, error) {
-              $field.before(
-                '<span class="help-inline error">' +
-                error + '</span>');
-            });
-            // Focus the first invalid field.
-            if (first_field) {
-              $field.focus();
-              first_field = false;
-            }
-          });
-        });
-
-        return false;
-      }
-    };
-
-    $('.workflow.wizard').bootstrapWizard({
-      tabClass: 'wizard-tabs',
-      nextSelector: '.button-next',
-      previousSelector: '.button-previous',
-      onTabShow: function (tab, navigation, index) {
-        var $navs = navigation.find('li');
-        var total = $navs.length;
-        var current = index;
-        var $footer = $('.modal-footer');
-        _max_visited_step = Math.max(_max_visited_step, current);
-        if (current + 1 >= total) {
-          $footer.find('.button-next').hide();
-          $footer.find('.button-final').show();
-        } else {
-          $footer.find('.button-next').show();
-          $footer.find('.button-final').hide();
-        }
-        $navs.each(function(i) {
-          $this = $(this);
-          if (i <= _max_visited_step) {
-            $this.addClass('done');
-          } else {
-            $this.removeClass('done');
-          }
-        });
-      },
-      onNext: function ($tab, $nav, index) {
-        return _validate_steps(index - 1);
-      },
-      onTabClick: function ($tab, $nav, current, index) {
-        // Validate if moving forward, but move backwards without validation
-        return (index <= current ||
-                _validate_steps(current, index - 1) !== false);
-      }
-    });
-  });
-
   horizon.modals.addModalInitFunction(horizon.datatables.validate_button);
+  horizon.modals.addModalInitFunction(horizon.utils.loadAngular);
 
   // Load modals for ajax-modal links.
   $(document).on('click', '.ajax-modal', function (evt) {
@@ -296,7 +325,7 @@ horizon.addInitFunction(function() {
         else {
           if (!horizon.ajax.get_messages(jqXHR)) {
             // Generic error handler. Really generic.
-            horizon.alert("error", gettext("An error occurred. Please try again later."));
+            horizon.alert("danger", gettext("An error occurred. Please try again later."));
           }
         }
       },
@@ -319,21 +348,19 @@ horizon.addInitFunction(function() {
 
   /* Manage the modal "stack" */
 
-  // When a new modal is opened, hide any that are already in the stack.
-  $(document).on("show", ".modal", function () {
-    var container = $("#modal_wrapper"),
-      modal_stack = container.find(".modal"),
-      $this = $(this);
+  // After a modal has been shown, hide any other modals that are already in
+  // the stack. Only one modal can be visible at the same time.
+  $(document).on("show.bs.modal", ".modal", function () {
+    var modal_stack = $("#modal_wrapper .modal");
     modal_stack.splice(modal_stack.length - 1, 1);
     modal_stack.modal("hide");
-    horizon.utils.loadAngular(container);
   });
 
   // After a modal has been fully hidden, remove it to avoid confusion.
   // Note: the modal should only be removed if it is the "top" of the stack of
   // modals, e.g. it's the one currently being interacted with and isn't just
   // temporarily being hidden.
-  $(document).on('hidden', '.modal', function () {
+  $(document).on('hidden.bs.modal', '.modal', function () {
     var $this = $(this),
       modal_stack = $("#modal_wrapper .modal");
     if ($this[0] === modal_stack.last()[0] || $this.hasClass("loading")) {
