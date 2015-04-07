@@ -34,26 +34,26 @@ horizon.tabs.load_tab = function (evt) {
     });
   }
   $this.attr("data-loaded", "true");
-  evt.preventDefault();
 };
 
 horizon.addInitFunction(function () {
-  var data = horizon.cookies.read('tabs');
+  var data = horizon.cookies.get("tabs") || {};
 
   $(".tab-content").find(".js-tab-pane").addClass("tab-pane");
   horizon.modals.addModalInitFunction(function (el) {
     $(el).find(".js-tab-pane").addClass("tab-pane");
   });
 
-  $(document).on("show", ".ajax-tabs a[data-loaded='false']", horizon.tabs.load_tab);
+  $(document).on("show.bs.tab", ".ajax-tabs a[data-loaded='false']", horizon.tabs.load_tab);
 
-  $(document).on("shown", ".nav-tabs a[data-toggle='tab']", function (evt) {
+  $(document).on("shown.bs.tab", ".nav-tabs a[data-toggle='tab']", function (evt) {
     var $tab = $(evt.target),
       $content = $($(evt.target).attr('data-target'));
     $content.find("table.datatable").each(function () {
       horizon.datatables.update_footer_count($(this));
     });
-    horizon.cookies.update("tabs", $tab.closest(".nav-tabs").attr("id"), $tab.attr('data-target'));
+    data[$tab.closest(".nav-tabs").attr("id")] = $tab.attr('data-target');
+    horizon.cookies.put("tabs", data);
   });
 
   // Initialize stored tab state for tab groups on this page.
@@ -85,7 +85,6 @@ horizon.addInitFunction(function () {
       evt.preventDefault();
       $(".nav-tabs a[data-target='#" + prev_pane.attr("id") + "']").tab('show');
       prev_pane.find(":input:last").focus();
-      console.log(prev_pane);
     }
   });
 

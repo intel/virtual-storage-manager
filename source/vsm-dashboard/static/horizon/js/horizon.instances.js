@@ -45,18 +45,19 @@ horizon.instances = {
    * Initializes an associative array of lists of the current
    * networks.
    **/
-  init_network_list: function() {
+  init_network_list: function () {
     horizon.instances.networks_selected = [];
     horizon.instances.networks_available = [];
-    $(this.get_network_element("")).each(function(){
+    $(this.get_network_element("")).each(function () {
       var $this = $(this);
       var $input = $this.children("input");
+      var name = horizon.escape_html($this.text().replace(/^\s+/, ""));
       var network_property = {
-        name:$this.text().replace(/^\s+/,""),
-        id:$input.attr("id"),
-        value:$input.attr("value")
+        "name": name,
+        "id": $input.attr("id"),
+        "value": $input.attr("value")
       };
-      if($input.is(':checked')) {
+      if ($input.is(":checked")) {
         horizon.instances.networks_selected.push(network_property);
       } else {
         horizon.instances.networks_available.push(network_property);
@@ -80,17 +81,17 @@ horizon.instances = {
   generate_networklist_html: function() {
     var self = this;
     var updateForm = function() {
-      var lists = $("#networkListId div.input li").attr('data-index',100);
+      var lists = $("#networkListId li").attr('data-index',100);
       var active_networks = $("#selected_network > li").map(function(){
         return $(this).attr("name");
       });
-      $("#networkListId div.input input:checkbox").removeAttr('checked');
+      $("#networkListId input:checkbox").removeAttr('checked');
       active_networks.each(function(index, value){
-        $("#networkListId div.input input:checkbox[value=" + value + "]")
-          .attr('checked','checked')
+        $("#networkListId input:checkbox[value=" + value + "]")
+          .prop('checked', true)
           .parents("li").attr('data-index',index);
       });
-      $("#networkListId div.input ul").html(
+      $("#networkListId ul").html(
         lists.sort(function(a,b){
           if( $(a).data("index") < $(b).data("index")) { return -1; }
           if( $(a).data("index") > $(b).data("index")) { return 1; }
@@ -125,8 +126,8 @@ horizon.instances = {
       }
       updateForm();
     });
-    if ($("#networkListId > div.control-group.error").length > 0) {
-      var errortext = $("#networkListId > div.control-group.error").find("span.help-inline").text();
+    if ($("#networkListId > div.form-group.error").length > 0) {
+      var errortext = $("#networkListId > div.form-group.error").find("span.help-block").text();
       $("#selected_network_label").before($('<div class="dynamic-error">').html(errortext));
     }
     $(".networklist").sortable({
@@ -163,29 +164,29 @@ horizon.addInitFunction(function () {
     var $this = $(field),
       base_type = $this.val();
 
-    $this.closest(".control-group").nextAll().hide();
+    $this.closest(".form-group").nextAll().hide();
 
     switch(base_type) {
       case "image_id":
-        $("#id_image_id").closest(".control-group").show();
+        $("#id_image_id").closest(".form-group").show();
         break;
 
       case "instance_snapshot_id":
-        $("#id_instance_snapshot_id").closest(".control-group").show();
+        $("#id_instance_snapshot_id").closest(".form-group").show();
         break;
 
       case "volume_id":
-        $("#id_volume_id").closest(".control-group").show();
+        $("#id_volume_id, #id_delete_on_terminate").closest(".form-group").show();
         break;
 
       case "volume_image_id":
-        $("#id_image_id, #id_volume_size, #id_device_name, , #id_delete_on_terminate")
-          .closest(".control-group").show();
+        $("#id_image_id, #id_volume_size, #id_device_name, #id_delete_on_terminate")
+          .closest(".form-group").show();
         break;
 
       case "volume_snapshot_id":
         $("#id_volume_snapshot_id, #id_device_name, #id_delete_on_terminate")
-          .closest(".control-group").show();
+          .closest(".form-group").show();
         break;
     }
   }
@@ -199,19 +200,34 @@ horizon.addInitFunction(function () {
     $(modal).find("#id_source_type").change();
   });
 
+  /*
+   Update the device size value to reflect minimum allowed
+   for selected image and flavor
+   */
+  function update_device_size() {
+    var volume_size = horizon.Quota.getSelectedFlavor().disk;
+    var image = horizon.Quota.getSelectedImage();
 
-  // Handle field toggles for the Launch Instance volume type field
-  function update_image_id_fields (field) {
-    var $this = $(field),
-      volume_opt = $this.val();
-    var $option = $this.find("option:selected");
-    var $form = $this.closest('form');
-    var $volSize = $form.find('input#id_volume_size');
-    $volSize.val($option.data("volume_size"));
+    if(image !== undefined) {
+      if(image.min_disk > volume_size) {
+        volume_size = image.min_disk;
+      }
+    }
+
+    // Make sure the new value is >= the minimum allowed (1GB)
+    if(volume_size < 1) {
+      volume_size = 1;
+    }
+
+    $("#id_volume_size").val(volume_size);
   }
 
+  $(document).on('change', '.workflow #id_flavor', function (evt) {
+    update_device_size();
+  });
+
   $(document).on('change', '.workflow #id_image_id', function (evt) {
-    update_image_id_fields(this);
+    update_device_size();
   });
 
   horizon.instances.decrypt_password = function(encrypted_password, private_key) {

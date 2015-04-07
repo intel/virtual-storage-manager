@@ -80,17 +80,17 @@ horizon.firewalls = {
   generate_rulelist_html: function() {
     var self = this;
     var updateForm = function() {
-      var lists = $("#ruleListId div.input li").attr('data-index',100);
+      var lists = $("#ruleListId li").attr('data-index',100);
       var active_rules = $("#selected_rule > li").map(function(){
         return $(this).attr("name");
       });
-      $("#ruleListId div.input input:checkbox").removeAttr('checked');
+      $("#ruleListId input:checkbox").removeAttr('checked');
       active_rules.each(function(index, value){
-        $("#ruleListId div.input input:checkbox[value=" + value + "]")
-          .attr('checked','checked')
+        $("#ruleListId input:checkbox[value=" + value + "]")
+          .prop('checked', true)
           .parents("li").attr('data-index',index);
       });
-      $("#ruleListId div.input ul").html(
+      $("#ruleListId ul").html(
         lists.sort(function(a,b){
           if( $(a).data("index") < $(b).data("index")) { return -1; }
           if( $(a).data("index") > $(b).data("index")) { return 1; }
@@ -122,8 +122,8 @@ horizon.firewalls = {
       }
       updateForm();
     });
-    if ($("#ruleListId > div.control-group.error").length > 0) {
-      var errortext = $("#ruleListId > div.control-group.error").find("span.help-inline").text();
+    if ($("#ruleListId > div.form-group.error").length > 0) {
+      var errortext = $("#ruleListId > div.form-group.error").find("span.help-block").text();
       $("#selected_rule_h4").before($('<div class="dynamic-error">').html(errortext));
     }
     $(".rulelist").sortable({
