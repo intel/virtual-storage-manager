@@ -34,9 +34,10 @@ function create_vis(chart) {
     .attr("class", "chart")
     .attr("width", WIDTH)
     .attr("height", HEIGHT)
+    .attr("viewBox", "0 0 " + WIDTH + " " + HEIGHT )
     .append("g")
     .attr("transform",
-      "translate(" + (RADIUS + 2) + "," + (RADIUS + 2) + ")");
+      "translate(" + (WIDTH / 2) + "," + (HEIGHT / 2) + ")");
 }
 
 function create_arc() {
@@ -141,9 +142,10 @@ horizon.d3_pie_chart_distribution = {
       self.keys = [];
       for (var j = 0; j < parts.length; j++) {
         var key_value = parts[j].split("=");
-        var d = {};
-        d["key"] = key_value[0];
-        d["value"] = key_value[1];
+        var d = {
+          key: key_value[0],
+          value: key_value[1]
+        };
         self.data.push(d);
         self.keys.push(key_value[0]);
       }
@@ -159,7 +161,7 @@ horizon.d3_pie_chart_distribution = {
 
     var total = 0;
     for (var j = 0; j < self.data.length; j++) {
-      total = total + parseInt(self.data[j]["value"]);
+      total = total + parseInt(self.data[j].value);
     }
 
     var initial_data = [];
@@ -233,8 +235,8 @@ horizon.d3_pie_chart_distribution = {
         }
         var value = 0;
         for (var j = 0; j < self.data.length; j++) {
-          if (self.data[j]["key"] == d) {
-            value = self.data[j]["value"];
+          if (self.data[j].key == d) {
+            value = self.data[j].value;
             break;
           }
         }

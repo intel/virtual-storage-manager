@@ -4,16 +4,24 @@ horizon.alert = function (type, message, extra_tags) {
   if (typeof(extra_tags) !== "undefined" && $.inArray('safe', extra_tags.split(' ')) !== -1) {
     safe = true;
   }
+
+  var type_display = {
+    'danger': gettext("Danger: "),
+    'warning': gettext("Warning: "),
+    'info': gettext("Notice: "),
+    'success': gettext("Success: "),
+    'error': gettext("Error: ")
+  }[type];
+
+  // the "error" type needs to be rewritten as "danger" for correct styling
+  if (type === 'error') {
+    type = 'danger';
+  }
+
   var template = horizon.templates.compiled_templates["#alert_message_template"],
     params = {
       "type": type,
-      "type_display": {
-        'danger': gettext("Danger: "),
-        'warning': gettext("Warning: "),
-        'info': gettext("Notice: "),
-        'success': gettext("Success: "),
-        'error': gettext("Error: ")
-      }[type],
+      "type_display": type_display,
       "message": message,
       "safe": safe
     };
@@ -21,7 +29,7 @@ horizon.alert = function (type, message, extra_tags) {
 };
 
 horizon.clearErrorMessages = function() {
-  $('#main_content .messages .alert.alert-error').remove();
+  $('#main_content .messages .alert.alert-danger').remove();
 };
 
 horizon.clearSuccessMessages = function() {
@@ -53,7 +61,7 @@ horizon.autoDismissAlerts = function() {
 
 horizon.addInitFunction(function () {
   // Bind AJAX message handling.
-  $("body").ajaxComplete(function(event, request, settings){
+  $(document).ajaxComplete(function(event, request, settings){
     var message_array = $.parseJSON(horizon.ajax.get_messages(request));
     $(message_array).each(function (index, item) {
       horizon.alert(item[0], item[1], item[2]);

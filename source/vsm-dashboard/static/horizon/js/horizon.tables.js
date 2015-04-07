@@ -45,6 +45,8 @@ horizon.datatables = {
                 }
                 // Reset tablesorter's data cache.
                 $table.trigger("update");
+                // Enable launch action if quota is not exceeded
+                horizon.datatables.update_actions();
                 break;
               default:
                 horizon.utils.log(gettext("An error occurred while updating."));
@@ -58,23 +60,14 @@ horizon.datatables = {
 
             if ($new_row.hasClass('status_unknown')) {
               var spinner_elm = $new_row.find("td.status_unknown:last");
-
-              if ($new_row.find('.btn-action-required').length > 0) {
-                spinner_elm.prepend(
-                  $("<div />")
-                    .addClass("action_required_img")
-                    .append(
-                      $("<img />")
-                        .attr("src", "/static/dashboard/img/action_required.png")));
-              } else {
-                // Replacing spin.js here with an animated gif to reduce CPU
-                spinner_elm.prepend(
-                  $("<div />")
-                    .addClass("loading_gif")
-                    .append(
-                      $("<img />")
-                        .attr("src", "/static/dashboard/img/loading.gif")));
-              }
+              var imagePath = $new_row.find('.btn-action-required').length > 0 ?
+                "dashboard/img/action_required.png":
+                "dashboard/img/loading.gif";
+              imagePath = STATIC_URL + imagePath;
+              spinner_elm.prepend(
+                $("<div>")
+                  .addClass("loading_gif")
+                  .append($("<img>").attr("src", imagePath)));
             }
 
             // Only replace row if the html content has changed
@@ -88,6 +81,11 @@ horizon.datatables = {
               $table.trigger("update");
               // Reset decay constant.
               $table.removeAttr('decay_constant');
+              // Check that quicksearch is enabled for this table
+              // Reset quicksearch's data cache.
+              if ($table.attr('id') in horizon.datatables.qs) {
+                horizon.datatables.qs[$table.attr('id')].cache();
+              }
             }
           },
           complete: function (jqXHR, textStatus) {
@@ -112,6 +110,27 @@ horizon.datatables = {
     }
   },
 
+  update_actions: function() {
+    var $actions_to_update = $('.btn-launch.ajax-update, .btn-create.ajax-update');
+    $actions_to_update.each(function(index, action) {
+      var $action = $(this);
+      horizon.ajax.queue({
+        url: $action.attr('data-update-url'),
+        error: function (jqXHR, textStatus, errorThrown) {
+          horizon.utils.log(gettext("An error occurred while updating."));
+        },
+        success: function (data, textStatus, jqXHR) {
+          var $new_action = $(data);
+
+          // Only replace row if the html content has changed
+          if($new_action.html() != $action.html()) {
+            $action.replaceWith($new_action);
+          }
+        }
+      });
+    });
+  },
+
   validate_button: function () {
     // Disable form button if checkbox are not checked
     $("form").each(function (i) {
@@ -122,7 +141,36 @@ horizon.datatables = {
       action_buttons.toggleClass("disabled",
                                  !checkboxes.filter(":checked").length);
     });
+  },
+
+  initialize_checkboxes_behavior: function() {
+    // Bind the "select all" checkbox action.
+    $('div.table_wrapper, #modal_wrapper').on('click', 'table thead .multi_select_column .table-row-multi-select:checkbox', function(evt) {
+      var $this = $(this),
+      $table = $this.closest('table'),
+      is_checked = $this.prop('checked'),
+      checkboxes = $table.find('tbody .table-row-multi-select:visible:checkbox');
+      checkboxes.prop('checked', is_checked);
+    });
+    // Change "select all" checkbox behavior while any checkbox is checked/unchecked.
+    $("div.table_wrapper, #modal_wrapper").on("click", 'table tbody .table-row-multi-select:checkbox', function (evt) {
+      var $table = $(this).closest('table');
+      var $multi_select_checkbox = $table.find('thead .multi_select_column .table-row-multi-select:checkbox');
+      var any_unchecked = $table.find("tbody .table-row-multi-select:checkbox").not(":checked");
+      $multi_select_checkbox.prop('checked', any_unchecked.length === 0);
+    });
+    // Enable dangerous buttons only if one or more checkbox is checked.
+    $("div.table_wrapper, #modal_wrapper").on("click", '.table-row-multi-select:checkbox', function (evt) {
+      var $form = $(this).closest("form");
+      var any_checked = $form.find("tbody .table-row-multi-select:checkbox").is(":checked");
+      if(any_checked) {
+        $form.find(".table_actions button.btn-danger").removeClass("disabled");
+      }else {
+        $form.find(".table_actions button.btn-danger").addClass("disabled");
+      }
+    });
   }
+
 };
 
 /* Generates a confirmation modal dialog for the given action. */
@@ -141,7 +189,8 @@ horizon.datatables.confirm = function (action) {
   closest_table_id = $(action).closest("table").attr("id");
   // Check if data-display attribute is available
   if ($("#"+closest_table_id+" tr[data-display]").length > 0) {
-    if($(action).closest("div").hasClass("table_actions")) {
+    var actions_div = $(action).closest("div");
+    if(actions_div.hasClass("table_actions") || actions_div.hasClass("table_actions_menu")) {
       // One or more checkboxes selected
       $("#"+closest_table_id+" tr[data-display]").has(".table-row-multi-select:checkbox:checked").each(function() {
         name_array.push(" \"" + $(this).attr("data-display") + "\"");
@@ -218,6 +267,78 @@ $.tablesorter.addParser({
   type: 'numeric'
 });
 
+$.tablesorter.addParser({
+  id: "timestampSorter",
+  is: function() {
+    return false;
+  },
+  format: function(s) {
+    s = s.replace(/\-/g, " ").replace(/:/g, " ");
+    s = s.replace("T", " ").replace("Z", " ");
+    s = s.split(" ");
+    return new Date(s[0], s[1], s[2], s[3], s[4], s[5]).getTime();
+  },
+  type: "numeric"
+});
+
+$.tablesorter.addParser({
+  id: 'naturalSort',
+  is: function(s) {
+    return false;
+  },
+  // compare int values, non-integers use the ordinal value of the first byte
+  format: function(s) {
+    result = parseInt(s);
+    if (isNaN(result)) {
+      m = s.match(/\d+/);
+      if (m && m.length) {
+        return parseInt(m[0]);
+      } else {
+        return s.charCodeAt(0);
+      }
+    } else {
+      return result;
+    }
+  },
+  type: 'numeric'
+});
+
+$.tablesorter.addParser({
+  id: 'IPv4Address',
+  is: function(s, table, cell) {
+    // the first arg to this function is a string of all the cell's
+    // innertext smashed together with no delimiters, so we need to find
+    // the original cell and grab its first element to do the work
+    var a = $(cell).find('li').first().text().split('.');
+    if (a.length !== 4) {
+      return false;
+    }
+    for (var i = 0; i < a.length; i++) {
+      if (isNaN(a[i])) {
+        return false;
+      }
+      if ((a[i] & 0xFF) != a[i]) {
+        return false;
+      }
+    }
+    return true;
+  },
+  format: function(s, table, cell) {
+    var result = 0;
+    var a = $(cell).find('li').first().text().split('.');
+    var last_index = a.length - 1;
+    // inet_aton(3), Javascript-style.  The unsigned-right-shift operation is
+    // needed to keep the result from flipping over to negative when suitably
+    // large values are generated
+    for (var i = 0; i < a.length; i++) {
+      var shift = 8 * (last_index - i);
+      result += ((parseInt(a[i], 10) << shift) >>> 0);
+    }
+    return result;
+  },
+  type: 'numeric'
+});
+
 horizon.datatables.disable_buttons = function() {
   $("table .table_actions").on("click", ".btn.disabled", function(event){
     event.preventDefault();
@@ -284,9 +405,13 @@ horizon.datatables.set_table_sorting = function (parent) {
         } else if ($th.data('type') === 'size'){
           header_options[i] = {sorter: 'sizeSorter'};
         } else if ($th.data('type') === 'ip'){
-          header_options[i] = {sorter: 'ipAddress'};
+          header_options[i] = {sorter: 'IPv4Address'};
         } else if ($th.data('type') === 'timesince'){
           header_options[i] = {sorter: 'timesinceSorter'};
+        } else if ($th.data('type') === 'timestamp'){
+          header_options[i] = {sorter: 'timestampSorter'};
+        } else if ($th.data('type') == 'naturalSort'){
+          header_options[i] = {sorter: 'naturalSort'};
         }
       });
       $table.tablesorter({
@@ -309,11 +434,12 @@ horizon.datatables.add_table_checkboxes = function(parent) {
 };
 
 horizon.datatables.set_table_query_filter = function (parent) {
+  horizon.datatables.qs = {};
   $(parent).find('table').each(function (index, elm) {
     var input = $($(elm).find('div.table_search.client input')),
         table_selector;
     if (input.length > 0) {
-      // Disable server-side searcing if we have client-side searching since
+      // Disable server-side searching if we have client-side searching since
       // (for now) the client-side is actually superior. Server-side filtering
       // remains as a noscript fallback.
       // TODO(gabriel): figure out an overall strategy for making server-side
@@ -323,13 +449,13 @@ horizon.datatables.set_table_query_filter = function (parent) {
           return false;
         }
       });
-      input.next('button.btn-search').on('click keypress', function (evt) {
+      input.next('button.btn span.glyphicon-search').on('click keypress', function (evt) {
         return false;
       });
 
       // Enable the client-side searching.
       table_selector = 'table#' + $(elm).attr('id');
-      input.quicksearch(table_selector + ' tbody tr', {
+      var qs = input.quicksearch(table_selector + ' tbody tr', {
         'delay': 300,
         'loader': 'span.loading',
         'bind': 'keyup click',
@@ -353,6 +479,7 @@ horizon.datatables.set_table_query_filter = function (parent) {
           return query.test($(_row).find('td:not(.hidden):not(.actions_column)').text());
         }
       });
+      horizon.datatables.qs[$(elm).attr('id')] = qs;
     }
   });
 };
@@ -387,31 +514,7 @@ horizon.addInitFunction(function() {
   $('table.datatable').each(function (idx, el) {
     horizon.datatables.update_footer_count($(el), 0);
   });
-  // Bind the "select all" checkbox action.
-  $('div.table_wrapper, #modal_wrapper').on('click', 'table thead .multi_select_column .table-row-multi-select:checkbox', function(evt) {
-    var $this = $(this),
-      $table = $this.closest('table'),
-      is_checked = $this.prop('checked'),
-      checkboxes = $table.find('tbody .table-row-multi-select:visible:checkbox');
-    checkboxes.prop('checked', is_checked);
-  });
-  // Change "select all" checkbox behaviour while any checkbox is checked/unchecked.
-  $("div.table_wrapper, #modal_wrapper").on("click", 'table tbody .table-row-multi-select:checkbox', function (evt) {
-    var $table = $(this).closest('table');
-    var $multi_select_checkbox = $table.find('thead .multi_select_column .table-row-multi-select:checkbox');
-    var any_unchecked = $table.find("tbody .table-row-multi-select:checkbox").not(":checked");
-    $multi_select_checkbox.prop('checked', any_unchecked.length === 0);
-  });
-  // Enable dangerous buttons only if one or more checkbox is checked.
-  $("div.table_wrapper, #modal_wrapper").on("click", '.table-row-multi-select:checkbox', function (evt) {
-    var $form = $(this).closest("form");
-    var any_checked = $form.find("tbody .table-row-multi-select:checkbox").is(":checked");
-    if(any_checked) {
-      $form.find(".table_actions button.btn-danger").removeClass("disabled");
-    }else {
-      $form.find(".table_actions button.btn-danger").addClass("disabled");
-    }
-  });
+  horizon.datatables.initialize_checkboxes_behavior();
 
   // Trigger run-once setup scripts for tables.
   horizon.datatables.add_table_checkboxes($('body'));
@@ -430,6 +533,8 @@ horizon.addInitFunction(function() {
   horizon.tabs.addTabLoadFunction(horizon.datatables.set_table_sorting);
   horizon.tabs.addTabLoadFunction(horizon.datatables.set_table_query_filter);
   horizon.tabs.addTabLoadFunction(horizon.datatables.set_table_fixed_filter);
+  horizon.tabs.addTabLoadFunction(horizon.datatables.initialize_checkboxes_behavior);
+  horizon.tabs.addTabLoadFunction(horizon.datatables.validate_button);
 
   horizon.datatables.update();
 });
