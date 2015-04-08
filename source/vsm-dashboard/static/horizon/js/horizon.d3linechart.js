@@ -127,11 +127,11 @@
   <form class="form-horizontal"
     id="linechart_general_form">
 
-    <div class="control-group">
-      <label for="meter" class="control-label">{% trans "Metric" %}:&nbsp;</label>
-      <div class="controls">
+    <div class="form-group">
+      <label for="meter" class="control-label col-sm-2">{% trans "Metric" %}:&nbsp;</label>
+      <div class="col-sm-10">
         <select data-line-chart-command="select_box_change"
-          name="meter" id="meter" class="span2 example">
+          name="meter" id="meter" class="col-sm-w form-control example">
           {% for meter in meters %}
             <option value="{{ meter }}" data-unit="{{ meter }}">
               {{ meter }}
@@ -149,23 +149,17 @@
   Example:
   <form class="form-horizontal"
     id="linechart_general_form">
-    <div class="control-group" id="date_from">
-      <label for="date_from" class="control-label">{% trans "From" %}:&nbsp;</label>
-      <div class="controls">
+    <div class="form-group" id="date_from">
+      <label for="date_from" class="control-label col-sm-2">{% trans "From" %}:&nbsp;</label>
+      <div class="col-sm-10">
         <input data-line-chart-command="date_picker_change"
-          type="text" id="date_from" name="date_from" class="span2 example"/>
+          type="text" id="date_from" name="date_from" class="form-control example"/>
       </div>
     </div>
   </form>
 
  */
 
-
-/**
- * TODO(lsmola) this is for representation of percentage charts. Need to be extended
- * so it can be used e.g. for setting fixed x axis as requested here:
- * https://bugs.launchpad.net/horizon/+bug/1243716
- */
 Rickshaw.namespace('Rickshaw.Graph.Renderer.StaticAxes');
 Rickshaw.Graph.Renderer.StaticAxes = Rickshaw.Class.create( Rickshaw.Graph.Renderer.Line, {
   name: 'StaticAxes',
@@ -174,17 +168,27 @@ Rickshaw.Graph.Renderer.StaticAxes = Rickshaw.Class.create( Rickshaw.Graph.Rende
       xMin: undefined,
       xMax: undefined,
       yMin: undefined,
-      yMax: undefined,
+      yMax: undefined
     });
   },
   domain: function($super) {
     var ret = $super();
+    var xMin, xMax;
     // If y axis wants to have static range, not based on data
     if (this.yMin !== undefined && this.yMax !== undefined){
       ret.y = [this.yMin, this.yMax];
     }
+    // If x axis wants to have static range, not based on data
+    if (this.xMin !== undefined && this.xMax !== undefined){
+      xMin = d3.time.format('%Y-%m-%dT%H:%M:%S').parse(this.xMin);
+      xMin = xMin.getTime() / 1000;
+      xMax = d3.time.format('%Y-%m-%dT%H:%M:%S').parse(this.xMax);
+      xMax = xMax.getTime() / 1000;
+
+      ret.x = [xMin, xMax];
+    }
     return ret;
-  },
+  }
 });
 
 horizon.d3_line_chart = {
@@ -258,10 +262,14 @@ horizon.d3_line_chart = {
       self.settings.auto_size = true;
       self.settings.axes_x = true;
       self.settings.axes_y = true;
+      self.settings.axes_y_label = true;
       self.settings.interpolation = 'linear';
       // Static y axes values
       self.settings.yMin = undefined;
       self.settings.yMax = undefined;
+      // Static x axes values
+      self.settings.xMin = undefined;
+      self.settings.xMax = undefined;
       // Show last point as dot
       self.settings.higlight_last_point = false;
 
@@ -300,9 +308,9 @@ horizon.d3_line_chart = {
       var self = this;
 
       var allowed_settings = ['renderer', 'auto_size', 'axes_x', 'axes_y',
-        'interpolation', 'yMin', 'yMax', 'bar_chart_settings',
+        'interpolation', 'yMin', 'yMax', 'xMin', 'xMax', 'bar_chart_settings',
         'bar_chart_selector', 'composed_chart_selector',
-        'higlight_last_point'];
+        'higlight_last_point', 'axes_y_label'];
 
       jQuery.each(allowed_settings, function(index, setting_name) {
         if (settings[setting_name] !== undefined){
@@ -374,8 +382,8 @@ horizon.d3_line_chart = {
         url: self.final_url,
         success: function (data, textStatus, jqXHR) {
           // Clearing the old chart data.
-          $(self.html_element).html('');
-          $(self.legend_element).html('');
+          self.jquery_element.empty();
+          $(self.legend_element).empty();
 
           self.series = data.series;
           self.stats = data.stats;
@@ -384,7 +392,7 @@ horizon.d3_line_chart = {
 
           if (self.series.length <= 0) {
             $(self.html_element).html(gettext('No data available.'));
-            $(self.legend_element).html('');
+            $(self.legend_element).empty();
             // Setting a fix height breaks things when legend is getting
             // bigger.
             $(self.legend_element).css('height', '');
@@ -394,7 +402,7 @@ horizon.d3_line_chart = {
         },
         error: function (jqXHR, textStatus, errorThrown) {
           $(self.html_element).html(gettext('No data available.'));
-          $(self.legend_element).html('');
+          $(self.legend_element).empty();
           // Setting a fix height breaks things when legend is getting
           // bigger.
           $(self.legend_element).css('height', '');
@@ -412,7 +420,7 @@ horizon.d3_line_chart = {
      */
     self.render = function(){
       var self = this;
-      var last_point = undefined, last_point_color = undefined;
+      var last_point, last_point_color;
 
       $.map(self.series, function (serie) {
         serie.color = last_point_color = self.color(serie.name);
@@ -430,6 +438,16 @@ horizon.d3_line_chart = {
         renderer = Rickshaw.Graph.Renderer.StaticAxes;
       }
 
+      // clean the old graph the messy way
+      // TODO(lsmola) clena when the Rickshaw issue is gone
+      // https://github.com/shutterstock/rickshaw/issues/432
+      self.jquery_element.empty();
+
+      var $newGraph = self.jquery_element.clone();
+      self.jquery_element.replaceWith($newGraph);
+      self.jquery_element = $newGraph;
+      self.html_element = self.jquery_element[0];
+
       // instantiate our graph!
       var graph = new Rickshaw.Graph({
         element: self.html_element,
@@ -439,7 +457,9 @@ horizon.d3_line_chart = {
         series: self.series,
         yMin: self.settings.yMin,
         yMax: self.settings.yMax,
-        interpolation: self.settings.interpolation,
+        xMin: self.settings.xMin,
+        xMax: self.settings.xMax,
+        interpolation: self.settings.interpolation
       });
 
       /*
@@ -493,9 +513,14 @@ horizon.d3_line_chart = {
         axes_x.render();
       }
       if (self.settings.axes_y) {
-        var axes_y = new Rickshaw.Graph.Axis.Y({
+        var axes_y_settings = {
           graph: graph
-        });
+        };
+        if (!self.settings.axes_y_label){
+          // hiding label of Y axis if setting is set to false
+          axes_y_settings.tickFormat = (function (d) { return ''; });
+        }
+        var axes_y = new Rickshaw.Graph.Axis.Y(axes_y_settings);
         axes_y.render();
       }
 
@@ -548,7 +573,7 @@ horizon.d3_line_chart = {
       $(self.html_element).append(self.backdrop);
 
       // Hide the legend.
-      $(self.legend_element).html('').addClass('disabled');
+      $(self.legend_element).empty().addClass('disabled');
 
       // Show the spinner.
       self.spinner = $('<div class="spinner_wrapper"></div>');
@@ -736,5 +761,5 @@ horizon.d3_line_chart = {
 
 /* Init the graphs */
 horizon.addInitFunction(function () {
-  horizon.d3_line_chart.init('div[data-chart-type="line_chart"]', {'auto_resize': true});
+  horizon.d3_line_chart.init('div[data-chart-type="line_chart"]', {});
 });
