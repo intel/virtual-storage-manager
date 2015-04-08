@@ -96,6 +96,12 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                       server_list=server_list))
         return ret
 
+    def intergrate_cluster(self, context, server_list):
+        ret = self.cast(context,
+                        self.make_msg('intergrate_cluster',
+                                      server_list=server_list))
+        return ret
+
     def get_zone_list(self, ctxt):
         ret = self.call(ctxt, self.make_msg('get_zone_list'))
         return ret

@@ -224,4 +224,9 @@ class ClusterManager(base.ManagerWithFind):
         url = "/clusters/refresh"
         return self.api.client.post(url)
 
-
+    def intergrate(self,servers=[]):
+        body = {'cluster': {
+                            "servers": servers,
+                           }}
+        url = "/clusters/intergrate"
+        return self.api.client.post(url)

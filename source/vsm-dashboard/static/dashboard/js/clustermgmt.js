@@ -90,6 +90,79 @@
         });
         $(this).closest('.modal').modal('hide');
     });
+
+    //Shouan: intergrate cluster
+    $(".IntergrateCluster-cluster-commit").live("click", function(){
+    	var SelectedNodeCount = 0;
+    	var SelectedNodeList = new Array();
+    	$(".multi_select_column>input").each(function(i,item){
+    		//Ignore the first checkbox which is used to check all | none
+    		if(item.checked==true && i!=0)
+    			{
+    				SelectedNodeCount++;
+    				SelectedNodeList.push(item.parentNode.parentNode);
+    			}
+    	});
+
+    	if(SelectedNodeCount==0)
+    		{
+    			alert("Please select nodes.");
+    			return;
+    		}
+
+
+    	var strSelectedNodesJSON = "[";
+    	for(var i=0;i<SelectedNodeList.length;i++)
+    		{
+    			node = SelectedNodeList[i];
+    			strSelectedNodesJSON+="{";
+    			strSelectedNodesJSON+="\"id\":\""+node.children[1].innerText+"\",";
+    			strSelectedNodesJSON+="\"name\":\""+node.children[2].innerText+"\",";
+    			strSelectedNodesJSON+="\"mgmtIP\":\""+node.children[3].innerText+"\",";
+    			strSelectedNodesJSON+="\"publicIP\":\""+node.children[4].innerText+"\",";
+    			strSelectedNodesJSON+="\"clusterIP\":\""+node.children[5].innerText+"\",";
+    			strSelectedNodesJSON+="\"zone\":\""+node.children[6].innerText+"\",";
+    			strSelectedNodesJSON+="\"OSDs\":\""+node.children[7].innerText+"\",";
+    			strSelectedNodesJSON+="\"monitor\":\""+node.children[8].innerText+"\",";
+    			strSelectedNodesJSON+="\"tatus\":\""+node.children[11].innerText+"\"";
+    			strSelectedNodesJSON+="},";
+    		}
+    	strSelectedNodesJSON = strSelectedNodesJSON.substring(0,strSelectedNodesJSON.length);
+    	strSelectedNodesJSON+="]";
+
+    	 token = $("input[name=csrfmiddlewaretoken]").val();
+    	  horizon.ajax.queue({
+              data: strSelectedNodesJSON,
+              type: "post",
+              dataType: "json",
+              url: "/dashboard/vsm/clustermgmt/cluster/intergrate",
+              success: function (data) {
+                console.log(data);
+              },
+              error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+              },
+              headers: {
+                "X-CSRFToken": token
+              },
+              complete: function(){
+
+              }
+          });
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
     var check_status = function(){
         var _check_status = function(){
             var status = null;
@@ -117,6 +190,8 @@
             });
         }
     }
+
+
     var init = function(){
         if($(".btn-create").length){
             setInterval(check_status, 1000);
@@ -126,3 +201,8 @@
         init();
     });
 })(jQuery)
+
+
+
+
+

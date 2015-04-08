@@ -75,6 +75,9 @@ class NoMoreTargets(exception.VsmException):
 
 ###################
 
+def device_get_by_name(context, device_name):
+    return IMPL.device_get_by_name(context, device_name)
+
 def service_destroy(context, service_id):
     """Destroy the service or raise if it does not exist."""
     return IMPL.service_destroy(context, service_id)
