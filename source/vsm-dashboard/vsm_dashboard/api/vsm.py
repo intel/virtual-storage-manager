@@ -144,6 +144,8 @@ def get_cluster_list(request, opts=None):
 def create_cluster(request, servers=[]):
     return vsmclient(request).clusters.create(servers=servers)
 
+def intergrate_cluster(request, servers=[]):
+    return vsmclient(request).clusters.intergrate(servers=servers)
 #osd api
 def osd_list(request):
     return vsmclient(request).osds.list()

@@ -279,6 +279,18 @@ def service_get_all_bmc_by_host(context, host):
         raise exception.VsmHostNotFound(host=host)
 
     return result
+@require_admin_context
+def service_get_by_device(context, host):
+    result = model_query(context, models.Service, read_deleted="no").\
+                options(joinedload('compute_node')).\
+                filter_by(host=host).\
+                filter_by(topic="vsm-bmc").\
+                all()
+
+    if not result:
+        raise exception.VsmHostNotFound(host=host)
+
+    return result
 
 @require_admin_context
 def _service_get_all_topic_subquery(context, session, topic, subq, label):
@@ -2300,6 +2312,16 @@ def device_get(context, device_id, session=None):
 
     if not result:
         raise exception.VsmDeviceNotFound(device=device_id)
+
+    return result
+@require_admin_context
+def device_get_by_name(context, device_name, session=None):
+    result = model_query(context, models.Device, session=session).\
+                     filter_by(name = device_name).\
+                     first()
+
+    if not result:
+        raise exception.VsmDeviceNotFound(device=device_name)
 
     return result
 

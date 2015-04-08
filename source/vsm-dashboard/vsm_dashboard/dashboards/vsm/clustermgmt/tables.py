@@ -148,11 +148,11 @@ class CreateClusterTable(tables.DataTable):
     zone = tables.Column("zone", classes=("zone",), verbose_name=_("Zone"))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
     monitor = tables.Column("monitor", verbose_name=_("Monitor"),
-        classes=('monitor',)) 
+        classes=('monitor',))
     is_monitor = tables.Column("ismonitor", verbose_name=_("Monitor"), classes=('is_monitor',),
-        empty_value=empty_value_maker("checkbox","is_monitor",1), hidden=True) 
+        empty_value=empty_value_maker("checkbox","is_monitor",1), hidden=True)
     is_storage = tables.Column("isstorage", verbose_name=_("Storage"), classes=('is_storage',),
-        empty_value=empty_value_maker("checkbox","is_storage",1),hidden=True) 
+        empty_value=empty_value_maker("checkbox","is_storage",1),hidden=True)
     server_status = tables.Column("status", verbose_name=_("Server Status"), classes=('server_status',))
     #createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
     #cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
@@ -160,7 +160,7 @@ class CreateClusterTable(tables.DataTable):
     class Meta:
         name = "clusteraction"
         verbose_name = _("Create Cluster")
-        #multi_select = True
+        multi_select = True
 
     def get_object_id(self, datum):
         if hasattr(datum, "id"):

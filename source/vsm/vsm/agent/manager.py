@@ -831,6 +831,61 @@ class AgentManager(manager.Manager):
         LOG.info("refresh all status")
         self.update_all_status(context)
         return True
+    def intergrate_cluster_from_ceph(self, context):
+        LOG.info("intergrate cluster from ceph")
+        self.update_all_status(context)
+        self.sync_osd_states_from_ceph(context)
+        return True
+    def sync_osd_states_from_ceph(self, context):
+        osd_json = self.ceph_driver.get_osds_status()
+        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        config_dict = config.as_dict()
+        osd_for_all = config_dict.get("osd")
+        osds_mount_point =  osd_for_all["osd data"]
+        if osd_json is None:
+            return None
+        osd_dict = json.loads(osd_json)
+        osd_list = osd_dict['osds']
+        for osd in osd_list:
+            osd_num = osd['osd']
+            osd_name = 'osd.' + (str(osd_num))
+            osd_mount_point = osds_mount_point.replace("$id",str(osd_num))
+            if osd['in'] and osd['up']:
+                osd_status = FLAGS.osd_in_up
+            elif osd['in'] and not osd['up']:
+                osd_status = FLAGS.osd_in_down
+            elif not osd['in'] and osd['up']:
+                osd_status = FLAGS.osd_out_up
+            else:
+                if FLAGS.osd_state_autoout in osd['state']:
+                    osd_status = FLAGS.osd_out_down_autoout
+                else:
+                    osd_status = FLAGS.osd_out_down
+            values = {}
+            values['osd_name'] = osd_name
+            values['state'] = osd_status
+            node = db.init_node_get_by_host(context , config_dict.get(osd_name)["host"])
+            values['service_id'] = node["service_id"]
+            values['cluster_ip'] = config_dict.get(osd_name)["cluster addr"]
+            values['public_ip'] = config_dict.get(osd_name)["public addr"]
+
+            device = db.device_get_by_name(context,config_dict.get(osd_name)["devs"])
+            values['device_id'] = device["id"]
+
+            cluster_id = node['cluster_id']
+            values['cluster_id'] = cluster_id
+            values['weight'] = 1.0
+            values['storage_group_id'] = 1
+
+            values['zone_id'] = node['zone_id']
+            values['operation_status'] = 'Present'
+            self._conductor_rpcapi.\
+                osd_state_update_or_create(context, values)
+
+            device_values = {}
+            device_values["mount_point"]=osd_mount_point
+            db.device_update(context,device["id"],device_values)
+
 
     def _get_cluster_id(self, context):
         init_node = db.init_node_get_by_host(context, FLAGS.host)

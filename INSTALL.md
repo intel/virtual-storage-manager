@@ -2,7 +2,6 @@
   Virtual Storage Manager for Ceph
 ==========================================================
 
-
 **Version:** 1.1
 
 **Source:** 2015-03
@@ -14,7 +13,6 @@ Preparation
 Before you get ready to install VSM, you should prepare your environment. The sections here are helpful for understanding the deployment concepts.
 
 **Note**: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster. 
-
 
 #Roles
 There are two roles for the VSM cluster.
@@ -33,7 +31,6 @@ Management Network is used to manage the VSM cluster, and interchange data betwe
 Ceph Public Network is used to serve IO operations between ceph nodes and clients.
 ## Ceph Cluster Network
 Ceph Cluster Network is used to interchange data between ceph nodes like Monitors and OSDs for replication and rebalancing.
-
 
 ##Recommendations
 Controller node should contain at least:
@@ -75,7 +72,6 @@ The configuration for VSM in the `cluster.manifest` file should be:
     192.168.125.0/24
 
 **cluster.manifest**: Do not worry about this file right now, we will elaborate it later in storage node setup step. 
-
 
 ### Sample 2
 But how about when all the nodes just have two NICs. Such as a controller node and storage node having:
@@ -130,7 +126,6 @@ After install of a clean CentOS 6.5 Basic Server operating system, do not run:
     yum update
 
 Otherwise you may get conflicts between yum packages when you install VSM.
-
 
 #Install Dependencies
 VSM depends on a few third party packages, resolving those dependencies is often a headache. To mitigate the trouble, we is maintaining another repository called [vsm-dependencies](https://github.com/01org/vsm-dependencies), which includes the rpm package list and corresponding binary packages. User can get those packages through command as following:
