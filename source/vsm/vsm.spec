@@ -11,13 +11,25 @@ URL:              http://intel.com
 Source0:          vsm-%{version}.tar.gz
 
 BuildArch:        noarch
+%if 0%{?suse_version}
+BuildRequires:    python-MySQL-python
+BuildRequires:    python-SQLAlchemy
+BuildRequires:    python-sqlalchemy-migrate
+BuildRequires:    python-Routes
+BuildRequires:    python-PasteDeploy
+%else
 BuildRequires:    MySQL-python
+BuildRequires:    python-sqlalchemy0.7
+BuildRequires:    python-routes1.12
+BuildRequires:    python-paste-deploy1.5
+BuildRequires:    python-migrate
+%endif
+
 BuildRequires:    python-importlib
 BuildRequires:    python-ordereddict
 BuildRequires:    python-pbr
 BuildRequires:    python-decorator
 BuildRequires:    python-tempita
-BuildRequires:    python-sqlalchemy0.7
 BuildRequires:    python-amqplib
 BuildRequires:    python-anyjson
 BuildRequires:    python-argparse
@@ -25,12 +37,9 @@ BuildRequires:    python-eventlet
 BuildRequires:    python-kombu
 BuildRequires:    python-lockfile
 BuildRequires:    python-lxml
-BuildRequires:    python-routes1.12
 BuildRequires:    python-webob
 BuildRequires:    python-greenlet
-BuildRequires:    python-paste-deploy1.5
 BuildRequires:    python-paste
-BuildRequires:    python-migrate
 BuildRequires:    python-stevedore
 BuildRequires:    python-suds
 BuildRequires:    python-paramiko
@@ -41,13 +50,25 @@ BuildRequires:    python-oslo-config
 BuildRequires:    numpy
 BuildRequires:    python-psutil
 
+%if 0%{?suse_version}
+Requires:    python-MySQL-python
+Requires:    python-SQLAlchemy
+Requires:    python-sqlalchemy-migrate
+Requires:    python-Routes
+Requires:    python-PasteDeploy
+%else
 Requires:    MySQL-python
+Requires:    python-sqlalchemy0.7
+Requires:    python-routes1.12
+Requires:    python-paste-deploy1.5
+Requires:    python-migrate
+%endif
+
 Requires:    python-importlib
 Requires:    python-ordereddict
 Requires:    python-pbr
 Requires:    python-decorator
 Requires:    python-tempita
-Requires:    python-sqlalchemy0.7
 Requires:    python-amqplib
 Requires:    python-anyjson
 Requires:    python-argparse
@@ -55,12 +76,9 @@ Requires:    python-eventlet
 Requires:    python-kombu
 Requires:    python-lockfile
 Requires:    python-lxml
-Requires:    python-routes1.12
 Requires:    python-webob
 Requires:    python-greenlet
-Requires:    python-paste-deploy1.5
 Requires:    python-paste
-Requires:    python-migrate
 Requires:    python-stevedore
 Requires:    python-suds
 Requires:    python-paramiko
@@ -87,10 +105,16 @@ Requires:         %{name} = %{version}-%{release}
 BuildRequires:    graphviz
 BuildRequires:    python-eventlet
 BuildRequires:    python-routes
-BuildRequires:    python-sqlalchemy0.7
 BuildRequires:    python-webob
-BuildRequires:    python-migrate
 BuildRequires:    python-iso8601
+
+%if 0%{?suse_version}
+BuildRequires:    python-SQLAlchemy
+BuildRequires:    python-sqlalchemy-migrate
+%else
+BuildRequires:    python-sqlalchemy0.7
+BuildRequires:    python-migrate
+%endif
 
 %description      doc
 OpenStack Volume (codename Cinder) provides services to manage and
@@ -110,6 +134,11 @@ mkdir -p %{buildroot}
 
 %install
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
+
+mkdir -p %{buildroot}/var/log/vsm/
+mkdir -p %{buildroot}/var/lib/vsm
+mkdir -p %{buildroot}/etc/vsm/
+mkdir -p %{buildroot}/etc/vsm/rootwrap.d
 
 #---------------------------
 # Log files
@@ -151,6 +180,19 @@ install -d -m 755 %{buildroot}%{_sysconfdir}/vsm/
 cp -rf etc/vsm/prepools %{buildroot}%{_sysconfdir}/vsm/
 
 
+%if 0%{?suse_version}
+#---------------------------
+# usr/lib/systemd/system
+#---------------------------
+install -d -m 755 %{buildroot}%{_unitdir}
+install -p -D -m 755 etc/systemd/vsm-physical.service %{buildroot}%{_unitdir}/vsm-physical.service
+install -p -D -m 755 etc/systemd/vsm-agent.service %{buildroot}%{_unitdir}/vsm-agent.service
+install -p -D -m 755 etc/systemd/vsm-api.service %{buildroot}%{_unitdir}/vsm-api.service
+install -p -D -m 755 etc/systemd/vsm-conductor.service %{buildroot}%{_unitdir}/vsm-conductor.service
+install -p -D -m 755 etc/systemd/vsm-scheduler.service %{buildroot}%{_unitdir}/vsm-scheduler.service
+
+install -m 0644 -D etc/systemd/vsm.tmpfiles.d %{buildroot}/%{_tmpfilesdir}/%{name}.conf
+%else
 #---------------------------
 # etc/init.d/
 #---------------------------
@@ -160,6 +202,7 @@ install -p -D -m 755 etc/init.d/vsm-agent %{buildroot}%{_initrddir}/vsm-agent
 install -p -D -m 755 etc/init.d/vsm-api %{buildroot}%{_initrddir}/vsm-api
 install -p -D -m 755 etc/init.d/vsm-conductor %{buildroot}%{_initrddir}/vsm-conductor
 install -p -D -m 755 etc/init.d/vsm-scheduler %{buildroot}%{_initrddir}/vsm-scheduler
+%endif
 
 
 #---------------------------
@@ -198,6 +241,10 @@ getent group vsm >/dev/null || groupadd -r vsm --gid 165
 if ! getent passwd vsm >/dev/null; then
   useradd -u 165 -r -g vsm -G vsm,nobody -d %{_sharedstatedir}/vsm -s /sbin/nologin -c "Vsm Storage Services" vsm
 fi
+%if 0%{?suse_version}
+  # added to install and files sections
+  # includes vsm.tmpfiles.d for /var/run/vsm
+%else
 mkdir -p /var/run/vsm/
 mkdir -p /var/log/vsm/
 mkdir -p /var/lib/vsm
@@ -208,6 +255,7 @@ chown -R vsm /etc/vsm/
 chown -R vsm /var/log/vsm/
 chown -R vsm /var/lib/vsm
 chown -R vsm /etc/vsm/
+%endif
 if [ -f /etc/init.d/ceph ]; then
     sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=osd.$id --keyring=$osd_keyring osd crush create-or-move -- $id ${osd_weight:-${defaultweight:-1}} $osd_location ||:",g' /etc/init.d/ceph;
     sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=osd.$id --keyring=$osd_keyring osd crush create-or-move -- $id ${osd_weight:-${defaultweight:-1}} $osd_location ||:",g' /etc/init.d/ceph;
@@ -221,6 +269,11 @@ exit 0
 %defattr(-,root,root,-)
 %doc LICENSE doc
 %{python_sitelib}/*
+
+%dir %attr(-, vsm, vsm) /var/log/vsm
+%dir %attr(-, vsm, vsm) /var/lib/vsm
+%dir %attr(-, vsm, vsm) /etc/vsm
+%dir %attr(-, vsm, vsm) /etc/vsm/rootwrap.d
 
 %dir %{_sysconfdir}/logrotate.d
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/logrotate.d/vsmceph
@@ -239,12 +292,22 @@ exit 0
 %dir %{_sysconfdir}/sudoers.d
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/sudoers.d/vsm
 
+%if 0%{?suse_version}
+%dir %{_unitdir}
+%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-physical.service
+%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-agent.service
+%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-api.service
+%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-conductor.service
+%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-scheduler.service
+%{_tmpfilesdir}/%{name}.conf
+%else
 %dir %{_initrddir}
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-physical
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-agent
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-api
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-conductor
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-scheduler
+%endif
 
 %dir %{_bindir}
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-rootwrap

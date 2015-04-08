@@ -9,6 +9,8 @@ Group:            Deploy/VSM
 License:          Intel
 URL:              http://intel.com
 Source0:          vsm-deploy-%{version}.tar.gz
+Requires:         shadow
+
 #TODO Add ceph rpms.
 %description
 Intel VSM Storage System Tools Kit.
