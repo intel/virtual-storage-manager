@@ -11,7 +11,7 @@ var Horizon = function () {
 
   /* Use the addInitFunction() function to add initialization code which must
    * be called on DOM ready. This is useful for adding things like event
-   * handlers or any other initialization functions which should preceed user
+   * handlers or any other initialization functions which should precede user
    * interaction but rely on DOM readiness.
    */
   horizon.addInitFunction = function (fn) {
@@ -26,6 +26,16 @@ var Horizon = function () {
 
     // Prevent multiple executions, just in case.
     initFunctions = [];
+  };
+
+  /* An utility function for escaping HTML to avoid XSS. */
+  horizon.escape_html = function (text) {
+    return text.replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
   };
 
   return horizon;

@@ -25,10 +25,10 @@ __EOF__
     sed -i "s,%RABBITMQ_NODE_PORT%,$RABBITMQ_PORT,g" $file
     sed -i "s,%RABBITMQ_NODE_IP_ADDRESS%,$RABBITMQ_HOST,g" $file
 
-    service rabbitmq-server restart
+    systemctl restart rabbitmq-server.service
     rabbitmqctl change_password guest $RABBITMQ_PASSWORD
-    service rabbitmq-server restart
-    chkconfig rabbitmq-server on
+    systemctl restart rabbitmq-server.service
+    systemctl enable rabbitmq-server.service
     sleep 3
 }
 

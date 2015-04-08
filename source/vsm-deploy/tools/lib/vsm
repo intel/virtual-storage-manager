@@ -56,7 +56,7 @@ SERVICE_ENDPOINT=http://$KEYSTONE_HOST:35357/v2.0
 #---------------------------------------------------
 for n in ${VSM_RUNNING_SERVICE//,/ }; do
     if [[ -e /etc/init.d/$n ]]; then
-        service $n stop
+        systemctl stop $n.service
     else
         echo "Can not find service $n"
     fi
@@ -165,8 +165,8 @@ rm -rf /tmp/tmp*
 echo $VSM_RUNNING_SERVICE
 for n in ${VSM_RUNNING_SERVICE//,/ }; do
     if [[ -e /etc/init.d/$n ]]; then
-        service $n restart
-        chkconfig $n on
+        systemctl restart $n.service
+        systemctl enable $n.service
     else
         echo "Can not find service $n"
     fi

@@ -264,13 +264,16 @@ class ManifestChecker(object):
         self._lan_list = [primary_public_network,
                           secondary_public_network,
                           cluster_network]
-
-        if self._is_in_lan(ip, primary_public_network):
-            return True
-        if self._is_in_lan(ip, secondary_public_network):
-            return True
-        if self._is_in_lan(ip, cluster_network):
-            return True
+        lan_list = primary_public_network.split(',') + \
+                          secondary_public_network.split(',') + \
+                          cluster_network.split(',')
+        for _lan in lan_list:
+            if self._is_in_lan(ip, _lan):
+                return True
+            # if self._is_in_lan(ip, secondary_public_network):
+            #     return True
+            # if self._is_in_lan(ip, cluster_network):
+            #     return True
 
         return False
 
@@ -289,7 +292,7 @@ class ManifestChecker(object):
                 self.__is_address_ok(ip)
                 ip_in_lan_cnt = ip_in_lan_cnt + 1
 
-        if ip_in_lan_cnt != len(self._lan_list):
+        if ip_in_lan_cnt < len(self._lan_list):
             info_list = ['Controller ip is not in LAN defined in',
                         'controller node /etc/manifest/cluster.manifest',
                         'Your IP = %s' % ip_list,

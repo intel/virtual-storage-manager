@@ -34,6 +34,13 @@ if ROOT_PATH not in sys.path:
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
+SECRET_KEY = '_n&qt--*3^1r--*$j6tk0^9t1^j_%134mm2frw_!!@3b3v56@1'
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+ALLOWED_HOSTS = [
+                 '*',
+                 ]
+
 SITE_BRANDING = 'VSM Dashboard'
 
 WEBROOT = '/dashboard'

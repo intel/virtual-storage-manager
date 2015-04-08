@@ -19,7 +19,7 @@
 {% load i18n %}
 
 {% block form_id %}create_storage_pool_form{% endblock %}
-{% block form_action %}{% url horizon:vsm:clustermgmt:createcluster %}{% endblock %}
+{% block form_action %}{% url 'horizon:vsm:clustermgmt:createcluster' %}{% endblock %}
 
 {% block modal-header %}{% trans "Create Cluster" %}{% endblock %}
 {% block modal_id %}create_storage_pool_modal{% endblock %}
@@ -34,4 +34,3 @@
   <input class="btn btn-primary pull-right IntergrateCluster-cluster-commit" type="submit" value="{% trans "IntergrateCluster" %}" />
   <a href="{% url horizon:vsm:clustermgmt:index %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
 {% endblock %}
-
