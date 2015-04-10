@@ -182,14 +182,14 @@ proxy=_none_
 EOF
 
 oldurl="file:///opt/vsm-dep-repo"
-newurl="http://$controller_ip/vsm-dep-repo"
+newurl="ftp://$controller_ip/pub/vsm-dep-repo"
 if [ $is_controller -eq 0 ]; then
     scp vsm.repo $USER@$controller_ip:/etc/yum.repos.d
-    ssh $USER@$controller_ip "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html"
+    ssh $USER@$controller_ip "yum makecache; yum -y install vsftpd; service vsftpd restart; rm -rf /var/ftp/pub/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/ftp/pub"
     ssh $USER@$controller_ip "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
 else
     cp vsm.repo /etc/yum.repos.d
-    yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html
+    yum makecache; yum -y install vsftpd; service vsftpd restart; rm -rf /var/ftp/pub/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/ftp/pub
     sed -i "s,$oldurl,$newurl,g" /etc/yum.repos.d/vsm.repo
     yum makecache
 fi
