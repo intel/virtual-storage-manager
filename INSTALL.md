@@ -5,7 +5,7 @@
 
 **Version:** 1.1
 
-**Source:** 2015-03
+**Source:** 2015-04
 
 **Keywords:** Ceph, Virtual Storage Management
 
@@ -37,42 +37,42 @@ Ceph Cluster Network is used to interchange data between ceph nodes like Monitor
 
 ##Recommendations
 Controller node should contain at least:
-
-    - Management Network
+	
+	>     Management Network
 
 Storage Node should contain:
 
-    - Management Network
-    - Ceph Public Network
-    - Ceph Cluster Network
+	>     Management Network
+	>     Ceph Public Network
+	>     Ceph Cluster Network
 
 ###Sample 1
 **Controller node** contains the networks listed below:
 
-    - 192.168.123.0/24
+	>     192.168.123.0/24
 
 **Storage node** contains networks below:
 
-    - 192.168.123.0/24
-    - 192.168.124.0/24
-    - 192.168.125.0/24
+	>     192.168.123.0/24
+	>     192.168.124.0/24
+	>     192.168.125.0/24
 
 Then we may assign these networks as below:
 
-    - Management network: 192.168.123.0/24
-    - Ceph public netwok: 192.168.124.0/24
-    - Ceph cluster network: 192.168.125.0/24
+	>     Management network: 192.168.123.0/24
+	>     Ceph public netwok: 192.168.124.0/24
+	>     Ceph cluster network: 192.168.125.0/24
 
 The configuration for VSM in the `cluster.manifest` file should be:
 
-    [management_addr]
-    192.168.123.0/24
-
-    [ceph_public_addr]
-    192.168.124.0/24
-
-    [ceph_cluster_addr]
-    192.168.125.0/24
+	>     [management_addr]
+	>     192.168.123.0/24
+	> 
+	>     [ceph_public_addr]
+	>     192.168.124.0/24
+	> 
+	>     [ceph_cluster_addr]
+	>     192.168.125.0/24
 
 **cluster.manifest**: Do not worry about this file right now, we will elaborate it later in storage node setup step. 
 
@@ -80,84 +80,152 @@ The configuration for VSM in the `cluster.manifest` file should be:
 ### Sample 2
 But how about when all the nodes just have two NICs. Such as a controller node and storage node having:
 
-    - 192.168.124.0/24
-    - 192.168.125.0/24
+	>     192.168.124.0/24
+	>     192.168.125.0/24
 
 We can assign these two networks as below:
 
-    - Management network: 192.168.124.0/24
-    - Ceph public network: 192.168.124.0/24
-    - Ceph cluster network: 192.168.125.0/24
+	>     Management network: 192.168.124.0/24
+	>     Ceph public network: 192.168.124.0/24
+	>     Ceph cluster network: 192.168.125.0/24
 
 The configuration for VSM in `cluster.manifest` file should be:
 
-    [management_addr]
-    192.168.124.0/24
-
-    [ceph_public_addr]
-    192.168.124.0/24
-
-    [ceph_cluster_addr]
-    192.168.125.0/24
+	>     [management_addr]
+	>     192.168.124.0/24
+	> 
+	>     [ceph_public_addr]
+	>     192.168.124.0/24
+	> 
+	>     [ceph_cluster_addr]
+	>     192.168.125.0/24
 
 ### Sammple 3
 It's quite common to have just one NIC in demo environment, then all nodes just have:
 
-    - 192.168.124.0/24 
+	>   192.168.124.0/24 
 
 We may assign this network as below:
 
-    - Management network: 192.168.124.0/24
-    - Ceph public network: 192.168.124.0/24
-    - Ceph cluster network: 192.168.124.0/24
+	>   Management network: 192.168.124.0/24
+	>   Ceph public network: 192.168.124.0/24
+	>   Ceph cluster network: 192.168.124.0/24
 
 So all of the networks use the same network, The configurations in `cluster.manifest` file would be:
 
-    [management_addr]
-    192.168.124.0/24
-
-    [ceph_public_addr]
-    192.168.124.0/24
-
-    [ceph_cluster_addr]
-    192.168.124.0/24
+	>     [management_addr]
+	>     192.168.124.0/24
+	> 
+	>     [ceph_public_addr]
+	>     192.168.124.0/24
+	> 
+	>     [ceph_cluster_addr]
+	>     192.168.124.0/24
 
 #Operating System
 We have done our development and testing based on CentOS 6.5 Linux system. For successful installation of VSM, it's best to install system with **CentOS-6.5 Basic Server**.
 
 After install of a clean CentOS 6.5 Basic Server operating system, do not run:
 
-    yum update
+	>     yum update
 
 Otherwise you may get conflicts between yum packages when you install VSM.
 
+#Automatic Deployment
+starting from 1.1, an automatic deployment tool is provided, which expects to simplifed the deployment. This section will describe how to use the tool to conduct automation.
 
-#Install Dependencies
+1. Firstly, a VSM binary release package should be acquired, it may be downloaded from binary repository, or built from source (see [Build VSM](#Build_VSM)). Then unpack the release package, the folder structure looks as following: 
+	> 	.
+	> 	├── CHANGELOG
+	> 	├── hostrc
+	> 	├── INSTALL.md
+	> 	├── install.sh
+	> 	├── LICENSE
+	> 	├── manifest
+	> 	│   ├── cluster.manifest.sample
+	> 	│   └── server.manifest.sample
+	> 	├── NOTICE
+	> 	├── README
+	> 	├── vsmrepo
+	> 	│   ├── python-vsmclient-2015.03.10-1.1.el6.noarch.rpm
+	> 	│   ├── repodata
+	> 	│   ├── vsm-2015.03.10-1.1.el6.noarch.rpm
+	> 	│   ├── vsm-dashboard-2015.03.10-1.1.el6.noarch.rpm
+	> 	│   └── vsm-deploy-2015.03.10-1.1.el6.x86_64.rpm
+	> 	└── vsm.repo
+
+2. Changing the "hostrc" file, set the storage_ip_list and the controller_ip, the ip addresses in storage_ip_list is delimitered by space, e.g.:
+	> 
+	> 	storage_ip_list="10.10.10.21 10.10.10.22 10.10.10.23"
+	> 	controller_ip="10.10.10.17"
+   
+3. Under the tool/manifest folder, you should create the folders named by the ip of controller and storage nodes, and c finally, the structure looks as following:
+
+4. Copy the cluster.manifest.sample to the folder named by the ip of controller node, then change the filename to cluster.manifest and edit it as required, refer 
+[Setup Controller Node](#Setup_Controller) for details.
+
+5. Copy the server.manifest.sample to the folders named by the ip of storage nodes, then change the filename to server.manifest and edit it as required, refer [Setup Storage Node](#Setup_Storage) for details.
+
+6. Finally, the manifest folder structure looks as following:
+	> 	.
+	> 	├── 10.10.10.17
+	> 	│   └── cluster.manifest
+	> 	├── 10.10.10.21
+	> 	│   └── server.manifest
+	> 	├── 10.10.10.22
+	> 	│   └── server.manifest
+	> 	├── 10.10.10.23
+	> 	│   └── server.manifest
+	> 	├── cluster.manifest.sample
+	> 	└── server.manifest.sample
+
+7. If people want to upgrade vsm rpm packages, one approach is to build rpm packages separately (see [Build RPMs](#Build_RPM)), then put the generated rpm packages into *vsmrepo* folder.
+
+8. Now we are ready to start the automatic procedure by executing below command line:
+	> 
+	> 	bash +x install.sh -v <version>
+
+9. If seeing executing is blocked at somewhere, please try to enter "y" to move ahead. 
+
+10. if all are well, people can try to [login to the webUI](#Login_WebUI).
+
+
+#Manual Deployment
+
+##Install Dependencies
 VSM depends on a few third party packages, resolving those dependencies is often a headache. To mitigate the trouble, we is maintaining another repository called [vsm-dependencies](https://github.com/01org/vsm-dependencies), which includes the rpm package list and corresponding binary packages. User can get those packages through command as following:
 
-	wget https://github.com/01org/vsm-dependencies/archive/<version>.zip
+	> 	wget https://github.com/01org/vsm-dependencies/archive/<version>.zip
 
 where <version> is the vsm version like 1.1.
 
 After got the zip file, just unpack it and install included rpm packages as following:
 	
-	unzip <version>.zip
-	cd <version>/repo
-	yum localinstall -y *.rpm
+	> 	unzip <version>.zip
+	> 	cd <version>/repo
+	> 	yum localinstall -y *.rpm
 
 
-#Build RPMs
+##<a name="Build_RPM"></a>Build RPMs
 After you download the source code from the VSM github, the first step is to build the VSM RPMs. If you already have VSM RPMs, you can jump to [VSM RPM Install](#RPM_Install).
 
-##<a name="RPM_Install"></a> VSM RPM Build
+###<a name="RPM_Install"></a> VSM RPM Build
 After you setup the repo, and make sure it works, you can build the RPMs from source code.
 
-    cd $source_code_path
-    ./buildrpm
+	>     cd $source_code_path
+	>     ./buildrpm
 
 After building, all the rpms are located in $source_code_path/vsmrepo directory.
 
-## VSM RPM Install
+##<a name="Build_VSM"></a>Build VSM
+starting from 1.1, a tool is provided to generate a VSM binary package, which covers what [Build_RPM]("Build RPMs") does. e.g, 
+
+	bash +x buildrelease.sh <version>
+
+Then a binary package named <version-<date>.tar.gz will be generated in *release* folder if all execute well.
+
+
+### VSM RPM Install
 
 Go to the directory that you placed your VSM RPMs in, or the /vsmrepo directory if you just built them from source. 
 
@@ -186,7 +254,7 @@ So we configure the network as below in VSM:
 
 **Note**You should set network appending on your network environment or check the network settings mentioned before.
 
-## Dependcies
+## Dependencies
 For every node, regardless of if it’s a controller node or a storage node, do the steps below:
 
     - Firstly, assume you've built & installed the VSM RPM packages as mentioned before.
@@ -307,9 +375,10 @@ Take the correct version as an example to set your /etc/hosts file to on the con
     - Not all of the IP address are listed for test1-storage1 and test1-storage2.
 
 
-## Setup controller node
-====================
-###Edit and check the file /etc/manifest/cluster.manifest
+##<a name="Setup_Controller"></a>Setup controller node
+
+###cluster.manifest
+It's in /etc/manifest folder for manual deployment , or current manifest/<controller_ip> folder for automatic deployment.
 
 **modify three IP addresses**
 
@@ -342,7 +411,7 @@ focus on the validity of the three IP addresses, and modify them according to yo
 
 **Warning** Do not set proxy env during installation.
 
-## Setup storage node
+##<a name="Setup_Storage"></a>Setup storage node
 ### server.manifest
 **step 1**
 For VSM storage nodes, edit the file `/etc/manifest/server.manifest` and modify it as described below:
@@ -451,7 +520,7 @@ After the configuration of `/etc/manifest/server.manifest`, you may run:
 
 to complete setup of the storage node.
 
-#Login the webUI
+#<a name="Login_WebUI"></a>Login the webUI
 
 After the command is finished executing, and to check if you have setup the controller correctly, do the following steps:
 
