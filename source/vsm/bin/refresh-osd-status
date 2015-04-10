@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from vsmclient.v1 import client as vsm_client
 

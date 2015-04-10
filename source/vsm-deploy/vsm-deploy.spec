@@ -9,6 +9,7 @@ Group:            Deploy/VSM
 License:          Intel
 URL:              http://intel.com
 Source0:          vsm-deploy-%{version}.tar.gz
+BuildRequires:    shadow
 Requires:         shadow
 
 #TODO Add ceph rpms.
