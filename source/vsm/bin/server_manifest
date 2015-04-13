@@ -307,6 +307,12 @@ class ManifestChecker(object):
                 cnt = raw_input('do you want to continue? (y/n)')
             if cnt == 'n':
                 error(info_list)
+        if ip_in_lan_cnt < 3:
+            info_list = [
+            'Warning: There are some networks be the same.',
+            'Controller ip lan = %s' % self._lan_list]
+            for info in info_list:
+                print info
 
         #self.elf.__is_address_ok(ip)
 
