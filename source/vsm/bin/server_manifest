@@ -282,14 +282,18 @@ class ManifestChecker(object):
         out = utils.execute('hostname', '-I')
         ip_list = out[0].strip().split()
         ip_in_lan_cnt = 0
+        ip_in_lan = []
         for ip in ip_list:
             print ip_list
             print self._lan_list
             if self.__in_lan(ip):
                 self.__is_address_ok(ip)
                 ip_in_lan_cnt = ip_in_lan_cnt + 1
+                ip_in_lan.append(ip)
+        ip_in_lan_cnt = len(set(ip_in_lan))
 
-        if ip_in_lan_cnt != len(self._lan_list):
+
+        if ip_in_lan_cnt != len(set(self._lan_list)):
             info_list = ['Controller ip is not in LAN defined in',
                         'controller node /etc/manifest/cluster.manifest',
                         'Your IP = %s' % ip_list,
