@@ -134,11 +134,11 @@ class ManifestParser(object):
             2. comments
             3. comments starts with spaces.
         """
-        print 'self._file_path==',self._file_path
+        #print 'self._file_path==',self._file_path
         lines = open(self._file_path).readlines()
         self._lines = []
         for single_line in lines:
-            print 'line^^^^^^^^^^^^^^',single_line
+            #print 'line^^^^^^^^^^^^^^',single_line
             single_line = single_line.strip()
             if not single_line.startswith("#") and len(single_line):
                 self._lines.append(single_line)
@@ -218,7 +218,7 @@ class ManifestParser(object):
         """Return dict info of cluster."""
         def _get_cluster_value(ktype):
             rpos = self._check_single_key_word_exists(ktype)
-            print 'self.lines=%s-----and pos=%s----'%(self._lines,rpos)
+            #print 'self.lines=%s-----and pos=%s----'%(self._lines,rpos)
             for pos in (rpos + 1, len(self._lines) - 1):
                 single_line = self._lines[pos]
                 if single_line.find("[") != -1:
