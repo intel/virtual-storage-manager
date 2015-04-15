@@ -22,7 +22,7 @@ from horizon import exceptions
 from horizon import forms
 from horizon import messages
 from horizon.utils.validators import validate_port_range
-from horizon.utils import fields
+# from horizon.utils import fields
 #from horizon.utils import validators
 
 import logging
