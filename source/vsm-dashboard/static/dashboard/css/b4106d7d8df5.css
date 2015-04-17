@@ -251,8 +251,8 @@ th {
     border: 1px solid #ddd !important; } }
 @font-face {
   font-family: 'Glyphicons Halflings';
-  src: url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.eot?7ad17c6085de');
-  src: url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.eot?&7ad17c6085de#iefix') format("embedded-opentype"), url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.woff?68ed1dac06bf') format("woff"), url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.ttf?e49d52e74b76') format("truetype"), url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.svg?32941d633004#glyphicons_halflingsregular') format("svg"); }
+  src: url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.eot?d41d8cd98f00');
+  src: url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.eot?&d41d8cd98f00#iefix') format("embedded-opentype"), url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.woff?d41d8cd98f00') format("woff"), url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.ttf?d41d8cd98f00') format("truetype"), url('/static/bootstrap/fonts/bootstrap/glyphicons-halflings-regular.svg?32941d633004#glyphicons_halflingsregular') format("svg"); }
 .glyphicon, .membership .role_dropdown li i {
   position: relative;
   top: 1px;
@@ -5539,8 +5539,8 @@ button.close {
 
 @font-face {
   font-family: 'anivers';
-  src: url('/static/dashboard/fonts/Anivers_Regular-webfont.eot?5f61443eb372');
-  src: url('/static/dashboard/fonts/Anivers_Regular-webfont.eot?iefix&5f61443eb372') format("eot"), url('/static/dashboard/fonts/Anivers_Regular-webfont.woff?2c3db88030ec') format("woff"), url('/static/dashboard/fonts/Anivers_Regular-webfont.ttf?6a7822aa21cf') format("truetype"), url('/static/dashboard/fonts/Anivers_Regular-webfont.svg?1dbc53d268e6#webfont3JLVF59W') format("svg");
+  src: url('/static/dashboard/fonts/Anivers_Regular-webfont.eot?d41d8cd98f00');
+  src: url('/static/dashboard/fonts/Anivers_Regular-webfont.eot?iefix&d41d8cd98f00') format("eot"), url('/static/dashboard/fonts/Anivers_Regular-webfont.woff?d41d8cd98f00') format("woff"), url('/static/dashboard/fonts/Anivers_Regular-webfont.ttf?d41d8cd98f00') format("truetype"), url('/static/dashboard/fonts/Anivers_Regular-webfont.svg?1dbc53d268e6#webfont3JLVF59W') format("svg");
   font-weight: normal;
   font-style: normal; }
 body {
@@ -7460,4 +7460,4 @@ a.link-popover {
 a:hover.link-popover {
   text-decoration: none; }
 
-/*# sourceMappingURL=tmpwS8ZB0.css.map */
+/*# sourceMappingURL=tmplmaADI.css.map */
