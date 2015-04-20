@@ -119,8 +119,10 @@ STATICFILES_FINDERS = (
 )
 
 less_binary = os.path.join(BIN_DIR, 'lessc')
+scss_binary = os.path.join('/usr', 'local', 'bin', 'scss')
 COMPRESS_PRECOMPILERS = (
     ('text/less', (less_binary + ' {infile} {outfile}')),
+    ('text/scss', (scss_binary + ' {infile} {outfile}')),
 )
 
 COMPRESS_CSS_FILTERS = (
