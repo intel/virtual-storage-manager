@@ -26,9 +26,9 @@ The controller node is used to run mariadb, rabbitmq, web ui services for the VS
 The storage or agent node is used to run the vsm-agent service which manages the Ceph and physical storage resources.
 
 #Network
-There are three kinds of networks defined in VSM, and the three networks are OK to be the same one. 
+There are three types of networks defined in VSM, and it’s OK if you use a single network for all three types.
 ## Management Network
-Management Network is used to manage the VSM cluster, and interchange data between vsm controller and agents.
+Management Network is used to manage the VSM cluster, and interchanges VSM maangement data between vsm controller and agents.
 ## Ceph Public Network
 Ceph Public Network is used to serve IO operations between ceph nodes and clients.
 ## Ceph Cluster Network
@@ -49,7 +49,7 @@ Storage Node should contain:
 ###Sample 1
 **Controller node** contains the networks listed below:
 
-	>     192.168.123.0/24
+	>     192.168.124.0/24
 
 **Storage node** contains networks below:
 
@@ -59,22 +59,22 @@ Storage Node should contain:
 
 Then we may assign these networks as below:
 
-	>     Management network: 192.168.123.0/24
-	>     Ceph public netwok: 192.168.124.0/24
+	>     Management network: 192.168.124.0/24
+	>     Ceph public netwok: 192.168.123.0/24
 	>     Ceph cluster network: 192.168.125.0/24
 
 The configuration for VSM in the `cluster.manifest` file should be:
 
 	>     [management_addr]
-	>     192.168.123.0/24
+	>     192.168.124.0/24
 	> 
 	>     [ceph_public_addr]
-	>     192.168.124.0/24
+	>     192.168.123.0/24
 	> 
 	>     [ceph_cluster_addr]
 	>     192.168.125.0/24
 
-**cluster.manifest**: Do not worry about this file right now, we will elaborate it later in storage node setup step. 
+**cluster.manifest**: Do not worry about this file right now, we will discuss it later in storage node setup step. 
 
 
 ### Sample 2
@@ -89,7 +89,7 @@ We can assign these two networks as below:
 	>     Ceph public network: 192.168.124.0/24
 	>     Ceph cluster network: 192.168.125.0/24
 
-The configuration for VSM in `cluster.manifest` file should be:
+The configuration for VSM in *cluster.manifest* file should be:
 
 	>     [management_addr]
 	>     192.168.124.0/24
@@ -100,7 +100,7 @@ The configuration for VSM in `cluster.manifest` file should be:
 	>     [ceph_cluster_addr]
 	>     192.168.125.0/24
 
-### Sammple 3
+### Sample 3
 It's quite common to have just one NIC in demo environment, then all nodes just have:
 
 	>   192.168.124.0/24 
@@ -132,7 +132,7 @@ After install of a clean CentOS 6.5 Basic Server operating system, do not run:
 Otherwise you may get conflicts between yum packages when you install VSM.
 
 #Automatic Deployment
-starting from 1.1, an automatic deployment tool is provided, which expects to simplifed the deployment. This section will describe how to use the tool to conduct automation.
+Beginning with VSM 1.1, an automatic deployment tool is provided, which expects to simplifed the deployment. This section will describe how to use the tool to conduct automation.
 
 1. Firstly, a VSM binary release package should be acquired, it may be downloaded from binary repository, or built from source (see [Build VSM](#Build_VSM)). Then unpack the release package, the folder structure looks as following: 
 	> 	.
@@ -154,38 +154,48 @@ starting from 1.1, an automatic deployment tool is provided, which expects to si
 	> 	│   └── vsm-deploy-2015.03.10-1.1.el6.x86_64.rpm
 	> 	└── vsm.repo
 
-2. Changing the "hostrc" file, set the storage_ip_list and the controller_ip, the ip addresses in storage_ip_list is delimitered by space, e.g.:
+2. Changing the "hostrc" file, set the storage_ip_list and the controller_ip, those management ip addresses in storage_ip_list is delimited by a space, e.g.:
 	> 
-	> 	storage_ip_list="10.10.10.21 10.10.10.22 10.10.10.23"
-	> 	controller_ip="10.10.10.17"
+	> 	storage_ip_list="192.168.124.21 192.168.124.22 192.168.124.23"
+	> 	controller_ip="192.168.124.10"
    
-3. Under the tool/manifest folder, you should create the folders named by the ip of controller and storage nodes, and c finally, the structure looks as following:
+3. Under the tool/manifest folder, you should create the folders named by the ip of controller and storage nodes, the structure looks as follows:
+	> 	.
+	> 	├── 192.168.124.10
+	> 	├── 192.168.124.21
+	> 	├── 192.168.124.22
+	> 	├── 192.168.124.23
+	> 	├── cluster.manifest.sample
+	> 	└── server.manifest.sample
 
 4. Copy the cluster.manifest.sample to the folder named by the ip of controller node, then change the filename to cluster.manifest and edit it as required, refer 
 [Setup Controller Node](#Setup_Controller) for details.
 
 5. Copy the server.manifest.sample to the folders named by the ip of storage nodes, then change the filename to server.manifest and edit it as required, refer [Setup Storage Node](#Setup_Storage) for details.
 
-6. Finally, the manifest folder structure looks as following:
+6. Finally, the manifest folder structure looks as follows:
 	> 	.
-	> 	├── 10.10.10.17
+	> 	├── 192.168.124.10
 	> 	│   └── cluster.manifest
-	> 	├── 10.10.10.21
+	> 	├── 192.168.124.21
 	> 	│   └── server.manifest
-	> 	├── 10.10.10.22
+	> 	├── 192.168.124.22
 	> 	│   └── server.manifest
-	> 	├── 10.10.10.23
+	> 	├── 192.168.124.23
 	> 	│   └── server.manifest
 	> 	├── cluster.manifest.sample
 	> 	└── server.manifest.sample
 
-7. If people want to upgrade vsm rpm packages, one approach is to build rpm packages separately (see [Build RPMs](#Build_RPM)), then put the generated rpm packages into *vsmrepo* folder.
+7. If people want to build from source, they can do that as described in [Build RPMs](#Build_RPM), then put the generated rpm packages into *vsmrepo* folder.
 
 8. Now we are ready to start the automatic procedure by executing below command line:
 	> 
 	> 	bash +x install.sh -v <version>
+	> 	
+	
+	The version looks like 1.1, 2.0.
 
-9. If seeing executing is blocked at somewhere, please try to enter "y" to move ahead. 
+9. If execution is blocked somewhere, please try to enter "y" to move ahead. 
 
 10. if all are well, people can try to [login to the webUI](#Login_WebUI).
 
