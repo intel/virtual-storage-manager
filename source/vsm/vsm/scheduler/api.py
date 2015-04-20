@@ -101,3 +101,7 @@ class API(object):
 
     def import_ceph_conf(self, context, cluster_id, ceph_conf_path):
         return self.scheduler_rpcapi.import_ceph_conf(context, cluster_id, ceph_conf_path)
+
+    def get_smart_info(self, context, body=None):
+        return self.scheduler_rpcapi.get_smart_info(context, body)
+

@@ -333,6 +333,9 @@ class AgentManager(manager.Manager):
             LOG.info('Get error in update_ssh_keys')
         finally:
             self._is_update_ssh = False
+    def get_smart_info(self, context):
+        """When find new servers, insert new server's key."""
+        return self.ceph_driver.get_smart_info(context)
 
     def _set_ssh_chanel(self):
         # Get self id from init_node table.
@@ -1025,7 +1028,11 @@ class AgentManager(manager.Manager):
             msg = _("Could not compute proper pg_num.")
             raise
         return pg_num
-
+    @periodic_task(run_immediately=True,
+                   service_topic=FLAGS.agent_topic,
+                   spacing=FLAGS.update_smartdev_info)
+    def update_smart_device(self, context):
+        pass#TODO modify the structrue of table devices and reflush values of column
     @periodic_task(run_immediately=True,
                    service_topic=FLAGS.agent_topic,
                    spacing=FLAGS.reset_pg_heart_beat)

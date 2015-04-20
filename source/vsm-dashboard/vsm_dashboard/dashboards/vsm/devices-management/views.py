@@ -32,6 +32,14 @@ from django.http import HttpResponse
 import json
 LOG = logging.getLogger(__name__)
 
+def device_get_smartinfo(request,device_id=None,action='get_smart_info'):
+    search_opts = {}
+    #print 'device_id====',device_id
+    if device_id:search_opts['device_id'] = device_id
+    search_opts['action'] = action
+    ret = vsmapi.device_get_smartinfo(request,search_opts=search_opts)
+    return ret
+
 class IndexView(tables.DataTableView):
     table_class = OsdsTable
     template_name = 'vsm/devices-management/index.html'
@@ -77,4 +85,40 @@ class IndexView(tables.DataTableView):
                   }
             osds.append(osd)
         return osds
+
+
+
+def DevicesAction(request, action):
+    data = json.loads(request.raw_post_data)
+    print "osd_id:"+str(data["osd_id"])
+    #print data
+
+    device_data_str = device_get_smartinfo(request,str(data["osd_id"]))
+    device_data_dict = {}
+    device_data_str = device_data_str[0].device_data
+    for data in device_data_str.split("\n"):
+        data_list = data.split("=")
+        data_list_len = len(data_list)
+        if data_list_len == 1:
+            device_data_dict[data_list[0]] = ""
+        if data_list_len == 2:
+            device_data_dict[data_list[0]] = data_list[1]
+    #print 'device_data_dict================',device_data_dict
+    device_data_json = {
+                "basic":{"status":device_data_dict["Drive Status"],
+                       "family":device_data_dict["Drive Family"],
+                       "seriesNumber":device_data_dict["Serial Number"],
+                       "firmware":device_data_dict["Firmware"],
+                       "totalCapacity":device_data_dict["Capacity in total"],
+                       "usedCapacity":device_data_dict["Capacity in use"],
+                },
+                "smart":{"percentageUsed":device_data_dict["Percentage Used"],
+                       "temperature":device_data_dict["Temperature"],
+                       "unitRead":str(int(device_data_dict["Data Units Read"],16)),
+                       "unitWRITE":device_data_dict["Data Units Written"],
+                }
+    }
+    devicedata = json.dumps(device_data_json)
+    #print 'device_data_json=========',device_data_json
+    return HttpResponse(devicedata)
 

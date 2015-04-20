@@ -21,7 +21,8 @@ from vsm.api import xmlutil
 from vsm import flags
 from vsm.openstack.common import log as logging
 from vsm.api.views import devices as devices_views
-from vsm import conductor
+from vsm import conductor,db
+from vsm import scheduler
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ class Controller(wsgi.Controller):
 
     def __init__(self, ext_mgr):
         self.conductor_api = conductor.API()
-        #self.scheduler_api = scheduler.API()
+        self.scheduler_api = scheduler.API()
         self.ext_mgr = ext_mgr
         super(Controller, self).__init__()
 
@@ -77,6 +78,36 @@ class Controller(wsgi.Controller):
         context = req.environ['vsm.context']
         devices = self.conductor_api.device_get_all(context)
         LOG.info('vsm/api/v1/devices.py devices:%s' % devices)
+
+        return self._view_builder.index(req, devices)
+
+    @wsgi.serializers(xml=DevicesTemplate)
+    def detail(self, req,search_opts=None):
+        """Get device list."""
+        context = req.environ['vsm.context']
+        #data = json.loads(request.raw_post_data)
+        device_id = req.GET.get('device_id',None)#str(data["osd_id"])
+        action = req.GET.get('action',None)#str(data["action"])
+        LOG.info('params--------- %s:%s'%(device_id,action))
+        devices=[]
+        if device_id:
+            if action == 'get_smart_info':
+                body = {'server':db.init_node_get_by_device_id(context,device_id)}
+                #return self.scheduler_api.get_smart_info(context, body)
+                device_data_str = self.scheduler_api.get_smart_info(context, body)
+                #LOG.info('get smart device info = %s:%s'%(device_id,device_data_str))
+                device_data_dict = {}
+                device_data_dict['id'] = device_id
+                device_data_dict['smart_info'] = 'YES'
+                device_data_dict['device_data'] = device_data_str
+                #devices = [device_data_dict]
+                devices = {"devices":[device_data_dict]}
+                #LOG.info('get smart device info222222 = %s:%s'%(device_id,devices))
+                return devices
+                #return HttpResponse(json.dumps(device_data_dict), content_type="application/json")
+            else:
+                devices =[(dict(db.device_get(context,device_id)))]
+                LOG.info('get device %s:%s'%(device_id,devices))
 
         return self._view_builder.index(req, devices)
 

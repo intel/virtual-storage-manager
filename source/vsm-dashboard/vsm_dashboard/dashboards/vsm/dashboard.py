@@ -52,7 +52,7 @@ class UserMgmt(horizon.PanelGroup):
     panels = ("usermgmt", 'settings')
 
 class VizDash(horizon.Dashboard):
-    name = _("Virtual Storage Manager for Ceph")
+    name = _("Virtual Storage Manager for Ceph1")
     slug = "vsm"
     panels = (Dashboard, ServerMgmt, ClusterMgmt, ClusterMonitor, OpenstackMgmt, UserMgmt)
     #default_panel = 'flocking'
