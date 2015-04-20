@@ -76,6 +76,6 @@ class DeviceManager(base.ManagerWithFind):
             detail = "/detail"
 
         ret = self._list("/devices%s%s" % (detail, query_string),
-                          "devices")
+                         "devices")
         return ret
 

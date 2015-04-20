@@ -1337,3 +1337,11 @@ class SchedulerManager(manager.Manager):
     def remove_cache_tier(self, context, body):
         active_server = self._get_active_server(context)
         self._agent_rpcapi.remove_cache_tier(context, body,active_server['host'])
+
+    def get_smart_info(self, context, body):
+        ser = body['server']
+        status = ser['status']
+        host =  ser['host']
+        if status == 'Active' or status == 'available':
+            res = self._agent_rpcapi.get_smart_info(context,host)
+            return res

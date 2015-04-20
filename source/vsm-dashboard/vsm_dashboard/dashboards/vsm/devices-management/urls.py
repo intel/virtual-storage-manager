@@ -16,8 +16,9 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView
-
+from .views import DevicesAction
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^devices/(?P<action>\w+)$', DevicesAction, name='devicesaction'),
     url(r'/', IndexView.as_view(), name='index'),
 )

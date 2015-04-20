@@ -184,6 +184,7 @@ install -p -D -m 755 bin/server_manifest  %{buildroot}%{_usr}/local/bin/server_m
 install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/local/bin/refresh-osd-status
 install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/local/bin/refresh-cluster-status
 install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/local/bin/getip
+install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
 
 install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/local/bin/get_storage
 install -p -D -m 755 tools/spot_info_list %{buildroot}%{_usr}/local/bin/spot_info_list

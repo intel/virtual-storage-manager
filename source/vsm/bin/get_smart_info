@@ -1,0 +1,14 @@
+#!/bin/bash
+echo """
+Drive Family=22222Intel SSD DC P3600 Series
+Serial Number=CVMD4346002V400AGN
+Firmware=8DV10100
+Drive Status=Healthy
+Available capacity percentage=100.00
+Capacity in total=400.09 GB
+Capacity in use=23.2 GB
+Temperature=29
+Percentage Used=0
+Data Units Read=1cd21
+Data Units Written=8
+"""

@@ -3072,7 +3072,12 @@ def init_node_get_by_service_id(context, service_id, session=None):
                        filter_by(service_id=service_id).\
                        options(joinedload('zone')).\
                        first()
-
+def init_node_get_by_device_id(context, device_id, session=None):
+    return model_query(context, \
+                   models.InitNode,\
+                   session=session).join(models.Service).join(models.Device).\
+                   filter(models.Device.id==device_id).\
+                   first()
 def zone_get_by_name(context, name, session=None):
     return model_query(
         context, 

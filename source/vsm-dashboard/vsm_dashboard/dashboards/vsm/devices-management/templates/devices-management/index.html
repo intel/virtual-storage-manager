@@ -13,7 +13,7 @@
  KIND, either express or implied. See the License for the
  specific language governing permissions and limitations
  under the License.
- --> 
+ -->
 
 {% extends 'base.html' %}
 {% load i18n %}
@@ -21,6 +21,10 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=_("All Devices") %}
+	<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    	<link href="{{ STATIC_URL }}dashboard/css/devicemgmt.css" rel="stylesheet">
+	<script src="{{ STATIC_URL }}dashboard/js/jquery-1.10.2.js" type='text/javascript' charset='utf-8'></script>
+	<script src="{{ STATIC_URL }}bootstrap/js/bootstrap.min.js" type='text/javascript' charset='utf-8'></script>
             <style>
             .page{
                 float:right;
@@ -30,10 +34,75 @@
 
 {% block main %}
     {{ table.render }}
+     	<div id="divOSDInfo" style="display:none">
+        <h4>Basic information</h4>
+        <hr />
+        <div id="divBaiscInfo">
+                <div class="form-group">
+                    <span class="span-label">Drive Status</span>
+                    <span id="lblStatus" class="span-label">--</span>
+                </div>
+                <div class="form-group">
+                    <span class="span-label">Device Family:</span>
+                    <span id="lblFamily" class="span-label">--</span>
+                </div>
+                <div class="form-group">
+                    <span class="span-label">Serial Number:</span>
+                    <span id="lblSeriesNumber" class="span-label">--</span>
+                </div>
+                <div class="form-group">
+                    <span class="span-label">Firmware:</span>
+                    <span id="lblFirmware" class="span-label">--</span>
+                </div>
+                <div class="form-group">
+                    <span class="span-label">Capacity in total(GB):</span>
+                    <span id="lblTotalCapacity" class="span-label">--</span>
+                </div>
+                <div class="form-group">
+                    <span class="span-label">Capacity in use(GB):</span>
+                    <span id="lblUsedCapacity" class="span-label">--</span>
+                </div>
+        </div>
+        <br/>
+        <br/>
+        <h4>Smart information</h4>
+        <hr />
+        <div id="divSmartInfo">
+            <table id="tSmartInfo" class="table table-striped">
+                  <thead>
+                        <tr>
+                            <th>Counter</th>
+                            <th>Value</th>
+                        </tr>
+                  </thead>
+                 <tbody>
+                  <tr>
+                        <td>Percentage Used</td>
+                        <td><span id="lblPercentageUsed" class="span-label">--</span></td>
+                    </tr>
+                     <tr>
+                        <td>Temperature</td>
+                        <td><span id="lblTemperature" class="span-label">--</span></td>
+                    </tr>
+                    <tr>
+                        <td>unitRead</td>
+                        <td><span id="lblUnitRead" class="span-label">--</span></td>
+                    </tr>
+                    <tr>
+                        <td>unitWRITE</td>
+                        <td><span id="lblUnitWRITE" class="span-label">--</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endblock %}
 
 {% block js %}
         {{ block.super }}
+ 	<script src="{{ STATIC_URL }}dashboard/js/jquery-ui.js" type="text/javascript" charset="utf-8"></script>
+       <script src="{{ STATIC_URL }}dashboard/js/vsm.dialog.js" type="text/javascript" charset="utf-8"></script>
+	<script src="{{ STATIC_URL }}dashboard/js/devicemgmt.js" type="text/javascript" charset="utf-8"></script>
         <script type="text/javascript">
             function searchToObject(){
                 var pairs = window.location.search.substring(1).split("&");
