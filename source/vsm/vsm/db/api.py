@@ -998,7 +998,9 @@ def init_node_get_by_cluster_id(context, cluster_id, session=None):
 def init_node_get_cluster_nodes(context, init_node_id, session=None):
     """Get active nodes in the same cluster."""
     return IMPL.init_node_get_cluster_nodes(context, init_node_id, session)
-
+def init_node_get_by_device_id(context, device_id, session=None):
+    """Get active nodes in the same cluster."""
+    return IMPL.init_node_get_by_device_id(context, device_id, session)
 #cluster
 def cluster_get_by_name(context, values):
     return IMPL.cluster_get_by_name(context, values)

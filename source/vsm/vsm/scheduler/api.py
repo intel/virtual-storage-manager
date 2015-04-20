@@ -98,3 +98,6 @@ class API(object):
 
     def remove_cache_tier(self, context, body=None):
         return self.scheduler_rpcapi.remove_cache_tier(context, body)
+
+    def get_smart_info(self, context, body=None):
+        return self.scheduler_rpcapi.get_smart_info(context, body)

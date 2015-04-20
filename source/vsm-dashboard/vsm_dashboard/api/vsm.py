@@ -221,6 +221,11 @@ def ec_profiles(request):
 def device_list(request):
     return vsmclient(request).devices.list()
 
+def device_get_smartinfo(request,search_opts=None):
+    ret = vsmclient(request).devices.list(detailed=True,search_opts=search_opts)
+    #print "vsm-dashboard get device =%s",ret
+    return ret
+
 #license api
 def license_create(request, value=True):
     return vsmclient(request).licenses.license_create(value)

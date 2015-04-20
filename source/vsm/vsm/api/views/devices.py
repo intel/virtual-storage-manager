@@ -24,7 +24,7 @@ class ViewBuilder(common.ViewBuilder):
     _collection_name = "devices"
 
     def basic(self, request, device):
-        LOG.info("devices api view %s " % device)
+        #LOG.info("devices api view %s " % device)
         return {
             "device": {
                 "id":device['id'],
@@ -48,5 +48,6 @@ class ViewBuilder(common.ViewBuilder):
         """Provide a view for a list of devices."""
         device_list = [func(request, device)["device"] for device in devices]
         devices_dict = dict(devices=device_list)
+        LOG.info("---devices_dict---%s"%devices_dict)
         return devices_dict
 
