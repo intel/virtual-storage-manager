@@ -826,3 +826,13 @@ class LongCalls(BASE, VsmBase):
     id = Column(Integer, primary_key=True, nullable=False)
     uuid = Column(String(length=255), nullable=False)
     status = Column(String(length=255), nullable=False)
+
+class CephPerformanceMetric(BASE, VsmBase):
+    """ ceph performance metric and value from diamond
+    """
+    __tablename__ = 'metrics'
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    metric = Column(String(length=255), nullable=False)
+    value = Column(String(length=255), nullable=False)
+    timestamp = Column(Integer, nullable=False)
