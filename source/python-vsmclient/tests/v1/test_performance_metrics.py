@@ -29,7 +29,7 @@ vsmclient = client.Client(
                  auth_url='http://127.0.0.1:5000/v2.0/',
                  extensions=[ExtensionManager('PerformanceMetricsManager',
                                                 performance_metrics.PerformanceMetricsManager)])
-#
+
 
 search_opt = {'metrics_name':'iops','timestamp_start':1234566}
 get = vsmclient.PerformanceMetricsManager.list(search_opt=search_opt)

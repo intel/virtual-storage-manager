@@ -4160,22 +4160,21 @@ def ec_profile_get_by_name(context, name, session=None):
         first()
 
 def performance_metrics_query(context, search_opts, session=None):
-    LOG.info("sql api search_opts=%s"%search_opts)
-    metrics_name = search_opts.has_key('metrice_name') and search_opts['metrics_name'] or ''
+    metrics_name = search_opts.has_key('metrics_name') and search_opts['metrics_name'] or ''
     host_name = search_opts.has_key('host_name') and search_opts['host_name'] or ''
     timestamp_start = search_opts.has_key('timestamp_start') and search_opts['timestamp_start'] or None
     timestamp_end = search_opts.has_key('timestamp_end') and search_opts['timestamp_end'] or None
 
     metrics_query = model_query(
-        context, models.CephPerformanceMetric, read_deleted='no', session=session)
+        context, models.CephPerformanceMetric, read_deleted='yes', session=session)
     if metrics_name:
-        metrics_query = metrics_query.filter(models.CephPerformanceMetric.metric.like('.%s%%'%metrics_name))
+        metrics_query = metrics_query.filter(models.CephPerformanceMetric.metric.like('%%.%s%%'%metrics_name))
     if host_name:
-        metrics_query = metrics_query.filter(models.CephPerformanceMetric.metric.like('servers.%s%.'%host_name))
+        metrics_query = metrics_query.filter(models.CephPerformanceMetric.metric.like('%%servers.%s.%%'%host_name))
     if timestamp_start:
-        metrics_query = metrics_query.filter("timestamp>:timestamp").params(timestamp=timestamp_start)
+        metrics_query = metrics_query.filter(models.CephPerformanceMetric.timestamp>timestamp_start)
     if timestamp_end:
-        metrics_query = metrics_query.filter("timestamp<:timestamp").params(timestamp=timestamp_end)
+        metrics_query = metrics_query.filter(models.CephPerformanceMetric.timestamp<timestamp_end)
     return metrics_query.all()
 #endregion
 
