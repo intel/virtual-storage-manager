@@ -31,6 +31,10 @@ def upgrade(migrate_engine):
         Column('metric', String(length=255), nullable=False),
         Column('value', String(length=255), nullable=False),
         Column('timestamp', Integer, nullable=False),
+        Column('created_at', DateTime(timezone=False)),
+        Column('updated_at', DateTime(timezone=False)),
+        Column('deleted_at', DateTime(timezone=False)),
+        Column('deleted', Boolean(create_constraint=True, name=None)),
     )
 
     try:
