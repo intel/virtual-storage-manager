@@ -28,9 +28,15 @@ class ExampleCollector(diamond.collector.Collector):
         """
 
         # Set Metric Name
-        metric_name = "metric1"
+        metric_name = "iops"
         # Set Metric Value
         metric_value = 343
-
         # Publish Metric
+        self.publish(metric_name, metric_value)
+        # Set Metric Name
+        metric_name = "latency"
+        metric_value = 343
+        self.publish(metric_name, metric_value)
+        metric_name = "bandwidth"
+        metric_value = 343
         self.publish(metric_name, metric_value)

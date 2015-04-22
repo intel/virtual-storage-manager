@@ -595,3 +595,5 @@ class ConductorManager(manager.Manager):
                     host_list.append(osd['service']['host']) 
         return zone_list, host_list
 
+    def get_performance_metrics(self, context, search_opts):
+        return db.get_performance_metrics(context, search_opts=search_opts)
