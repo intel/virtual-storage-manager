@@ -204,3 +204,9 @@ class APIRouter(vsm.api.openstack.APIRouter):
                                     'create': 'post',
                                     'get_by_name': 'get'},
                         member={'action': 'post'})
+
+        self.resources['performance_metrics'] = servers.create_resource(ext_mgr)
+        mapper.resource("performance_metrics", "performance_metrics",
+                        controller=self.resources['performance_metrics'],
+                        collection={"get_list": "get",},
+                        member={'action':'post'})
