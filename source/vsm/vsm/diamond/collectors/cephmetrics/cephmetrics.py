@@ -4,7 +4,7 @@
 import diamond.collector
 
 
-class ExampleCollector(diamond.collector.Collector):
+class CephMetricsCollector(diamond.collector.Collector):
 
     def get_default_config_help(self):
         config_help = super(ExampleCollector, self).get_default_config_help()
@@ -16,9 +16,9 @@ class ExampleCollector(diamond.collector.Collector):
         """
         Returns the default collector settings
         """
-        config = super(ExampleCollector, self).get_default_config()
+        config = super(CephMetricsCollector, self).get_default_config()
         config.update({
-            'path':     'example'
+            'path':     'cephmetric'
         })
         return config
 
