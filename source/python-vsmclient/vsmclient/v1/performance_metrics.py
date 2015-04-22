@@ -45,5 +45,26 @@ class PerformanceMetricsManager(base.ManagerWithFind):
     """
     resource_class = PerformanceMetrics
 
+    def list(self, search_opts=None):
+    """
+    Get a list of .
+
+    :rtype: list of :class:`VsmSettings`
+    """
+    if search_opts is None:
+        search_opts = {}
+
+    qparams = {}
+
+    for opt, val in search_opts.iteritems():
+        if val:
+            qparams[opt] = val
+
+    query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+
+    ret = self._list("/performance_metrics/get_list%s" % (query_string),
+                     "performance_metrics")
+    return ret
+
 
 
