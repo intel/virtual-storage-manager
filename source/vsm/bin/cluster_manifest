@@ -215,6 +215,9 @@ def check_sections(file_path):
 
 if __name__ == '__main__':
     fpath = '/etc/manifest/cluster.manifest'
+    if len(sys.argv) > 1 :
+        fpath = sys.argv[1]
+
     check_storage_group(fpath)
     check_sections(fpath)
 

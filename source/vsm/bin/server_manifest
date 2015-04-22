@@ -314,6 +314,8 @@ class ManifestChecker(object):
 
 if __name__ == '__main__':
     fpath = '/etc/manifest/server.manifest'
+    if len(sys.argv) > 1 :
+        fpath = sys.argv[1]
     if os.path.exists(fpath) == False:
         error('%s is not exists.' % fpath)
     smp = ManifestChecker(fpath)
