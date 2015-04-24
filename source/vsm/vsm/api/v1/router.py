@@ -211,5 +211,6 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         controller=self.resources['performance_metrics'],
                         collection={"get_list": "get",
                                     "get_iops_or_banwidth": "get",
+                                    "get_lantency": "get",
                                     },
                         member={'action':'post'})
