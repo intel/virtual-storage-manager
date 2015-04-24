@@ -80,10 +80,10 @@ class MySQLHandler(Handler):
         data_name = data[0].split('.')
         try:
             cursor = self.conn.cursor()
-            cursor.execute("INSERT INTO %s (%s, %s, %s) VALUES(%%s, %%s, %%s)"
+            cursor.execute("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES(%%s, %%s, %%s ,%%s, %%s)"
                            % (self.table, self.col_metric, self.col_hostname, self.col_instance,
                               self.col_time, self.col_value),
-                           (data_name[4], data_name[3], data_name[1], data[2], data[1]))
+                           (data_name[4], data_name[1], data_name[3], data[2], data[1]))
             cursor.close()
             self.conn.commit()
         except BaseException, e:
