@@ -4168,13 +4168,42 @@ def performance_metrics_query(context, search_opts, session=None):
     metrics_query = model_query(
         context, models.CephPerformanceMetric, read_deleted='yes', session=session)
     if metrics_name:
-        metrics_query = metrics_query.filter(models.CephPerformanceMetric.metric.like('%%.%s%%'%metrics_name))
+        metrics_query = metrics_query.filter(models.CephPerformanceMetric.metric==metrics_name)
     if host_name:
-        metrics_query = metrics_query.filter(models.CephPerformanceMetric.metric.like('%%servers.%s.%%'%host_name))
+        metrics_query = metrics_query.filter(models.CephPerformanceMetric.hostname==host_name)
     if timestamp_start:
         metrics_query = metrics_query.filter(models.CephPerformanceMetric.timestamp>timestamp_start)
     if timestamp_end:
         metrics_query = metrics_query.filter(models.CephPerformanceMetric.timestamp<timestamp_end)
     return metrics_query.all()
+
+def sum_performance_metrics(context, search_opts, session=None):#for iops bandwidth
+    metrics_name =  search_opts['metrics_name']
+    #host_name = search_opts['host_name'] or ''
+    timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
+    timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
+    correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
+    if timestamp_start is None and timestamp_end:
+        timestamp_start = timestamp_end - 15
+    elif timestamp_start  and  timestamp_end is None:
+        timestamp_end = timestamp_start + 15
+    ret_list = []
+    timestamp_cur = timestamp_start
+    while timestamp_cur<timestamp_end:
+        metrics_query = model_query(\
+            context, models.CephPerformanceMetric, func.sum(models.CephPerformanceMetric.value), func.count(models.CephPerformanceMetric.value), read_deleted='yes', session=session)\
+            .filter(models.CephPerformanceMetric.metric==metrics_name).filter(models.CephPerformanceMetric.timestamp>timestamp_start).filter(models.CephPerformanceMetric.timestamp<timestamp_end)
+        sql_ret = metrics_query.all()[0]
+        if correct_cnt:
+            metrics_value =  sql_ret[1]/sql_ret[2]*correct_cnt
+        else:
+            metrics_value = sql_ret[1]
+        sql_ret_dict = {'timestamp':str(timestamp_cur),'metrics_value':metrics_value,'metrics':metrics_name,}
+        ret_list.append(sql_ret_dict)
+        timestamp_cur = timestamp_cur + 15
+
+    return ret_list
+
+
 #endregion
 

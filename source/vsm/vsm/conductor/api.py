@@ -291,3 +291,6 @@ class API(object):
 
     def get_performance_metrics(self, context, search_opts):
         return self.conductor_rpcapi.get_performance_metrics(context, search_opts)
+
+    def get_sum_performance_metrics(self, context, search_opts):
+        return self.conductor_rpcapi.get_sum_performance_metrics(context, search_opts)

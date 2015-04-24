@@ -597,3 +597,6 @@ class ConductorManager(manager.Manager):
 
     def get_performance_metrics(self, context, search_opts):
         return db.get_performance_metrics(context, search_opts=search_opts)
+
+     def get_sum_performance_metrics(self, context, search_opts):
+        return db.get_sum_performance_metrics(context, search_opts=search_opts)

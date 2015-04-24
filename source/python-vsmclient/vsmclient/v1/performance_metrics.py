@@ -63,5 +63,23 @@ class PerformanceMetricsManager(base.ManagerWithFind):
         ret = self._list("/performance_metrics/get_list%s" % (query_string),"performance_metrics")
         return ret
 
+    def get_iops_or_width(self, search_opts=None):
+        """
+        Get a list of .
+        """
+        if search_opts is None:
+            search_opts = {}
+
+        qparams = {}
+
+        for opt, val in search_opts.iteritems():
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+
+        ret = self._list("/performance_metrics/get_iops_or_banwidth%s" % (query_string),"performance_metrics")
+        return ret
+
 
 
