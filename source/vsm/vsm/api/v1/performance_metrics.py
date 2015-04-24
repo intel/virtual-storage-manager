@@ -58,6 +58,15 @@ class PerformanceMetricsController(wsgi.Controller):
         LOG.info("CEPH_LOG get performance metrics by search opts: %s" % search_opts)
         return {"metrics": metrics}
 
+    def get_iops_or_banwidth(self, req):
+        """update cluster."""
+        search_opts = {}
+        search_opts.update(req.GET)
+        context = req.environ['vsm.context']
+        metrics = self.conductor_api.get_sum_performance_metrics(context, search_opts=search_opts)
+        LOG.info("CEPH_LOG get performance metrics  iops or banwidth  by search opts: %s" % search_opts)
+        return {"metrics": metrics}
+
 
 
 

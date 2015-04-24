@@ -30,6 +30,8 @@ def upgrade(migrate_engine):
         Column('id', Integer, primary_key=True, nullable=False),
         Column('metric', String(length=255), nullable=False),
         Column('value', String(length=255), nullable=False),
+        Column('hostname', String(length=255), nullable=False),
+        Column('instance', String(length=255), nullable=False),
         Column('timestamp', Integer, nullable=False),
         Column('created_at', DateTime(timezone=False)),
         Column('updated_at', DateTime(timezone=False)),
