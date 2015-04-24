@@ -389,3 +389,7 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def get_sum_performance_metrics(self, context, search_opts):
         return self.call(context,self.make_msg('get_sum_performance_metrics', \
                                search_opts=search_opts))
+
+    def get_lantency(self, context, search_opts):
+        return self.call(context,self.make_msg('get_lantency', \
+                               search_opts=search_opts))
