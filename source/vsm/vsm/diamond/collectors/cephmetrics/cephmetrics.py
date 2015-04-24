@@ -28,15 +28,15 @@ class CephMetricsCollector(diamond.collector.Collector):
         """
 
         # Set Metric Name
-        metric_name = "iops"
+        metric_name = "osd1.iops"
         # Set Metric Value
         metric_value = 343
         # Publish Metric
         self.publish(metric_name, metric_value)
         # Set Metric Name
-        metric_name = "latency"
+        metric_name = "osd1.latency"
         metric_value = 343
         self.publish(metric_name, metric_value)
-        metric_name = "bandwidth"
+        metric_name = "osd1.bandwidth"
         metric_value = 343
         self.publish(metric_name, metric_value)
