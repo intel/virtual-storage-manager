@@ -505,8 +505,12 @@ class CephDriver(object):
         LOG.info('strg_list %s' % strg_list)
 
         #added_to_crushmap = False
+        osd_cnt = len(strg_list)
+        count = 0
         for strg in strg_list:
             LOG.info('>> Step 1: start to ceph osd %s' % strg)
+            count = count + 1
+            self._conductor_api.init_node_update(context, host_id, {"status": "add_osd %s/%s"%(count,osd_cnt)})
             # Create osd from # ceph osd create
             stdout = utils.execute("ceph",
                                    "osd",

@@ -471,10 +471,12 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.update_ceph_conf(context, ser['host'])
                 # save admin keyring
                 LOG.info(" start save ceph keyring to %s " % ser['host'])
+                self._update_server_list_status(context,[ser],'update keyring')
                 self._agent_rpcapi.update_keyring_admin_from_db(context,
                                                                 ser['host'])
 
                 LOG.info('Begin to add osd in agent host = %s' % ser['host'])
+                self._update_server_list_status(context, [ser], 'add osds')
                 self._agent_rpcapi.add_osd(context,
                                            ser['id'],
                                            ser['host'])
@@ -709,9 +711,9 @@ class SchedulerManager(manager.Manager):
                     db.init_node_update(context, ser_ref['id'], values)
                 
 
-        self._update_server_list_status(context, server_list, 'running')
+        self._update_server_list_status(context, server_list, 'update ssh key')
         _update_ssh_key()
-
+        self._update_server_list_status(context, server_list, 'add monitor')
         self.add_monitor(context, server_list)
 
         # Begin to add osds.
