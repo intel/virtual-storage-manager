@@ -41,6 +41,7 @@ from vsm.api.v1 import monitors
 from vsm.api.v1 import vsm_settings
 from vsm.api.v1 import vsms
 from vsm.api.v1 import licenses
+from vsm.api.v1 import performance_metrics
 
 from vsm.openstack.common import log as logging
 
@@ -204,3 +205,12 @@ class APIRouter(vsm.api.openstack.APIRouter):
                                     'create': 'post',
                                     'get_by_name': 'get'},
                         member={'action': 'post'})
+
+        self.resources['performance_metrics'] = performance_metrics.create_resource(ext_mgr)
+        mapper.resource("performance_metrics", "performance_metrics",
+                        controller=self.resources['performance_metrics'],
+                        collection={"get_list": "get",
+                                    "get_iops_or_banwidth": "get",
+                                    "get_lantency": "get",
+                                    },
+                        member={'action':'post'})

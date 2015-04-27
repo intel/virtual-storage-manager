@@ -1289,4 +1289,13 @@ def ec_profile_get(context, ec_profile_id):
 
 def ec_profile_get_by_name(context, name):
     return IMPL.ec_profile_get_by_name(context, name)
+
+def get_performance_metrics(context, search_opts):
+    return IMPL.performance_metrics_query(context, search_opts=search_opts)
+
+def get_sum_performance_metrics(context, search_opts):
+    return IMPL.sum_performance_metrics(context, search_opts=search_opts)
+
+def get_lantency(context, search_opts):
+    return IMPL.lantency_performance_metrics(context, search_opts=search_opts)
 #endregion

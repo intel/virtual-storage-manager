@@ -253,3 +253,6 @@ def get_setting_by_name(request, name):
 def update_setting(request, name, value):
     return vsmclient(request).vsm_settings.create({'name': name, 'value':value})
 
+def get_iops_or_width(request,search_opts):
+    return vsmclient(request).performance_metrics.get_iops_or_width(search_opts=search_opts)
+

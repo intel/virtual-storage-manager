@@ -288,3 +288,12 @@ class API(object):
     def zones_hosts_get_by_storage_group(self, context, storage_group):
         return self.conductor_rpcapi.\
                zones_hosts_get_by_storage_group(context, storage_group)
+
+    def get_performance_metrics(self, context, search_opts):
+        return self.conductor_rpcapi.get_performance_metrics(context, search_opts)
+
+    def get_sum_performance_metrics(self, context, search_opts):
+        return self.conductor_rpcapi.get_sum_performance_metrics(context, search_opts)
+
+    def get_lantency(self, context, search_opts):
+        return self.conductor_rpcapi.get_lantency(context, search_opts)
