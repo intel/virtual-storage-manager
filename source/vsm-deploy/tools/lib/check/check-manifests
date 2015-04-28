@@ -59,3 +59,7 @@ function check_manifests() {
 # Jan 21 2015 Zhu Boxiang <boxiangx.zhu@intel.com> - 2015.1.21-1
 # Initial release
 #
+<<<<<<< HEAD
+=======
+
+>>>>>>> changing the file format
