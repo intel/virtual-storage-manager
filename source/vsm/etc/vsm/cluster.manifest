@@ -20,6 +20,12 @@ cluster_a
 [file_system]
 xfs
 
+[osd_heartbeat_interval]
+12
+
+[osd_heartbeat_grace]
+13
+
 [management_addr]
 192.168.123.0/24
 
