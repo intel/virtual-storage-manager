@@ -261,6 +261,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/admin-token
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-backup
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-restore
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/get_smart_info
 
 
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/getip

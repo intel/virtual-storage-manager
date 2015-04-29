@@ -57,7 +57,7 @@ DATE=`date "+%Y%m%d"`
 is_lsb_release=0
 lsb_release -a >/dev/null 2>&1 && is_lsb_release=1
 
-if [[ $is_lsb_release -gt ]]; then
+if [[ $is_lsb_release -gt 0 ]]; then
     OS=`lsb_release -a|grep "Distributor ID:"|awk -F ' ' '{print $3}'`
     OS_VERSION=`lsb_release -a|grep "Release"|awk -F ' ' '{print $2}'`
 else
@@ -76,11 +76,21 @@ cd $TEMP_VSM
 
 function create_release() {
     if [[ $OS == "Ubuntu" && $OS_VERSION == "14.04" ]]; then
+        cp -rf ubuntu14/python-vsmclient ./source
+        cp -rf ubuntu14/vsm ./source
+        cp -rf ubuntu14/vsm-dashboard ./source
+        cp -rf ubuntu14/vsm-deploy ./source
         cp ubuntu14/builddeb .
         bash +x builddeb
         sudo cp ubuntu14/install.sh release/$VERSION-$DATE
     elif [[ $OS == "CentOS" && $OS_VERSION == "7" ]]; then
-        pass
+        cp -rf centos7/python-vsmclient ./source
+        cp -rf centos7/vsm ./source
+        cp -rf centos7/vsm-dashboard ./source
+        cp -rf centos7/vsm-deploy ./source
+        cp centos7/buildrpm .
+        bash +x buildrpm
+        sudo cp centos7/install.sh release/$VERSION-$DATE
     elif [[ $OS == "CentOS" && $OS_VERSION == "6.5" ]]; then
         pass
     fi
