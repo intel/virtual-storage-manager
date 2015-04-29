@@ -1,0 +1,17 @@
+#!/bin/bash
+
+mkdir -p /etc/apache2/conf-enabled
+ln -s /etc/apache2/conf-available/vsm-dashboard.conf /etc/apache2/conf-enabled/vsm-dashboard.conf
+
+mkdir -p /etc/vsm-dashboard
+#chown -R apache:apache /etc/vsm-dashboard
+rm -rf /etc/vsm-dashboard/*
+ln -sf /usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py /etc/vsm-dashboard/local_settings
+
+chmod -R a+r /usr/share/vsm-dashboard
+#chown -R apache:apache /usr/share/vsm-dashboard
+#chown -R apache:apache /etc/vsm-dashboard
+#chown -R apache:apache /etc/httpd/conf.d/vsm-dashboard.conf
+
+VSM_VERSION="2015.03-1.2"
+sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" /usr/share/vsm-dashboard/vsm_dashboard/dashboards/vsm/overview/summarys.py

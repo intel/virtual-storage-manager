@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rm -rf /etc/apache2/conf-enabled/vsm-dashboard.conf

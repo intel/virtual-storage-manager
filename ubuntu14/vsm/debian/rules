@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+build:
+	sed -i '/setup_requires/d; /install_requires/d; /dependency_links/d' setup.py
+	python setup.py build
+
+binary: clean build install
+	dh_makeshlibs
+	dh_shlibdeps
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+
+	sed -i 's,Version: 2015.03-1,Version: 2015.03-1.2,g' debian/vsm/DEBIAN/control
+	rm -rf debian/vsm/DEBIAN/conffiles
+
+	dh_builddeb
+
+binary-indep: binary
+
+binary-arch: binary
+
+clean:
+	#dh_auto_clean
+	rm -rf ./debian/vsm
+
+install:
+	./install-vsm.sh
+
+.PHONY: build clean binary-indep binary-arch binary install

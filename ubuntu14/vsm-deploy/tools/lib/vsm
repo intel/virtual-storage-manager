@@ -1,0 +1,201 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function setup_vsm() {
+if [[ `is_service_enabled $VSM_HOST` -gt 0 ]]; then
+#---------------------------------------------
+# Begin func
+#---------------------------------------------
+
+#---------------------------------------------
+# Install System Packages.
+#---------------------------------------------
+
+#---------------------------------------------
+# Important Variables.
+#---------------------------------------------
+
+BASE_SQL_CONN=mysql://$MYSQL_VSM_USER:$MYSQL_VSM_PASSWORD@$MYSQL_HOST
+unset OS_USERNAME
+unset OS_AUTH_KEY
+unset OS_AUTH_TENANT
+unset OS_STRATEGY
+unset OS_AUTH_STRATEGY
+unset OS_AUTH_URL
+unset SERVICE_TOKEN
+unset SERVICE_ENDPOINT
+unset http_proxy
+unset https_proxy
+unset ftp_proxy
+
+KEYSTONE_AUTH_HOST=$KEYSTONE_HOST
+KEYSTONE_AUTH_PORT=35357
+KEYSTONE_AUTH_PROTOCOL=http
+KEYSTONE_SERVICE_HOST=$KEYSTONE_HOST
+KEYSTONE_SERVICE_PORT=5000
+KEYSTONE_SERVICE_PROTOCOL=http
+SERVICE_ENDPOINT=http://$KEYSTONE_HOST:35357/v2.0
+
+#---------------------------------------------------
+# Clear Front installation
+#---------------------------------------------------
+for n in ${VSM_RUNNING_SERVICE//,/ }; do
+    if [[ -e /etc/init.d/$n ]]; then
+        service $n stop
+    else
+        echo "Can not find service $n"
+    fi
+done
+
+[[ -d /etc/vsm ]] && rm -rf /etc/vsm/*
+mkdir -p /etc/vsm
+cp -rf $TOPDIR/tools/etc/vsm/* /etc/vsm/
+
+mysql_cmd "DROP DATABASE IF EXISTS vsm;"
+
+#---------------------------------------------------
+# Create VSM User in Keystone
+#---------------------------------------------------
+
+export SERVICE_TOKEN=$ADMIN_TOKEN
+export SERVICE_ENDPOINT=http://$KEYSTONE_HOST:35357/v2.0
+
+get_tenant SERVICE_TENANT service
+get_role ADMIN_ROLE admin
+
+if [[ `keystone user-list | grep vsm | wc -l` -eq 0 ]]; then
+VSM_USER=$(get_id keystone user-create --name=vsm \
+                                          --pass="$KEYSTONE_VSM_SERVICE_PASSWORD" \
+                                          --tenant_id $SERVICE_TENANT \
+                                          --email=vsm@example.com)
+keystone user-role-add --tenant_id $SERVICE_TENANT \
+                       --user_id $VSM_USER \
+                       --role_id $ADMIN_ROLE
+VSM_SERVICE=$(get_id keystone service-create \
+    --name=vsm \
+    --type=vsm \
+    --description="VSM Service")
+keystone endpoint-create \
+    --region RegionOne \
+    --service_id $VSM_SERVICE \
+    --publicurl "http://$VSM_HOST:8778/v1/\$(tenant_id)s" \
+    --adminurl "http://$VSM_HOST:8778/v1/\$(tenant_id)s" \
+    --internalurl "http://$VSM_HOST:8778/v1/\$(tenant_id)s"
+fi
+
+unset SERVICE_TOKEN
+unset SERVICE_ENDPOINT
+
+#---------------------------------------------------
+# Create VSM user in Mysql
+#---------------------------------------------------
+
+# create user
+cnt=`mysql_cmd "select * from mysql.user;" | grep -w $MYSQL_VSM_USER | wc -l`
+if [[ $cnt -eq 0 ]]; then
+    mysql_cmd "create user '$MYSQL_VSM_USER'@'%' identified by '$MYSQL_VSM_PASSWORD';"
+    mysql_cmd "flush privileges;"
+fi
+
+# create database
+cnt=`mysql_cmd "show databases;" | grep -w vsm | wc -l`
+if [[ $cnt -eq 0 ]]; then
+    mysql_cmd "create database vsm CHARACTER SET utf8;"
+    mysql_cmd "grant all privileges on vsm.* to '$MYSQL_VSM_USER'@'%' identified by '$MYSQL_VSM_PASSWORD';"
+    mysql_cmd "grant all privileges on vsm.* to 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD';"
+    mysql_cmd "flush privileges;"
+fi
+
+#---------------------------------------------------
+# Change VSM configuration files.
+#---------------------------------------------------
+
+[[ -d /etc/vsm ]] && rm -rf /etc/vsm/*
+mkdir -p /etc/vsm
+cp -rf $TOPDIR/tools/etc/vsm/* /etc/vsm/
+cp -rf /etc/vsm/vsm.conf.sample /etc/vsm/vsm.conf
+
+file=/etc/vsm/api-paste.ini
+sed -i "s,auth_host = 127.0.0.1,auth_host = $KEYSTONE_HOST,g" $file
+sed -i "s,%SERVICE_TENANT_NAME%,$SERVICE_TENANT_NAME,g" $file
+sed -i "s,%SERVICE_USER%,vsm,g" $file
+sed -i "s,%SERVICE_PASSWORD%,$KEYSTONE_VSM_SERVICE_PASSWORD,g" $file
+
+file=/etc/vsm/rootwrap.conf
+sed -i "s,filters_path=.*,filters_path=/etc/vsm/rootwrap.d,g" $file
+
+file=/etc/vsm/vsm.conf
+
+sed -i "s,%RABBITMQ_PASSWORD%,$RABBITMQ_PASSWORD,g" $file
+sed -i "s,%RABBITMQ_HOST%,$RABBITMQ_HOST,g" $file
+sed -i "s,%RABBITMQ_PORT%,$RABBITMQ_PORT,g" $file
+sed -i "s,%MYSQL_VSM_USER%,$MYSQL_VSM_USER,g" $file
+sed -i "s,%MYSQL_VSM_PASSWORD%,$MYSQL_VSM_PASSWORD,g" $file
+sed -i "s,%MYSQL_HOST%,$MYSQL_HOST,g" $file
+
+mkdir -p /opt/stack/data/vsm
+chmod a+w -R /opt/stack/data/vsm
+#---------------------------------------------------
+# Create tables in DB.
+#---------------------------------------------------
+
+vsm-manage db sync
+
+#---------------------------------------------------
+# Create start services script.
+#---------------------------------------------------
+
+rm -rf /tmp/pip*
+rm -rf /tmp/tmp*
+echo $VSM_RUNNING_SERVICE
+for n in ${VSM_RUNNING_SERVICE//,/ }; do
+    if [[ -e /etc/init.d/$n ]]; then
+        service $n restart
+#        systemctl enable $n.service
+    else
+        echo "Can not find service $n"
+    fi
+done
+
+for n in `ls /etc/init.d | grep vsm`; do
+    cnt=0
+    for x in ${VSM_RUNNING_SERVICE//,/ }; do
+        if [[ $x == $n ]]; then
+            let cnt=cnt+1
+        fi
+    done
+done
+
+#---------------------------------------------------
+# Change script exe.
+#---------------------------------------------------
+
+for n in `find /etc/vsm/prepools -name "*"`; do
+    if [[ ! -d $n ]]; then
+        cnt=`head -1 $n | grep bash | wc -l`
+        if [[ $cnt -gt 0 ]];then
+            chmod +x $n
+        fi
+    fi
+done
+
+#---------------------------------------------------
+# End function.
+#---------------------------------------------------
+fi
+}

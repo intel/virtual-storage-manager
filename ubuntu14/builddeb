@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+set -e
+
+TOPDIR=$(cd "$(dirname "$0")" && pwd)
+
+rm -rf $TOPDIR/vsmrepo.tar.gz
+rm -rf $TOPDIR/vsmrepo
+cd $TOPDIR
+mkdir -p $TOPDIR/vsmrepo
+
+tar -czvf lib.tar.gz .lib
+cp -rf ubuntu14/.lib .
+
+set -o xtrace
+TEMP=`mktemp`;
+rm -rfv $TEMP >/dev/null;
+mkdir -p $TEMP;
+echo '%debug_package %{nil}' >> ~/.debmacros
+#---------------------------------------------
+# Load Function
+#---------------------------------------------
+
+VERSION="2015.03"
+RELEASE="2.0"
+SOURCE_DIR=source
+VSM_DIR=vsm
+VSMCLIENT_DIR=python-vsmclient
+VSMDASHBOARD_DIR=vsm-dashboard
+VSM_DEPLOY_DIR=vsm-deploy
+
+source  $TOPDIR/.lib/setiptables
+for n in `ls $TOPDIR/.lib/ | grep -v iptables`; do
+    source $TOPDIR/.lib/$n
+done
+
+for pkg in vsm vsm-dashboard python-vsmclient vsm-deploy; do
+    for ph in /root /var /tmp /opt /mnt; do
+        find $ph -name "${pkg}*.deb" | xargs -i rm -rf {}
+    done
+done
+
+# rm *.pyc and *.pyo
+find $TOPDIR -name "*.pyc" | xargs -i rm -rf {}
+find $TOPDIR -name "*.pyo" | xargs -i rm -rf {}
+
+#---------------------------------------------
+# Begin to build vsm deb
+#---------------------------------------------
+
+build_vsm_deb
+
+#---------------------------------------------
+# Begin to build python-vsmclient deb
+#---------------------------------------------
+
+build_vsmclient_deb
+
+#---------------------------------------------
+# Begin to build vsm-dashboard deb
+#---------------------------------------------
+
+build_vsm_dashboard_deb
+
+#---------------------------------------------
+# Begin to build vsm-deploy deb
+#---------------------------------------------
+
+build_vsmdeploy_deb
+
+#---------------------------------------------
+# Update vsmrepo
+#---------------------------------------------
+
+rm -rf .lib
+tar -zxvf lib.tar.gz
+rm -rf lib.tar.gz
+
+# __create_repo_by_rpms
+
+dpkg-scanpackages vsmrepo | gzip > vsmrepo/Packages.gz
+#apt-get update
+
+rm -rf $TEMP
+
+set +o xtrace

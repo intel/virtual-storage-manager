@@ -1,0 +1,20 @@
+Source: vsm-dashboard
+Section: python
+Priority: optional
+Maintainer: intel <intel@intel.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+XS-Python-Version: all
+
+Package: vsm-dashboard
+Architecture: amd64
+Depends: python, python-setuptools, python-mysqldb, python-compressor,
+    python-django, python-openstack-auth, python-netaddr, python-keystoneclient,
+    python-lockfile, libapr1, libaprutil1, libaprutil1-ldap,
+    python-pyparsing, python-backports.ssl-match-hostname, python-chardet, python-cliff,
+    python-cmd2, python-appconf, python-django-horizon, python-httplib2, python-iso8601,
+    python-jsonschema, python-keyring, python-keystoneclient, python-oslo.config,
+    python-prettytable, python-requests, python-simplejson, python-six, python-urllib3,
+    python-versiontools, python-warlock, python-webob, python-vsmclient
+Description: The VSM Dashboard is a reference implementation of a Django site that
+    uses the Django project to provide web based interactions with the VSM cloud controller.

@@ -1,0 +1,5 @@
+vsm-deploy (2015.03-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- root <intel@intel.com>  Mon, 30 Mar 2015 15:10:03 +0800

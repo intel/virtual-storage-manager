@@ -1,0 +1,82 @@
+#!/bin/sh
+#
+# vsm-api  VSM Storage API Service
+#
+# chkconfig:   - 98 02
+# description: VSM Storage API Service works provide apis to  \
+#		* Ceph operations. \
+#		* Cluster operations.
+### END INIT INFO
+
+. /lib/lsb/init-functions
+sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=osd.$id --keyring=$osd_keyring osd crush create-or-move -- $id ${osd_weight:-${defaultweight:-1}} $osd_location ||:",g' /etc/init.d/ceph;
+
+NAME=vsm-api
+DAEMON=/usr/bin/vsm-api
+CONFIGFILE=/etc/vsm/vsm.conf
+PIDFILE=/var/run/vsm-api.pid
+LOGFILE=/var/log/vsm/vsm-api.log
+DAEMON_OPTS="--config-file $CONFIGFILE --log-file $LOGFILE"
+
+test -x $DAEMON || exit 5
+
+[ -e /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+
+LOCKFILE=/var/lock/vsm-api
+
+lock_vsmapi() {
+	if [ -x /usr/bin/lockfile-create ]; then
+		lockfile-create $LOCKFILE
+		lockfile-touch $LOCKFILE &
+		LOCKTOUCHPID="$!"
+	fi
+}
+
+unlock_vsmapi() {
+	if [ -x /usr/bin/lockfile-create ] ; then
+		kill $LOCKTOUCHPID
+		lockfile-remove $LOCKFILE
+	fi
+}
+
+RUNASUSER=vsm
+
+case $1 in
+	start)
+		log_daemon_msg "Starting VSM server" "vsm-api"
+		lock_vsmapi
+  		start-stop-daemon --start --quiet --oknodo --background --pidfile $PIDFILE --startas $DAEMON -- $DAEMON_OPTS
+  		PID=`ps -ef|grep vsm-api|awk -F ' ' '{ if($3==1) print $2 }'`
+  		echo $PID > $PIDFILE
+
+		status=$?
+		unlock_vsmapi
+		log_end_msg $status
+  		;;
+	stop)
+		log_daemon_msg "Stopping VSM server" "vsm-api"
+  		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
+		log_end_msg $?
+		rm -rf $PIDFILE
+  		;;
+	restart|force-reload)
+		$0 stop && sleep 2 && $0 start
+  		;;
+	try-restart)
+		if $0 status >/dev/null; then
+			$0 restart
+		else
+			exit 0
+		fi
+		;;
+	reload)
+		exit 3
+		;;
+	status)
+		status_of_proc $DAEMON "VSM server vsm-api"
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|try-restart|force-reload|status}"
+		exit 2
+		;;
+esac

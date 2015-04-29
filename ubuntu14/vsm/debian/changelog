@@ -1,0 +1,5 @@
+vsm (2015.03-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- intel <intel@intel.com>  Fri, 27 Mar 2015 09:58:52 +0800

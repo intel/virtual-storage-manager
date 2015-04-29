@@ -1,0 +1,27 @@
+#!/bin/bash
+
+update-rc.d -f vsm-agent remove
+update-rc.d -f vsm-api remove
+update-rc.d -f vsm-conductor remove
+update-rc.d -f vsm-physical remove
+update-rc.d -f vsm-scheduler remove
+
+getent group vsm >/dev/null || groupadd -r vsm --gid 165
+if ! getent passwd vsm >/dev/null; then
+  useradd -u 165 -r -g vsm -G vsm,nogroup -d /var/lib/vsm -s /sbin/nologin -c "Vsm Storage Services" vsm
+fi
+
+mkdir -p /var/run/vsm/
+mkdir -p /var/log/vsm/
+mkdir -p /var/lib/vsm/
+mkdir -p /etc/vsm/
+
+chown -R vsm /var/run/vsm/
+chown -R vsm /etc/vsm/
+chown -R vsm /var/log/vsm/
+chown -R vsm /var/lib/vsm/
+
+if [ -f /etc/init.d/ceph ]; then
+    sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=osd.$id --keyring=$osd_keyring osd crush create-or-move -- $id ${osd_weight:-${defaultweight:-1}} $osd_location ||:",g' /etc/init.d/ceph;
+    sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=osd.$id --keyring=$osd_keyring osd crush create-or-move -- $id ${osd_weight:-${defaultweight:-1}} $osd_location ||:",g' /etc/init.d/ceph;
+fi

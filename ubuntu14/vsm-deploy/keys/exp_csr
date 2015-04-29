@@ -1,0 +1,48 @@
+#!/usr/bin/expect -f
+
+#openssl req -new -key server.key -out server.csr
+
+#Enter pass phrase for server.key:
+#Country Name (2 letter code) [XX]:cn
+#State or Province Name (full name) []:intel
+#Locality Name (eg, city) [Default City]:it
+#Organization Name (eg, company) [Default Company Ltd]:flex
+#Organizational Unit Name (eg, section) []:cn
+#Common Name (eg, your name or your server's hostname) []:intel
+#Email Address []:intel@intel.com
+
+#Please enter the following 'extra' attributes
+#to be sent with your certificate request
+#A challenge password []:%PASSWORD%
+#An optional company name []:intel
+
+spawn openssl req -new -key server.key -out server.csr
+
+expect "Country Name*:"
+send "CC\r"
+
+expect "State or Province Name*:"
+send "some\r"
+
+expect "Locality Name*:"
+send "ceph\r"
+
+expect "Organization Name*:"
+send "opensource\r"
+
+expect "Organizational Unit Name*:"
+send "storage\r"
+
+expect "Common Name*:"
+send "%HOSTNAME%\r"
+
+expect "Email Address*:"
+send "ceph@storage.com\r"
+
+expect "A challenge password*:"
+send "%PASSWORD%\r"
+
+expect "An optional company name*:"
+send "cephsystem\r"
+
+expect eof
