@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DATE=`date "+%Y%m%d%H%M%S"`
+if [[ -f /usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py ]]; then
+  cp /usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py /etc/vsm-dashboard/local_settings.$DATE
+fi

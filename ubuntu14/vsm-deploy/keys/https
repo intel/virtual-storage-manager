@@ -1,0 +1,63 @@
+#!/bin/bash
+
+#Steps to generate keys.
+
+# cd /opt/keys/
+# ./exp_key                                       generate key file
+# cp -rf server.key server.key.secure
+# ./exp_sec                                       avoid typing password
+# ./exp_csr                                        generate request file
+# ./exp_crt                                        generate certificate file
+
+function _generate_keys() {
+    mkdir -p /tmp/__keys
+    for n in exp_key exp_sec exp_csr exp_crt; do
+        cp -rf /usr/local/bin/keys/$n /tmp/__keys
+        chmod 755 /tmp/__keys/$n
+    done
+
+    mkdir -p /tmp/__keys
+    cd /tmp/__keys/
+
+    for n in `ls`; do
+        sed -i "s,%PASSWORD%,$VSM_HTTPS_PASSWORD,g" $n
+    done
+
+    # Here we generate keys.
+    ./exp_key
+    cp -rf server.key server.key.secure
+    ./exp_sec
+    ./exp_csr
+    openssl x509 -req -days 7000 -in server.csr -signkey server.key -out server.crt
+
+    mkdir -p /etc/apache2/keys/
+    rm -rf /etc/apache2/keys/*
+    cp -rf * /etc/apache2/keys/
+
+    # then we begin to set http configurations.
+    sed -i "s,/etc/ssl/certs/ssl-cert-snakeoil.pem,/etc/apache2/keys/server.crt,g" /etc/apache2/sites-enabled/default-ssl.conf
+    sed -i "s,/etc/ssl/private/ssl-cert-snakeoil.key,/etc/apache2/keys/server.key,g" /etc/apache2/sites-enabled/default-ssl.conf
+
+    sed -i "s,Listen 80,#Listen 80,g" /etc/apache2/ports.conf
+
+    service apache2 reload
+    service apache2 restart
+
+    rm -rf /tmp/__keys
+}
+
+function setup_https() {
+    old_dir=`pwd`
+    host_name=`hostname` 
+    sed -i "s,%HOSTNAME%,$host_name,g" /usr/local/bin/keys/exp_csr
+
+    service apache2 restart
+    a2dissite default-ssl
+    rm -rf /etc/apache2/sites-enabled/default-ssl.conf
+    a2enmod ssl
+    a2ensite default-ssl
+
+    _generate_keys
+
+    cd $old_dir
+}

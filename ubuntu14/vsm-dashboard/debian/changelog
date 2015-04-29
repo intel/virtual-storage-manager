@@ -1,0 +1,5 @@
+vsm-dashboard (2015.03-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- root <intel@intel.com>  Tue, 31 Mar 2015 10:55:52 +0800

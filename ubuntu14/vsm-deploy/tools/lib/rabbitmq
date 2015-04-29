@@ -1,0 +1,38 @@
+function _setup_rabbitmq() {
+
+    host_name=`hostname`
+
+    cnt=`dpkg -s rabbitmq-server|grep "install ok installed"|wc -l`
+    if [[ ! $cnt -gt 0 ]]; then
+        echo "************ERROR***********"
+        echo "Have not find rabbitmq-server package."
+        echo "Do you install it by apt-get."
+        echo "Check apt configuration."
+        exit 0
+    fi
+
+    file=/etc/rabbitmq/rabbitmq-env.conf
+    rm -rf /etc/rabbitmq/rabbitmq-env.conf
+
+cat <<"__EOF__">$file
+NODENAME=%RABBITMQ_NODENAME%
+NODE_PORT=%RABBITMQ_NODE_PORT%
+NODE_IP_ADDRESS=%RABBITMQ_NODE_IP_ADDRESS%
+__EOF__
+
+    sed -i "s,%RABBITMQ_NODENAME%,$RABBITMQ_NODENAME,g" $file
+    sed -i "s,%RABBITMQ_NODE_PORT%,$RABBITMQ_PORT,g" $file
+    sed -i "s,%RABBITMQ_NODE_IP_ADDRESS%,$RABBITMQ_HOST,g" $file
+
+    service rabbitmq-server restart
+    rabbitmqctl change_password guest $RABBITMQ_PASSWORD
+    service rabbitmq-server restart
+#    systemctl enable rabbitmq-server.service
+    sleep 3
+}
+
+function setup_rabbitmq() {
+    if [[ `is_service_enabled $RABBITMQ_HOST` -gt 0 ]]; then
+        _setup_rabbitmq
+    fi
+}

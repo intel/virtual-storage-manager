@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+rm -rf /opt/stack/data/vsm/*
+service vsm-api restart &
+service vsm-scheduler restart &
+service vsm-conductor restart  &
+
+password=`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'`
+host_list=`mysql -uroot -p$password -Ns -e "use vsm; select host from init_nodes;"`
+
+for n in $host_list; do
+    if [[ `hostname` == $n ]]; then
+        continue
+    fi
+    ssh $n "mkdir -p /opt/stack/data/vsm; rm -rf /opt/stack/data/vsm/*; chown -R vsm:vsm /opt/stack"
+    ssh $n "rm -rf /var/log/vsm/*"
+    ssh $n "service vsm-agent restart"
+    ssh $n "service vsm-physical restart"
+done
