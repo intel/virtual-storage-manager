@@ -65,6 +65,7 @@ else
     if [[ $var =~ "CentOS Linux 7" ]]; then
         OS="CentOS"
         OS_VERSION="7"
+    fi
 fi
 
 TEMP_VSM=`mktemp`; rm -rfv $TEMP_VSM >/dev/null; mkdir -p $TEMP_VSM;
