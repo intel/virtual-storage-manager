@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+MYSQL_ROOT_PASSWORD=""
+INPUT_FILE=""
+
+function get_mysql_root_password() {
+    if [[ $MYSQL_ROOT_PASSWORD == "" ]]; then
+        if [[ -e /etc/vsmdeploy/deployrc ]]; then
+            str=`cat /etc/vsmdeploy/deployrc | grep MYSQL_ROOT_PASSWORD | awk -F = '{print $2}'`
+            MYSQL_ROOT_PASSWORD=$str
+        else
+            echo "You have installed and set MySQL ROOT password before."
+            echo "You can use --mysql parameter."
+            exit 0
+        fi
+    fi
+}
+
+#---------------------------------------------
+# Usage
+#---------------------------------------------
+
+function usage() {
+    cat << EOF
+Usage: cache-tier-defaults
+Project:VSM
+       You can create or delete cache-tier-defaults in DB.
+examples:
+    create:
+        cache-tier-defaults -c -f /etc/vsm/cache-tier.conf
+    delete:
+        cache-tier-defaults -d
+EOF
+cat << EOF
+Options:
+  --help | -h
+    Print usage information.
+
+  -c | create 
+    Create cache tier defaults in DB
+
+  -d | delete 
+    Delete cache tier defaults in DB 
+ 
+  -f | input file
+    Input file
+
+  -p 
+    MySQL root user password. 
+    If you don\'t use this parameter, it will use the MySQL root password in /etc/vsmdeploy/deployrc.
+
+EOF
+    exit 0
+}
+
+function create() {
+    if [[ $INPUT_FILE == "" ]]; then
+        echo "You should set an input file use -f parameter."
+        exit 0
+    fi
+    VALUES=`cat $INPUT_FILE|awk NF|awk '{print "(\""$1"\", "$2", "$2", 0),"}'`
+    VALUES=${VALUES%?}
+    get_mysql_root_password
+    ret=`mysql -uroot -p$MYSQL_ROOT_PASSWORD -Ns -e \
+    "use vsm;insert into vsm_settings (name, value, default_value, deleted) values $VALUES"`
+    if [[ $? == 1 ]] ;then
+        echo "created failed!"
+    else
+        echo "created successfully!"
+    fi
+    exit 0
+}
+
+function delete() {
+    get_mysql_root_password
+    ret=`mysql -uroot -p$MYSQL_ROOT_PASSWORD -Ns -e \
+    'use vsm; delete from vsm_settings where name in ("ct_hit_set_count", "ct_hit_set_period_s",
+    "ct_target_max_mem_mb", "ct_target_dirty_ratio", "ct_target_full_ratio",
+    "ct_target_max_objects", "ct_target_min_flush_age_m", "ct_target_min_evict_age_m");'`  
+    if [[ $? == 1 ]] ;then
+        echo "deleted failed!"
+    else
+        echo "deleted successfully!"
+    fi
+    exit 0
+}
+
+do_create=do_delete=n
+
+if [[ $# -eq 0 ]]; then
+    usage
+    exit 0
+fi
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h | --help) usage ;;
+        -c| create)  do_create=y ;;
+        -d| delete)  do_delete=y ;;
+        -p) shift; MYSQL_ROOT_PASSWORD=$1 ;;
+        -f) shift; INPUT_FILE=$1 ;;
+        *) shift ;;
+    esac
+    shift
+done
+
+if [[ $do_create == "y" ]]; then
+    create
+    exit 0
+fi
+
+if [[ $do_delete == "y" ]]; then
+    delete
+    exit 0
+fi 
+

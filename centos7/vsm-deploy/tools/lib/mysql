@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+function _install_and_configure_mysql() {
+    if  rpm -q mysql-libs > /dev/null; then
+        rpm -e mysql-libs --nodeps > /dev/null
+    fi
+    systemctl restart mariadb.service
+    if [[ `cat /etc/my.cnf | grep "firsttime" | wc -l` -eq 0 ]]; then
+        mysqladmin -uroot password $MYSQL_ROOT_PASSWORD
+        echo "#firsttime" >> /etc/my.cnf
+        echo "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" > ~/.mysql_password
+    fi
+    sed -i 's/127.0.0.1/0.0.0.0/g' /etc/my.cnf
+    systemctl restart mariadb.service
+    systemctl enable mariadb.service
+}
+
+function mysql_cmd() {
+    set +o xtrace
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -h$MYSQL_HOST -e "$@"
+    set -o xtrace
+}
+
+function mysql_local_root_cmd() {
+    set +o xtrace
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "$@"
+    set -o xtrace
+}
+
+function _configure_root_right() {
+    mysql_local_root_cmd "use mysql; delete from user where user=''; flush privileges;"
+    mysql_local_root_cmd "use mysql; delete from user where password=''; flush privileges;"
+    mysql_local_root_cmd "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD'; FLUSH PRIVILEGES;"
+    mysql_local_root_cmd "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD'  WITH GRANT OPTION; FLUSH PRIVILEGES;"
+    mysql_local_root_cmd "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD'; FLUSH PRIVILEGES;"
+    mysql_local_root_cmd "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD'  WITH GRANT OPTION; FLUSH PRIVILEGES;"
+    mysql_local_root_cmd "flush privileges;"
+    mysql_local_root_cmd "use mysql; delete from user where user=''; flush privileges;"
+    mysql_local_root_cmd "use mysql; delete from user where password=''; flush privileges;"
+    systemctl restart mariadb.service
+}
+
+function setup_mysql() {
+    if [[ `is_service_enabled $MYSQL_HOST` -gt 0 ]]; then
+        echo "Begin to install MySQL"
+        if [[ `cat /etc/my.cnf | grep "firsttime" | wc -l` -eq 0 ]]; then
+            _install_and_configure_mysql
+            _configure_root_right
+        fi
+    fi
+    echo "Comes here"
+}
