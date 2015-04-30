@@ -66,6 +66,10 @@ class ListOSDStatusTable(tables.DataTable):
     storage_group = tables.Column("storage_group", verbose_name=_("Storage Group"))
     zone = tables.Column("zone", verbose_name=_("Zone"))
     updated_at = tables.Column("updated_at", verbose_name=_("Updated at"), classes=("span2",))
+    pageCount = tables.Column("pageCount", verbose_name=_("pageCount"), classes=("pageCount",),hidden=True)
+    pageIndex = tables.Column("pageIndex", verbose_name=_("pageIndex"), classes=("pageIndex",),hidden=True)
+    pagerCount = tables.Column("pagerCount", verbose_name=_("pagerCount"), classes=("pagerCount",),hidden=True)
+    pagerIndex = tables.Column("pagerIndex", verbose_name=_("pagerIndex"), classes=("pagerIndex",),hidden=True)
 
     class Meta:
         name = "server_list"
@@ -80,11 +84,6 @@ class ListOSDStatusTable(tables.DataTable):
         else:
             return datum["id"]
 
-    def get_object_display(self, datum):
-        if hasattr(datum, "name"):
-            return datum.id
-        else:
-            return datum["name"]
 
 def empty_value_maker(type, name, value, attrs=None):
     def _empty_value_caller(datum):
