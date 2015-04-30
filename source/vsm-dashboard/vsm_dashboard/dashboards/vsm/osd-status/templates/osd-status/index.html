@@ -31,12 +31,33 @@
 {% block main %}
     {{ summary.render }}
     {{ table.render }}
+
+<nav style="margin-left:auto;margin-right:auto">
+       <ul class="pagination">
+       <li id="liPrevious">
+          <a id="linkPrevious" href="#" aria-label="Previous" >
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+       </li>
+      <!--Page Link-->
+       <li id="liNext" >
+         <a id="linkNext"  href="#" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+         </a>
+       </li>
+       </ul>
+</nav>
+
+<input id="hfPagerCount" type="hidden"  value="" />
+<input id="hfPagerIndex" type="hidden"  value="" />
+
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
     <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
     <script src='{{ STATIC_URL }}dashboard/js/clustermgmt.js' type='text/javascript' charset='utf-8'></script>
+    <script src='{{ STATIC_URL }}dashboard/js/osdstatus.js' type='text/javascript' charset='utf-8'></script>   
         <script type="text/javascript">
             function searchToObject(){
                 var pairs = window.location.search.substring(1).split("&");
@@ -59,6 +80,7 @@
             var next_page_url = location.pathname + "?marker=" + marker;
             //$("tfoot tr td").append("<div class='page'>"+back+"<a href='"+next_page_url+"'>next</a></div>");
         </script>
+
 
 {% endblock %}
 

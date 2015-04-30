@@ -53,11 +53,6 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
         default_sort_keys = ['osd_name']
         marker = self.request.GET.get('marker', "")
 
-        LOG.info("CEPH_LOG VSM OSD SUMMARY:%s"%vsmapi.osd_summary(self.request))
-        #LOG.error(vsmapi.osd_summary(self.request))
-        #LOG.error(">CEPH_LOG VSM OSD SUMMARY")
-        #LOG.error(vsmapi.osd_status(self.request))
-        #LOG.error("CEPH_LOG VSM OSD SUMMARY")
         try:
             _osd_status = vsmapi.osd_status(self.request, paginate_opts={
                 "limit": default_limit,
@@ -71,6 +66,25 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
             exceptions.handle(self.request,
                               _('Unable to retrieve osd list. '))
 
+        page_index = int(self.request.GET.get('pageIndex',1))
+        page_size = 20
+        page_count = int(len(_osd_status)/page_size)
+        page_mod = len(_osd_status)%page_size
+        if page_mod > 0:
+            page_count = page_count + 1
+        pager_size = 10
+        pager_count = int(page_count/(pager_size))
+        pager_index = int(page_index/(pager_size))
+        if page_count%pager_size > 0:
+            pager_count = pager_count + 1
+        if page_index%pager_size > 0:
+            pager_index = pager_index + 1
+
+        dataStartIndex = (page_index-1)*page_size
+        dataEndIndex = dataStartIndex+page_size
+        _osd_status = _osd_status[dataStartIndex:dataEndIndex]
+
+
         osd_status = []
         for _osd in _osd_status:
             LOG.info("DEVICE:%s"%_osd.device.keys())
@@ -83,11 +97,11 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
                 "osd_state": _osd.state,
                 "crush_weight": _osd.weight,
                 "capacity_total": 0 if not _osd.device['total_capacity_kb']\
-			else int(_osd.device['total_capacity_kb']/1024),#TODO dict to obj ?
+            else int(_osd.device['total_capacity_kb']/1024),#TODO dict to obj ?
                 "capacity_used": 0 if not _osd.device['used_capacity_kb']\
-			else int(_osd.device['used_capacity_kb']/1024),
+            else int(_osd.device['used_capacity_kb']/1024),
                 "capacity_avail": 0 if not _osd.device['avail_capacity_kb']\
-			else int(_osd.device['avail_capacity_kb']/1024),
+            else int(_osd.device['avail_capacity_kb']/1024),
                 "capacity_percent_used": 0 if not _osd.device['total_capacity_kb'] \
                     else _osd.device['used_capacity_kb']\
                     * 100 / _osd.device['total_capacity_kb'], #TODO
@@ -95,6 +109,10 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
                 "storage_group": _osd.storage_group['name'],
                 "zone": _osd.zone,
                 "updated_at": get_time_delta(_osd.updated_at),
+                "pageCount":page_count,
+                "pageIndex":page_index,
+                "pagerCount":pager_count,
+                "pagerIndex":pager_index,
                 }
 
             osd_status.append(osd)
