@@ -25,9 +25,6 @@ rm -rf $TOPDIR/vsmrepo
 cd $TOPDIR
 mkdir -p $TOPDIR/vsmrepo
 
-tar -czvf lib.tar.gz .lib
-cp -rf ubuntu14/.lib .
-
 set -o xtrace
 TEMP=`mktemp`;
 rm -rfv $TEMP >/dev/null;
@@ -87,10 +84,6 @@ build_vsmdeploy_deb
 #---------------------------------------------
 # Update vsmrepo
 #---------------------------------------------
-
-rm -rf .lib
-tar -zxvf lib.tar.gz
-rm -rf lib.tar.gz
 
 # __create_repo_by_rpms
 

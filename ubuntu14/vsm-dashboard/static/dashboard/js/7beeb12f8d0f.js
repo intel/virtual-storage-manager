@@ -1,0 +1,2 @@
+var Horizon=function(){var horizon={},initFunctions=[];horizon.addInitFunction=function(fn){initFunctions.push(fn);};horizon.init=function(){for(var i=0;i<initFunctions.length;i+=1){initFunctions[i]();}
+initFunctions=[];};horizon.escape_html=function(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/\//g,'&#x2F;');};return horizon;};var horizon=new Horizon();

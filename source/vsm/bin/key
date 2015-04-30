@@ -16,6 +16,7 @@
 # under the License.
 
 TOPDIR=$(cd "$(dirname "$0")" && pwd)
+[[ ! -d /root/.ssh ]] && mkdir /root/.ssh
 [[ ! -e /root/.ssh/id_rsa ]] && $TOPDIR/auto_key_gen
 [[ ! -e /root/.ssh/authorized_keys ]] && touch /root/.ssh/authorized_keys
 chmod +x /root/.ssh/authorized_keys
