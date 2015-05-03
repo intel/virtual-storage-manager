@@ -9,9 +9,19 @@
 
 **Keywords:** Ceph, Virtual Storage Management
 
+**Supported Combo:** 
+
+	OS:			CentOS 6.5 (Basic Server)
+	Ceph: 		Firefly
+	OpenStack:	Havana/Icehouse
+
+	(Other combos might also be working, but we didn't try yet.)
+
+	
+	
 Preparation
 ===================================
-Before you get ready to install VSM, you should prepare your environment. The sections here are helpful for understanding the deployment concepts.
+Before you get ready to install VSM, you should prepare your environment. **_VSM CANNOT manage Ceph Cluster not created by it_**. The sections here are helpful for understanding the deployment concepts.
 
 **Note**: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster. 
 
@@ -22,13 +32,13 @@ There are two roles for the VSM cluster.
 
 The controller node is used to run mariadb, rabbitmq, web ui services for the VSM cluster.
 
-## Storage Node
+## Storage Node (a.k.a Agent Node)
 The storage or agent node is used to run the vsm-agent service which manages the Ceph and physical storage resources.
 
 #Network
 There are three types of networks defined in VSM, and it’s OK if you use a single network for all three types.
 ## Management Network
-Management Network is used to manage the VSM cluster, and interchanges VSM maangement data between vsm controller and agents.
+Management Network is used to manage the VSM cluster, and interchanges VSM mangement data between vsm controller and agents.
 ## Ceph Public Network
 Ceph Public Network is used to serve IO operations between ceph nodes and clients.
 ## Ceph Cluster Network
@@ -47,7 +57,7 @@ Storage Node should contain:
 	>     Ceph Cluster Network
 
 ###Sample 1
-**Controller node** contains the networks listed below:
+**Controller node** contains the network listed below:
 
 	>     192.168.124.0/24
 
@@ -154,12 +164,12 @@ Beginning with VSM 1.1, an automatic deployment tool is provided, which expects 
 	> 	│   └── vsm-deploy-2015.03.10-1.1.el6.x86_64.rpm
 	> 	└── vsm.repo
 
-2. Changing the "hostrc" file, set the storage_ip_list and the controller_ip, those management ip addresses in storage_ip_list is delimited by a space, e.g.:
+2. Changing the *hostrc* file, set the *storage_ip_list* and the *controller_ip*, those management ip addresses in *storage_ip_list* is delimited by a space, e.g.:
 	> 
 	> 	storage_ip_list="192.168.124.21 192.168.124.22 192.168.124.23"
 	> 	controller_ip="192.168.124.10"
    
-3. Under the tool/manifest folder, you should create the folders named by the ip of controller and storage nodes, the structure looks as follows:
+3. Under the *manifest* folder, you should create the folders named by the ip of controller and storage nodes, the structure looks as follows:
 	> 	.
 	> 	├── 192.168.124.10
 	> 	├── 192.168.124.21
@@ -168,10 +178,9 @@ Beginning with VSM 1.1, an automatic deployment tool is provided, which expects 
 	> 	├── cluster.manifest.sample
 	> 	└── server.manifest.sample
 
-4. Copy the cluster.manifest.sample to the folder named by the ip of controller node, then change the filename to cluster.manifest and edit it as required, refer 
-[Setup Controller Node](#Setup_Controller) for details.
+4. Copy the *cluster.manifest.sample* to the folder named by the ip of controller node, then change the filename to *cluster.manifest* and edit it as required, refer [Setup Controller Node](#Setup_Controller) for details.
 
-5. Copy the server.manifest.sample to the folders named by the ip of storage nodes, then change the filename to server.manifest and edit it as required, refer [Setup Storage Node](#Setup_Storage) for details.
+5. Copy the *server.manifest.sample* to the folders named by the ip of storage nodes, then change the filename to *server.manifest* and edit it as required, refer [Setup Storage Node](#Setup_Storage) for details.
 
 6. Finally, the manifest folder structure looks as follows:
 	> 	.
@@ -186,18 +195,16 @@ Beginning with VSM 1.1, an automatic deployment tool is provided, which expects 
 	> 	├── cluster.manifest.sample
 	> 	└── server.manifest.sample
 
-7. If people want to build from source, they can do that as described in [Build RPMs](#Build_RPM), then put the generated rpm packages into *vsmrepo* folder.
-
-8. Now we are ready to start the automatic procedure by executing below command line:
+7. Now we are ready to start the automatic procedure by executing below command line:
 	> 
 	> 	bash +x install.sh -v <version>
 	> 	
 	
 	The version looks like 1.1, 2.0.
 
-9. If execution is blocked somewhere, please try to enter "y" to move ahead. 
+8. If execution is blocked somewhere, please try to enter "y" to move ahead. 
 
-10. if all are well, people can try to [login to the webUI](#Login_WebUI).
+9. if all are well, people can try to [login to the webUI](#Login_WebUI).
 
 
 #Manual Deployment
@@ -210,72 +217,48 @@ VSM depends on a few third party packages, resolving those dependencies is often
 where <version> is the vsm version like 1.1.
 
 After got the zip file, just unpack it and install included rpm packages as following:
-	
+
+	> 	yum install -y unzip
 	> 	unzip <version>.zip
-	> 	cd <version>/repo
+	> 	cd vsm-dependencies-<version>/repo
 	> 	yum localinstall -y *.rpm
 
+##<a name="Build_VSM"></a>Install VSM Release Package
+There are a few ways to get a VSM release package, a direct way is to download release package from [github](https://github.com/01org/virtual-storage-manager/releases). Or you can build a release package from source code as following:
 
-##<a name="Build_RPM"></a>Build RPMs
-After you download the source code from the VSM github, the first step is to build the VSM RPMs. If you already have VSM RPMs, you can jump to [VSM RPM Install](#RPM_Install).
+	> 	./buildvsm.sh <version>
 
-###<a name="RPM_Install"></a> VSM RPM Build
-After you setup the repo, and make sure it works, you can build the RPMs from source code.
+Then a binary package named version-<date>.tar.gz will be generated in *release* folder if all execute well. 
 
-	>     cd $source_code_path
-	>     ./buildrpm
+Unpack the VSM release package, then you can install vsm packages by:
 
-After building, all the rpms are located in $source_code_path/vsmrepo directory.
-
-##<a name="Build_VSM"></a>Build VSM
-starting from 1.1, a tool is provided to generate a VSM binary package, which covers what [Build_RPM]("Build RPMs") does. e.g, 
-
-	bash +x buildrelease.sh <version>
-
-Then a binary package named <version-<date>.tar.gz will be generated in *release* folder if all execute well.
-
-
-### VSM RPM Install
-
-Go to the directory that you placed your VSM RPMs in, or the /vsmrepo directory if you just built them from source. 
-
-You can use `yum localinstall` to install vsm packages by:
-
-    cd vsmrepo
-    yum localinstall -y *.rpm
+    > 	cd vsmrepo
+    > 	yum localinstall -y *.rpm
 
 **Note**: vsm-dashboard will use the httpd service to setup the Web UI. Sometimes it conflicts with the OpenStack dashboard, so try to install the OpenStack dashboard and the VSM dashboard onto different nodes.
 
 
-# Installation
+# Configuration
 
 Here is the information about the sample installation environment and its roles:
 
-* 1. test1-controll: 192.168.123.4
-* 2. test1-storage1: 192.168.123.40, 192.168.124.54, 192.168.125.117
-* 3. test1-storage2: 192.168.123.179, 192.168.124.122, 192.168.125.109
-* 4. test1-storage3: 192.168.123.193, 192.168.124.59, 192.168.125.77
+* 1. test1-control: 192.168.124.10
+* 2. test1-storage1: 192.168.123.21, 192.168.124.21, 192.168.125.21
+* 3. test1-storage2: 192.168.123.22, 192.168.124.22, 192.168.125.22
+* 4. test1-storage3: 192.168.123.23, 192.168.124.23, 192.168.125.23
 
 So we configure the network as below in VSM:
 
-    - Management network: 192.168.123.0/24
-    - Ceph public network: 192.168.124.0/24
+    - Management network: 192.168.124.0/24
+    - Ceph public network: 192.168.123.0/24
     - Ceph cluster network: 192.168.125.0/24
 
 **Note**You should set network appending on your network environment or check the network settings mentioned before.
 
-## Dependencies
-For every node, regardless of if it’s a controller node or a storage node, do the steps below:
-
-    - Firstly, assume you've built & installed the VSM RPM packages as mentioned before.
-    - After that, install the required services for VSM.
-    
-        preinstall
-
 
 ## Firewall and SELinux
 ### Solution 1
-1>  Disable SELinux in the file /etc/selinux/config
+1>  Disable SELinux in the file /etc/selinux/config. A reboot is required to apply it.
 
     SELINUX=disabled
 
@@ -284,7 +267,7 @@ For every node, regardless of if it’s a controller node or a storage node, do 
     service iptables stop
 
 ### Solution 2
-1> If you want to open selinux, you should run commands below to add policies httpd:
+1> If you want to open selinux, you should run commands below to add policies httpd. A reboot is required to apply it.
 
     setsebool -P httpd_can_network_connect 1 &
     chcon -R -h -t httpd_sys_content_t /var/www/html/
@@ -332,57 +315,26 @@ Here is one sample configuration `iptables`, take it as references.
 
 VSM will sync /etc/hosts file from the controller node. Make sure your controller node's /etc/hosts file follows these rules:
 
-    - All the ip address should be listed in /etc/hosts file for very node.
     - Lines with `localhost`, `127.0.0.1` and `::1` should not contains the actual hostname.
 
-Take the correct version as an example to set your /etc/hosts file to on the controller node.
-
-### Correct version
+Take the correct version as an example to set your /etc/hosts file to on the controller node:
 
     127.0.0.1       localhost localhost.localdomain localhost4 localhost4.localdomain4
     ::1             localhost localhost.localdomain localhost6 localhost6.localdomain6
-    192.168.123.4 test1-control
+	
+    192.168.124.10 test1-control
 
-    192.168.122.172 test1-storage1
-    192.168.123.40 test1-storage1
-    192.168.124.54 test1-storage1
-    192.168.125.117 test1-storage1
+    192.168.123.21 test1-storage1
+    192.168.124.21 test1-storage1
+    192.168.125.21 test1-storage1
 
-    192.168.122.216 test1-storage2
-    192.168.123.179 test1-storage2
-    192.168.124.122 test1-storage2
-    192.168.125.109 test1-storage2
+    192.168.123.22 test1-storage2
+    192.168.124.22 test1-storage2
+    192.168.125.22 test1-storage2
 
-    192.168.122.167 test1-storage3
-    192.168.123.193 test1-storage3
-    192.168.124.59 test1-storage3
-    192.168.125.77 test1-storage3
-
-**Note**Although 192.168.122.0/24 network is not used by VSM, you should include it in the /etc/hosts file.
-
-### Wrong version
-
-    127.0.0.1       test1-control localhost localhost.localdomain localhost4 localhost4.localdomain4
-    ::1             test1-control localhost localhost.localdomain localhost6 localhost6.localdomain6
-    192.168.123.4 test1-control
-
-    192.168.123.40 test1-storage1
-    192.168.124.54 test1-storage1
-    192.168.125.117 test1-storage1
-
-    192.168.123.179 test1-storage2
-    192.168.124.122 test1-storage2
-    192.168.125.109 test1-storage2
-
-    192.168.122.167 test1-storage3
-    192.168.123.193 test1-storage3
-    192.168.124.59 test1-storage3
-    192.168.125.77 test1-storage3
-
-**Error**:
-
-    - You cannot put `hostname` in lines with localhost.
-    - Not all of the IP address are listed for test1-storage1 and test1-storage2.
+    192.168.123.23 test1-storage3
+    192.168.124.23 test1-storage3
+    192.168.125.23 test1-storage3
 
 
 ##<a name="Setup_Controller"></a>Setup controller node
@@ -392,16 +344,16 @@ It's in /etc/manifest folder for manual deployment , or current manifest/<contro
 
 **modify three IP addresses**
 
-1>  For the VSM controller, edit the file /etc/manifest/cluster.manifest and modify it as described below:
+1>  For the VSM controller, edit the cluster.manifest and modify it as described below:
 
 focus on the validity of the three IP addresses, and modify them according to your environment.
 `management_addr` is used by VSM to communicate with different services, such as using rabbitmq to transfer messages, rpc.call/rpc.cast etc.`ceph_public_addr` is a public (front-side) network address. `ceph_cluster_addr` is a cluster (back-side) network address.
 
     [management_addr]
-    192.168.123.0/24
+    192.168.124.0/24
 
     [ceph_public_addr]
-    192.168.124.0/24
+    192.168.123.0/24
 
     [ceph_cluster_addr]
     192.168.125.0/24
@@ -427,12 +379,12 @@ focus on the validity of the three IP addresses, and modify them according to yo
 For VSM storage nodes, edit the file `/etc/manifest/server.manifest` and modify it as described below:
 
     [vsm_controller_ip]
-    #10.239.82.168
+    controller_ip
 
 Update `vsm_controller_ip` to the VSM controller's IP address under subnet `management_addr`
 
     [vsm_controller_ip]
-    192.168.123.4  #refer to test1-controll node.
+    192.168.124.10  #refer to test1-control node.
 
 **step 2*
 
@@ -534,13 +486,15 @@ to complete setup of the storage node.
 
 After the command is finished executing, and to check if you have setup the controller correctly, do the following steps:
 
-1.  Access https://vsm controller IP/dashboard/vsm.(for example https://192.168.123.4/dashboard/vsm)
+1.  Access https://vsm controller IP/dashboard/vsm.(for example https://192.168.124.10/dashboard/vsm)
 2.  User name: admin
 3.  Password can be obtained from: /etc/vsmdeploy/deployrc, the ADMIN_PASSWORD field
 
         cat /etc/vsmdeploy/deployrc |grep ADMIN_PASSWORD
 
 4.  Then you can switch to the `Create Cluster` Panel, and push the create cluster button to create a ceph cluster. Good Luck!
+
+
 #Frequently Asked Questions
 
 **	Q: Executing "agent-token" is hang.**

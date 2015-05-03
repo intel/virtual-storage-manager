@@ -60,6 +60,7 @@ bash +x buildrpm
 
 sudo cp README.md release/$VERSION-$DATE/README
 sudo cp INSTALL.md release/$VERSION-$DATE
+sudo cp INSTALL.pdf release/$VERSION-$DATE
 sudo cp install.sh release/$VERSION-$DATE
 sudo cp LICENSE release/$VERSION-$DATE
 sudo cp NOTICE release/$VERSION-$DATE
