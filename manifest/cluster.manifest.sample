@@ -21,13 +21,13 @@ cluster_a
 xfs
 
 [management_addr]
-192.168.20.0/24
+192.168.124.0/24
 
 [ceph_public_addr]
-192.168.30.0/24
+192.168.123.0/24
 
 [ceph_cluster_addr]
-192.168.40.0/24
+192.168.125.0/24
 
 [settings]
 storage_group_near_full_threshold  65
@@ -55,3 +55,5 @@ ct_target_max_objects 1000000
 ct_target_min_flush_age_m 10
 ct_target_min_evict_age_m 20
 
+[zone]
+zone0

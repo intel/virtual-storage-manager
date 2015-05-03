@@ -1,5 +1,5 @@
 [vsm_controller_ip]
-#10.239.82.168
+controller_ip
 
 [role]
 storage
@@ -13,6 +13,7 @@ token-tenant
 
 [7200_rpm_sata]
 #format [sata_device]  [journal_device]
+
 [10krpm_sas]
 #format [sas_device]  [journal_device] 
 %osd-by-path-1%   %journal-by-path-1%
