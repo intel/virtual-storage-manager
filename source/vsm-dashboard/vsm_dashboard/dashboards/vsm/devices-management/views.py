@@ -49,6 +49,7 @@ class IndexView(tables.DataTableView):
         default_sort_dir = "asc";
         default_sort_keys = ['osd_name']
         marker = self.request.GET.get('marker', "")
+        osd_id = self.request.GET.get('osdid',"-1")
         try:
             _osds = vsmapi.osd_status(self.request, paginate_opts={
                 "limit": default_limit,
@@ -83,7 +84,12 @@ class IndexView(tables.DataTableView):
                     'server': _osd.service['host'],
                     'zone': _osd.zone,
                   }
-            osds.append(osd)
+            if osd_id == "-1":
+                osds.append(osd)  #all of the deivces
+            elif str(_osd.id) == str(osd_id):
+                osds.append(osd)  #filter the devices by osd_id
+            else:
+                pass
         return osds
 
 
