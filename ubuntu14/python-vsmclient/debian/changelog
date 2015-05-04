@@ -1,0 +1,5 @@
+python-vsmclient (2015.03-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- root <intel@intel.com>  Wed, 01 Apr 2015 14:30:32 +0800

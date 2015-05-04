@@ -1,0 +1,6 @@
+#!/bin/bash
+
+getent group vsm >/dev/null || groupadd -r vsm --gid 165
+if ! getent passwd vsm >/dev/null; then
+  useradd -u 165 -r -g vsm -G vsm,nogroup -d /var/lib/vsm -s /sbin/nologin -c "Vsm Storage Services" vsm
+fi

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DATE=`date "+%Y%m%d%H%M%S"`
+if [[ -f /etc/vsmdeploy/deployrc ]]; then
+  cp /etc/vsmdeploy/deployrc /etc/vsmdeploy/deployrc.$DATE
+fi

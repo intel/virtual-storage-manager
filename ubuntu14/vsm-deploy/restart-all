@@ -15,8 +15,21 @@
 # specific language governing permissions and limitations
 # under the License.
 
-TOPDIR=$(cd "$(dirname "$0")" && pwd)
-[[ ! -d /root/.ssh ]] && mkdir /root/.ssh
-[[ ! -e /root/.ssh/id_rsa ]] && $TOPDIR/auto_key_gen
-[[ ! -e /root/.ssh/authorized_keys ]] && touch /root/.ssh/authorized_keys
-chmod +x /root/.ssh/authorized_keys
+
+rm -rf /opt/stack/data/vsm/*
+service vsm-api restart &
+service vsm-scheduler restart &
+service vsm-conductor restart  &
+
+password=`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'`
+host_list=`mysql -uroot -p$password -Ns -e "use vsm; select host from init_nodes;"`
+
+for n in $host_list; do
+    if [[ `hostname` == $n ]]; then
+        continue
+    fi
+    ssh $n "mkdir -p /opt/stack/data/vsm; rm -rf /opt/stack/data/vsm/*; chown -R vsm:vsm /opt/stack"
+    ssh $n "rm -rf /var/log/vsm/*"
+    ssh $n "service vsm-agent restart"
+    ssh $n "service vsm-physical restart"
+done

@@ -1,0 +1,18 @@
+Source: vsm
+Section: python
+Priority: optional
+Maintainer: intel <intel@intel.com>
+Build-Depends: cdbs, debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+XS-Python-Version: all
+
+Package: vsm
+Architecture: amd64
+Depends: python, python-mysqldb, python-pbr, python-decorator, python-tempita,
+    python-sqlalchemy, python-amqplib, python-anyjson, python-eventlet, python-kombu,
+    python-lockfile, python-lxml, python-routes, python-webob, python-greenlet,
+    python-pastedeploy, python-paste, python-migrate, python-stevedore, python-suds,
+    python-paramiko, python-babel, python-iso8601, python-keystoneclient,
+    python-oslo.config, python-numpy, python-psutil,
+    xfsprogs, python-psutil, graphviz
+Description: vsm

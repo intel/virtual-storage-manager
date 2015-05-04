@@ -18,9 +18,6 @@
 
 spawn openssl req -new -key server.key -out server.csr
 
-expect "Enter pass phrase for server.key:"
-send "%PASSWORD%\r"
-
 expect "Country Name*:"
 send "CC\r"
 

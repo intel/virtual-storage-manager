@@ -1,0 +1,15 @@
+Source: python-vsmclient
+Section: python
+Priority: optional
+Maintainer: intel <intel@intel.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+XS-Python-Version: all
+
+Package: python-vsmclient
+Architecture: amd64
+Depends: python, python-setuptools, python-prettytable, python-requests,
+    python-simplejson, python-httplib2
+Description: This is a client for the  vsm API. There's a Python API (the
+    vsmclient module), and a command-line script (vsm). Each implements
+    100% of the  vsm API.

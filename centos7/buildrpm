@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+set -e
+
+TOPDIR=$(cd "$(dirname "$0")" && pwd)
+
+rm -rf $TOPDIR/vsmrepo.tar.gz
+rm -rf $TOPDIR/vsmrepo
+cd $TOPDIR
+
+set -o xtrace
+TEMP=`mktemp`;
+rm -rfv $TEMP >/dev/null;
+mkdir -p $TEMP;
+echo '%debug_package %{nil}' >> ~/.rpmmacros
+#---------------------------------------------
+# Load Function
+#---------------------------------------------
+
+SOURCE_DIR=source
+VSM_DIR=vsm
+VSMCLIENT_DIR=python-vsmclient
+VSMDASHBOARD_DIR=vsm-dashboard
+VSM_DEPLOY_DIR=vsm-deploy
+
+source  $TOPDIR/.lib/setiptables
+for n in `ls $TOPDIR/.lib/ | grep -v iptables`; do
+    source $TOPDIR/.lib/$n
+done
+[[ -e ~/rpmbuild ]] && rm -rf ~/rpmbuild
+[[ -e ~/rpmbuild ]] && rm -rf ~/rpmbuild
+find /root -name "*vsm*.rpm" | xargs -i rm -rf {}
+find /var -name "*vsm*.rpm" | xargs -i rm -rf {}
+find /tmp/ -name "*vsm*.rpm" | xargs -i rm -rf {}
+find /opt -name "*vsm*.rpm" | xargs -i rm -rf {}
+find /mnt -name "*vsm*.rpm" | xargs -i rm -rf {}
+
+for pkg in vsm vsm-dashboard python-vsmclient vsm-deploy; do
+    for ph in ~/ /var/ $TOPDIR/vsmrepo /tmp/; do
+        find $ph -name "${pkg}*.rpm" | xargs -i rm -rf {}
+    done
+done
+
+create_dir
+find $TOPDIR -name "*.pyc" | xargs -i rm -rf {}
+find $TOPDIR -name "*.pyo" | xargs -i rm -rf {}
+
+#---------------------------------------------
+# Begin to build VSM rpms.
+#---------------------------------------------
+
+build_vsm_rpm
+
+#---------------------------------------------
+# Begin to build python-vsmclient rpm.
+#---------------------------------------------
+
+build_vsmclient_rpm
+
+#---------------------------------------------
+# Begin to build vsm-dashboard rpm
+#---------------------------------------------
+
+build_vsm_dashboard_rpm
+
+#---------------------------------------------
+# vsm deploy
+#---------------------------------------------
+
+build_vsmdeploy_rpm
+
+#---------------------------------------------
+# Update vsmrepo
+#---------------------------------------------
+
+__create_repo_by_rpms
+
+rm -rf $TEMP
+
+set +o xtrace

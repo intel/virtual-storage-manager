@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -rf /etc/vsm-dashboard/local_settings
+rm -rf /usr/share/vsm-dashboard
