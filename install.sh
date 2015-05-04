@@ -49,10 +49,10 @@ while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
-    -m| --manifest) MANIFEST_PATH=$2 ;;
-    -v| --version) dependence_version=$2 ;;
-	-k| --key) keyfile=$2; export SSH='ssh -i $keyfile'; export SCP='scp -i $keyfile' ;;
-    -u| --user) USER=$2 ;;
+    -m| --manifest) shift; MANIFEST_PATH=$1 ;;
+    -v| --version) shift; dependence_version=$1 ;;
+	-k| --key) shift; keyfile=$1; export SSH='ssh -i $keyfile'; export SCP='scp -i $keyfile' ;;
+    -u| --user) shift; USER=$1 ;;
     *) shift ;;
   esac
   shift
