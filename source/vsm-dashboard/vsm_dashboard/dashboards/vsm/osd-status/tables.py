@@ -70,6 +70,7 @@ class ListOSDStatusTable(tables.DataTable):
     pageIndex = tables.Column("pageIndex", verbose_name=_("pageIndex"), classes=("pageIndex",),hidden=True)
     pagerCount = tables.Column("pagerCount", verbose_name=_("pagerCount"), classes=("pagerCount",),hidden=True)
     pagerIndex = tables.Column("pagerIndex", verbose_name=_("pagerIndex"), classes=("pagerIndex",),hidden=True)
+    deviceInfo = tables.Column("deviceInfo", verbose_name=_("deviceInfo"), classes=("deviceInfo",))
 
     class Meta:
         name = "server_list"

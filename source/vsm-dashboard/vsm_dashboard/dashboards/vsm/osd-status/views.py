@@ -113,6 +113,7 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
                 "pageIndex":page_index,
                 "pagerCount":pager_count,
                 "pagerIndex":pager_index,
+                "deviceInfo":""
                 }
 
             osd_status.append(osd)
