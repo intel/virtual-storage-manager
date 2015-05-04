@@ -45,6 +45,8 @@ EOF
 MANIFEST_PATH=""
 dependence_version="master"
 USER=`whoami`
+SSH='ssh'
+SCP='scp'
 while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
