@@ -45,6 +45,7 @@ Requires:    python-iso8601
 Requires:    python-jsonschema
 Requires:    python-keyring
 Requires:    python-keystoneclient
+Requires:  python-netaddr
 Requires:    python-ordereddict
 Requires:    python-oslo-config
 Requires:    python-prettytable
