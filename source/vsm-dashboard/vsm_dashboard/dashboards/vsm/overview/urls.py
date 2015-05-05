@@ -16,7 +16,9 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView
+from .views import ClusterCount
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^ClusterCount/$', ClusterCount, name='ClusterCount'),
 )
