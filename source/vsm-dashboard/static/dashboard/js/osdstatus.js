@@ -5,9 +5,22 @@ $(function(){
         pagerIndex = parseInt(trNodes[0].children[16].innerHTML);
         generatePager(pagerIndex,pagerCount);
     } 
-    
+    addOptionButton();
 })
 
+function addOptionButton(){
+    var trNodes = $("#server_list>tbody>tr");
+
+    for(var i=0;i<trNodes.length;i++){
+        var osd_id = trNodes[i].children[0].innerHTML;
+        var tdOption = trNodes[i].children[17];
+        var linkDetail = "";
+        linkDetail += "<a href='/dashboard/vsm/devices-management/?osdid="+osd_id+"'>";
+        linkDetail += "<img style='margin-left:10px;cursor:pointer' src='/static/dashboard/img/info_32.png' />";
+        linkDetail += "</a>";
+        tdOption.innerHTML =  linkDetail;
+    }
+}
 
 
 function nextPager(){
