@@ -21,10 +21,10 @@ cluster_a
 xfs
 
 [management_addr]
-192.168.124.0/24
+192.168.123.0/24
 
 [ceph_public_addr]
-192.168.123.0/24
+192.168.124.0/24
 
 [ceph_cluster_addr]
 192.168.125.0/24
