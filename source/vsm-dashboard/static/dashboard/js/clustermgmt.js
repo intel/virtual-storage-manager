@@ -16,7 +16,12 @@
  */
 
 (function() {
-    $(".create-cluster-commit").live("click", function(){
+    var checkboxCell = $(".multi_select_column.hidden");
+    for(var i=0;i<checkboxCell.length;i++){
+        checkboxCell[i].className = "multi_select_column";
+    }
+
+    $(".create-cluster-commit").click(function(){
         var rows_num = $(".modal-body .zone").length - 1;
         console.log(rows_num);
         var data_list = new Array();
@@ -25,43 +30,28 @@
             alert("You must have at least 3 servers");
             return;
         }
-        var mon_num = 0;
         for (var i=1; i <= rows_num; i++)
         {
             row_id = $($(".server_id")[i]).html();
             row = $("#clusteraction__row__" + row_id);
             console.log(row_id);
             checked = row.find(".multi_select_column").find("input").is(":checked");
-            if(checked == true)
-            {
-                id = row.find(".multi_select_column").find("input").val();
-            }else{
+            if(checked == true){
                 id = row.find(".server_id").html();
-                console.log("pass");
-                //continue;
-            }
-            console.log(id);
-            console.log(row);
-            zone_id = row.find(".zone").find("select").val();
-            is_monitor = row.find(".is_monitor").find("input").attr("checked") ? true : false;
-            is_storage = row.find(".is_storage").find("input").attr("checked") ? true : false;
-            data = {id:id, is_monitor:is_monitor, is_storage:is_storage, zone_id:zone_id};
-            data_list.push(data);
-            console.log(data_list);
-            if (is_monitor){
-                mon_num += 1;
+                zone_id = row.find(".zone").find("select").val();
+                is_monitor = row.find(".is_monitor").find("input").attr("checked") ? true : false;
+                is_storage = row.find(".is_storage").find("input").attr("checked") ? true : false;
+                data = {id:id, is_monitor:is_monitor, is_storage:is_storage, zone_id:zone_id};
+                data_list.push(data);
             }
         }
-        //if (mon_num < 3){
-        //    alert("monitor must > 2");
-        //    return;
-        //}
+
         data_list_json = JSON.stringify(data_list);
         console.log(data_list);
         token = $("input[name=csrfmiddlewaretoken]").val();
         modal_stack = $("#modal_wrapper .modal");
-        horizon.modals.modal_spinner(gettext("Working"));
-        horizon.ajax.queue({
+        //horizon.modals.modal_spinner(gettext("Working"));
+        $.ajax({
             data: data_list_json,
             type: "post",
             dataType: "json",
@@ -72,27 +62,27 @@
                     $("#server_list__row__"+data_list[x]['id']).addClass("status_unknown").removeClass("status_up");
                     $("#server_list__row__"+data_list[x]['id']).find(".status_up").addClass("status_unknown").removeClass("status_up");
                 }
-                console.log(data.status);
-                horizon.alert(data.status, data.message);
-                setTimeout(horizon.datatables.update, 2000);
+                //console.log(data.status);
+                //horizon.alert(data.status, data.message);
+                //setTimeout(horizon.datatables.update, 2000);
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-                horizon.alert("error", "Network Error");
-                horizon.modals.spinner.modal('hide');
+                //horizon.alert("error", "Network Error");
+                //horizon.modals.spinner.modal('hide');
             },
             headers: {
               "X-CSRFToken": token
             },
             complete: function(){
-                horizon.modals.spinner.modal('hide');
-                modal_stack.remove();
+                //horizon.modals.spinner.modal('hide');
+                //modal_stack.remove();
             }
         });
-        $(this).closest('.modal').modal('hide');
+        //$(this).closest('.modal').modal('hide');
     });
 
     //Shouan: intergrate cluster
-    $(".IntergrateCluster-cluster-commit").live("click", function(){
+    $(".IntergrateCluster-cluster-commit").click(function(){
     	var SelectedNodeCount = 0;
     	var SelectedNodeList = new Array();
     	$(".multi_select_column>input").each(function(i,item){
@@ -131,13 +121,13 @@
     	strSelectedNodesJSON+="]";
 
     	 token = $("input[name=csrfmiddlewaretoken]").val();
-    	  horizon.ajax.queue({
+    	  $.ajax({
               data: strSelectedNodesJSON,
               type: "post",
               dataType: "json",
               url: "/dashboard/vsm/clustermgmt/cluster/intergrate",
               success: function (data) {
-                console.log(data);
+                //console.log(data);
               },
               error: function (XMLHttpRequest, textStatus, errorThrown) {
 
@@ -151,16 +141,6 @@
           });
 
     });
-
-
-
-
-
-
-
-
-
-
 
 
     var check_status = function(){
