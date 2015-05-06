@@ -54,7 +54,7 @@ class IndexView(ModalSummaryMixin, TemplateView):
 
 
 def ClusterCount(request):
-    clusterlist = vsmapi.get_cluster_initialize_list(None)
+    clusterlist = vsmapi.get_clusters_by_status(None,1)
     clusterlist_dict = {"count":len(clusterlist)}
     clusterlistdata = json.dumps(clusterlist_dict)
     return HttpResponse(clusterlistdata)
