@@ -1612,7 +1612,7 @@ def get_fs_options(fs_type):
     if fs_type == 'btrfs':
         return ['-f', 'noatime,nodiratime']
     if fs_type == 'xfs':
-        return ['-f', 'rw,noatime']
+        return ['-f', 'rw,noatime,inode64,logbsize=256k,delaylog']
 
 def append_to_file(file_path, msg):
     try:
