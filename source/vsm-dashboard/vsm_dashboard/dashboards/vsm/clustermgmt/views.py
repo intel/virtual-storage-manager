@@ -156,9 +156,8 @@ class CreateClusterView(ModalEditTableMixin, tables.DataTableView):
 
 
 def ClusterAction(request, action):
-    post_data = request.raw_post_data
-    data = json.loads(post_data)
-
+    data = json.loads(request.body)
+    
     if not len(data):
         status = "error"
         msg = "No server selected"
