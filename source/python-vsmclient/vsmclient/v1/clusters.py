@@ -224,4 +224,12 @@ class ClusterManager(base.ManagerWithFind):
         url = "/clusters/refresh"
         return self.api.client.post(url)
 
+    def import_ceph_conf(self,cluster_name,ceph_conf_path=None):
+        body = {'cluster': {
+                            "cluster_name": cluster_name,
+                            "ceph_conf_path":ceph_conf_path,
+                           }}
+        url = "/clusters/import_ceph_conf"
+        return self.api.client.post(url,body=body)
+
 

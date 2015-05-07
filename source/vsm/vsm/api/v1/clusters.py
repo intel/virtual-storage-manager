@@ -111,6 +111,21 @@ class ClusterController(wsgi.Controller):
         self.scheduler_api.create_cluster(context, server_list)
         return webob.Response(status_int=202)
 
+    def import_ceph_conf(self, req, body=None):
+        """
+        import_ceph_conf to db and ceph nodes
+        """
+        LOG.info("CEPH_LOG import_ceph_conf body=%s"%body )
+        context = req.environ['vsm.context']
+        ceph_conf_path = body["cluster"]["ceph_conf_path"]
+        cluster_name = body["cluster"]["cluster_name"]
+        cluster = db.cluster_get_by_name(context,cluster_name)
+        if cluster:
+            self.scheduler_api.import_ceph_conf(context,cluster_id=cluster.id,ceph_conf_path=ceph_conf_path)
+            return {"message":"Success"}
+        else:
+            return {"message":"No such cluster which named  %s in DB"%cluster_name}
+
     @wsgi.serializers(xml=ClustersTemplate)
     def show(self, req, id):
         """update cluster."""

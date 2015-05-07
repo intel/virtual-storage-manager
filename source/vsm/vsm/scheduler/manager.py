@@ -42,7 +42,7 @@ from vsm.openstack.common.rpc import common as rpc_exc
 from vsm.conductor import rpcapi as conductor_rpcapi
 from vsm.agent import rpcapi as agent_rpc
 from vsm.conductor import api as conductor_api
-
+from vsm.agent import cephconfigparser
 from vsm.exception import *
 
 LOG = logging.getLogger(__name__)
@@ -942,6 +942,20 @@ class SchedulerManager(manager.Manager):
                                          server=ser)
                 thread_list.append(thd)
         utils.start_threads(thread_list)
+
+    @utils.single_lock
+    def import_ceph_conf(self, context, cluster_id, ceph_conf_path):
+        """
+        """
+        LOG.info('import ceph conf from %s to db '%ceph_conf_path)#ceph_conf_path!=FLAG.ceph_conf
+        ceph_conf = cephconfigparser.CephConfigParser(ceph_conf_path)._parser.as_str()
+        db.cluster_update_ceph_conf(context, cluster_id, ceph_conf)
+        server_list = db. init_node_get_all(context)
+        LOG.info('import ceph conf from db to ceph nodes ')
+        for ser in server_list:
+            self._agent_rpcapi.update_ceph_conf(context, ser['host'])
+        LOG.info('import ceph conf from db to ceph nodes success ')
+        return server_list
 
     @utils.single_lock
     def create_cluster(self, context, server_list):
