@@ -139,3 +139,9 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         version='1.0',
                         timeout=6000)
         return ret
+
+    def import_ceph_conf(self, context, cluster_id, ceph_conf_path):
+        ret = self.cast(context,
+                        self.make_msg('import_ceph_conf',
+                                      cluster_id=cluster_id, ceph_conf_path=ceph_conf_path))
+        return ret
