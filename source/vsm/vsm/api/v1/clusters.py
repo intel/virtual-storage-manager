@@ -33,6 +33,7 @@ from vsm import utils
 from vsm import conductor
 from vsm import scheduler
 from vsm import db
+from vsm.agent import cephconfigparser
 
 LOG = logging.getLogger(__name__)
 
@@ -121,6 +122,12 @@ class ClusterController(wsgi.Controller):
         cluster_name = body["cluster"]["cluster_name"]
         cluster = db.cluster_get_by_name(context,cluster_name)
         if cluster:
+            ceph_conf_dict_old = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)._parser.as_dict()
+            ceph_conf_parser = cephconfigparser.CephConfigParser(ceph_conf_path)._parser
+            ceph_conf_dict = ceph_conf_parser.as_dict()
+            check_ret = check_ceph_conf(ceph_conf_dict_old,ceph_conf_dict)
+            if check_ret:
+                return {"message":"%s"%check_ret}
             self.scheduler_api.import_ceph_conf(context,cluster_id=cluster.id,ceph_conf_path=ceph_conf_path)
             return {"message":"Success"}
         else:
@@ -182,3 +189,40 @@ def remove_invalid_options(context, search_options, allowed_search_options):
     for opt in unknown_options:
         del search_options[opt]
 
+def check_ceph_conf(ceph_conf_dict_old,ceph_conf_dict):
+    check_result = ''
+    keys_old = ceph_conf_dict_old.keys()
+    keys_new = ceph_conf_dict.keys()
+    old_osds = [key  for key in keys_old if key.find("osd.")!=-1]
+    old_mons = [key  for key in keys_old if key.find("mon.")!=-1]
+    old_mds = [key  for key in keys_old if key.find("mds.")!=-1]
+    new_osds = [key  for key in keys_new if key.find("osd.")!=-1]
+    new_mons = [key  for key in keys_new if key.find("mon.")!=-1]
+    new_mds = [key  for key in keys_new if key.find("mds.")!=-1]
+    if set(old_osds) != set(new_osds):
+        check_result = '%s\n.error:The number of osd is different from the old version'%check_result
+    if set(old_mons) != set(new_mons):
+        check_result = '%s\n.error:The number of mon is different from the old version'%check_result
+    if set(old_mds) != set(new_mds):
+        check_result = '%s\n.error:The number of mds is different from the old version'%check_result
+    if check_result:
+        return check_result
+    try:
+        osd_field_to_check = ["osd journal","devs","host","cluster addr","public addr"]
+        for osd in new_osds:
+            for field in osd_field_to_check:
+                if ceph_conf_dict[osd][field]!= ceph_conf_dict_old[osd][field]:
+                   check_result = '%s\n.error:the value of %s below section %s'%(check_result,field,osd)
+        mon_field_to_check = ['mon addr','host']
+        for mon in new_mons:
+            for field in mon_field_to_check:
+                if ceph_conf_dict[mon][field]!= ceph_conf_dict_old[mon][field]:
+                   check_result = '%s\n.error:the value of %s below section %s'%(check_result,field,mon)
+        mds_field_to_check = ['public addr','host']
+        for mds in new_mds:
+            for field in mds_field_to_check:
+                if ceph_conf_dict[mds][field]!= ceph_conf_dict_old[mds][field]:
+                   check_result = '%s\n.error:the value of %s below section %s'%(check_result,field,mds)
+    except Exception,e:
+        check_result = '%s\n.error:KeyError :%s'%(check_result,e)
+    return check_result
