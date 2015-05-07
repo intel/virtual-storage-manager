@@ -1,0 +1,116 @@
+# vsm-rootwrap command filters for storage nodes
+# This file should be owned by (and only-writeable by) the root user
+
+[Filters]
+# vsm/storage/iscsi.py: iscsi_helper '--op' ...
+ceph: CommandFilter, /usr/bin/ceph, root
+ietadm: CommandFilter, /usr/sbin/ietadm, root
+tgtadm: CommandFilter, /usr/sbin/tgtadm, root
+tgt-admin: CommandFilter, /usr/sbin/tgt-admin, root
+vsm-rtstool: CommandFilter, vsm-rtstool, root
+
+#changed by YOURONG
+#ceph
+ceph-osd: CommandFilter, /usr/bin/ceph-osd, root
+mkcephfs: CommandFilter, /sbin/mkcephfs, root
+#problem?TODO
+#ceph: CommandFilter, /etc/init.d/ceph, root
+ceph-bin: CommandFilter, /usr/bin/ceph, root
+crushtool: CommandFilter, /usr/bin/crushtool, root
+ceph-mon: CommandFilter, /usr/bin/ceph-mon, root
+ceph-disk: CommandFilter, /usr/bin/ceph-disk, root
+ceph-authtool: CommandFilter, /usr/bin/ceph-authtool, root
+ceph-conf: CommandFilter, /usr/bin/ceph-conf, root
+ceph-dencoder: CommandFilter, /usr/bin/ceph-dencoder, root
+ceph-debugpack: CommandFilter, /usr/bin/ceph-debugpack, root
+ceph-rest-api: CommandFilter, /usr/bin/ceph-rest-api, root
+ceph-run: CommandFilter, /usr/bin/ceph-run, root
+ceph-conf: CommandFilter, /usr/bin/ceph-conf, root
+ceph-syn: CommandFilter, /usr/bin/ceph-syn, root
+ceph-clsinfo: CommandFilter, /usr/bin/ceph-clsinfo, root
+ceph-coverage: CommandFilter, /usr/bin/ceph-coverage, root
+ceph-authtool: CommandFilter, /usr/bin/ceph-authtool, root
+ceph-mds: CommandFilter, /usr/bin/ceph-mds, root
+ceph-rbdnamer: CommandFilter, /usr/bin/ceph-rbdnamer, root
+ceph-post-file: CommandFilter, /usr/bin/ceph-post-file, root
+monmaptool: CommandFilter, /usr/bin/monmaptool, root
+mkfs.xfs: CommandFilter, /sbin/mkfs.xfs, root
+key: CommandFilter, /usr/bin/key, root
+vsm-assist: CommandFilter, /usr/bin/vsm-assist, root
+presentpool: CommandFilter, /usr/bin/presentpool, root
+start_osd: CommandFilter, /usr/local/bin/start_osd, root
+mkfs: CommandFilter, /sbin/mkfs, root
+mount: CommandFilter, /bin/mount, root
+umount: CommandFilter, /bin/umount, root
+
+#common
+ssh: CommandFilter, /usr/bin/ssh, root
+sed: CommandFilter, /bin/sed, root
+touch: CommandFilter, /bin/touch, root
+echo: CommandFilter, /bin/echo, root
+cp: CommandFilter, /bin/cp, root
+scp: CommandFilter, /usr/bin/scp, root
+service: CommandFilter, /usr/sbin/service, root
+mkdir: CommandFilter, /bin/mkdir, root
+hostname: CommandFilter, /bin/hostname, root
+ls: CommandFilter, /bin/ls, root
+pgrep: CommandFilter, /usr/bin/pgrep, root
+kill: CommandFilter, /bin/kill, root
+ssh-keygen: CommandFilter, /usr/bin/ssh-keygen, root
+##end changed by YOURONG
+
+# vsm/storage/driver.py: 'vgs', '--noheadings', '-o', 'name'
+vgs: CommandFilter, /sbin/vgs, root
+
+# vsm/storage/driver.py: 'lvcreate', '-L', sizestr, '-n', storage_name,..
+# vsm/storage/driver.py: 'lvcreate', '-L', ...
+lvcreate: CommandFilter, /sbin/lvcreate, root
+
+# vsm/storage/driver.py: 'dd', 'if=%s' % srcstr, 'of=%s' % deststr,...
+dd: CommandFilter, /bin/dd, root
+
+# vsm/storage/driver.py: 'lvremove', '-f', %s/%s % ...
+lvremove: CommandFilter, /sbin/lvremove, root
+
+# vsm/storage/driver.py: 'lvdisplay', '--noheading', '-C', '-o', 'Attr',..
+lvdisplay: CommandFilter, /sbin/lvdisplay, root
+
+# vsm/storage/driver.py: 'iscsiadm', '-m', 'discovery', '-t',...
+# vsm/storage/driver.py: 'iscsiadm', '-m', 'node', '-T', ...
+iscsiadm: CommandFilter, /sbin/iscsiadm, root
+iscsiadm_usr: CommandFilter, /usr/bin/iscsiadm, root
+
+# vsm/storage/drivers/lvm.py: 'shred', '-n3'
+# vsm/storage/drivers/lvm.py: 'shred', '-n0', '-z', '-s%dMiB'
+shred: CommandFilter, /usr/bin/shred, root
+
+#vsm/storage/.py: utils.temporary_chown(path, 0), ...
+chown: CommandFilter, /bin/chown, root
+
+# vsm/storage/driver.py
+dmsetup: CommandFilter, /sbin/dmsetup, root
+dmsetup_usr: CommandFilter, /usr/sbin/dmsetup, root
+ln: CommandFilter, /bin/ln, root
+qemu-img: CommandFilter, /usr/bin/qemu-img, root
+env: CommandFilter, /usr/bin/env, root
+
+# vsm/storage/driver.py: utils.read_file_as_root()
+cat: CommandFilter, /bin/cat, root
+get_smart_info: CommandFilter, /usr/bin/get_smart_info, root
+
+# vsm/storage/nfs.py
+stat: CommandFilter, /usr/bin/stat, root
+mount: CommandFilter, /bin/mount, root
+umount: CommandFilter, /bin/umount, root
+df: CommandFilter, /bin/df, root
+truncate: CommandFilter, /usr/bin/truncate, root
+chmod: CommandFilter, /bin/chmod, root
+rm: CommandFilter, /bin/rm, root
+lvs: CommandFilter, /sbin/lvs, root
+
+# vsm/storage/scality.py
+mount: CommandFilter, /bin/mount, root
+umount: CommandFilter, /bin/umount, root
+dd: CommandFilter, /bin/dd, root
+rbd: CommandFilter, /usr/bin/rbd, root
+rbd_ls: CommandFilter, /usr/bin/rbd_ls, root
