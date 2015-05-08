@@ -368,7 +368,9 @@ Next edit the cluster.manifest file. It's in /etc/manifest folder for manual dep
 1>  For the VSM controller, edit the cluster.manifest and modify it as described below:
 
 Modify the three IP addresses according to your environment.
-`management_addr` is used by VSM to communicate with different services, such as using rabbitmq to transfer messages, rpc.call/rpc.cast etc.`ceph_public_addr` is a public (front-side) network address. `ceph_cluster_addr` is a cluster (back-side) network address.
+`management_addr` is used by VSM to communicate with different services, such as using rabbitmq to transfer messages, rpc.call/rpc.cast etc.`ceph_public_addr` is a public (front-side) network address. `ceph_cluster_addr` is a cluster (back-side) network address. 
+
+Also, make sure the netmask is correctly set. In this sample, _netmask_=24 is fine, but with AWS instances, normally, _netmask_=16 are required.
 
     [management_addr]
     192.168.123.0/24
