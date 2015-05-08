@@ -29,7 +29,7 @@ from optparse import OptionParser
 import os
 
 if __name__ == "__main__":
-    usage = "usage: %prog [options]"
+    usage = "usage: %prog [cluster name] [filename for ceph.conf]"
     parser = OptionParser(usage=usage)
     parser.add_option("--cluster_name", dest="cluster_name",
             help = "which cluster to be modified.")
