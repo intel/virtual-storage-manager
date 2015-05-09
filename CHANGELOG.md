@@ -12,12 +12,13 @@ New Features
 -	[VSM-156](https://01.org/jira/browse/VSM-156)	add sanity check tool to help identify potential issues before or after deployment
 -	[VSM-159](https://01.org/jira/browse/VSM-159)	add issue reporting tool
 -	[VSM-184](https://01.org/jira/browse/VSM-184)	add automated script to help deploy VSM on multiple nodes
-
+-	[VSM-242](https://01.org/jira/browse/VSM-242)	Allow user to modify ceph.conf outside VSM
 
 Resolved bugs
 ----------------
 -	[VSM-4](https://01.org/jira/browse/VSM-4)	Average Response Time" missing in dashboard Overview panel "VSM Status" section. 
 -	[VSM-15](https://01.org/jira/browse/VSM-15)	VSM-backup prompt info not correct
+-	[VSM-25](https://01.org/jira/browse/VSM-25) VSM Dashboard | Capacity of hard drives is wrong and percentage used capacity is not correct.
 -	[VSM-26](https://01.org/jira/browse/VSM-26)	[CDEK-1664] VSM | Not possible to replace node if ceph contain only 3 nodes.
 -	[VSM-29](https://01.org/jira/browse/VSM-29)	vsm-agent process causes high i/o on os disk
 -	[VSM-33](https://01.org/jira/browse/VSM-33)	negative update time in RBD list
@@ -35,8 +36,13 @@ Resolved bugs
 -	[VSM-193](https://01.org/jira/browse/VSM-193)	hard-coded cluster id
 -	[VSM-207](https://01.org/jira/browse/VSM-207)	can't assume eth0 device name 
 -	[VSM-216](https://01.org/jira/browse/VSM-216)	Add storage group requires at least 3 nodes
+-	[VSM-217](https://01.org/jira/browse/VSM-217) Problem with replication size on "pool" created on newly added storage group.
 -	[VSM-224](https://01.org/jira/browse/VSM-224)	Controller node error in /var/log/httpd/error_log - constantly ongoing messages [error] <Response [200]>
 -	[VSM-230](https://01.org/jira/browse/VSM-230)	when presenting pool to openstack, cache tiering pools should be listed. 
+-	[VSM-233](https://01.org/jira/browse/VSM-233) console blocks when running automatic installation procedure
+-	[VSM-236](https://01.org/jira/browse/VSM-236) no way to check manifest correctness after editing them
+-	[VSM-239](https://01.org/jira/browse/VSM-239) with automatic deployment, the execution is blocked at asking if start mysql service
+-	[VSM-244](https://01.org/jira/browse/VSM-244) Internal server error when installing v1.1
 
 
 Known issues
