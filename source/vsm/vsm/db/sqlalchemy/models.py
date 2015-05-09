@@ -837,6 +837,5 @@ class CephPerformanceMetric(BASE, VsmBase):
     metric = Column(String(length=255), nullable=False)
     hostname = Column(String(length=255), nullable=False)
     instance = Column(String(length=255), nullable=False)
-
     value = Column(String(length=255), nullable=False)
     timestamp = Column(Integer, nullable=False)

@@ -112,11 +112,7 @@ class ClusterController(wsgi.Controller):
         self.scheduler_api.create_cluster(context, server_list)
         return webob.Response(status_int=202)
 
-<<<<<<< HEAD
     def import_ceph_conf(self, req, body=None):
-=======
-    def intergrate(self, req,body=None):
->>>>>>> add "intergrate cluster" button to dashboard
         """
         import_ceph_conf to db and ceph nodes
         """
@@ -136,6 +132,16 @@ class ClusterController(wsgi.Controller):
             return {"message":"Success"}
         else:
             return {"message":"No such cluster which named  %s in DB"%cluster_name}
+
+    def intergrate(self, req,body=None):
+        """
+        intergrate an existing ceph cluster
+        """
+        LOG.info("CEPH_LOG cluster intergrate body" )
+        context = req.environ['vsm.context']
+        #server_list = body['cluster']['servers']
+        LOG.info('Begin to call scheduler.intergrate_cluster')
+        self.scheduler_api.intergrate_cluster(context)
 
     @wsgi.serializers(xml=ClustersTemplate)
     def show(self, req, id):

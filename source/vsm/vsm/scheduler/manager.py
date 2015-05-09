@@ -946,7 +946,6 @@ class SchedulerManager(manager.Manager):
     @utils.single_lock
     def import_ceph_conf(self, context, cluster_id, ceph_conf_path):
         """
-<<<<<<< HEAD
         """
         LOG.info('import ceph conf from %s to db '%ceph_conf_path)#ceph_conf_path!=FLAG.ceph_conf
         ceph_conf_parser = cephconfigparser.CephConfigParser(ceph_conf_path)._parser
@@ -958,6 +957,17 @@ class SchedulerManager(manager.Manager):
             self._agent_rpcapi.update_ceph_conf(context, ser['host'])
         LOG.info('import ceph conf from db to ceph nodes success ')
         return {"message":"success"}
+
+    def intergrate_cluster(self, context, server_list):
+        """ intergrate an exsiting cluster
+        :param context:
+        :param server_list:
+        :return:
+        """
+        LOG.info('intergrate cluster by refreshing cluster status')
+        active_server = self._set_active_server(context)
+        #TODO db.update_mount_points()
+        return self._agent_rpcapi.intergrate_cluster_from_ceph(context, active_server['host'])
 
     @utils.single_lock
     def create_cluster(self, context, server_list):

@@ -139,4 +139,3 @@ function check_services() {
 	done
 
 }
-

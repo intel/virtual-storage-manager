@@ -31,11 +31,8 @@ class MySQLHandler(Handler):
         self.col_time = self.config['col_time']
         self.col_metric = self.config['col_metric']
         self.col_value = self.config['col_value']
-<<<<<<< HEAD
         self.col_hostname = self.config['col_hostname']
         self.col_instance = self.config['col_instance']
-=======
->>>>>>> get data from diamond and save them to mysql database
 
         # Connect
         self._connect()
@@ -80,7 +77,6 @@ class MySQLHandler(Handler):
         Insert the data
         """
         data = data.strip().split(' ')
-<<<<<<< HEAD
         data_name = data[0].split('.')
         try:
             cursor = self.conn.cursor()
@@ -88,14 +84,14 @@ class MySQLHandler(Handler):
                            % (self.table, self.col_metric, self.col_hostname, self.col_instance,
                               self.col_time, self.col_value),
                            (data_name[4], data_name[1], data_name[3], data[2], data[1]))
-=======
+
         try:
             cursor = self.conn.cursor()
             cursor.execute("INSERT INTO %s (%s, %s, %s) VALUES(%%s, %%s, %%s)"
                            % (self.table, self.col_metric,
                               self.col_time, self.col_value),
                            (data[0], data[2], data[1]))
->>>>>>> get data from diamond and save them to mysql database
+
             cursor.close()
             self.conn.commit()
         except BaseException, e:
