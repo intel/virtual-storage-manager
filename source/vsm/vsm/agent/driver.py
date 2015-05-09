@@ -1111,8 +1111,7 @@ class CephDriver(object):
         # Generate new keyring.
         mds_path = '/var/lib/ceph/mds/ceph-%s' % mds_id
         utils.execute('mkdir', '-p', mds_path, run_as_root=True)
-        #mds_key = '/etc/ceph/keyring.mds.%s' % mds_id
-        mds_key = os.path.join(mds_path,'keyring')
+        mds_key = '/etc/ceph/keyring.mds.%s' % mds_id
         out = utils.execute('ceph', 'auth',
                       'get-or-create', 'mds.%d' % mds_id,
                       'mds', "allow",
