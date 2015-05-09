@@ -71,7 +71,7 @@ while [ $# -gt 0 ]; do
     --service) shift; APP=$1 ;;
     -p|--password) shift; MYSQL_APP_PW=$1 ;;
     -r|--rootpw) shift; MYSQL_ROOT_PW=$1 ;;
-    -y|--yes) ASSUME_YES="yes" ;;
+    -y|--yes) ASSUME_YES='yes' ;;
     --host) shift; MYSQL_HOST_IP=$1;;
     *) shift ;; # ignore
   esac
