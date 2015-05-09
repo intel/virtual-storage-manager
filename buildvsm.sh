@@ -64,7 +64,8 @@ sudo cp INSTALL.pdf release/$VERSION-$DATE
 sudo cp install.sh release/$VERSION-$DATE
 sudo cp LICENSE release/$VERSION-$DATE
 sudo cp NOTICE release/$VERSION-$DATE
-sudo cp CHANGELOG release/$VERSION-$DATE
+sudo cp CHANGELOG.md release/$VERSION-$DATE
+sudo cp CHANGELOG.pdf release/$VERSION-$DATE
 sudo cp hostrc release/$VERSION-$DATE
 sudo cp -r manifest release/$VERSION-$DATE
 sudo cp -r vsmrepo release/$VERSION-$DATE
