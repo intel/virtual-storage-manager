@@ -75,7 +75,7 @@ cp -rf .lib $TEMP_VSM
 cd $TEMP_VSM
 
 function create_release() {
-    if [[ $OS == "Ubuntu" && $OS_VERSION == "14.04" ]]; then
+    if [[ "$OS" == Ubuntu && "$OS_VERSION" == 14.04 ]]; then
         cp -rf ubuntu14/python-vsmclient ./source
         cp -rf ubuntu14/vsm ./source
         cp -rf ubuntu14/vsm-dashboard ./source
@@ -83,7 +83,7 @@ function create_release() {
         cp ubuntu14/builddeb .
         bash +x builddeb
         cp ubuntu14/install.sh release/$VERSION-$DATE
-    elif [[ $OS == "CentOS" && $OS_VERSION == "7" ]]; then
+    elif [[ "$OS" == CentOS && "$OS_VERSION" == 7 ]]; then
         cp -rf centos7/python-vsmclient ./source
         cp -rf centos7/vsm ./source
         cp -rf centos7/vsm-dashboard ./source
@@ -91,15 +91,15 @@ function create_release() {
         cp centos7/buildrpm .
         bash +x buildrpm
         cp centos7/install.sh release/$VERSION-$DATE
-    elif [[ $OS == "CentOS" && $OS_VERSION == "6.5" ]]; then
-        pass
+    elif [[ "$OS" == CentOS && "$OS_VERSION" == 6.5 ]]; then
+    	echo "default os distro"
     fi
 
     cp README.md release/$VERSION-$DATE/README
     cp INSTALL.md release/$VERSION-$DATE
     cp LICENSE release/$VERSION-$DATE
     cp NOTICE release/$VERSION-$DATE
-    cp CHANGELOG release/$VERSION-$DATE
+    cp CHANGELOG.md release/$VERSION-$DATE
     cp hostrc release/$VERSION-$DATE
     cp -r manifest release/$VERSION-$DATE
     cp -r vsmrepo release/$VERSION-$DATE
