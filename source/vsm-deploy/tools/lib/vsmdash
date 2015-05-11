@@ -112,8 +112,8 @@ cd $TOPDIR
 # Start httpd Server
 #---------------------------------------------------
 
-systemctl restart httpd.service
-systemctl enable httpd.service
+service httpd restart
+chkconfig httpd on
 rm -rf /tmp/pip*; rm -rf /tmp/tmp*
 
 #---------------------------------------------------
@@ -122,3 +122,4 @@ rm -rf /tmp/pip*; rm -rf /tmp/tmp*
 
 fi
 }
+

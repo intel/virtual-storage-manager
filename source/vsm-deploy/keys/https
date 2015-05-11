@@ -13,6 +13,7 @@ function _generate_keys() {
     mkdir -p /tmp/__keys
     for n in exp_key exp_sec exp_csr exp_crt; do
         cp -rf /usr/local/bin/keys/$n /tmp/__keys
+        chmod 755 /tmp/__keys/$n
     done
 
     mkdir -p /tmp/__keys
@@ -23,16 +24,12 @@ function _generate_keys() {
     done
 
     # Here we generate keys.
-    chmod 755 exp_key
     ./exp_key
     cp -rf server.key server.key.secure
-    chmod 755 exp_sec
     ./exp_sec
-    chmod 755 exp_csr
     ./exp_csr
     openssl x509 -req -days 7000 -in server.csr -signkey server.key -out server.crt
 
-    # ./exp_crt
     mkdir -p /etc/httpd/conf.d/keys/
     rm -rf /etc/httpd/conf.d/keys/*
     cp -rf * /etc/httpd/conf.d/keys/
@@ -51,8 +48,7 @@ function _generate_keys() {
 
     sed -i "s,Listen 80,#Listen 80,g" /etc/httpd/conf/httpd.conf
     sed -i "s,Require all denied,#Require all denied,g" /etc/httpd/conf/httpd.conf
-#    service httpd restart
-    systemctl restart httpd.service
+    service httpd restart
 
     rm -rf /tmp/__keys
 }
@@ -65,3 +61,4 @@ function setup_https() {
 
     cd $old_dir
 }
+

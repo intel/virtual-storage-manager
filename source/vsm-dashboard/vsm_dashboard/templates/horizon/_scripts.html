@@ -11,24 +11,12 @@
 <script src='{{ STATIC_URL }}horizon/js/angular/horizon.conf.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/angular/services/horizon.utils.js' type='text/javascript' charset='utf-8'></script>
 
-<script src='{{ STATIC_URL }}horizon/lib/jquery/jquery.cookie.js' type='text/javascript' charset="utf-8"></script>
-<script src='{{ STATIC_URL }}horizon/lib/jquery/jquery.quicksearch.js' type='text/javascript' charset="utf-8"></script>
-<script src="{{ STATIC_URL }}horizon/lib/jquery/jquery.tablesorter.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{ STATIC_URL }}horizon/lib/spin.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{ STATIC_URL }}horizon/lib/spin.jquery.js" type="text/javascript" charset="utf-8"></script>
-<script src="{{ STATIC_URL }}horizon/lib/jquery/jquery-ui-1.9.2.custom.js" type="text/javascript" charset="utf-8"></script>
 <script src="{{ STATIC_URL }}horizon/lib/jquery/jquery.bootstrap.wizard.js" type="text/javascript" charset="utf-8"></script>
 
-<script src="{{ STATIC_URL }}horizon/lib/d3.js" type="text/javascript" charset="utf-8"></script>
-
 <script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
-<script src='{{ STATIC_URL }}bootstrap/js/bootstrap-datepicker.js' type='text/javascript' charset='utf-8'></script>
-
-<script src="{{ STATIC_URL }}horizon/lib/hogan-2.0.0.js" type="text/javascript" charset='utf-8'></script>
 
 <script src='{{ STATIC_URL }}horizon/js/horizon.accordion_nav.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.communication.js' type='text/javascript' charset='utf-8'></script>
-<script src='{{ STATIC_URL }}horizon/js/horizon.cookies.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.forms.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.formset_table.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.instances.js' type='text/javascript' charset='utf-8'></script>
@@ -44,11 +32,9 @@
 <script src='{{ STATIC_URL }}horizon/js/horizon.networktopology.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.d3piechart.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.heattop.js' type='text/javascript' charset='utf-8'></script>
-<script src='{{ STATIC_URL }}horizon/lib/rickshaw.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.d3linechart.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.d3barchart.js' type='text/javascript' charset='utf-8'></script>
 <script src='{{ STATIC_URL }}horizon/js/horizon.firewalls.js' type='text/javascript' charset='utf-8'></script>
-<script src='{{ STATIC_URL }}horizon/lib/jsencrypt/jsencrypt.js' type='text/javascript' charset='utf-8'></script>
 
 {% block custom_js_files %}{% endblock %}
 {% endcompress %}
@@ -61,3 +47,4 @@
   // Call init on DOM ready.
   $(document).ready(horizon.init);
 </script>
+

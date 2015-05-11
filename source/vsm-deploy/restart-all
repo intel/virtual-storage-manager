@@ -17,9 +17,9 @@
 
 
 rm -rf /opt/stack/data/vsm/*
-systemctl restart vsm-api.service &
-systemctl restart vsm-scheduler.service &
-systemctl restart vsm-conductor.service  &
+service vsm-api restart &
+service vsm-scheduler restart &
+service vsm-conductor restart &
 
 password=`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'`
 host_list=`mysql -uroot -p$password -Ns -e "use vsm; select host from init_nodes;"`
@@ -30,6 +30,7 @@ for n in $host_list; do
     fi
     ssh $n "mkdir -p /opt/stack/data/vsm; rm -rf /opt/stack/data/vsm/*; chown -R vsm:vsm /opt/stack"
     ssh $n "rm -rf /var/log/vsm/*"
-    ssh $n "systemctl restart vsm-agent.service"
-    ssh $n "systemctl restart vsm-physical.service"
+    ssh $n "service vsm-agent restart"
+    ssh $n "service vsm-physical restart"
 done
+

@@ -17,11 +17,11 @@
 
 
 set -o xtrace
-systemctl stop vsm-api.service
-systemctl stop vsm-scheduler.service
-systemctl stop vsm-conductor.service
-systemctl stop vsm-agent.service
-systemctl stop vsm-physical.service
+service vsm-api stop
+service vsm-scheduler stop
+service vsm-conductor stop
+service vsm-agent stop
+service vsm-physical stop
 TOPDIR=$(cd $(dirname "$0") && pwd)
 
 function is_controller() {
@@ -43,11 +43,11 @@ function is_controller() {
 }
 
 function clean_controller() {
-    systemctl stop vsm-api.service
-    systemctl stop vsm-scheduler.service
-    systemctl stop vsm-conductor.service
-    systemctl stop vsm-agent.service
-    systemctl stop vsm-physical.service
+    service vsm-api stop
+    service vsm-scheduler stop
+    service vsm-conductor stop
+    service vsm-agent stop
+    service vsm-physical stop
     if [[ `is_controller` -gt 0 ]]; then
         echo "Clean over! you have to run vsm-controller again."
         echo "Begin to install controller. (y/n)?"
@@ -98,3 +98,4 @@ else
 fi
 
 set +o xtrace
+

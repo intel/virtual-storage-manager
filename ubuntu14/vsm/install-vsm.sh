@@ -84,6 +84,7 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/getip
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/get_storage
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/spot_info_list
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/vsm-reporter.py
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/intergrate-cluster
 mv $VSM_ROOT_PATH/usr/local/bin/vsm-reporter.py $VSM_ROOT_PATH/usr/local/bin/vsm-reporter
 rm -rf $VSM_ROOT_PATH/usr/local/bin/vsm-agent
 rm -rf $VSM_ROOT_PATH/usr/local/bin/vsm-all
@@ -103,3 +104,9 @@ cp -rf doc $VSM_ROOT_PATH/usr/share/doc/vsm-2015.03
 
 # fix the file not included in the deb package
 cp vsm/db/sqlalchemy/migrate_repo/migrate.cfg $VSM_ROOT_PATH/usr/local/lib/python2.7/dist-packages/vsm/db/sqlalchemy/migrate_repo
+
+# fix the folder locale not included in the deb package
+cp -rf vsm/locale $VSM_ROOT_PATH/usr/local/lib/python2.7/dist-packages/vsm
+
+# fix the file not included in the deb package
+cp vsm/diamond/diamond.conf $VSM_ROOT_PATH/usr/local/lib/python2.7/dist-packages/vsm/diamond

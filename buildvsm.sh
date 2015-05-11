@@ -41,7 +41,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
-    -v| --version) VERSION=$2 ;;
+    -v| --version) shift; VERSION=$1 ;;
     *) shift ;;
   esac
   shift
@@ -72,10 +72,12 @@ TEMP_VSM=`mktemp`; rm -rfv $TEMP_VSM >/dev/null; mkdir -p $TEMP_VSM;
 mkdir -p $TEMP_VSM/release/$VERSION-$DATE
 cp -rf * $TEMP_VSM
 cp -rf .lib $TEMP_VSM
+cp -rf ubuntu14/.lib $TEMP_VSM/ubuntu14/.lib
 cd $TEMP_VSM
 
 function create_release() {
-    if [[ "$OS" == Ubuntu && "$OS_VERSION" == 14.04 ]]; then
+    if [[ $OS == "Ubuntu" && $OS_VERSION =~ "14" ]]; then
+        cp -rf ubuntu14/.lib .
         cp -rf ubuntu14/python-vsmclient ./source
         cp -rf ubuntu14/vsm ./source
         cp -rf ubuntu14/vsm-dashboard ./source
@@ -83,7 +85,8 @@ function create_release() {
         cp ubuntu14/builddeb .
         bash +x builddeb
         cp ubuntu14/install.sh release/$VERSION-$DATE
-    elif [[ "$OS" == CentOS && "$OS_VERSION" == 7 ]]; then
+        cp ubuntu14/debs.lst release/$VERSION-$DATE
+    elif [[ $OS == "CentOS" && $OS_VERSION == "7" ]]; then
         cp -rf centos7/python-vsmclient ./source
         cp -rf centos7/vsm ./source
         cp -rf centos7/vsm-dashboard ./source
@@ -91,8 +94,9 @@ function create_release() {
         cp centos7/buildrpm .
         bash +x buildrpm
         cp centos7/install.sh release/$VERSION-$DATE
-    elif [[ "$OS" == CentOS && "$OS_VERSION" == 6.5 ]]; then
-    	echo "default os distro"
+    elif [[ $OS == "CentOS" && $OS_VERSION =~ "6" ]]; then
+        bash +x buildrpm
+        cp install.sh release/$VERSION-$DATE
     fi
 
     cp README.md release/$VERSION-$DATE/README
@@ -108,6 +112,7 @@ function create_release() {
     tar -czvf $VERSION-$DATE.tar.gz $VERSION-$DATE
     rm -rf $VERSION-$DATE
     cp -r $TEMP_VSM/release $TOPDIR
+    cp -r $TEMP_VSM/vsmrepo $TOPDIR
 
 }
 
@@ -116,3 +121,4 @@ create_release
 rm -rf $TEMP_VSM
 
 set +o xtrace
+
