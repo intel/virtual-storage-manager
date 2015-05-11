@@ -47,9 +47,9 @@ while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
-    -m| --manifest) MANIFEST_PATH=$2 ;;
-    -v| --version) dependence_version=$2 ;;
-    -u| --user) USER=$2 ;;
+    -m| --manifest) shift; MANIFEST_PATH=$1 ;;
+    -v| --version) shift; dependence_version=$1 ;;
+    -u| --user) shift; USER=$1 ;;
     *) shift ;;
   esac
   shift
@@ -98,10 +98,10 @@ if [ ! -d vsmrepo ]; then
 fi
 
 cd vsmrepo
-is_python_vsmclient=`ls|grep python-vsmclient*.rpm|wc -l`
+is_python_vsmclient=`ls|grep python-vsmclient*.deb|wc -l`
 is_vsm=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
-is_vsm_dashboard=`ls|grep vsm-dashboard*.rpm|wc -l`
-is_vsm_deploy=`ls|grep vsm-deploy*.rpm|wc -l`
+is_vsm_dashboard=`ls|grep vsm-dashboard*.deb|wc -l`
+is_vsm_deploy=`ls|grep vsm-deploy*.deb|wc -l`
 if [ $is_python_vsmclient -gt 0 ] && [ $is_vsm -gt 0 ] && [ $is_vsm_dashboard -gt 0 ] && [ $is_vsm_deploy -gt 0 ]; then
     echo "The vsm pachages have been already prepared"
 else
@@ -147,26 +147,22 @@ echo "+++++++++++++++finish checking packages+++++++++++++++"
 #-------------------------------------------------------------------------------
 
 if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
-    wget https://github.com/01org/vsm-dependencies/archive/"$dependence_version".zip
-    unzip $dependence_version
-    mv vsm-dependencies-$dependence_version/repo vsm-dep-repo
-    is_dpkg_dev=`dpkg -s dpkg-dev|grep "install ok installed"|wc -l`
-    if [[ $is_dpkg_dev -gt 0 ]]; then
-        dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
-    fi
-    rm -rf vsm-dependencies-$dependence_version
-    rm -rf $dependence_version
+    mkdir -p vsm-dep-repo
+    cd vsm-dep-repo
+    for i in `cat debs.lst`; do
+        wget https://github.com/01org/vsm-dependencies/tree/2.0/ubuntu14/$i
+    done
 fi
 
-if [ $is_controller -eq 0 ]; then
-    ssh $USER@$controller_ip "rm -rf /opt/vsm-dep-repo"
-    scp -r vsm-dep-repo $USER@$controller_ip:/opt
-else
-    if [ -d vsm-dep-repo ]; then
-        rm -rf /opt/vsm-dep-repo
-        cp -rf vsm-dep-repo /opt
-    fi
-fi
+#if [ $is_controller -eq 0 ]; then
+#    ssh $USER@$controller_ip "rm -rf /opt/vsm-dep-repo"
+#    scp -r vsm-dep-repo $USER@$controller_ip:/opt
+#else
+#    if [ -d vsm-dep-repo ]; then
+#        rm -rf /opt/vsm-dep-repo
+#        cp -rf vsm-dep-repo /opt
+#    fi
+#fi
 
 
 #-------------------------------------------------------------------------------
@@ -181,51 +177,55 @@ if [[ $is_dpkg_dev -eq 0 ]]; then
     apt-get install -y dpkg-dev
 fi
 
-dpkg-scanpackages vsmrepo | gzip > vsmrepo/Packages.gz
 dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
 
-is_apache2=`dpkg -s apache2|grep "install ok installed"|wc -l`
-if [[ is_apache2 -gt 0 ]]; then
-    sed -i "s,#*Listen 80,Listen 80,g" /etc/apache2/ports.conf
-    service apache2 restart
-fi
+#is_apache2=`dpkg -s apache2|grep "install ok installed"|wc -l`
+#if [[ is_apache2 -gt 0 ]]; then
+#    sed -i "s,#*Listen 80,Listen 80,g" /etc/apache2/ports.conf
+#    service apache2 restart
+#fi
 
 rm -rf vsm.list
 rm -rf vsm-dep.list
 
 cat <<"EOF" >vsm.list
-deb file:///var/www/html vsmrepo/
+deb file:///opt vsmrepo/
 EOF
 
 cat <<"EOF" >vsm-dep.list
-deb file:///var/www/html vsm-dep-repo/
+deb file:///opt vsm-dep-repo/
 EOF
 
-oldvsmurl="deb file:///var/www/html vsmrepo/"
-oldvsmdepurl="deb file:///var/www/html vsm-dep-repo/"
-newvsmurl="deb http://$controller_ip vsmrepo/"
-newvsmdepurl="deb http://$controller_ip vsm-dep-repo/"
+cat <<"EOF" >apt.conf
+APT::Get::AllowUnauthenticated 1 ;
+EOF
+
+#oldvsmurl="deb file:///opt vsmrepo/"
+#oldvsmdepurl="deb file:///opt vsm-dep-repo/"
+#newvsmurl="deb http://$controller_ip vsmrepo/"
+#newvsmdepurl="deb http://$controller_ip vsm-dep-repo/"
+#sed -i "s,$oldvsmurl,$newvsmurl,g" ./vsm.list
+#sed -i "s,$oldvsmdepurl,$newvsmdepurl,g" ./vsm-dep.list
+
 if [ $is_controller -eq 0 ]; then
+    scp -r vsm-dep-repo $USER@$controller_ip:/opt
+    scp -r vsmrepo $USER@$controller_ip:/opt
+    scp apt.conf $USER@$controller_ip:/etc/apt
     scp vsm.list $USER@$controller_ip:/etc/apt/sources.list.d
     scp vsm-dep.list $USER@$controller_ip:/etc/apt/sources.list.d
-    ssh $USER@$controller_ip "apt-get update; apt-get install -y apache2; service apache2 restart; \
-    rm -rf /var/www/html/vsm-dep-repo /var/www/html/vsmrepo; cp -rf /opt/vsm-dep-repo /var/www/html; \
-    cp -rf /opt/vsmrepo /var/www/html"
-    ssh $USER@$controller_ip "sed -i \"s,oldvsmurl,newvsmurl,g\" /etc/apt/sources.list.d/vsm.list; \
-    sed -i \"s,oldvsmdepurl,newvsmdepurl,g\" /etc/apt/sources.list.d/vsm-dep.list; \
-    apt-get update"
+    ssh $USER@$controller_ip "apt-get update"
 else
+    cp -r vsm-dep-repo /opt
+    cp -r vsmrepo /opt
+    cp apt.conf /etc/apt
     cp vsm.list /etc/apt/sources.list.d
     cp vsm-dep.list /etc/apt/sources.list.d
-    apt-get update; apt-get install -y apache2; service apache2 restart; \
-    rm -rf /var/www/html/vsm-dep-repo /var/www/html/vsmrepo; cp -rf /opt/vsm-dep-repo /var/www/html; \
-    cp -rf /opt/vsmrepo /var/www/html
-    sed -i \"s,oldvsmurl,newvsmurl,g\" /etc/apt/sources.list.d/vsm.list
-    sed -i \"s,oldvsmdepurl,newvsmdepurl,g\" /etc/apt/sources.list.d/vsm-dep.list
     apt-get update
 fi
 
 function set_repo() {
+    scp -r vsm-dep-repo $USER@$1:/opt
+    scp -r vsmrepo $USER@$1:/opt
     ssh $USER@$1 "rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list"
     scp vsm.list $USER@$1:/etc/apt/sources.list.d
     scp vsm-dep.list $USER@$1:/etc/apt/sources.list.d
@@ -246,19 +246,19 @@ echo "+++++++++++++++finish setting the repo+++++++++++++++"
 echo "+++++++++++++++install vsm rpm and dependences+++++++++++++++"
 
 function install_vsm_controller() {
-    ssh $USER@$1 "apt-get install vsm vsm-deploy vsm-dashboard python-vsmclient"
+    ssh $USER@$1 "apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
     ssh $USER@$1 "preinstall"
 }
 
 function install_vsm_storage() {
-    ssh $USER@$1 "apt-get install vsm vsm-deploy"
+    ssh $USER@$1 "apt-get install -y vsm vsm-deploy"
     ssh $USER@$1 "preinstall"
 }
 
 if [ $is_controller -eq 0 ]; then
     install_vsm_controller $controller_ip
 else
-    apt-get install vsm vsm-deploy vsm-dashboard python-vsmclient
+    apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient
     preinstall
 fi
 
@@ -366,3 +366,4 @@ set +o xtrace
 # 
 #
 # 
+

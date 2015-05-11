@@ -3,12 +3,7 @@
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 
-#rpm_dash=`rpm -qa | grep vsm-dashboard`
-#rpm_dash=${rpm_dash##*board-}
-#rpm_dash=${rpm_dash%%.el6*}
-
 vsm-manage db sync
-#VSM_VERSION=$rpm_dash
 VSM_VERSION=`dpkg -s vsm-dashboard|grep Version|awk '{ print $2 }'`
 sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" /usr/share/vsm-dashboard/vsm_dashboard/dashboards/vsm/overview/summarys.py
 
@@ -38,3 +33,4 @@ source $TOPDIR/keys/https
 setup_https
 
 restart-all
+

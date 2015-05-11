@@ -85,13 +85,6 @@ class MySQLHandler(Handler):
                               self.col_time, self.col_value),
                            (data_name[4], data_name[1], data_name[3], data[2], data[1]))
 
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute("INSERT INTO %s (%s, %s, %s) VALUES(%%s, %%s, %%s)"
-                           % (self.table, self.col_metric,
-                              self.col_time, self.col_value),
-                           (data[0], data[2], data[1]))
-
             cursor.close()
             self.conn.commit()
         except BaseException, e:

@@ -34,7 +34,13 @@ if ROOT_PATH not in sys.path:
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
-SECRET_KEY = '_n&qt--*3^1r--*$j6tk0^9t1^j_%134mm2frw_!!@3b3v56@1'
+SECRET_KEY = None
+
+if not SECRET_KEY:
+    from horizon.utils import secret_key
+    SECRET_KEY = secret_key.generate_key()
+
+# SECRET_KEY = '_n&qt--*3^1r--*$j6tk0^9t1^j_%134mm2frw_!!@3b3v56@1'
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
 ALLOWED_HOSTS = [
@@ -119,8 +125,10 @@ STATICFILES_FINDERS = (
 )
 
 less_binary = os.path.join(BIN_DIR, 'lessc')
+scss_binary = os.path.join('/usr', 'local', 'bin', 'scss')
 COMPRESS_PRECOMPILERS = (
     ('text/less', (less_binary + ' {infile} {outfile}')),
+    ('text/scss', (scss_binary + ' {infile} {outfile}')),
 )
 
 COMPRESS_CSS_FILTERS = (
@@ -224,3 +232,4 @@ for old, new in _renames:
                       Warning)
         _dashboards[_dashboards.index(_old_name)] = _new_name
 HORIZON_CONFIG['dashboards'] = _dashboards
+

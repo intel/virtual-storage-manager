@@ -87,6 +87,10 @@ build_vsmdeploy_deb
 
 # __create_repo_by_rpms
 
+is_dpkg_dev=`dpkg -s dpkg-dev|grep "install ok installed"|wc -l`
+if [[ $is_dpkg_dev -eq 0 ]]; then
+    apt-get install dpkg-dev
+fi
 dpkg-scanpackages vsmrepo | gzip > vsmrepo/Packages.gz
 #apt-get update
 

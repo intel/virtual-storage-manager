@@ -66,14 +66,6 @@ function remove() {
     rm -rf /etc/init.d/vsm-*
     rm -rf /etc/init.d/*keystone*
 
-    systemctl disable mysqld.service
-    systemctl disable rabbitmq-server.service
-    systemctl disable openstack-keystone.service
-    for n in `ls /etc/init.d | grep vsm`; do
-        systemctl disable $n.service
-    done
-    systemctl disable httpd.service
-
     exit 0
 }
 
@@ -128,7 +120,6 @@ cp -rf $TOPDIR/tools/etc/sudoers.d/vsm  /etc/sudoers.d/
 #---------------------------------------------
 
 service vsm-agent restart
-#systemctl enable vsm-agent.service
 sed -i '/exit/d' /etc/rc.local
 echo "service vsm-agent restart" >> /etc/rc.local
 echo "service vsm-physical restart" >> /etc/rc.local
@@ -137,7 +128,7 @@ chmod +x /etc/vsm/prepools/main
 echo "..."
 sleep 5
 service vsm-physical restart
-#systemctl enable vsm-physical.service
 echo "The End!"
 
 set +o xtrace
+

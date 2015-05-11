@@ -71,7 +71,7 @@ while [ $# -gt 0 ]; do
     --service) shift; APP=$1 ;;
     -p|--password) shift; MYSQL_APP_PW=$1 ;;
     -r|--rootpw) shift; MYSQL_ROOT_PW=$1 ;;
-    -y|--yes) ASSUME_YES='yes' ;;
+    -y|--yes) ASSUME_YES="yes" ;;
     --host) shift; MYSQL_HOST_IP=$1;;
     *) shift ;; # ignore
   esac
@@ -122,15 +122,15 @@ fi
 # Make sure MySQL is installed.
 
 NEW_MYSQL_INSTALL=0
-if ! rpm -q --whatprovides mariadb-server > /dev/null; then
+if ! rpm -q --whatprovides MariaDB-server > /dev/null; then
   if [ -z "${ASSUME_YES}" ]; then
-    printf "mariadb-server is not installed.  Would you like to install it now? (y/n): "
+    printf "MariaDB-server is not installed.  Would you like to install it now? (y/n): "
     read response
     case "$response" in
       y|Y)
         ;;
       n|N)
-        echo "mariadb-server must be installed.  Please install it before proceeding."
+        echo "MariaDB-server must be installed.  Please install it before proceeding."
         exit 0
         ;;
       *)
@@ -145,7 +145,7 @@ fi
 
 # Make sure mysql is running.
 
-if ! service_running mariadb; then
+if ! service_running mysql; then
   if [ -z "${ASSUME_YES}" ]; then
     printf "mysql is not running.  Would you like to start it now? (y/n): "
     read response
@@ -162,10 +162,10 @@ if ! service_running mariadb; then
     esac
   fi
 
-  start_service 'mariadb'
+  start_service 'mysql'
 
   # If we both installed and started, ensure it starts at boot
-  [ $NEW_MYSQL_INSTALL -eq 1 ] && systemctl enable mariadb.service
+  [ $NEW_MYSQL_INSTALL -eq 1 ] && chkconfig mysql on
 fi
 
 # Get MySQL root access.
@@ -291,3 +291,4 @@ fi
 echo "Complete!"
 
 set +o xtrace
+

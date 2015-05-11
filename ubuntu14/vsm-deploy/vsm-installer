@@ -40,11 +40,7 @@ VSM_RC_FILE=$1
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 [[ -e $VSM_RC_FILE ]] && source $VSM_RC_FILE
-#source $TOPDIR/tools/lib/services
-#source $TOPDIR/tools/lib/mysql
-#source $TOPDIR/tools/lib/ntp
 
-#for n in `ls $TOPDIR/tools/lib/ | grep -v services | grep -v manifest| grep -v check`; do
 for n in `ls $TOPDIR/tools/lib/ | grep -v check`; do
     source $TOPDIR/tools/lib/$n
 done
@@ -60,7 +56,7 @@ cluster_manifest
 # Repo
 #---------------------------------------------
 
-HOST_IP=`nic_ip eth0`
+HOST_IP=`nic_ip ${NET_DEV}`
 REPO_HOST=${REPO_HOST:-$HOST_IP}
 STACK_USER=${STACK_USER:-stack}
 
@@ -146,3 +142,4 @@ echo "service apache2 restart" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 
 set +o xtrace
+

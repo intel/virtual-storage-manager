@@ -27,7 +27,7 @@ __EOF__
         exit 0
     fi
 
-    systemctl restart httpd.service
+    service httpd restart
     echo "" > /etc/httpd/conf.d/welcome.conf
     chmod -R a+r /var/www/html/
 }
@@ -91,3 +91,4 @@ function setup_repo() {
         setup_yum_repo
     fi
 }
+

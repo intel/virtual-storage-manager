@@ -47,9 +47,9 @@ while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
-    -m| --manifest) MANIFEST_PATH=$2 ;;
-    -v| --version) dependence_version=$2 ;;
-    -u| --user) USER=$2 ;;
+    -m| --manifest) shift; MANIFEST_PATH=$1 ;;
+    -v| --version) shift; dependence_version=$1 ;;
+    -u| --user) shift; USER=$1 ;;
     *) shift ;;
   esac
   shift
@@ -352,3 +352,4 @@ set +o xtrace
 # 
 #
 # 
+

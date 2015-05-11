@@ -189,6 +189,7 @@ install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
 install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/local/bin/get_storage
 install -p -D -m 755 tools/spot_info_list %{buildroot}%{_usr}/local/bin/spot_info_list
 install -p -D -m 755 tools/vsm-reporter.py %{buildroot}%{_usr}/local/bin/vsm-reporter
+install -p -D -m 755 bin/intergrate-cluster %{buildroot}%{_usr}/local/bin/intergrate-cluster
 
 %pre
 getent group vsm >/dev/null || groupadd -r vsm --gid 165
@@ -273,6 +274,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/get_storage
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/spot_info_list
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-reporter
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/intergrate-cluster
 
 #-----------------------------
 # Prepools

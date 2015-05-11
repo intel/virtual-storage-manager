@@ -24,7 +24,7 @@ UserKnownHostsFile /dev/null
 ConnectTimeout 15
 StrictHostKeyChecking no
 EOF
-systemctl restart sshd.service
+service sshd restart
 
 #---------------------------------------------
 # Setup Variable.
@@ -59,7 +59,7 @@ cluster_manifest
 # Repo
 #---------------------------------------------
 
-HOST_IP=`nic_ip eth0`
+HOST_IP=`nic_ip ${NET_DEV}`
 REPO_HOST=${REPO_HOST:-$HOST_IP}
 STACK_USER=${STACK_USER:-stack}
 
@@ -129,19 +129,20 @@ setup_https
 
 
 sed -i "/exit/d" /etc/rc.local
-sed -i "/systemctl restart vsm-api.service/d" /etc/rc.local
-sed -i "/systemctl restart vsm-scheduler.service/d" /etc/rc.local
-sed -i "/systemctl restart vsm-conductor.service/d" /etc/rc.local
-sed -i "/systemctl restart httpd.service/d" /etc/rc.local
-sed -i "/systemctl restart rabbitmq-server.service/d" /etc/rc.local
-sed -i "/systemctl restart mariadb.service/d" /etc/rc.local
+sed -i "/service vsm-api restart/d" /etc/rc.local
+sed -i "/service vsm-scheduler restart/d" /etc/rc.local
+sed -i "/service vsm-conductor restart/d" /etc/rc.local
+sed -i "/service httpd restart/d" /etc/rc.local
+sed -i "/service rabbitmq-server restart/d" /etc/rc.local
+sed -i "/service mysql restart/d" /etc/rc.local
 
-echo "systemctl restart mariadb.service" >> /etc/rc.local
-echo "systemctl restart rabbitmq-server.service" >> /etc/rc.local
-echo "systemctl restart vsm-api.service" >> /etc/rc.local
-echo "systemctl restart vsm-scheduler.service" >> /etc/rc.local
-echo "systemctl restart vsm-conductor.service" >> /etc/rc.local
-echo "systemctl restart httpd.service" >> /etc/rc.local
+echo "service mysql restart" >> /etc/rc.local
+echo "service rabbitmq-server restart" >> /etc/rc.local
+echo "service vsm-api restart" >> /etc/rc.local
+echo "service vsm-scheduler restart" >> /etc/rc.local
+echo "service vsm-conductor restart" >> /etc/rc.local
+echo "service httpd restart" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 
 set +o xtrace
+
