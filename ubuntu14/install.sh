@@ -152,6 +152,7 @@ if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
     for i in `cat debs.lst`; do
         wget https://github.com/01org/vsm-dependencies/tree/2.0/ubuntu14/$i
     done
+    cd $TOPDIR
 fi
 
 #if [ $is_controller -eq 0 ]; then
