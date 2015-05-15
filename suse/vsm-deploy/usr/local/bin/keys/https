@@ -1,0 +1,75 @@
+#!/bin/bash
+
+#Steps to generate keys.
+
+# cd /opt/keys/
+# ./exp_key                                       generate key file
+# cp -rf server.key server.key.secure
+# ./exp_sec                                       avoid typing password
+# ./exp_csr                                        generate request file
+# ./exp_crt                                        generate certificate file
+
+function _generate_keys() {
+    mkdir -p /tmp/__keys
+    for n in exp_key exp_sec exp_csr exp_crt; do
+        cp -rf /usr/local/bin/keys/$n /tmp/__keys
+    done
+
+    mkdir -p /tmp/__keys
+    cd /tmp/__keys/
+
+    for n in `ls`; do
+        sed -i "s,%PASSWORD%,$VSM_HTTPS_PASSWORD,g" $n
+    done
+
+    # Here we generate keys.
+    chmod +x exp_key
+    ./exp_key
+    cp -rf server.key server.key.secure
+    chmod +x exp_sec
+    chmod +x exp_csr
+    ./exp_sec
+    ./exp_csr
+    openssl x509 -req -days 7000 -in server.csr -signkey server.key -out server.crt
+
+    cp /tmp/__keys/server.key /etc/apache2/ssl.key/
+    cp /tmp/__keys/server.csr /etc/apache2/ssl.csr/
+    cp /tmp/__keys/server.crt /etc/apache2/ssl.crt/
+
+    cp /etc/apache2/default-vhost-ssl.conf /etc/apache2/default-server-ssl.conf
+    grep -sq default-server-ssl.conf$ /etc/apache2/httpd.conf ||
+      sed -i '/^Include .etc.apache2.default-server.conf/a Include /etc/apache2/default-server-ssl.conf' /etc/apache2/httpd.conf
+
+    systemctl restart apache2
+
+    # ./exp_crt
+#    mkdir -p /etc/httpd/conf.d/keys/
+#    rm -rf /etc/httpd/conf.d/keys/*
+#    cp -rf * /etc/httpd/conf.d/keys/
+
+    # then we begin to set http configurations.
+#    cat <<"____EOF" >/etc/httpd/conf.d/ssl.conf
+#SSLCertificateKeyFile /etc/httpd/conf.d/keys/server.key
+#Listen 443
+#SSLEngine on
+#SSLCertificateFile /etc/httpd/conf.d/keys/server.crt
+#LoadModule ssl_module modules/mod_ssl.so
+#____EOF
+
+#    sed -i "s,SSLCertificateFile /etc/pki/tls/certs/localhost.crt,SSLCertificateFile /etc/httpd/conf.d/keys/server.crt,g" /etc/httpd/conf.d/ssl.conf
+#    sed -i "s,SSLCertificateKeyFile /etc/pki/tls/private/localhost.key,SSLCertificateKeyFile /etc/httpd/conf.d/keys/server.key,g" /etc/httpd/conf.d/ssl.conf
+#
+#    sed -i "s,Listen 80,#Listen 80,g" /etc/httpd/conf/httpd.conf
+#    service httpd restart
+#
+#    rm -rf /tmp/__keys
+}
+
+function setup_https() {
+    old_dir=`pwd`
+    host_name=`hostname` 
+    sed -i "s,%HOSTNAME%,$host_name,g" /usr/local/bin/keys/exp_csr
+    _generate_keys
+
+    cd $old_dir
+}

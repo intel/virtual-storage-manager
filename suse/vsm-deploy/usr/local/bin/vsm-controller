@@ -1,0 +1,254 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+set -e
+TOPDIR=$(cd $(dirname "$0") && pwd)
+TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
+
+#---------------------------------------------
+# Usage
+#---------------------------------------------
+
+function usage() {
+    cat << EOF
+Usage: vsm-controller
+
+Simple installation:
+  Controller Node: vsm-controller -r controller [-m mysql_root_password] [-k old_key_file]
+  All in one:      vsm-controller -r allinone [-m mysql_root_password] [-k old_key_file]
+
+EOF
+
+if [[ $1 -gt 0 ]]; then
+cat << EOF
+Self-Designed installation:
+  Step 1: create file file_name.rc with content.
+
+    VSM_CONTROLLER_IP=192.168.111.1
+    VSM_ROLE=controller
+    MYSQL_ROOT_PASSWORD=mysqlpassword
+    RABBITMQ_PASSWORD=password_a
+    MYSQL_KEYSTONE_PASSWORD=password_b
+    ADMIN_PASSWORD=password_c
+    MYSQL_VSM_PASSWORD=password_d
+    KEYSTONE_VSM_SERVICE_PASSWORD=password_e
+    MYSQL_DASHBOARD_PASSWORD=password_f
+    VSM_OLD_KEY_FILE=/etc/vsm/hostname.key
+
+  Step 2: vsm-controller -f file_name.rc
+
+EOF
+fi
+cat << EOF
+Options:
+  --help | -h
+    Print usage information.
+  --remove | --clean
+    Remove all the VSM packages and configuration files.
+  -r | --role
+    Set the role of this host.
+    {controller,allinone}
+  -f | --config-file
+    Configuratoin file path. If you use this parameter, you may ignore other parameters.
+  -c | --controller-ip
+    Controller IP address. If you have mutilple IP, you can prefer one IP manually.
+  -m | --mysql
+    MySQL root user password.
+  -k | --key-file  [Ignore this paramter at now.]
+    Old key file. We must use private key file here.
+  -p | --password
+    password for manage other agents.
+    Put it in /etc/vsmdeploy/deployrc
+EOF
+    exit 0
+}
+
+#---------------------------------------------
+# Clear installtion
+#---------------------------------------------
+
+function remove() {
+    yum remove -y openstack-keystone python-keystone python-keystoneclient
+    yum remove -y python-vsmclient vsm vsm-dashboard
+    rm -rf /etc/vsm
+    rm -rf /etc/vsm-dashboard
+    rm -rf /usr/share/vsm-dashboard
+    rm -rf /etc/httpd/conf.d/vsm-dashboard.conf
+    rm -rf /etc/keystone
+    rm -rf /etc/init.d/vsm-*
+    rm -rf /etc/init.d/*keystone*
+
+    chkconfig mysql off
+    chkconfig rabbitmq-server off
+    for n in `ls /etc/init.d | grep vsm`; do
+        chkconfig $n off
+    done
+    chkconfig httpd off
+    yum remove -y vsm-deploy
+    exit 0
+}
+
+#---------------------------------------------
+# Read Parameters.
+#---------------------------------------------
+
+VSM_CONTROLLER_IP=""
+VSM_ROLE="controller"
+VSM_OLD_KEY_FILE=""
+VSM_RC_FILE=""
+MYSQL_ROOT_PASSWORD=""
+
+if [[ $# -eq 1 ]]; then
+    if [[ -e $1 ]]; then
+        echo "You should use as: vsm-controller -f config_file_path"
+        exit 0
+    fi
+fi
+
+ADMIN_PASSWORD=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h) usage ;;
+    --help) usage 1;;
+    --remove) remove ;;
+    --clean) remove ;;
+    -m|--mysql) shift; MYSQL_ROOT_PASSWORD=$1 ;;
+    -r|--role) shift; VSM_ROLE=$1 ;;
+    -f|--config-file) shift; VSM_RC_FILE=$1 ;;
+    -c|--controller-ip) shift; VSM_CONTROLLER_IP=$1 ;;
+    -k|--token) shift; VSM_OLD_KEY_FILE=$1 ;;
+    -p|--password) shift; AGENT_PASSWORD=$1;;
+    *) shift ;;
+  esac
+  shift
+done
+
+#---------------------------------------------
+# Check Parameters.
+#---------------------------------------------
+
+mkdir -p /etc/vsmdeploy/
+if [[ ! $MYSQL_ROOT_PASSWORD ]]; then
+    if [[ -e /etc/my.cnf ]]; then
+        if [[ `cat /etc/my.cnf | grep firsttime | wc -l` -gt 0 ]]; then
+            if [[ -e /etc/vsmdeploy/deployrc ]]; then
+                str=`cat /etc/vsmdeploy/deployrc |
+                    grep MYSQL_ROOT_PASSWORD |
+                    awk -F "=" '{print $2}'`
+                MYSQL_ROOT_PASSWORD=$str
+            else
+                if [[ -e ~/.mysql_password ]]; then
+                    source ~/.mysql_password
+                else
+                    echo "You have installed and set MySQL ROOT password before."
+                    echo "Please provide it my -m|--mysql parameter."
+                    exit 0
+                fi
+            fi
+        fi
+    fi
+fi
+
+#---------------------------------------------
+# Check Parameters.
+#---------------------------------------------
+
+if [[ -e $VSM_RC_FILE ]]; then
+    source $VSM_RC_FILE
+fi
+
+echo $VSM_CONTROLLER_IP
+
+test_cnt=0
+for x in controller allinone; do
+    if [[ $VSM_ROLE == $x ]]; then
+        let test_cnt=test_cnt+1
+    fi
+done
+
+if [[ $test_cnt -eq 0 ]]; then
+        cat << ________EOF
+        ERROR: You can just set you role in {controller|allinone}
+________EOF
+        exit 0
+fi
+
+#---------------------------------------------
+# Check Parameters.
+#---------------------------------------------
+
+function set_password {
+    var=$1; msg=$2
+    pw=${!var}
+    localrc=/etc/vsmdeploy/deployrc
+
+    if [ ! $pw ]; then
+        if [ ! -e $localrc ]; then
+            touch $localrc
+        fi
+        pw=" "
+        if [ ! $pw ]; then
+            pw=`openssl rand -hex 10`
+        fi
+        eval "$var=$pw"
+    fi
+    sed -i "s,$var=.*,$var=$pw,g" $localrc
+
+}
+
+#---------------------------------------------
+# Controller
+#---------------------------------------------
+
+HOST_IP=`hostname -I | awk '{print $1}'`
+#HOST_IP=`getip`
+VSM_CONTROLLER_IP=${VSM_CONTROLLER_IP:-$HOST_IP}
+
+if [[ $VSM_ROLE == "controller" ]]; then
+    file=/etc/vsmdeploy/deployrc
+    cp -rf $TOPDIR/tools/controllerrc $file
+    sed -i "s,%CONTROLLER_IP%,$VSM_CONTROLLER_IP,g" $file
+    set_password MYSQL_ROOT_PASSWORD
+    set_password RABBITMQ_PASSWORD
+    set_password MYSQL_KEYSTONE_PASSWORD
+    set_password ADMIN_PASSWORD
+    set_password AGENT_PASSWORD
+    set_password ADMIN_TOKEN
+    set_password MYSQL_VSM_PASSWORD
+    set_password KEYSTONE_VSM_SERVICE_PASSWORD
+    set_password MYSQL_DASHBOARD_PASSWORD
+    set_password VSM_HTTPS_PASSWORD
+    [[ -e /etc/init.d/vsm-agent ]] && service vsm-agent stop
+fi
+
+if [[ $VSM_ROLE == "allinone" ]]; then
+    file=/etc/vsmdeploy/deployrc
+    cp -rf $TOPDIR/tools/allinonerc $file
+    sed -i "s,%CONTROLLER_IP%,$VSM_CONTROLLER_IP,g" $file
+    set_password MYSQL_ROOT_PASSWORD
+    set_password RABBITMQ_PASSWORD
+    set_password MYSQL_KEYSTONE_PASSWORD
+    set_password ADMIN_PASSWORD
+    set_password AGENT_PASSWORD
+    set_password ADMIN_TOKEN
+    set_password MYSQL_VSM_PASSWORD
+    set_password KEYSTONE_VSM_SERVICE_PASSWORD
+    set_password MYSQL_DASHBOARD_PASSWORD
+    set_password VSM_HTTPS_PASSWORD
+fi
+
+[[ -e /usr/local/bin/vsm-installer ]] && vsm-installer /etc/vsmdeploy/deployrc

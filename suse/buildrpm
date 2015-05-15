@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Remove redundant file
+rm -f source/vsm-deploy/tools/etc/vsm-dashboard/local_settings.template
+rm -f source/vsm-dashboard/vsm_dashboard/local/local_settings.py
+rm -f source/vsm-deploy/vsm-controller
+rm -f source/vsm-deploy/vsm-installer
+
+rm -rf source/vsm/vsm/db/sqlalchemy/migrate_repo/versions/034_modify_cluster.py
+
+VSMCLIENT_SPEC="source/python-vsmclient/python-vsmclient.spec"
+VSMCLIENT_VERSION=`awk '/^Version:/ {print $2}' $VSMCLIENT_SPEC`
+
+VSM_SPEC="source/vsm/vsm.spec"
+VSM_VERSION=`awk '/^Version:/ {print $2}' $VSM_SPEC`
+
+VSM_DEPLOY_SPEC="source/vsm-deploy/vsm-deploy.spec"
+VSM_DEPLOY_VERSION=`awk '/^Version:/ {print $2}' $VSM_DEPLOY_SPEC`
+
+VSM_DASHBOARD_SPEC="source/vsm-dashboard/vsm-dashboard.spec"
+VSM_DASHBOARD_VERSION=`awk '/^Version:/ {print $2}' $VSM_DASHBOARD_SPEC`
+
+(cd source; 
+rm -f python-vsmclient-$VSMCLIENT_VERSION;
+ln -s python-vsmclient python-vsmclient-$VSMCLIENT_VERSION;
+tar czf ~/rpmbuild/SOURCES/python-vsmclient-$VSMCLIENT_VERSION.tar.gz python-vsmclient-$VSMCLIENT_VERSION/* )
+
+(cd source; 
+rm -f vsm-$VSM_VERSION;
+ln -s vsm vsm-$VSM_VERSION;
+tar czf ~/rpmbuild/SOURCES/vsm-$VSM_VERSION.tar.gz vsm-$VSM_VERSION/* )
+
+(cd source; 
+rm -f vsm-deploy-$VSM_DEPLOY_VERSION;
+ln -s vsm-deploy vsm-deploy-$VSM_DEPLOY_VERSION;
+tar czf ~/rpmbuild/SOURCES/vsm-deploy-$VSM_DEPLOY_VERSION.tar.gz vsm-deploy-$VSM_DEPLOY_VERSION/* )
+
+(cd source; 
+rm -f vsm-dashboard-$VSM_DASHBOARD_VERSION;
+ln -s vsm-dashboard vsm-dashboard-$VSM_DASHBOARD_VERSION;
+tar czf ~/rpmbuild/SOURCES/vsm-dashboard-$VSM_DASHBOARD_VERSION.tar.gz vsm-dashboard-$VSM_DASHBOARD_VERSION/* )
+
+rpmbuild -bb $VSMCLIENT_SPEC || exit 1
+rpmbuild -bb $VSM_SPEC || exit 1
+rpmbuild -bb $VSM_DEPLOY_SPEC || exit 1
+rpmbuild -bb $VSM_DASHBOARD_SPEC || exit 1
+
+mkdir -p vsmrepo
+
+cp ~/rpmbuild/RPMS/noarch/python-vsmclient-$VSMCLIENT_VERSION-1.0.noarch.rpm vsmrepo/
+cp ~/rpmbuild/RPMS/noarch/vsm-$VSM_VERSION-1.0.noarch.rpm vsmrepo/
+cp ~/rpmbuild/RPMS/x86_64/vsm-deploy-$VSM_DEPLOY_VERSION-1.0.noarch vsmrepo/
+cp ~/rpmbuild/RPMS/x86_64/vsm-dashboard-$VSM_DASHBOARD_VERSION-1.0.x86_64.rpm vsmrepo/
+

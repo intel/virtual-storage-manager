@@ -1,0 +1,142 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function setup_keystone() {
+if [[ `is_service_enabled $KEYSTONE_HOST` -gt 0 ]]; then
+
+#---------------------------------------------------
+# Set up global ENV
+#---------------------------------------------------
+unset http_proxy
+unset https_proxy
+unset ftp_proxy
+export OS_USERNAME=""
+export OS_AUTH_KEY=""
+export OS_AUTH_TENANT=""
+export OS_STRATEGY=""
+export OS_AUTH_STRATEGY=""
+export OS_AUTH_URL=""
+export SERVICE_ENDPOINT=""
+
+#---------------------------------------------------
+# Yum install Keystone.
+#---------------------------------------------------
+
+#---------------------------------------------------
+# set some variables
+#---------------------------------------------------
+
+BASE_SQL_CONN=mysql://$MYSQL_KEYSTONE_USER:$MYSQL_KEYSTONE_PASSWORD@$MYSQL_HOST
+KEYSTONE_AUTH_HOST=$KEYSTONE_HOST
+KEYSTONE_AUTH_PORT=35357
+KEYSTONE_AUTH_PROTOCOL=http
+KEYSTONE_SERVICE_HOST=$KEYSTONE_HOST
+KEYSTONE_SERVICE_PORT=5000
+KEYSTONE_SERVICE_PROTOCOL=http
+SERVICE_ENDPOINT=http://$KEYSTONE_HOST:35357/v2.0
+KEYSTONE_CATALOG_BACKEND=sql
+logfile=/var/log/keystone/keystone.log
+
+#---------------------------------------------------
+# Clear front installation & configuration
+#---------------------------------------------------
+
+service openstack-keystone stop
+
+#[[ -d /etc/keystone ]] && rm -rf /etc/keystone/*
+mkdir -p /etc/keystone/
+cp -rf $TOPDIR/tools/etc/keystone/* /etc/keystone/
+
+chown -R keystone /etc/keystone
+
+chmod +x $TOPDIR/tools/script/openstack-db
+$TOPDIR/tools/script/openstack-db --drop --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
+$TOPDIR/tools/script/openstack-db --init --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
+
+#---------------------------------------------------
+# Change keystone.conf
+#---------------------------------------------------
+
+file=/etc/keystone/keystone.conf
+sed -i "s,# admin_token = .*,admin_token = $ADMIN_TOKEN,g" $file
+sed -i "s,connection = .*,connection = $BASE_SQL_CONN/keystone,g" $file
+sed -i "s,#token_format =.*,token_format = UUID,g" $file
+
+#---------------------------------------------------
+# Sync Data Base
+#---------------------------------------------------
+
+keystone-manage --config-file /etc/keystone/keystone.conf db_sync
+service openstack-keystone restart
+chkconfig openstack-keystone on
+
+#---------------------------------------------------
+# Wait the service to startup
+#---------------------------------------------------
+
+sleep 5
+ps aux | grep keystone
+sleep 5
+echo $SERVICE_ENDPOINT
+if ! timeout 5 sh -c "while ! curl -s $SERVICE_ENDPOINT/ >/dev/null; do sleep 1; done"; then
+      echo "keystone did not start"
+      echo "ERROR occur!"
+      exit 1
+fi
+
+#---------------------------------------------------
+# Init the databases and endpoints.
+#---------------------------------------------------
+
+cp -rf $TOPDIR/tools/script/keystone_data.sh /tmp/
+sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" /tmp/keystone_data.sh
+sed -i "s,%SERVICE_TOKEN%,$SERVICE_TOKEN,g" /tmp/keystone_data.sh
+sed -i "s,%ADMIN_PASSWORD%,$ADMIN_PASSWORD,g" /tmp/keystone_data.sh
+sed -i "s,%SERVICE_TENANT_NAME%,$SERVICE_TENANT_NAME,g" /tmp/keystone_data.sh
+sed -i "s,%KEYSTONE_CATALOG_BACKEND%,$KEYSTONE_CATALOG_BACKEND,g" /tmp/keystone_data.sh
+sed -i "s,%SERVICE_ENDPOINT%,$SERVICE_ENDPOINT,g" /tmp/keystone_data.sh
+sed -i "s,%AGENT_PASSWORD%,$AGENT_PASSWORD,g" /tmp/keystone_data.sh
+
+chmod +x /tmp/keystone_data.sh
+/tmp/keystone_data.sh
+
+#---------------------------------------------------
+# Test the service
+#---------------------------------------------------
+
+curl -d "{\"auth\": {\"tenantName\": \"$ADMIN_USER\", \"passwordCredentials\":{\"username\": \"$ADMIN_USER\", \"password\": \"$ADMIN_PASSWORD\"}}}" -H "Content-type: application/json" $SERVICE_ENDPOINT/tokens | python -mjson.tool
+
+TOKEN=`curl -s -d  "{\"auth\":{\"passwordCredentials\": {\"username\": \"$ADMIN_USER\", \"password\": \"$ADMIN_PASSWORD\"}, \"tenantName\": \"admin\"}}" -H "Content-type: application/json" $SERVICE_ENDPOINT/tokens | python -c "import sys; import json; tok = json.loads(sys.stdin.read()); print tok['access']['token']['id'];"`
+echo $TOKEN
+
+#---------------------------------------------------
+# Generate Keystone RC
+#---------------------------------------------------
+
+cat <<EOF > ~/keyrc
+export OS_TENANT_NAME=$ADMIN_USER
+export OS_USERNAME=$ADMIN_USER
+export OS_PASSWORD=$ADMIN_PASSWORD
+export OS_AUTH_URL="http://$KEYSTONE_HOST:5000/v2.0/"
+EOF
+
+#---------------------------------------------------
+# Generate Keystone RC
+#---------------------------------------------------
+fi
+}

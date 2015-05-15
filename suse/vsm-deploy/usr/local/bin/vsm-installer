@@ -1,0 +1,150 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+set -e
+set -o xtrace
+
+cat <<"EOF" > /etc/ssh/ssh_config
+UserKnownHostsFile /dev/null
+ConnectTimeout 15
+StrictHostKeyChecking no
+EOF
+service sshd restart
+
+#---------------------------------------------
+# Setup Variable.
+#---------------------------------------------
+
+if [[ ! $# -eq 1 ]]; then
+    echo "There must be one parameters."
+    echo "Usage as: ./vsm-installer ./localrc file."
+    exit 0
+fi
+
+VSM_RC_FILE=$1
+TOPDIR=$(cd $(dirname "$0") && pwd)
+TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
+[[ -e $VSM_RC_FILE ]] && source $VSM_RC_FILE
+source $TOPDIR/tools/lib/services
+source $TOPDIR/tools/lib/mysql
+source $TOPDIR/tools/lib/ntp
+
+for n in `ls $TOPDIR/tools/lib/ | grep -v services | grep -v manifest| grep -v check`; do
+    source $TOPDIR/tools/lib/$n
+done
+cluster_manifest
+
+#---------------------------------------------
+# Create USER
+#---------------------------------------------
+
+#create_stack_user
+
+#---------------------------------------------
+# Repo
+#---------------------------------------------
+
+HOST_IP=`nic_ip ${NET_DEV}`
+REPO_HOST=${REPO_HOST:-$HOST_IP}
+STACK_USER=${STACK_USER:-stack}
+
+#setup_repo
+
+#---------------------------------------------
+# MySQL.
+#---------------------------------------------
+
+MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-mysqlpassword}
+MYSQL_HOST=${MYSQL_HOST:-$HOST_IP}
+setup_mysql
+
+#---------------------------------------------
+# RabbitMQ
+#---------------------------------------------
+
+RABBITMQ_HOST=${RABBITMQ_HOST:-$HOST_IP}
+RABBITMQ_USER=${RABBITMQ_USER:-guest}
+RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbit_password}
+RABBITMQ_NODENAME=${RABBITMQ_NODENAME:-deploy_rabbitmq}
+RABBITMQ_PORT=${RABBITMQ_PORT:-5673}
+
+setup_rabbitmq
+
+#---------------------------------------------
+# Keystone
+#---------------------------------------------
+
+MYSQL_KEYSTONE_USER=${MYSQL_KEYSTONE_USER:-keystone}
+MYSQL_KEYSTONE_PASSWORD=${MYSQL_KEYSTONE_PASSWORD:-keystone_password}
+KEYSTONE_HOST=${KEYSTONE_HOST:-$HOST_IP}
+ADMIN_PASSWORD=${ADMIN_PASSWORD:-nova}
+ADMIN_TOKEN=${ADMIN_TOKEN:-admin_token}
+SERVICE_TOKEN=$ADMIN_TOKEN
+ADMIN_USER=${ADMIN_USER:-admin}
+SERVICE_TENANT_NAME=${SERVICE_TENANT_NAME:-service}
+
+setup_keystone
+
+#---------------------------------------------
+# VSM
+#---------------------------------------------
+
+VSM_HOST=${VSM_HOST:-$HOST_IP}
+MYSQL_VSM_USER=${MYSQL_VSM_USER:-vsm}
+MYSQL_VSM_PASSWORD=${MYSQL_VSM_PASSWORD:-vsm_password}
+KEYSTONE_VSM_SERVICE_PASSWORD=${KEYSTONE_VSM_SERVICE_PASSWORD:-keystone_vsm_password}
+
+setup_vsm
+echo "After setup vsm."
+
+#---------------------------------------------
+# VSM Dashboard
+#---------------------------------------------
+
+DASHBOARD_HOST=${DASHBOARD_HOST:-$HOST_IP}
+MYSQL_DASHBOARD_USER=${MYSQL_DASHBOARD_USER:-dashboard}
+MYSQL_DASHBOARD_PASSWORD=${MYSQL_DASHBOARD_PASSWORD:-dashboard_password}
+
+echo "Begin to set up vsm dashboard."
+setup_vsmdash
+
+VSM_HTTPS_PASSWORD=${VSM_HTTPS_PASSWORD:-https_password}
+source $TOPDIR/keys/https
+setup_https
+
+
+if [ -f "/etc/rc.local" ]
+then
+  sed -i "/exit/d" /etc/rc.local
+  sed -i "/service vsm-api restart/d" /etc/rc.local
+  sed -i "/service vsm-scheduler restart/d" /etc/rc.local
+  sed -i "/service vsm-conductor restart/d" /etc/rc.local
+  sed -i "/service httpd restart/d" /etc/rc.local
+  sed -i "/service rabbitmq-server restart/d" /etc/rc.local
+  sed -i "/service mysql restart/d" /etc/rc.local
+  
+  echo "service mysql restart" >> /etc/rc.local
+  echo "service rabbitmq-server restart" >> /etc/rc.local
+  echo "service vsm-api restart" >> /etc/rc.local
+  echo "service vsm-scheduler restart" >> /etc/rc.local
+  echo "service vsm-conductor restart" >> /etc/rc.local
+  echo "service httpd restart" >> /etc/rc.local
+  echo "exit 0" >> /etc/rc.local
+fi
+
+set +o xtrace

@@ -1,0 +1,137 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+function setup_vsmdash() {
+if [[ `is_service_enabled $DASHBOARD_HOST` -gt 0 ]]; then
+
+#---------------------------------------------------
+# Set up global ENV
+#---------------------------------------------------
+
+#---------------------------------------------
+# Install System Packages.
+#---------------------------------------------
+
+echo "" > /etc/apache2/conf.d/welcome.conf
+
+#---------------------------------------------
+# Important Variables.
+#---------------------------------------------
+
+BASE_SQL_CONN=mysql://$MYSQL_DASHBOARD_USER:$MYSQL_DASHBOARD_PASSWORD@$MYSQL_HOST
+
+unset OS_USERNAME
+unset OS_AUTH_KEY
+unset OS_AUTH_TENANT
+unset OS_STRATEGY
+unset OS_AUTH_STRATEGY
+unset OS_AUTH_URL
+unset SERVICE_TOKEN
+unset SERVICE_ENDPOINT
+unset https_proxy
+unset http_proxy
+unset ftp_proxy
+
+KEYSTONE_AUTH_HOST=$KEYSTONE_HOST
+KEYSTONE_AUTH_PORT=35357
+KEYSTONE_AUTH_PROTOCOL=http
+KEYSTONE_SERVICE_HOST=$KEYSTONE_HOST
+KEYSTONE_SERVICE_PORT=5000
+KEYSTONE_SERVICE_PROTOCOL=http
+SERVICE_ENDPOINT=http://$KEYSTONE_HOST:35357/v2.0
+HORIZON_DIR=/usr/share/openstack-dashboard
+
+#---------------------------------------------
+# Clear front installation.
+#---------------------------------------------
+
+mysql_cmd "DROP DATABASE IF EXISTS dashboard;"
+
+#---------------------------------------------------
+# Configuration
+#---------------------------------------------------
+# create user
+cnt=`mysql_cmd "select * from mysql.user;" | grep $MYSQL_DASHBOARD_USER | wc -l`
+if [[ $cnt -eq 0 ]]; then
+    mysql_cmd "create user '$MYSQL_DASHBOARD_USER'@'%' identified by '$MYSQL_DASHBOARD_PASSWORD';"
+    mysql_cmd "flush privileges;"
+fi
+
+# create database
+cnt=`mysql_cmd "show databases;" | grep dashboard | wc -l`
+if [[ $cnt -eq 0 ]]; then
+    mysql_cmd "create database dashboard CHARACTER SET utf8;"
+    mysql_cmd "grant all privileges on dashboard.* to '$MYSQL_DASHBOARD_USER'@'%' identified by '$MYSQL_DASHBOARD_PASSWORD';"
+    mysql_cmd "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD'; FLUSH PRIVILEGES;"
+    mysql_cmd "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD'  WITH GRANT OPTION; FLUSH PRIVILEGES;"
+    mysql_cmd "flush privileges;"
+fi
+
+#---------------------------------------------------
+# Change local setting configuration.
+#---------------------------------------------------
+
+file=/usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py
+
+#[[ -e $file ]] && rm -rf $file
+#cp -rf $TOPDIR/tools/etc/vsm-dashboard/local_settings.template $file
+#rm -rf /etc/vsm-dashboard/local_settings
+#ln -s $file /etc/vsm-dashboard/local_settings
+#############
+# Something is wrong here.  The local_settings.py has already been populated as
+# though vsmdash has been called a second time.  If you don't copy over the
+# local_settings.py with the template, then /etc/vsm-dashboard/local_settings
+# which is a symlink to $file above will contain a different MySQL password
+# than what $MYSQL_DASHBOARD_PASSWORD.  I don't see how that's possible at the
+# moment, but I'll leave this until later.  
+#
+# There's no need to remove and recreate the symlink.  Copying over the file is
+# enough
+############
+cp -f /usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.template $file
+
+sed -i "s,%MYSQL_VSM_DASHBOARD_DATABASE%,dashboard,g" $file
+sed -i "s,%MYSQL_VSM_DASHBOARD_USER_NAME%,$MYSQL_DASHBOARD_USER,g" $file
+sed -i "s,%MYSQL_VSM_DASHBOARD_PASSWORD%,$MYSQL_DASHBOARD_PASSWORD,g" $file
+sed -i "s,%MYSQL_HOST%,$MYSQL_HOST,g" $file
+sed -i "s,OPENSTACK_HOST =.*,OPENSTACK_HOST = \"%KEYSTONE_HOST%\",g" $file
+sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" $file
+sed -i "s,%KEYSTONE_VSM_SERVICE_PASSWORD%,$KEYSTONE_VSM_SERVICE_PASSWORD,g" $file
+
+#---------------------------------------------------
+# Sync the DB.
+#---------------------------------------------------
+
+cd /usr/share/vsm-dashboard/
+python manage.py syncdb --noinput
+cd $TOPDIR
+
+#---------------------------------------------------
+# Start httpd Server
+#---------------------------------------------------
+
+service apache2 restart
+chkconfig apache2 on
+rm -rf /tmp/pip*; rm -rf /tmp/tmp*
+
+#---------------------------------------------------
+# Start httpd Server
+#---------------------------------------------------
+
+fi
+}
