@@ -2238,7 +2238,7 @@ class CreateCrushMapDriver(object):
                         item["weight"] = host["weight"]
                         item["host_name"] = host["name"]
                         items.append(item)
-                        weight = weight + host["weight"]
+                        weight = weight + float(host["weight"])
                 dic["weight"] = (weight != 0 and weight or FLAGS.default_weight)
                 dic["item"] = items
                 num = num - 1
