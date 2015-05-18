@@ -120,6 +120,7 @@ cp -rf $TOPDIR/tools/etc/sudoers.d/vsm  /etc/sudoers.d/
 #---------------------------------------------
 
 service vsm-agent restart
+update-rc.d vsm-agent defaults
 sed -i '/exit/d' /etc/rc.local
 echo "service vsm-agent restart" >> /etc/rc.local
 echo "service vsm-physical restart" >> /etc/rc.local
@@ -128,6 +129,7 @@ chmod +x /etc/vsm/prepools/main
 echo "..."
 sleep 5
 service vsm-physical restart
+update-rc.d vsm-physical defaults
 echo "The End!"
 
 set +o xtrace
