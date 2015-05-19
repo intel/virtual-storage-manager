@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Check names of the first partition of each drive
+first_partitions=`awk '/1$/ {print $4}' /proc/partitions`
+
+declare -a table
+declare -a hdds
+declare -a journals
+
+for p in $first_partitions
+do
+  device=${p%%1}
+  name=`sgdisk -i 1 /dev/$device | awk -F\' '/^Partition name/ {print $2}'`
+
+  # Journal and data are on the same drive
+  if [ "$name" == "hdd_journal" ]
+  then
+    table[${#table[@]}]="/dev/${device}2 /dev/${device}1"
+  fi
+
+  # Collect dedicated data partitions
+  if [ "$name" == "hdd" ]
+  then
+    hdds[${#hdds[@]}]="$p"
+  fi
+
+  # Collect journal devices
+  if [ "$name" == "ssd_journal" ]
+  then
+    partitions=`awk '/'$device'.+$/ {print $4}' /proc/partitions`
+    for part in $partitions
+    do
+      journals[${#journals[@]}]="/dev/$part"
+    done
+  fi
+done
+
+# Pair each drive with a journal device
+if [ ${#hdds[@]} -ne 0 ]
+then
+  index=0
+  while [ $index -lt ${#hdds[@]} ]
+  do
+    table[${#table[@]}]="/dev/${hdds[$index]} /dev/${journals[$index]}"
+    index=$(($index + 1))
+  done
+fi
+
+# Convert array to multiline string
+index=0
+lines=""
+while [ $index -lt ${#table[@]} ]
+do
+  if [ -z "lines" ]
+  then
+    lines="${table[$index]}\\n"
+  else
+    lines="$lines${table[$index]}\\n"
+  fi
+  index=$(($index + 1))
+done
+
+# Update manifest
+sed -i -e '/.7200_rpm_sata/,/^\[/{//!d}' -e "/.7200_rpm_sata/a $lines" /etc/manifest/server.manifest
+

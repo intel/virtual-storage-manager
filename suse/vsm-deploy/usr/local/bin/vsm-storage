@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Configure the storage nodes
+
+# Pull the ip address only
+controller_ip=`sed -n -e '/^.vsm_controller_ip/,+1{/^.vsm_controller_ip/b; p}' /etc/manifest/server.manifest`
+
+token=`ssh -oStrictHostKeyChecking=no $controller_ip agent-token`
+
+# Replace the text under auth_key with $token
+sed -i '/^.auth_key/,+1s!^[^-]*-.*$!'$token'!' /etc/manifest/server.manifest
+
+partition-drives
+
+populate-servermanifest
+
+server_manifest 
+if [ $? -eq 0 ]
+then
+  vsm-node
+fi

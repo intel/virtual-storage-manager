@@ -41,6 +41,7 @@ function _generate_keys() {
       sed -i '/^Include .etc.apache2.default-server.conf/a Include /etc/apache2/default-server-ssl.conf' /etc/apache2/httpd.conf
 
     systemctl restart apache2
+    systemctl enable apache2
 
     # ./exp_crt
 #    mkdir -p /etc/httpd/conf.d/keys/

@@ -111,6 +111,14 @@ KEYSTONE_VSM_SERVICE_PASSWORD=${KEYSTONE_VSM_SERVICE_PASSWORD:-keystone_vsm_pass
 
 setup_vsm
 echo "After setup vsm."
+systemctl enable vsm-api
+systemctl start vsm-api
+
+systemctl enable vsm-scheduler
+systemctl start vsm-scheduler
+
+systemctl enable vsm-conductor
+systemctl start vsm-conductor
 
 #---------------------------------------------
 # VSM Dashboard

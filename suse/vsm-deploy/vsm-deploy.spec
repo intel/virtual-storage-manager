@@ -48,6 +48,9 @@ install -d -m 755 %{buildroot}%{_usr}/local/bin/
 install -d -m 755 %{buildroot}%{_usr}/local/bin/tools
 
 install -p -D -m 755 usr/local/bin/vsm-controller %{buildroot}%{_usr}/local/bin/vsm-controller
+install -p -D -m 755 usr/local/bin/vsm-storage %{buildroot}%{_usr}/local/bin/vsm-storage
+install -p -D -m 755 usr/local/bin/populate-servermanifest %{buildroot}%{_usr}/local/bin/populate-servermanifest
+install -p -D -m 755 usr/local/bin/partition-drives %{buildroot}%{_usr}/local/bin/partition-drives
 install -p -D -m 755 restart-all %{buildroot}%{_usr}/local/bin/restart-all
 install -p -D -m 755 sync-code %{buildroot}%{_usr}/local/bin/sync-code
 install -p -D -m 755 replace-str %{buildroot}%{_usr}/local/bin/replace-str
@@ -56,6 +59,7 @@ install -p -D -m 755 vsm-node %{buildroot}%{_usr}/local/bin/vsm-node
 install -p -D -m 755 clean-data %{buildroot}%{_usr}/local/bin/clean-data
 install -p -D -m 755 __clean-data %{buildroot}%{_usr}/local/bin/__clean-data
 install -p -D -m 755 usr/local/bin/vsm-installer %{buildroot}%{_usr}/local/bin/vsm-installer
+install -p -D -m 755 usr/local/bin/vsm-node %{buildroot}%{_usr}/local/bin/vsm-node
 install -p -D -m 755 downloadrepo  %{buildroot}%{_usr}/local/bin/downloadrepo
 install -p -D -m 755 preinstall %{buildroot}%{_usr}/local/bin/preinstall
 install -p -D -m 755 rpms_list %{buildroot}%{_usr}/local/bin/rpms_list
@@ -92,6 +96,9 @@ exit 0
 %{_sysconfdir}/systemd/system/epmd.socket
 %dir %{_usr}
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-controller
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-storage
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/partition-drives
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/populate-servermanifest
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/restart-all
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/replace-str
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/sync-code
@@ -99,6 +106,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/clean-data
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/__clean-data
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-installer
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-node
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/downloadrepo
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/preinstall
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/rpms_list
