@@ -1,11 +1,14 @@
 #!/bin/sh
-#
-# vsm-api  VSM Storage API Service
-#
-# chkconfig:   - 98 02
-# description: VSM Storage API Service works provide apis to  \
-#		* Ceph operations. \
-#		* Cluster operations.
+
+### BEGIN INIT INFO
+# Provides:             vsm-api
+# Required-Start:       $remote_fs $syslog
+# Required-Stop:        $remote_fs $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    VSM Storage API Service works provide apis to \
+#                   * Ceph operations \
+#		            * Cluster operations
 ### END INIT INFO
 
 . /lib/lsb/init-functions

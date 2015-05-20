@@ -166,7 +166,7 @@ echo $VSM_RUNNING_SERVICE
 for n in ${VSM_RUNNING_SERVICE//,/ }; do
     if [[ -e /etc/init.d/$n ]]; then
         service $n restart
-#        systemctl enable $n.service
+        update-rc.d $n defaults
     else
         echo "Can not find service $n"
     fi

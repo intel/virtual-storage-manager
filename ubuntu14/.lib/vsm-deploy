@@ -1,0 +1,43 @@
+function _install_vsmdeploy_dep_package() {
+    apt-get install -y debhelper
+}
+
+function _setup_vsmdeploy_deb() {
+    rm -rf $TEMP/*
+    local old_dir=`pwd`
+    local version=$VERSION
+    local release=$RELEASE
+ 
+    cp -rf $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR $TEMP/
+
+    rm -rf $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR/tools/etc/vsm
+    cp -rf $TOPDIR/$SOURCE_DIR/$VSM_DIR/etc/vsm $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR/tools/etc/
+    rm -rf $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR/tools/etc/vsm-dashboard/*
+
+    local FROM_DIR=$TOPDIR/source/vsm-dashboard/vsm_dashboard/
+    local TO_DIR=$TOPDIR/source/vsm-deploy/tools/etc/vsm-dashboard/
+    cp -rf $FROM_DIR/local/local_settings.template $TO_DIR/
+    cp -rf $FROM_DIR/settings.py $TO_DIR/
+    cp -rf $FROM_DIR/../tools/vsm-dashboard.conf $TO_DIR/
+
+    cd $TEMP/
+
+    if [[ $VSM_DEPLOY_DIR != vsm-deploy-$version ]]; then
+        mv $VSM_DEPLOY_DIR vsm-deploy-$version
+    fi
+
+    sed -i "s,2015.03-1.2,$version-$release,g" vsm-deploy-$version/debian/rules
+
+    cd vsm-deploy-$version
+    _install_vsmdeploy_dep_package
+    fakeroot debian/rules binary-arch
+    cd ..
+    cp *.deb $TOPDIR/vsmrepo
+
+    cd $old_dir
+}
+
+function build_vsmdeploy_deb() {
+    _setup_vsmdeploy_deb
+}
+

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-update-rc.d -f vsm-agent remove
-update-rc.d -f vsm-api remove
-update-rc.d -f vsm-conductor remove
-update-rc.d -f vsm-physical remove
-update-rc.d -f vsm-scheduler remove
+#update-rc.d -f vsm-agent remove
+#update-rc.d -f vsm-api remove
+#update-rc.d -f vsm-conductor remove
+#update-rc.d -f vsm-physical remove
+#update-rc.d -f vsm-scheduler remove
 
 getent group vsm >/dev/null || groupadd -r vsm --gid 165
 if ! getent passwd vsm >/dev/null; then

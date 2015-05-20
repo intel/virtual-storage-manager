@@ -1,9 +1,12 @@
 #!/bin/sh
-#
-# vsm-conductor  VSM Storage DB Service
-#
-# chkconfig:   - 98 02
-# description: VSM Storage DB Service works on MySQL.
+
+### BEGIN INIT INFO
+# Provides:             vsm-conductor
+# Required-Start:       $remote_fs $syslog
+# Required-Stop:        $remote_fs $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    VSM Storage DB Service works on MySQL
 ### END INIT INFO
 
 . /lib/lsb/init-functions

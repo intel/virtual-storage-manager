@@ -147,15 +147,17 @@ echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
 #-------------------------------------------------------------------------------
 
 if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
-    wget https://github.com/01org/vsm-dependencies/archive/"$dependence_version".zip
-    unzip $dependence_version
-    mv vsm-dependencies-$dependence_version/repo vsm-dep-repo
+    mkdir -p vsm-dep-repo
+    cd vsm-dep-repo
+    for i in `cat rpms.lst`; do
+        wget wget https://github.com/01org/vsm-dependencies/tree/2.0/centos7/$i
+    done
+    cd $TOPDIR
     is_createrepo=`rpm -qa|grep createrepo|wc -l`
-    if [[ $is_createrepo -gt 0 ]]; then
-        createrepo vsm-dep-repo
+    if [[ $is_createrepo -eq 0 ]]; then
+        yum install -y createrepo
     fi
-    rm -rf vsm-dependencies-$dependence_version
-    rm -rf $dependence_version
+    createrepo vsm-dep-repo
 fi
 
 if [ $is_controller -eq 0 ]; then

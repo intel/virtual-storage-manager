@@ -1,0 +1,34 @@
+function _install_vsmclient_dep_package() {
+    apt-get install -y debhelper
+}
+
+function _setup_vsmclient_deb() {
+    rm -rf $TEMP/*
+    local old_dir=`pwd`
+    local version=$VERSION
+    local release=$RELEASE
+ 
+    cp -rf $TOPDIR/$SOURCE_DIR/$VSMCLIENT_DIR $TEMP/
+    cd $TEMP/
+
+    if [[ $VSMCLIENT_DIR != python-vsmclient-$version ]]; then
+        mv $VSMCLIENT_DIR python-vsmclient-$version
+    fi
+
+    [[ -e python-vsmclient-$version/build ]] && rm -rf python-vsmclient-$version/build
+
+    sed -i "s,2015.03-1.2,$version-$release,g" python-vsmclient-$version/debian/rules
+
+    cd python-vsmclient-$version
+    _install_vsmclient_dep_package
+    fakeroot debian/rules binary-arch
+    cd ..
+    cp *.deb $TOPDIR/vsmrepo
+
+    cd $old_dir
+}
+
+function build_vsmclient_deb() {
+    _setup_vsmclient_deb
+}
+

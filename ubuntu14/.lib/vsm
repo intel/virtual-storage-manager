@@ -1,0 +1,36 @@
+function _install_vsm_dep_package() {
+    apt-get install -y debhelper
+    apt-get install -y python-setuptools python-webob python-sqlalchemy python-routes python-pastedeploy
+}
+
+function _setup_vsm_deb() {
+    rm -rf $TEMP/*
+    local old_dir=`pwd`
+    local version=$VERSION
+    local release=$RELEASE
+
+    cp -rf $TOPDIR/$SOURCE_DIR/$VSM_DIR $TEMP/
+    cd $TEMP/
+
+    if [[ $VSM_DIR != vsm-$version ]]; then
+        mv $VSM_DIR vsm-$version
+    fi
+
+    [[ -e vsm-$version/build ]] && rm -rf vsm-$version/build
+
+    sed -i "s,2015.03-1.2,$version-$release,g" vsm-$version/debian/rules
+    sed -i "s,2015.03-1.2,$version-$release,g" vsm-$version/debian/postinst
+
+    cd vsm-$version
+    _install_vsm_dep_package
+    fakeroot debian/rules binary-arch
+    cd ..
+    cp *.deb $TOPDIR/vsmrepo
+
+    cd $old_dir
+}
+
+function build_vsm_deb() {
+    _setup_vsm_deb
+}
+
