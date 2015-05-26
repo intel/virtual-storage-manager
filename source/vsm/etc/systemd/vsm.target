@@ -1,0 +1,4 @@
+[Unit]
+Description=vsm target allowing to start/stop all vsm instances at once
+[Install]
+WantedBy=multi-user.target

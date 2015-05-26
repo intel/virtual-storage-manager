@@ -1,0 +1,15 @@
+[Unit]
+Description=VSM Storage DB Service works on MySQL
+After=network-online.target
+Wants=network-online.target
+
+After=network-online.target local-fs.target
+Wants=network-online.target local-fs.target
+PartOf=vsm.target
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/vsm
+ExecStart=/usr/bin/vsm-physical --config-file /etc/vsm/vsm.conf --logfile /var/log/vsm/vsm-physical.log
+
+[Install]
+WantedBy=vsm.target

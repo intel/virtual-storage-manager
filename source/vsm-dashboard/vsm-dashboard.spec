@@ -8,21 +8,40 @@ License:        Apache 2.0
 Group:          Development/Languages/Python
 Source:		    %{name}-%{version}.tar.gz
 BuildRoot:	    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Summary:        web based management interface for VSM.
+Summary:        Web based management interface for VSM
 
-BuildArch:      noarch
-BuildRequires:  python-devel
-BuildRequires:  python-setuptools
+ExclusiveArch:  x86_64 i586
+%if 0%{?suse_version}
+BuildRequires:    python-MySQL-python
+BuildRequires:    python-django_compressor
+BuildRequires:    python-Django
+BuildRequires:    python-django_openstack_auth
+BuildRequires:    python-pytz
+%else
 BuildRequires:  MySQL-python
 BuildRequires:  python-django-compressor
 BuildRequires:  Django14
 BuildRequires:  python-django-openstack-auth
+BuildRequires:  pytz
+%endif
+
+BuildRequires:  python-devel
+BuildRequires:  python-setuptools
 BuildRequires:  python-netaddr
 BuildRequires:  python-keystoneclient
-BuildRequires:  pytz
 BuildRequires:  python-lockfile
 
+%if 0%{?suse_version}
+Requires:    apache2
+Requires:    python-Django
+Requires:    python-django_openstack_auth
+Requires:    python-django_compressor
+%else
 Requires:    Django14
+Requires:    python-django-openstack-auth
+Requires:    python-django-compressor
+%endif
+
 Requires:    apr
 Requires:    apr-util
 Requires:    apr-util-ldap
@@ -37,9 +56,7 @@ Requires:    python-chardet
 Requires:    python-cliff
 Requires:    python-cmd2
 Requires:    python-django-appconf
-Requires:    python-django-compressor
 Requires:    python-django-horizon
-Requires:    python-django-openstack-auth
 Requires:    python-httplib2
 Requires:    python-iso8601
 Requires:    python-jsonschema
@@ -74,8 +91,13 @@ rm -rf %{buildroot}
 # httpd Configuration file
 #---------------------------
 
+%if 0%{?suse_version}
+install -d -m 755 %{buildroot}%{_sysconfdir}/apache2/conf.d
+install -p -D -m 755 tools/vsm-dashboard.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/vsm-dashboard.conf
+%else
 install -d -m 755 %{buildroot}%{_sysconfdir}/httpd/conf.d
 install -p -D -m 755 tools/vsm-dashboard.conf %{buildroot}%{_sysconfdir}/httpd/conf.d/vsm-dashboard.conf
+%endif
 
 
 #---------------------------
@@ -112,43 +134,86 @@ install -p -D -m 755 manage.py %{buildroot}%{_datadir}/vsm-dashboard/
 #python -m dashboard.manage syncdb
 
 mkdir -p %{_sysconfdir}/vsm-dashboard
+
+%if 0%{?suse_version}
+chown -R wwwrun:www %{_sysconfdir}/vsm-dashboard
+%else
 chown -R apache:apache %{_sysconfdir}/vsm-dashboard
+%endif
 rm -rf %{_sysconfdir}/vsm-dashboard/*
 ln -sf %{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py %{_sysconfdir}/vsm-dashboard/local_settings
 
 chmod -R a+r %{_datadir}/vsm-dashboard
+
+
+%if 0%{?suse_version}
+chown -R wwwrun:www %{_datadir}/vsm-dashboard
+chown -R wwwrun:www %{_sysconfdir}/vsm-dashboard
+%else
 chown -R apache:apache %{_datadir}/vsm-dashboard
 chown -R apache:apache %{_sysconfdir}/vsm-dashboard
+%endif
+
+
+%if 0%{?suse_version}
+chown -R wwwrun:www %{_sysconfdir}/apache2/conf.d/vsm-dashboard.conf
+%else
 chown -R apache:apache %{_sysconfdir}/httpd/conf.d/vsm-dashboard.conf
+%endif
 
 VSM_VERSION=%{version}-%{release}
 sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" %{_datadir}/vsm-dashboard/vsm_dashboard/dashboards/vsm/overview/summarys.py
 
 %files
 %defattr(-,root,root,-)
+%if 0%{?suse_version}
+%dir %{_sysconfdir}/apache2
+%dir %{_sysconfdir}/apache2/conf.d
+%config(noreplace) %attr(-, root, www) %{_sysconfdir}/apache2/conf.d/vsm-dashboard.conf
+%else
 %dir %{_sysconfdir}/httpd/conf.d
 %config(noreplace) %attr(-, root, apache) %{_sysconfdir}/httpd/conf.d/vsm-dashboard.conf
+%endif
 
 %dir %{_bindir}
+%if 0%{?suse_version}
+%config(noreplace) %attr(-, root, www) %{_bindir}/lessc
+%else
 %config(noreplace) %attr(-, root, apache) %{_bindir}/lessc
+%endif
 
+
+%if 0%{?suse_version}
+%dir %attr(0755, wwwrun, www) %{_libdir}/less
+%else
 %dir %attr(0755, apache, apache) %{_libdir}/less
+%endif
 %{_libdir}/less/*
 
+%if 0%{?suse_version}
+%dir %attr(0755, wwwrun, www) %{_datadir}/vsm-dashboard
+%else
 %dir %attr(0755, apache, apache) %{_datadir}/vsm-dashboard
+%endif
 %{_datadir}/vsm-dashboard/*
+
+
+%if 0%{?suse_version}
+%config(noreplace) %attr(-, wwwrun, www) %{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py
+%else
 %config(noreplace) %attr(-, apache, apache) %{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py
-#%dir %attr(0755, apache, apache) %{_datadir}/vsm-dashboard/vsm_dashboard
-#%{_datadir}/vsm-dashboard/vsm_dashboard/*
+%endif
+##%dir %attr(0755, apache, apache) %{_datadir}/vsm-dashboard/vsm_dashboard
+##%{_datadir}/vsm-dashboard/vsm_dashboard/*
 
-#%dir %attr(0755, apache, apache) %{_datadir}/vsm-dashboard/static
-#%{_datadir}/vsm-dashboard/static/*
-#%config(noreplace) %attr(-, root, apache) %{_datadir}/vsm-dashboard/manage.py
+##%dir %attr(0755, apache, apache) %{_datadir}/vsm-dashboard/static
+##%{_datadir}/vsm-dashboard/static/*
+##%config(noreplace) %attr(-, root, apache) %{_datadir}/vsm-dashboard/manage.py
 
-#%dir %attr(0755, apache, apache) %{_sysconfdir}/vsm-dashboard/
-#%config(noreplace) %attr(-, root, apache) %{_sysconfdir}/vsm-dashboard/local_settings
+##%dir %attr(0755, apache, apache) %{_sysconfdir}/vsm-dashboard/
+##%config(noreplace) %attr(-, root, apache) %{_sysconfdir}/vsm-dashboard/local_settings
 
-#%{_sysconfdir}/vsm-dashboard/*
+##%{_sysconfdir}/vsm-dashboard/*
 
 %changelog
 * Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
