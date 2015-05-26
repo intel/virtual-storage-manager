@@ -30,6 +30,10 @@ from .summarys import MdsSummary
 from .summarys import PGSummaryDashboard
 from .summarys import ClusterHealthSummary
 
+import json
+from django.http import HttpResponse
+from vsm_dashboard.api import vsm as vsmapi
+
 class ModalSummaryMixin(object):
 
     def get_context_data(self, **kwargs):
@@ -48,3 +52,9 @@ class ModalSummaryMixin(object):
 class IndexView(ModalSummaryMixin, TemplateView):
     template_name = 'vsm/overview/index.html'
 
+
+def ClusterCount(request):
+    clusterlist = vsmapi.get_clusters_by_status(None,1)
+    clusterlist_dict = {"count":len(clusterlist)}
+    clusterlistdata = json.dumps(clusterlist_dict)
+    return HttpResponse(clusterlistdata)
