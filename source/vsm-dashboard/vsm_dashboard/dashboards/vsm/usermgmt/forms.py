@@ -15,7 +15,12 @@
 # under the License.
 
 from django.core.urlresolvers import reverse
-from django.utils.translation import force_text, ugettext_lazy as _
+try:
+    from django.utils.translation import force_unicode
+except:
+    from django.utils.translation import force_text as force_unicode
+
+from django.utils.translation import  ugettext_lazy as _
 
 from horizon import exceptions
 from horizon import forms
@@ -178,7 +183,7 @@ class UpdateUserForm(BaseUserForm):
         if succeeded:
             messages.success(request, _('User has been updated successfully.'))
         if failed:
-            failed = map(force_text, failed)
+            failed = map(force_unicode, failed)
             messages.error(request,
                            _('Unable to update %(attributes)s for the user.')
                              % {"attributes": ", ".join(failed)})
