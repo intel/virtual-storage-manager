@@ -111,12 +111,13 @@ class ManifestChecker(object):
                           secondary_public_network,
                           cluster_network]
 
-        if self._is_in_lan(ip, primary_public_network):
-            return True
-        if self._is_in_lan(ip, secondary_public_network):
-            return True
-        if self._is_in_lan(ip, cluster_network):
-            return True
+        lan_list = primary_public_network.split(',') + \
+                          secondary_public_network.split(',') + \
+                          cluster_network.split(',')
+        for _lan in lan_list:
+            if self._is_in_lan(ip, _lan):
+                return True
+        return False
 
     def _is_network_ok(self):
         primary_public_network = \
@@ -128,7 +129,9 @@ class ManifestChecker(object):
         self._lan_list = [primary_public_network,
                           secondary_public_network,
                           cluster_network]
-
+        lan_list = primary_public_network.split(',') + \
+                          secondary_public_network.split(',') + \
+                          cluster_network.split(',')
         if len(cluster_network) == 0:
             error('Error: cluster_network not found')
 
@@ -149,9 +152,8 @@ class ManifestChecker(object):
             for info in info_list:
                 print info
 
-        self.__is_address_ok(primary_public_network)
-        self.__is_address_ok(secondary_public_network)
-        self.__is_address_ok(cluster_network)
+        for _lan in lan_list:
+            self.__is_address_ok(_lan)
 
         out = utils.execute('hostname', '-I')
         ip_list = out[0].strip().split()
@@ -215,6 +217,9 @@ def check_sections(file_path):
 
 if __name__ == '__main__':
     fpath = '/etc/manifest/cluster.manifest'
+    if len(sys.argv) > 1 :
+        fpath = sys.argv[1]
+
     check_storage_group(fpath)
     check_sections(fpath)
 
