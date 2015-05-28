@@ -149,8 +149,8 @@ echo "+++++++++++++++finish checking packages+++++++++++++++"
 if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
     mkdir -p vsm-dep-repo
     cd vsm-dep-repo
-    for i in `cat debs.lst`; do
-        wget https://github.com/01org/vsm-dependencies/tree/2.0/ubuntu14/$i
+    for i in `cat ../debs.lst`; do
+        wget https://raw.githubusercontent.com/01org/vsm-dependencies/$DEPENDENCE_VERSION/ubuntu14/$i
     done
     cd $TOPDIR
 fi
@@ -228,6 +228,7 @@ function set_repo() {
     scp -r vsm-dep-repo $USER@$1:/opt
     scp -r vsmrepo $USER@$1:/opt
     ssh $USER@$1 "rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list"
+    scp apt.conf $USER@$1:/etc/apt
     scp vsm.list $USER@$1:/etc/apt/sources.list.d
     scp vsm-dep.list $USER@$1:/etc/apt/sources.list.d
     ssh $USER@$1 "apt-get update"
