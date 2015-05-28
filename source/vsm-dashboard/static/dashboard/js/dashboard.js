@@ -387,7 +387,7 @@ function GenerateGaugeOption(value) {
 
     return option;
 }
-
+/*
 function GetAreaLineOption(){
     option = {
         xAxis : [
@@ -475,6 +475,7 @@ function GetPieOption(AC,NAC){
 	return option;
 
 }
+*/
 
 //clearInterval(timeTicket);
 //    timeTicket = setInterval(function () {
