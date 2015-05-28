@@ -37,7 +37,8 @@ horizon.tabs.load_tab = function (evt) {
 };
 
 horizon.addInitFunction(function () {
-  var data = horizon.cookies.get("tabs") || {};
+  //var data = horizon.cookies.get("tabs") || {};
+  var data = {};
 
   $(".tab-content").find(".js-tab-pane").addClass("tab-pane");
   horizon.modals.addModalInitFunction(function (el) {

@@ -361,8 +361,10 @@ horizon.datatables.update_footer_count = function (el, modifier) {
     $footer = $el.find('tfoot span.table_count');
   }
   row_count = $el.find('tbody tr:visible').length + modifier - $el.find('.empty').length;
-  footer_text_template = ngettext("Displaying %s item", "Displaying %s items", row_count);
-  footer_text = interpolate(footer_text_template, [row_count]);
+  //footer_text_template = ngettext("Displaying %s item", "Displaying %s items", row_count);
+  //footer_text_template = "Displaying "+ row_count  +" item"
+  //footer_text = interpolate(footer_text_template, [row_count]);
+  footer_text = "Displaying "+ row_count  +" item";
   $footer.text(footer_text);
   return row_count;
 };

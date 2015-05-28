@@ -293,7 +293,7 @@ horizon.addInitFunction(function() {
   });
 
   horizon.modals.addModalInitFunction(horizon.datatables.validate_button);
-  horizon.modals.addModalInitFunction(horizon.utils.loadAngular);
+  //horizon.modals.addModalInitFunction(horizon.utils.loadAngular);
 
   // Load modals for ajax-modal links.
   $(document).on('click', '.ajax-modal', function (evt) {
