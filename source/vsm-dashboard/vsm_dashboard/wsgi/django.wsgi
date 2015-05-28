@@ -11,5 +11,6 @@ sys.stdout = sys.stderr
 
 DEBUG = True
 
-application = django.core.handlers.wsgi.WSGIHandler()
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
 
