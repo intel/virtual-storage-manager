@@ -1,99 +1,270 @@
-
-<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
-
- Licensed under the Apache License, Version 2.0 (the"License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing,
- software distributed under the License is distributed on an
- "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- KIND, either express or implied. See the License for the
- specific language governing permissions and limitations
- under the License.
- --> 
-
 {% extends 'base.html' %}
 {% load i18n %}
 {% block title %}{% trans "Cluster Status" %}{% endblock %}
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=_("Dashboard") %}
-        <style>
-            #health_status {
-            }
-            #health_ok {
-                color: #00ff00;
-                font-weight: bold;
-            }
-            #health_warning {
-                color: #0000FF;
-                font-weight: bold;
-            }
-            #health_error {
-                color: #FF0000;
-                font-weight: bold;
-            }
-            .summary_group {
-                width: 820px;
-            }
-            .summary_group .summary {
-                float:left;
-                width: 270px;
-            }
-            .summary {
-                margin-bottom: 30px;
-                height: 182px;
-            }
-            .warn {
-                color: red;
-            }
-            .summary_title{
-                text-decoration: underline;
-            }
-            .summary a{
-                margin-top: 2px;
-                width: 200px;
-            }
-            #summary_cluster_summary {
-                height: 50px;
-            }
-            #summary_waring_summary {
-                height: 50px;
-            }
-        </style>
+   <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
+   <link href="{{ STATIC_URL }}dashboard/css/dashboard.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-    <div id="health_status">
-        {{ cluster_summary.render }}
-    </div>
-    <div class="summary_group">
-        {{ sg_summary.render }}
-        {{ monitor_summary.render }}
-        {{ vsm_summary.render }}
-    </div>
+     <!--The frame work of dashboard-->
+    <div id="framework">
+        <!--the main area-->
+        <div id="divMain">
+        <!--VSM Status -->
+             
+            <div id="divVSMVersion" class="vsm-container-full" >  
+               <h4 id="lblVSMVersionInfo" class="full-container-label" >VSM Version</h4>
+               <div id="divVSMVersionContent"  class="vsm-container-full-content">
+            <span id="lblVersion" class="vsm-label">Version:--</span>
+                        <span id="lblVersionUpdate" class="vsm-label">Update:--</span>
+                </div>
+            </div>
 
-    <div class="summary_group" >
-        {{ mds_summary.render }}
-        {{ osd_summary.render }}
-        {{ pg_summary.render }}
+
+            <!--VSM Cluster summary-->
+            <div id="divCluster" class="vsm-container-full">
+                <h4 class="full-container-label">VSM Status</h4>
+                <div id="divVSMVersionContent"  class="vsm-container-full-content">
+                    <div id="divClusterNote" >
+                        <div >
+                             <span id="lblClusterName" class="vsm-label">Cluster Name:--</span>        
+                             <button id="btnClusterTip" type="button" class="btn btn-success">health</button>
+                        </div>
+                        <div id="divClusterContent" class="alert alert-success"  role="alert">
+                            
+                        </div>
+                    </div>
+                    <div  id="divClusterGauge">
+
+                    </div>
+                </div>
+            </div>
+
+                 <!--VSM Monitor OSD MDS-->
+            <div id="divMonitorOSDMDS">
+                <!--OSD Area-->
+                <div id="divOSD" class="vsm-container-3 vsm-container-offset">
+                    <div>
+                        <h4>OSD</h4>
+                        <a id="linkOSD" href="/dashboard/vsm/osd-status/" class="info-link"><img id="imgOSD" src="{{ STATIC_URL }}dashboard/img/info_health.png" /></a>
+                    </div>
+                    <div>
+                        <span id="lblOSDEpoch" class="vsm-label">Epoch:--</span>
+                        <span id="lblOSDUpdate" class="vsm-label">Update:--</span>
+                    </div>
+                    <div id="divOSDContent">
+                        <table id="tOSD">
+                            <tbody>
+                                <tr >
+                                    <td></td>
+                                    <td>Up</td>
+                                    <td>Down</td>
+                                </tr>
+                                <tr >
+                                    <td style="width:30px;">In</td>
+                                    <td>
+                                        <div id="divOSD_INUP" class="vsm-rect vsm-rect-2 vsm-rect-green">0</div>
+                                    </td>
+                                    <td>
+                                        <div id="divOSD_INDOWN" class="vsm-rect vsm-rect-2 vsm-rect-red">0</div>
+                                    </td>
+                                </tr>
+                                <tr >
+                                    <td style="width:30px;">Out</td>
+                                    <td>
+                                        <div id="divOSD_OUTUP" class="vsm-rect vsm-rect-2 vsm-rect-orange">0</div>
+                                    </td>
+                                    <td>
+                                        <div id="divOSD_OUTDOWN" class="vsm-rect vsm-rect-2 vsm-rect-gray">0</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!--Monitor Area-->
+                <div id="divMonitor" class="vsm-container-3 vsm-container-offset">
+                    <div>
+                        <h4>Monitor</h4>
+                        <a href="/dashboard/vsm/monitor-status/" class="info-link"><img src="{{ STATIC_URL }}dashboard/img/info_health.png" /></a>
+                    </div>
+                    <div id="divMonitorContent">
+                        <div>
+                            <span id="lblMonitorEpoch" class="vsm-label">Epoch:--</span>
+                            <span id="lblMonitorUpdate" class="vsm-label">Update:--</span>
+                        </div>
+                        <div id="divMonitorRect">
+
+                        </div>
+                    </div>
+                </div>
+
+                 <!--MDS Area-->
+                <div id="divMDS" class="vsm-container-3">
+                    <div>
+                        <h4>MDS</h4>
+                         <a href="/dashboard/vsm/mds-status/" class="info-link"><img src="{{ STATIC_URL }}dashboard/img/info_health.png" /></a>
+                    </div>
+                    <div id="divMDSContent">
+                        <div>
+                            <span id="lblMDSEpoch" class="vsm-label">Epoch:--</span>
+                            <span id="lblMDSUpdate" class="vsm-label">Update:--</span>
+                        </div>
+                        <div id="divMDSRect">
+                            <div id="divMDSList" class="mds-list-row">
+                                <div class = "mds-block mds-block-green" >
+                                    <div class = "mds-block-number">
+                                        12
+                                    </div>
+                                    <div class = "mds-block-status">
+                                        IN
+                                    </div>
+                                </div>
+
+                                <div class = "mds-block mds-block-red" >
+                                    <div class = "mds-block-number">
+                                        12
+                                    </div>
+                                    <div class = "mds-block-status">
+                                        IN
+                                    </div>
+                                </div>
+
+                                <div class = "mds-block mds-block-orange" >
+                                    <div class = "mds-block-number">
+                                        12
+                                    </div>
+                                    <div class = "mds-block-status">
+                                        IN
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="divMDSInfos" class="mds-list-row">
+                                <table id="tMDS">
+                                    <tbody>
+                                        <tr id="trMDSCircle">
+                                            <td>
+                                                <svg >
+                                                    <circle cx="80" cy="40" r="30" fill="green" />
+                                                    <text id="lblMDSMetaData" x="80" y="46" font-size="20" text-anchor="middle" fill="yellow">3</text>
+                                                </svg>
+                                            </td>
+                                            <td>
+                                                <svg >
+                                                    <circle cx="80" cy="40" r="30" fill="green" />
+                                                    <text id="lblMDSMetaData" x="80" y="46" font-size="20" text-anchor="middle" fill="yellow">2</text>
+                                                </svg>    
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--VSM Storage & Pool-->
+            <div id="divStoragePool" >
+                <div id="divStorage" class="vsm-container-2 vsm-container-offset">
+                    <div>
+                        <h4>Storage Group</h4>
+                         <a href="/dashboard/vsm/storage-group-status/" class="info-link"><img src="{{ STATIC_URL }}dashboard/img/info_health.png" /></a>
+                    </div>
+                    <div id="divStorageContent">
+            <div>
+                            <!--<span id="lblStorageEpoch" class="vsm-label">Epoch:--</span>-->
+                            <span id="lblStorageUpdate" class="vsm-label">Update:--</span>
+                        </div>
+                        <table id="tStorage">
+                            <tbody>
+                                <tr id="trStorageTitle">
+                                    <td>Normal</td>
+                                    <td>Near Full</td>
+                                    <td>Full</td>
+                                </tr>
+                                <tr id="trStorageCircle">
+                                    <td>
+                                        <svg >
+                                            <circle cx="80" cy="70" r="60" fill="green" />
+                                            <text id="lblStorageNormal" x="80" y="80" font-size="30" text-anchor="middle" fill="white">0</text>
+                                        </svg>
+                                    </td>
+                                    <td>
+                                        <svg >
+                                            <circle cx="80" cy="70" r="60" fill="orange" />
+                                            <text id="lblStorageNearFull" x="80" y="80" font-size="30" text-anchor="middle" fill="white">0</text>
+                                        </svg>
+                                    </td>
+                                    <td>
+                                        <svg>
+                                            <circle cx="80" cy="70" r="60" fill="red" />
+                                            <text id="lblStorageFull" x="80" y="80" font-size="30" text-anchor="middle" fill="white">0</text>
+                                        </svg>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="divPG" class="vsm-container-2">
+                    <div>
+                        <h4>PG</h4>
+                        <a href="/dashboard/vsm/pg-status/" class="info-link"><img src="{{ STATIC_URL }}dashboard/img/info_health.png" /></a>
+                    </div>
+            <div id="divPGContent">
+                         <div>
+                            <span id="lblPGUpdate" class="vsm-label">Update:--</span>
+                        </div>
+            <div id="divPGRect"> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--VSM Throughput & Latency-->
+            <div id="divIOPs" class="vsm-container-full chart-container-height">
+                <h4 class="full-container-label">IOPS</h4>
+                <div class="vsm-container-full-content">
+                     <div>
+                        <span class="vsm-label">Epoch:2.0</span>
+                        <span class="vsm-label">Update:2h 23m 23s</span>
+                     </div>
+                     <div id="divIOPsContent" class="chart-rect">
+                     </div>
+                </div>
+            </div>
+            <div id="divLatency" class="vsm-container-full chart-container-height">
+                 <h4 class="full-container-label">Latency</h4>
+                 <div class="vsm-container-full-content">
+                     <div>
+                        <span class="vsm-label">Epoch:2.0</span>
+                        <span class="vsm-label">Update:2h 23m 23s</span>
+                     </div>
+                    <div id="divLatencyContent" class="chart-rect">
+                    </div>
+                 </div>
+            </div>
+            <div id="divBandwidth" class="vsm-container-full chart-container-height">
+                 <h4 class="full-container-label">Bandwidth</h4>
+                 <div class="vsm-container-full-content"> 
+                     <div>
+                        <span class="vsm-label">Epoch:2.0</span>
+                        <span class="vsm-label">Update:2h 23m 23s</span>
+                     </div>
+                    <div id="divBandwidthContent" class="chart-rect">
+                    </div>
+                 </div>
+            </div>
+        </div>
     </div>
-<div class="summary_group" >
-    {{ cluster_health_summary.render }}
-    {{ warning_summary.render }}
-</div>
 {% endblock %}
-
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/clustermgmt.js' type='text/javascript' charset='utf-8'></script>
-
-<script type="text/javascript">
-    $(".summary a").css("display", "block");
-</script>
+    <script src="{{ STATIC_URL }}lib/echarts.js"></script>
+    <script src="{{ STATIC_URL }}dashboard/js/dashboard.js"></script> 
 {% endblock %}
-
