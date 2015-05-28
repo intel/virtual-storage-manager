@@ -150,7 +150,7 @@ if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
     mkdir -p vsm-dep-repo
     cd vsm-dep-repo
     for i in `cat ../debs.lst`; do
-        wget https://raw.githubusercontent.com/01org/vsm-dependencies/$DEPENDENCE_VERSION/ubuntu14/$i
+        wget https://github.com/01org/vsm-dependencies/raw/$dependence_version/ubuntu14/$i
     done
     cd $TOPDIR
 fi
