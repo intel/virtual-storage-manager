@@ -1,0 +1,120 @@
+h4.full-container-label{
+    display: inline-block;
+}
+
+.alert{
+    width: auto;
+}
+
+.full-container-label{
+   position:relative;
+   top:20px;
+   z-index:100;
+   background-color:white;
+}
+
+.vsm-container-offset{
+    margin-right: 10px;
+}
+
+.vsm-container-full{
+    
+    text-align:center;
+}
+
+.vsm-container-full-content{
+    margin-top:0px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding:15px  15px;
+    overflow: hidden;
+    text-align:left;
+ }
+
+.vsm-container-full-content{
+   
+}
+
+.vsm-container-2{
+    margin-top:20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding:5px  15px;
+    height: 250px;
+    width: 635px;
+    float: left;
+}
+
+.vsm-container-3{
+    margin-top:20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding:5px  15px;
+    height: 250px;
+    width: 420px;
+    float: left;
+}
+
+.vsm-rect{
+    width: 60px;
+    height: 40px;
+    line-height: 40px;
+    background-color: #0062a8;
+    font-size: 20px;
+    font-weight: normal;
+    text-align: center;
+    border-radius: 5px;
+    color:#ffffff;
+}
+
+.vsm-rect-1{
+    float: left;
+    margin: 5px;
+}
+
+.vsm-rect-2{
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.vsm-rect-green{
+   background-color:  green;
+}
+
+.vsm-rect-gray{
+    background-color: gray;
+}
+
+.vsm-rect-red{
+    background-color: red;
+}
+
+.vsm-rect-orange{
+    background-color: orange;
+}
+
+.chart-rect{
+    width:100%;
+    height:200px;
+    margin-left:10px;
+}
+
+.chart-container-height{
+    height:300px ;
+}
+
+.vsm-label{
+    min-width: 130px;
+    display:inline-block;
+    margin-right: 10px;
+}
+
+.info-link{
+    float: right;
+    cursor:pointer;
+    text-decoration: none;
+}
+
+.info-link:hover{
+    text-decoration: none;
+}
