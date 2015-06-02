@@ -47,8 +47,9 @@ function _generate_keys() {
 }
 
 function setup_https() {
+    echo "ServerName $host_name" >> /etc/apache2/apache2.conf
     old_dir=`pwd`
-    host_name=`hostname` 
+    host_name=`hostname`
     sed -i "s,%HOSTNAME%,$host_name,g" /usr/local/bin/keys/exp_csr
 
     service apache2 restart
