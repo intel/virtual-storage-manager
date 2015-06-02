@@ -1840,9 +1840,13 @@ class CephDriver(object):
             if mds_dict:
                 mdsmap['failed'] = len(mds_dict['failed'])
                 mdsmap['stopped'] = len(mds_dict['stopped'])
+                mdsmap['data_pools'] = mds_dict['data_pools']
+                mdsmap['metadata_pool'] = mds_dict['metadata_pool']
             else:
                 mdsmap['failed'] = -1
                 mdsmap['stopped'] = -1
+                mdsmap['data_pools'] = []
+                mdsmap['metadata_pool'] = []
             return json.dumps(mdsmap)
         return None
 
