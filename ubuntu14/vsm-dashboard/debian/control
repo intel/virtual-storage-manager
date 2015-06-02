@@ -13,7 +13,7 @@ Depends: python, python-setuptools, python-mysqldb, python-compressor,
     python-lockfile, libapr1, libaprutil1, libaprutil1-ldap,
     python-pyparsing, python-backports.ssl-match-hostname, python-chardet, python-cliff,
     python-cmd2, python-appconf, python-django-horizon, python-httplib2, python-iso8601,
-    python-jsonschema, python-keyring, python-keystoneclient, python-oslo.config,
+    python-jsonschema, python-keyring, python-oslo.config,
     python-prettytable, python-requests, python-simplejson, python-six, python-urllib3,
     python-versiontools, python-warlock, python-webob, python-vsmclient
 Description: The VSM Dashboard is a reference implementation of a Django site that

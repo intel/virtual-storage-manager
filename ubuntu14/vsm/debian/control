@@ -13,6 +13,5 @@ Depends: python, python-mysqldb, python-pbr, python-decorator, python-tempita,
     python-lockfile, python-lxml, python-routes, python-webob, python-greenlet,
     python-pastedeploy, python-paste, python-migrate, python-stevedore, python-suds,
     python-paramiko, python-babel, python-iso8601, python-keystoneclient,
-    python-oslo.config, python-numpy, python-psutil,
-    xfsprogs, python-psutil, graphviz
+    python-oslo.config, python-numpy, xfsprogs, python-psutil, graphviz
 Description: vsm
