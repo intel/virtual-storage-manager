@@ -2110,7 +2110,8 @@ class CreateCrushMapDriver(object):
             osd_num = osd_num + int(res)
         init_node = db.init_node_get(context, service_id[0])
         zone_tag = True
-        if init_node['zone']['name'] == FLAGS.default_zone:
+        zone_cnt = len(db.zone_get_all(context))
+        if init_node['zone']['name'] == FLAGS.default_zone or zone_cnt <= 1:
             zone_tag = False 
         self._gen_crushmap_optimal()
         self._gen_device_osd(osd_num)

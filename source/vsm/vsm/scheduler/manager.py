@@ -92,6 +92,21 @@ class SchedulerManager(manager.Manager):
         pool_ref = db.pool_get_by_name(context,
                                        body['name'],
                                        body['cluster_id'])
+        replication_factor = body['size']
+        zone_cnt = len(db.zone_get_all(context))
+        factor_flag = True
+        if zone_cnt > 1 and replication_factor > zone_cnt:
+            factor_flag = False
+            LOG.error("4004 - replication_factor of %s error:replica count greater than number of zones in Storage Group-loss of zone may resule in data loss" % body['name'])
+        if zone_cnt <= 1 :
+            host_cnt = db.init_node_count_by_status(context,status='Active')
+            if replication_factor > host_cnt:
+                factor_flag = False
+                LOG.error("4005 - replication_factor of %s error:replica count greater than number of host in Storage Group-loss of host may resule in data loss" % body['name'])
+
+        if not factor_flag:
+            res = "pool "+ body['name'] + ":replication_factor is too big"
+            return {'message':res}
         if not pool_ref:
             self._agent_rpcapi.create_storage_pool(context, body)#TODO need to specify host?
             #pool_id = self._agent_rpcapi.get_pool_id_by_name(context,
