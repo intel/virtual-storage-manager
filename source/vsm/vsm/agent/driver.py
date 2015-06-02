@@ -1316,12 +1316,32 @@ class CephDriver(object):
                 LOG.error("%s:%s" %(e.code, e.message))
             return True
         return True
+
+    def get_ceph_version(self):
+        out, err = utils.execute('ceph',
+                                 '--version',
+                                 run_as_root=True)
+        LOG.info("get_ceph_version:%s--%s"%(out,err))
+        out = out.split(' ')[2]
+        return out
+
+    def get_vsm_version(self):
+        try:
+            out, err = utils.execute('vsm',
+                                     '--version',
+                                     run_as_root=True)
+            LOG.info("get_vsm_version:%s--%s"%(out,err))
+        except:
+            out = '2.0'
+        return out
+
     def get_smart_info(self, context):
         out, err = utils.execute('get_smart_info',
                                  'll',
                                  run_as_root=True)
         LOG.info("get_smart_info:%s--%s"%(out,err))
         return out
+
     def get_ceph_admin_keyring(self, context):
         """
         read ceph keyring from CEPH_PATH
@@ -1853,8 +1873,12 @@ class CephDriver(object):
             uptime = open("/proc/uptime", "r").read().strip().split(" ")[0]
         except:
             uptime = ""
+        ceph_version = self.get_ceph_version()
+        vsm_version = self.get_vsm_version()
         return json.dumps({
             'uptime': uptime,
+            'ceph_version': ceph_version,
+            'vsm_version':vsm_version,
         })
 
     def ceph_status(self):
