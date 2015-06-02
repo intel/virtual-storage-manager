@@ -55,6 +55,11 @@ class CreatePool(forms.SelfHandlingForm):
                                         ' required to set as an integer,'
                                         'the default number is 3'),
                                         required=True)
+    max_pg_num_per_osd = forms.IntegerField(label=_("PG Count Factor"),
+                                    help_text=_('max pg_num value for per OSD'
+                                    ' required to set as an integer,'
+                                    'the default number is 100'),
+                                    required=True)
     tag = forms.CharField(label=_("Tag"),
                             max_length=16,
                             min_length=1,
@@ -106,6 +111,7 @@ class CreatePool(forms.SelfHandlingForm):
 
                         'enablePoolQuota': data['enable_pool_quota'],
                         'poolQuota': data['pool_quota'],
+                        'max_pg_num_per_osd': data["max_pg_num_per_osd"],
 
                     }
             }

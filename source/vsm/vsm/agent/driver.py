@@ -176,7 +176,8 @@ class CephDriver(object):
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
                     'replica_storage_group': replica_storage_group if replica_storage_group else None, 
-                    'quota': body.get('quota')
+                    'quota': body.get('quota'),
+                    'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')

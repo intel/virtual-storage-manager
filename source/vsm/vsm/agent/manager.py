@@ -1044,15 +1044,25 @@ class AgentManager(manager.Manager):
             if storage_group:
                 osd_num_per_group = db.osd_state_count_by_storage_group_id(context, storage_group['id'])
                 #reset pgs
-                if 20 * osd_num_per_group > pool['pg_num']:
-                    pg_num = self._compute_pg_num(context, osd_num_per_group, pool['size'])   
+                max_pg_num_per_osd = pool['max_pg_num_per_osd']
+                if not max_pg_num_per_osd:
+                    settings = db.vsm_settings_get_all(context)
+                    for setting in settings:
+                        if setting['name'] == 'pg_count_factor':
+                             max_pg_num_per_osd = int(setting['value'])
+                max_pg_num_finally = max_pg_num_per_osd * osd_num_per_group//pool['size']
+                if max_pg_num_finally > pool['pg_num']:
+                    pg_num = max_pg_num_finally#self._compute_pg_num(context, osd_num_per_group, pool['size'])
                     LOG.info("storage group id %s has %s osds" % (storage_group['id'], osd_num_per_group))
                     if osd_num_per_group > 64:
                         osd_num_per_group = 64
                         LOG.info("osd_num_per_group > 64, use osd_num_per_group=64")
                     step_max_pg_num = osd_num_per_group * 32
                     max_pg_num = step_max_pg_num + pool['pg_num']
-                    if pg_num > max_pg_num:
+                    if pg_num > max_pg_num_finally:
+                        pgp_num = pg_num = max_pg_num_finally
+                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                    elif pg_num > max_pg_num:
                         pgp_num = pg_num = max_pg_num 
                         self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
                     elif pg_num > pool['pg_num']:
