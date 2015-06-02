@@ -67,8 +67,8 @@ while [ $# -gt 0 ]; do
     -v| --version) shift; DEPENDENCE_VERSION=$1 ;;
     -u| --user) shift; USER=$1 ;;
     --prepare) IS_PREPARE=True ;;
-    --controller) shift; IS_CONTROLLER_INSTALL=True; IS_PREPARE=True; NEW_CONTROLLER_IP=$1 ;;
-    --agent) shift; IS_AGENT_INSTALL=True; IS_PREPARE=True; NEW_AGENT_IPS=$1 ;;
+    --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_IP=$1 ;;
+    --agent) shift; IS_AGENT_INSTALL=True; NEW_AGENT_IPS=$1 ;;
     *) shift ;;
   esac
   shift
@@ -94,6 +94,10 @@ source $TOPDIR/hostrc
 
 if [ -z $MANIFEST_PATH ]; then
     MANIFEST_PATH="manifest"
+fi
+
+if [[ $NEW_CONTROLLER_IP != "" ]]; then
+    controller_ip=$NEW_CONTROLLER_IP
 fi
 
 IS_CONTROLLER=0
@@ -307,24 +311,28 @@ function install_agent() {
 #            start to install
 #-------------------------------------------------------------------------------
 
-if [[ $IS_PREPARE == False ]]; then
+if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
+    && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
     TOKEN=`ssh $USER@$controller_ip "sudo agent-token"`
     for ip in $storage_ip_list; do
         install_agent $ip
     done
-elif [[ $IS_PREPARE == True ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
-        && [[ $IS_AGENT_INSTALL == False ]]; then
-    prepare
-elif [[ $IS_CONTROLLER_INSTALL == True ]]; then
-    install_controller $NEW_CONTROLLER_IP
-elif [[ $IS_AGENT_INSTALL == True ]]; then
-    TOKEN=`ssh $USER@$controller_ip "sudo agent-token"`
-    AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
-    for ip in $AGENT_IP_LIST; do
-        install_agent $ip
-    done
+else
+    if [[ $IS_PREPARE == True ]]; then
+        prepare
+    fi
+    if [[ $IS_CONTROLLER_INSTALL == True ]]; then
+        install_controller
+    fi
+    if [[ $IS_AGENT_INSTALL == True ]]; then
+        TOKEN=`ssh $USER@$controller_ip "sudo agent-token"`
+        AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
+        for ip in $AGENT_IP_LIST; do
+            install_agent $ip
+        done
+    fi
 fi
 
 #-------------------------------------------------------------------------------
