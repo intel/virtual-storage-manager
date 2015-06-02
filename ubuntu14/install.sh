@@ -25,31 +25,50 @@ Usage: install.sh
 
 Auto deploy vsm:
     The tool can help you to deploy the vsm envirement automatically.
-    Please run such as bash +x install.sh
+    Please run the command like: bash +x install.sh or ./install.sh
 
 Options:
   --help | -h
     Print usage information.
   --manifest [manifest directory] | -m [manifest directory]
     The directory to store the server.manifest and cluster.manifest.
+  --repo-path [dependencies path]
+    The path of dependencies.
   --version [master] | -v [master]
     The version of vsm dependences to download(Default=master).
   --user | -u
-    The user will be used to connect remote nodes to deploy vsm
+    The user will be used to connect remote nodes to deploy vsm.
+  --prepare
+    Preparing to install vsm. Checking vsm packages, setting iptables
+  and selinux, downloading the dependencies and setting the repository.
+  --controller [ip]
+    Installing the controller node only.
+  --agent [ip,ip]
+    Install the agent node(s), like: --agnet ip,ip with no blank.
 EOF
     exit 0
 }
 
 MANIFEST_PATH=""
-dependence_version="master"
+REPO_PATH="vsm-dep-repo"
+DEPENDENCE_VERSION="master"
 USER=`whoami`
+IS_PREPARE=False
+IS_CONTROLLER_INSTALL=False
+IS_AGENT_INSTALL=False
+NEW_CONTROLLER_IP=""
+NEW_AGENT_IPS=""
+
 while [ $# -gt 0 ]; do
   case "$1" in
-    -h) usage ;;
-    --help) usage ;;
+    -h| --help) usage ;;
     -m| --manifest) shift; MANIFEST_PATH=$1 ;;
-    -v| --version) shift; dependence_version=$1 ;;
+    --repo-path) shift; REPO_PATH=$1 ;;
+    -v| --version) shift; DEPENDENCE_VERSION=$1 ;;
     -u| --user) shift; USER=$1 ;;
+    --prepare) IS_PREPARE=True ;;
+    --controller) shift; IS_CONTROLLER_INSTALL=True; IS_PREPARE=True; NEW_CONTROLLER_IP=$1 ;;
+    --agent) shift; IS_AGENT_INSTALL=True; IS_PREPARE=True; NEW_AGENT_IPS=$1 ;;
     *) shift ;;
   esac
   shift
@@ -70,294 +89,249 @@ HOSTNAME=`hostname`
 #HOSTIP=`hostname -I|sed s/[[:space:]]//g`
 HOSTIP=`hostname -I`
 
+source /opt/env
 source $TOPDIR/hostrc
-
-is_controller=0
-for ip in $HOSTIP; do
-    if [ $ip == $controller_ip ]; then
-        is_controller=1
-    fi
-done
-
-if [ $is_controller -eq 0 ]; then
-    echo "[Info]: You run the tool in a third server."
-else
-    echo "[Info]: You run the tool in the controller server."
-fi
-
-
-#-------------------------------------------------------------------------------
-#            checking packages
-#-------------------------------------------------------------------------------
-
-echo "+++++++++++++++start checking packages+++++++++++++++"
-
-if [ ! -d vsmrepo ]; then
-    echo "You should have the vsmrepo folder, please check and try again"
-    exit 1
-fi
-
-cd vsmrepo
-is_python_vsmclient=`ls|grep python-vsmclient*.deb|wc -l`
-is_vsm=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
-is_vsm_dashboard=`ls|grep vsm-dashboard*.deb|wc -l`
-is_vsm_deploy=`ls|grep vsm-deploy*.deb|wc -l`
-if [ $is_python_vsmclient -gt 0 ] && [ $is_vsm -gt 0 ] && [ $is_vsm_dashboard -gt 0 ] && [ $is_vsm_deploy -gt 0 ]; then
-    echo "The vsm pachages have been already prepared"
-else
-    echo "please check the vsm packages, then try again"
-    exit 1
-fi
-
-cd $TOPDIR
-echo "+++++++++++++++finish checking packages+++++++++++++++"
-
-
-##-------------------------------------------------------------------------------
-##            setting the iptables and selinux
-##-------------------------------------------------------------------------------
-#
-#echo "+++++++++++++++start setting the iptables and selinux+++++++++++++++"
-#
-#function set_iptables_selinux() {
-#    ssh $USER@$1 "service iptables stop"
-#    ssh $USER@$1 "chkconfig iptables off"
-#    ssh $USER@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
-##    ssh $USER@$1 "setenforce 0"
-#}
-#
-#if [ $is_controller -eq 0 ]; then
-#    set_iptables_selinux $controller_ip
-#else
-#    service iptables stop
-#    chkconfig iptables off
-#    sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
-##    setenforce 0
-#fi
-#
-#for ip in $storage_ip_list; do
-#    set_iptables_selinux $ip
-#done
-#
-#echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
-
-
-#-------------------------------------------------------------------------------
-#            downloading the dependences
-#-------------------------------------------------------------------------------
-
-if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
-    mkdir -p vsm-dep-repo
-    cd vsm-dep-repo
-    for i in `cat ../debs.lst`; do
-        wget https://github.com/01org/vsm-dependencies/raw/$dependence_version/ubuntu14/$i
-    done
-    cd $TOPDIR
-fi
-
-#if [ $is_controller -eq 0 ]; then
-#    ssh $USER@$controller_ip "rm -rf /opt/vsm-dep-repo"
-#    scp -r vsm-dep-repo $USER@$controller_ip:/opt
-#else
-#    if [ -d vsm-dep-repo ]; then
-#        rm -rf /opt/vsm-dep-repo
-#        cp -rf vsm-dep-repo /opt
-#    fi
-#fi
-
-
-#-------------------------------------------------------------------------------
-#            setting the repo
-#-------------------------------------------------------------------------------
-
-echo "+++++++++++++++start setting the repo+++++++++++++++"
-
-apt-get update
-is_dpkg_dev=`dpkg -s dpkg-dev|grep "install ok installed"|wc -l`
-if [[ $is_dpkg_dev -eq 0 ]]; then
-    apt-get install -y dpkg-dev
-fi
-
-dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
-
-#is_apache2=`dpkg -s apache2|grep "install ok installed"|wc -l`
-#if [[ is_apache2 -gt 0 ]]; then
-#    sed -i "s,#*Listen 80,Listen 80,g" /etc/apache2/ports.conf
-#    service apache2 restart
-#fi
-
-rm -rf vsm.list
-rm -rf vsm-dep.list
-
-cat <<"EOF" >vsm.list
-deb file:///opt vsmrepo/
-EOF
-
-cat <<"EOF" >vsm-dep.list
-deb file:///opt vsm-dep-repo/
-EOF
-
-cat <<"EOF" >apt.conf
-APT::Get::AllowUnauthenticated 1 ;
-EOF
-
-#oldvsmurl="deb file:///opt vsmrepo/"
-#oldvsmdepurl="deb file:///opt vsm-dep-repo/"
-#newvsmurl="deb http://$controller_ip vsmrepo/"
-#newvsmdepurl="deb http://$controller_ip vsm-dep-repo/"
-#sed -i "s,$oldvsmurl,$newvsmurl,g" ./vsm.list
-#sed -i "s,$oldvsmdepurl,$newvsmdepurl,g" ./vsm-dep.list
-
-if [ $is_controller -eq 0 ]; then
-    scp -r vsm-dep-repo $USER@$controller_ip:/opt
-    scp -r vsmrepo $USER@$controller_ip:/opt
-    scp apt.conf $USER@$controller_ip:/etc/apt
-    scp vsm.list $USER@$controller_ip:/etc/apt/sources.list.d
-    scp vsm-dep.list $USER@$controller_ip:/etc/apt/sources.list.d
-    ssh $USER@$controller_ip "apt-get update"
-else
-    cp -r vsm-dep-repo /opt
-    cp -r vsmrepo /opt
-    cp apt.conf /etc/apt
-    cp vsm.list /etc/apt/sources.list.d
-    cp vsm-dep.list /etc/apt/sources.list.d
-    apt-get update
-fi
-
-function set_repo() {
-    scp -r vsm-dep-repo $USER@$1:/opt
-    scp -r vsmrepo $USER@$1:/opt
-    ssh $USER@$1 "rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list"
-    scp apt.conf $USER@$1:/etc/apt
-    scp vsm.list $USER@$1:/etc/apt/sources.list.d
-    scp vsm-dep.list $USER@$1:/etc/apt/sources.list.d
-    ssh $USER@$1 "apt-get update"
-}
-
-for ip in $storage_ip_list; do
-    set_repo $ip
-done
-
-echo "+++++++++++++++finish setting the repo+++++++++++++++"
-
-
-#-------------------------------------------------------------------------------
-#            install vsm rpm and dependences
-#-------------------------------------------------------------------------------
-
-echo "+++++++++++++++install vsm rpm and dependences+++++++++++++++"
-
-function install_vsm_controller() {
-    ssh $USER@$1 "apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
-    ssh $USER@$1 "preinstall"
-}
-
-function install_vsm_storage() {
-    ssh $USER@$1 "apt-get install -y vsm vsm-deploy"
-    ssh $USER@$1 "preinstall"
-}
-
-if [ $is_controller -eq 0 ]; then
-    install_vsm_controller $controller_ip
-else
-    apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient
-    preinstall
-fi
-
-for ip in $storage_ip_list; do
-    install_vsm_storage $ip
-done
-
-echo "+++++++++++++++finish install vsm rpm and dependences+++++++++++++++"
-
-
-#-------------------------------------------------------------------------------
-#            setup vsm controller node
-#-------------------------------------------------------------------------------
 
 if [ -z $MANIFEST_PATH ]; then
     MANIFEST_PATH="manifest"
 fi
 
-function setup_controller() {
-    ssh $USER@$controller_ip "rm -rf /etc/manifest/cluster_manifest"
-    scp $MANIFEST_PATH/$controller_ip/cluster.manifest $USER@$controller_ip:/etc/manifest
-    ssh $USER@$controller_ip "chown root:vsm /etc/manifest/cluster.manifest; chmod 755 /etc/manifest/cluster.manifest"
+IS_CONTROLLER=0
+for ip in $HOSTIP; do
+    if [ $ip == $controller_ip ]; then
+        IS_CONTROLLER=1
+    fi
+done
+
+if [ $IS_CONTROLLER -eq 0 ]; then
+    echo "[Info]: You run the tool in a third server."
+else
+    echo "[Info]: You run the tool in the controller server."
+fi
+
+#-------------------------------------------------------------------------------
+#            prepare
+#-------------------------------------------------------------------------------
+
+function check_vsm_package() {
+    if [[ ! -d vsmrepo ]]; then
+        echo "You must have the vsmrepo folder, please check and try again."
+        exit 1
+    fi
+    cd vsmrepo
+    IS_PYTHON_VSMCLIENT=`ls|grep python-vsmclient*.deb|wc -l`
+    IS_VSM=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
+    IS_VSM_DASHBOARD=`ls|grep vsm-dashboard*.deb|wc -l`
+    IS_VSM_DEPLOY=`ls|grep vsm-deploy*.deb|wc -l`
+    if [[ $IS_PYTHON_VSMCLIENT -gt 0 ]] && [[ $IS_VSM -gt 0 ]] &&\
+        [[ $IS_VSM_DASHBOARD -gt 0 ]] && [[ $IS_VSM_DEPLOY -gt 0 ]]; then
+        echo "The vsm pachages have been already prepared"
+    else
+        echo "please check the vsm packages, then try again"
+        exit 1
+    fi
+    cd $TOPDIR
+}
+
+function set_iptables_and_selinux() {
+    ssh $USER@$1 "service iptables stop"
+    ssh $USER@$1 "chkconfig iptables off"
+    ssh $USER@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
+    ssh $USER@$1 "setenforce 0"
+}
+
+function download_dependencies() {
+    if [[ ! -d $REPO_PATH ]]; then
+        mkdir -p $REPO_PATH
+        cd $REPO_PATH
+        for i in `cat $TOPDIR/debs.lst`; do
+            wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_VERSION/ubuntu14/$i
+        done
+        cd $TOPDIR
+    elif [[ -d $REPO_PATH ]]; then
+        cd $REPO_PATH
+        for i in `cat $TOPDIR/debs.lst`; do
+            if [[ `ls |grep $i|wc -l` -eq 0 ]]; then
+                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_VERSION/ubuntu14/$i
+            else
+                COUNT=0
+                for j in `ls |grep $i`; do
+                    if [[ $i == $j ]]; then
+                        let COUNT+=1
+                    fi
+                done
+                if [[ $COUNT -eq 0 ]]; then
+                    wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_VERSION/ubuntu14/$i
+                fi
+            fi
+        done
+        sudo rm -rf *.deb.*
+        cd $TOPDIR
+    fi
+}
+
+function prepare_repo() {
+    sudo apt-get update
+    IS_DPKG_DEV=`dpkg -s dpkg-dev|grep "install ok installed"|wc -l`
+    if [[ $IS_DPKG_DEV -eq 0 ]]; then
+        sudo apt-get install -y dpkg-dev
+    fi
+    mkdir -p $REPO_PATH/vsm-dep-repo
+    cd $REPO_PATH
+    cp *.deb vsm-dep-repo
+    dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
+    cd $TOPDIR
+
+    rm -rf vsm.list vsm-dep.list
+
+    cat <<"EOF" >vsm.list
+deb file:///opt vsmrepo/
+EOF
+
+    cat <<"EOF" >vsm-dep.list
+deb file:///opt vsm-dep-repo/
+EOF
+
+}
+
+function prepare() {
+    check_vsm_package
+#    set_iptables_and_selinux
+    download_dependencies
+    prepare_repo
+}
+
+function set_repo() {
+    ssh $USER@$1 "sudo rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list; \
+        sudo rm -rf /opt/vsm-dep-repo /opt/vsmrepo"
+    scp -r $REPO_PATH/vsm-dep-repo $USER@$1:/tmp
+    ssh $USER@$1 "sudo mv /tmp/vsm-dep-repo /opt"
+    scp -r vsmrepo $USER@$1:/tmp
+    ssh $USER@$1 "sudo mv /tmp/vsmrepo /opt"
+    ssh $USER@$1 "if [[ -f /etc/apt/apt.conf ]]; then sudo mv /etc/apt/apt.conf /tmp; \
+        sudo echo \"APT::Get::AllowUnauthenticated 1 ;\" >> /tmp/apt.conf; sudo mv /tmp/apt.conf /etc/apt; \
+        else touch /tmp/apt.conf; echo \"APT::Get::AllowUnauthenticated 1 ;\" >> /tmp/apt.conf; \
+        sudo mv /tmp/apt.conf /etc/apt; fi"
+#    scp apt.conf $USER@$1:/etc/apt
+    scp vsm.list $USER@$1:/tmp
+    ssh $USER@$1 "sudo mv /tmp/vsm.list /etc/apt/sources.list.d"
+    scp vsm-dep.list $USER@$1:/tmp
+    ssh $USER@$1 "sudo mv /tmp/vsm-dep.list /etc/apt/sources.list.d"
+    ssh $USER@$1 "source /opt/env; sudo apt-get update"
+}
+
+function check_manifest() {
+    if [[ $1 == $controller_ip ]]; then
+        if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/cluster.manifest ]]; then
+            echo "Please check the manifest, then try again."
+            exit 1
+        fi
+    else
+        if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/server.manifest ]]; then
+            echo "Please check the manifest, then try again."
+            exit 1
+        fi
+    fi
+}
+
+#-------------------------------------------------------------------------------
+#            controller
+#-------------------------------------------------------------------------------
+
+function setup_remote_controller() {
+    ssh $USER@$controller_ip "sudo rm -rf /etc/manifest/cluster_manifest"
+    scp $MANIFEST_PATH/$controller_ip/cluster.manifest $USER@$controller_ip:/tmp
+    ssh $USER@$controller_ip "sudo mv /tmp/cluster.manifest /etc/manifest"
+    ssh $USER@$controller_ip "sudo chown root:vsm /etc/manifest/cluster.manifest; sudo chmod 755 /etc/manifest/cluster.manifest"
     is_cluster_manifest_error=`ssh $USER@$controller_ip "cluster_manifest|grep error|wc -l"`
     if [ $is_cluster_manifest_error -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        ssh $USER@$controller_ip "vsm-controller"
+        ssh $USER@$controller_ip "sudo vsm-controller"
     fi
 }
 
-if [ $is_controller -eq 0 ]; then
-    setup_controller
-else
-    rm -rf /etc/manifest/cluster.manifest
-    cp $MANIFEST_PATH/$controller_ip/cluster.manifest /etc/manifest
-    chown root:vsm /etc/manifest/cluster.manifest
-    chmod 755 /etc/manifest/cluster.manifest
-    if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
-        echo "please check the cluster.manifest, then try again"
-        exit 1
+function install_controller() {
+    check_manifest $controller_ip
+    set_repo $controller_ip
+    ssh $USER@$controller_ip "source /opt/env; sudo apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
+    ssh $USER@$controller_ip "source /opt/env; sudo preinstall"
+
+    if [[ $IS_CONTROLLER -eq 0 ]]; then
+        setup_remote_controller
     else
-        vsm-controller
+        sudo rm -rf /etc/manifest/cluster.manifest
+        sudo cp $MANIFEST_PATH/$controller_ip/cluster.manifest /etc/manifest
+        sudo chown root:vsm /etc/manifest/cluster.manifest
+        sudo chmod 755 /etc/manifest/cluster.manifest
+        if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
+            echo "please check the cluster.manifest, then try again"
+            exit 1
+        else
+            sudo vsm-controller
+        fi
     fi
-fi
-
+}
 
 #-------------------------------------------------------------------------------
-#            setup vsm storage node
+#            agent
 #-------------------------------------------------------------------------------
 
-count_ip=0
-for ip in $storage_ip_list; do
-    let count_ip=$count_ip+1
-done
-let count_ip=$count_ip+2+1
-if [ `ls $MANIFEST_PATH|wc -l` != $count_ip ]; then
-    echo "please check the manifest folder"
-    exit 1
-fi
-
-success=""
-failure=""
-if [ $is_controller -eq 0 ]; then
-    token=`ssh $USER@$controller_ip "agent-token"`
-else
-    token=`agent-token`
-fi
-
-function setup_storage() {
-    ssh $USER@$1 "rm -rf /etc/manifest/server.manifest"
-    sed -i "s/token-tenant/$token/g" $MANIFEST_PATH/$1/server.manifest
+function setup_remote_agent() {
+    ssh $USER@$1 "sudo rm -rf /etc/manifest/server.manifest"
+    sudo sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
     old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
-    sed -i "s/$old_str/$token/g" $MANIFEST_PATH/$1/server.manifest
-    scp $MANIFEST_PATH/$1/server.manifest $USER@$1:/etc/manifest
-    ssh $USER@$1 "chown root:vsm /etc/manifest/server.manifest; chmod 755 /etc/manifest/server.manifest"
+    sudo sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    scp $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
+    ssh $USER@$1 "sudo mv /tmp/server.manifest /etc/manifest"
+    ssh $USER@$1 "sudo chown root:vsm /etc/manifest/server.manifest; sudo chmod 755 /etc/manifest/server.manifest"
     is_server_manifest_error=`ssh $USER@$1 "server_manifest|grep ERROR|wc -l"`
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
-        failure=$failure"$1 "
     else
-        ssh $USER@$1 "vsm-node"
-        success=$success"$1 "
+        ssh $USER@$1 "sudo vsm-node"
     fi
 }
 
-for ip in $storage_ip_list; do
-    setup_storage $ip
-done
+function install_agent() {
+    check_manifest $1
+    set_repo $1
+    ssh $USER@$1 "source /opt/env; sudo apt-get install -y vsm vsm-deploy"
+    ssh $USER@$1 "source /opt/env; sudo preinstall"
 
+    setup_remote_agent $1
+}
+
+#-------------------------------------------------------------------------------
+#            start to install
+#-------------------------------------------------------------------------------
+
+if [[ $IS_PREPARE == False ]]; then
+    prepare
+    install_controller
+    TOKEN=`ssh $USER@$controller_ip "sudo agent-token"`
+    for ip in $storage_ip_list; do
+        install_agent $ip
+    done
+elif [[ $IS_PREPARE == True ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
+        && [[ $IS_AGENT_INSTALL == False ]]; then
+    prepare
+elif [[ $IS_CONTROLLER_INSTALL == True ]]; then
+    install_controller $NEW_CONTROLLER_IP
+elif [[ $IS_AGENT_INSTALL == True ]]; then
+    TOKEN=`ssh $USER@$controller_ip "sudo agent-token"`
+    AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
+    for ip in $AGENT_IP_LIST; do
+        install_agent $ip
+    done
+fi
 
 #-------------------------------------------------------------------------------
 #            finish auto deploy
 #-------------------------------------------------------------------------------
 
-echo "Successful storage node ip: $success"
-echo "Failure storage node ip: $failure"
+echo "Finished."
 
 set +o xtrace
 
@@ -368,4 +342,3 @@ set +o xtrace
 # 
 #
 # 
-
