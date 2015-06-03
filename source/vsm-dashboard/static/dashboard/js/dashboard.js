@@ -245,7 +245,7 @@ function loadMDS(){
 	    data: null,
 	    dataType:"json",
 	    success: function(data){
-    		console.log(data)
+    		//console.log(data)
     		$("#lblMDSEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
     		$("#lblMDSUpdate")[0].innerHTML ="Update:"+ data.update;
 
