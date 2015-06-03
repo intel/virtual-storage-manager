@@ -44,6 +44,8 @@ pg_count_factor 100
 heartbeat_interval 5
 osd_heartbeat_interval 6
 osd_heartbeat_grace 20
+host_near_full_threshold 75
+host_full_threshold 90
 
 [ec_profiles]
 #format: [profile-name] [path-to-plugin] [plugin-name] [pg_num value] [json format key/value]

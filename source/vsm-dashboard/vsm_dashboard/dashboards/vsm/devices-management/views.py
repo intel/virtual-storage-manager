@@ -63,6 +63,9 @@ class IndexView(tables.DataTableView):
         if _osds:
             logging.debug("resp osds in view: %s" % _osds)
         osds = []
+        settings = vsmapi.get_setting_dict(self.request)
+        host_near_full_threshold = settings['host_near_full_threshold']
+        #host_full_threshold = settings['host_full_threshold']
         for _osd in _osds:
             osd = {
                     'id': _osd.id,
@@ -83,7 +86,12 @@ class IndexView(tables.DataTableView):
                     'journal_device_status': _osd.device['journal_state'], 
                     'server': _osd.service['host'],
                     'zone': _osd.zone,
+                    'full_warn': 0
                   }
+
+            osd['full_status'] = round(osd['data_dev_used'] * 1.0 / osd['data_dev_capacity'] * 100, 2)
+            if osd['full_status'] >= host_near_full_threshold:
+                osd['full_warn'] = 1
             if osd_id == "-1":
                 osds.append(osd)  #all of the deivces
             elif str(_osd.id) == str(osd_id):

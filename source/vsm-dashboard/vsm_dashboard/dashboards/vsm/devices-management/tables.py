@@ -167,6 +167,10 @@ class OsdsTable(tables.DataTable):
                                         verbose_name=_("Journal Device Path"))
     journal_device_status = tables.Column("journal_device_status", \
                                    verbose_name=_("Journal Device Status"))
+    full_status = tables.Column("full_status", \
+                               verbose_name=_("Used(%)"))
+    full_warn = tables.Column("full_warn", \
+                               verbose_name=_("Used Wran"))
 
     class Meta:
         name = "osds"

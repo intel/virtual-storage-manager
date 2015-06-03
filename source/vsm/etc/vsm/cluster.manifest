@@ -37,6 +37,8 @@ ceph_full_threshold  90
 pg_count_factor 100
 osd_heartbeat_interval 10
 osd_heartbeat_grace 10
+host_near_full_threshold 75
+host_full_threshold 90
 
 [ec_profiles]
 #format: [profile-name] [path-to-plugin] [plugin-name] [pg_num value] [json format key/value]

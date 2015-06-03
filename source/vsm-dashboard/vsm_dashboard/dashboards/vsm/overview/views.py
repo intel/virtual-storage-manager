@@ -27,6 +27,7 @@ from vsm_dashboard.utils import get_time_delta2
 import json
 import random
 import datetime
+import commands
 LOG = logging.getLogger(__name__)
 
 
@@ -79,11 +80,25 @@ def IOPS(request):
     return HttpResponse(IOPSdata)
 
 
+def get_vsm_version():
+    try:
+        (status, out) = commands.getstatusoutput('vsm --version')
+        print "get_vsm_version:%s--%s"%(out,status)
+    except:
+        out = '2.0'
+    return out
+
+
 #get the vsm_version
 def get_version():
-    vsm_summary = vsmapi.vsm_summary(None)
-    vsm_version = { "version":"2015.01-1.0.el6"
-                   , "update": get_time_delta2(vsm_summary.created_at)}
+    vsm_version = get_vsm_version()
+    try:
+        vsm_summary = vsmapi.vsm_summary(None)
+        uptime = get_time_delta2(vsm_summary.created_at)
+    except:
+        uptime = ''
+    vsm_version = { "version": vsm_version,
+                    "update": uptime }
     versiondata = json.dumps(vsm_version)
     return versiondata
 
