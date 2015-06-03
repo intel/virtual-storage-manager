@@ -89,7 +89,6 @@ HOSTNAME=`hostname`
 #HOSTIP=`hostname -I|sed s/[[:space:]]//g`
 HOSTIP=`hostname -I`
 
-source /opt/env
 source $TOPDIR/hostrc
 
 if [ -z $MANIFEST_PATH ]; then
@@ -221,7 +220,7 @@ function set_repo() {
     ssh $USER@$1 "sudo mv /tmp/vsm.list /etc/apt/sources.list.d"
     scp vsm-dep.list $USER@$1:/tmp
     ssh $USER@$1 "sudo mv /tmp/vsm-dep.list /etc/apt/sources.list.d"
-    ssh $USER@$1 "source /opt/env; sudo apt-get update"
+    ssh $USER@$1 "sudo apt-get update"
 }
 
 function check_manifest() {
@@ -259,8 +258,8 @@ function setup_remote_controller() {
 function install_controller() {
     check_manifest $controller_ip
     set_repo $controller_ip
-    ssh $USER@$controller_ip "source /opt/env; sudo apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
-    ssh $USER@$controller_ip "source /opt/env; sudo preinstall"
+    ssh $USER@$controller_ip "sudo apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
+    ssh $USER@$controller_ip "sudo preinstall"
 
     if [[ $IS_CONTROLLER -eq 0 ]]; then
         setup_remote_controller
@@ -301,8 +300,8 @@ function setup_remote_agent() {
 function install_agent() {
     check_manifest $1
     set_repo $1
-    ssh $USER@$1 "source /opt/env; sudo apt-get install -y vsm vsm-deploy"
-    ssh $USER@$1 "source /opt/env; sudo preinstall"
+    ssh $USER@$1 "sudo apt-get install -y vsm vsm-deploy"
+    ssh $USER@$1 "sudo preinstall"
 
     setup_remote_agent $1
 }
