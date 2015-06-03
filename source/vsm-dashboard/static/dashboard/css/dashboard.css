@@ -1,62 +1,19 @@
 #framework
 {
     text-align: left;
-    margin-left:50px;
+    margin-left:5px;
 }
 
-#spPageTitle
-{
-    height: 60px;
-    display:inline-block;
-    font-size: 20px;
-    letter-spacing: 1px;
-    position:relative;
-     top: 20px;
-    left: 10px;
-    color:#0062a8;
-}
-
-
-#spVSMVersion
-{
-    display:inline-block;
-    color:gray;
-    letter-spacing: 1px;
-    position:relative;
-    top: 20px;
-    left: 10px;
-    float:right;
-}
-
-#divNavBar
-{
-    width: 1024px;
-    margin-right: auto;
-    margin-left: auto;
-    text-align: left;
-}
-
-.nav>li>a
-{
-    font-size: 14px;
-    font-family: 'ClearSans-Medium', 'Arial';
-    color: white;
-}
 
 #divMain{
     text-align: left;
-    width: 1280px;
+    width: 960px;
     height: auto;
-    /*margin-right: auto;
-    margin-left: auto;*/
 }
 
-#divCluster{
-    /*height: 180px;*/
-    height: auto;
-    overflow: hidden;
-}
-
+/**
+ * cluster module
+ */
 #btnClusterTip {
     margin-bottom: 10px;
 }
@@ -65,18 +22,13 @@
 #divClusterNote{
     margin:10px;
     width: 70%;
-    /*height: 150px;*/
     height: auto;
     float: left;
-    /*border: 1px solid #ccc;*/
 }
 
 #divClusterContent{
-     /*height: 100px;*/
     min-height: 150px;
     margin-left: 0px;
-    /*border: 1px solid #ccc;*/
-    /*overflow-y:scroll;*/
 }
 
 
@@ -84,13 +36,89 @@
     margin-top:20px;
     width: 25%;
     height: 200px;
-    /*height: 150px;*/
     float:left;
-    /*border: 1px solid #ccc;*/
 }
 
 
+/**
+ * OSD module
+ */
+#tOSD>tbody>tr>td{
+    height: 45px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
 
+/**
+ * MDS module
+ */
+#divMDSRect{
+    margin-top:10px;
+    height:180px;
+    overflow-y:auto;
+    /*border:1px solid green;*/
+}
+ 
+#tMDS>tbody>tr>td{
+    height: auto;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    /*border:1px solid #ccc;*/
+}
+
+.mds-svg{
+    width: 90px;
+    height: 55px;
+}
+
+.mds-block{
+    width: 75px;
+    height: 75px;
+    text-align: center;
+    display: inline-block;
+    border-radius: 5px;
+    margin-top: 1px;
+    font-size: 20px;
+    color:white;
+}
+
+.mds-block-green{
+    background-color: green;
+}
+
+.mds-block-blue{
+    background-color: blue;
+}
+
+
+.mds-block-orange{
+    background-color: orange;
+}
+
+.mds-block-red{
+    background-color: red;
+}
+
+.mds-block-number{
+    width: 75px;
+    height: 35px;
+    line-height: 35px;
+    display:  block;
+    border-bottom: 1px solid #ccc;
+}
+
+.mds-block-status{
+    width: 75px;
+    height: 40px;
+    line-height: 40px;
+    display:  block;
+}
+
+/**
+ * storage module
+ */
 #tStorage{
     margin-top: 15px;
 }
@@ -105,35 +133,16 @@
 }
 
 #trStorageCircle>td{
-    width: 300px;
+    width: 200px;
     height: 150px;
     text-align: center;
     /*border: 1px solid #ccc;*/
 }
 
 #trStorageCircle>td>svg {
-    width: 160px;
+    width: 120px;
 }
 
-#tOSD>tbody>tr>td{
-    width: 100px;
-    height: 45px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-    /*border:1px solid #ccc;*/
-}
-
-#tMDS>tbody>tr>td{
-    width: 180px;
-    height: 75px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-    /*border:1px solid #ccc;*/
-}
 
 #trMDSCircle>td>svg {
     width: 160px;
@@ -141,13 +150,7 @@
 }
 
 #divMonitorRect{
-    margin-top:10px;
-    height:160px;
-    overflow-y:auto;
-}
-
-#divMDSRect{
-    margin-top:10px;
+    margin-top:20px;
     height:160px;
     overflow-y:auto;
 }
@@ -166,56 +169,4 @@
 }
 
 
-.mds-list-row{
-    width: 350px;
-    height: 80px;
-/*    border: 1px solid #ccc;*/
-    display: block;
-    overflow-x:auto;
-    /*overflow:hidden;*/
-}
 
-.mds-block{
-    width: 75px;
-    height: 75px;
-    text-align: center;
-    display: inline-block;
-    /*border: 1px solid #ccc;*/
-    border-radius: 5px;
-    margin-top: 1px;
-    margin-left: 30px;
-    font-size: 20px;
-    color:white;
-}
-
-.mds-block-green{
-    background-color: green;
-}
-
-.mds-block-orange{
-    background-color: orange;
-}
-
-.mds-block-red{
-    background-color: red;
-}
-
-
-
-
-.mds-block-number{
-    width: 75px;
-    height: 35px;
-    line-height: 35px;
-    display:  block;
-    border-bottom: 1px solid #ccc;
-}
-
-.mds-block-status{
-    width: 75px;
-    height: 40px;
-    line-height: 40px;
-    display:  block;
-}
-/*
-*/

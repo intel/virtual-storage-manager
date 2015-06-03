@@ -1,60 +1,142 @@
-h4.full-container-label{
+/**
+ * any labels
+ */
+.vsm-block1-title{
+    top:20px;    
+    z-index:100;
+    position:relative;
     display: inline-block;
+    background-color:white;
 }
 
-.alert{
-    width: auto;
+.vsm-block3-title{
+    top:-25px;
+    z-index:100;
+    position:relative;
+    display: inline-block;
+    background-color:white;
+    margin-right: auto;
+    margin-left: auto;
 }
 
-.full-container-label{
-   position:relative;
-   top:20px;
-   z-index:100;
-   background-color:white;
+.vsm-block2-title{
+    top:-25px;
+    z-index:100;
+    position:relative;
+    display: inline-block;
+    background-color:white;
+    margin-right: auto;
+    margin-left: auto;
 }
 
-.vsm-container-offset{
-    margin-right: 10px;
+.vsm-block3-title{
+    top:-25px;
+    z-index:100;
+    position:relative;
+    display: inline-block;
+    background-color:white;
+    margin-right: auto;
+    margin-left: auto;
 }
 
-.vsm-container-full{
-    
+
+/**
+ * block link: link to any other pages;
+ */
+.vsm-block-link{
+    color:black;
+}
+
+    .vsm-block-link:hover{
+         color:black;
+         text-decoration: none;
+    }
+
+/**
+ * block1: full screen block;
+ */
+.vsm-block1{
+    height: auto;
+    overflow: hidden;
     text-align:center;
 }
 
-.vsm-container-full-content{
-    margin-top:0px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding:15px  15px;
-    overflow: hidden;
+.vsm-block1-content{
     text-align:left;
+    padding:15px 15px;
+    margin-top:0px;
+    border-radius:5px;
+    border: 1px solid #ccc;
+    overflow: hidden;
  }
 
-.vsm-container-full-content{
-   
-}
-
-.vsm-container-2{
-    margin-top:20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding:5px  15px;
+ /**
+ * block2: 1/2 screen block;
+ */
+.vsm-block2{
+    width: 477px;
     height: 250px;
-    width: 635px;
     float: left;
-}
-
-.vsm-container-3{
+    text-align: center;
     margin-top:20px;
-    border: 1px solid #ccc;
+    padding:5px 15px;
     border-radius: 5px;
-    padding:5px  15px;
-    height: 250px;
-    width: 420px;
-    float: left;
+    border: 1px solid #ccc;
 }
 
+
+.vsm-block2-content{
+    text-align: left;
+    margin-top: -20px;
+    /*border:1px solid #ccc;*/
+}
+
+
+ /**
+ * block3: 1/3 screen block;
+ */
+.vsm-block3{
+    width: 316px;
+    height: 250px;
+    float: left;
+    text-align: center;
+    margin-top:20px;
+    padding:5px 15px;
+    border-radius:5px;
+    border: 1px solid #ccc;
+}
+
+.vsm-block3-content{
+    text-align: left;
+    margin-top: -20px;
+}
+
+
+
+/**
+ * block offset
+ */
+.vsm-block-offset{
+    margin-right: 6px;
+}
+
+/**
+ * block chart
+ */
+.vsm-block-chart{
+    height:300px ;
+}
+
+.vsm-chart-rect{
+    width:100%;
+    height:200px;
+    margin-left:10px;
+}
+
+
+/**
+ * rect
+ */
 .vsm-rect{
     width: 60px;
     height: 40px;
@@ -67,18 +149,18 @@ h4.full-container-label{
     color:#ffffff;
 }
 
-.vsm-rect-1{
-    float: left;
-    margin: 5px;
-}
-
 .vsm-rect-2{
     margin-right: auto;
     margin-left: auto;
 }
 
+.vsm-rect-monitor{
+    float: left;
+    margin: 5px;
+}
+
 .vsm-rect-green{
-   background-color:  green;
+   background-color: green;
 }
 
 .vsm-rect-gray{
@@ -93,18 +175,34 @@ h4.full-container-label{
     background-color: orange;
 }
 
-.chart-rect{
-    width:100%;
-    height:200px;
-    margin-left:10px;
+.vsm-rect-blue{
+    background-color: blue;
 }
 
-.chart-container-height{
-    height:300px ;
+/**
+ * table and anything
+ */
+.td-80{
+    width: 80px;
 }
+.td-120{
+    width: 120px;
+}
+
+/**
+ * alert
+ */
+.alert{
+    width: auto;
+}
+
+.vsm-status-icon{
+    float: right;
+}
+
 
 .vsm-label{
-    min-width: 130px;
+    min-width: 110px;
     display:inline-block;
     margin-right: 10px;
 }
