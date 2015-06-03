@@ -351,6 +351,7 @@ class StoragePoolController(wsgi.Controller):
         body_info.update({
             "quota": pool_dict.get("poolQuota"),
             "enable_quota": pool_dict.get("enablePoolQuota"),
+            "max_pg_num_per_osd": pool_dict.get("max_pg_num_per_osd") or 100,
         })
 
         return self.scheduler_api.create_storage_pool(context, body_info)

@@ -176,7 +176,8 @@ class CephDriver(object):
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
                     'replica_storage_group': replica_storage_group if replica_storage_group else None, 
-                    'quota': body.get('quota')
+                    'quota': body.get('quota'),
+                    'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
@@ -2110,7 +2111,8 @@ class CreateCrushMapDriver(object):
             osd_num = osd_num + int(res)
         init_node = db.init_node_get(context, service_id[0])
         zone_tag = True
-        if init_node['zone']['name'] == FLAGS.default_zone:
+        zone_cnt = len(db.zone_get_all(context))
+        if init_node['zone']['name'] == FLAGS.default_zone or zone_cnt <= 1:
             zone_tag = False 
         self._gen_crushmap_optimal()
         self._gen_device_osd(osd_num)
