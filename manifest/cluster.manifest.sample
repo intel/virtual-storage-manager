@@ -39,6 +39,9 @@ heartbeat_interval 5
 osd_heartbeat_interval 6
 osd_heartbeat_grace 20
 
+
+
+
 [ec_profiles]
 #format: [profile-name] [path-to-plugin] [plugin-name] [pg_num value] [json format key/value]
 #the key/value strings should not have spaces
