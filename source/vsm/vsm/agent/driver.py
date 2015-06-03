@@ -1318,11 +1318,14 @@ class CephDriver(object):
         return True
 
     def get_ceph_version(self):
-        out, err = utils.execute('ceph',
-                                 '--version',
-                                 run_as_root=True)
-        LOG.info("get_ceph_version:%s--%s"%(out,err))
-        out = out.split(' ')[2]
+        try:
+            out, err = utils.execute('ceph',
+                                     '--version',
+                                     run_as_root=True)
+            LOG.info("get_ceph_version:%s--%s"%(out,err))
+            out = out.split(' ')[2]
+        except:
+            out = ''
         return out
 
     def get_vsm_version(self):

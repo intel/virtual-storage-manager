@@ -79,10 +79,6 @@ def IOPS(request):
     IOPSdata = json.dumps(IOPS_dict)
     return HttpResponse(IOPSdata)
 
-def get_ceph_version():
-    (status, out) = commands.getstatusoutput('ceph --version')
-    out = out.split(' ')[2]
-    return out
 
 def get_vsm_version():
     try:
@@ -96,14 +92,12 @@ def get_vsm_version():
 #get the vsm_version
 def get_version():
     vsm_version = get_vsm_version()
-    ceph_version = get_ceph_version()
     try:
         vsm_summary = vsmapi.vsm_summary(None)
         uptime = get_time_delta2(vsm_summary.created_at)
     except:
         uptime = ''
     vsm_version = { "version": vsm_version,
-                    "ceph_version": ceph_version,
                     "update": uptime }
     versiondata = json.dumps(vsm_version)
     return versiondata
