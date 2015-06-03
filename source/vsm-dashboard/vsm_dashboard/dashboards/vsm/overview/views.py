@@ -44,9 +44,9 @@ class IndexView(ModalSummaryMixin, TemplateView):
 def version(request):
     return HttpResponse(get_version())
 
-#handle the vsm_status
-def status(request):
-    return HttpResponse(get_vsm_status())
+#handle the cluster data
+def cluster(request):
+    return HttpResponse(get_cluster())
 
 #handle the capactiy data
 def capacity(request):
@@ -88,8 +88,8 @@ def get_version():
     return versiondata
 
 
-#get the vsm_status data
-def get_vsm_status():
+#get the cluster data
+def get_cluster():
     cluster_summary = vsmapi.cluster_summary(None)
     cluster_name = vsmapi.get_cluster_list(None)[1]['clusters'][0]['name']
     #HEALTH_OK HEALTH_WARN  HEALTH_ERROR
@@ -163,17 +163,25 @@ def get_monitor():
 #get the MDS data
 def get_MDS():
     mds_summary = vsmapi.mds_summary(None)
-    mds_status = vsmapi.mds_status(None)
     ecpoch = mds_summary.epoch
-    MDS = []
-    update = "";
+    Up = mds_summary.num_up_mdses
+    In = mds_summary.num_in_mdses
+    Failed = mds_summary.num_failed_mdses
+    Stopped = mds_summary.num_stopped_mdses
+
+    mds_status = vsmapi.mds_status(None)
+    update = ""
     for mds in mds_status:
-        MDS.append(mds.name)
         update = get_time_delta(mds.updated_at)
 
     MDS_dict = {"epoch":ecpoch
-              ,"MDS":MDS
-              ,"update":update}
+              ,"update":update
+              ,"Up":Up
+              ,"In":In
+              ,"Failed":Failed
+              ,"Stopped":Stopped
+              ,"PoolData":"--"
+              ,"MetaData":"--"}
     MDSdata = json.dumps(MDS_dict)
     return MDSdata
 

@@ -26,7 +26,7 @@ require(
         cIOPs.setOption(GenerateLineOption());
         cLatency.setOption(GetAreaLineOption());
         
-    
+  
 	$.ajax({
             type: "get",
             url: "/dashboard/vsm/capcity/",
@@ -37,7 +37,7 @@ require(
                     cClusterGague.setOption(GenerateGaugeOption(data.value));
                 }
          });
-
+  
 	$.ajax({
             type: "get",
             url: "/dashboard/vsm/PG/",
@@ -48,31 +48,31 @@ require(
                 }
          });
        
-  
-       setInterval(function(){
-            $.ajax({
+
+    setInterval(function(){
+        $.ajax({
+	    type: "get",
+	    url: "/dashboard/vsm/capcity/",
+	    data: null,
+	    dataType:"json",
+	    success: function(data){
+	            option.series[0].data[0].value = data.value;
+	            cClusterGague.setOption(option, true);
+	        }
+	    });
+    },15000);
+   
+	setInterval(function(){
+	    $.ajax({
 		    type: "get",
-		    url: "/dashboard/vsm/capcity/",
+		    url: "/dashboard/vsm/PG/",
 		    data: null,
 		    dataType:"json",
 		    success: function(data){
-		            option.series[0].data[0].value = data.value;
-		            cClusterGague.setOption(option, true);
-		        }
-		    });
-        },15000);
-    
-	// setInterval(function(){
-	//     $.ajax({
-	// 	    type: "get",
-	// 	    url: "/dashboard/vsm/PG/",
-	// 	    data: null,
-	// 	    dataType:"json",
-	// 	    success: function(data){
-	// 	            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
-	// 	    	}
-	//   	  });
-	// },15000);
+		            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
+		    	}
+	  	  });
+	},15000);
 
 
         /*var IOPsInterval = setInterval(function (){
@@ -97,10 +97,10 @@ require(
 
 $(document).ready(function(){
     loadVersion();
-    loadVSMStatus();
+    loadClusterStatus();
     loadOSD();
     loadMonitor();
-    //loadMDS();
+    loadMDS();
     loadStorage();
 
     //Load Interval
@@ -110,10 +110,10 @@ $(document).ready(function(){
 
 function loadInterval(){
      setInterval(function(){
-        loadVSMStatus();
+        loadClusterStatus();
  	    loadOSD();
         loadMonitor();
-        //loadMDS();
+        loadMDS();
 	    loadStorage();
      } ,15000);
 }
@@ -131,11 +131,10 @@ function loadVersion(){
     });
 }
 
-
-function loadVSMStatus(){
+function loadClusterStatus(){
         $.ajax({
             type: "get",
-            url: "/dashboard/vsm/status/",
+            url: "/dashboard/vsm/cluster/",
             data: null,
             dataType: "json",
             success: function (data) {
@@ -193,15 +192,24 @@ function loadOSD(){
 	    $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
 	    $("#divOSD_OUTDOWN")[0].innerHTML = data.out_down;
 
+        //data.in_down = 0;
+        //data.out_up = 1;
+
+        //init
+        $("#divOSD")[0].style.border = "1px solid #ccc";
+        $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_health.png";
+        //when error
         if(data.in_down>0){
-		$("#imgOSD")[0].src = "/static/dashboard/img/info_error.png";
-                return;
+            $("#divOSD")[0].style.border = "1px solid red";
+            $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_error.png";
+            return;
 	    }
-            
-            if(data.out_up>0){
-                $("#imgOSD")[0].src = "/static/dashboard/img/info_warning.png";  
-                return;
-            }         
+        //when warnning
+        if(data.out_up>0){
+            $("#divOSD")[0].style.border = "1px solid orange";
+            $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_warning.png";
+            return;
+        }         
 	}
     });
 }
@@ -220,10 +228,10 @@ function loadMonitor(){
                 var rect =null;
                 $("#divMonitorRect").empty();
                 for(var i=0;i<data.quorum.length;i++) {
-                    //if (i == data.selMonitor)
-                    //    rect = "<div class='vsm-rect vsm-rect-1 vsm-rect-green'>"+data.quorum[i]+"</div>";
-                    //else
-                        rect = "<div class='vsm-rect vsm-rect-1'>"+data.quorum[i]+"</div>";
+                    if (i == data.selMonitor)
+                       rect = "<div class='vsm-rect vsm-rect-monitor vsm-rect-green'>"+data.quorum[i]+"</div>";
+                    else
+                        rect = "<div class='vsm-rect vsm-rect-monitor'>"+data.quorum[i]+"</div>";
                     $("#divMonitorRect").append(rect);
                 }
             }
@@ -237,20 +245,36 @@ function loadMDS(){
 	    data: null,
 	    dataType:"json",
 	    success: function(data){
-		//console.log(data)
-		$("#lblMDSEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
-		$("#lblMDSUpdate")[0].innerHTML ="Update:"+ data.update;
+    		console.log(data)
+    		$("#lblMDSEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
+    		$("#lblMDSUpdate")[0].innerHTML ="Update:"+ data.update;
 
-		var rect =null;
-		$("#divMDSRect").empty();
-		for(var i=0;i<data.MDS.length;i++) {
-		    //if (i == data.selMDS)
-		    //    rect = "<div class='vsm-rect vsm-rect-1 vsm-rect-green'>"+data.MDS[i]+"</div>";
-		    //else
-		        rect = "<div class='vsm-rect vsm-rect-1'>"+data.MDS[i]+"</div>";
-		    $("#divMDSRect").append(rect);
-		}
-	    }
+            //data.Failed = 1;
+            //data.Stopped = 3;
+
+            $("#lblMDSMetaData")[0].innerHTML = data.MetaData;
+            $("#lblMDSPoolData")[0].innerHTML = data.PoolData;
+            $("#divMDS_IN")[0].innerHTML = data.In;
+            $("#divMDS_UP")[0].innerHTML = data.Up;
+            $("#divMDS_FAILED")[0].innerHTML = data.Failed;
+            $("#divMDS_STOPPED")[0].innerHTML = data.Stopped;
+
+            //init
+            $("#divMDS")[0].style.border = "1px solid #ccc";
+            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_health.png";
+            //when error
+            if(data.Failed>0){
+                $("#divMDS")[0].style.border = "1px solid red";
+                $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_error.png";
+                return;
+            }
+            //when warnning
+            if(data.Stopped>0){
+                $("#divMDS")[0].style.border = "1px solid orange";
+                $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_warning.png";
+                return;
+            }         
+         }
 	});
 }
 
@@ -387,7 +411,7 @@ function GenerateGaugeOption(value) {
 
     return option;
 }
-/*
+
 function GetAreaLineOption(){
     option = {
         xAxis : [
@@ -461,7 +485,7 @@ function GetPieOption(AC,NAC){
 		{
 		    name:'PG Summary',
 		    type:'pie',
-		    radius : '80%',
+		    radius : '60%',
 		    center: ['50%', '50%'],
 		    data:[
 		        {value:AC, name:'Active+Clean'},
@@ -475,7 +499,6 @@ function GetPieOption(AC,NAC){
 	return option;
 
 }
-*/
 
 //clearInterval(timeTicket);
 //    timeTicket = setInterval(function () {

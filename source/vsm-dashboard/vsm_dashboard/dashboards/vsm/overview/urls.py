@@ -16,12 +16,12 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView
-from .views import version,status,capacity,OSD,monitor,MDS,storage,IOPS,PG
+from .views import version,cluster,capacity,OSD,monitor,MDS,storage,IOPS,PG
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^version/$', version, name='version'),
-    url(r'^status/$', status, name='status'),
+    url(r'^cluster/$', cluster, name='cluster'),
     url(r'^capcity/$', capacity, name='capcity'),
     url(r'^osd/$', OSD, name='OSD'),
     url(r'^monitor/$', monitor, name='monitor'),
