@@ -126,7 +126,7 @@ class ViewBuilder(common.ViewBuilder):
             ret = {
                 dict_root: {
                     'uptime': sum_data.get('uptime'),
-                    #'version': sum_data.get('version'),
+                    'ceph_version': sum_data.get('ceph_version'),
                     'created_at': sum_data.get('created_at'),
                     'is_ceph_active': sum_data.get('is_ceph_active'),
                     'updated_at': updated_at,
