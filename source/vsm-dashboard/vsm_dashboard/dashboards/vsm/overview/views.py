@@ -95,10 +95,12 @@ def get_version():
     try:
         vsm_summary = vsmapi.vsm_summary(None)
         uptime = get_time_delta2(vsm_summary.created_at)
+        ceph_version = vsm_summary.ceph_version
     except:
         uptime = ''
     vsm_version = { "version": vsm_version,
-                    "update": uptime }
+                    "update": uptime,
+                    "ceph_version":ceph_version}
     versiondata = json.dumps(vsm_version)
     return versiondata
 
@@ -183,6 +185,8 @@ def get_MDS():
     In = mds_summary.num_in_mdses
     Failed = mds_summary.num_failed_mdses
     Stopped = mds_summary.num_stopped_mdses
+    PoolData = mds_summary.data_pools
+    MetaData = mds_summary.metadata_pool
 
     mds_status = vsmapi.mds_status(None)
     update = ""
@@ -195,8 +199,8 @@ def get_MDS():
               ,"In":In
               ,"Failed":Failed
               ,"Stopped":Stopped
-              ,"PoolData":"--"
-              ,"MetaData":"--"}
+              ,"PoolData":PoolData
+              ,"MetaData":MetaData}
     MDSdata = json.dumps(MDS_dict)
     return MDSdata
 

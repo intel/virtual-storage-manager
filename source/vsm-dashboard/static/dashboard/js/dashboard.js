@@ -125,7 +125,9 @@ function loadVersion(){
 	data: null,
 	dataType:"json",
 	success: function(data){
-        $("#lblVersion")[0].innerHTML= "Version:"+data.version;
+        //console.log(data);
+        $("#lblCephVersion")[0].innerHTML = "Ceph Version:"+data.ceph_version;
+        $("#lblVersion")[0].innerHTML= "VSM Version:"+data.version;
 	    $("#lblVersionUpdate")[0].innerHTML ="Update:"+data.update;
 	   }
     });
