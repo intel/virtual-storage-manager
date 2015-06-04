@@ -78,6 +78,8 @@ class ViewBuilder(common.ViewBuilder):
                     'num_max_mdses': sum_data.get('max'),
                     'num_failed_mdses': sum_data.get('failed'),
                     'num_stopped_mdses': sum_data.get('stopped'),
+                    'metadata_pool': sum_data.get('metadata_pool'),
+                    'data_pools': sum_data.get('data_pools'),
                     'updated_at': updated_at,
                 }
             }
