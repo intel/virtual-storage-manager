@@ -36,7 +36,6 @@ function _generate_keys() {
     cp /tmp/__keys/server.csr /etc/apache2/ssl.csr/
     cp /tmp/__keys/server.crt /etc/apache2/ssl.crt/
 
-    cp /etc/apache2/default-vhost-ssl.conf /etc/apache2/default-server-ssl.conf
     grep -sq default-server-ssl.conf$ /etc/apache2/httpd.conf ||
       sed -i '/^Include .etc.apache2.default-server.conf/a Include /etc/apache2/default-server-ssl.conf' /etc/apache2/httpd.conf
 

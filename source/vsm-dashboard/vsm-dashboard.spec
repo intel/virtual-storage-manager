@@ -33,7 +33,7 @@ BuildRequires:  python-lockfile
 
 %if 0%{?suse_version}
 Requires:    apache2
-Requires:    python-Django
+Requires:    python-Django = 1.6.11
 Requires:    python-django_openstack_auth
 Requires:    python-django_compressor
 %else
@@ -93,7 +93,9 @@ rm -rf %{buildroot}
 
 %if 0%{?suse_version}
 install -d -m 755 %{buildroot}%{_sysconfdir}/apache2/conf.d
-install -p -D -m 755 tools/vsm-dashboard.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/vsm-dashboard.conf
+install -p -D -m 755 etc/apache2/conf.d/vsm-dashboard.conf %{buildroot}%{_sysconfdir}/apache2/conf.d/vsm-dashboard.conf
+install -p -D -m 755 etc/apache2/default-server-ssl.conf %{buildroot}%{_sysconfdir}/apache2/default-server-ssl.conf
+install -p -D -m 755 usr/share/vsm-dashboard/vsm_dashboard/local/local_settings.py %{buildroot}%{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py
 %else
 install -d -m 755 %{buildroot}%{_sysconfdir}/httpd/conf.d
 install -p -D -m 755 tools/vsm-dashboard.conf %{buildroot}%{_sysconfdir}/httpd/conf.d/vsm-dashboard.conf
@@ -122,10 +124,15 @@ install -p -D -m 755 manage.py %{buildroot}%{_datadir}/vsm-dashboard/
 # configuration file
 #---------------------------
 
-#install -d -m 755 %{buildroot}%{_sysconfdir}/vsm-dashboard/
-#ln -sf %{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py %{_sysconfdir}/vsm-dashboard/local_settings
-#rm -rf %{buildroot}%{_sysconfdir}/vsm-dashboard/local_settings
-#ln -sf %{buildroot}%{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py %{buildroot}%{_sysconfdir}/vsm-dashboard/local_settings
+#install -d -m 755 %%{buildroot}%%{_sysconfdir}/vsm-dashboard/
+#ln -sf %%{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py %%{_sysconfdir}/vsm-dashboard/local_settings
+#rm -rf %%{buildroot}%%{_sysconfdir}/vsm-dashboard/local_settings
+#ln -sf %%{buildroot}%%{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py %%{buildroot}%%{_sysconfdir}/vsm-dashboard/local_settings
+
+%if 0%{?suse_version}
+#ln -sf %{_datadir}/vsm-dashboard/static/dashboard/img %{buildroot}%{_datadir}/vsm-dashboard/vsm_dashboard/static/dashboard/
+%fdupes %{buildroot}
+%endif
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -157,6 +164,7 @@ chown -R apache:apache %{_sysconfdir}/vsm-dashboard
 
 %if 0%{?suse_version}
 chown -R wwwrun:www %{_sysconfdir}/apache2/conf.d/vsm-dashboard.conf
+chown -R wwwrun:www %{_sysconfdir}/apache2/default-server-ssl.conf
 %else
 chown -R apache:apache %{_sysconfdir}/httpd/conf.d/vsm-dashboard.conf
 %endif
@@ -170,6 +178,7 @@ sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" %{_datadir}/vsm-dashboard/vsm_dashboard/
 %dir %{_sysconfdir}/apache2
 %dir %{_sysconfdir}/apache2/conf.d
 %config(noreplace) %attr(-, root, www) %{_sysconfdir}/apache2/conf.d/vsm-dashboard.conf
+%config(noreplace) %attr(-, root, www) %{_sysconfdir}/apache2/default-server-ssl.conf
 %else
 %dir %{_sysconfdir}/httpd/conf.d
 %config(noreplace) %attr(-, root, apache) %{_sysconfdir}/httpd/conf.d/vsm-dashboard.conf

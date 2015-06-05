@@ -17,16 +17,26 @@ BuildRequires:    python-SQLAlchemy
 BuildRequires:    python-sqlalchemy-migrate
 BuildRequires:    python-Routes
 BuildRequires:    python-PasteDeploy
+BuildRequires:    fdupes
+BuildRequires:    systemd-rpm-macros
+BuildRequires:    aaa_base
+# SLE 12
+%if 0%{?suse_version} == 1315
+BuildRequires:    python-cyordereddict
+%else
+BuildRequires:    python-ordereddict
+%endif
 %else
 BuildRequires:    MySQL-python
 BuildRequires:    python-sqlalchemy0.7
 BuildRequires:    python-routes1.12
 BuildRequires:    python-paste-deploy1.5
 BuildRequires:    python-migrate
-%endif
-
+BuildRequires:    python-amqplib
 BuildRequires:    python-importlib
 BuildRequires:    python-ordereddict
+%endif
+
 BuildRequires:    python-pbr
 BuildRequires:    python-decorator
 BuildRequires:    python-tempita
@@ -56,16 +66,28 @@ Requires:    python-SQLAlchemy
 Requires:    python-sqlalchemy-migrate
 Requires:    python-Routes
 Requires:    python-PasteDeploy
+Requires:    btrfsprogs
+Requires:    logrotate
+# SLE 12
+%if 0%{?suse_version} == 1315
+Requires:    python-cyordereddict
+%else
+Requires:    python-ordereddict
+%endif
+%{?systemd_requires}
 %else
 Requires:    MySQL-python
 Requires:    python-sqlalchemy0.7
 Requires:    python-routes1.12
 Requires:    python-paste-deploy1.5
 Requires:    python-migrate
-%endif
-
+Requires:    btrfs-progs
+Requires:    mod_ssl
+Requires:    python-amqplib
 Requires:    python-importlib
 Requires:    python-ordereddict
+%endif
+
 Requires:    python-pbr
 Requires:    python-decorator
 Requires:    python-tempita
@@ -191,6 +213,7 @@ install -p -D -m 755 etc/systemd/vsm-api.service %{buildroot}%{_unitdir}/vsm-api
 install -p -D -m 755 etc/systemd/vsm-conductor.service %{buildroot}%{_unitdir}/vsm-conductor.service
 install -p -D -m 755 etc/systemd/vsm-scheduler.service %{buildroot}%{_unitdir}/vsm-scheduler.service
 
+install -d -m 755 %{buildroot}%{_tmpfilesdir}
 install -m 0644 -D etc/systemd/vsm.tmpfiles.d %{buildroot}/%{_tmpfilesdir}/%{name}.conf
 %else
 #---------------------------
@@ -267,6 +290,21 @@ fi
 
 exit 0
 
+%post
+%if 0%{?suse_version}
+%service_add_post vsm-physical.service vsm-agent.service vsm-api.service vsm-scheduler.service vsm-conductor.service
+%endif
+
+%preun
+%if 0%{?suse_version}
+%service_del_preun vsm-physical.service vsm-agent.service vsm-api.service vsm-scheduler.service vsm-conductor.service
+%endif
+
+%postun
+%if 0%{?suse_version}
+%service_del_postun vsm-physical.service vsm-agent.service vsm-api.service vsm-scheduler.service vsm-conductor.service
+%endif
+
 
 %files
 %defattr(-,root,root,-)
@@ -297,11 +335,17 @@ exit 0
 
 %if 0%{?suse_version}
 %dir %{_unitdir}
-%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-physical.service
-%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-agent.service
-%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-api.service
-%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-conductor.service
-%config(noreplace) %attr(-, root, vsm) %{_unitdir}/vsm-scheduler.service
+%attr(-, root, root) %{_unitdir}/vsm-physical.service
+%attr(-, root, root) %{_unitdir}/vsm-agent.service
+%attr(-, root, root) %{_unitdir}/vsm-api.service
+%attr(-, root, root) %{_unitdir}/vsm-conductor.service
+%attr(-, root, root) %{_unitdir}/vsm-scheduler.service
+%attr(-, root, root) %{_sbindir}/rcvsm-physical
+%attr(-, root, root) %{_sbindir}/rcvsm-agent
+%attr(-, root, root) %{_sbindir}/rcvsm-api
+%attr(-, root, root) %{_sbindir}/rcvsm-conductor
+%attr(-, root, root) %{_sbindir}/rcvsm-scheduler
+%dir %{_tmpfilesdir}
 %{_tmpfilesdir}/%{name}.conf
 %else
 %dir %{_initrddir}
