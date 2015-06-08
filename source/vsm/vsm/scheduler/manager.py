@@ -1284,6 +1284,32 @@ class SchedulerManager(manager.Manager):
             return False
 
     @utils.single_lock
+    def osd_add(self, context, osd_id):
+        LOG.info('scheduler manager:osd_add')
+        osd = db.osd_state_get(context, osd_id)
+        init_node = db.init_node_get_by_service_id(context, \
+                                                 osd['service_id'])
+        if init_node['status'] == 'Active':
+            try:
+                self._agent_rpcapi.osd_add(context, osd_id, init_node['host'])
+                self._agent_rpcapi.update_osd_state(context, init_node['host'])
+            except rpc_exc.Timeout:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart rpc timeout')
+                LOG.error('ERROR: osd_add rpc timeout')
+            except rpc_exc.RemoteError:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart rpc remote error')
+                LOG.error('ERROR: osd_add rpc remote error')
+            except:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart')
+                LOG.error('ERROR: osd_add')
+                raise
+        else:
+            return False
+
+    @utils.single_lock
     def osd_restore(self, context, osd_id):
         LOG.info('osd_restoree osd_id = %s' % osd_id)
         osd = db.osd_state_get(context, osd_id)

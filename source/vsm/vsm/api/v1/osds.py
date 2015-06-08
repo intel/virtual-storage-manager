@@ -193,6 +193,15 @@ class Controller(wsgi.Controller):
         self.scheduler_api.osd_restore(context, id)
         return webob.Response(status_int=202)
 
+    @wsgi.response(202)
+    @wsgi.serializers(xml=OSDsTemplate)
+    @wsgi.action('add')
+    def _action_add(self, req, id, body):
+        context = req.environ['vsm.context']
+        LOG.info("osd_add osd_id = %s" % id)
+        self.scheduler_api.osd_add(context, id)
+        return webob.Response(status_int=202)
+
     def summary(self, req, cluster_id = None):
         #LOG.info('osd-summary body %s ' % body)
         context = req.environ['vsm.context']

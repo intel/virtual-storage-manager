@@ -3265,6 +3265,16 @@ def osd_state_get_by_osd_name_and_service_id_and_cluster_id(\
         first()
     return result
 
+def osd_state_get_by_device_id_and_service_id_and_cluster_id(\
+        context, device_id, service_id, cluster_id):
+    result = model_query(
+        context, models.OsdState).\
+        filter_by(device_id=device_id).\
+        filter_by(service_id=service_id).\
+        filter_by(cluster_id=cluster_id).\
+        first()
+    return result
+
 def osd_state_count_by_storage_group_id(context, storage_group_id):
     result = model_query(
         context, models.OsdState, read_deleted="no").\

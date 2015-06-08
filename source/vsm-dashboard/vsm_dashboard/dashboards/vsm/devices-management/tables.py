@@ -38,6 +38,7 @@ LOG = logging.getLogger(__name__)
 
 ACTIVE_STATES = ("Present",)
 REMOVED_STATES = ("Removed",)
+UNINIT_STATES = ("Uninitialized")
 
 class UpdateRow(tables.Row):
     ajax = True
@@ -129,6 +130,34 @@ class RestoreOsdsAction(tables.BatchAction):
             redirect = reverse(self.redirect_url)
             exceptions.handle(request, msg, redirect=redirect)
 
+class AddOsdsAction(tables.BatchAction):
+    name = "Add_osds"
+    action_present = _("Add")
+    action_past = _("Scheduled add of")
+    data_type_singular = _("Osd")
+    data_type_plural = _("Osds")
+    classes = ('btn-danger',)
+    redirect_url = "horizon:vsm:devices-management:index"
+
+    def allowed(self, request, osd=None):
+        if osd is not None:
+            if osd['vsm_status'] not in UNINIT_STATES:
+                msg = _('Only osd with VSM status "%s" will be added'%UNINIT_STATES)
+                messages.error(request, msg)
+                return False
+        return True
+
+    def action(self, request, obj_id):
+        obj = self.table.get_object_by_id(obj_id)
+        name = self.table.get_object_display(obj)
+        try:
+            vsmapi.add_osd_from_node_in_cluster(request, obj_id)
+        except Exception:
+            msg = _('Error adding %s.' % name)
+            LOG.info(msg)
+            redirect = reverse(self.redirect_url)
+            exceptions.handle(request, msg, redirect=redirect)
+
 STATUS_DISPLAY_CHOICES = (
     ("removing", "Removing"),
     ("restarting", "Restarting"),
@@ -176,7 +205,7 @@ class OsdsTable(tables.DataTable):
         name = "osds"
         verbose_name = _("Device List")
         table_actions = (RestartOsdsAction, RemoveOsdsAction, \
-                         RestoreOsdsAction)
+                         RestoreOsdsAction,AddOsdsAction)
         status_columns = ['vsm_status']
         row_class = UpdateRow
 
@@ -191,4 +220,5 @@ class OsdsTable(tables.DataTable):
 
     def get_object_display(self, obj):
         return obj["osd"]
+
 

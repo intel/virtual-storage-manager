@@ -156,6 +156,14 @@ class AgentManager(manager.Manager):
         device_dict['fs_type'] = 'xfs'
         device_dict['total_capacity_kb'] = 0
         self._drive_num_count = 0
+        # Get zone_id
+        zone_id = 0
+        zone_ref = db.zone_get_by_name(self._context, self._node_info['zone'])
+        if zone_ref:
+            zone_id = zone_ref['id']
+        else:
+            LOG.error("Can't find the zone in DB!")
+            raise
 
         for storage_class in self._node_info["storage_class"]:
             device_type = storage_class['name']
@@ -179,7 +187,23 @@ class AgentManager(manager.Manager):
                         if not device_ref:
                             device_dict['used_capacity_kb'] = 0
                             device_dict['avail_capacity_kb'] = 0
-                            db.device_create(self._context, device_dict)
+                            dev = db.device_create(self._context, device_dict)
+                            LOG.info("storage_group_ref=%s=="%(dir(storage_group_ref)))
+                            osd_states_dict = {
+                                'osd_name':'osd.%s.%s'%(FLAGS.vsm_status_uninitialized, dev.id),
+                                'device_id': dev.id,
+                                'storage_group_id': storage_group_ref.id,
+                                'service_id':self._service_id,
+                                'cluster_id':self._cluster_id,
+                                'state':FLAGS.vsm_status_uninitialized,
+                                'operation_status':FLAGS.vsm_status_uninitialized,
+                                'weight':'0',
+                                'public_ip':'',
+                                'cluster_ip':'',
+                                'zone_id':zone_id,
+
+                            }
+                            db.osd_state_create(self._context, osd_states_dict)
                     except exception.UpdateDBError, e:
                         LOG.error('%s:%s' % (e.code, e.message))
             else:
@@ -247,12 +271,14 @@ class AgentManager(manager.Manager):
                                              FLAGS.agent_topic)
             self._service_id = service_ref['id']
 
-        self._write_info_into_devices()
-
         # Get cluster_id
         cluster_ref = self._get_cluster_ref()
         cluster_id = cluster_ref['id']
         self._cluster_id = cluster_id
+
+        self._write_info_into_devices()
+
+
         cluster_id_file = os.path.join(FLAGS.state_path, 'cluster_id')
         utils.write_file_as_root(cluster_id_file, self._cluster_id, 'w')
         # Get zone_id
@@ -832,6 +858,9 @@ class AgentManager(manager.Manager):
     def osd_restart(self, context, osd_id):
         self.ceph_driver.osd_restart(context, osd_id)
         return True
+
+    def osd_add(self, context, osd_id):
+        return self.ceph_driver.add_osd(context, host_id=None, osd_id_in=osd_id)
 
     def osd_restore(self, context, osd_id):
         self.ceph_driver.osd_restore(context, osd_id)

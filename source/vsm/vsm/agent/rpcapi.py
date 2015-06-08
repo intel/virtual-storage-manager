@@ -299,6 +299,15 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                       topic, version='1.0', timeout=6000)
         return res
 
+    def osd_add(self, context, osd_id, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        #self.test_service(context, topic)
+        res = self.call(context,
+                      self.make_msg('osd_add',
+                                    osd_id=osd_id),
+                      topic, version='1.0', timeout=6000)
+        return res
+
     def osd_restore(self, context, osd_id, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         #self.test_service(context, topic)

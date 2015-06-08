@@ -127,6 +127,11 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         version='1.0', timeout=6000)
         return ret
 
+    def osd_add(self, ctxt, body):
+        ret = self.call(ctxt, self.make_msg('osd_add', osd_id=body), \
+                        version='1.0', timeout=6000)
+        return ret
+
     def osd_restore(self, ctxt, body):
         ret = self.call(ctxt, self.make_msg('osd_restore', osd_id=body), \
                         version='1.0', timeout=6000)
