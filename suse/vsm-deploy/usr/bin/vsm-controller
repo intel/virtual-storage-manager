@@ -221,7 +221,7 @@ VSM_CONTROLLER_IP=${VSM_CONTROLLER_IP:-$HOST_IP}
 
 if [[ $VSM_ROLE == "controller" ]]; then
     file=/etc/vsmdeploy/deployrc
-    cp -rf $TOPDIR/tools/controllerrc $file
+    cp -rf /usr/lib/vsm/tools/controllerrc $file
     sed -i "s,%CONTROLLER_IP%,$VSM_CONTROLLER_IP,g" $file
     set_password MYSQL_ROOT_PASSWORD
     set_password RABBITMQ_PASSWORD
@@ -238,7 +238,7 @@ fi
 
 if [[ $VSM_ROLE == "allinone" ]]; then
     file=/etc/vsmdeploy/deployrc
-    cp -rf $TOPDIR/tools/allinonerc $file
+    cp -rf /usr/lib/vsm/tools/allinonerc $file
     sed -i "s,%CONTROLLER_IP%,$VSM_CONTROLLER_IP,g" $file
     set_password MYSQL_ROOT_PASSWORD
     set_password RABBITMQ_PASSWORD
@@ -252,4 +252,4 @@ if [[ $VSM_ROLE == "allinone" ]]; then
     set_password VSM_HTTPS_PASSWORD
 fi
 
-[[ -e /usr/local/bin/vsm-installer ]] && vsm-installer /etc/vsmdeploy/deployrc
+vsm-installer /etc/vsmdeploy/deployrc

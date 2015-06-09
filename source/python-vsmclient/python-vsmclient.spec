@@ -17,7 +17,11 @@ BuildRequires:    python-argparse
 BuildRequires:    python-prettytable
 BuildRequires:    python-requests
 BuildRequires:    python-simplejson
+%if 0%{?suse_version}
+BuildRequires:    fdupes
+%else
 Requires:         python-httplib2
+%endif
 Requires:         python-prettytable
 Requires:         python-setuptools
 
@@ -40,11 +44,16 @@ rm -rf python_vsmclient.egg-info
 # Delete tests
 rm -fr %{buildroot}%{python_sitelib}/tests
 
+%if 0%{?suse_version}
+%fdupes %{buildroot}
+%endif
+
 %files
 %doc LICENSE
 %{_bindir}/vsm
 %{python_sitelib}/vsmclient
 %{python_sitelib}/*.egg-info
+
 
 %changelog
 * Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2

@@ -4,7 +4,7 @@ Name:           vsm-dashboard
 Version:	    2015.01
 Release:	    1.0%{?dist}
 Url:            http://intel.com/itflex
-License:        Apache 2.0
+License:        Apache-2.0
 Group:          Development/Languages/Python
 Source:		    %{name}-%{version}.tar.gz
 BuildRoot:	    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -17,6 +17,7 @@ BuildRequires:    python-django_compressor
 BuildRequires:    python-Django
 BuildRequires:    python-django_openstack_auth
 BuildRequires:    python-pytz
+BuildRequires:    fdupes
 %else
 BuildRequires:  MySQL-python
 BuildRequires:  python-django-compressor
@@ -36,28 +37,34 @@ Requires:    apache2
 Requires:    python-Django = 1.6.11
 Requires:    python-django_openstack_auth
 Requires:    python-django_compressor
+#Requires:    libapr-util1
+Requires:    apache2
+Requires:    python-pyparsing
+Requires:    python-backports.ssl_match_hostname
+Requires:    python-horizon
 %else
 Requires:    Django14
 Requires:    python-django-openstack-auth
 Requires:    python-django-compressor
-%endif
 
 Requires:    apr
 Requires:    apr-util
 Requires:    apr-util-ldap
 Requires:    httpd
 Requires:    httpd-tools
-Requires:    mod_wsgi
 Requires:    pyparsing
-Requires:    python-argparse
 Requires:    python-backports
 Requires:    python-backports-ssl_match_hostname
+Requires:    python-django-horizon
+Requires:    python-httplib2
+Requires:    python-urllib3
+%endif
+Requires:    mod_wsgi
+Requires:    python-argparse
 Requires:    python-chardet
 Requires:    python-cliff
 Requires:    python-cmd2
 Requires:    python-django-appconf
-Requires:    python-django-horizon
-Requires:    python-httplib2
 Requires:    python-iso8601
 Requires:    python-jsonschema
 Requires:    python-keyring
@@ -68,7 +75,6 @@ Requires:    python-prettytable
 Requires:    python-requests
 Requires:    python-simplejson
 Requires:    python-six
-Requires:    python-urllib3
 Requires:    python-versiontools
 Requires:    python-warlock
 Requires:    python-webob
@@ -212,19 +218,21 @@ sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" %{_datadir}/vsm-dashboard/vsm_dashboard/
 %else
 %config(noreplace) %attr(-, apache, apache) %{_datadir}/vsm-dashboard/vsm_dashboard/local/local_settings.py
 %endif
-##%dir %attr(0755, apache, apache) %{_datadir}/vsm-dashboard/vsm_dashboard
-##%{_datadir}/vsm-dashboard/vsm_dashboard/*
+##%%dir %%attr(0755, apache, apache) %%{_datadir}/vsm-dashboard/vsm_dashboard
+##%%{_datadir}/vsm-dashboard/vsm_dashboard/*
 
-##%dir %attr(0755, apache, apache) %{_datadir}/vsm-dashboard/static
-##%{_datadir}/vsm-dashboard/static/*
-##%config(noreplace) %attr(-, root, apache) %{_datadir}/vsm-dashboard/manage.py
+##%%dir %%attr(0755, apache, apache) %%{_datadir}/vsm-dashboard/static
+##%%{_datadir}/vsm-dashboard/static/*
+##%%config(noreplace) %%attr(-, root, apache) %%{_datadir}/vsm-dashboard/manage.py
 
-##%dir %attr(0755, apache, apache) %{_sysconfdir}/vsm-dashboard/
-##%config(noreplace) %attr(-, root, apache) %{_sysconfdir}/vsm-dashboard/local_settings
+##%%dir %%attr(0755, apache, apache) %%{_sysconfdir}/vsm-dashboard/
+##%%config(noreplace) %%attr(-, root, apache) %%{_sysconfdir}/vsm-dashboard/local_settings
 
-##%{_sysconfdir}/vsm-dashboard/*
+##%%{_sysconfdir}/vsm-dashboard/*
 
 %changelog
+* Thu May 28 2015 Eric Jackson <ejackson@suse.com> 2015.01
+- distribution specific packages
 * Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
 - Initial release
 

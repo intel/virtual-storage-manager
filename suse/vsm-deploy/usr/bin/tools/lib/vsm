@@ -64,7 +64,7 @@ done
 
 [[ -d /etc/vsm ]] && rm -rf /etc/vsm/*
 mkdir -p /etc/vsm
-cp -rf $TOPDIR/tools/etc/vsm/* /etc/vsm/
+cp -rf /usr/lib/vsm/tools/etc/vsm/* /etc/vsm/
 
 mysql_cmd "DROP DATABASE IF EXISTS vsm;"
 
@@ -127,7 +127,7 @@ fi
 
 [[ -d /etc/vsm ]] && rm -rf /etc/vsm/*
 mkdir -p /etc/vsm
-cp -rf $TOPDIR/tools/etc/vsm/* /etc/vsm/
+cp -rf /usr/lib/vsm/tools/etc/vsm/* /etc/vsm/
 cp -rf /etc/vsm/vsm.conf.sample /etc/vsm/vsm.conf
 
 file=/etc/vsm/api-paste.ini

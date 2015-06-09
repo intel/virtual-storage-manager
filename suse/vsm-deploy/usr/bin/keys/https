@@ -12,7 +12,7 @@
 function _generate_keys() {
     mkdir -p /tmp/__keys
     for n in exp_key exp_sec exp_csr exp_crt; do
-        cp -rf /usr/local/bin/keys/$n /tmp/__keys
+        cp -rf /usr/lib/vsm/keys/$n /tmp/__keys
     done
 
     mkdir -p /tmp/__keys
@@ -68,7 +68,7 @@ function _generate_keys() {
 function setup_https() {
     old_dir=`pwd`
     host_name=`hostname` 
-    sed -i "s,%HOSTNAME%,$host_name,g" /usr/local/bin/keys/exp_csr
+    sed -i "s,%HOSTNAME%,$host_name,g" /usr/lib/vsm/keys/exp_csr
     _generate_keys
 
     cd $old_dir

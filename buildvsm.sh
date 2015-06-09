@@ -69,7 +69,6 @@ else
 fi
 
 TEMP_VSM=`mktemp`; rm -rfv $TEMP_VSM >/dev/null; mkdir -p $TEMP_VSM;
-TEMP_VSM=/tmp/temp_vsm
 mkdir -p $TEMP_VSM/release/$VERSION-$DATE
 cp -rf * $TEMP_VSM
 cp -rf .lib $TEMP_VSM
@@ -131,7 +130,7 @@ function create_release() {
 
 create_release
 
-#rm -rf $TEMP_VSM
+rm -rf $TEMP_VSM
 
 set +o xtrace
 

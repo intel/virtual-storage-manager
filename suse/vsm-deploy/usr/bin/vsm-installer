@@ -40,12 +40,12 @@ VSM_RC_FILE=$1
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 [[ -e $VSM_RC_FILE ]] && source $VSM_RC_FILE
-source $TOPDIR/tools/lib/services
-source $TOPDIR/tools/lib/mysql
-source $TOPDIR/tools/lib/ntp
+source /usr/lib/vsm/tools/lib/services
+source /usr/lib/vsm/tools/lib/mysql
+source /usr/lib/vsm/tools/lib/ntp
 
-for n in `ls $TOPDIR/tools/lib/ | grep -v services | grep -v manifest| grep -v check`; do
-    source $TOPDIR/tools/lib/$n
+for n in `ls /usr/lib/vsm/tools/lib/ | grep -v services | grep -v manifest| grep -v check`; do
+    source /usr/lib/vsm/tools/lib/$n
 done
 cluster_manifest
 
@@ -83,6 +83,9 @@ RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbit_password}
 RABBITMQ_NODENAME=${RABBITMQ_NODENAME:-deploy_rabbitmq}
 RABBITMQ_PORT=${RABBITMQ_PORT:-5673}
 
+# Uncomment guest access, remove trailing comma
+sed -i '/\%\% {loopback_users, \[\]},/s!%% {loopback_users, \[\]},!{loopback_users, \[\]}!' /etc/rabbitmq/rabbitmq.config
+
 setup_rabbitmq
 
 #---------------------------------------------
@@ -109,6 +112,8 @@ MYSQL_VSM_USER=${MYSQL_VSM_USER:-vsm}
 MYSQL_VSM_PASSWORD=${MYSQL_VSM_PASSWORD:-vsm_password}
 KEYSTONE_VSM_SERVICE_PASSWORD=${KEYSTONE_VSM_SERVICE_PASSWORD:-keystone_vsm_password}
 
+sed -i '/paste.filter_factory/s!keystoneclient.middleware!keystonemiddleware!' /etc/vsm/api-paste.ini
+
 setup_vsm
 echo "After setup vsm."
 systemctl enable vsm-api
@@ -132,7 +137,7 @@ echo "Begin to set up vsm dashboard."
 setup_vsmdash
 
 VSM_HTTPS_PASSWORD=${VSM_HTTPS_PASSWORD:-https_password}
-source $TOPDIR/keys/https
+source /usr/lib/vsm/keys/https
 setup_https
 
 

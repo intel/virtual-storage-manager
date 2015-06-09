@@ -60,13 +60,13 @@ service openstack-keystone stop
 
 #[[ -d /etc/keystone ]] && rm -rf /etc/keystone/*
 mkdir -p /etc/keystone/
-cp -rf $TOPDIR/tools/etc/keystone/* /etc/keystone/
+cp -rf /usr/lib/vsm/tools/etc/keystone/* /etc/keystone/
 
 chown -R keystone /etc/keystone
 
-chmod +x $TOPDIR/tools/script/openstack-db
-$TOPDIR/tools/script/openstack-db --drop --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
-$TOPDIR/tools/script/openstack-db --init --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
+chmod +x /usr/lib/vsm/tools/script/openstack-db
+/usr/lib/vsm/tools/script/openstack-db --drop --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
+/usr/lib/vsm/tools/script/openstack-db --init --password $MYSQL_KEYSTONE_PASSWORD --rootpw $MYSQL_ROOT_PASSWORD --service keystone --host $MYSQL_HOST
 
 #---------------------------------------------------
 # Change keystone.conf
@@ -103,7 +103,7 @@ fi
 # Init the databases and endpoints.
 #---------------------------------------------------
 
-cp -rf $TOPDIR/tools/script/keystone_data.sh /tmp/
+cp -rf /usr/lib/vsm/tools/script/keystone_data.sh /tmp/
 sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" /tmp/keystone_data.sh
 sed -i "s,%SERVICE_TOKEN%,$SERVICE_TOKEN,g" /tmp/keystone_data.sh
 sed -i "s,%ADMIN_PASSWORD%,$ADMIN_PASSWORD,g" /tmp/keystone_data.sh

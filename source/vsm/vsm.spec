@@ -3,7 +3,7 @@
 Name:             vsm
 Version:          2015.01
 Release:          1.0%{?dist}
-Summary:          VSM
+Summary:          Virtual Storage Manager for managing Ceph clusters
 
 Group:            Storage/System
 License:          Intel
@@ -40,7 +40,6 @@ BuildRequires:    python-ordereddict
 BuildRequires:    python-pbr
 BuildRequires:    python-decorator
 BuildRequires:    python-tempita
-BuildRequires:    python-amqplib
 BuildRequires:    python-anyjson
 BuildRequires:    python-argparse
 BuildRequires:    python-eventlet
@@ -91,7 +90,6 @@ Requires:    python-ordereddict
 Requires:    python-pbr
 Requires:    python-decorator
 Requires:    python-tempita
-Requires:    python-amqplib
 Requires:    python-anyjson
 Requires:    python-argparse
 Requires:    python-eventlet
@@ -110,13 +108,11 @@ Requires:    python-keystoneclient
 Requires:    python-oslo-config
 Requires:    numpy
 Requires:    ceph
-Requires:    btrfs-progs
 Requires:    xfsprogs
 Requires:    python-psutil
-Requires:    mod_ssl
 
 %description
-Intel VSM Storage System.
+Virtual Storage Manager (VSM) is software that Intel has developed to help manage Ceph clusters. VSM simplifies the creation and day-to-day management of Ceph cluster for cloud and datacenter storage administrators.
 
 %if 0%{?with_doc}
 %package doc
@@ -151,16 +147,22 @@ sed -i '/setup_requires/d; /install_requires/d; /dependency_links/d' setup.py
 
 %build
 
-mkdir -p %{buildroot}
 %{__python} setup.py build
 
 %install
 %{__python} setup.py install -O1 --skip-build --root %{buildroot}
 
+%if 0%{?suse_version}
+install -d -m 755 %{buildroot}/var/log/vsm/
+install -d -m 700 %{buildroot}/var/lib/vsm
+install -d -m 755 %{buildroot}/etc/vsm/
+install -d -m 755 %{buildroot}/etc/vsm/rootwrap.d
+%else
 mkdir -p %{buildroot}/var/log/vsm/
 mkdir -p %{buildroot}/var/lib/vsm
 mkdir -p %{buildroot}/etc/vsm/
 mkdir -p %{buildroot}/etc/vsm/rootwrap.d
+%endif
 
 #---------------------------
 # Log files
@@ -185,13 +187,18 @@ install -p -D -m 640 etc/vsm/policy.json %{buildroot}%{_sysconfdir}/vsm/policy.j
 install -p -D -m 640 etc/vsm/logging_sample.conf %{buildroot}%{_sysconfdir}/vsm/logging.conf
 install -p -D -m 640 etc/vsm/rootwrap.d/vsm.filters %{buildroot}%{_sysconfdir}/vsm/rootwrap.d/vsm.filters
 install -p -D -m 640 etc/sudoers.d/vsm %{buildroot}%{_sysconfdir}/sudoers.d/vsm
+
+%if 0%{?suse_version}
+install -p -D -m 640 etc/logrotate.d/vsm %{buildroot}%{_sysconfdir}/logrotate.d/vsm
+%else
 install -p -D -m 640 etc/logrotate.d/vsmceph %{buildroot}%{_sysconfdir}/logrotate.d/vsmceph
+%endif
 
 #---------------------------
 #  SSH Keys
 #---------------------------
 # TODO check this line whether is needed
-#cp -rf etc/vsm/*.sh %{buildroot}%{_sysconfdir}/vsm/
+#cp -rf etc/vsm/*.sh %%{buildroot}%%{_sysconfdir}/vsm/
 
 
 #---------------------------
@@ -207,11 +214,19 @@ cp -rf etc/vsm/prepools %{buildroot}%{_sysconfdir}/vsm/
 # usr/lib/systemd/system
 #---------------------------
 install -d -m 755 %{buildroot}%{_unitdir}
-install -p -D -m 755 etc/systemd/vsm-physical.service %{buildroot}%{_unitdir}/vsm-physical.service
-install -p -D -m 755 etc/systemd/vsm-agent.service %{buildroot}%{_unitdir}/vsm-agent.service
-install -p -D -m 755 etc/systemd/vsm-api.service %{buildroot}%{_unitdir}/vsm-api.service
-install -p -D -m 755 etc/systemd/vsm-conductor.service %{buildroot}%{_unitdir}/vsm-conductor.service
-install -p -D -m 755 etc/systemd/vsm-scheduler.service %{buildroot}%{_unitdir}/vsm-scheduler.service
+install -p -D -m 644 usr/lib/systemd/system/vsm-physical.service %{buildroot}%{_unitdir}/vsm-physical.service
+install -p -D -m 644 usr/lib/systemd/system/vsm-agent.service %{buildroot}%{_unitdir}/vsm-agent.service
+install -p -D -m 644 usr/lib/systemd/system/vsm-api.service %{buildroot}%{_unitdir}/vsm-api.service
+install -p -D -m 644 usr/lib/systemd/system/vsm-conductor.service %{buildroot}%{_unitdir}/vsm-conductor.service
+install -p -D -m 644 usr/lib/systemd/system/vsm-scheduler.service %{buildroot}%{_unitdir}/vsm-scheduler.service
+
+
+install -d -m 755 %{buildroot}%{_sbindir}
+ln -sf %_sbindir/service %{buildroot}%_sbindir/rcvsm-physical
+ln -sf %_sbindir/service %{buildroot}%_sbindir/rcvsm-agent
+ln -sf %_sbindir/service %{buildroot}%_sbindir/rcvsm-api
+ln -sf %_sbindir/service %{buildroot}%_sbindir/rcvsm-conductor
+ln -sf %_sbindir/service %{buildroot}%_sbindir/rcvsm-scheduler
 
 install -d -m 755 %{buildroot}%{_tmpfilesdir}
 install -m 0644 -D etc/systemd/vsm.tmpfiles.d %{buildroot}/%{_tmpfilesdir}/%{name}.conf
@@ -249,6 +264,21 @@ install -p -D -m 755 bin/agent-token %{buildroot}%{_bindir}/agent-token
 install -p -D -m 755 bin/admin-token %{buildroot}%{_bindir}/admin-token
 install -p -D -m 755 bin/vsm-backup %{buildroot}%{_bindir}/vsm-backup
 install -p -D -m 755 bin/vsm-restore %{buildroot}%{_bindir}/vsm-restore
+
+%if 0%{?suse_version}
+install -p -D -m 755 bin/cluster_manifest %{buildroot}%{_usr}/bin/cluster_manifest
+install -p -D -m 755 bin/server_manifest  %{buildroot}%{_usr}/bin/server_manifest
+install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/bin/refresh-osd-status
+install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/bin/refresh-cluster-status
+install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/bin/getip
+install -p -D -m 755 bin/import_ceph_conf  %{buildroot}%{_usr}/bin/import_ceph_conf
+install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
+
+install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/bin/get_storage
+install -p -D -m 644 tools/spot_info_list %{buildroot}%{_usr}/bin/spot_info_list
+install -p -D -m 755 tools/vsm-reporter.py %{buildroot}%{_usr}/bin/vsm-reporter
+install -p -D -m 755 bin/intergrate-cluster %{buildroot}%{_usr}/bin/intergrate-cluster
+%else
 install -p -D -m 755 bin/cluster_manifest %{buildroot}%{_usr}/local/bin/cluster_manifest
 install -p -D -m 755 bin/server_manifest  %{buildroot}%{_usr}/local/bin/server_manifest
 install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/local/bin/refresh-osd-status
@@ -261,6 +291,11 @@ install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/local/bin/get_storage
 install -p -D -m 755 tools/spot_info_list %{buildroot}%{_usr}/local/bin/spot_info_list
 install -p -D -m 755 tools/vsm-reporter.py %{buildroot}%{_usr}/local/bin/vsm-reporter
 install -p -D -m 755 bin/intergrate-cluster %{buildroot}%{_usr}/local/bin/intergrate-cluster
+%endif
+
+%if 0%{?suse_version}
+%fdupes %{buildroot}
+%endif
 
 %pre
 getent group vsm >/dev/null || groupadd -r vsm --gid 165
@@ -268,8 +303,8 @@ if ! getent passwd vsm >/dev/null; then
   useradd -u 165 -r -g vsm -G vsm,nobody -d %{_sharedstatedir}/vsm -s /sbin/nologin -c "Vsm Storage Services" vsm
 fi
 %if 0%{?suse_version}
-  # added to install and files sections
-  # includes vsm.tmpfiles.d for /var/run/vsm
+%service_add_pre vsm-physical.service vsm-agent.service vsm-api.service vsm-scheduler.service vsm-conductor.service
+install -d -m 755 %{buildroot}/var/run/vsm
 %else
 mkdir -p /var/run/vsm/
 mkdir -p /var/log/vsm/
@@ -311,14 +346,34 @@ exit 0
 %doc LICENSE doc
 %{python_sitelib}/*
 
+
+%dir %{_sysconfdir}/logrotate.d
+%if 0%{?suse_version}
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/logrotate.d/vsm
+%dir %attr(-, root, root) /var/log/vsm
+%dir %attr(-, root, root) /var/lib/vsm
+##%%dir %%attr(-, root, root) /var/run/vsm
+%dir %attr(-, root, root) /etc/vsm
+%dir %attr(-, root, root) /etc/vsm/rootwrap.d
+%dir %{_sysconfdir}/vsm
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/vsm.conf
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/ceph.conf.template
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/api-paste.ini
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/rootwrap.conf
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/policy.json
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/logging.conf
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/cache-tier.conf
+%dir %{_sysconfdir}/vsm/rootwrap.d
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/rootwrap.d/vsm.filters
+
+%dir %{_sysconfdir}/sudoers.d
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/sudoers.d/vsm
+%else
+%config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/logrotate.d/vsmceph
 %dir %attr(-, vsm, vsm) /var/log/vsm
 %dir %attr(-, vsm, vsm) /var/lib/vsm
 %dir %attr(-, vsm, vsm) /etc/vsm
 %dir %attr(-, vsm, vsm) /etc/vsm/rootwrap.d
-
-%dir %{_sysconfdir}/logrotate.d
-%config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/logrotate.d/vsmceph
-
 %dir %{_sysconfdir}/vsm
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/vsm.conf
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/ceph.conf.template
@@ -332,6 +387,8 @@ exit 0
 
 %dir %{_sysconfdir}/sudoers.d
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/sudoers.d/vsm
+%endif
+
 
 %if 0%{?suse_version}
 %dir %{_unitdir}
@@ -356,6 +413,39 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-scheduler
 %endif
 
+
+%if 0%{?suse_version}
+%attr(-, root, root) %{_bindir}/vsm-rootwrap
+%attr(-, root, root) %{_bindir}/vsm-physical
+%attr(-, root, root) %{_bindir}/vsm-agent
+%attr(-, root, root) %{_bindir}/vsm-api
+%attr(-, root, root) %{_bindir}/vsm-conductor
+%attr(-, root, root) %{_bindir}/vsm-all
+%attr(-, root, root) %{_bindir}/vsm-manage
+%attr(-, root, root) %{_bindir}/vsm-scheduler
+%attr(-, root, root) %{_bindir}/key
+%attr(-, root, root) %{_bindir}/auto_key_gen
+%attr(-, root, root) %{_bindir}/vsm-assist
+%attr(-, root, root) %{_bindir}/presentpool
+%attr(-, root, root) %{_bindir}/rbd_ls
+%attr(-, root, root) %{_bindir}/agent-token
+%attr(-, root, root) %{_bindir}/admin-token
+%attr(-, root, root) %{_bindir}/vsm-backup
+%attr(-, root, root) %{_bindir}/vsm-restore
+%attr(-, root, root) %{_bindir}/get_smart_info
+%attr(-, root, root) %{_bindir}/intergrate-cluster
+%attr(-, root, root) %{_usr}/bin/import_ceph_conf
+
+%attr(-, root, root) %{_usr}/bin/getip
+%attr(-, root, root) %{_usr}/bin/cluster_manifest
+%attr(-, root, root) %{_usr}/bin/server_manifest
+%attr(-, root, root) %{_usr}/bin/refresh-osd-status
+%attr(-, root, root) %{_usr}/bin/refresh-cluster-status
+
+%attr(-, root, root) %{_usr}/bin/get_storage
+%attr(-, root, root) %{_usr}/bin/spot_info_list
+%attr(-, root, root) %{_usr}/bin/vsm-reporter
+%else
 %dir %{_bindir}
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-rootwrap
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-physical
@@ -374,7 +464,8 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/admin-token
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-backup
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-restore
-
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/get_smart_info
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/intergrate-cluster
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/import_ceph_conf
 
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/getip
@@ -386,15 +477,22 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/get_storage
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/spot_info_list
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-reporter
+%endif
 
 #-----------------------------
 # Prepools
 #-----------------------------
 %dir %{_sysconfdir}/vsm/prepools
+%if 0%{?suse_version}
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/prepools/*
+%else
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/prepools/*
+%endif
 # TODO check this line whether needed
 
 %changelog
+* Thu May 28 2015 Eric Jackson <ejackson@suse.com> 2015.01
+- distribution specific packages, pathnames
 * Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
 - Initial release
 
