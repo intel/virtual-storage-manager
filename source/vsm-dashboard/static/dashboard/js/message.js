@@ -1,24 +1,28 @@
-//info warning success error
-function showMessage(tag,message){
+function showTip(tag,msg){
 	var style = "alert-info";
-	switch(tag){}{
+	switch(tag){
 		case "info":
-			style = "alert-info";
+			style="alert-info"
 			break;
 		case "warning":
-			style = "alert-warning";
+			style="alert-warning"
 			break;
 		case "success":
-			style = "alert-success";
+			style="alert-success"
 			break;
 		case "error":
-			style = "alert-error";
+			style="alert-danger "
 			break;
 	}
-	var html = " <div class='alert alert-block "+style+" fade in>";
-    html += "<a class='close' data-dismiss='alert' href='#''>&times;</a>";
-    html += "<p><strong>"+message+"<strong/></p>";
-    html += "</div>";
 
-    $(".messages")[0].innerHTML(html);
+	var html = "";
+	html += "<div class='alert " + style + " fade in'>";
+	html += "	<button type='button' class='close' data-dismiss='alert' aria-label='Close'>";
+	html += "		<span aria-hidden='true'>&times;</span>";
+	html += "	</button>";
+	html += " 	<p><strong>";
+	html += msg;
+	html += "	</strong><p>";
+	html += "</div>";
+	$(".messages").append(html);
 }

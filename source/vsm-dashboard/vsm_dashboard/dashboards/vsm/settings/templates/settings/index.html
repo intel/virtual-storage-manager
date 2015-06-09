@@ -77,44 +77,6 @@
 
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
-
-<script type="text/javascript">
-    $(".update").click(function(){
-        var setting_name = $(this).parent().parent().attr('name');
-        var setting_new_value = $(this).parent().parent().find('.new_value').val();
-        console.log(setting_new_value);
-        token = $("input[name=csrfmiddlewaretoken]").val();
-        modal_stack = $("#modal_wrapper .modal");
-        horizon.modals.modal_spinner(gettext("Working"));
-        horizon.ajax.queue({
-            data: JSON.stringify( {setting_name:setting_name, setting_value:setting_new_value} ),
-            type: "post",
-            dataType: "json",
-            url: "/dashboard/vsm/settings/update",
-            success: function (data) {
-                //prepare refresh status
-                if(data.status == "success"){
-                    console.log(data);
-                    location.reload();
-                }
-                else{
-                    horizon.alert('error', 'invalid parameter');
-                }
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                horizon.alert("error", "Network Error");
-                horizon.modals.spinner.modal('hide');
-            },
-            headers: {
-              "X-CSRFToken": token
-            },
-            complete: function(){
-                //
-                horizon.modals.spinner.modal('hide');
-            }
-        });
-    });
-</script>
+    <script src='{{ STATIC_URL }}dashboard/js/settings.js' type='text/javascript' charset='utf-8'></script>
 {% endblock %}
 
