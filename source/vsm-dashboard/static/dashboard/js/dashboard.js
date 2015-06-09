@@ -49,30 +49,30 @@ require(
          });
        
 
- //    setInterval(function(){
- //        $.ajax({
-	//     type: "get",
-	//     url: "/dashboard/vsm/capcity/",
-	//     data: null,
-	//     dataType:"json",
-	//     success: function(data){
-	//             option.series[0].data[0].value = data.value;
-	//             cClusterGague.setOption(option, true);
-	//         }
-	//     });
- //    },15000);
+     setInterval(function(){
+         $.ajax({
+	     type: "get",
+	     url: "/dashboard/vsm/capcity/",
+	     data: null,
+	     dataType:"json",
+	     success: function(data){
+	             option.series[0].data[0].value = data.value;
+	             cClusterGague.setOption(option, true);
+	         }
+	     });
+     },15000);
    
-	// setInterval(function(){
-	//     $.ajax({
-	// 	    type: "get",
-	// 	    url: "/dashboard/vsm/PG/",
-	// 	    data: null,
-	// 	    dataType:"json",
-	// 	    success: function(data){
-	// 	            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
-	// 	    	}
-	//   	  });
-	// },15000);
+	setInterval(function(){
+	     $.ajax({
+		    type: "get",
+		    url: "/dashboard/vsm/PG/",
+		    data: null,
+		    dataType:"json",
+		    success: function(data){
+		            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
+		    	}
+	   	  });
+	},15000);
 
 
         /*var IOPsInterval = setInterval(function (){
@@ -104,7 +104,7 @@ $(document).ready(function(){
     loadStorage();
 
     //Load Interval
-    //loadInterval();
+    loadInterval();
 })
 
 function loadInterval(){
