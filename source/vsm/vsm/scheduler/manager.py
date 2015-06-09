@@ -823,10 +823,12 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.stop_server(context,
                                                item['id'],
                                                res['host'])
-                cluster_id = res['cluster_id']
-                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
-                self._agent_rpcapi.update_osd_state(context,
-                                      active_monitor['host'])
+                try:
+                    cluster_id = res['cluster_id']
+                    active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+                    self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                except:
+                    pass
 
             except rpc_exc.Timeout:
                 self._update_server_list_status(context,
@@ -860,9 +862,12 @@ class SchedulerManager(manager.Manager):
             self._start_start(context, item['id'])
             try:
                 self._agent_rpcapi.start_server(context, item['id'], res['host'])
-                cluster_id = res['cluster_id']
-                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
-                self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                try:
+                    cluster_id = res['cluster_id']
+                    active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+                    self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                except:
+                    pass
             except rpc_exc.Timeout:
                 self._update_server_list_status(context,
                                                 server_list,

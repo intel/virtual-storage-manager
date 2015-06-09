@@ -111,7 +111,11 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         controller=self.resources['clusters'],
                         collection={'summary': 'get',
                                     'refresh': 'post',
-                                    'import_ceph_conf': 'post'},
+                                    'import_ceph_conf': 'post',
+                                    'intergrate': 'post',
+                                    'start_cluster': 'post',
+                                    'stop_cluster': 'post',
+                                    },
                         member={'action': 'post'})
 
         self.resources['servers'] = servers.create_resource(ext_mgr)

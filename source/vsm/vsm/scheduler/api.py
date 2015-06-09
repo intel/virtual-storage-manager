@@ -108,3 +108,8 @@ class API(object):
     def get_smart_info(self, context, body=None):
         return self.scheduler_rpcapi.get_smart_info(context, body)
 
+    def start_server(self, context, body=None):
+        return self.scheduler_rpcapi.start_server(context, body)
+
+    def stop_server(self, context, body=None):
+        return self.scheduler_rpcapi.stop_server(context, body)

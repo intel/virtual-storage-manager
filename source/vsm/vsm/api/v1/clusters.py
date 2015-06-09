@@ -143,6 +143,36 @@ class ClusterController(wsgi.Controller):
         LOG.info('Begin to call scheduler.intergrate_cluster')
         self.scheduler_api.intergrate_cluster(context)
 
+    def start_cluster(self, req, body=None):
+        """
+        start_cluster
+        """
+        LOG.info("CEPH_LOG start_cluster body=%s"%body )
+        context = req.environ['vsm.context']
+        cluster_id = body["cluster"]["id"]
+        if cluster_id:
+            nodes = db.init_node_get_by_cluster_id(context,cluster_id)
+        else:
+            nodes = db.init_node_get_all(context)
+        servers = {"servers":nodes}
+        self.scheduler_api.start_server(context,servers)
+        return {"message":"Success"}
+
+    def stop_cluster(self, req, body=None):
+        """
+        stop_cluster
+        """
+        LOG.info("CEPH_LOG stop_cluster body=%s"%body )
+        context = req.environ['vsm.context']
+        cluster_id = body["cluster"]["id"]
+        if cluster_id:
+            nodes = db.init_node_get_by_cluster_id(context,cluster_id)
+        else:
+            nodes = db.init_node_get_all(context)
+        servers = {"servers":nodes}
+        self.scheduler_api.stop_server(context,servers)
+        return {"message":"Success"}
+
     @wsgi.serializers(xml=ClustersTemplate)
     def show(self, req, id):
         """update cluster."""

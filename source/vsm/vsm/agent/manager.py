@@ -875,11 +875,13 @@ class AgentManager(manager.Manager):
         LOG.info("refresh all status")
         self.update_all_status(context)
         return True
+
     def intergrate_cluster_from_ceph(self, context):
         LOG.info("intergrate cluster from ceph")
         self.update_all_status(context)
         self.sync_osd_states_from_ceph(context)
         return True
+
     def sync_osd_states_from_ceph(self, context):
         osd_json = self.ceph_driver.get_osds_status()
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)

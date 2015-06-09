@@ -159,3 +159,15 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         self.make_msg('import_ceph_conf',
                                       cluster_id=cluster_id, ceph_conf_path=ceph_conf_path))
         return ret
+
+    def start_server(self, context, body=None):
+        ret = self.call(context,
+                        self.make_msg('start_server',
+                                      body=body))
+        return ret
+
+    def stop_server(self, context, body=None):
+        ret = self.call(context,
+                        self.make_msg('stop_server',
+                                      body=body))
+        return ret
