@@ -49,30 +49,30 @@ require(
          });
        
 
-    setInterval(function(){
-        $.ajax({
-	    type: "get",
-	    url: "/dashboard/vsm/capcity/",
-	    data: null,
-	    dataType:"json",
-	    success: function(data){
-	            option.series[0].data[0].value = data.value;
-	            cClusterGague.setOption(option, true);
-	        }
-	    });
-    },15000);
+ //    setInterval(function(){
+ //        $.ajax({
+	//     type: "get",
+	//     url: "/dashboard/vsm/capcity/",
+	//     data: null,
+	//     dataType:"json",
+	//     success: function(data){
+	//             option.series[0].data[0].value = data.value;
+	//             cClusterGague.setOption(option, true);
+	//         }
+	//     });
+ //    },15000);
    
-	setInterval(function(){
-	    $.ajax({
-		    type: "get",
-		    url: "/dashboard/vsm/PG/",
-		    data: null,
-		    dataType:"json",
-		    success: function(data){
-		            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
-		    	}
-	  	  });
-	},15000);
+	// setInterval(function(){
+	//     $.ajax({
+	// 	    type: "get",
+	// 	    url: "/dashboard/vsm/PG/",
+	// 	    data: null,
+	// 	    dataType:"json",
+	// 	    success: function(data){
+	// 	            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
+	// 	    	}
+	//   	  });
+	// },15000);
 
 
         /*var IOPsInterval = setInterval(function (){
@@ -104,9 +104,8 @@ $(document).ready(function(){
     loadStorage();
 
     //Load Interval
-    loadInterval();
+    //loadInterval();
 })
-
 
 function loadInterval(){
      setInterval(function(){
@@ -420,7 +419,7 @@ function GetAreaLineOption(){
             {
                 type : 'category',
                 boundaryGap : false,
-                data : ['周一','周二','周三','周四','周五','周六','周日']
+                data : ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
             }
         ],
         yAxis : [
@@ -436,37 +435,37 @@ function GetAreaLineOption(){
         },
         series : [
             {
-                name:'邮件营销',
+                name:'A',
                 type:'line',
-                stack: '总量',
+                stack: 'A',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
                 data:[120, 132, 101, 134, 90, 230, 210]
             },
             {
-                name:'联盟广告',
+                name:'B',
                 type:'line',
-                stack: '总量',
+                stack: 'B',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
                 data:[220, 182, 191, 234, 290, 330, 310]
             },
             {
-                name:'视频广告',
+                name:'C',
                 type:'line',
-                stack: '总量',
+                stack: 'C',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
                 data:[150, 232, 201, 154, 190, 330, 410]
             },
             {
-                name:'直接访问',
+                name:'D',
                 type:'line',
-                stack: '总量',
+                stack: 'D',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
                 data:[320, 332, 301, 334, 390, 330, 320]
             },
             {
-                name:'搜索引擎',
+                name:'E',
                 type:'line',
-                stack: '总量',
+                stack: 'E',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
                 data:[820, 932, 901, 934, 1290, 1330, 1320]
             }
