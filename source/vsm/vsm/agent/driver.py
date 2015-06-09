@@ -499,7 +499,14 @@ class CephDriver(object):
                 return False
         return True
 
-    def add_osd(self, context, host_id):
+    def add_osd(self, context, host_id, osd_id_in=None):
+
+        if osd_id_in is not None:
+            osd_obj = db.osd_get(context, osd_id_in)
+            host_obj =  db.init_node_get_by_device_id(context, osd_obj.device_id)
+            host_id = host_obj.id
+            LOG.info("begin to add osd %s from host %s"%(osd_obj.device_id,host_id))
+
         LOG.info('start to ceph osd on %s' % host_id)
         strg_list = self._conductor_api.\
             host_storage_groups_devices(context, host_id)
@@ -507,11 +514,17 @@ class CephDriver(object):
 
         #added_to_crushmap = False
         osd_cnt = len(strg_list)
+        if osd_id_in is not None:
+            osd_cnt = 1
         count = 0
+
         for strg in strg_list:
+            if osd_id_in is not None and strg.get("dev_id") != osd_obj.device_id:
+                continue
             LOG.info('>> Step 1: start to ceph osd %s' % strg)
             count = count + 1
-            self._conductor_api.init_node_update(context, host_id, {"status": "add_osd %s/%s"%(count,osd_cnt)})
+            if osd_id_in is  None:
+                self._conductor_api.init_node_update(context, host_id, {"status": "add_osd %s/%s"%(count,osd_cnt)})
             # Create osd from # ceph osd create
             stdout = utils.execute("ceph",
                                    "osd",
@@ -553,6 +566,8 @@ class CephDriver(object):
             osd_state['cluster_ip'] = strg['cluster_ip']
             osd_state['deleted'] = 0
             osd_state['zone_id'] = strg['zone_id']
+            if osd_id_in is not None:
+                db.osd_state_update(context,osd_id_in,osd_state)
 
             LOG.info('>> crush_dict  %s' % crush_dict)
             LOG.info('>> osd_conf_dict %s' % osd_conf_dict)

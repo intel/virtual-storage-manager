@@ -823,10 +823,12 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.stop_server(context,
                                                item['id'],
                                                res['host'])
-                cluster_id = res['cluster_id']
-                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
-                self._agent_rpcapi.update_osd_state(context,
-                                      active_monitor['host'])
+                try:
+                    cluster_id = res['cluster_id']
+                    active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+                    self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                except:
+                    pass
 
             except rpc_exc.Timeout:
                 self._update_server_list_status(context,
@@ -860,9 +862,12 @@ class SchedulerManager(manager.Manager):
             self._start_start(context, item['id'])
             try:
                 self._agent_rpcapi.start_server(context, item['id'], res['host'])
-                cluster_id = res['cluster_id']
-                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
-                self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                try:
+                    cluster_id = res['cluster_id']
+                    active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+                    self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                except:
+                    pass
             except rpc_exc.Timeout:
                 self._update_server_list_status(context,
                                                 server_list,
@@ -1279,6 +1284,32 @@ class SchedulerManager(manager.Manager):
                 #self._conductor_api.init_node_update_status_by_id(context,
                 #    init_node['id'], 'ERROR: osd_restart')
                 LOG.error('ERROR: osd_restart')
+                raise
+        else:
+            return False
+
+    @utils.single_lock
+    def osd_add(self, context, osd_id):
+        LOG.info('scheduler manager:osd_add')
+        osd = db.osd_state_get(context, osd_id)
+        init_node = db.init_node_get_by_service_id(context, \
+                                                 osd['service_id'])
+        if init_node['status'] == 'Active':
+            try:
+                self._agent_rpcapi.osd_add(context, osd_id, init_node['host'])
+                self._agent_rpcapi.update_osd_state(context, init_node['host'])
+            except rpc_exc.Timeout:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart rpc timeout')
+                LOG.error('ERROR: osd_add rpc timeout')
+            except rpc_exc.RemoteError:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart rpc remote error')
+                LOG.error('ERROR: osd_add rpc remote error')
+            except:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart')
+                LOG.error('ERROR: osd_add')
                 raise
         else:
             return False

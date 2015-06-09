@@ -81,6 +81,9 @@ class API(object):
     def osd_restart(self, context, body=None):
         return self.scheduler_rpcapi.osd_restart(context, body)
 
+    def osd_add(self, context, body=None):
+        return self.scheduler_rpcapi.osd_add(context, body)
+
     def osd_restore(self, context, body=None):
         return self.scheduler_rpcapi.osd_restore(context, body)
 
@@ -105,3 +108,8 @@ class API(object):
     def get_smart_info(self, context, body=None):
         return self.scheduler_rpcapi.get_smart_info(context, body)
 
+    def start_server(self, context, body=None):
+        return self.scheduler_rpcapi.start_server(context, body)
+
+    def stop_server(self, context, body=None):
+        return self.scheduler_rpcapi.stop_server(context, body)

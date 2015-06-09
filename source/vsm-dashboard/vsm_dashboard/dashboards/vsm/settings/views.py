@@ -36,22 +36,24 @@ class IndexView(TemplateView):
             setting.verbose_name = setting.name.upper()
         context['settings'] = [x for x in settings if
                                x.verbose_name in ("STORAGE_GROUP_NEAR_FULL_THRESHOLD",
-                                                  "STORAGE_GROUP_FULL_THRESHOLD")]
+                                                  "STORAGE_GROUP_FULL_THRESHOLD","HOST_NEAR_FULL_THRESHOLD","HOST_FULL_THRESHOLD")]
         return context
 
 def SettingsAction(request, action):
-    data = json.loads(request.body)
-    print data
+
+    post_data = request.raw_post_data
+    data = json.loads(post_data)
     # TODO add cluster_id in data
     if not len(data):
         status = "error"
         msg = "No server selected"
     else:
         if action == "update":
+            #vsmapi.add_servers(request, data)
             try:
-                setting_value = int(data['keyValue'])
+                setting_value = int(data['setting_value'])
                 if 0 < setting_value < 21600:
-                    vsmapi.update_setting(request, data['keyName'], data['keyValue'])
+                    vsmapi.update_setting(request, data['setting_name'], data['setting_value'])
                     status = "success"
                     msg = "Update Success"
                 else:

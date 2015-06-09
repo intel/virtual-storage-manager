@@ -33,6 +33,7 @@ class ViewBuilder(common.ViewBuilder):
                 "friendly_name": storage_group["friendly_name"].replace("_", " "),
                 "storage_class": storage_group["storage_class"],
                 "attached_pools": storage_group["attached_pools"],
+                "attached_osds": storage_group["attached_osds"],
                 "capacity_total": storage_group["capacity_total"],
                 "capacity_used": storage_group["capacity_used"],
                 "capacity_avail": storage_group["capacity_avail"],

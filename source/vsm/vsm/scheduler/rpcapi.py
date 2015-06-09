@@ -127,6 +127,11 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         version='1.0', timeout=6000)
         return ret
 
+    def osd_add(self, ctxt, body):
+        ret = self.call(ctxt, self.make_msg('osd_add', osd_id=body), \
+                        version='1.0', timeout=6000)
+        return ret
+
     def osd_restore(self, ctxt, body):
         ret = self.call(ctxt, self.make_msg('osd_restore', osd_id=body), \
                         version='1.0', timeout=6000)
@@ -153,4 +158,16 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         ret = self.call(context,
                         self.make_msg('import_ceph_conf',
                                       cluster_id=cluster_id, ceph_conf_path=ceph_conf_path))
+        return ret
+
+    def start_server(self, context, body=None):
+        ret = self.call(context,
+                        self.make_msg('start_server',
+                                      body=body))
+        return ret
+
+    def stop_server(self, context, body=None):
+        ret = self.call(context,
+                        self.make_msg('stop_server',
+                                      body=body))
         return ret
