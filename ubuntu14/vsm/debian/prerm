@@ -33,3 +33,7 @@ if [[ -d /etc/vsm ]]; then
   rm -rf vsm
   mv vsm-$DATE.tar /etc/vsm
 fi
+
+rm -rf /etc/vsm/cluster.manifest
+rm -rf /etc/vsm/server.manifest
+rm -rf /etc/vsm/vsm.conf

@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rm -rf /etc/vsm/cluster.manifest
-rm -rf /etc/vsm/server.manifest
-rm -rf /etc/vsm/vsm.conf
+#rm -rf /etc/vsm/cluster.manifest
+#rm -rf /etc/vsm/server.manifest
+#rm -rf /etc/vsm/vsm.conf
