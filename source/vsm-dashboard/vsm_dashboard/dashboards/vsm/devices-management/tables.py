@@ -40,7 +40,7 @@ ACTIVE_STATES = ("Present",)
 REMOVED_STATES = ("Removed",)
 
 class UpdateRow(tables.Row):
-    ajax = True
+    ajax = False
 
     def get_data(self, request, osd_id):
         osd = vsmapi.osd_get(request, osd_id)
