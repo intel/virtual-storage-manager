@@ -35,6 +35,7 @@ storage_group_full_threshold  85
 ceph_near_full_threshold  75 
 ceph_full_threshold  90 
 pg_count_factor 100
+heartbeat_interval 5
 osd_heartbeat_interval 10
 osd_heartbeat_grace 10
 disk_near_full_threshold 75
