@@ -155,7 +155,7 @@ class ClusterController(wsgi.Controller):
         else:
             nodes = db.init_node_get_all(context)
         servers = {"servers":nodes}
-        self.scheduler_api.start_server(context,servers)
+        self.scheduler_api.start_cluster(context,servers)
         return {"message":"Success"}
 
     def stop_cluster(self, req, body=None):
@@ -170,7 +170,7 @@ class ClusterController(wsgi.Controller):
         else:
             nodes = db.init_node_get_all(context)
         servers = {"servers":nodes}
-        self.scheduler_api.stop_server(context,servers)
+        self.scheduler_api.stop_cluster(context,servers)
         return {"message":"Success"}
 
     @wsgi.serializers(xml=ClustersTemplate)

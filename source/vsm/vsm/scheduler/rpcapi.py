@@ -171,3 +171,15 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         self.make_msg('stop_server',
                                       body=body))
         return ret
+
+    def start_cluster(self, context, body=None):
+        ret = self.call(context,
+                        self.make_msg('start_cluster',
+                                      body=body))
+        return ret
+
+    def stop_cluster(self, context, body=None):
+        ret = self.call(context,
+                        self.make_msg('stop_cluster',
+                                      body=body))
+        return ret
