@@ -41,7 +41,7 @@ REMOVED_STATES = ("Removed",)
 UNINIT_STATES = ("Uninitialized")
 
 class UpdateRow(tables.Row):
-    ajax = True
+    ajax = False
 
     def get_data(self, request, osd_id):
         osd = vsmapi.osd_get(request, osd_id)

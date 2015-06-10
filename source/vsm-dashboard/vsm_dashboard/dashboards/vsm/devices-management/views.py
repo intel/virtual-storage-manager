@@ -106,12 +106,8 @@ class IndexView(tables.DataTableView):
         return osds
 
 
-
 def DevicesAction(request, action):
-    data = json.loads(request.raw_post_data)
-    print "osd_id:"+str(data["osd_id"])
-    #print data
-
+    data = json.loads(request.body)
     device_data_str = device_get_smartinfo(request,str(data["osd_id"]))
     device_data_dict = {}
     device_data_str = device_data_str[0].device_data
@@ -122,7 +118,6 @@ def DevicesAction(request, action):
             device_data_dict[data_list[0]] = ""
         if data_list_len == 2:
             device_data_dict[data_list[0]] = data_list[1]
-    #print 'device_data_dict================',device_data_dict
     device_data_json = {
                 "basic":{"status":device_data_dict["Drive Status"],
                        "family":device_data_dict["Drive Family"],
@@ -137,7 +132,6 @@ def DevicesAction(request, action):
                        "unitWRITE":device_data_dict["Data Units Written"],
                 }
     }
-    devicedata = json.dumps(device_data_json)
-    #print 'device_data_json=========',device_data_json
-    return HttpResponse(devicedata)
 
+    devicedata = json.dumps(device_data_json)
+    return HttpResponse(devicedata)
