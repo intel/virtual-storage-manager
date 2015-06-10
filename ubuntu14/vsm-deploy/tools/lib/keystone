@@ -90,7 +90,7 @@ sed -i "s,#token_format =.*,token_format = UUID,g" $file
 #---------------------------------------------------
 
 keystone-manage --config-file /etc/keystone/keystone.conf db_sync
-#sleep 5
+sleep 5
 service keystone restart
 #systemctl enable openstack-keystone.service
 
