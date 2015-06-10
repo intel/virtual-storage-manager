@@ -821,6 +821,17 @@ class AgentManager(manager.Manager):
     def stop_server(self, context, node_id):
         return self.ceph_driver.stop_server(context, node_id)
 
+    def start_cluster(self, context):
+        self.ceph_driver.start_cluster(context)
+        utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
+                    run_as_root=True)
+        return True
+
+    def stop_cluster(self, context):
+        utils.execute('ceph', 'osd', 'getcrushmap', '-o', FLAGS.crushmap_bin,
+                                run_as_root=True)
+        return self.ceph_driver.stop_cluster(context)
+
     def stop_mds(self, context):
         return self.ceph_driver.stop_mds(context)
 

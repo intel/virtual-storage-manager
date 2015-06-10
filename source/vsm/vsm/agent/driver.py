@@ -1077,7 +1077,24 @@ class CephDriver(object):
             LOG.info('>> start the monitor id: %s' % mon_id)
             if node_type and node_type.find('monitor') != -1:
                 self.start_mon_daemon(context, mon_id)
+    def stop_monitor(self, context):
+        # Get info from db.
+        res = self._conductor_rpcapi.init_node_get_by_host(context, FLAGS.host)
+        node_type = res.get('type', None)
+        # get mon_id
+        mon_id = None
+        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        config_dict = config.as_dict()
+        for section in config_dict:
+            if section.startswith("mon."):
+                if config_dict[section]['host'] == FLAGS.host:
+                    mon_id = section.replace("mon.", "")
 
+        # Try to start monitor service.
+        if mon_id:
+            LOG.info('>> start the monitor id: %s' % mon_id)
+            if node_type and node_type.find('monitor') != -1:
+                self.stop_mon_daemon(context, mon_id)
     def start_osd(self, context):
         # Start all the osds on this node.
         osd_list = []
@@ -1277,6 +1294,19 @@ class CephDriver(object):
                       '-o',
                       '/var/lib/ceph/bootstrap-mds/ceph.keyring',
                       run_as_root=True)
+
+    def stop_cluster(self,context):
+        "stop cluster"
+        LOG.info('agent/driver.py stop cluster')
+        utils.execute('service', 'ceph', '-a', 'stop', run_as_root=True)
+        return True
+
+
+    def start_cluster(self,context):
+        LOG.info('agent/driver.py start cluster')
+        utils.execute('service', 'ceph', '-a', 'start', run_as_root=True)
+        return True
+
 
     def stop_server(self, context, node_id):
         """Stop server.
