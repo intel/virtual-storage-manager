@@ -1,0 +1,29 @@
+#divPGSummary{
+	/*text-align: center;*/
+	display: inline-block;
+	width: 360px;
+	height: 220px;
+	/*border:1px solid #ccc;*/
+	overflow: hidden;
+}
+
+
+#divCapcitySummary{
+	display: inline-block;
+	width: 360px;
+	height: 220px;
+	/*border:1px solid #ccc;*/
+	overflow: hidden;
+}
+
+
+#lblPGUpdate{
+}
+
+#divPGRect{
+    width:280px;
+    height:180px;
+    /*border:1px solid #ccc;*/
+    margin-right: auto;
+    margin-left: auto;
+}

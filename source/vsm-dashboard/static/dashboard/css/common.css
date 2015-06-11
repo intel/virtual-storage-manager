@@ -179,6 +179,7 @@
     background-color: blue;
 }
 
+
 /**
  * table and anything
  */
@@ -189,6 +190,7 @@
     width: 120px;
 }
 
+
 /**
  * alert
  */
@@ -196,13 +198,14 @@
     width: auto;
 }
 
+
 .vsm-status-icon{
     float: right;
 }
 
 
 .vsm-label{
-    min-width: 110px;
+    min-width: 120px;
     display:inline-block;
     margin-right: 10px;
 }
@@ -215,4 +218,42 @@
 
 .info-link:hover{
     text-decoration: none;
+}
+
+
+.vsm-spin{
+    width: 50px;
+    height: 50px;
+    top: 150px;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.spin-modal{
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0.5;
+    background-color: #000; 
+    display: none;
+}
+
+
+.vsm-page-panel{
+    width: 100%;
+    height: auto;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.vsm-page-panel h3{
+    font-family: anivers;
+    font-weight: normal;
+    font-size: 24px;
+    margin: 10px;
 }

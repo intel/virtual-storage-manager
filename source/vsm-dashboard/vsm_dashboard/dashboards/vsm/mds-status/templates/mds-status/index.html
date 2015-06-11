@@ -21,16 +21,67 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=cluster.title %}
+   <link href="{{ STATIC_URL }}dashboard/css/mdsstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-    {{ summary.render }}
+	<div id="divMDSSummary" class="vsm-page-panel" style="min-height: 220px;">
+    	<h3 class="table_title">MDS Summary</h3>
+    	<div id="divMDSSummaryContent">
+    		 <div>
+                <span id="lblMDSEpoch" class="vsm-label">Epoch:--</span>
+                <span id="lblMDSUpdate" class="vsm-label">Update:--</span>
+            </div>
+            <div id="divMDSRect">
+                <table id="tMDS">
+                    <tr>
+                        <td class="td-100">
+                            <svg class="mds-svg" >
+                                <circle cx="40" cy="30" r="25" fill="green" />
+                                <text id="lblMDSMetaData" x="40" y="35" font-size="18" text-anchor="middle" fill="yellow">--</text>
+                            </svg>
+                        </td>
+                        <td class="td-120">
+                            <div id="divMDS_IN" class="vsm-rect vsm-rect-2 vsm-rect-green">0</div>
+                        </td>
+                        <td class="td-120">  
+                             <div id="divMDS_UP" class="vsm-rect vsm-rect-2 vsm-rect-blue">0</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Data</td>
+                        <td>In</td>
+                        <td>Up</td>
+                    </tr>
+                    <tr>
+                        <td class="td-100"> 
+                             <svg  class="mds-svg">
+                               <circle cx="40" cy="30" r="25" fill="green" />
+                                <text id="lblMDSPoolData" x="40" y="35" font-size="18" text-anchor="middle" fill="yellow">--</text>
+                            </svg>
+                
+                        </td>
+                        <td>
+                            <div id="divMDS_FAILED" class="vsm-rect vsm-rect-2 vsm-rect-red">0</div>
+                        </td>
+                        <td>
+                            <div id="divMDS_STOPPED" class="vsm-rect vsm-rect-2 vsm-rect-orange">0</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Metadata</td>
+                        <td>Failed</td>
+                        <td>Stopped</td>
+                    </tr>
+                </table>
+            </div>
+    	</div>
+    </div>
     {{ table.render }}
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/clustermgmt.js' type='text/javascript' charset='utf-8'></script>
+     <script src='{{ STATIC_URL }}dashboard/js/mdsstatus.js' type='text/javascript' charset='utf-8'></script>   
 {% endblock %}
 

@@ -1,0 +1,17 @@
+#divOSDSummaryContent{
+	width: 100%;
+	height: auto;
+	padding: 10px;
+	/*border: 1px solid red;*/
+}
+
+
+/**
+ * OSD module
+ */
+#tOSD>tbody>tr>td{
+    height: 45px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+}

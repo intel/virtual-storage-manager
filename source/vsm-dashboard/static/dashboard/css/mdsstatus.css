@@ -1,0 +1,26 @@
+#divMDSSummaryContent{
+	width: 100%;
+	height: auto;
+	padding: 10px;
+	/*border: 1px solid red;*/
+}
+
+#divMDSRect{
+    margin-top:10px;
+    height:180px;
+    overflow-y:auto;
+    /*border:1px solid green;*/
+}
+
+#tMDS>tbody>tr>td{
+    height: auto;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    /*border:1px solid #ccc;*/
+}
+
+.mds-svg{
+    width: 90px;
+    height: 55px;
+}

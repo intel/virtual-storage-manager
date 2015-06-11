@@ -1,4 +1,8 @@
 $(function(){
+    //load OSD data,5 min update
+    loadOSD();
+    loadInterval();
+
     var trNodes = $("#server_list>tbody>tr");
     if(trNodes){
         pagerCount = parseInt(trNodes[0].children[15].innerHTML);
@@ -7,6 +11,33 @@ $(function(){
     } 
     addOptionButton();
 })
+
+
+//load OSD data
+function loadOSD(){
+    $.ajax({
+        type: "get",
+        url: "/dashboard/vsm/osd/",
+        data: null,
+        dataType:"json",
+        success: function(data){
+            //console.log(data);
+            $("#lblOSDEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
+            $("#lblOSDUpdate")[0].innerHTML ="Update:"+ data.update;
+            $("#divOSD_INUP")[0].innerHTML = data.in_up;
+            $("#divOSD_INDOWN")[0].innerHTML = data.in_down;
+            $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
+            $("#divOSD_OUTDOWN")[0].innerHTML = data.out_down;
+        }
+    });
+}
+
+function loadInterval(){
+    setInterval(function(){
+        loadOSD();
+    },15000);
+}
+
 
 function addOptionButton(){
     var trNodes = $("#server_list>tbody>tr");

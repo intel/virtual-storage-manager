@@ -83,48 +83,6 @@
     height: 55px;
 }
 
-.mds-block{
-    width: 75px;
-    height: 75px;
-    text-align: center;
-    display: inline-block;
-    border-radius: 5px;
-    margin-top: 1px;
-    font-size: 20px;
-    color:white;
-}
-
-.mds-block-green{
-    background-color: green;
-}
-
-.mds-block-blue{
-    background-color: blue;
-}
-
-
-.mds-block-orange{
-    background-color: orange;
-}
-
-.mds-block-red{
-    background-color: red;
-}
-
-.mds-block-number{
-    width: 75px;
-    height: 35px;
-    line-height: 35px;
-    display:  block;
-    border-bottom: 1px solid #ccc;
-}
-
-.mds-block-status{
-    width: 75px;
-    height: 40px;
-    line-height: 40px;
-    display:  block;
-}
 
 /**
  * storage module

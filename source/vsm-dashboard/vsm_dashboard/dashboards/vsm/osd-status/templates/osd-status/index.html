@@ -21,15 +21,46 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=cluster.title %}
-        <style>
-            .page{
-                float:right;
-            }
-        </style>
+  <link href="{{ STATIC_URL }}dashboard/css/osdstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-    {{ summary.render }}
+   <div id="divOSDSummary" class="vsm-page-panel" style="min-height: 220px;">
+    <h3 class="table_title">OSD Summary</h3>
+    <div id="divOSDSummaryContent">
+        <span id="lblOSDEpoch" class="vsm-label">Epoch:--</span>
+        <span id="lblOSDUpdate" class="vsm-label">Update:--</span>
+        <br />
+        <table id="tOSD">
+            <tbody>
+                <tr >
+                    <td class="td-80"></td>
+                    <td class="td-120">Up</td>
+                    <td class="td-120">Down</td>
+                </tr>
+                <tr >
+                    <td>In</td>
+                    <td>
+                        <div id="divOSD_INUP" class="vsm-rect vsm-rect-2 vsm-rect-green">0</div>
+                    </td>
+                    <td>
+                        <div id="divOSD_INDOWN" class="vsm-rect vsm-rect-2 vsm-rect-red">0</div>
+                    </td>
+                </tr>
+                <tr >
+                    <td>Out</td>
+                    <td>
+                        <div id="divOSD_OUTUP" class="vsm-rect vsm-rect-2 vsm-rect-orange">0</div>
+                    </td>
+                    <td>
+                        <div id="divOSD_OUTDOWN" class="vsm-rect vsm-rect-2 vsm-rect-gray">0</div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+  </div>  
+
     {{ table.render }}
 
 <nav style="margin-left:auto;margin-right:auto">
@@ -55,8 +86,6 @@
 
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/clustermgmt.js' type='text/javascript' charset='utf-8'></script>
     <script src='{{ STATIC_URL }}dashboard/js/osdstatus.js' type='text/javascript' charset='utf-8'></script>   
         <script type="text/javascript">
             function searchToObject(){
