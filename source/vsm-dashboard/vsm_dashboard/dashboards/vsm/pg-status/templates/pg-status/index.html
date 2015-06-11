@@ -21,60 +21,31 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=cluster.title %}
-         <style>
-            .summary_group {
-                width: 820px;
-                float: left;
-            }
-            .summary_group .summary {
-                float:left;
-                width: 270px;
-            }
-            .summary {
-                margin-bottom: 30px;
-                height: 182px;
-            }
-            .warn {
-                color: red;
-            }
-            .summary_title{
-                text-decoration: underline;
-            }
-            .summary a{
-                margin-top: 2px;
-                width: 200px;
-            }
-            #summary_cluster_summary {
-                height: 50px;
-            }
-            #summary_waring_summary {
-                height: 50px;
-            }
-            .table_wrapper {
-                clear: left;
-            }
-            .page{
-                float:right;
-            }
-        </style>
+   <link href="{{ STATIC_URL }}dashboard/css/pgstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-
-    <div style="float: left;">
-        <div class="summary_group">
-            {{ object_summary.render }}
-            {{ performance_summary.render }}
-            {{ pg_summary.render }}
-            {{ capacity_summary.render }}
+    <div class="vsm-page-panel" style="min-height: 220px;">
+        <h3 class="table_title">PG Summary</h3>
+        <div id="divPGSummary">
+            <span id="lblPGUpdate" class="vsm-label">Update:--</span>
+            <br />
+            <div id="divPGRect"> 
+            </div>
         </div>
-        {{ table.render }}
+        <div id="divCapcitySummary">
+        
+        </div>
+    </div>
+
+
+    {{ table.render }}
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/clustermgmt.js' type='text/javascript' charset='utf-8'></script>
+        <script src="{{ STATIC_URL }}lib/echarts.js"></script>
+         <script src='{{ STATIC_URL }}dashboard/js/pgstatus.js' type='text/javascript' charset='utf-8'></script>   
         <script type="text/javascript">
             function searchToObject(){
                 var pairs = window.location.search.substring(1).split("&");
