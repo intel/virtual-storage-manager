@@ -25,6 +25,15 @@ __EOF__
     sed -i "s,%RABBITMQ_NODE_PORT%,$RABBITMQ_PORT,g" $file
     sed -i "s,%RABBITMQ_NODE_IP_ADDRESS%,$RABBITMQ_HOST,g" $file
 
+    config=/etc/rabbitmq/rabbitmq.config
+    rm -fr $config
+
+cat <<"__EOF__" >$config
+[
+    {rabbit, [{loopback_users, []}]}
+].
+__EOF__
+
     service rabbitmq-server restart
     sleep 3
     rabbitmqctl change_password guest $RABBITMQ_PASSWORD
