@@ -15,14 +15,10 @@
 #    under the License.
 
 import logging
-import os
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse_lazy
 
 from horizon import exceptions
 from horizon import tables
-from horizon import forms
-from horizon import views
 
 from vsm_dashboard.api import vsm as vsmapi
 from .tables import ListStorageGroupStatusTable
@@ -31,43 +27,14 @@ from django.http import HttpResponse
 import json
 LOG = logging.getLogger(__name__)
 
-from vsm_dashboard.common.horizon.chart import ChartRenderer
-
-from django.utils.datastructures import SortedDict
 from vsm_dashboard.utils import get_time_delta
 
-class SGChart(ChartRenderer):
-    name = "Storage Groups"
 
-    def get_chart(self):
-        _sgs = vsmapi.storage_group_status(self.request,)
-        charts = []
-        _cfg = vsmapi.get_setting_dict(self.request)
-        for _sg in _sgs:
-            _sg.capacity_total = 1 if not _sg.capacity_total else _sg.capacity_total
-            capacity_percent_used = 0 if not _sg.capacity_total else _sg.capacity_used * 10000.0 / _sg.capacity_total / 100.0
-            capacity_percent_used = round(capacity_percent_used, 2)
-            capacity_percent_avail = 100 - capacity_percent_used
-            if capacity_percent_used < int(_cfg["storage_group_near_full_threshold"]):
-                index = 1
-            elif capacity_percent_used < int(_cfg["storage_group_full_threshold"]):
-                index = 4
-            else:
-                index = 7
-
-            chart = {"type": "pie", "name": _sg.name,"verbose_name": _sg.name,
-                     "used": capacity_percent_used,
-                     "datas":[{"index": index,"value": capacity_percent_used},
-                                          {"index":20,"value": capacity_percent_avail}]}
-            charts.append(chart)
-
-        return charts
 
 class ModalChartMixin(object):
 
    def get_context_data(self, **kwargs):
         context = super(ModalChartMixin, self).get_context_data(**kwargs)
-        context['chart'] = SGChart(self.request)
         context['settings'] = vsmapi.get_setting_dict(self.request)
         return context
 
@@ -93,7 +60,6 @@ class IndexView(ModalChartMixin, tables.DataTableView):
         for _sg in _sgs:
             sg = {"id": _sg.id,
                         "name": _sg.name,
-                        "attached_osds": _sg.attached_osds,
                         "attached_pools": _sg.attached_pools,
                         "capacity_total": 0 if not _sg.capacity_total else round(_sg.capacity_total * 1.0 / 1024 / 1024, 1),
                         "capacity_used": 0 if not _sg.capacity_used else round(_sg.capacity_used * 1.0 / 1024 / 1024, 1),
@@ -117,4 +83,39 @@ class IndexView(ModalChartMixin, tables.DataTableView):
 
             storage_group_status.append(sg)
         return storage_group_status
+
+#get pie charts data
+def chart_data(request):
+    charts = []
+    _cfg = vsmapi.get_setting_dict(None)
+    _sgs = vsmapi.storage_group_status(None)
+
+    for _sg in _sgs:
+        _sg.capacity_total = 1 if not _sg.capacity_total else _sg.capacity_total
+
+        capacity_percent_used = 0 if not _sg.capacity_total else _sg.capacity_used * 10000.0 / _sg.capacity_total / 100.0
+        capacity_percent_used = round(capacity_percent_used, 2)
+        capacity_percent_avail = 100 - capacity_percent_used
+
+        #0:normal;1:near full;2:full;  
+        status = 0 
+        if capacity_percent_used < int(_cfg["storage_group_near_full_threshold"]):
+            status = 0
+        elif capacity_percent_used < int(_cfg["storage_group_full_threshold"]):
+            status = 1
+        else:
+            status = 2
+
+        chart = {"id": _sg.id
+                ,"name":_sg.name
+                ,"status":status
+                ,"used":capacity_percent_used
+                ,"available":capacity_percent_avail}
+        charts.append(chart)
+
+    print charts
+
+    chartsdata = json.dumps(charts)
+    return HttpResponse(chartsdata)
+
 
