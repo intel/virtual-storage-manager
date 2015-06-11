@@ -33,14 +33,12 @@ import json
 LOG = logging.getLogger(__name__)
 
 from django.utils.datastructures import SortedDict
-from vsm_dashboard.dashboards.vsm.overview.summarys import MonitorSummary
 from vsm_dashboard.utils import get_time_delta
 
 class ModalSummaryMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(ModalSummaryMixin, self).get_context_data(**kwargs)
-        context['summary'] = MonitorSummary(self.request)
         return context
 
 class IndexView(ModalSummaryMixin, tables.DataTableView):

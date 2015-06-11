@@ -21,16 +21,28 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=cluster.title %}
+  <link href="{{ STATIC_URL }}dashboard/css/monitorstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-    {{ summary.render }}
+	<div id="divMonitorSummary" class="vsm-page-panel" style="min-height: 220px;">
+		<h3 class="table_title">Monitor Summary</h3>
+		<div id="divMonitorSummaryContent">
+			<div>
+                <span id="lblMonitorEpoch" class="vsm-label">Epoch:--</span>
+                <span id="lblMonitorUpdate" class="vsm-label">Update:--</span>
+            </div>
+            <div id="divMonitorRect">
+
+            </div>
+		</div>
+	</div>
+
     {{ table.render }}
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/clustermgmt.js' type='text/javascript' charset='utf-8'></script>
+    <script src='{{ STATIC_URL }}dashboard/js/monitorstatus.js' type='text/javascript' charset='utf-8'></script>   
 {% endblock %}
 

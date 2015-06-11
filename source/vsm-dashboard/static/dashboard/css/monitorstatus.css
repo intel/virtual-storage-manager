@@ -1,0 +1,15 @@
+#divMonitorSummaryContent{
+	width: 100%;
+	height: auto;
+	padding: 10px;
+	/*border: 1px solid red;*/
+}
+
+#divMonitorRect{
+    margin-top:20px;
+    height:160px;
+    overflow-y:auto;
+    /*border: 1px solid #ccc;*/
+}
+
+

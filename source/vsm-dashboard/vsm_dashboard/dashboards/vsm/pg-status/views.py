@@ -32,19 +32,11 @@ import json
 LOG = logging.getLogger(__name__)
 
 from django.views.generic import TemplateView
-from vsm_dashboard.dashboards.vsm.overview.summarys import PGSummary
-from vsm_dashboard.dashboards.vsm.overview.summarys import CapacitySummary
-from vsm_dashboard.dashboards.vsm.overview.summarys import PerformanceSummary
-from vsm_dashboard.dashboards.vsm.overview.summarys import ObjectSummary
 
 class ModalSummaryMixin(object):
 
    def get_context_data(self, **kwargs):
         context = super(ModalSummaryMixin, self).get_context_data(**kwargs)
-        context['pg_summary'] = PGSummary(self.request)
-        context['performance_summary'] = PerformanceSummary(self.request)
-        context['object_summary'] = ObjectSummary(self.request)
-        context['capacity_summary'] = CapacitySummary(self.request)
         return context
 
 class IndexView(ModalSummaryMixin, tables.DataTableView):
