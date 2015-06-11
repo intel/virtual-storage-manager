@@ -86,6 +86,9 @@ class MonitorsManager(base.ManagerWithFind):
         url = "/monitors/summary"
         return self._get(url, 'monitor-summary')
 
+    def restart(self, mon):
+        self._action('restart', mon)
+
     def _action(self, action, monitor, info=None, **kwargs):
         """
         Perform a monitor "action."

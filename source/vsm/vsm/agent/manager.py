@@ -1523,3 +1523,7 @@ class AgentManager(manager.Manager):
 
     def remove_cache_tier(self, context, body):
         return self.ceph_driver.remove_cache_tier(context, body)
+
+    def monitor_restart(self, context, monitor_num):
+        self.ceph_driver.start_mon_daemon(context, monitor_num)
+        return True

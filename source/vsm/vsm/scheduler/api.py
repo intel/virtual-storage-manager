@@ -119,3 +119,6 @@ class API(object):
 
     def stop_cluster(self, context, body=None):
         return self.scheduler_rpcapi.stop_cluster(context, body)
+
+    def monitor_restart(self, context, body=None):
+        return self.scheduler_rpcapi.monitor_restart(context, body)

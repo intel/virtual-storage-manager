@@ -183,3 +183,8 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         self.make_msg('stop_cluster',
                                       body=body))
         return ret
+
+    def monitor_restart(self, ctxt, body):
+        ret = self.call(ctxt, self.make_msg('monitor_restart', monitor_id=body), \
+                        version='1.0', timeout=6000)
+        return ret
