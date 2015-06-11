@@ -36,7 +36,7 @@ class IndexView(TemplateView):
             setting.verbose_name = setting.name.upper()
         context['settings'] = [x for x in settings if
                                x.verbose_name in ("STORAGE_GROUP_NEAR_FULL_THRESHOLD",
-                                                  "STORAGE_GROUP_FULL_THRESHOLD","HOST_NEAR_FULL_THRESHOLD","HOST_FULL_THRESHOLD")]
+                                                  "STORAGE_GROUP_FULL_THRESHOLD","DISK_NEAR_FULL_THRESHOLD","DISK_FULL_THRESHOLD")]
         return context
 
 def SettingsAction(request, action):

@@ -92,24 +92,25 @@ class SchedulerManager(manager.Manager):
         pool_ref = db.pool_get_by_name(context,
                                        body['name'],
                                        body['cluster_id'])
-        replication_factor = body['size']
-        zone_cnt = len(db.zone_get_all(context))
-        factor_flag = True
-        message = ''
-        if zone_cnt > 1 and replication_factor > zone_cnt:
-            factor_flag = False
-            message = "4004 - replication_factor of %s error:replica count greater than number of zones in Storage Group-loss of zone may result in data loss" % body['name']
-            LOG.error(message)
-        if zone_cnt <= 1 :
-            host_cnt = db.init_node_count_by_status(context,status='Active')
-            if replication_factor > host_cnt:
+        if body.has_key('size'):
+            replication_factor = body['size']
+            zone_cnt = len(db.zone_get_all(context))
+            factor_flag = True
+            message = ''
+            if zone_cnt > 1 and replication_factor > zone_cnt:
                 factor_flag = False
-                message = "4005 - replication_factor of %s error:replica count greater than number of host in Storage Group-loss of host may resultin data loss" % body['name']
+                message = "4004 - replication_factor of %s error:replica count greater than number of zones in Storage Group-loss of zone may result in data loss" % body['name']
                 LOG.error(message)
+            if zone_cnt <= 1:
+                host_cnt = db.init_node_count_by_status(context,status='Active')
+                if replication_factor > host_cnt:
+                    factor_flag = False
+                    message = "4005 - replication_factor of %s error:replica count greater than number of host in Storage Group-loss of host may resultin data loss" % body['name']
+                    LOG.error(message)
 
-        if not factor_flag:
-            res = "pool "+ body['name'] + ":%s"%message
-            return {'message':res}
+            if not factor_flag:
+                res = "pool "+ body['name'] + ":%s"%message
+                return {'message':res}
         if not pool_ref:
             self._agent_rpcapi.create_storage_pool(context, body)#TODO need to specify host?
             #pool_id = self._agent_rpcapi.get_pool_id_by_name(context,
@@ -164,12 +165,13 @@ class SchedulerManager(manager.Manager):
                 raise MonitorAddFailed
             except Exception, e:
                 LOG.error("%s: %s" %(e.code, e.message))
-
-        if len(monitor_list) < 3:
-            LOG.error('There must be at least three monitors.')
+        pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
+        pool_default_size = int(pool_default_size.value)
+        if len(monitor_list) < pool_default_size:
+            LOG.error('There must be at least %s monitors.'%pool_default_size)
             self._update_server_list_status(context,
                                             server_list,
-                                            "Error: monitors < 3")
+                                            "Error: monitors < %s"%pool_default_size)
             try:
                 raise MonitorAddFailed
             except Exception, e:
@@ -177,7 +179,10 @@ class SchedulerManager(manager.Manager):
             raise
 
         LOG.info(' monitor_list = %s' % monitor_list)
-        idx = random.randint(0, len(monitor_list)-1)
+        if len(monitor_list) == 1:
+            idx = 0
+        else:
+            idx = random.randint(0, len(monitor_list)-1)
         LOG.info(' select monitor = %d' % idx)
         job_server = monitor_list[idx]
         return job_server
@@ -1084,9 +1089,7 @@ class SchedulerManager(manager.Manager):
             ser_ref = db.init_node_get(context, ser['id'])
             ser['host'] = ser_ref['host']
 
-        # Use mkcephfs to set up ceph system.
-        monitor_node = self._select_monitor(context, server_list)
-        LOG.info('Choose monitor node = %s' % monitor_node)
+
 
         def _update(status):
             LOG.debug('status = %s' % status)
@@ -1097,15 +1100,18 @@ class SchedulerManager(manager.Manager):
                 raise
 
         # Set at least 3 mons when creating cluster
+        pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
+        pool_default_size = int(pool_default_size.value)
         nums = len(server_list)
-        if nums >= 3:
+        if nums >= pool_default_size:
             count = 0
             rest_mon_num = 0
             for ser in server_list:
                 if ser['is_monitor'] == True:
                     count += 1
-            if count < 3:
-                rest_mon_num = 3 - count
+            LOG.info('is monitor--1111--%s'%count)
+            if count < pool_default_size:
+                rest_mon_num = pool_default_size - count
             if rest_mon_num > 0:
                 for ser in server_list:
                     if ser['is_monitor'] == False:
@@ -1113,7 +1119,9 @@ class SchedulerManager(manager.Manager):
                         rest_mon_num -= 1
                         if rest_mon_num <= 0:
                             break
-
+        # Use mkcephfs to set up ceph system.
+        monitor_node = self._select_monitor(context, server_list)
+        LOG.info('Choose monitor node = %s' % monitor_node)
         # Clean ceph data.
         def __clean_data(host):
             self._agent_rpcapi.update_ssh_keys(context, host)

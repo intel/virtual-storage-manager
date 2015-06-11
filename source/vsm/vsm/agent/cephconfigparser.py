@@ -299,7 +299,8 @@ class CephConfigParser(manager.Manager):
                    osd_heartbeat_grace=None, 
                    is_cephx=True,
                    max_file=131072,
-                   down_out_interval=90):
+                   down_out_interval=90,
+                   pool_default_size=3):
 
         self._parser.add_section('global')
         if not is_cephx:
@@ -325,6 +326,8 @@ class CephConfigParser(manager.Manager):
             self._parser.set('global', 'osd heartbeat interval', str(osd_heartbeat_interval))
         if osd_heartbeat_grace:
             self._parser.set('global', 'osd heartbeat grace', str(osd_heartbeat_grace))
+        if pool_default_size:
+            self._parser.set('global', 'osd pool default size', str(pool_default_size))
 
         # Must add fsid for create cluster in newer version of ceph.
         # In order to support lower version of vsm.
