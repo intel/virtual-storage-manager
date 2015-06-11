@@ -1,0 +1,293 @@
+#!/bin/bash
+set -e
+set -o xtrace
+#
+# Copyright (C) 2011 - 2012, Red Hat, Inc.
+# Russell Bryant <rbryant@redhat.com>
+# Alan Pevec <apevec@redhat.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+
+systemctl --version >/dev/null 2>&1 && systemctl=1
+
+usage() {
+
+cat << EOF
+Set up a local database (MySQL) for use with openstack-<service>.
+This script will create a '<service>' database that is accessible
+only on localhost by user '<service>' with password '<service>'.
+The setup of a database with a multi-server OpenStack installation
+is outside of the scope of this simple helper script.
+
+Usage: openstack-db --service <service> --init|--drop [options]
+Options:
+  --help | -h
+      Print usage information.
+  --drop
+      Drop the database.
+  --init
+      Initialise the database.
+  --password <pw> | -p <pw>
+      Specify the password for user that will be used
+      to connect database for the service.  By default the
+      <service> parameter is used for the password.
+  --rootpw <pw> | -r <pw>
+      Specify the root database password.  If the script installs
+      the database server, it will set the root password to this value
+      instead of prompting for a password.  If the database server is
+      already installed, this password will be used to connect to the
+      database instead of having to prompt for it.
+  --service <service>
+      Specify the openstack service to manipulate the database for.
+      This option is mandatory.
+  --yes | -y
+      In cases where the script would normally ask for confirmation
+      before doing something, such as installing the database server,
+      just assume yes.  This is useful if you want to run the script
+      non-interactively.
+  --host <MySQL IP Address>
+      Prefer to the remote MySQL host server.
+EOF
+
+  exit $1
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help) usage 0 ;;
+    --drop) MODE='drop' ;;
+    --init) MODE='init' ;;
+    --service) shift; APP=$1 ;;
+    -p|--password) shift; MYSQL_APP_PW=$1 ;;
+    -r|--rootpw) shift; MYSQL_ROOT_PW=$1 ;;
+    -y|--yes) ASSUME_YES="yes" ;;
+    --host) shift; MYSQL_HOST_IP=$1;;
+    *) shift ;; # ignore
+  esac
+  shift
+done
+
+# Check mandatory args set
+if [ ! "$MODE" ] || [ ! "$APP" ]; then
+  usage 1
+fi
+
+case "$APP" in
+  nova|glance|keystone|cinder) ;;
+  *)
+    printf "Unrecognized --service $APP\n" >&2
+    printf "Please specify nova|glance|keystone|cinder\n" >&2
+    exit 1 ;;
+esac
+
+install_mysql_server() {
+    echo "ok"
+}
+
+start_service() {
+  if test "$systemctl"; then
+    systemctl start $1.service
+  else
+    service $1 start
+  fi
+}
+
+service_running() {
+  if test "$systemctl"; then
+    systemctl status $1.service >/dev/null
+  else
+    service $1 status >/dev/null
+  fi
+}
+
+MYSQL_APP_PW_DEFAULT="$APP"
+: ${MYSQL_APP_PW=$MYSQL_APP_PW_DEFAULT}
+if [ "${APP}" = "glance" ]; then
+  APP_CONFIG="/etc/$APP/$APP-registry.conf /etc/$APP/$APP-api.conf"
+else
+  APP_CONFIG="/etc/$APP/$APP.conf"
+fi
+
+# Make sure MySQL is installed.
+
+NEW_MYSQL_INSTALL=0
+if ! rpm -q --whatprovides mariadb > /dev/null; then
+  if [ -z "${ASSUME_YES}" ]; then
+    printf "MariaDB-server is not installed.  Would you like to install it now? (y/n): "
+    read response
+    case "$response" in
+      y|Y)
+        ;;
+      n|N)
+        echo "MariaDB-server must be installed.  Please install it before proceeding."
+        exit 0
+        ;;
+      *)
+        echo "Invalid response." >&2
+        exit 1
+    esac
+  fi
+
+  NEW_MYSQL_INSTALL=1
+  install_mysql_server
+fi
+
+# Make sure mysql is running.
+
+if ! service_running mysql; then
+  if [ -z "${ASSUME_YES}" ]; then
+    printf "mysql is not running.  Would you like to start it now? (y/n): "
+    read response
+    case "$response" in
+      y|Y)
+        ;;
+      n|N)
+        echo "mysql must be running.  Please start it before proceeding."
+        exit 0
+        ;;
+      *)
+        echo "Invalid response." >&2
+        exit 1
+    esac
+  fi
+
+  start_service 'mysql'
+
+  # If we both installed and started, ensure it starts at boot
+  [ $NEW_MYSQL_INSTALL -eq 1 ] && chkconfig mysql on
+fi
+
+# Get MySQL root access.
+
+if [ $NEW_MYSQL_INSTALL -eq 1 ]; then
+  if [ ! "${MYSQL_ROOT_PW+defined}" ]; then
+    echo "Since this is a fresh installation of MySQL, please set a password for the 'root' mysql user."
+
+    PW_MATCH=0
+    while [ $PW_MATCH -eq 0 ]; do
+      printf "Enter new password for 'root' mysql user: "
+      read -s MYSQL_ROOT_PW
+      echo
+      printf "Enter new password again: "
+      read -s PW2
+      echo
+      if [ "${MYSQL_ROOT_PW}" = "${PW2}" ]; then
+        PW_MATCH=1
+      else
+        echo "Passwords did not match." >&2
+      fi
+    done
+  fi
+
+  if ! echo "UPDATE mysql.user SET password = password('${MYSQL_ROOT_PW}') WHERE user = 'root'; DELETE FROM mysql.user WHERE user = ''; flush privileges;" |
+       mysql -uroot -p$MYSQL_ROOT_PW -h$MYSQL_HOST_IP; then
+    echo "Failed to set password for 'root' MySQL user." >&2
+    exit 1
+  fi
+elif [ ! "${MYSQL_ROOT_PW+defined}" ]; then
+  printf "Please enter the password for the 'root' MySQL user: "
+  read -s MYSQL_ROOT_PW
+  echo
+fi
+
+# Sanity check MySQL credentials.
+
+MYSQL_ROOT_PW_ARG=""
+#if [ "${MYSQL_ROOT_PW+defined}" ]; then
+#  MYSQL_ROOT_PW_ARG="--password=${MYSQL_ROOT_PW}"
+#fi
+
+if ! echo "SELECT 1;" |  mysql -uroot -p$MYSQL_ROOT_PW -h$MYSQL_HOST_IP ${MYSQL_ROOT_PW_ARG} > /dev/null; then
+  echo "Failed to connect to the MySQL server.  Please check your root user credentials." >&2
+  exit 1
+fi
+echo "Verified connectivity to MySQL."
+
+# Sanity check that there are no existing db or users
+
+if [ "$MODE" = 'init' ]; then
+  dbs=$(echo "SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='$APP';" |
+         mysql -uroot -p$MYSQL_ROOT_PW -h$MYSQL_HOST_IP ${MYSQL_ROOT_PW_ARG} | tail -n+2)
+  if [ "$dbs" != 0 ]; then
+    echo "Database '$APP' already exists. Please consider first running:" >&2
+    echo "$0 --drop --service $APP" >&2
+    exit 1
+  fi
+  users=$(echo "SELECT COUNT(*) FROM mysql.user WHERE User = '$APP';" |
+           mysql -uroot -p$MYSQL_ROOT_PW -h$MYSQL_HOST_IP ${MYSQL_ROOT_PW_ARG} | tail -n+2)
+  if [ "$users" != 0 ]; then
+    echo "User '$APP' already exists. Please consider first running:" >&2
+    echo "$0 --drop --service $APP" >&2
+    exit 1
+  fi
+fi
+
+# Create or Drop the db.
+
+if [ "$MODE" = 'init' ]; then
+  echo "Creating '$APP' database." >&2
+cat << EOF
+CREATE DATABASE $APP;
+CREATE USER '$APP'@'localhost' IDENTIFIED BY '${MYSQL_APP_PW}';
+CREATE USER '$APP'@'%' IDENTIFIED BY '${MYSQL_APP_PW}';
+GRANT ALL ON $APP.* TO '$APP'@'localhost';
+GRANT ALL ON $APP.* TO '$APP'@'%';
+flush privileges;
+EOF
+else
+  echo "Dropping '$APP' database." >&2
+drop_users=$(
+ echo "SELECT User,Host FROM mysql.user WHERE User = '$APP';" |
+  mysql -uroot -p$MYSQL_ROOT_PW -h$MYSQL_HOST_IP ${MYSQL_ROOT_PW_ARG} |
+ sed -n "s/\($APP\)[\t ]*\(.*\)/DROP USER '\1'@'\2';/p"
+)
+cat << EOF
+$drop_users
+DROP DATABASE IF EXISTS $APP;
+flush privileges;
+EOF
+fi |
+ mysql -uroot -p$MYSQL_ROOT_PW -h$MYSQL_HOST_IP ${MYSQL_ROOT_PW_ARG}
+
+if [ "$MODE" = 'init' ]; then
+
+  # Make sure $APP configuration has the right MySQL password.
+  if [ "${MYSQL_APP_PW}" != "${MYSQL_APP_PW_DEFAULT}" ]; then
+    echo "Updating '$APP' database password in ${APP_CONFIG}"
+    sed -i -e "s|^#* *\(\(sql_\)*connection *= *mysql://$APP\):.*@|\1:${MYSQL_APP_PW}@|" ${APP_CONFIG}
+  fi
+
+  # Ask openstack-$APP to sync the db.
+  echo "Initializing the $APP database, please wait..."
+  if [ "${APP}" = "nova" ] || [ "${APP}" = "cinder" ]; then
+    db_sync='db sync'
+  else
+    db_sync='db_sync'
+  fi
+  # Run as $APP user so any newly created (log) files have correct ownership
+  runuser -s /bin/sh $APP -c "$APP-manage $db_sync"
+
+  # Do a final sanity check on the database.
+  if ! echo "SELECT * FROM migrate_version;" |
+     mysql -u $APP --password=${MYSQL_APP_PW} $APP > /dev/null; then
+    echo "Final sanity check failed." >&2
+    echo "Please file a bug report on bugzilla.redhat.com against the openstack-$APP package." >&2
+    exit 1
+  fi
+
+fi
+
+echo "Complete!"
+
+set +o xtrace

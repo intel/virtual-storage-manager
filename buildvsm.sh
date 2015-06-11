@@ -72,7 +72,9 @@ TEMP_VSM=`mktemp`; rm -rfv $TEMP_VSM >/dev/null; mkdir -p $TEMP_VSM;
 mkdir -p $TEMP_VSM/release/$VERSION-$DATE
 cp -rf * $TEMP_VSM
 cp -rf .lib $TEMP_VSM
-cp -rf ubuntu14/.lib $TEMP_VSM/ubuntu14/.lib
+if [ -d ubuntu14/.lib ]; then
+    cp -rf ubuntu14/.lib $TEMP_VSM/ubuntu14/.lib
+fi
 cd $TEMP_VSM
 
 function create_release() {
@@ -94,6 +96,13 @@ function create_release() {
         cp centos7/buildrpm .
         bash +x buildrpm
         cp centos7/install.sh release/$VERSION-$DATE
+    elif [[ $OS =~ "SUSE" ]]; then
+        cp -rf suse/python-vsmclient ./source
+        cp -rf suse/vsm ./source
+        cp -rf suse/vsm-dashboard ./source
+        cp -rf suse/vsm-deploy ./source
+        cp suse/buildrpm .
+        bash +x buildrpm
     elif [[ $OS == "CentOS" && $OS_VERSION =~ "6" ]]; then
         bash +x buildrpm
         cp install.sh release/$VERSION-$DATE

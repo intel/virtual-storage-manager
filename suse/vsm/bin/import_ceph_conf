@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+from vsmclient.v1 import client as vsm_client
+
+# load vsm config
+CONF_FILE = "/etc/vsmdeploy/deployrc"
+conf_str = open(CONF_FILE, "r").read()
+CONF_DICT = dict([x.strip().split("=",1) for x in conf_str.split("\n") if "=" in x])
+
+vsmclient = None
+
+def get_vsmclient():
+    global vsmclient
+    if not vsmclient:
+        vsmclient = vsm_client.Client('vsm',
+                          CONF_DICT['KEYSTONE_VSM_SERVICE_PASSWORD'],
+                          'service',
+                          "http://%s:5000/v2.0" % CONF_DICT['VSM_HOST'],
+                         )
+    return vsmclient
+
+
+def import_ceph_conf(cluster_name,ceph_conf_path = "/opt/ceph.conf"):
+    return get_vsmclient().clusters.import_ceph_conf(cluster_name=cluster_name,ceph_conf_path=ceph_conf_path)
+
+
+
+from optparse import OptionParser
+import os
+
+if __name__ == "__main__":
+    usage = "usage: %prog [cluster name] [filename for ceph.conf]"
+    parser = OptionParser(usage=usage)
+    parser.add_option("--cluster_name", dest="cluster_name",
+            help = "which cluster to be modified.")
+    parser.add_option("--ceph_conf_path", dest="ceph_conf_path",
+            help = "file path of ceph.conf you want to import")
+    options, args = parser.parse_args()
+    ceph_conf_path = "/opt/ceph.conf"
+    if not options.ceph_conf_path:
+        print '-'*80
+        print 'default value of ceph_conf_path is /opt/ceph.conf.\n  \
+               Please make sure the file already exists if you have not specified any other file path.'
+        print '-'*80
+    else:
+        ceph_conf_path = options.ceph_conf_path
+    if ceph_conf_path and not os.path.exists(ceph_conf_path):
+        parser.error("No such file %s"%ceph_conf_path)
+    if not options.cluster_name:
+        print '-'*80
+        print 'ERROR:Please  specify a cluster name!'
+    else:
+        code,message = import_ceph_conf(options.cluster_name, ceph_conf_path)
+        print message

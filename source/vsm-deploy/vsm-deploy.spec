@@ -3,14 +3,17 @@
 Name:             vsm-deploy
 Version:          2015.01
 Release:          1.0%{?dist}
-Summary:          VSM-Deploy
+Summary:          Deployment tool for VSM
 
 Group:            Deploy/VSM
 License:          Intel
 URL:              http://intel.com
 Source0:          vsm-deploy-%{version}.tar.gz
+BuildArch:        noarch
+%if 0%{?suse_version}
 BuildRequires:    shadow
 Requires:         shadow
+%endif
 
 #TODO Add ceph rpms.
 %description
@@ -33,7 +36,6 @@ This package contains documentation files for vsm.
 
 %build
 
-mkdir -p %{buildroot}
 
 %install
 #---------------------------
@@ -46,15 +48,44 @@ install -p -D -m 755 tools/etc/vsm/server.manifest %{buildroot}%{_sysconfdir}/ma
 install -d -m 755 %{buildroot}%{_usr}/local/bin/
 install -d -m 755 %{buildroot}%{_usr}/local/bin/tools
 
+%if 0%{?suse_version}
+install -p -D -m 755 usr/bin/vsm-controller %{buildroot}%{_usr}/bin/vsm-controller
+install -p -D -m 755 usr/bin/vsm-storage %{buildroot}%{_usr}/bin/vsm-storage
+install -p -D -m 755 usr/bin/populate-servermanifest %{buildroot}%{_usr}/bin/populate-servermanifest
+install -p -D -m 755 usr/bin/partition-drives %{buildroot}%{_usr}/bin/partition-drives
+install -p -D -m 755 usr/bin/vsm-installer %{buildroot}%{_usr}/bin/vsm-installer
+install -p -D -m 755 usr/bin/vsm-node %{buildroot}%{_usr}/bin/vsm-node
+install -d -m 755 %{buildroot}%{_sysconfdir}/systemd/system
+install -p -D -m 755 etc/systemd/system/epmd.socket %{buildroot}%{_sysconfdir}/systemd/system
+install -p -D -m 755 restart-all %{buildroot}%{_usr}/bin/restart-all
+install -p -D -m 755 sync-code %{buildroot}%{_usr}/bin/sync-code
+install -p -D -m 755 replace-str %{buildroot}%{_usr}/bin/replace-str
+
+install -p -D -m 755 clean-data %{buildroot}%{_usr}/bin/clean-data
+install -p -D -m 755 __clean-data %{buildroot}%{_usr}/bin/__clean-data
+install -p -D -m 755 downloadrepo  %{buildroot}%{_usr}/bin/downloadrepo
+install -p -D -m 755 start_osd %{buildroot}%{_usr}/bin/start_osd
+install -p -D -m 755 ec-profile %{buildroot}%{_usr}/bin/ec-profile
+install -p -D -m 755 cache-tier-defaults %{buildroot}%{_usr}/bin/cache-tier-defaults
+install -p -D -m 755 reset_status %{buildroot}%{_usr}/bin/reset_status
+install -p -D -m 755 vsm-update %{buildroot}%{_usr}/bin/vsm-update
+
+install -p -D -m 755 vsm-checker %{buildroot}%{_usr}/bin/vsm-checker
+install -d -m 755 %{buildroot}%{_usr}/lib/vsm
+cp -rf keys  %{buildroot}%{_usr}/lib/vsm/
+cp -rf tools/ %{buildroot}%{_usr}/lib/vsm/
+cp -rf usr/bin/keys  %{buildroot}%{_usr}/lib/vsm/
+cp -rf usr/bin/tools/ %{buildroot}%{_usr}/lib/vsm/
+%else
 install -p -D -m 755 vsm-controller %{buildroot}%{_usr}/local/bin/vsm-controller
+install -p -D -m 755 vsm-installer %{buildroot}%{_usr}/local/bin/vsm-installer
+install -p -D -m 755 vsm-node %{buildroot}%{_usr}/local/bin/vsm-node
 install -p -D -m 755 restart-all %{buildroot}%{_usr}/local/bin/restart-all
 install -p -D -m 755 sync-code %{buildroot}%{_usr}/local/bin/sync-code
 install -p -D -m 755 replace-str %{buildroot}%{_usr}/local/bin/replace-str
 
-install -p -D -m 755 vsm-node %{buildroot}%{_usr}/local/bin/vsm-node
 install -p -D -m 755 clean-data %{buildroot}%{_usr}/local/bin/clean-data
 install -p -D -m 755 __clean-data %{buildroot}%{_usr}/local/bin/__clean-data
-install -p -D -m 755 vsm-installer %{buildroot}%{_usr}/local/bin/vsm-installer
 install -p -D -m 755 downloadrepo  %{buildroot}%{_usr}/local/bin/downloadrepo
 install -p -D -m 755 preinstall %{buildroot}%{_usr}/local/bin/preinstall
 install -p -D -m 755 rpms_list %{buildroot}%{_usr}/local/bin/rpms_list
@@ -69,6 +100,8 @@ install -p -D -m 755 vsm-checker %{buildroot}%{_usr}/local/bin/vsm-checker
 
 cp -rf keys  %{buildroot}%{_usr}/local/bin/
 cp -rf tools %{buildroot}%{_usr}/local/bin/
+%endif
+
 
 %pre
 getent group vsm >/dev/null || groupadd -r vsm --gid 165
@@ -79,7 +112,37 @@ exit 0
 
 %files
 %defattr(-,root,root,-)
-%dir %{_usr}
+%if 0%{?suse_version}
+%dir %{_sysconfdir}/systemd
+%dir %{_sysconfdir}/systemd/system
+%attr(-, root, root) %{_usr}/bin/vsm-storage
+%attr(-, root, root) %{_usr}/bin/partition-drives
+%attr(-, root, root) %{_usr}/bin/populate-servermanifest
+%attr(-, root, root) %{_usr}/bin/vsm-controller
+%attr(-, root, root) %{_usr}/bin/restart-all
+%attr(-, root, root) %{_usr}/bin/replace-str
+%attr(-, root, root) %{_usr}/bin/sync-code
+%attr(-, root, root) %{_usr}/bin/vsm-node
+%attr(-, root, root) %{_usr}/bin/clean-data
+%attr(-, root, root) %{_usr}/bin/__clean-data
+%attr(-, root, root) %{_usr}/bin/vsm-installer
+%attr(-, root, root) %{_usr}/bin/downloadrepo
+%attr(-, root, root) %{_usr}/bin/start_osd
+%attr(-, root, root) %{_usr}/bin/ec-profile
+%attr(-, root, root) %{_usr}/bin/cache-tier-defaults
+%attr(-, root, root) %{_usr}/bin/reset_status
+%attr(-, root, root) %{_usr}/bin/vsm-update
+%attr(-, root, root) %{_usr}/bin/vsm-checker
+%dir %{_usr}/lib/vsm
+%attr(-, root, root) %{_usr}/lib/vsm/*
+%dir %{_usr}/lib/vsm/keys
+%attr(-, root, root) %{_usr}/lib/vsm/keys/*
+
+%dir %{_sysconfdir}/manifest
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/manifest/server.manifest
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/manifest/cluster.manifest
+%{_sysconfdir}/systemd/system/epmd.socket
+%else
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-controller
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/restart-all
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/replace-str
@@ -109,7 +172,10 @@ exit 0
 %dir %{_sysconfdir}/manifest
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/manifest/server.manifest
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/manifest/cluster.manifest
+%endif
 
 %changelog
+* Thu May 28 2015 Eric Jackson <ejackson@suse.com> 2015.01
++- distribution specific changes, reduce rpmlint warnings
 * Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
 - Initial release

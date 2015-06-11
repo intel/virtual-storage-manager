@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# Partition and name unallocated drives
+
+drives=`grep -l -v ^0$ /sys/block/*/size | cut -f4 -d/`
+
+for d in $drives
+do
+  # Skip removable drives
+  if [ `cat /sys/block/$d/removable` -eq 1 ]
+  then
+    continue
+  fi
+
+  # Collect allocated drives
+  sgdisk -i 1 /dev/$d | awk -F\' '/^Partition name/ {print $2}'| egrep -q "hdd_journal|hdd|ssd_journal"
+  if [ $? -eq 0 ]
+  then
+    allocated="$allocated $d"
+  fi
+
+  # Exclude partitioned drives
+  has_partition=`ls /sys/block/$d/*/partition 2>/dev/null`
+  if [ -z "$has_partition" ]
+  then
+    unallocated="$unallocated $d"
+  fi
+done
+
+hdd_size=`
+for d in $unallocated $allocated
+do
+  cat /sys/block/$d/size
+done | sort -n | tail -1 `
+
+separate_journals=0
+for d in $unallocated
+do
+  if [ `cat /sys/block/$d/size` -ne "$hdd_size" ]
+  then
+    separate_journals=1
+    break
+  fi
+done
+
+if [ "$separate_journals" -eq 0 ]
+then
+  # All drives are same size, local journals
+  for d in $unallocated
+  do
+    parted /dev/$d mklabel gpt
+    parted /dev/$d mkpart primary 0% 10%
+    parted /dev/$d mkpart primary 11% 100%
+    parted /dev/$d name 1 hdd_journal
+    sgdisk -t 1:8300 /dev/$d
+    sgdisk -t 2:8300 /dev/$d
+  done
+
+else
+  # Different sized drives, smaller drives are journals
+  for d in $unallocated
+  do
+    
+    # Add a check for rotational on physical systems
+    if [ `cat /sys/block/$d/size` -ne "$hdd_size" ]
+    then
+      # Journal drive
+      parted /dev/$d mklabel gpt
+      parted /dev/$d mkpart primary 0% 16%
+      parted /dev/$d mkpart primary 17% 32%
+      parted /dev/$d mkpart primary 33% 48%
+      parted /dev/$d mkpart primary 49% 64%
+      parted /dev/$d mkpart primary 65% 80%
+      parted /dev/$d mkpart primary 81% 96%
+      parted /dev/$d name 1 ssd_journal
+      sgdisk -t 1:8300 /dev/$d
+      sgdisk -t 2:8300 /dev/$d
+      sgdisk -t 3:8300 /dev/$d
+      sgdisk -t 4:8300 /dev/$d
+      sgdisk -t 5:8300 /dev/$d
+      sgdisk -t 6:8300 /dev/$d
+    else
+      # Data drive
+      parted /dev/$d mklabel gpt
+      parted /dev/$d mkpart primary 0% 100%
+      parted /dev/$d name 1 hdd
+      sgdisk -t 1:8300 /dev/$d
+    fi
+
+  done
+fi
+
+

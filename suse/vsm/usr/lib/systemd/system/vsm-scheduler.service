@@ -1,0 +1,15 @@
+[Unit]
+Description=VSM Storage DB Service works on MySQL
+After=network-online.target rabbitmq-server.service
+Wants=network-online.target rabbitmq-server.service
+
+After=network-online.target local-fs.target
+Wants=network-online.target local-fs.target
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/vsm
+ExecStart=/usr/bin/vsm-scheduler --config-file /etc/vsm/vsm.conf --logfile /var/log/vsm/vsm-scheduler.log
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
