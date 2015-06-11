@@ -57,5 +57,3 @@ ct_target_max_objects 1000000
 ct_target_min_flush_age_m 10
 ct_target_min_evict_age_m 20
 
-[zone]
-zone0
