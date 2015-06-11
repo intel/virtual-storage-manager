@@ -153,9 +153,11 @@ class Controller(wsgi.Controller):
 
             # largest
             nodes = {}
+            osd_cnt = 0
             for osd in osds:
-                if not osd['storage_group']['id'] == storage_group["id"]:
+                if not osd['storage_group']['id'] == storage_group["id"] or osd['state'] == FLAGS.vsm_status_uninitialized:
                     continue
+                osd_cnt = osd_cnt + 1
                 k = osd['service']['host']
                 if k not in osd:
                     nodes.setdefault(k, 0)
@@ -165,6 +167,7 @@ class Controller(wsgi.Controller):
             else:
                 storage_group['largest_node_capacity_used'] = max(nodes.values())
 
+            storage_group["attached_osds"] = osd_cnt
             # attached pools
             storage_group["attached_pools"] = len([pool for pool in pools.values()
                                                     if (pool['primary_storage_group_id'] == storage_group["id"])])

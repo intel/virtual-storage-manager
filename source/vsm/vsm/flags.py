@@ -434,6 +434,9 @@ vsm_status_opts = [
     cfg.StrOpt('vsm_status_present',
               default='Present',
               help='prisent status'),
+    cfg.StrOpt('vsm_status_uninitialized',
+          default='Uninitialized',
+          help='Uninitialized status'),
 ]
 
 FLAGS.register_opts(vsm_status_opts)

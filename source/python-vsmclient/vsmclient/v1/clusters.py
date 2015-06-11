@@ -238,3 +238,17 @@ class ClusterManager(base.ManagerWithFind):
                            }}
         url = "/clusters/intergrate"
         return self.api.client.post(url)
+
+    def stop_cluster(self,cluster_id):
+        body = {'cluster': {
+                            "id": cluster_id,
+                           }}
+        url = "/clusters/stop_cluster"
+        return self.api.client.post(url,body=body)
+
+    def start_cluster(self,cluster_id):
+        body = {'cluster': {
+                            "id": cluster_id,
+                           }}
+        url = "/clusters/start_cluster"
+        return self.api.client.post(url,body=body)

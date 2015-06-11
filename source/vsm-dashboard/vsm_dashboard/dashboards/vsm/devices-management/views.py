@@ -63,6 +63,9 @@ class IndexView(tables.DataTableView):
         if _osds:
             logging.debug("resp osds in view: %s" % _osds)
         osds = []
+        settings = vsmapi.get_setting_dict(self.request)
+        disk_near_full_threshold = settings['disk_near_full_threshold']
+        disk_full_threshold = settings['disk_full_threshold']
         for _osd in _osds:
             osd = {
                     'id': _osd.id,
@@ -83,7 +86,17 @@ class IndexView(tables.DataTableView):
                     'journal_device_status': _osd.device['journal_state'], 
                     'server': _osd.service['host'],
                     'zone': _osd.zone,
+                    'full_warn': 0
                   }
+
+            if osd['data_dev_capacity']:
+                osd['full_status'] = round(osd['data_dev_used'] * 1.0 / osd['data_dev_capacity'] * 100, 2)
+            else:
+                osd['full_status'] = ''
+            if osd['full_status'] >= disk_near_full_threshold and osd['full_status'] < disk_full_threshold:
+                osd['full_warn'] = 1
+            elif osd['full_status'] >=disk_full_threshold:
+                osd['full_warn'] = 2
             if osd_id == "-1":
                 osds.append(osd)  #all of the deivces
             elif str(_osd.id) == str(osd_id):
@@ -93,12 +106,8 @@ class IndexView(tables.DataTableView):
         return osds
 
 
-
 def DevicesAction(request, action):
-    data = json.loads(request.raw_post_data)
-    print "osd_id:"+str(data["osd_id"])
-    #print data
-
+    data = json.loads(request.body)
     device_data_str = device_get_smartinfo(request,str(data["osd_id"]))
     device_data_dict = {}
     device_data_str = device_data_str[0].device_data
@@ -109,7 +118,6 @@ def DevicesAction(request, action):
             device_data_dict[data_list[0]] = ""
         if data_list_len == 2:
             device_data_dict[data_list[0]] = data_list[1]
-    #print 'device_data_dict================',device_data_dict
     device_data_json = {
                 "basic":{"status":device_data_dict["Drive Status"],
                        "family":device_data_dict["Drive Family"],
@@ -124,7 +132,6 @@ def DevicesAction(request, action):
                        "unitWRITE":device_data_dict["Data Units Written"],
                 }
     }
-    devicedata = json.dumps(device_data_json)
-    #print 'device_data_json=========',device_data_json
-    return HttpResponse(devicedata)
 
+    devicedata = json.dumps(device_data_json)
+    return HttpResponse(devicedata)

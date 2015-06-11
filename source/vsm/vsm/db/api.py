@@ -1067,6 +1067,11 @@ def osd_state_get_by_service_id_and_storage_group_id(context, service_id,\
     return IMPL.osd_state_get_by_service_id_and_storage_group_id(context,\
                                                service_id, storage_group_id)
 
+def osd_state_get_by_device_id_and_service_id_and_cluster_id(\
+        context, device_id, service_id, cluster_id):
+    return IMPL.osd_state_get_by_device_id_and_service_id_and_cluster_id(\
+        context, device_id, service_id, cluster_id)
+
 def osd_state_get_by_service_id(context, service_id):
     return IMPL.osd_state_get_by_service_id(context, service_id)
 

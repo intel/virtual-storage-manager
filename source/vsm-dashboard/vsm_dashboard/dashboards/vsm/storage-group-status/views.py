@@ -93,6 +93,7 @@ class IndexView(ModalChartMixin, tables.DataTableView):
         for _sg in _sgs:
             sg = {"id": _sg.id,
                         "name": _sg.name,
+                        "attached_osds": _sg.attached_osds,
                         "attached_pools": _sg.attached_pools,
                         "capacity_total": 0 if not _sg.capacity_total else round(_sg.capacity_total * 1.0 / 1024 / 1024, 1),
                         "capacity_used": 0 if not _sg.capacity_used else round(_sg.capacity_used * 1.0 / 1024 / 1024, 1),

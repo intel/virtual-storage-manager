@@ -59,3 +59,12 @@
 	height:30px;
 	border: 1px solid #ccc
 }
+
+.page{
+	float:right;
+}
+
+.smart-info-icon{
+	margin-left:10px;
+	cursor:pointer;
+}

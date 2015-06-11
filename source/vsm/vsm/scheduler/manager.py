@@ -92,6 +92,24 @@ class SchedulerManager(manager.Manager):
         pool_ref = db.pool_get_by_name(context,
                                        body['name'],
                                        body['cluster_id'])
+        replication_factor = body['size']
+        zone_cnt = len(db.zone_get_all(context))
+        factor_flag = True
+        message = ''
+        if zone_cnt > 1 and replication_factor > zone_cnt:
+            factor_flag = False
+            message = "4004 - replication_factor of %s error:replica count greater than number of zones in Storage Group-loss of zone may result in data loss" % body['name']
+            LOG.error(message)
+        if zone_cnt <= 1 :
+            host_cnt = db.init_node_count_by_status(context,status='Active')
+            if replication_factor > host_cnt:
+                factor_flag = False
+                message = "4005 - replication_factor of %s error:replica count greater than number of host in Storage Group-loss of host may resultin data loss" % body['name']
+                LOG.error(message)
+
+        if not factor_flag:
+            res = "pool "+ body['name'] + ":%s"%message
+            return {'message':res}
         if not pool_ref:
             self._agent_rpcapi.create_storage_pool(context, body)#TODO need to specify host?
             #pool_id = self._agent_rpcapi.get_pool_id_by_name(context,
@@ -781,6 +799,73 @@ class SchedulerManager(manager.Manager):
             raise
 
     @utils.single_lock
+    def stop_cluster(self, context, body=None):
+        """Noout and stop all osd service, then stop the server.
+           body = {u'servers': [{u'cluster_id': 1, u'id': u'1'},
+                        {u'cluster_id': 1, u'id': u'2'}]}
+        """
+        LOG.info("DEBUG in stop cluster in scheduler manager.")
+
+        server_list = body['servers']
+        active_monitor = server_list[0]
+        self._update_server_list_status(context,
+                                            server_list,
+                                            'stopping')
+        try:
+            self._agent_rpcapi.stop_cluster(context, active_monitor['host'])
+            self._update_server_list_status(context,
+                                    server_list,
+                                    'stopped')
+        except rpc_exc.Timeout:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'rpc timeout error: check network')
+        except rpc_exc.RemoteError:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'rpc remote error: check network')
+        except:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'ERROR')
+            raise
+
+        return True
+
+    @utils.single_lock
+    def start_cluster(self, context, body=None):
+        """Start all osd service, then start the server.
+           body = {u'servers': [{u'cluster_id': 1, u'id': u'1'},
+                        {u'cluster_id': 1, u'id': u'2'}]}
+        """
+        LOG.info("DEBUG in start cluster in scheduler manager.")
+        server_list = body['servers']
+        active_monitor = server_list[0]
+        self._update_server_list_status(context,
+                                    server_list,
+                                    'starting')
+        try:
+            self._agent_rpcapi.start_cluster(context, active_monitor['host'])
+            self._update_server_list_status(context,
+                                    server_list,
+                                    'Active')
+        except rpc_exc.Timeout:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'rpc timeout error: check network')
+        except rpc_exc.RemoteError:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'rpc remote error: check network')
+        except:
+            self._update_server_list_status(context,
+                                            server_list,
+                                            'ERROR')
+            raise
+
+        return True
+
+    @utils.single_lock
     def stop_server(self, context, body=None):
         """Noout and stop all osd service, then stop the server.
            body = {u'servers': [{u'cluster_id': 1, u'id': u'1'},
@@ -805,10 +890,12 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.stop_server(context,
                                                item['id'],
                                                res['host'])
-                cluster_id = res['cluster_id']
-                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
-                self._agent_rpcapi.update_osd_state(context,
-                                      active_monitor['host'])
+                try:
+                    cluster_id = res['cluster_id']
+                    active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+                    self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                except:
+                    pass
 
             except rpc_exc.Timeout:
                 self._update_server_list_status(context,
@@ -842,9 +929,12 @@ class SchedulerManager(manager.Manager):
             self._start_start(context, item['id'])
             try:
                 self._agent_rpcapi.start_server(context, item['id'], res['host'])
-                cluster_id = res['cluster_id']
-                active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
-                self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                try:
+                    cluster_id = res['cluster_id']
+                    active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+                    self._agent_rpcapi.update_osd_state(context, active_monitor['host'])
+                except:
+                    pass
             except rpc_exc.Timeout:
                 self._update_server_list_status(context,
                                                 server_list,
@@ -1261,6 +1351,32 @@ class SchedulerManager(manager.Manager):
                 #self._conductor_api.init_node_update_status_by_id(context,
                 #    init_node['id'], 'ERROR: osd_restart')
                 LOG.error('ERROR: osd_restart')
+                raise
+        else:
+            return False
+
+    @utils.single_lock
+    def osd_add(self, context, osd_id):
+        LOG.info('scheduler manager:osd_add')
+        osd = db.osd_state_get(context, osd_id)
+        init_node = db.init_node_get_by_service_id(context, \
+                                                 osd['service_id'])
+        if init_node['status'] == 'Active':
+            try:
+                self._agent_rpcapi.osd_add(context, osd_id, init_node['host'])
+                self._agent_rpcapi.update_osd_state(context, init_node['host'])
+            except rpc_exc.Timeout:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart rpc timeout')
+                LOG.error('ERROR: osd_add rpc timeout')
+            except rpc_exc.RemoteError:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart rpc remote error')
+                LOG.error('ERROR: osd_add rpc remote error')
+            except:
+                #self._conductor_api.init_node_update_status_by_id(context,
+                #    init_node['id'], 'ERROR: osd_restart')
+                LOG.error('ERROR: osd_add')
                 raise
         else:
             return False

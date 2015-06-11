@@ -160,7 +160,10 @@ class API(object):
         result = self.osd_state_get_by_osd_name_and_service_id_and_cluster_id(\
                  context, values['osd_name'], values['service_id'],\
                  values['cluster_id'])
-
+        if not result:
+            result = self.osd_state_get_by_device_id_and_service_id_and_cluster_id(\
+                 context, values['device_id'], values['service_id'],\
+                 values['cluster_id'])
         if not result:
             return self.conductor_rpcapi.\
                osd_state_update_or_create(context, values, create=True)

@@ -176,7 +176,8 @@ class CephDriver(object):
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
                     'replica_storage_group': replica_storage_group if replica_storage_group else None, 
-                    'quota': body.get('quota')
+                    'quota': body.get('quota'),
+                    'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
@@ -498,7 +499,14 @@ class CephDriver(object):
                 return False
         return True
 
-    def add_osd(self, context, host_id):
+    def add_osd(self, context, host_id, osd_id_in=None):
+
+        if osd_id_in is not None:
+            osd_obj = db.osd_get(context, osd_id_in)
+            host_obj =  db.init_node_get_by_device_id(context, osd_obj.device_id)
+            host_id = host_obj.id
+            LOG.info("begin to add osd %s from host %s"%(osd_obj.device_id,host_id))
+
         LOG.info('start to ceph osd on %s' % host_id)
         strg_list = self._conductor_api.\
             host_storage_groups_devices(context, host_id)
@@ -506,11 +514,17 @@ class CephDriver(object):
 
         #added_to_crushmap = False
         osd_cnt = len(strg_list)
+        if osd_id_in is not None:
+            osd_cnt = 1
         count = 0
+
         for strg in strg_list:
+            if osd_id_in is not None and strg.get("dev_id") != osd_obj.device_id:
+                continue
             LOG.info('>> Step 1: start to ceph osd %s' % strg)
             count = count + 1
-            self._conductor_api.init_node_update(context, host_id, {"status": "add_osd %s/%s"%(count,osd_cnt)})
+            if osd_id_in is  None:
+                self._conductor_api.init_node_update(context, host_id, {"status": "add_osd %s/%s"%(count,osd_cnt)})
             # Create osd from # ceph osd create
             stdout = utils.execute("ceph",
                                    "osd",
@@ -552,6 +566,8 @@ class CephDriver(object):
             osd_state['cluster_ip'] = strg['cluster_ip']
             osd_state['deleted'] = 0
             osd_state['zone_id'] = strg['zone_id']
+            if osd_id_in is not None:
+                db.osd_state_update(context,osd_id_in,osd_state)
 
             LOG.info('>> crush_dict  %s' % crush_dict)
             LOG.info('>> osd_conf_dict %s' % osd_conf_dict)
@@ -1061,7 +1077,24 @@ class CephDriver(object):
             LOG.info('>> start the monitor id: %s' % mon_id)
             if node_type and node_type.find('monitor') != -1:
                 self.start_mon_daemon(context, mon_id)
+    def stop_monitor(self, context):
+        # Get info from db.
+        res = self._conductor_rpcapi.init_node_get_by_host(context, FLAGS.host)
+        node_type = res.get('type', None)
+        # get mon_id
+        mon_id = None
+        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        config_dict = config.as_dict()
+        for section in config_dict:
+            if section.startswith("mon."):
+                if config_dict[section]['host'] == FLAGS.host:
+                    mon_id = section.replace("mon.", "")
 
+        # Try to start monitor service.
+        if mon_id:
+            LOG.info('>> start the monitor id: %s' % mon_id)
+            if node_type and node_type.find('monitor') != -1:
+                self.stop_mon_daemon(context, mon_id)
     def start_osd(self, context):
         # Start all the osds on this node.
         osd_list = []
@@ -1262,6 +1295,19 @@ class CephDriver(object):
                       '/var/lib/ceph/bootstrap-mds/ceph.keyring',
                       run_as_root=True)
 
+    def stop_cluster(self,context):
+        "stop cluster"
+        LOG.info('agent/driver.py stop cluster')
+        utils.execute('service', 'ceph', '-a', 'stop', run_as_root=True)
+        return True
+
+
+    def start_cluster(self,context):
+        LOG.info('agent/driver.py start cluster')
+        utils.execute('service', 'ceph', '-a', 'start', run_as_root=True)
+        return True
+
+
     def stop_server(self, context, node_id):
         """Stop server.
            0. Remove monitor if it is a monitor
@@ -1316,12 +1362,35 @@ class CephDriver(object):
                 LOG.error("%s:%s" %(e.code, e.message))
             return True
         return True
+
+    def get_ceph_version(self):
+        try:
+            out, err = utils.execute('ceph',
+                                     '--version',
+                                     run_as_root=True)
+            LOG.info("get_ceph_version:%s--%s"%(out,err))
+            out = out.split(' ')[2]
+        except:
+            out = ''
+        return out
+
+    def get_vsm_version(self):
+        try:
+            out, err = utils.execute('vsm',
+                                     '--version',
+                                     run_as_root=True)
+            LOG.info("get_vsm_version:%s--%s"%(out,err))
+        except:
+            out = '2.0'
+        return out
+
     def get_smart_info(self, context):
         out, err = utils.execute('get_smart_info',
                                  'll',
                                  run_as_root=True)
         LOG.info("get_smart_info:%s--%s"%(out,err))
         return out
+
     def get_ceph_admin_keyring(self, context):
         """
         read ceph keyring from CEPH_PATH
@@ -1820,9 +1889,13 @@ class CephDriver(object):
             if mds_dict:
                 mdsmap['failed'] = len(mds_dict['failed'])
                 mdsmap['stopped'] = len(mds_dict['stopped'])
+                mdsmap['data_pools'] = mds_dict['data_pools']
+                mdsmap['metadata_pool'] = mds_dict['metadata_pool']
             else:
                 mdsmap['failed'] = -1
                 mdsmap['stopped'] = -1
+                mdsmap['data_pools'] = []
+                mdsmap['metadata_pool'] = []
             return json.dumps(mdsmap)
         return None
 
@@ -1853,8 +1926,12 @@ class CephDriver(object):
             uptime = open("/proc/uptime", "r").read().strip().split(" ")[0]
         except:
             uptime = ""
+        ceph_version = self.get_ceph_version()
+        vsm_version = self.get_vsm_version()
         return json.dumps({
             'uptime': uptime,
+            'ceph_version': ceph_version,
+            'vsm_version':vsm_version,
         })
 
     def ceph_status(self):
@@ -2110,7 +2187,8 @@ class CreateCrushMapDriver(object):
             osd_num = osd_num + int(res)
         init_node = db.init_node_get(context, service_id[0])
         zone_tag = True
-        if init_node['zone']['name'] == FLAGS.default_zone:
+        zone_cnt = len(db.zone_get_all(context))
+        if init_node['zone']['name'] == FLAGS.default_zone or zone_cnt <= 1:
             zone_tag = False 
         self._gen_crushmap_optimal()
         self._gen_device_osd(osd_num)

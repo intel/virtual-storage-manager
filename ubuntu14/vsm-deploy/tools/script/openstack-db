@@ -276,8 +276,9 @@ if [ "$MODE" = 'init' ]; then
     db_sync='db_sync'
   fi
   # Run as $APP user so any newly created (log) files have correct ownership
-  $APP-manage $db_sync|sudo -u $APP /bin/sh
-  exit
+#  $APP-manage $db_sync|sudo -u $APP /bin/sh
+#  exit
+  su -s /bin/sh -c "exec ${APP}-manage ${db_sync}" $APP
 
   # Do a final sanity check on the database.
   if ! echo "SELECT * FROM migrate_version;" |

@@ -105,7 +105,10 @@ function create_release() {
     cp NOTICE release/$VERSION-$DATE
     cp CHANGELOG.md release/$VERSION-$DATE
     cp hostrc release/$VERSION-$DATE
-    cp -r manifest release/$VERSION-$DATE
+#    cp -r manifest release/$VERSION-$DATE
+    mkdir -p release/$VERSION-$DATE/manifest
+    cp source/vsm/etc/vsm/cluster.manifest release/$VERSION-$DATE/manifest/cluster.manifest.sample
+    cp source/vsm/etc/vsm/server.manifest release/$VERSION-$DATE/manifest/server.manifest.sample
     cp -r vsmrepo release/$VERSION-$DATE
 
     cd release

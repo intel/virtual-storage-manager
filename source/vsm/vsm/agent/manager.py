@@ -156,6 +156,14 @@ class AgentManager(manager.Manager):
         device_dict['fs_type'] = 'xfs'
         device_dict['total_capacity_kb'] = 0
         self._drive_num_count = 0
+        # Get zone_id
+        zone_id = 0
+        zone_ref = db.zone_get_by_name(self._context, self._node_info['zone'])
+        if zone_ref:
+            zone_id = zone_ref['id']
+        else:
+            LOG.error("Can't find the zone in DB!")
+            raise
 
         for storage_class in self._node_info["storage_class"]:
             device_type = storage_class['name']
@@ -179,7 +187,23 @@ class AgentManager(manager.Manager):
                         if not device_ref:
                             device_dict['used_capacity_kb'] = 0
                             device_dict['avail_capacity_kb'] = 0
-                            db.device_create(self._context, device_dict)
+                            dev = db.device_create(self._context, device_dict)
+                            LOG.info("storage_group_ref=%s=="%(dir(storage_group_ref)))
+                            osd_states_dict = {
+                                'osd_name':'osd.%s.%s'%(FLAGS.vsm_status_uninitialized, dev.id),
+                                'device_id': dev.id,
+                                'storage_group_id': storage_group_ref.id,
+                                'service_id':self._service_id,
+                                'cluster_id':self._cluster_id,
+                                'state':FLAGS.vsm_status_uninitialized,
+                                'operation_status':FLAGS.vsm_status_uninitialized,
+                                'weight':'0',
+                                'public_ip':'',
+                                'cluster_ip':'',
+                                'zone_id':zone_id,
+
+                            }
+                            db.osd_state_create(self._context, osd_states_dict)
                     except exception.UpdateDBError, e:
                         LOG.error('%s:%s' % (e.code, e.message))
             else:
@@ -247,12 +271,14 @@ class AgentManager(manager.Manager):
                                              FLAGS.agent_topic)
             self._service_id = service_ref['id']
 
-        self._write_info_into_devices()
-
         # Get cluster_id
         cluster_ref = self._get_cluster_ref()
         cluster_id = cluster_ref['id']
         self._cluster_id = cluster_id
+
+        self._write_info_into_devices()
+
+
         cluster_id_file = os.path.join(FLAGS.state_path, 'cluster_id')
         utils.write_file_as_root(cluster_id_file, self._cluster_id, 'w')
         # Get zone_id
@@ -795,6 +821,17 @@ class AgentManager(manager.Manager):
     def stop_server(self, context, node_id):
         return self.ceph_driver.stop_server(context, node_id)
 
+    def start_cluster(self, context):
+        self.ceph_driver.start_cluster(context)
+        utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
+                    run_as_root=True)
+        return True
+
+    def stop_cluster(self, context):
+        utils.execute('ceph', 'osd', 'getcrushmap', '-o', FLAGS.crushmap_bin,
+                                run_as_root=True)
+        return self.ceph_driver.stop_cluster(context)
+
     def stop_mds(self, context):
         return self.ceph_driver.stop_mds(context)
 
@@ -833,6 +870,9 @@ class AgentManager(manager.Manager):
         self.ceph_driver.osd_restart(context, osd_id)
         return True
 
+    def osd_add(self, context, osd_id):
+        return self.ceph_driver.add_osd(context, host_id=None, osd_id_in=osd_id)
+
     def osd_restore(self, context, osd_id):
         self.ceph_driver.osd_restore(context, osd_id)
         return True
@@ -846,11 +886,13 @@ class AgentManager(manager.Manager):
         LOG.info("refresh all status")
         self.update_all_status(context)
         return True
+
     def intergrate_cluster_from_ceph(self, context):
         LOG.info("intergrate cluster from ceph")
         self.update_all_status(context)
         self.sync_osd_states_from_ceph(context)
         return True
+
     def sync_osd_states_from_ceph(self, context):
         osd_json = self.ceph_driver.get_osds_status()
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
@@ -1044,15 +1086,25 @@ class AgentManager(manager.Manager):
             if storage_group:
                 osd_num_per_group = db.osd_state_count_by_storage_group_id(context, storage_group['id'])
                 #reset pgs
-                if 20 * osd_num_per_group > pool['pg_num']:
-                    pg_num = self._compute_pg_num(context, osd_num_per_group, pool['size'])   
+                max_pg_num_per_osd = pool['max_pg_num_per_osd']
+                if not max_pg_num_per_osd:
+                    settings = db.vsm_settings_get_all(context)
+                    for setting in settings:
+                        if setting['name'] == 'pg_count_factor':
+                             max_pg_num_per_osd = int(setting['value'])
+                max_pg_num_finally = max_pg_num_per_osd * osd_num_per_group//pool['size']
+                if max_pg_num_finally > pool['pg_num']:
+                    pg_num = max_pg_num_finally#self._compute_pg_num(context, osd_num_per_group, pool['size'])
                     LOG.info("storage group id %s has %s osds" % (storage_group['id'], osd_num_per_group))
                     if osd_num_per_group > 64:
                         osd_num_per_group = 64
                         LOG.info("osd_num_per_group > 64, use osd_num_per_group=64")
                     step_max_pg_num = osd_num_per_group * 32
                     max_pg_num = step_max_pg_num + pool['pg_num']
-                    if pg_num > max_pg_num:
+                    if pg_num > max_pg_num_finally:
+                        pgp_num = pg_num = max_pg_num_finally
+                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                    elif pg_num > max_pg_num:
                         pgp_num = pg_num = max_pg_num 
                         self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
                     elif pg_num > pool['pg_num']:

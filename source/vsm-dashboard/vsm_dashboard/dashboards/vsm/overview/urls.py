@@ -16,9 +16,17 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView
-from .views import ClusterCount
+from .views import version,cluster,capacity,OSD,monitor,MDS,storage,IOPS,PG
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^ClusterCount/$', ClusterCount, name='ClusterCount'),
+    url(r'^version/$', version, name='version'),
+    url(r'^cluster/$', cluster, name='cluster'),
+    url(r'^capcity/$', capacity, name='capcity'),
+    url(r'^osd/$', OSD, name='OSD'),
+    url(r'^monitor/$', monitor, name='monitor'),
+    url(r'^mds/$', MDS, name='MDS'),
+    url(r'^storage/$', storage, name='storage'),
+    url(r'^IOPS/$', IOPS, name='IOPS'),
+    url(r'^PG/$', PG, name='PG'),
 )
