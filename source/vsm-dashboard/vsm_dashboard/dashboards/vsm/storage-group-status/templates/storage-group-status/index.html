@@ -21,45 +21,52 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=cluster.title %}
+  <link href="{{ STATIC_URL }}dashboard/css/storagegroupstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-<style>
-    .table_wrapper {
-          clear: left;
-      }
-      .threshold {
-          width: 1330px;
-          height: 55px;
-          float: left;
-          text-align: center;
-          padding-top: 50px;
-      }
-</style>
-    <div style="float:left; clear:right">
-    {{ chart.render }}
-        <div class="threshold" style="width:1330px">
-            <span style="font-weight: bold;text-decoration: underline;font-size: 16px;">Capacity Warning Thresholds</span><br />
-            <br/>
-            <span style="font-weight: bold;">Storage Group Near Full: {{ settings.storage_group_near_full_threshold }} % &nbsp;
-            Storage Group Full: {{ settings.storage_group_full_threshold }} %&nbsp;
-            Ceph OSD Near Full: {{ settings.ceph_near_full_threshold }} %&nbsp;
-            Ceph OSD Full: {{ settings.ceph_full_threshold }} %
-            </span>
-        </div>
-    {{ table.render }}
+  <div id="divPieCharts" class="sgs-block" style="min-height: 220px;">
+    <h3 class="table_title">Threshold</h3>
+    <div id="divPieChartsContent"></div>
+  </div>  
+
+  <div id="divStandardSettings" class="sgs-block" style="height: 80px;">
+    <h3 class="table_title">Capacity Warning Thresholds</h3>
+    <div id="divStandardSettingsContent">
+      <table id="tSettings">
+        <tr>
+          <td>
+            <label>Storage Group Near Full:</label>
+            <span>{{ settings.storage_group_near_full_threshold}}</span>
+          </td>
+          <td>
+            <label>Storage Group Full:</label>
+            <span>{{ settings.storage_group_full_threshold }}</span>
+          </td>
+          <td>
+            <label>Ceph OSD Near Full:</label>
+            <span>{{ settings.ceph_near_full_threshold}}</span>
+          </td>
+          <td>
+            <label>Ceph OSD Full:</label>
+            <span>{{ settings.ceph_full_threshold}}</span>
+          </td>
+        </tr>
+      </table>
     </div>
+  </div>
+
+  {{ table.render }}
+  
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/d3.v2.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/d3.ay-pie-chart.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/chart.js' type='text/javascript' charset='utf-8'></script>
+    <script src="{{ STATIC_URL }}lib/echarts.js"></script>
+    <script src="{{ STATIC_URL }}dashboard/js/storagegroupstatus.js"></script> 
 {% endblock %}
+
 {% block css %}
-        {{ block.super }}
-        <link rel="stylesheet" href="/static/dashboard/css/chart.css" type="text/css" media="screen" />
+    {{ block.super }}
 {% endblock %}
 
