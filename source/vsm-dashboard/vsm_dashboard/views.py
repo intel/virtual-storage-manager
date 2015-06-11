@@ -24,7 +24,7 @@ from django.conf import settings
 
 import horizon
 
-from openstack_auth.views import Login
+from openstack_auth.views import login
 
 from vsm_dashboard import api
 
@@ -59,7 +59,7 @@ def splash(request):
         #        return license_gate(request)
         #else:
         return shortcuts.redirect(get_user_home(request.user))
-    form = Login(request)
+    form = login(request)
     request.session.clear()
     request.session.set_test_cookie()
     return shortcuts.render(request, 'splash.html', {'form': form})
