@@ -475,3 +475,12 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         topic,
                         version='1.0', timeout=6000)
         return res
+
+    def monitor_restart(self, context, monitor_num, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        #self.test_service(context, topic)
+        res = self.call(context,
+                      self.make_msg('monitor_restart',
+                                    monitor_num=monitor_num),
+                      topic, version='1.0', timeout=6000)
+        return res

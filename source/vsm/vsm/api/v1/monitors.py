@@ -73,6 +73,7 @@ class Controller(wsgi.Controller):
     def __init__(self, ext_mgr):
         super(Controller, self).__init__()
         self.conductor_api = conductor.API()
+        self.scheduler_api = scheduler.API()
 
     @wsgi.serializers(xml=MonitorsTemplate)
     def show(self, req, id):
@@ -130,6 +131,14 @@ class Controller(wsgi.Controller):
         mon = db.monitor_get(context, id)
 
         db.monitor_destroy(context, mon.get('name'))
+
+    @wsgi.response(202)
+    @wsgi.action('restart')
+    def _action_restart(self, req, id, body):
+        context = req.environ['vsm.context']
+        LOG.info("action_restart")
+        self.scheduler_api.monitor_restart(context, id)
+        return webob.Response(status_int=202)
 
     def summary(self, req, cluster_id=None):
         LOG.info('mon-summary.')

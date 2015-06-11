@@ -96,7 +96,6 @@ class OsdManager(base.ManagerWithFind):
         self._action('remove', osd)
 
     def add_osd_from_node_in_cluster(self, osd):
-        print '---add--vsmclient--'
         self._action('add', osd)
 
     def delete(self, osd):

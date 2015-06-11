@@ -1477,3 +1477,31 @@ class SchedulerManager(manager.Manager):
         if status == 'Active' or status == 'available':
             res = self._agent_rpcapi.get_smart_info(context,host)
             return res
+
+    @utils.single_lock
+    def monitor_restart(self, context, monitor_id):
+        LOG.info('scheduler manager:monitor_restart')
+        mon_obj = db.monitor_get(context,monitor_id)
+        init_nodes = db.init_node_get_all(context)
+        monitor_num = mon_obj.name
+        mon_address = mon_obj.address.split(':')[0]
+        #LOG.info('scheduler manager:monitor_restart--mon_address==%s'%mon_address)
+        init_node = None
+        for node in init_nodes:
+            raw_ip = node.raw_ip.split(',')
+            if mon_address in raw_ip:
+                init_node = node
+                LOG.info("scheduler manager:monitor_restart-- init_node['host']==%s"% init_node['host'])
+                break
+        if init_node['status'] == 'Active':
+            try:
+                self._agent_rpcapi.monitor_restart(context, monitor_num, init_node['host'])
+            except rpc_exc.Timeout:
+                LOG.error('ERROR: monitor_restart rpc timeout')
+            except rpc_exc.RemoteError:
+                LOG.error('ERROR: moitor_restart rpc remote error')
+            except:
+                LOG.error('ERROR: monitorrestart')
+                raise
+        else:
+            return False
