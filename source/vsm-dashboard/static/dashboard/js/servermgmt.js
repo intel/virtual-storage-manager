@@ -15,6 +15,245 @@
  under the License.
  */
 
+
+
+$(function(){
+    //Open the TableCheckbox
+    OpenTableCheckbox();
+    
+});
+
+function OpenTableCheckbox(){
+    //Opent the table header
+    if($(".multi_select_column.hidden.tablesorter-header.sorter-false").length>0)
+        $(".multi_select_column.hidden.tablesorter-header.sorter-false")[0].className = "multi_select_column";
+
+    if($(".multi_select_column.hidden").length>0)
+        $(".multi_select_column.hidden")[0].className = "multi_select_column";
+
+    if($("#tServers") && $("#tServers").length>0){
+        $("#tServers>tbody>tr>.multi_select_column.hidden").each(function(){
+            this.className = "multi_select_column";
+        })
+    }
+}
+
+//Add Servers
+$("#btnSubmit").click(function(){
+    //the action including action option and action index.
+    var action = CheckAction();
+
+    var data;
+    switch(action.index){
+        case 1:
+            data = GenerateAddServerData();
+            break;
+        case 2:
+            data = GenerateRemoveServerData();
+            break;
+        case 3:
+            //"add monitor" use the method as same as "add server"
+            data = GenerateAddServerData(); 
+            break;
+        case 4:
+            //"remove monitor" use the method as same as "add server"
+            data = GenerateRemoveServerData();
+            break;
+        case 5://start server
+            data = GenerateStartServerData();
+            break;
+        case 6://stop server
+            data = GenerateRemoveServerData();
+            break;
+        default:
+            data = "";
+            //nothing to do
+            return;
+    }
+
+    PostRequest(action,data);
+});
+
+
+$(".reset-status-action").click(function() {
+    var token = $("input[name=csrfmiddlewaretoken]").val();
+    var server_id = $(this).parent().parent().find(".server_id").html()
+    console.log(server_id);
+    $.ajax({
+        data: "",
+        type: "post",
+        dataType: "json",
+        url: "/dashboard/vsm/storageservermgmt/reset_status/"+ server_id,
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+        },
+        headers: {
+            "X-CSRFToken": token
+        },
+        complete: function(){
+
+        }
+    });
+})
+
+
+function PostRequest(action,data){
+    var token = $("input[name=csrfmiddlewaretoken]").val();
+    $.ajax({
+        data: data,
+        type: "post",
+        dataType: "json",
+        url: "/dashboard/vsm/storageservermgmt/servers/"+action.action,
+        success: function (data) {
+            console.log(data);
+            window.location.href="/dashboard/vsm/storageservermgmt/";
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+        },
+        headers: {
+            "X-CSRFToken": token
+        },
+        complete: function(){
+
+        }
+    });
+}
+
+
+function GenerateAddServerData(){
+    var data_list = new Array();
+    $("#tServers>tbody>tr").each(function(){
+        var tr_id = this.id;
+        var checkbox = $("#"+tr_id).find(".table-row-multi-select");
+        
+        if(checkbox[0].checked){
+            id = checkbox.val();
+            zone_id = $("#"+tr_id).find(".zone").find("select").val();
+            monitor = $("#"+tr_id).find(".monitor").find("input")[0].checked ? true : false;
+            storage = $("#"+tr_id).find(".storage").find("input")[0].checked ? true : false;
+
+            data = {id:id, is_monitor:monitor, is_storage:storage, zone_id:zone_id};
+            data_list.push(data);
+        }
+    })
+    var data = JSON.stringify(data_list);
+    return data;
+}
+
+
+function GenerateRemoveServerData(){
+    var data_list = new Array();
+    $("#tServers>tbody>tr").each(function(){
+        var tr_id = this.id;
+        var checkbox = $("#"+tr_id).find(".table-row-multi-select");
+        
+        if(checkbox[0].checked){
+            id = checkbox.val();
+            remove_monitor = $("#"+tr_id).find(".monitor_tag").html() == "yes" ? true : false;
+            remove_storage = $("#"+tr_id).find(".remove_storage").find("input").attr("checked") ? true : false;
+            data = {id:id, remove_monitor:remove_monitor, remove_storage:remove_storage};
+            data_list.push(data);
+        }
+    })
+    var data = JSON.stringify(data_list);
+    return data;
+}
+
+
+function GenerateStartServerData(){
+    var data_list = new Array();
+    $("#tServers>tbody>tr").each(function(){
+        var tr_id = this.id;
+        var checkbox = $("#"+tr_id).find(".table-row-multi-select");
+        
+        if(checkbox[0].checked){
+            id = checkbox.val();
+            data = {id:id};
+            data_list.push(data);
+        }
+    });
+    var data = JSON.stringify(data_list);
+    return data;
+}
+
+function GenerateStopServerData(){
+    var data_list = new Array();
+    $("#tServers>tbody>tr").each(function(){
+        var tr_id = this.id;
+        var checkbox = $("#"+tr_id).find(".table-row-multi-select");
+        
+        if(checkbox[0].checked){
+            id = checkbox.val();
+            var remove_monitor = $("#"+tr_id).find(".monitor_tag").html() == "yes" ? true:false;
+            var remove_storage = $("#"+tr_id).find(".remove_monitor").find("input").attr("checked") ? true : false;
+            data = {id:id, remove_monitor:remove_monitor, remove_storage:remove_storage};
+            data_list.push(data);
+        }
+    });
+    var data = JSON.stringify(data_list);
+    return data;
+}
+
+
+//1.Add Servers
+//2.Remove Servers
+//3.Add Monitors
+//4.Remove Monitors
+//5.Start Servers
+//6.Remove Servers
+//actually return the json data including postback_url 
+function CheckAction(){
+    var tag = $(".table_title")[0].innerHTML;
+    var index = 0;
+    var action  = "";
+    switch(tag){
+        case "Add Servers":
+            index = 1;
+            action = "add";
+            break;
+        case "Remove Servers":
+            index = 2;
+            action = "remove";
+            break;
+        case "Add Monitors":
+            index = 3;
+            action = "add";
+            break;
+        case "Remove Monitors":
+            index = 4;
+            action = "remove";
+            break;
+        case "Start Servers":
+            index = 5;
+            action = "start";
+            break;
+        case "Stop Servers":
+            index = 6;
+            action = "stop";
+            break;
+        default:
+            index = 0;
+            action = "null";
+            break;
+    }
+
+    var action = {"index":index
+                 ,"action":action}
+    return action;
+}
+
+
+
+
+
+
+
+/*
+
 (function() {
     function mon_zone_limit(zone_list){
         for( var i=0;i<zone_list.length;i++)
@@ -97,16 +336,6 @@
         url = "/dashboard/vsm/storageservermgmt/servers/start"
         post_request(url, data_list);
     };
-    function post_reset_status(server_id)
-    {
-        url = "/dashboard/vsm/storageservermgmt/reset_status/"+ server_id;
-        post_request(url,"")
-    }
-    $(".reset-status-action").live("click",function(){
-        var server_id = $(this).parent().parent().find(".server_id").html()
-        post_reset_status(server_id);
-
-    });
     function jump_ok_form(data_list, topic){
         $('#messagebox_modal').modal('show');
         $('#modal_ok').show();
@@ -139,6 +368,7 @@
     };
     $(".add-server-commit").live("click", function(){ 
         var pre_mon_count = 0;
+        //It is not exist
         $("#server_list tbody tr").each(function(){
             if($(this).find(".monitor_tag").html() == "yes" &&
                $(this).find(".status_up").html() == "Active" )
@@ -582,3 +812,4 @@
 
            
 })(jQuery)
+*/

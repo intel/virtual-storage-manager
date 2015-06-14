@@ -4,7 +4,8 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=_("Dashboard") %}
-   <link href="{{ STATIC_URL }}dashboard/css/dashboard.css" rel="stylesheet">
+    <link href='{{ STATIC_URL }}dashboard/css/common.css' type='text/css' media='screen' rel='stylesheet' />
+    <link href="{{ STATIC_URL }}dashboard/css/dashboard.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}

@@ -24,15 +24,12 @@
 {% endblock page_header %}
 
 {% block main %}
+	{% csrf_token %}
     {{ table.render }}
-    {% include "vsm/storageservermgmt/_index.html" %}
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/json2.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/vsm.js' type='text/javascript' charset='utf-8'></script>
-    <script src='{{ STATIC_URL }}dashboard/js/vsm.tables.js' type='text/javascript' charset='utf-8'></script>
     <script src='{{ STATIC_URL }}dashboard/js/servermgmt.js' type='text/javascript' charset='utf-8'></script>
 {% endblock %}
 
