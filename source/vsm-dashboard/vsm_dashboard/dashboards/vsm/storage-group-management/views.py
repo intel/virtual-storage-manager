@@ -54,8 +54,27 @@ class IndexView(tables.DataTableView):
         return storage_group_status
 
 class CreateView(forms.ModalFormView):
-    LOG.debug("DEBUG in CreateView")
     form_class = CreateStorageGroupForm
-    template_name = 'vsm/flocking/createstoragegroup.html'
+    template_name = 'vsm/storage-group-management/createstoragegroup.html'
     success_url = reverse_lazy('horizon:vsm:storage-group-management:index')
 
+
+def create_storage_group(request):
+    status = ""
+    msg = ""
+    body = json.loads(request.body)
+    print ""
+    print "============Create Storage Group==============="
+    print body
+    try:
+        rsp = vsm_api.storage_group_create(request, body=body)
+        status = "OK"
+        msg = "Add Cache Tier Successfully!"
+    except ex:
+        print ex
+        status = "Failed"
+        msg = "Add Cache Tier Failed!"
+
+    resp = dict(message=msg, status=status)
+    resp = json.dumps(resp)
+    return HttpResponse(resp)

@@ -1,6 +1,3 @@
-/**
- * Created by root on 15-6-16.
- */
 $(function(){
 	InitCtrlCSS();
 });
@@ -56,6 +53,7 @@ $("#btnAddCacheTier").click(function(){
 		dataType:"json",
 		success: function(data){
 				console.log(data);
+				window.location.href="/dashboard/vsm/poolsmanagement/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				showTip("error","Some error")
@@ -86,6 +84,7 @@ $("#btnRemoveCacheTier").click(function(){
 		dataType:"json",
 		success: function(data){
 				console.log(data);
+				window.location.href="/dashboard/vsm/poolsmanagement/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				showTip("error","Some error")
@@ -127,6 +126,7 @@ $("#btnAddReplicatedPool").click(function(){
 		dataType:"json",
 		success: function(data){
 				console.log(data);
+				window.location.href="/dashboard/vsm/poolsmanagement/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				showTip("error","Some error")
@@ -164,6 +164,7 @@ $("#btnCreateErasureCodedPool").click(function(){
 		dataType:"json",
 		success: function(data){
 				console.log(data);
+				window.location.href="/dashboard/vsm/poolsmanagement/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				showTip("error","Some error")

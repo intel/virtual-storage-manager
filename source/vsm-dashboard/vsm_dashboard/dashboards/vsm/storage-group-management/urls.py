@@ -17,8 +17,10 @@
 from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import CreateView
+from .views import create_storage_group
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^create/$', CreateView.as_view(), name='create')
+    url(r'^create/$', CreateView.as_view(), name='create'),
+    url(r'^create_storage_group/$', create_storage_group, name='create_storage_group')
 )
