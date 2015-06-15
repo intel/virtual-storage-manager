@@ -1,0 +1,54 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Create Erasure Coded Pool{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Create Erasure Coded Pool") %}
+  <link href="{{ STATIC_URL }}dashboard/css/poolmgmt.css" rel="stylesheet">
+
+{% endblock page_header %}
+
+{% block main %}
+    {% csrf_token %}
+    <div id="divPoolForm" >
+	    <form>
+			<div class="left">
+			    <fieldset>
+			    {% include "horizon/common/_form_fields.html" %}
+			    </fieldset>
+			</div>
+			<div class="right">
+			    <h3>{% trans "Description" %}:</h3>
+			    <p>{% trans "From here you can create an erasure coded pool" %}</p>
+			</div>
+		</form>
+		 <div id="divFormOptions" class="vsm-options-bar">
+	    	<button id="btnCreateErasureCodedPool" class="btn btn-primary">Submit</button>
+	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/poolsmanagement/">Cancel</a>
+	    </div>
+	</div>
+{% endblock %}
+
+
+{% block js %}
+    {{ block.super }}
+    <script src="{{ STATIC_URL }}dashboard/js/poolmgmt.js"></script> 
+{% endblock %}
+

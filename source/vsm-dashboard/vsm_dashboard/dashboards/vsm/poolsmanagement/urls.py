@@ -19,6 +19,7 @@ from .views import IndexView,CreateView
 from .views import CreateErasureCodedPoolView
 from .views import AddCacheTierView
 from .views import RemoveCacheTierView
+from .views import add_cache_tier,remove_cache_tier,create_replicated_pool,create_ec_pool
 
 
 urlpatterns = patterns('',
@@ -26,6 +27,10 @@ urlpatterns = patterns('',
     url(r'^create/$', CreateView.as_view(), name='create'),
     url(r'^create_ec_pool/$', CreateErasureCodedPoolView.as_view(), name='create_ec_pool'),
     url(r'^add_cache_tier/$', AddCacheTierView.as_view(), name='add_cache_tier'),
-    url(r'^remove_cache_tier/$', RemoveCacheTierView.as_view(), name='remove_cache_tier')
+    url(r'^remove_cache_tier/$', RemoveCacheTierView.as_view(), name='remove_cache_tier'),
+    url(r'^add_cache_tier_action/$', add_cache_tier, name='add_cache_tier_action'),
+    url(r'^remove_cache_tier_action/$', remove_cache_tier, name='remove_cache_tier_action'),
+    url(r'^create_replicated_pool_action/$', create_replicated_pool, name='create_replicated_pool_action'),
+    url(r'^create_ec_pool_action/$', create_ec_pool, name='create_ec_pool_action'),
 )
 
