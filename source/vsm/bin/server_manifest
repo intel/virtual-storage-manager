@@ -126,14 +126,7 @@ class ManifestChecker(object):
         if len(osd_list) != len(js_list):
             error('The OSD devices is not equal to journal devices!')
 
-        if len(osd_list) == 0:
-            role = self._info['role']
-            role = role.strip()
-            role = role.replace(',', ' ')
-            role = role.strip()
-            if role != 'monitor' or role.find('storage') != -1:
-                error('Error find for role %s, \
-                       there is node disks for ceph!' % role)
+
 
         self.__check_osd_devices(osd_list)
         self.__check_journal_devices(js_list)

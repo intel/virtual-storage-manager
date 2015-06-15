@@ -253,7 +253,6 @@ class CephDriver(object):
         config = cephconfigparser.CephConfigParser()
         osd_num = db.device_get_count(context)
         LOG.info("osd_num:%d" % osd_num)
-        pg_count_factor = 200
         settings = db.vsm_settings_get_all(context)
         for setting in settings:
             if setting['name'] == 'ceph_near_full_threshold':
@@ -268,15 +267,15 @@ class CephDriver(object):
                 osd_heartbeat_interval = setting['value']
             elif setting['name'] == 'osd_heartbeat_grace':
                 osd_heartbeat_grace = setting['value']
-            
+            elif setting['name'] == 'osd_pool_default_size':
+                pool_default_size = setting['value']
 
-        pg_num = osd_num * pg_count_factor / 2
-        config.add_global(pg_num=pg_num, \
-                          cnfth=cnfth, \
+        config.add_global(cnfth=cnfth,
                           cfth=cfth,
                           heartbeat_interval=heartbeat_interval,
                           osd_heartbeat_interval=osd_heartbeat_interval,
-                          osd_heartbeat_grace=osd_heartbeat_grace)
+                          osd_heartbeat_grace=osd_heartbeat_grace,
+                          pool_default_size=pool_default_size)
 
         is_first_mon = True
         is_first_osd = True
