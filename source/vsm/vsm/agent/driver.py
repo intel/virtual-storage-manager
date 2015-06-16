@@ -2010,7 +2010,7 @@ class CephDriver(object):
                       cache_pool_name, run_as_root=True)
         db.pool_update(context, cache_pool.pool_id, {"cache_tier_status": None})
         # TODO cluster id
-        if body.haskey('cluster_id') and body['cluster_id']:
+        if body.has_key('cluster_id') and body['cluster_id']:
             cluster_id = body['cluster_id']
         else:
             cluster_id = db.cluster_get_all(context)[0]['id']
