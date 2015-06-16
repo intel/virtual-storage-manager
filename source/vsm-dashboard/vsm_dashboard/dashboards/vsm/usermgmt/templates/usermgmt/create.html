@@ -17,13 +17,46 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Create User" %}{% endblock %}
+{% block title %}Create User{% endblock %}
 
 {% block page_header %}
-  {# to make searchable false, just remove it from the include statement #}
   {% include "horizon/common/_page_header.html" with title=_("Create User") %}
+
+     <link href="{{ STATIC_URL }}dashboard/css/user.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-    {% include 'vsm/usermgmt/_create.html' %}
+{% csrf_token %}
+<div id="divUserForm" >
+  <div id="divWarningInfo" class="alert alert-warning" role="alert">
+      <!-- some warning info -->
+  </div>
+
+  	<form>
+		<div class="left">
+	    <fieldset>
+	    {% include "horizon/common/_form_fields.html" %}
+	    </fieldset>
+		</div>
+
+
+		 <div class="right">
+		    <h3>{% trans "Description" %}:</h3>
+		    <p>{% trans "From here you can create a user " %}</p>
+		    <p>{% trans "Your user name must be combination of letter,number ,'@', '.' and '_' " %}</p>
+		    <p>{% trans "Your password must be at least 8 characters long, and contain at least one number, one upper case letter, one lower case letter, and  one of the special characters !@#$%^&*(){}[]<>?" %}</p>
+		</div>
+ 	</form>
+ <div id="divFormOptions" class="vsm-options-bar">
+          <input id="btnCreateUser"  class="btn btn-primary" type="submit" value="Create User" />
+          <a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/usermgmt/">Cancel</a>
+      </div>
+</div>
+
 {% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{{ STATIC_URL }}dashboard/js/user.js"></script> 
+{% endblock %}
+

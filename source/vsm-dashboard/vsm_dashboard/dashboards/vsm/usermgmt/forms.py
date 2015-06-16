@@ -91,31 +91,32 @@ class CreateUserForm(BaseUserForm):
 #            },)
 
     def handle(self, request, data):
-        LOG.error("CEPH_LOG> data %s " % data)
-        data['email'] = ''
+        pass
+        # LOG.error("CEPH_LOG> data %s " % data)
+        # data['email'] = ''
 
-        try:
-            admin_tenant = get_admin_tenant(request)
-            tenant_id = admin_tenant.id
-            ret = api.keystone.user_create(request, data['name'], data['email'],
-                                           data['password'], tenant_id, enabled=True)
-            LOG.error("CEPH_LOG> ret: %s " % ret)
+        # try:
+        #     admin_tenant = get_admin_tenant(request)
+        #     tenant_id = admin_tenant.id
+        #     ret = api.keystone.user_create(request, data['name'], data['email'],
+        #                                    data['password'], tenant_id, enabled=True)
+        #     LOG.error("CEPH_LOG> ret: %s " % ret)
 
-            roles = api.keystone.role_list(request)
-            for role in roles:
-                if role.name in ['admin', 'KeystoneAdmin']:
-                    api.keystone.add_tenant_user_role(request, tenant_id, ret.id, role.id)
+        #     roles = api.keystone.role_list(request)
+        #     for role in roles:
+        #         if role.name in ['admin', 'KeystoneAdmin']:
+        #             api.keystone.add_tenant_user_role(request, tenant_id, ret.id, role.id)
 
-            LOG.error(api.keystone.user_get(request, ret.id))
-            messages.success(request,
-                     _('Successfully created user: %s')
-                     % data['name'])
-            return ret
-        except:
-            redirect = reverse("horizon:vsm:usermgmt:index")
-            exceptions.handle(request,
-                              _('Unable to create User.'),
-                              redirect=redirect)
+        #     LOG.error(api.keystone.user_get(request, ret.id))
+        #     messages.success(request,
+        #              _('Successfully created user: %s')
+        #              % data['name'])
+        #     return ret
+        # except:
+        #     redirect = reverse("horizon:vsm:usermgmt:index")
+        #     exceptions.handle(request,
+        #                       _('Unable to create User.'),
+        #                       redirect=redirect)
 
 class UpdateUserForm(BaseUserForm):
     id = forms.CharField(label=_("ID"), widget=forms.HiddenInput)
@@ -171,7 +172,6 @@ class UpdateUserForm(BaseUserForm):
 
         # if user_is_editable:
         #     # If present, update password
-        #     
         #     if password:
         #         msg_bits = (_('password'),)
         #         try:
