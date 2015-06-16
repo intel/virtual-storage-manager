@@ -9,7 +9,7 @@
 	width:780px;
 	height: 50px;
 	line-height: 50px;
-	/*overflow: hidden;*/
+	clear: both;
 }
 
 .control-group{

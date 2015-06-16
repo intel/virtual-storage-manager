@@ -84,11 +84,11 @@ class IndexView(tables.DataTableView):
                      and not str(x['cache_tier_status']).startswith("Cache pool for")]
         return pools
 
-class PresentPoolsView(ModalEditTableMixin, tables.DataTableView):
+class PresentPoolsView(tables.DataTableView):
     table_class = ListPresentPoolTable
-    template_name = 'vsm/flocking/rbdsaction.html'
+    template_name = 'vsm/rbdpools/rbdsaction.html'
     verbose_name = "Present Pools"
-    submit_btn = {"verbose_name": "Present Pools", "class": "present-pool-commit"}
+   
 
     def get_data(self):
         pools = []
@@ -124,9 +124,7 @@ class CreateView(forms.ModalFormView):
     success_url = reverse_lazy('horizon:vsm:rbdpools:index')
 
 def PoolsAction(request, action):
-
-    post_data = request.raw_post_data
-    data = json.loads(post_data)
+    data = json.loads(request.body)
     # TODO add cluster_id in data
     if not len(data):
         status = "error"
@@ -138,9 +136,12 @@ def PoolsAction(request, action):
         # TODO add cluster_id in data
 
         if action == "present":
+            print data
+            print "========Start Present Pools==========="
             vsmapi.present_pool(request, [x['id'] for x in data])
             status = "info"
             msg = "Begin to Present Pools!"
+            print "========End Present Pools==========="
 
     resp = dict(message=msg, status=status, data="")
     resp = json.dumps(resp)

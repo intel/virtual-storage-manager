@@ -15,63 +15,69 @@
  under the License.
  */
 
-(function() {
-    $(".present-pool-commit").live("click", function(){
-        var rows_num = $(".modal-body .pool_id").length - 1;
-        console.log(rows_num);
-        var data_list = new Array();
-        for (var i=1; i <= rows_num; i++)
-        {
-            row_id = $($(".modal-body .pool_id")[i]).html();
-            row = $("#poolsaction__row__" + row_id);
-            checked = row.find(".multi_select_column").find("input").is(":checked");
-            if(checked == true)
-            {
-                id = row.find(".multi_select_column").find("input").val();
-                console.log(id);
-            }else{
-                console.log("pass");
-                continue;
-            }
 
+$(function(){
+    //Open the TableCheckbox
+    OpenTableCheckbox();
+});
+
+
+function OpenTableCheckbox(){
+    //Opent the table header
+    if($(".multi_select_column.hidden.tablesorter-header.sorter-false").length>0)
+        $(".multi_select_column.hidden.tablesorter-header.sorter-false")[0].className = "multi_select_column";
+
+    if($(".multi_select_column.hidden").length>0)
+        $(".multi_select_column.hidden")[0].className = "multi_select_column";
+
+    if($("#tPools") && $("#tPools").length>0){
+        $("#tPools>tbody>tr>.multi_select_column.hidden").each(function(){
+            this.className = "multi_select_column";
+        })
+    }
+}
+
+
+$("#btnSubmit").click(function(){
+    var data_list = new Array();
+
+    $("#tPools>tbody>tr").each(function(){
+        var tr_id = this.id;
+        var checkbox = $("#"+tr_id).find(".table-row-multi-select");
+        
+        if(checkbox[0].checked){
+            id = checkbox.val();
             data = {id:id};
             data_list.push(data);
-            console.log(data_list);
         }
-        data_list_json = JSON.stringify(data_list);
-        console.log(data_list_json);
-        token = $("input[name=csrfmiddlewaretoken]").val();
-        modal_stack = $("#modal_wrapper .modal");
-        horizon.modals.modal_spinner(gettext("Working"));
-        horizon.ajax.queue({
-            data: data_list_json,
-            type: "post",
-            dataType: "json",
-            url: "/dashboard/vsm/rbdpools/pools/present",
-            success: function (data) {
-                //prepare refresh status
-                for( x in data_list){
-                    $("#pools__row__"+data_list[x]['id']).addClass("status_unknown").removeClass("status_up");
-                    $("#pools__row__"+data_list[x]['id']).find(".status_up").addClass("status_unknown").removeClass("status_up");
-                }
-                console.log(data.status);
-                horizon.alert(data.status, data.message);
-                setTimeout(horizon.datatables.update, 2000);
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                horizon.alert("error", "OpenStack Access not configured!");
-                horizon.modals.spinner.modal('hide');
-            },
-            headers: {
-              "X-CSRFToken": token
-            },
-            complete: function(){
-                horizon.modals.spinner.modal('hide');
-                modal_stack.remove();
-            }
-        });
-        $(this).closest('.modal').modal('hide');
+    })
 
+    if(data_list.length==0)
+    {
+        return false;
+    }
+
+    var data_list_json = JSON.stringify(data_list);
+    token = $("input[name=csrfmiddlewaretoken]").val();
+
+    $.ajax({
+        data: data_list_json,
+        type: "post",
+        dataType: "json",
+        url: "/dashboard/vsm/rbdpools/pools/present",
+        success: function (data) {
+            console.log(data);
+            window.location.href="/dashboard/vsm/rbdpools/";
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+        },
+        headers: {
+            "X-CSRFToken": token
+        },
+        complete: function(){
+
+        }
     });
-
-})(jQuery)
+})
