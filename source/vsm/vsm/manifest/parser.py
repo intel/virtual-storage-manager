@@ -337,7 +337,8 @@ class ManifestParser(object):
 
         if len(name_dict['single']) == 0:
             LOG.error('Find 0 role, format error')
-            raise
+            name_dict['single'] = ['unspecified']
+            #raise
 
         for node_role in name_dict['single']:
             self._map['role'] = node_role + ',' + self._map['role']

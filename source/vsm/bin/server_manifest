@@ -70,10 +70,10 @@ class ManifestChecker(object):
         except:
             info_list = ['Can not connect to controller ip = %s' % \
                          self._server_host,
-                         'Maybe your auth_keys is error!',
-                         'check auth_key in server.manifest',
-                         'with /etc/vsmdeploy/deployrc AGENT_PASSWORD variable',
-                         'Check if you can ping this host']
+                         'Possible reasons: ',
+                         '(i) Maybe your auth_keys is error! please make sure the auth_keys is consistent '
+                         'with the output from agent_toekn command executed on controller node.',
+                         '(ii) Check if you can ping this host']
             error(info_list)
 
         self._secs_list = self._storage_class_list + ['vsm_controller_ip', 'role', 'auth_key', 'zone']
@@ -89,6 +89,8 @@ class ManifestChecker(object):
             if r.find('storage') != -1:
                 continue
             if r.find('monitor') != -1:
+                continue
+            if r.find('unspecified') != -1:
                 continue
 
             error('Can not define this role %s for VSM.' % r)
