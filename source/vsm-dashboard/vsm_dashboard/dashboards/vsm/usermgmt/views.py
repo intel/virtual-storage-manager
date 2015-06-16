@@ -133,3 +133,15 @@ class UpdateView(forms.ModalFormView):
             # If handled didn't return, we can assume something went
             # wrong, and we should send back the form as-is.
             return self.form_invalid(form)
+
+
+def update_pwd(request):
+    data = json.loads(request.body)
+    print "============update pwd================="
+    print data
+
+    api.keystone.user_update_password(request, data.id, data.pwd)
+    resp = dict(message="Update", status="OK", data="")
+    resp = json.dumps(resp)
+    return HttpResponse(resp)
+
