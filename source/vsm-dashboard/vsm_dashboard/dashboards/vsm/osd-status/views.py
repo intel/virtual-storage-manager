@@ -64,10 +64,29 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
             exceptions.handle(self.request,
                               _('Unable to retrieve osd list. '))
 
+        #filter the data list contain up_in or not
+        filter_data = []
+        check_num = self.request.path.find("not_up_in")
+        print check_num
+        if check_num == -1:
+            filter_data = _osd_status
+        else:
+            for _osd in _osd_status:
+                if _osd.state != "In-Up":
+                  filter_data.append(_osd)
+
+        print "==========filter data=================="
+        print filter_data
+
+        #if the fitler is empty then return
+        if(len(filter_data) == 0):
+            return []
+
+
         page_index = int(self.request.GET.get('pageIndex',1))
         page_size = 20
-        page_count = int(len(_osd_status)/page_size)
-        page_mod = len(_osd_status)%page_size
+        page_count = int(len(filter_data)/page_size)
+        page_mod = len(filter_data)%page_size
         if page_mod > 0:
             page_count = page_count + 1
         pager_size = 10
@@ -80,11 +99,11 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
 
         dataStartIndex = (page_index-1)*page_size
         dataEndIndex = dataStartIndex+page_size
-        _osd_status = _osd_status[dataStartIndex:dataEndIndex]
+        filter_data = filter_data[dataStartIndex:dataEndIndex]
 
 
         osd_status = []
-        for _osd in _osd_status:
+        for _osd in filter_data:
             LOG.info("DEVICE:%s"%_osd.device.keys())
             #LOG.error(_osd.device.keys())
             #LOG.error(">DEVICE")

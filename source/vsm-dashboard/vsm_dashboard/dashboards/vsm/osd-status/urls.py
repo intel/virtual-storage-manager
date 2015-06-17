@@ -20,4 +20,5 @@ from .views import IndexView
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'/', IndexView.as_view(), name='index'),
+    url(r'not_up_in/', IndexView.as_view(), name='index'),
 )
