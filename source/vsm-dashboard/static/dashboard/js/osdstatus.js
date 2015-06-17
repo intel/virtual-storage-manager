@@ -1,4 +1,7 @@
 $(function(){
+    //CheckFilterStatus
+    CheckFilterStatus();
+
     //load OSD data,5 min update
     loadOSD();
     loadInterval();
@@ -11,6 +14,26 @@ $(function(){
     } 
     addOptionButton();
 })
+
+//CheckFilterStatus
+function CheckFilterStatus(){
+    var pathname = window.location.pathname;
+    if(pathname.indexOf("not_up_in")>0){
+        $("#chkFilter")[0].checked = true;
+    }
+    else{
+        $("#chkFilter")[0].checked = false;
+    }
+
+}
+
+//Filter the OSD table data
+$("#chkFilter").click(function(){
+    if(this.checked)
+        window.location.href = "/dashboard/vsm/osd-status/not_up_in/";
+    else
+        window.location.href = "/dashboard/vsm/osd-status/";
+});
 
 
 //load OSD data
@@ -36,7 +59,8 @@ function loadInterval(){
     setInterval(function(){
         loadOSD();
     },15000);
-}
+};
+
 
 
 function addOptionButton(){
@@ -78,7 +102,6 @@ function generatePager(pagerIndex,pagerCount){
     var pageCount =parseInt(trNodes[0].children[13].innerHTML);
     //var pageIndex = trNodes[0].children[15].innerHTML;
 
-   
     var pagerStart = 0;
     var pagerEnd = 0;
     switch(pagerIndex){
