@@ -238,6 +238,13 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                osd_name=osd_name, service_id=service_id, \
                cluster_id=cluster_id))
 
+    def osd_state_get_by_device_id_and_service_id_and_cluster_id(self, \
+        context, device_id, service_id, cluster_id):
+        return self.call(context, self.\
+        make_msg('osd_state_get_by_device_id_and_service_id_and_cluster_id',\
+               device_id=device_id, service_id=service_id, \
+               cluster_id=cluster_id))
+
     #device
     def device_get_all(self, context):
         return self.call(context, self.make_msg('device_get_all'))

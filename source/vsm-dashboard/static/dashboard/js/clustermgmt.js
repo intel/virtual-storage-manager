@@ -65,6 +65,7 @@
                 //console.log(data.status);
                 //horizon.alert(data.status, data.message);
                 //setTimeout(horizon.datatables.update, 2000);
+                window.location.href="/dashboard/vsm/storageservermgmt/";
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 //horizon.alert("error", "Network Error");
