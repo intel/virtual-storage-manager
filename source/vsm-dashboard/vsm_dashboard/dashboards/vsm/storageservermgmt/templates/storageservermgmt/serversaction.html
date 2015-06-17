@@ -17,16 +17,24 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Manage RBD Pools" %}{% endblock %}
+{% block title %}{% trans "Manage Servers" %}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=cluster.title %}
+  {% include "horizon/common/_page_header.html" with title=_("All Servers") %}
 {% endblock page_header %}
 
 {% block main %}
     {{ table.render }}
+    {% csrf_token %}
+    <div id="divFormOptions" class="vsm-options-bar">
+    	<button id="btnSubmit" class="btn btn-primary">Submit</button>
+    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/storageservermgmt/">Cancel</a>
+    </div>
+
 {% endblock %}
 
 {% block js %}
     {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/servermgmt.js' type='text/javascript' charset='utf-8'></script>
 {% endblock %}
+

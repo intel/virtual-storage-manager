@@ -41,6 +41,7 @@ from .utils import get_zone_list
 
 import json
 LOG = logging.getLogger(__name__)
+from django.core.context_processors import csrf
 
 class ModalEditTableMixin(object):
     def get_template_names(self):
@@ -71,18 +72,11 @@ class IndexView(tables.DataTableView):
         servers = get_server_list(self.request, )
         return servers
 
-class ServersActionViewBase(ModalEditTableMixin, tables.DataTableView):
-    #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
-
-    def get_data(self):
-        raise NotImplementedError
-
-class AddServersView(ServersActionViewBase):
+#Edit the class by XuShouan
+class AddServersView(tables.DataTableView):
     table_class = AddServerTable
-    template_name = 'vsm/flocking/serversaction.html'
     verbose_name = "Add Servers"
-    submit_btn = {"verbose_name": "Add Servers", "class": "add-server-commit"}
-    #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
+    template_name = 'vsm/storageservermgmt/serversaction.html'
 
     def get_data(self):
         servers = get_server_list(self.request, lambda x: x['status'] == "available" or 
@@ -96,6 +90,68 @@ class AddServersView(ServersActionViewBase):
             del server['zone']
 
         return servers
+
+#Edit the class by XuShouan
+class RemoveServersView(tables.DataTableView):
+    table_class = RemoveServerTable
+    verbose_name = "Remove Servers"
+    template_name = 'vsm/storageservermgmt/serversaction.html'
+
+    def get_data(self):
+        return get_server_list(self.request, lambda x: x['status'] in ("Active", "999999999"))
+
+
+#Edit the class by XuShouan
+class AddMonitorsView(tables.DataTableView):
+    table_class = AddMonitorTable
+    template_name = 'vsm/storageservermgmt/serversaction.html'
+    verbose_name = "Add Monitors"
+    def get_data(self):
+        servers = get_server_list(self.request, (
+            lambda x: x['status'] in ("Active", "available"),
+            lambda x: not (x['status'] == "Active" and "monitor" in x['type']),))
+        for server in servers:
+            del server['is_monitor']
+        return servers
+
+#Edit the class by XuShouan
+class RemoveMonitorsView(tables.DataTableView):
+    table_class = RemoveMonitorTable
+    template_name = 'vsm/storageservermgmt/serversaction.html'
+    verbose_name = "Remove Monitors"
+
+    def get_data(self):
+        servers = get_server_list(self.request, (
+            lambda x: x['status'] == "Active",
+            lambda x: "monitor" in x['type'],))
+        return servers
+
+
+#Edit the class by XuShouan
+class StartServersView(tables.DataTableView):
+    table_class = StartServerTable
+    template_name = 'vsm/storageservermgmt/serversaction.html'
+    verbose_name = "Start Servers"
+    def get_data(self):
+        return get_server_list(self.request, lambda x:x['status'] == "Stopped")
+
+#Edit the class by XuShouan
+class StopServersView(tables.DataTableView):
+    table_class = StopServerTable
+    template_name = 'vsm/storageservermgmt/serversaction.html'
+    verbose_name = "Stop Servers"
+    def get_data(self):
+        return get_server_list(self.request, lambda x:x['status'] == "Active")
+
+
+
+
+class ServersActionViewBase(ModalEditTableMixin, tables.DataTableView):
+    #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
+
+    def get_data(self):
+        raise NotImplementedError
+
 
 class AddServersView2(AddServersView):
     table_class = AddServerTable2
@@ -150,61 +206,9 @@ class TextMixin(object):
         context['storage_group_threshold_text'] = StorageGroupThresholdText(self.request)
         return context
 
-class RemoveServersView(TextMixin, ServersActionViewBase):
-    table_class = RemoveServerTable
-    template_name = 'vsm/flocking/serversaction.html'
-    verbose_name = "Remove Servers"
-    submit_btn = {"verbose_name": "Remove Servers", "class": "remove-server-commit"}
-    #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
-
-    def get_data(self):
-        return get_server_list(self.request, lambda x: x['status'] in ("Active", "unavailable"))
-
-class AddMonitorsView(ServersActionViewBase):
-    table_class = AddMonitorTable
-    template_name = 'vsm/flocking/serversaction.html'
-    verbose_name = "Add Monitors"
-    submit_btn = {"verbose_name": "Add Monitors", "class": "add-server-commit"}
-    def get_data(self):
-        servers = get_server_list(self.request, (
-            lambda x: x['status'] in ("Active", "available"),
-            lambda x: not (x['status'] == "Active" and "monitor" in x['type']),))
-        for server in servers:
-            del server['is_monitor']
-        return servers
-
-class RemoveMonitorsView(ServersActionViewBase):
-    table_class = RemoveMonitorTable
-    template_name = 'vsm/flocking/serversaction.html'
-    verbose_name = "Remove Monitors"
-    submit_btn = {"verbose_name": "Remove Monitors", "class": "remove-server-commit"}
-
-    def get_data(self):
-        servers = get_server_list(self.request, (
-            lambda x: x['status'] == "Active",
-            lambda x: "monitor" in x['type'],))
-        return servers
-
-class StartServersView(ServersActionViewBase):
-    table_class = StartServerTable
-    template_name = 'vsm/flocking/serversaction.html'
-    verbose_name = "Start Servers"
-    submit_btn = {"verbose_name": "Start Servers", "class": "start-server-commit"}
-    def get_data(self):
-        return get_server_list(self.request, lambda x:x['status'] == "Stopped")
-
-class StopServersView(ServersActionViewBase):
-    table_class = StopServerTable
-    template_name = 'vsm/flocking/serversaction.html'
-    verbose_name = "Stop Servers"
-    submit_btn = {"verbose_name": "Stop Servers", "class": "stop-server-commit"}
-    def get_data(self):
-        return get_server_list(self.request, lambda x:x['status'] == "Active")
 
 def ServersAction(request, action):
-
-    post_data = request.raw_post_data
-    data = json.loads(post_data)
+    data = json.loads(request.body)
     # TODO add cluster_id in data
     if not len(data):
         status = "error"

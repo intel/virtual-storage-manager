@@ -257,3 +257,15 @@
     font-size: 24px;
     margin: 10px;
 }
+
+
+.vsm-options-bar{
+    width: 100%;
+    height: auto;
+    text-align: right;
+    /*border: 1px solid #ccc;*/
+}
+
+.vsm-options-bar button{
+    margin-left: 10px;
+}

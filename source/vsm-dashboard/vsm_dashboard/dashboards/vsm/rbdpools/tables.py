@@ -118,7 +118,7 @@ class ListPoolTable(tables.DataTable):
 #    cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
-        name = "pools"
+        name = "tpools"
         verbose_name = _("Manage Openstack RBD Pools")
         table_actions = (PresentPoolAction, )
         #row_actions = (PresentPoolAction,)
@@ -150,7 +150,7 @@ class ListPresentPoolTable(tables.DataTable):
 #    cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
-        name = "poolsaction"
+        name = "tPools"
         verbose_name = _("Present RBD Pools")
         #row_actions = (PresentPoolAction,)
         multi_select = True

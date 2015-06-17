@@ -30,7 +30,6 @@ from .views import ResetStatus
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^addserversview/$', AddServersView.as_view(), name='addserversview'),
-    url(r'^addserversview_/$', AddServersView2.as_view(), name='addserversview_'),
     url(r'^removeserversview/$', RemoveServersView.as_view(), name='removeserversview'),
     url(r'^addmonitorsview/$', AddMonitorsView.as_view(), name='addmonitorsview'),
     url(r'^removemonitorsview/$', RemoveMonitorsView.as_view(), name='removemonitorsview'),

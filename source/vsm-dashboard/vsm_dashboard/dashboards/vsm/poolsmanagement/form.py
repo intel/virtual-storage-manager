@@ -32,8 +32,6 @@ from vsm_dashboard.utils.validators import StorageGroupValidator
 LOG = logging.getLogger(__name__)
 
 
-
-
 class CreatePool(forms.SelfHandlingForm):
 
     failure_url = 'horizon:vsm:poolsmanagement:index'
@@ -98,41 +96,7 @@ class CreatePool(forms.SelfHandlingForm):
         self.fields['replicated_storage_group'].choices = replicated_storage_group_list
 
     def handle(self, request, data):
-        try:
-            body = {
-                    'pool': {
-                        'name': data['name'],
-                        'storageGroupId': data['storage_group'],
-                        'replicatedStorageGroupId': data['replicated_storage_group'],
-                        'replicationFactor': data['replication_factor'],
-                        'tag': data['tag'],
-                        'clusterId': '0',
-                        'createdBy': 'VSM',
-
-                        'enablePoolQuota': data['enable_pool_quota'],
-                        'poolQuota': data['pool_quota'],
-                        'max_pg_num_per_osd': data["max_pg_num_per_osd"],
-
-                    }
-            }
-            rsp, ret = vsm_api.create_storage_pool(request,body=body)
-
-            res = str(ret['message']).strip( )
-            if res.startswith('pool') and res.endswith('created'):
-                messages.success(request,
-                                _('Successfully created storage pool: %s')
-                                % data['name'])
-            else:
-                messages.error(request,
-                                _('%s Failed to create storage pool!')
-                                % ret['message'])
-
-            return ret
-        except:
-            redirect = reverse("horizon:vsm:poolsmanagement:index")
-            exceptions.handle(request,
-                              _('Unable to create storage pool.'),
-                              redirect=redirect)
+        pass
 
 class CreateErasureCodedPool(forms.SelfHandlingForm):
 
@@ -190,38 +154,7 @@ class CreateErasureCodedPool(forms.SelfHandlingForm):
         self.fields['ec_failure_domain'].choices = ec_failure_domain_list
 
     def handle(self, request, data):
-        try:
-            body = {
-                'pool': {
-                    'name': data['name'],
-                    'storageGroupId': data['storage_group'],
-                    'tag': data['tag'],
-                    'clusterId': '0',
-                    'createdBy': 'VSM',
-                    'ecProfileId': data['ec_profile'],
-                    'ecFailureDomain': data['ec_failure_domain'],
-                    'enablePoolQuota': data['enable_pool_quota'],
-                    'poolQuota': data['pool_quota'],
-                }
-            }
-            rsp, ret = vsm_api.create_storage_pool(request,body=body)
-
-            res = str(ret['message']).strip( )
-            if res.startswith('pool') and res.endswith('created'):
-                messages.success(request,
-                                 _('Successfully created storage pool: %s')
-                                 % data['name'])
-            else:
-                messages.error(request,
-                               _('%s Failed to create storage pool!')
-                               % ret['message'])
-
-            return ret
-        except:
-            redirect = reverse("horizon:vsm:poolsmanagement:index")
-            exceptions.handle(request,
-                              _('Unable to create storage pool.'),
-                              redirect=redirect)
+        pass
 
 class AddCacheTier(forms.SelfHandlingForm):
 
@@ -265,42 +198,8 @@ class AddCacheTier(forms.SelfHandlingForm):
         self.fields['target_min_evict_age_m'].initial = setting_dict["ct_target_min_evict_age_m"]
 
     def handle(self, request, data):
-
-        try:
-            body = {
-                'cache_tier': {
-                    'storage_pool_id': data['storage_tier_pool'],
-                    'cache_pool_id': data['cache_tier_pool'],
-                    'cache_mode': data['cache_mode'],
-                    'force_nonempty': data['force_nonempty'],
-                    'options': {
-                        'hit_set_type': data['hit_set_type'],
-                        'hit_set_count': data['hit_set_count'],
-                        'hit_set_period_s': data['hit_set_period_s'],
-                        'target_max_mem_mb': data['target_max_mem_mb'],
-                        'target_dirty_ratio': data['target_dirty_ratio'],
-                        'target_full_ratio': data['target_full_ratio'],
-                        'target_max_objects': data['target_max_objects'],
-                        'target_min_flush_age_m': data['target_min_flush_age_m'],
-                        'target_min_evict_age_m': data['target_min_evict_age_m']
-                        }
-                    }
-            }
-            if(data['cache_tier_pool'] == data['storage_tier_pool']):
-                messages.error(request,
-                                 _('Failed to add cache tier: cache_pool, storage_pool cannot be the same!'))
-                return False
-
-            ret = vsm_api.add_cache_tier(request,body=body)
-
-            messages.success(request,
-                                 _('Successfully add cache tier: '))
-            return True
-        except:
-            redirect = reverse("horizon:vsm:poolsmanagement:index")
-            exceptions.handle(request,
-                              _('Unable to add a cache tier.'),
-                              redirect=redirect)
+        pass
+        
 
 class RemoveCacheTier(forms.SelfHandlingForm):
 
@@ -315,22 +214,5 @@ class RemoveCacheTier(forms.SelfHandlingForm):
         self.fields['cache_tier_pool'].choices = cache_tier_pool_list
 
     def handle(self, request, data):
-
-        try:
-            body = {
-                'cache_tier': {
-                    'cache_pool_id': data['cache_tier_pool'],
-                    }
-            }
-
-            ret = vsm_api.remove_cache_tier(request,body=body)
-
-            messages.success(request,
-                                 _('Successfully remove cache tier: '))
-            return True
-        except:
-            redirect = reverse("horizon:vsm:poolsmanagement:index")
-            exceptions.handle(request,
-                              _('Unable to remove cache tier.'),
-                              redirect=redirect)
+        pass
 

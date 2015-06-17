@@ -17,12 +17,25 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Storage Pools" %}{% endblock %}
+{% block title %}{{ verbose_name }}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("All Clusters") %}
+  {% include "horizon/common/_page_header.html" with title=verbose_name %}
 {% endblock page_header %}
 
 {% block main %}
+    hehehhe
     {{ table.render }}
+    {% csrf_token %}
+    <div id="divFormOptions" class="vsm-options-bar">
+    	<button id="btnSubmit" class="btn btn-primary">Submit</button>
+    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/rbdpools/">Cancel</a>
+    </div>
+
 {% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/rbdmgmt.js' type='text/javascript' charset='utf-8'></script>
+{% endblock %}
+

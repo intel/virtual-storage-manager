@@ -1,0 +1,17 @@
+#divStorageGroupForm{
+	width:800px;
+	border:1px solid #ccc;
+	overflow: hidden;
+	padding: 5px;
+}
+
+#divFormOptions{
+	width:780px;
+	height: 50px;
+	line-height: 50px;
+	clear: both;
+}
+
+.control-group{
+	margin-top: 10px;
+}

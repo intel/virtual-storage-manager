@@ -236,9 +236,10 @@ class AddServerTable(tables.DataTable):
     #cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
-        name = "serversaction"
-        verbose_name = _("Servers")
         multi_select = True
+        name = "tServers"
+        verbose_name = _("Add Servers")
+        
 
     def get_object_id(self, datum):
         if hasattr(datum, "id"):
@@ -274,9 +275,9 @@ class RemoveServerTable(tables.DataTable):
     #cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
-        name = "serversaction"
-        verbose_name = _("Servers")
         multi_select = True
+        name = "tServers"
+        verbose_name = _("Remove Servers")
 
     def get_object_id(self, datum):
         if hasattr(datum, "id"):
@@ -303,8 +304,8 @@ class AddMonitorTable(ListServerTableBase):
     monitor = tables.Column("is_monitor", verbose_name=_("isMonitor"), hidden=True,
         classes=('monitor',), empty_value=empty_value_maker("checkbox","", 1))
     class Meta:
-        name = "serversaction"
-        verbose_name = _("Servers")
+        name = "tServers"
+        verbose_name = _("Add Monitors")
         multi_select = True
 
 class RemoveMonitorTable(ListServerTableBase):
@@ -315,20 +316,20 @@ class RemoveMonitorTable(ListServerTableBase):
         empty_value=empty_value_maker("checkbox","remove_storage",False), hidden=True)
 
     class Meta:
-        name = "serversaction"
-        verbose_name = _("Servers")
+        name = "tServers"
+        verbose_name = _("Remove Monitors")
         multi_select = True
 
 class StartServerTable(ListServerTableBase):
 
     class Meta:
-        name = "serversaction"
-        verbose_name = _("Servers")
+        name = "tServers"
+        verbose_name = _("Start Servers")
         multi_select = True
 
 class StopServerTable(ListServerTableBase):
 
     class Meta:
-        name = "serversaction"
-        verbose_name = _("Servers")
+        name = "tServers"
+        verbose_name = _("Stop Servers")
         multi_select = True
