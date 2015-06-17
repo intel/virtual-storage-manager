@@ -91,31 +91,32 @@ class CreateUserForm(BaseUserForm):
 #            },)
 
     def handle(self, request, data):
-        LOG.error("CEPH_LOG> data %s " % data)
-        data['email'] = ''
+        pass
+        # LOG.error("CEPH_LOG> data %s " % data)
+        # data['email'] = ''
 
-        try:
-            admin_tenant = get_admin_tenant(request)
-            tenant_id = admin_tenant.id
-            ret = api.keystone.user_create(request, data['name'], data['email'],
-                                           data['password'], tenant_id, enabled=True)
-            LOG.error("CEPH_LOG> ret: %s " % ret)
+        # try:
+        #     admin_tenant = get_admin_tenant(request)
+        #     tenant_id = admin_tenant.id
+        #     ret = api.keystone.user_create(request, data['name'], data['email'],
+        #                                    data['password'], tenant_id, enabled=True)
+        #     LOG.error("CEPH_LOG> ret: %s " % ret)
 
-            roles = api.keystone.role_list(request)
-            for role in roles:
-                if role.name in ['admin', 'KeystoneAdmin']:
-                    api.keystone.add_tenant_user_role(request, tenant_id, ret.id, role.id)
+        #     roles = api.keystone.role_list(request)
+        #     for role in roles:
+        #         if role.name in ['admin', 'KeystoneAdmin']:
+        #             api.keystone.add_tenant_user_role(request, tenant_id, ret.id, role.id)
 
-            LOG.error(api.keystone.user_get(request, ret.id))
-            messages.success(request,
-                     _('Successfully created user: %s')
-                     % data['name'])
-            return ret
-        except:
-            redirect = reverse("horizon:vsm:usermgmt:index")
-            exceptions.handle(request,
-                              _('Unable to create User.'),
-                              redirect=redirect)
+        #     LOG.error(api.keystone.user_get(request, ret.id))
+        #     messages.success(request,
+        #              _('Successfully created user: %s')
+        #              % data['name'])
+        #     return ret
+        # except:
+        #     redirect = reverse("horizon:vsm:usermgmt:index")
+        #     exceptions.handle(request,
+        #                       _('Unable to create User.'),
+        #                       redirect=redirect)
 
 class UpdateUserForm(BaseUserForm):
     id = forms.CharField(label=_("ID"), widget=forms.HiddenInput)
@@ -140,57 +141,57 @@ class UpdateUserForm(BaseUserForm):
                 self.fields.pop(field)
 
     def handle(self, request, data):
-        failed, succeeded = [], []
-        user_is_editable = api.keystone.keystone_can_edit_user()
-        user = data.pop('id')
-        tenant = get_admin_tenant(request)
+        pass
+        # failed, succeeded = [], []
+        # user_is_editable = api.keystone.keystone_can_edit_user()
+        # user = data.pop('id')
+        # tenant = get_admin_tenant(request)
 
-        if user_is_editable:
-            password = data.pop('password')
-            data.pop('confirm_password', None)
+        # if user_is_editable:
+        #     password = data.pop('password')
+        #     data.pop('confirm_password', None)
 
-        if user_is_editable:
-            # Update user details
-            msg_bits = (_('name'), _('email'))
-            try:
-                api.keystone.user_update(request, user, **data)
-                succeeded.extend(msg_bits)
-            except:
-                failed.extend(msg_bits)
-                exceptions.handle(request, ignore=True)
+        # if user_is_editable:
+        #     # Update user details
+        #     msg_bits = (_('name'), _('email'))
+        #     try:
+        #         api.keystone.user_update(request, user, **data)
+        #         succeeded.extend(msg_bits)
+        #     except:
+        #         failed.extend(msg_bits)
+        #         exceptions.handle(request, ignore=True)
 
-        # Update default tenant
-        msg_bits = (_('primary project'),)
-        try:
-            api.keystone.user_update_tenant(request, user, tenant)
-            succeeded.extend(msg_bits)
-        except:
-            failed.append(msg_bits)
-            exceptions.handle(request, ignore=True)
+        # # Update default tenant
+        # msg_bits = (_('primary project'),)
+        # try:
+        #     api.keystone.user_update_tenant(request, user, tenant)
+        #     succeeded.extend(msg_bits)
+        # except:
+        #     failed.append(msg_bits)
+        #     exceptions.handle(request, ignore=True)
 
-        if user_is_editable:
-            # If present, update password
-            # FIXME(gabriel): password change should be its own form and view
-            if password:
-                msg_bits = (_('password'),)
-                try:
-                    api.keystone.user_update_password(request, user, password)
-                    succeeded.extend(msg_bits)
-                except:
-                    failed.extend(msg_bits)
-                    exceptions.handle(request, ignore=True)
+        # if user_is_editable:
+        #     # If present, update password
+        #     if password:
+        #         msg_bits = (_('password'),)
+        #         try:
+        #             api.keystone.user_update_password(request, user, password)
+        #             succeeded.extend(msg_bits)
+        #         except:
+        #             failed.extend(msg_bits)
+        #             exceptions.handle(request, ignore=True)
 
-        if succeeded:
-            messages.success(request, _('User has been updated successfully.'))
-        if failed:
-            failed = map(force_unicode, failed)
-            messages.error(request,
-                           _('Unable to update %(attributes)s for the user.')
-                             % {"attributes": ", ".join(failed)})
-        LOG.error(request.user.id)
-        LOG.error(user)
-        if request.user.id == user:
-            response = http.HttpResponseRedirect(settings.LOGOUT_URL)
-            return response
-        return True
+        # if succeeded:
+        #     messages.success(request, _('User has been updated successfully.'))
+        # if failed:
+        #     failed = map(force_unicode, failed)
+        #     messages.error(request,
+        #                    _('Unable to update %(attributes)s for the user.')
+        #                      % {"attributes": ", ".join(failed)})
+        # LOG.error(request.user.id)
+        # LOG.error(user)
+        # if request.user.id == user:
+        #     response = http.HttpResponseRedirect(settings.LOGOUT_URL)
+        #     return response
+        # return True
 

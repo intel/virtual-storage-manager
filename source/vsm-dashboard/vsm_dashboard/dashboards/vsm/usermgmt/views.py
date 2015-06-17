@@ -66,7 +66,7 @@ class IndexView(tables.DataTableView):
 
 class CreateView(forms.ModalFormView):
     form_class = CreateUserForm
-    template_name = 'vsm/flocking/createuser.html'
+    template_name = 'vsm/usermgmt/create.html'
     success_url = reverse_lazy('horizon:vsm:usermgmt:index')
 
 class UpdateView(forms.ModalFormView):
@@ -133,3 +133,46 @@ class UpdateView(forms.ModalFormView):
             # If handled didn't return, we can assume something went
             # wrong, and we should send back the form as-is.
             return self.form_invalid(form)
+
+
+
+def create_user(request):
+    data = json.loads(request.body)
+    print "============create user================="
+    print data
+
+    try:
+        admin_tenant = get_admin_tenant(request)
+        tenant_id = admin_tenant.id
+        #create user
+        ret = api.keystone.user_create(request, data['name'], data['email'],
+                                            data['pwd'], tenant_id, enabled=True)
+        #assign the role
+        roles = api.keystone.role_list(request)
+        for role in roles:
+            if role.name in ['admin', 'KeystoneAdmin']:
+                api.keystone.add_tenant_user_role(request, tenant_id, ret.id, role.id)
+        
+        resp = dict(message="Create user successfully", status="OK", data="")
+        resp = json.dumps(resp)
+        return HttpResponse(resp)
+    except:
+        resp = dict(message="Create User failed", status="Bad", data="")
+        resp = json.dumps(resp)
+        return HttpResponse(resp)
+
+
+def update_pwd(request):
+    data = json.loads(request.body)
+    print "=============update pwd================"
+    print data
+
+    api.keystone.user_update_password(request, data["id"], data["pwd"])
+    resp = dict(message="Update User", status="OK", data="")
+    resp = json.dumps(resp)
+    return HttpResponse(resp)
+
+
+
+
+

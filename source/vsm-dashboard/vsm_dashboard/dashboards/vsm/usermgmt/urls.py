@@ -18,9 +18,13 @@ from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import CreateView
 from .views import UpdateView
+from .views import update_pwd
+from .views import create_user
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^(?P<user_id>[^/]+)/update/$', UpdateView.as_view(), name='update'),
-    url(r'^create/$', CreateView.as_view(), name='create')
+    url(r'^update/(?P<user_id>[^/]+)/$', UpdateView.as_view(), name='update'),
+    url(r'^create/$', CreateView.as_view(), name='create'),
+    url(r'^update_pwd/$', update_pwd, name='update_pwd'),
+    url(r'^create_user/$', create_user, name='create_user')
 )
