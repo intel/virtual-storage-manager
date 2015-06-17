@@ -689,7 +689,7 @@ class CephDriver(object):
                       run_as_root=True)
 
         # step 6 zone host stg
-        LOG.info('>>> step6 start')
+        LOG.info('>>> step6 star')
         utils.execute("ceph", "osd", "crush", "add", "osd.%s" % osd_id, weight,
                  "root=%s" % crush_dict['root'],
                  "storage_group=%s" % crush_dict['storage_group'],

@@ -297,6 +297,10 @@ class ConductorManager(manager.Manager):
     def osd_state_update_or_create(self, context, values, create=None):
         #LOG.info("osd_state_update_or_create")
         osd_ref = db.osd_state_get_by_name(context, values['osd_name'])
+        if not osd_ref:
+            osd_ref = db.osd_state_get_by_device_id_and_service_id_and_cluster_id(\
+                 context, values['device_id'], values['service_id'],\
+                 values['cluster_id'])
         if osd_ref:
             osd_state = db.osd_state_update(context, osd_ref['id'], values)
             return osd_state
@@ -336,6 +340,10 @@ class ConductorManager(manager.Manager):
         return db.osd_state_get_by_osd_name_and_service_id_and_cluster_id(\
             context, osd_name, service_id, cluster_id)
 
+    def osd_state_get_by_device_id_and_service_id_and_cluster_id(self, \
+            context, device_id, service_id, cluster_id):
+        return db.osd_state_get_by_device_id_and_service_id_and_cluster_id(\
+            context, device_id, service_id, cluster_id)
     #device
     def device_get_all(self, context):
         error = self._set_error(context)

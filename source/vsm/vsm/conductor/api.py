@@ -188,7 +188,11 @@ class API(object):
         return self.conductor_rpcapi.\
                osd_state_get_by_osd_name_and_service_id_and_cluster_id(\
                context, osd_name, service_id, cluster_id)
-
+    def osd_state_get_by_device_id_and_service_id_and_cluster_id(\
+        self, context, device_id, service_id, cluster_id):
+        return self.conductor_rpcapi.\
+               osd_state_get_by_device_id_and_service_id_and_cluster_id(\
+               context, device_id, service_id, cluster_id)
     #device
     def device_get_all(self, context):
         return self.conductor_rpcapi.device_get_all(context)
