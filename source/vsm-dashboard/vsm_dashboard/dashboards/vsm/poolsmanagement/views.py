@@ -99,8 +99,6 @@ def remove_cache_tier(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print ""
-    print "============Remove Cache Tier==============="
     print body
     try:
         ret = vsmapi.remove_cache_tier(request,body=body)
@@ -119,14 +117,9 @@ def create_replicated_pool(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print ""
-    print "============create replicated pool==============="
     print body
     try:
-        print '22222'
         rsp, ret = vsmapi.create_storage_pool(request,body=body)
-        print '3333'
-        print rsp
         res = str(ret['message']).strip()
         if res.startswith('pool') and res.endswith('created'):
             status = "OK"
@@ -134,7 +127,6 @@ def create_replicated_pool(request):
     except:
         status = "Failed"
         msg = "Remove Cache Tier Failed!"
-    print '4444'
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
     return HttpResponse(resp)
@@ -143,8 +135,6 @@ def create_ec_pool(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print ""
-    print "============create ec pool==============="
     print body
 
     try:
