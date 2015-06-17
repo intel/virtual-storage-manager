@@ -134,7 +134,13 @@ function GenerateAddServerData(){
             id = checkbox.val();
             zone_id = $("#"+tr_id).find(".zone").find("select").val();
             monitor = $("#"+tr_id).find(".monitor").find("input")[0].checked ? true : false;
-            storage = $("#"+tr_id).find(".storage").find("input")[0].checked ? true : false;
+            try{
+                storage = $("#"+tr_id).find(".storage").find("input")[0].checked ? true : false;
+            }
+            catch(e){
+                storage = false;
+            }
+
 
             data = {id:id, is_monitor:monitor, is_storage:storage, zone_id:zone_id};
             data_list.push(data);
