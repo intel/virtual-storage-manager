@@ -5,16 +5,41 @@ $(function(){
 
 function addInfoNode(){
 
+	var htmlDeviceIcon = "";
+	htmlDeviceIcon += "<img id='imgOSDDialog' onClick='getStateData({0})'  src='/static/dashboard/img/{1}' />";
+	htmlDeviceIcon += "<img id='imgOSDDialog'  src='/static/dashboard/img/{2}' />";
+
+	var htmlJorunalDeviceIcon = "<img id='imgOSDDialog' onClick='getStateData({0})'  src='/static/dashboard/img/info_health.png' />"
+
     var trNodes = $("#osds>tbody>tr");
 
     for(var i=0;i<trNodes.length;i++){
         var osd_id = trNodes[i].children[0].children[0].value;
+        var tdDeviceStatus = trNodes[i].children[2];
         var tdDataDevice = trNodes[i].children[9];
         var tdJorunalDevice = trNodes[i].children[14];
-        //
-        var imgHTML = "<img id='imgOSDDialog' onClick='getStateData("+osd_id+")'  src='/static/dashboard/img/info_32.png' />";
-        tdDataDevice.innerHTML =  imgHTML;
-        tdJorunalDevice.innerHTML = imgHTML;
+        var tdOSDCapcityStatus = trNodes[i].children[16];
+        
+        //show device status
+        var iconDeviceStatus = "info_health.png";
+        if (tdDeviceStatus.innerHTML != "Present"){
+        	iconDeviceStatus = "info_error.png";
+        }
+        //show osd capctiy status
+        var iconOSDCapcityStatus = "osd_normal.png";
+        switch(tdOSDCapcityStatus.innerHTML){
+        	case "0":
+        		iconOSDCapcityStatus = "osd_normal.png";
+        		break;
+        	case "1":
+        		iconOSDCapcityStatus = "osd_near_full.png";
+        		break;
+        	case "2":
+        		iconOSDCapcityStatus = "osd_full.png";
+        		break;
+        }
+        tdDataDevice.innerHTML =   htmlDeviceIcon.replace("{0}",osd_id).replace("{1}",iconDeviceStatus).replace("{2}",iconOSDCapcityStatus);
+        tdJorunalDevice.innerHTML = htmlJorunalDeviceIcon.replace("{0}",osd_id);
     }
     var yep = false;
 }
