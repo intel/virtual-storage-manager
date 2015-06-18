@@ -1,5 +1,5 @@
 function _get_vsm_version() {
-    local version_file=$TOPDIR/$SOURCE_DIR/$VSM_DIR/vsm.spec
+    local version_file=$TOPDIR/VERSION
     local str=`cat $version_file | grep Version | awk '{print $2}'`
     echo $str
 }
