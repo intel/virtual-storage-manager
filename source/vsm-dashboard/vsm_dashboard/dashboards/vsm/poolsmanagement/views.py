@@ -32,6 +32,7 @@ from .tables import ListPoolTable
 
 from vsm_dashboard.api import vsm as vsmapi
 import json
+from django.http import HttpResponse
 
 LOG = logging.getLogger(__name__)
 
@@ -82,11 +83,10 @@ def add_cache_tier(request):
     body = json.loads(request.body)
 
     try:
-        ret = vsm_api.add_cache_tier(request,body=body)
+        ret = vsmapi.add_cache_tier(request,body=body)
         status = "OK"
         msg = "Add Cache Tier Successfully!"
-    except ex:
-        print ex
+    except:
         status = "Failed"
         msg = "Add Cache Tier Failed!"
 
@@ -99,15 +99,12 @@ def remove_cache_tier(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print ""
-    print "============Remove Cache Tier==============="
     print body
     try:
-        ret = vsm_api.remove_cache_tier(request,body=body)
+        ret = vsmapi.remove_cache_tier(request,body=body)
         status = "OK"
         msg = "Remove Cache Tier Successfully!"
-    except ex:
-        print ex
+    except:
         status = "Failed"
         msg = "Remove Cache Tier Failed!"
 
@@ -120,20 +117,16 @@ def create_replicated_pool(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print ""
-    print "============create replicated pool==============="
     print body
     try:
-        rsp, ret = vsm_api.create_storage_pool(request,body=body)
+        rsp, ret = vsmapi.create_storage_pool(request,body=body)
         res = str(ret['message']).strip()
         if res.startswith('pool') and res.endswith('created'):
             status = "OK"
             msg = "Created storage pool successfully!"
-    except ex:
-        print ex
+    except:
         status = "Failed"
         msg = "Remove Cache Tier Failed!"
-
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
     return HttpResponse(resp)
@@ -142,18 +135,15 @@ def create_ec_pool(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print ""
-    print "============create ec pool==============="
     print body
 
     try:
-        rsp, ret = vsm_api.create_storage_pool(request,body=body)
+        rsp, ret = vsmapi.create_storage_pool(request,body=body)
         res = str(ret['message']).strip()
         if res.startswith('pool') and res.endswith('created'):
             status = "OK"
             msg = "Created storage pool successfully!"
-    except ex:
-        print ex
+    except:
         status = "Failed"
         msg = "Remove Cache Tier Failed!"
 
