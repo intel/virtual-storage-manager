@@ -43,7 +43,7 @@ EOF
 }
 
 MANIFEST_PATH=""
-dependence_version="master"
+DEPENDENCE_BRANCH="master"
 USER=`whoami`
 SSH='ssh'
 SCP='scp'
@@ -52,7 +52,7 @@ while [ $# -gt 0 ]; do
     -h) usage ;;
     --help) usage ;;
     -m| --manifest) shift; MANIFEST_PATH=$1 ;;
-    -v| --version) shift; dependence_version=$1 ;;
+    -v| --version) shift; DEPENDENCE_BRANCH=$1 ;;
 	-k| --key) shift; keyfile=$1; export SSH='ssh -i $keyfile'; export SCP='scp -i $keyfile' ;;
     -u| --user) shift; USER=$1 ;;
     *) shift ;;
@@ -152,15 +152,15 @@ echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
 #-------------------------------------------------------------------------------
 
 if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
-    wget https://github.com/01org/vsm-dependencies/archive/"$dependence_version".zip
-    unzip $dependence_version
-    mv vsm-dependencies-$dependence_version/repo vsm-dep-repo
+    wget https://github.com/01org/vsm-dependencies/archive/"$DEPENDENCE_BRANCH".zip
+    unzip $DEPENDENCE_BRANCH
+    mv vsm-dependencies-$DEPENDENCE_BRANCH/repo vsm-dep-repo
     is_createrepo=`rpm -qa|grep createrepo|wc -l`
     if [[ $is_createrepo -gt 0 ]]; then
         createrepo vsm-dep-repo
     fi
-    rm -rf vsm-dependencies-$dependence_version
-    rm -rf $dependence_version
+    rm -rf vsm-dependencies-$DEPENDENCE_BRANCH
+    rm -rf $DEPENDENCE_BRANCH
 fi
 
 if [ $is_controller -eq 0 ]; then
