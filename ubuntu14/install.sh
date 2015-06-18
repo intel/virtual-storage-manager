@@ -51,7 +51,7 @@ EOF
 
 MANIFEST_PATH=""
 REPO_PATH="vsm-dep-repo"
-DEPENDENCE_VERSION="master"
+DEPENDENCE_BRANCH="master"
 USER=`whoami`
 IS_PREPARE=False
 IS_CONTROLLER_INSTALL=False
@@ -63,8 +63,8 @@ while [ $# -gt 0 ]; do
   case "$1" in
     -h| --help) usage ;;
     -m| --manifest) shift; MANIFEST_PATH=$1 ;;
-    --repo-path) shift; REPO_PATH=$1 ;;
-    -v| --version) shift; DEPENDENCE_VERSION=$1 ;;
+    -r| --repo-path) shift; REPO_PATH=$1 ;;
+    -v| --version) shift; DEPENDENCE_BRANCH=$1 ;;
     -u| --user) shift; USER=$1 ;;
     --prepare) IS_PREPARE=True ;;
     --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_IP=$1 ;;
@@ -148,14 +148,14 @@ function download_dependencies() {
         mkdir -p $REPO_PATH
         cd $REPO_PATH
         for i in `cat $TOPDIR/debs.lst`; do
-            wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_VERSION/ubuntu14/$i
+            wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
         done
         cd $TOPDIR
     elif [[ -d $REPO_PATH ]]; then
         cd $REPO_PATH
         for i in `cat $TOPDIR/debs.lst`; do
             if [[ `ls |grep $i|wc -l` -eq 0 ]]; then
-                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_VERSION/ubuntu14/$i
+                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
             else
                 COUNT=0
                 for j in `ls |grep $i`; do
@@ -164,7 +164,7 @@ function download_dependencies() {
                     fi
                 done
                 if [[ $COUNT -eq 0 ]]; then
-                    wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_VERSION/ubuntu14/$i
+                    wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
                 fi
             fi
         done
