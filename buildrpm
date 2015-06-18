@@ -44,7 +44,6 @@ for n in `ls $TOPDIR/.lib/ | grep -v iptables`; do
     source $TOPDIR/.lib/$n
 done
 [[ -e ~/rpmbuild ]] && rm -rf ~/rpmbuild
-[[ -e ~/rpmbuild ]] && rm -rf ~/rpmbuild
 find /root -name "*vsm*.rpm" | xargs -i rm -rf {}
 find /var -name "*vsm*.rpm" | xargs -i rm -rf {}
 find /tmp/ -name "*vsm*.rpm" | xargs -i rm -rf {}
