@@ -36,7 +36,7 @@ EOF
     exit 0
 }
 
-VERSION="1.1"
+VERSION=`cat VERSION`
 while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
