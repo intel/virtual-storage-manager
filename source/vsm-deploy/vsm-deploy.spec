@@ -1,14 +1,16 @@
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
+%define version %(cat %{sourcedir}/../VERSION)
+%define release %(cat %{sourcedir}/../BUILD)
 
 Name:             vsm-deploy
-Version:          2015.01
-Release:          1.0%{?dist}
+Version:          %{version}
+Release:          %{release}
 Summary:          Deployment tool for VSM
 
 Group:            Deploy/VSM
 License:          Intel
 URL:              http://intel.com
-Source0:          vsm-deploy-%{version}.tar.gz
+Source:          vsm-deploy-%{version}_%{release}.tar.gz
 BuildArch:        noarch
 %if 0%{?suse_version}
 BuildRequires:    shadow
@@ -32,7 +34,7 @@ This package contains documentation files for vsm.
 %endif
 
 %prep
-%setup -q -n vsm-deploy-%{version}
+%setup -q -n vsm-deploy-%{version}_%{release}
 
 %build
 

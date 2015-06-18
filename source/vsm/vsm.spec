@@ -1,14 +1,16 @@
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
+%define version %(cat %{sourcedir}/../VERSION)
+%define release %(cat %{sourcedir}/../BUILD)
 
 Name:             vsm
-Version:          2015.01
-Release:          1.0%{?dist}
+Version:          %{version}
+Release:          %{release}
 Summary:          Virtual Storage Manager for managing Ceph clusters
 
 Group:            Storage/System
 License:          Intel
 URL:              http://intel.com
-Source0:          vsm-%{version}.tar.gz
+Source:          ${name}-%{version}_%{release}.tar.gz
 
 BuildArch:        noarch
 %if 0%{?suse_version}
@@ -116,10 +118,10 @@ Virtual Storage Manager (VSM) is software that Intel has developed to help manag
 
 %if 0%{?with_doc}
 %package doc
-Summary:          Documentation for OpenStack Volume
+Summary:          Documentation for Virtual Storage Manager for Ceph
 Group:            Documentation
 
-Requires:         %{name} = %{version}-%{release}
+Requires:         %{name} = %{version}_%{release}
 BuildRequires:    graphviz
 BuildRequires:    python-eventlet
 BuildRequires:    python-routes
@@ -142,7 +144,7 @@ This package contains documentation files for vsm.
 %endif
 
 %prep
-%setup -q -n vsm-%{version}
+%setup -q -n %{name}-%{version}_%{release}
 sed -i '/setup_requires/d; /install_requires/d; /dependency_links/d' setup.py
 
 %build
@@ -489,10 +491,3 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/prepools/*
 %endif
 # TODO check this line whether needed
-
-%changelog
-* Thu May 28 2015 Eric Jackson <ejackson@suse.com> 2015.01
-- distribution specific packages, pathnames
-* Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
-- Initial release
-

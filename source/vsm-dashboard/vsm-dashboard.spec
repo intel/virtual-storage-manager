@@ -1,13 +1,15 @@
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%define version %(cat %{sourcedir}/../VERSION)
+%define release %(cat %{sourcedir}/../BUILD)
 
 Name:           vsm-dashboard
-Version:	    2015.01
-Release:	    1.0%{?dist}
+Version:	    %{version}
+Release:	    %{release}
 Url:            http://intel.com/itflex
 License:        Apache-2.0
 Group:          Development/Languages/Python
-Source:		    %{name}-%{version}.tar.gz
-BuildRoot:	    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source:		    %{name}-%{version}_%{release}.tar.gz
+BuildRoot:	    %{_tmppath}/%{name}-%{version}_%{release}-root-%(%{__id_u} -n)
 Summary:        Web based management interface for VSM
 
 ExclusiveArch:  x86_64 i586
@@ -86,7 +88,7 @@ uses the Django project to provide web based interactions with the
 VSM cloud controller.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n %{name}-%{version}_%{release}
 
 %build
 %{__python} setup.py build
@@ -175,7 +177,7 @@ chown -R wwwrun:www %{_sysconfdir}/apache2/default-server-ssl.conf
 chown -R apache:apache %{_sysconfdir}/httpd/conf.d/vsm-dashboard.conf
 %endif
 
-VSM_VERSION=%{version}-%{release}
+VSM_VERSION=%{version}_%{release}
 sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" %{_datadir}/vsm-dashboard/vsm_dashboard/dashboards/vsm/overview/summarys.py
 
 %files
@@ -230,9 +232,4 @@ sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" %{_datadir}/vsm-dashboard/vsm_dashboard/
 
 ##%%{_sysconfdir}/vsm-dashboard/*
 
-%changelog
-* Thu May 28 2015 Eric Jackson <ejackson@suse.com> 2015.01
-- distribution specific packages
-* Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
-- Initial release
 
