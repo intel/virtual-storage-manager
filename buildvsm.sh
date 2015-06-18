@@ -37,6 +37,10 @@ EOF
 }
 
 VERSION=`cat VERSION`
+BUILD=`cat BUILD`
+RELEASE=${VERSION}_${BUILD}
+echo $((++BUILD)) > BUILD
+
 while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
@@ -52,7 +56,7 @@ set -o xtrace
 
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
-DATE=`date "+%Y%m%d"`
+#DATE=`date "+%Y%m%d"`
 
 is_lsb_release=0
 lsb_release -a >/dev/null 2>&1 && is_lsb_release=1
@@ -69,7 +73,7 @@ else
 fi
 
 TEMP_VSM=`mktemp`; rm -rfv $TEMP_VSM >/dev/null; mkdir -p $TEMP_VSM;
-mkdir -p $TEMP_VSM/release/$VERSION-$DATE
+mkdir -p $TEMP_VSM/release/$RELEASE
 cp -rf * $TEMP_VSM
 cp -rf .lib $TEMP_VSM
 if [ -d ubuntu14/.lib ]; then
@@ -86,8 +90,8 @@ function create_release() {
         cp -rf ubuntu14/vsm-deploy ./source
         cp ubuntu14/builddeb .
         bash +x builddeb
-        cp ubuntu14/install.sh release/$VERSION-$DATE
-        cp ubuntu14/debs.lst release/$VERSION-$DATE
+        cp ubuntu14/install.sh release/$RELEASE
+        cp ubuntu14/debs.lst release/$RELEASE
     elif [[ $OS == "CentOS" && $OS_VERSION == "7" ]]; then
         cp -rf centos7/python-vsmclient ./source
         cp -rf centos7/vsm ./source
@@ -95,7 +99,7 @@ function create_release() {
         cp -rf centos7/vsm-deploy ./source
         cp centos7/buildrpm .
         bash +x buildrpm
-        cp centos7/install.sh release/$VERSION-$DATE
+        cp centos7/install.sh release/$RELEASE
     elif [[ $OS =~ "SUSE" ]]; then
         cp -rf suse/python-vsmclient ./source
         cp -rf suse/vsm ./source
@@ -105,24 +109,24 @@ function create_release() {
         bash +x buildrpm
     elif [[ $OS == "CentOS" && $OS_VERSION =~ "6" ]]; then
         bash +x buildrpm
-        cp install.sh release/$VERSION-$DATE
+        cp install.sh release/$RELEASE
     fi
 
-    cp README.md release/$VERSION-$DATE/README
-    cp INSTALL.md release/$VERSION-$DATE
-    cp LICENSE release/$VERSION-$DATE
-    cp NOTICE release/$VERSION-$DATE
-    cp CHANGELOG.md release/$VERSION-$DATE
-    cp hostrc release/$VERSION-$DATE
-#    cp -r manifest release/$VERSION-$DATE
-    mkdir -p release/$VERSION-$DATE/manifest
-    cp source/vsm/etc/vsm/cluster.manifest release/$VERSION-$DATE/manifest/cluster.manifest.sample
-    cp source/vsm/etc/vsm/server.manifest release/$VERSION-$DATE/manifest/server.manifest.sample
-    cp -r vsmrepo release/$VERSION-$DATE
+    cp README.md release/$RELEASE/README
+    cp INSTALL.md release/$RELEASE
+    cp LICENSE release/$RELEASE
+    cp NOTICE release/$RELEASE
+    cp CHANGELOG.md release/$RELEASE
+    cp hostrc release/$RELEASE
+#    cp -r manifest release/$RELEASE
+    mkdir -p release/$RELEASE/manifest
+    cp source/vsm/etc/vsm/cluster.manifest release/$RELEASE/manifest/cluster.manifest.sample
+    cp source/vsm/etc/vsm/server.manifest release/$RELEASE/manifest/server.manifest.sample
+    cp -r vsmrepo release/$RELEASE
 
     cd release
-    tar -czvf $VERSION-$DATE.tar.gz $VERSION-$DATE
-    rm -rf $VERSION-$DATE
+    tar -czvf $RELEASE.tar.gz $RELEASE
+    rm -rf $RELEASE
     cp -r $TEMP_VSM/release $TOPDIR
     cp -r $TEMP_VSM/vsmrepo $TOPDIR
 
