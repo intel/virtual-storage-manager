@@ -689,7 +689,7 @@ class CephDriver(object):
                       run_as_root=True)
 
         # step 6 zone host stg
-        LOG.info('>>> step6 star')
+        LOG.info('>>> step6 start')
         utils.execute("ceph", "osd", "crush", "add", "osd.%s" % osd_id, weight,
                  "root=%s" % crush_dict['root'],
                  "storage_group=%s" % crush_dict['storage_group'],
@@ -699,6 +699,9 @@ class CephDriver(object):
         # step 7 start osd service
         LOG.info('>>> step7 start')
         self.start_osd_daemon(context, osd_id)
+        utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_id, weight,
+          "host=%s" % crush_dict['host'],
+         run_as_root=True)
 
         self._conductor_api.osd_state_create(context, osd_state)
         LOG.info('>>> step7 finish')
@@ -1634,6 +1637,9 @@ class CephDriver(object):
         #step2
         utils.execute('ceph', 'osd', 'in', osd_name, run_as_root=True)
         time.sleep(10)
+        utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_inner_id, weight,
+          "host=%s" % crush_dict['host'],
+         run_as_root=True)
         #update db
         value = {}
         value['id'] = osd_id
