@@ -1534,7 +1534,8 @@ class CephDriver(object):
 
     def osd_restart(self, context, osd_id):
         LOG.info('osd_restart osd_id = %s' % osd_id)
-        osd = db.osd_get(context, osd_id)
+        osd = db.get_zone_hostname_storagegroup_by_osd_id(context, osd_id)
+        osd=osd[0]
         #stop
         utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
         self.ceph_osd_stop(context, osd['osd_name'])
@@ -1542,6 +1543,9 @@ class CephDriver(object):
         utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
         self.ceph_osd_start(context, osd['osd_name'])
         time.sleep(10)
+        utils.execute("ceph", "osd", "crush", "create-or-move", osd['osd_name'], osd['weight'],
+          "host=%s_%s_%s" %(osd['service']['host'],osd['storage_group']['name'],osd['zone']['name']) ,
+         run_as_root=True)
         return True
 
     def osd_restore(self, context, osd_id):
