@@ -1,9 +1,3 @@
-function _get_vsmdeploy_version() {
-    local version_file=$TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR/vsm-deploy.spec
-    local str=`cat $version_file | grep Version | awk '{print $2}'`
-    echo $str
-}
-
 function _install_vsmdeploy_dep_package() {
     yum install -y rpm-build
 }
@@ -11,7 +5,7 @@ function _install_vsmdeploy_dep_package() {
 function _setup_vsmdeploy_rpm() {
     rm -rf $TEMP/*
     local old_dir=`pwd`
-    local version=`_get_vsmdeploy_version`
+    local version=`cat VERSION`
  
     cp -rf $TOPDIR/$SOURCE_DIR/$VSM_DEPLOY_DIR $TEMP/
 

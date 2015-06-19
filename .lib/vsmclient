@@ -1,9 +1,3 @@
-function _get_vsmclient_version() {
-    local version_file=$TOPDIR/$SOURCE_DIR/$VSMCLIENT_DIR/python-vsmclient.spec
-    local str=`cat $version_file | grep Version | awk '{print $2}'`
-    echo $str
-}
-
 function _change_vsmclient_files() {
     echo "" > $TEMP/$VSMCLIENT_DIR/python_vsmclient.egg-info/requires.txt
     echo "" > $TEMP/$VSMCLIENT_DIR/tools/pip-requires
@@ -18,7 +12,7 @@ function _install_vsmclient_dep_package() {
 function _setup_vsmclient_rpm() {
     rm -rf $TEMP/*
     local old_dir=`pwd`
-    local version=`_get_vsmclient_version`
+    local version=`cat VERSION`
  
     cp -rf $TOPDIR/$SOURCE_DIR/$VSMCLIENT_DIR $TEMP/
     cd $TEMP/

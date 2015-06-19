@@ -1,9 +1,3 @@
-function _get_vsm_dashboard_version() {
-    local version_file=$TOPDIR/$SOURCE_DIR/$VSMDASHBOARD_DIR/vsm-dashboard.spec
-    local str=`cat $version_file | grep Version | awk '{print $2}'`
-    echo $str
-}
-
 function _change_vsm_dashboard_files() {
     echo "" > $TEMP/$VSMDASHBOARD_DIR/vsm_dashboard.egg-info/requires.txt
     echo "" > $TEMP/$VSMDASHBOARD_DIR/tools/pip-requires
@@ -18,7 +12,7 @@ function _install_vsm_dashboard_dep_package() {
 function _setup_vsm_dashboard_rpm() {
     rm -rf $TEMP/*
     local old_dir=`pwd`
-    local version=`_get_vsm_dashboard_version`
+    local version=`cat VERSION`
  
     cp -rf $TOPDIR/$SOURCE_DIR/$VSMDASHBOARD_DIR $TEMP/
     cd $TEMP/
