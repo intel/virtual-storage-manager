@@ -37,9 +37,12 @@ EOF
 }
 
 VERSION=`cat VERSION`
-BUILD=`cat BUILD`
-RELEASE=${VERSION}_${BUILD}
-echo $((++BUILD)) > BUILD
+export VERSION
+RELEASE=`cat RELEASE`
+export RELEASE
+BUILD="${VERSION}-${RELEASE}"
+echo -n $BUILD
+echo -n $((++RELEASE)) > RELEASE
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -73,7 +76,7 @@ else
 fi
 
 TEMP_VSM=`mktemp`; rm -rfv $TEMP_VSM >/dev/null; mkdir -p $TEMP_VSM;
-mkdir -p $TEMP_VSM/release/$RELEASE
+mkdir -p $TEMP_VSM/release/$BUILD
 cp -rf * $TEMP_VSM
 cp -rf .lib $TEMP_VSM
 if [ -d ubuntu14/.lib ]; then
@@ -90,8 +93,8 @@ function create_release() {
         cp -rf ubuntu14/vsm-deploy ./source
         cp ubuntu14/builddeb .
         bash +x builddeb
-        cp ubuntu14/install.sh release/$RELEASE
-        cp ubuntu14/debs.lst release/$RELEASE
+        cp ubuntu14/install.sh release/$BUILD
+        cp ubuntu14/debs.lst release/$BUILD
     elif [[ $OS == "CentOS" && $OS_VERSION == "7" ]]; then
         cp -rf centos7/python-vsmclient ./source
         cp -rf centos7/vsm ./source
@@ -99,7 +102,7 @@ function create_release() {
         cp -rf centos7/vsm-deploy ./source
         cp centos7/buildrpm .
         bash +x buildrpm
-        cp centos7/install.sh release/$RELEASE
+        cp centos7/install.sh release/$BUILD
     elif [[ $OS =~ "SUSE" ]]; then
         cp -rf suse/python-vsmclient ./source
         cp -rf suse/vsm ./source
@@ -109,24 +112,26 @@ function create_release() {
         bash +x buildrpm
     elif [[ $OS == "CentOS" && $OS_VERSION =~ "6" ]]; then
         bash +x buildrpm
-        cp install.sh release/$RELEASE
+        cp install.sh release/$BUILD
     fi
 
-    cp README.md release/$RELEASE/README
-    cp INSTALL.md release/$RELEASE
-    cp LICENSE release/$RELEASE
-    cp NOTICE release/$RELEASE
-    cp CHANGELOG.md release/$RELEASE
-    cp hostrc release/$RELEASE
-#    cp -r manifest release/$RELEASE
-    mkdir -p release/$RELEASE/manifest
-    cp source/vsm/etc/vsm/cluster.manifest release/$RELEASE/manifest/cluster.manifest.sample
-    cp source/vsm/etc/vsm/server.manifest release/$RELEASE/manifest/server.manifest.sample
-    cp -r vsmrepo release/$RELEASE
+    cp VERSION release/$BUILD
+    cp RELEASE release/$BUILD
+    cp README.md release/$BUILD
+    cp INSTALL.md release/$BUILD
+    cp LICENSE release/$BUILD
+    cp NOTICE release/$BUILD
+    cp CHANGELOG.md release/$BUILD
+    cp hostrc release/$BUILD
+#    cp -r manifest release/$BUILD
+    mkdir -p release/$BUILD/manifest
+    cp source/vsm/etc/vsm/cluster.manifest release/$BUILD/manifest/cluster.manifest.sample
+    cp source/vsm/etc/vsm/server.manifest release/$BUILD/manifest/server.manifest.sample
+    cp -r vsmrepo release/$BUILD
 
     cd release
-    tar -czvf $RELEASE.tar.gz $RELEASE
-    rm -rf $RELEASE
+    tar -czvf $BUILD.tar.gz $BUILD
+    rm -rf $BUILD
     cp -r $TEMP_VSM/release $TOPDIR
     cp -r $TEMP_VSM/vsmrepo $TOPDIR
 
