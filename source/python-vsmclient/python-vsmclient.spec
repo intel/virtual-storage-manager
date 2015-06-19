@@ -1,5 +1,5 @@
-%define version %(cat %{sourcedir}/../VERSION)
-%define release %(cat %{sourcedir}/../BUILD)
+%define version %{getenv:VERSION}
+%define release %{getenv:RELEASE}
 
 Name:             python-vsmclient
 Version:          %{version}
@@ -9,7 +9,7 @@ Summary:          Python API and CLI for  vsm
 Group:            Development/Languages
 License:          Intel Reserved
 URL:              http://intel.com/itflex
-Source:          %{name}-%{version}_%{release}.tar.gz
+Source:           %{name}-%{version}.tar.gz
 
 #
 # patches_base=1.0.1

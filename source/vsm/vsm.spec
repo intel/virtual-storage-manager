@@ -1,6 +1,6 @@
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
-%define version %(cat %{sourcedir}/../VERSION)
-%define release %(cat %{sourcedir}/../BUILD)
+%define version %{getenv:VERSION}
+%define release %{getenv:RELEASE}
 
 Name:             vsm
 Version:          %{version}
@@ -10,7 +10,7 @@ Summary:          Virtual Storage Manager for managing Ceph clusters
 Group:            Storage/System
 License:          Intel
 URL:              http://intel.com
-Source:          ${name}-%{version}_%{release}.tar.gz
+Source:           %{name}-%{version}.tar.gz
 
 BuildArch:        noarch
 %if 0%{?suse_version}
@@ -121,7 +121,7 @@ Virtual Storage Manager (VSM) is software that Intel has developed to help manag
 Summary:          Documentation for Virtual Storage Manager for Ceph
 Group:            Documentation
 
-Requires:         %{name} = %{version}_%{release}
+#Requires:         %{name} = %{version}-%{release}
 BuildRequires:    graphviz
 BuildRequires:    python-eventlet
 BuildRequires:    python-routes
@@ -144,7 +144,7 @@ This package contains documentation files for vsm.
 %endif
 
 %prep
-%setup -q -n %{name}-%{version}_%{release}
+%setup -q -n %{name}-%{version}
 sed -i '/setup_requires/d; /install_requires/d; /dependency_links/d' setup.py
 
 %build
