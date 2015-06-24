@@ -26,7 +26,8 @@ import horizon
 from django.views.generic import RedirectView
 
 urlpatterns = patterns('',
-    url(r'^$', 'vsm_dashboard.views.splash', name='splash'),
+    #url(r'^$', 'vsm_dashboard.views.splash', name='splash'),
+    url(r'^$', RedirectView.as_view(url='/dashboard/vsm/')),
     url(r'^auth/', include('openstack_auth.urls')),
     url(r'^license_accept/', 'vsm_dashboard.views.license_accept',
         name='license_accept'),
