@@ -8,3 +8,4 @@ mon_initial_members = $monitor_host_list
 fsid = $fsid
 public network = $public_network
 cluster network = $cluster_network
+
