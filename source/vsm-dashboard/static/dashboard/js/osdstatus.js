@@ -1,6 +1,6 @@
 $(function(){
-    //CheckFilterStatus
-    CheckFilterStatus();
+   //LoadFilterCheckbox
+    LoadFilterCheckbox();
 
     //load OSD data,5 min update
     loadOSD();
@@ -16,24 +16,26 @@ $(function(){
 })
 
 //CheckFilterStatus
-function CheckFilterStatus(){
+function LoadFilterCheckbox(){
+    var chkBoxHtml = "";
+    chkBoxHtml += "<input id='chkFilter' type='checkbox'  {0} onclick='ReloadData(this.checked)' >show not up and in</input>";
+
     var pathname = window.location.pathname;
+    var _is_checked = ""
     if(pathname.indexOf("not_up_in")>0){
-        $("#chkFilter")[0].checked = true;
-    }
-    else{
-        $("#chkFilter")[0].checked = false;
+        _is_checked = "checked";
     }
 
+    $("th[class='table_header']").append(chkBoxHtml.replace("{0}",_is_checked));
 }
 
-//Filter the OSD table data
-$("#chkFilter").click(function(){
-    if(this.checked)
+function ReloadData(is_checked){
+    if(is_checked == true)
         window.location.href = "/dashboard/vsm/osd-status/not_up_in/";
     else
         window.location.href = "/dashboard/vsm/osd-status/";
-});
+}
+
 
 
 //load OSD data
