@@ -3232,6 +3232,14 @@ def osd_state_get_all(context,
                                           limit, sort_keys=sort_keys,
                                           marker=marker_item, sort_dir=sort_dir)
 
+def get_zone_hostname_storagegroup_by_osd_id(context,osd_id):
+    result = model_query(context, models.OsdState, read_deleted="no").\
+        options(joinedload('device')).\
+        options(joinedload('service')).\
+        options(joinedload('storage_group')).\
+        options(joinedload('zone')).filter_by(id=osd_id)
+    return result
+
 def osd_state_get_by_name(context, name):
     result = model_query(context,
             models.OsdState, read_deleted="no").\

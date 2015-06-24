@@ -253,7 +253,6 @@ install -d -m 755 %{buildroot}%{_bindir}/
 install -p -D -m 755 bin/vsm-api %{buildroot}%{_bindir}/vsm-api
 install -p -D -m 755 bin/vsm-agent %{buildroot}%{_bindir}/vsm-agent
 install -p -D -m 755 bin/vsm-physical %{buildroot}%{_bindir}/vsm-physical
-install -p -D -m 755 bin/vsm-rootwrap %{buildroot}%{_bindir}/vsm-rootwrap
 install -p -D -m 755 bin/vsm-conductor %{buildroot}%{_bindir}/vsm-conductor
 install -p -D -m 755 bin/vsm-scheduler %{buildroot}%{_bindir}/vsm-scheduler
 install -p -D -m 755 bin/vsm-rootwrap %{buildroot}%{_bindir}/vsm-rootwrap
@@ -314,7 +313,6 @@ mkdir -p /var/lib/vsm
 mkdir -p /etc/vsm/
 mkdir -p /etc/vsm/rootwrap.d
 chown -R vsm /var/run/vsm
-chown -R vsm /etc/vsm/
 chown -R vsm /var/log/vsm/
 chown -R vsm /var/lib/vsm
 chown -R vsm /etc/vsm/
