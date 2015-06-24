@@ -110,11 +110,12 @@ class AgentManager(manager.Manager):
                 break
 
             lan_list_1 = [cluster_ref['primary_public_network'],
-                       cluster_ref['secondary_public_network'],
-                       cluster_ref['cluster_network']]
+                        cluster_ref['secondary_public_network'],
+                        cluster_ref['cluster_network']]
             lan_list = cluster_ref['primary_public_network'].split(',') + \
                         cluster_ref['secondary_public_network'].split(',') + \
                         cluster_ref['cluster_network'].split(',')
+
             LOG.info('Get vlan list = %s' % lan_list)
 
             for lan in lan_list:
@@ -133,6 +134,7 @@ class AgentManager(manager.Manager):
         name_list = ['primary_public_ip',
                      'secondary_public_ip',
                      'cluster_ip']
+
         for pos,lan in enumerate(self._lan_list):
             lan_list = lan.split(",")
             ip_list = []
@@ -142,7 +144,6 @@ class AgentManager(manager.Manager):
                         ip_list.append(ip)
                 if ip_list:
                     ip_dict[name_list[pos]] = ','.join(ip_list)
-                        #break
 
         LOG.info('ip_dict = %s', ip_dict)
 
@@ -404,7 +405,6 @@ class AgentManager(manager.Manager):
             pri_ip = node['primary_public_ip']
             sed_ip = node['secondary_public_ip']
             thr_ip = node['cluster_ip']
-            #ip_list = [pri_ip, sed_ip, thr_ip]
             ip_list = pri_ip.split(',')+sed_ip.split(',')+thr_ip.split(',')
             ip_list = [x for x in ip_list if x]
             LOG.info('host = %s ip = %s' % (hname, ip_list))

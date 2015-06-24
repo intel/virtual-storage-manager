@@ -533,6 +533,35 @@ After the command has finished execution, performing the following steps to chec
 3.  Then you can switch to the `Create Cluster` Panel, and push the create cluster button to create a ceph cluster. At this point please refer to the VSM Manual, which is located at *https://01.org/virtual-storage-manager*
 
 
+##Uninstall
+
+There are a few cases where you may expect to uninstall VSM, e.g, you expect to reinstall it with different configurations, you feel VSM doesn't work as you expected. You could take below steps to do the removal:
+
+1.	Go to the VSM folder where you start the installation procedure. 
+2.	Make sure the `hostrc` file is there, and the ip addresses for controller node and agent nodes are correctly set. Normally, if you correctly installed VSM, you should have already correctly set the file.
+3.	Execute below commands:
+	> 
+	> 	TOPDIR=$(cd $(dirname "$0") && pwd)
+	> 	
+	> 	source $TOPDIR/hostrc
+	> 	
+	> 	for ip in $controller_ip; do
+	> 	    ssh -t $ip "clean-data -f; yum -y erase ceph httpd librbd 
+	> 	    MariaDB-client MariaDB-devel MariaDB-server memcached 
+	> 	    openstack-keystone openstack-utils python-devel rabbitmq-server 
+	> 	    rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
+	> 	done
+	> 	
+	> 	for ip in $storage_ip_list; do
+	>       ssh -t $ip "clean-data -f; yum -y erase ceph httpd librbd 
+	>       MariaDB-client MariaDB-devel MariaDB-server memcached 
+	>       openstack-keystone openstack-utils python-devel rabbitmq-server 
+	>       rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
+	>     done
+	>   
+ 
+
+
 #Frequently Asked Questions
 
 **	Q: Executing "agent-token" is hung.**

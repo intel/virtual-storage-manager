@@ -121,6 +121,13 @@ class ManifestChecker(object):
             # if self._is_in_lan(ip, cluster_network):
             #     return True
 
+        lan_list = primary_public_network.split(',') + \
+                          secondary_public_network.split(',') + \
+                          cluster_network.split(',')
+        for _lan in lan_list:
+            if self._is_in_lan(ip, _lan):
+                return True
+
         return False
 
     def _is_network_ok(self):
@@ -155,10 +162,9 @@ class ManifestChecker(object):
             'cluster_network = %s' % cluster_network]
             for info in info_list:
                 print info
+
         for _lan in lan_list:
             self.__is_address_ok(_lan)
-        # self.__is_address_ok(secondary_public_network)
-        # self.__is_address_ok(cluster_network)
 
         out = utils.execute('hostname', '-I')
         ip_list = out[0].strip().split()

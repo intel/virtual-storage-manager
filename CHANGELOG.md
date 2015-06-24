@@ -1,3 +1,27 @@
+1.1_1
+------------------------------------
+
+Special Notes
+---------------
+-	this is a bugfix release for 1.1, which fixed the issues found in VSM-242 ("Allow user to modify ceph.conf outside VSM"). Also adding an new script uninstall.sh to help uninstall VSM in the case user expects to restart installation again.
+
+
+New Features
+---------------
+-	[VSM-209](https://01.org/jira/browse/VSM-209)	support multiple subnets
+
+
+Resolved bugs
+----------------
+-	[VSM-260](https://01.org/jira/browse/VSM-260)	the check_network in server_manifest will be wrong when it has a single network card
+
+
+Known issues
+-----------------
+-	
+
+
+
 1.1
 ------------------------------------
 

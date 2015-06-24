@@ -1043,12 +1043,13 @@ class SchedulerManager(manager.Manager):
         """
         """
         LOG.info('import ceph conf from %s to db '%ceph_conf_path)#ceph_conf_path!=FLAG.ceph_conf
-        ceph_conf_parser = cephconfigparser.CephConfigParser(ceph_conf_path)._parser
+        ceph_conf_parser = cephconfigparser.CephConfigParser(str(ceph_conf_path))._parser
         ceph_conf_str = ceph_conf_parser.as_str()
         db.cluster_update_ceph_conf(context, cluster_id, ceph_conf_str)
-        server_list = db. init_node_get_all(context)
+        server_list = db.init_node_get_all(context)
         LOG.info('import ceph conf from db to ceph nodes ')
         for ser in server_list:
+            LOG.info('import ceph conf from db to ceph nodes %s '%ser['host'])
             self._agent_rpcapi.update_ceph_conf(context, ser['host'])
         LOG.info('import ceph conf from db to ceph nodes success ')
         return {"message":"success"}

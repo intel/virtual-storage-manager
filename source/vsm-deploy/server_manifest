@@ -70,10 +70,10 @@ class ManifestChecker(object):
         except:
             info_list = ['Can not connect to controller ip = %s' % \
                          self._server_host,
-                         'Possible reasons: ',
-                         '(i) Maybe your auth_keys is error! please make sure the auth_keys is consistent '
-                         'with the output from agent_toekn command executed on controller node.',
-                         '(ii) Check if you can ping this host']
+                         'Maybe your auth_keys is error!',
+                         'check auth_key in server.manifest',
+                         'with /etc/vsmdeploy/deployrc AGENT_PASSWORD variable',
+                         'Check if you can ping this host']
             error(info_list)
 
         self._secs_list = self._storage_class_list + ['vsm_controller_ip', 'role', 'auth_key', 'zone']
@@ -249,6 +249,7 @@ class ManifestChecker(object):
                 secondary public address,
                 cluster address
         """
+        return True
         if ip in ipcalc.Network(ip_mask):
             return True
         else:
@@ -264,7 +265,12 @@ class ManifestChecker(object):
         self._lan_list = [primary_public_network,
                           secondary_public_network,
                           cluster_network]
-
+        lan_list = primary_public_network.split(',') + \
+                          secondary_public_network.split(',') + \
+                          cluster_network.split(',')
+        for _lan in lan_list:
+            if self._is_in_lan(ip, _lan):
+                return True
         if self._is_in_lan(ip, primary_public_network):
             return True
         if self._is_in_lan(ip, secondary_public_network):
@@ -282,27 +288,30 @@ class ManifestChecker(object):
         out = utils.execute('hostname', '-I')
         ip_list = out[0].strip().split()
         ip_in_lan_cnt = 0
+        ip_in_lan = []
         for ip in ip_list:
             print ip_list
             print self._lan_list
             if self.__in_lan(ip):
                 self.__is_address_ok(ip)
-                ip_in_lan_cnt = ip_in_lan_cnt + 1
+                ip_in_lan.append(ip)
+        ip_in_lan_cnt = len(set(ip_in_lan))
 
-        if ip_in_lan_cnt != len(self._lan_list):
+
+        if ip_in_lan_cnt < len(set(self._lan_list)):
             info_list = ['Controller ip is not in LAN defined in',
                         'controller node /etc/manifest/cluster.manifest',
                         'Your IP = %s' % ip_list,
                         'Controller ip lan = %s' % self._lan_list]
             for info in info_list:
                 print info
-
-            cnt = raw_input('Some error found, do you want to continue? (y/n)')
-            cnt = cnt.lower()
-            while cnt != 'y' and cnt != 'n':
-                cnt = raw_input('do you want to continue? (y/n)')
-            if cnt == 'n':
-                error(info_list)
+            error(info_list)
+        if ip_in_lan_cnt < 3:
+            info_list = [
+            'Warning: There are some networks be the same.',
+            'Controller ip lan = %s' % self._lan_list]
+            for info in info_list:
+                print info
 
         #self.elf.__is_address_ok(ip)
 
@@ -311,6 +320,8 @@ class ManifestChecker(object):
 
 if __name__ == '__main__':
     fpath = '/etc/manifest/server.manifest'
+    if len(sys.argv) > 1 :
+        fpath = sys.argv[1]
     if os.path.exists(fpath) == False:
         error('%s is not exists.' % fpath)
     smp = ManifestChecker(fpath)
