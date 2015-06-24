@@ -124,18 +124,18 @@ function loadVersion(){
 	data: null,
 	dataType:"json",
 	success: function(data){
-        console.log(data);
-        $("#lblVersionUpdate")[0].innerHTML ="Update:"+data.update;
+         //console.log(data);
+        $("#lblVersionUpdate")[0].innerHTML ="Update:&nbsp&nbsp"+data.update;
 
         if(data.version == null)
-            $("#lblVersion")[0].innerHTML= "VSM Version:--";
+            $("#lblVersion")[0].innerHTML= "VSM Version:&nbsp&nbsp--";
         else
-            $("#lblVersion")[0].innerHTML= "VSM Version:"+data.version;
+            $("#lblVersion")[0].innerHTML= "VSM Version:&nbsp&nbsp"+data.version;
 
 	    if(data.ceph_version == null)
-            $("#lblCephVersion")[0].innerHTML= "Ceph Version::--";
+            $("#lblCephVersion")[0].innerHTML= "Ceph Version:&nbsp&nbsp--";
         else
-            $("#lblCephVersion")[0].innerHTML= "Ceph Version::"+data.ceph_version;
+            $("#lblCephVersion")[0].innerHTML= "Ceph Version:&nbsp&nbsp"+data.ceph_version;
 	   }
     });
 }
@@ -259,12 +259,12 @@ function loadMDS(){
     		$("#lblMDSUpdate")[0].innerHTML ="Update:"+ data.update;
 
             if(data.MetaData == null)
-                $("#lblMDSMetaData")[0].innerHTML = "0";
+                $("#lblMDSMetaData")[0].innerHTML = "";
             else
                 $("#lblMDSMetaData")[0].innerHTML = data.MetaData;
 
             if(data.PoolData == null)
-                $("#lblMDSPoolData")[0].innerHTML = "0";
+                $("#lblMDSPoolData")[0].innerHTML = "";
             else
                 $("#lblMDSPoolData")[0].innerHTML = data.PoolData;
 
