@@ -143,20 +143,20 @@ function loadClusterStatus(){
                 var statusClass = "";
                 var noteClass = "";
 
-                switch (data.status) {
+               switch (data.status) {
                     case "HEALTH_OK":
                         statusTip = "health";
-                        statusClass = "btn btn-success";
+                        statusClass = "cluster-tip cluster-tip-health";
                         noteClass = "alert alert-success";
                         break;
                     case "HEALTH_WARN": //warning
                         statusTip = "warning";
-                        statusClass = "btn btn-warning";
+                        statusClass = "cluster-tip cluster-tip-warning";
                         noteClass = "alert alert-warning";
                         break;
                     case "HEALTH_ERROR": //error
                         statusTip = "error";
-                        statusClass = "btn btn-danger";
+                        statusClass = "cluster-tip cluster-tip-error";
                         noteClass = "alert alert-danger";
                         break;
                 }
@@ -170,8 +170,8 @@ function loadClusterStatus(){
 		}
 
 		$("#lblClusterName")[0].innerHTML = "Cluster Name:"+data.name;
-                $("#btnClusterTip")[0].innerHTML = statusTip;
-                $("#btnClusterTip")[0].className = statusClass;
+                $("#lblClusterTip")[0].innerHTML = statusTip;
+                $("#lblClusterTip")[0].className = statusClass;
                 $("#divClusterContent")[0].innerHTML = note;
                 $("#divClusterContent")[0].className = noteClass;
             }
