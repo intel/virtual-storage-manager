@@ -24,9 +24,9 @@ USER=`whoami`
 source $TOPDIR/hostrc
 
 for ip in $controller_ip; do
-    ssh -t $ip "clean-data -f; rpm -e vsm-deploy vsm vsm-dashboard python-vsmclient"
+    ssh -t $ip "clean-data -f; yum -y erase ceph httpd librbd MariaDB-client MariaDB-devel MariaDB-server memcached openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
 done
 
 for ip in $storage_ip_list; do
-    ssh -t $ip "clean-data -f; rpm -e vsm-deploy vsm vsm-dashboard python-vsmclient"
+    ssh -t $ip "clean-data -f; yum -y erase ceph httpd librbd MariaDB-client MariaDB-devel MariaDB-server memcached openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
 done
