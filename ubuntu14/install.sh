@@ -63,7 +63,7 @@ SCP='scp'
 IS_PREPARE=False
 IS_CONTROLLER_INSTALL=False
 IS_AGENT_INSTALL=False
-NEW_CONTROLLER_IP_OR_HOSTNAME=""
+NEW_CONTROLLER_ADDRESS=""
 NEW_AGENT_IPS=""
 IS_CHECK_DEPENDENCE_PACKAGE=False
 
@@ -76,7 +76,7 @@ while [ $# -gt 0 ]; do
     -u| --user) shift; USER=$1 ;;
     -k| --key) shift; keyfile=$1; export SSH='ssh -i $keyfile'; export SCP='scp -i $keyfile' ;;
     --prepare) IS_PREPARE=True ;;
-    --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_IP_OR_HOSTNAME=$1 ;;
+    --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_ADDRESS=$1 ;;
     --agent) shift; IS_AGENT_INSTALL=True; NEW_AGENT_IPS=$1 ;;
     --check-dependence-package) shift; IS_CHECK_DEPENDENCE_PACKAGE=True ;;
     *) shift ;;
@@ -105,18 +105,18 @@ if [ -z $MANIFEST_PATH ]; then
     MANIFEST_PATH="manifest"
 fi
 
-if [[ $NEW_CONTROLLER_IP_OR_HOSTNAME != "" ]]; then
-    CONTROLLER_IP_OR_HOSTNAME=$NEW_CONTROLLER_IP_OR_HOSTNAME
+if [[ $NEW_CONTROLLER_ADDRESS != "" ]]; then
+    CONTROLLER_ADDRESS=$NEW_CONTROLLER_ADDRESS
 fi
 
 IS_CONTROLLER=0
 for ip in $HOSTIP; do
-    if [ $ip == $CONTROLLER_IP_OR_HOSTNAME ]; then
+    if [ $ip == $CONTROLLER_ADDRESS ]; then
         IS_CONTROLLER=1
     fi
 done
 
-if [[ $HOSTNAME == $CONTROLLER_IP_OR_HOSTNAME ]]; then
+if [[ $HOSTNAME == $CONTROLLER_ADDRESS ]]; then
     IS_CONTROLLER=1
 fi
 
@@ -256,7 +256,7 @@ function set_local_repo() {
     sudo apt-get update
 }
 function check_manifest() {
-    if [[ $1 == $CONTROLLER_IP_OR_HOSTNAME ]]; then
+    if [[ $1 == $CONTROLLER_ADDRESS ]]; then
         if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/cluster.manifest ]]; then
             echo "Please check the manifest, then try again."
             exit 1
@@ -274,33 +274,33 @@ function check_manifest() {
 #-------------------------------------------------------------------------------
 
 function setup_remote_controller() {
-    $SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "sudo rm -rf /etc/manifest/cluster_manifest"
-    $SCP $MANIFEST_PATH/$CONTROLLER_IP_OR_HOSTNAME/cluster.manifest $USER@$CONTROLLER_IP_OR_HOSTNAME:/tmp
-    $SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "sudo mv /tmp/cluster.manifest /etc/manifest"
-    $SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "sudo chown root:vsm /etc/manifest/cluster.manifest; sudo chmod 755 /etc/manifest/cluster.manifest"
-    is_cluster_manifest_error=`$SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "cluster_manifest|grep error|wc -l"`
+    $SSH $USER@$CONTROLLER_ADDRESS "sudo rm -rf /etc/manifest/cluster_manifest"
+    $SCP $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest $USER@$CONTROLLER_ADDRESS:/tmp
+    $SSH $USER@$CONTROLLER_ADDRESS "sudo mv /tmp/cluster.manifest /etc/manifest"
+    $SSH $USER@$CONTROLLER_ADDRESS "sudo chown root:vsm /etc/manifest/cluster.manifest; sudo chmod 755 /etc/manifest/cluster.manifest"
+    is_cluster_manifest_error=`$SSH $USER@$CONTROLLER_ADDRESS "cluster_manifest|grep error|wc -l"`
     if [ $is_cluster_manifest_error -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        $SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "sudo vsm-controller"
+        $SSH $USER@$CONTROLLER_ADDRESS "sudo vsm-controller"
     fi
 }
 
 function install_controller() {
-    check_manifest $CONTROLLER_IP_OR_HOSTNAME
+    check_manifest $CONTROLLER_ADDRESS
 
     if [[ $IS_CONTROLLER -eq 0 ]]; then
-        set_remote_repo $CONTROLLER_IP_OR_HOSTNAME
-        $SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "sudo apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
-        $SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "sudo preinstall"
+        set_remote_repo $CONTROLLER_ADDRESS
+        $SSH $USER@$CONTROLLER_ADDRESS "sudo apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
+        $SSH $USER@$CONTROLLER_ADDRESS "sudo preinstall"
         setup_remote_controller
     else
         set_local_repo
         sudo apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient
         sudo preinstall
         sudo rm -rf /etc/manifest/cluster.manifest
-        sudo cp $MANIFEST_PATH/$CONTROLLER_IP_OR_HOSTNAME/cluster.manifest /etc/manifest
+        sudo cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
         sudo chown root:vsm /etc/manifest/cluster.manifest
         sudo chmod 755 /etc/manifest/cluster.manifest
         if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
@@ -349,7 +349,7 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
-    TOKEN=`$SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "sudo agent-token"`
+    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "sudo agent-token"`
     for ip_or_hostname in $AGENT_IP_OR_HOSTNAME_LIST; do
         install_agent $ip_or_hostname
     done
@@ -361,7 +361,7 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
-        TOKEN=`$SSH $USER@$CONTROLLER_IP_OR_HOSTNAME "sudo agent-token"`
+        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "sudo agent-token"`
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname
