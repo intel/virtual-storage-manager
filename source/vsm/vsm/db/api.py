@@ -1072,6 +1072,9 @@ def osd_state_get_by_device_id_and_service_id_and_cluster_id(\
     return IMPL.osd_state_get_by_device_id_and_service_id_and_cluster_id(\
         context, device_id, service_id, cluster_id)
 
+def get_zone_hostname_storagegroup_by_osd_id(context, osd_id):
+    return IMPL.get_zone_hostname_storagegroup_by_osd_id(context, osd_id)
+
 def osd_state_get_by_service_id(context, service_id):
     return IMPL.osd_state_get_by_service_id(context, service_id)
 
