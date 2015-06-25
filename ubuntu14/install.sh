@@ -350,7 +350,7 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     prepare
     install_controller
     TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "sudo agent-token"`
-    for ip_or_hostname in $AGENT_IP_OR_HOSTNAME_LIST; do
+    for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
     done
 else
@@ -363,7 +363,7 @@ else
     if [[ $IS_AGENT_INSTALL == True ]]; then
         TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "sudo agent-token"`
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
-        for ip_or_hostname in $AGENT_IP_LIST; do
+        for ip_or_hostname in $AGENT_ADDRESS_LIST; do
             install_agent $ip_or_hostname
         done
     fi
