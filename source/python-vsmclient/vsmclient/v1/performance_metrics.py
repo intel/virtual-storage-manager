@@ -22,7 +22,7 @@ from vsmclient import base
 class PerformanceMetrics(base.Resource):
     """A vsm is an extra block level storage to the OpenStack instances."""
     def __repr__(self):
-        return "<PerformanceMetrics: %s>" % self.id
+        return "<PerformanceMetrics:resource object >"
 
     def delete(self):
         """Delete this vsm."""
@@ -78,7 +78,7 @@ class PerformanceMetricsManager(base.ManagerWithFind):
 
         query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
 
-        ret = self._list("/performance_metrics/get_metrics%s" % (query_string),"performance_metrics")
+        ret = self._list("/performance_metrics/get_metrics%s" % (query_string),"metrics")
         return ret
 
 

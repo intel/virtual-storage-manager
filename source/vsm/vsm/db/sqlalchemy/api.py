@@ -4235,19 +4235,21 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
         timestamp_end = timestamp_start + 15
     ret_list = []
     timestamp_cur = timestamp_start
+    session = get_session()
     while timestamp_cur<timestamp_end:
-        metrics_query = model_query(\
-            context, models.CephPerformanceMetric, func.sum(models.CephPerformanceMetric.value), func.count(models.CephPerformanceMetric.value, models.CephPerformanceMetric.instance) \
-            , read_deleted='yes', session=session)\
-            .filter(models.CephPerformanceMetric.metric==metrics_name).filter(models.CephPerformanceMetric.timestamp>timestamp_cur).filter(models.CephPerformanceMetric.timestamp<timestamp_cur+15) \
-            .group_by(models.CephPerformanceMetric.instance)
-        sql_ret_set = metrics_query.all()
+        sql_str = '''
+            SELECT   sum(metrics.value) AS sum_1, count(metrics.value) AS count_1,metrics.instance AS metrics_instance
+            FROM metrics
+            WHERE metrics.metric = '%s' AND metrics.timestamp >= %s AND metrics.timestamp < %s GROUP BY metrics.instance
+        '''%(metrics_name,timestamp_cur,timestamp_cur+15)
+
+        sql_ret_set = session.execute(sql_str).fetchall()
         for cell in sql_ret_set:
             if correct_cnt:
-                metrics_value = cell[1]/cell[2]*correct_cnt
+                metrics_value = cell[0]/cell[1]*correct_cnt
             else:
-                metrics_value = cell[1]
-            sql_ret_dict = {'instance': cell[3], 'timestamp': str(timestamp_cur), 'metrics_value': metrics_value, 'metrics': metrics_name,}
+                metrics_value = cell[0]
+            sql_ret_dict = {'instance': cell[2], 'timestamp': str(timestamp_cur), 'metrics_value': metrics_value, 'metrics': metrics_name,}
             ret_list.append(sql_ret_dict)
         timestamp_cur = timestamp_cur + 15
 
@@ -4267,20 +4269,19 @@ def lantency_performance_metrics(context, search_opts, session=None):#for iops b
     session = get_session()
     while timestamp_cur<timestamp_end:
         sql_str = '''
-            select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency,instance  from \
+            select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency,iopstable.instance  from \
             (\
               (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='ops_%s') as iopstable \
               inner join (select  metric,hostname,instance,timestamp,value as lantency_value from metrics where metric='%s') as latencytable \
             on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance \
             )
-            where iopstable.timestamp > %s and  iopstable.timestamp < %s group by instance;
+            where iopstable.timestamp > %s and  iopstable.timestamp < %s group by iopstable.instance;
             '''%(lantency_type,metrics_name,timestamp_cur,timestamp_cur+15)
         timestamp_cur = timestamp_cur + 15
         sql_ret = session.execute(sql_str).fetchall()
         for cell in sql_ret:
-            if cell[0] and cell[1]:
-                metrics_value =  cell[1]/cell[0]
-                ret_list.append({'instance':cell[2], 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
+            metrics_value = cell[0] and  cell[1]/cell[0] or 0
+            ret_list.append({'instance':cell[2], 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list
 #endregion
 

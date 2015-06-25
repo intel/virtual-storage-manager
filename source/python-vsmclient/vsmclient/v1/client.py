@@ -36,6 +36,7 @@ from vsmclient.v1 import appnodes
 from vsmclient.v1 import mons
 from vsmclient.v1 import licenses
 from vsmclient.v1 import vsm_settings
+from vsmclient.v1 import performance_metrics
 
 class Client(object):
     """
@@ -86,6 +87,7 @@ class Client(object):
         self.appnodes = appnodes.AppNodeManager(self)
         self.licenses = licenses.LicenseManager(self)
         self.vsm_settings = vsm_settings.VsmSettingsManager(self)
+        self.performance_metrics = performance_metrics.PerformanceMetricsManager(self)
 
         # Add in any extensions...
         if extensions:
