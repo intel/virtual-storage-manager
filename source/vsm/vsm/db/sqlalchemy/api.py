@@ -4226,7 +4226,6 @@ def performance_metrics_query(context, search_opts, session=None):
 
 def sum_performance_metrics(context, search_opts, session=None):#for iops bandwidth
     metrics_name =  search_opts['metrics_name']
-    #host_name = search_opts['host_name'] or ''
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
@@ -4238,20 +4237,25 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
     timestamp_cur = timestamp_start
     while timestamp_cur<timestamp_end:
         metrics_query = model_query(\
-            context, models.CephPerformanceMetric, func.sum(models.CephPerformanceMetric.value), func.count(models.CephPerformanceMetric.value), read_deleted='yes', session=session)\
-            .filter(models.CephPerformanceMetric.metric==metrics_name).filter(models.CephPerformanceMetric.timestamp>timestamp_cur).filter(models.CephPerformanceMetric.timestamp<timestamp_cur+15)
-        sql_ret = metrics_query.all()[0]
-        if correct_cnt:
-            metrics_value =  sql_ret[1]/sql_ret[2]*correct_cnt
-        else:
-            metrics_value = sql_ret[1]
-        sql_ret_dict = {'timestamp':str(timestamp_cur),'metrics_value':metrics_value,'metrics':metrics_name,}
-        ret_list.append(sql_ret_dict)
+            context, models.CephPerformanceMetric, func.sum(models.CephPerformanceMetric.value), func.count(models.CephPerformanceMetric.value, models.CephPerformanceMetric.instance) \
+            , read_deleted='yes', session=session)\
+            .filter(models.CephPerformanceMetric.metric==metrics_name).filter(models.CephPerformanceMetric.timestamp>timestamp_cur).filter(models.CephPerformanceMetric.timestamp<timestamp_cur+15) \
+            .group_by(models.CephPerformanceMetric.instance)
+        sql_ret_set = metrics_query.all()
+        for cell in sql_ret_set:
+            if correct_cnt:
+                metrics_value = cell[1]/cell[2]*correct_cnt
+            else:
+                metrics_value = cell[1]
+            sql_ret_dict = {'instance': cell[3], 'timestamp': str(timestamp_cur), 'metrics_value': metrics_value, 'metrics': metrics_name,}
+            ret_list.append(sql_ret_dict)
         timestamp_cur = timestamp_cur + 15
 
     return ret_list
 
 def lantency_performance_metrics(context, search_opts, session=None):#for iops bandwidth
+    metrics_name = search_opts['metrics_name']
+    lantency_type = metrics_name.split('_')[1]
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     if timestamp_start is None and timestamp_end:
@@ -4263,19 +4267,20 @@ def lantency_performance_metrics(context, search_opts, session=None):#for iops b
     session = get_session()
     while timestamp_cur<timestamp_end:
         sql_str = '''
-            select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency  from \
+            select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency,instance  from \
             (\
-              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='iops') as iopstable \
-              inner join (select  metric,hostname,instance,timestamp,value as lantency_value from metrics where metric='latency') as latencytable \
+              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='ops_%s') as iopstable \
+              inner join (select  metric,hostname,instance,timestamp,value as lantency_value from metrics where metric='%s') as latencytable \
             on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance \
             )
-            where iopstable.timestamp > %s and  iopstable.timestamp < %s;
-            '''%(timestamp_cur,timestamp_cur+15)
+            where iopstable.timestamp > %s and  iopstable.timestamp < %s group by instance;
+            '''%(lantency_type,metrics_name,timestamp_cur,timestamp_cur+15)
         timestamp_cur = timestamp_cur + 15
-        sql_ret = session.execute(sql_str).fetchall()[0]
-        if sql_ret[0] and sql_ret[1]:
-            metrics_value =  sql_ret[1]/sql_ret[0]
-            ret_list.append({'timestamp':str(timestamp_cur),'metrics_value':metrics_value,'metrics':'lantency',})
+        sql_ret = session.execute(sql_str).fetchall()
+        for cell in sql_ret:
+            if cell[0] and cell[1]:
+                metrics_value =  cell[1]/cell[0]
+                ret_list.append({'instance':cell[2], 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list
 #endregion
 
