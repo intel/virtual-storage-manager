@@ -25,26 +25,42 @@
         var rows_num = $(".modal-body .zone").length - 1;
         console.log(rows_num);
         var data_list = new Array();
-        if (rows_num < 3)
-        {
-            alert("You must have at least 3 servers");
-            return;
-        }
+
+
+
+        //get the zone_id which monitor == true
+        var zone_id_has_monitor_list = new Array();
+        var zone_id_all = new Array();
+
+
+        //get the data list
         for (var i=1; i <= rows_num; i++)
         {
+            var is_ok = true;
             row_id = $($(".server_id")[i]).html();
             row = $("#clusteraction__row__" + row_id);
-            console.log(row_id);
+
             checked = row.find(".multi_select_column").find("input").is(":checked");
-            if(checked == true){
+            if(checked == true ){
                 id = row.find(".server_id").html();
-                zone_id = row.find(".zone").find("select").val();
                 is_monitor = row.find(".is_monitor").find("input").attr("checked") ? true : false;
                 is_storage = row.find(".is_storage").find("input").attr("checked") ? true : false;
+                zone_id = row.find(".zone").find("select").val();
+                zone_name = row.find(".zone").html();
                 data = {id:id, is_monitor:is_monitor, is_storage:is_storage, zone_id:zone_id};
                 data_list.push(data);
+                if ($.inArray(zone_name,zone_id_all)==-1){zone_id_all.push(zone_name)}
+                if(is_monitor == true){
+                    if ($.inArray(zone_name,zone_id_has_monitor_list)==-1){zone_id_has_monitor_list.push(zone_name)}
+                }
             }
         }
+        if (zone_id_all.length>zone_id_has_monitor_list.length){
+            alert("Warning:there is some zone which no monitor in!");
+            return false;
+        }
+
+
 
         data_list_json = JSON.stringify(data_list);
         console.log(data_list);
