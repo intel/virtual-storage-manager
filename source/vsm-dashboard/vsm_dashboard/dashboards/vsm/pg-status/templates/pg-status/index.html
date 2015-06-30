@@ -21,23 +21,103 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=cluster.title %}
-      <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
    <link href="{{ STATIC_URL }}dashboard/css/pgstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-    <div class="vsm-page-panel" style="min-height: 220px;">
-        <h3 class="table_title">PG Summary</h3>
-        <div id="divPGSummary">
-            <span id="lblPGUpdate" class="vsm-label">Update:--</span>
-            <br />
-            <div id="divPGRect"> 
-            </div>
-        </div>
-        <div id="divCapcitySummary">
-        
-        </div>
+    <div class="vsm-summary"  >
+        <h3 class="table_title">Object Summary</h3>
+        <div class = "vsm-summary-content">
+          <div class="form-group">
+            <label class="control-label">Degraded Objects</label>
+            <label id ="lblDegradedObjects" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Degraded Totals</label>
+            <label id ="lblDegradedTotal" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Degraded Ratio</label>
+            <label id ="lblDegradedRatio" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Unfound Objects</label>
+            <label id ="lblUnfoundObjects" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Unfound Totals</label>
+            <label id ="lblUnfoundTotals" class="control-label">--</label>
+          </div>
+           <div class="form-group">
+            <label class="control-label">Unfound Ratio</label>
+            <label id ="lblUnfoundRatio" class="control-label">--</label>
+          </div>
     </div>
+  </div>  
+
+
+    <div class="vsm-summary" >
+        <h3 class="table_title">Performance Summary</h3>
+        <div class = "vsm-summary-content">
+          <div class="form-group">
+            <label class="control-label">Read</label>
+            <label id ="lblRead" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Write</label>
+            <label id ="lblWrite" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Operation</label>
+            <label id ="lblOperation" class="control-label">--</label>
+          </div>
+    </div>
+  </div>  
+
+
+  <div class="vsm-summary"    >
+        <h3 class="table_title">PG Summary</h3>
+        <div class = "vsm-summary-content">
+          <div class="form-group">
+            <label class="control-label">PG Map Version</label>
+            <label id ="lblPGMapVersion" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Total PGs</label>
+            <label id ="lblTotalPGs" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Update</label>
+            <label id ="lblUpdate" class="control-label">--</label>
+          </div>
+    </div>
+  </div>  
+
+
+
+  <div class="vsm-summary"    >
+        <h3 class="table_title">Capacity Summary</h3>
+        <div class = "vsm-summary-content">
+          <div class="form-group">
+            <label class="control-label">Data Capacity Used</label>
+            <label id ="lblDataCapacityUsed" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Total Capacity Used </label>
+            <label id ="lblTotalCapacityUsed" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Capacity available</label>
+            <label id ="lblCapacityAvailable" class="control-label">--</label>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Capacity Total</label>
+            <label id ="lblCapacityTotal" class="control-label">--</label>
+          </div>
+    </div>
+  </div>  
+
+
 
 
     {{ table.render }}

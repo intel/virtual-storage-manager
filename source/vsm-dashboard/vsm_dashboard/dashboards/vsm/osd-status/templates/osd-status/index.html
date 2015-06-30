@@ -20,50 +20,41 @@
 {% block title %}{% trans "OSD Status" %}{% endblock %}
 
 {% block page_header %}
-        {% include "horizon/common/_page_header.html" with title=cluster.title %}
-        <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
-        <link href="{{ STATIC_URL }}dashboard/css/osdstatus.css" rel="stylesheet">
+  {% include "horizon/common/_page_header.html" with title=cluster.title %}
+  <!-- <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet"> -->
+  <link href="{{ STATIC_URL }}dashboard/css/osdstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-   <div id="divOSDSummary" class="vsm-page-panel" style="min-height: 220px;">
+   <div class="vsm-summary" >
     <h3 class="table_title">OSD Summary</h3>
-    <div id="divOSDSummaryContent">
-        <span id="lblOSDEpoch" class="vsm-label">Epoch:--</span>
-        <span id="lblOSDUpdate" class="vsm-label">Update:--</span>
-        <br />
-        <table id="tOSD">
-            <tbody>
-                <tr >
-                    <td class="td-80"></td>
-                    <td class="td-120">Up</td>
-                    <td class="td-120">Down</td>
-                </tr>
-                <tr >
-                    <td>In</td>
-                    <td>
-                        <div id="divOSD_INUP" class="vsm-rect vsm-rect-2 vsm-rect-green">0</div>
-                    </td>
-                    <td>
-                        <div id="divOSD_INDOWN" class="vsm-rect vsm-rect-2 vsm-rect-red">0</div>
-                    </td>
-                </tr>
-                <tr >
-                    <td>Out</td>
-                    <td>
-                        <div id="divOSD_OUTUP" class="vsm-rect vsm-rect-2 vsm-rect-orange">0</div>
-                    </td>
-                    <td>
-                        <div id="divOSD_OUTDOWN" class="vsm-rect vsm-rect-2 vsm-rect-gray">0</div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+    <div class = "vsm-summary-content">
+      <div class="form-group">
+        <label class="control-label">Osdmap Epoch</label>
+        <label id ="lblEpoch" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">OSDs Total </label>
+        <label id ="lblTotal" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">OSDs In</label>
+        <label id ="lblIn" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">OSDs Up</label>
+        <label id ="lblUp" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Last Updated</label>
+        <label id ="lblUpdate" class="control-label">--</label>
+      </div>
     </div>
-  </div>  
+  </div> 
 
+  <!-- <div style="clear:left"></div>  -->
 
-  
+  {% csrf_token %}
   {{ table.render }}
 
 <nav style="margin-left:auto;margin-right:auto">

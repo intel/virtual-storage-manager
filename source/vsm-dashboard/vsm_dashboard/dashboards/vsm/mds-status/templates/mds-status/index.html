@@ -21,63 +21,43 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=cluster.title %}
-    <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
-    <link href="{{ STATIC_URL }}dashboard/css/mdsstatus.css" rel="stylesheet">
+  <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
+   <link href="{{ STATIC_URL }}dashboard/css/mdsstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-	<div id="divMDSSummary" class="vsm-page-panel" style="min-height: 220px;">
-    	<h3 class="table_title">MDS Summary</h3>
-    	<div id="divMDSSummaryContent">
-    		 <div>
-                <span id="lblMDSEpoch" class="vsm-label">Epoch:--</span>
-                <span id="lblMDSUpdate" class="vsm-label">Update:--</span>
-            </div>
-            <div id="divMDSRect">
-                <table id="tMDS">
-                    <tr>
-                        <td class="td-100">
-                            <svg class="mds-svg" >
-                                <circle cx="40" cy="30" r="25" fill="green" />
-                                <text id="lblMDSMetaData" x="40" y="35" font-size="18" text-anchor="middle" fill="yellow">--</text>
-                            </svg>
-                        </td>
-                        <td class="td-120">
-                            <div id="divMDS_IN" class="vsm-rect vsm-rect-2 vsm-rect-green">0</div>
-                        </td>
-                        <td class="td-120">  
-                             <div id="divMDS_UP" class="vsm-rect vsm-rect-2 vsm-rect-blue">0</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Data</td>
-                        <td>In</td>
-                        <td>Up</td>
-                    </tr>
-                    <tr>
-                        <td class="td-100"> 
-                             <svg  class="mds-svg">
-                               <circle cx="40" cy="30" r="25" fill="green" />
-                                <text id="lblMDSPoolData" x="40" y="35" font-size="18" text-anchor="middle" fill="yellow">--</text>
-                            </svg>
-                
-                        </td>
-                        <td>
-                            <div id="divMDS_FAILED" class="vsm-rect vsm-rect-2 vsm-rect-red">0</div>
-                        </td>
-                        <td>
-                            <div id="divMDS_STOPPED" class="vsm-rect vsm-rect-2 vsm-rect-orange">0</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Metadata</td>
-                        <td>Failed</td>
-                        <td>Stopped</td>
-                    </tr>
-                </table>
-            </div>
-    	</div>
+	 <div class="vsm-summary" >
+    <h3 class="table_title">OSD Summary</h3>
+    <div class = "vsm-summary-content">
+      <div class="form-group">
+        <label class="control-label">Epoch</label>
+        <label id ="lblEpoch" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Up</label>
+        <label id ="lblUp" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">In</label>
+        <label id ="lblIn" class="control-label">--</label>
+      </div>
+       <div class="form-group">
+        <label class="control-label">Max</label>
+        <label id ="lblMax" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">failed</label>
+        <label id ="lblFailed" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">stopped</label>
+        <label id ="lblStopped" class="control-label">--</label>
+      </div>
     </div>
+  </div>  
+    
+
+
     {{ table.render }}
 {% endblock %}
 

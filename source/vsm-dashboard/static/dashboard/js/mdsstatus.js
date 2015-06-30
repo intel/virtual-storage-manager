@@ -9,20 +9,17 @@ $(function(){
 function loadMDS(){
     $.ajax({
         type: "get",
-        url: "/dashboard/vsm/mds/",
+        url: "/dashboard/vsm/mds_summary/",
         data: null,
         dataType:"json",
         success: function(data){
             //console.log(data)
-            $("#lblMDSEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
-            $("#lblMDSUpdate")[0].innerHTML ="Update:"+ data.update;
-
-            $("#lblMDSMetaData")[0].innerHTML = data.MetaData;
-            $("#lblMDSPoolData")[0].innerHTML = data.PoolData;
-            $("#divMDS_IN")[0].innerHTML = data.In;
-            $("#divMDS_UP")[0].innerHTML = data.Up;
-            $("#divMDS_FAILED")[0].innerHTML = data.Failed;
-            $("#divMDS_STOPPED")[0].innerHTML = data.Stopped;
+            $("#lblEpoch")[0].innerHTML = data.epoch;
+            $("#lblUp")[0].innerHTML = data.up;
+            $("#lblIn")[0].innerHTML = data.in;
+            $("#lblMax")[0].innerHTML = data.max;
+            $("#lblFailed")[0].innerHTML = data.failed;
+            $("#lblStopped")[0].innerHTML = data.stopped;
         }
     });
 }

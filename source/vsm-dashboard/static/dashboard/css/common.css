@@ -250,18 +250,29 @@ h1.brand a{
 
 
 .vsm-page-panel{
-    width: 100%;
+.vsm-summary{
+    width: 400px;
     height: auto;
-    border: 1px solid #ccc;
-    margin-top: 20px;
+    /*border: 1px solid #ccc;*/
     margin-bottom: 20px;
+    display: inline-block;
 }
 
-.vsm-page-panel h3{
+.vsm-summary h3{
     font-family: anivers;
     font-weight: normal;
     font-size: 24px;
     margin: 10px;
+}
+
+.vsm-summary-content{
+    width: 400px;
+    height: auto;
+    padding: 10px;
+}
+
+.vsm-summary-content .form-group label{
+    min-width: 140px;
 }
 
 

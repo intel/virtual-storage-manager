@@ -24,65 +24,92 @@ LOG = logging.getLogger(__name__)
 from vsm_dashboard.utils import get_time_delta
 from vsm_dashboard.utils import get_time_delta2
 
-class MonitorSummary(SummaryRenderer):
-    verbose_name = "Monitor Summary"
-    name = "monitor_summary"
-    detail = {'name': "Monitor Status",
-              'link': reverse_lazy("horizon:vsm:monitor-status:index")}
+def osd():
+    osd_summary = vsmapi.osd_summary(None)
+    osd_summary_dict = {
+         "epoch":osd_summary.epoch
+        ,"total":osd_summary.num_osds
+        ,"up": osd_summary.num_up_osds
+        ,"in": osd_summary.num_in_osds
+        ,"update":get_time_delta(osd_summary.updated_at)
+    }
+    return osd_summary_dict
 
-    def get_summary(self):
-        monitor_summary = vsmapi.monitor_summary(self.request)
-        LOG.debug("dir monitor_summary:%s"%(dir(monitor_summary)))
-        #LOG.error(dir(monitor_summary))
-        #LOG.error("(monitor_summary)")
-        data = SortedDict()
-        data["Monmap Epoch"] = monitor_summary.monmap_epoch
-        data["Monitors"] = monitor_summary.monitors
-        data["Election epoch"] = monitor_summary.election_epoch
-        data["Quorum"] = monitor_summary.quorum
-        data["Last Updated"] = get_time_delta(monitor_summary.updated_at)
-        return data
+def monitor():
+    monitor_summary = vsmapi.monitor_summary(None)
+    monitor_summary_dict = {
+         "monmap_epoch":monitor_summary.monmap_epoch
+        ,"monitors":monitor_summary.monitors
+        ,"election_epoch": monitor_summary.election_epoch
+        ,"quorum": monitor_summary.quorum
+        ,"update":get_time_delta(monitor_summary.updated_at)
+    }
+    return monitor_summary_dict
 
-class OsdSummary(SummaryRenderer):
-    verbose_name = "OSD Summary"
-    name = "osd_summary"
-    detail = {'name': "OSD Status",
-              'link': reverse_lazy("horizon:vsm:osd-status:index")}
 
-    def get_summary(self):
-        osd_summary = vsmapi.osd_summary(self.request)
-        LOG.debug("dir osd_summary:%s"%(dir(osd_summary)))
-        #LOG.error(dir(osd_summary))
-        #LOG.error("(osd_summary)")
-        data = SortedDict()
-        data["Osdmap Epoch"] = osd_summary.epoch
-        data["Total OSDs"] = osd_summary.num_osds
-        data["OSDs up"] = osd_summary.num_up_osds
-        data["OSDs in"] = osd_summary.num_in_osds
-        #data["Near Full"] = osd_summary.nearfull
-        #data["Full"] = osd_summary.full
-        data["Last Updated"] = get_time_delta(osd_summary.updated_at)
-        return data
+def mds():
+    mds_summary = vsmapi.mds_summary(None)
+    mds_summary_dict = {
+         "epoch":mds_summary.epoch
+        ,"up": mds_summary.num_up_mdses
+        ,"in": mds_summary.num_in_mdses
+        ,"max": mds_summary.num_max_mdses
+        ,"failed":mds_summary.num_failed_mdses
+        ,"stopped":mds_summary.num_stopped_mdses
+    }
+    return mds_summary_dict
 
-class MdsSummary(SummaryRenderer):
-    verbose_name = "MDS Summary"
-    name = "mds_summary"
-    detail = {'name': "MDS Status",
-              'link': reverse_lazy("horizon:vsm:mds-status:index")}
+def objects():
+    pg_summary = vsmapi.placement_group_summary(None)
 
-    def get_summary(self):
-        mds_summary = vsmapi.mds_summary(self.request)
-        LOG.debug("dir mds_summary:%s"%(dir(mds_summary)))
-        #LOG.error(dir(mds_summary))
-        #LOG.error("(mds_summary)")
-        data = SortedDict()
-        data["MDS Epoch"] = mds_summary.epoch
-        data["Up"] = mds_summary.num_up_mdses
-        data["In"] = mds_summary.num_in_mdses
-        data["Max"] = mds_summary.num_max_mdses
-        data["Failed"] = mds_summary.num_failed_mdses
-        data["Stopped"] = mds_summary.num_stopped_mdses
-        return data
+    pg_summary_dict = {
+         "degraded_objects":pg_summary.degraded_objects
+        ,"degraded_total": pg_summary.degraded_total
+        ,"degraded_ratio": pg_summary.degraded_ratio
+        ,"unfound_objects": pg_summary.unfound_objects
+        ,"unfound_total": pg_summary.unfound_total
+        ,"unfound_ratio": pg_summary.unfound_ratio
+    }
+    return pg_summary_dict
+
+def performance():
+    pg_summary = vsmapi.placement_group_summary(None)
+  
+    pg_summary_dict = {
+         "read": "%s B/s" % pg_summary.read_bytes_sec
+        ,"write": "%s B/s" % pg_summary.write_bytes_sec
+        ,"operations":"%s operation/s" % pg_summary.op_per_sec
+    }
+    return pg_summary_dict 
+
+def pg():
+    pg_summary = vsmapi.placement_group_summary(None)
+
+    #get the pag collection
+    # pg_state_sort = SortedDict()
+    # for pgs in pg_summary.pgs_by_state:
+    #     pg_state_sort["PGs " + pgs['state_name']] = pgs['count']
+
+    pg_summary_dict = {
+         "pgmap_version":pg_summary.version
+        ,"total_pgs":pg_summary.num_pgs
+        #,"pg_state":pg_state_sort
+        ,"update":get_time_delta(pg_summary.updated_at)
+    }
+    return pg_summary_dict
+
+def capactiy():
+    pg_summary = vsmapi.placement_group_summary(None)
+    capactiy_summary_dict = {
+         "data_used": str(0 if not pg_summary.data_bytes else round(pg_summary.data_bytes * 1.0/1024/1024/1024, 1)) + " GB"
+        ,"total_used": str(0 if not pg_summary.bytes_used else round(pg_summary.bytes_used * 1.0/1024/1024/1024, 1)) + " GB"
+        ,"available": str(0 if not pg_summary.bytes_avail else round(pg_summary.bytes_avail * 1.0/1024/1024/1024, 1)) + " GB"
+        ,"total":  str(0 if not pg_summary.bytes_total else round(pg_summary.bytes_total * 1.0/1024/1024/1024, 1)) + " GB"
+    }
+    return capactiy_summary_dict
+
+   
+
 
 class StorageGroupSummary(SummaryRenderer):
     verbose_name = "Storage Group Summary"
@@ -121,14 +148,14 @@ class StorageGroupSummary(SummaryRenderer):
 
 class VsmSummary(SummaryRenderer):
     # TODO
-    #verbose_name = "VSM Status" + " Version: %VSM_VERSION%"
+    #verbose_name = "VSM Status" + " Version: 2015.03-1.2"
     verbose_name = "VSM Status"
     name = "vsm_summary"
 
     def get_summary(self):
         vsm_summary = vsmapi.vsm_summary(self.request)
         data = SortedDict()
-        data["Version"] = "%VSM_VERSION%"
+        data["Version"] = "2015.03-1.2"
         data["Uptime"] = get_time_delta2(vsm_summary.created_at)
         return data
         try:
@@ -241,21 +268,6 @@ class CapacitySummary(SummaryRenderer):
 		else round(pg_summary.bytes_avail * 1.0/1024/1024/1024, 1)) + " GB"
         data['Capacity Total'] = str(0 if not pg_summary.bytes_total \
 		else round(pg_summary.bytes_total * 1.0/1024/1024/1024, 1)) + " GB"
-        return data
-
-class ObjectSummary(SummaryRenderer):
-    verbose_name = "Object Summary"
-    name = "object_summary"
-
-    def get_summary(self):
-        pg_summary = vsmapi.placement_group_summary(self.request)
-        data = SortedDict()
-        data['Degraded objects'] = pg_summary.degraded_objects
-        data['Degraded total'] = pg_summary.degraded_total
-        data['Degraded ratio'] = pg_summary.degraded_ratio
-        data['Unfound objects'] = pg_summary.unfound_objects
-        data['Unfound total'] = pg_summary.unfound_total
-        data['Unfound ratio'] = pg_summary.unfound_ratio
         return data
 
 class PerformanceSummary(SummaryRenderer):

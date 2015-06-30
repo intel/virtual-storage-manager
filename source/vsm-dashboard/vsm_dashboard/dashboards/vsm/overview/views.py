@@ -24,6 +24,7 @@ from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from vsm_dashboard.utils import get_time_delta
 from vsm_dashboard.utils import get_time_delta2
+import summarys
 import json
 import random
 import datetime
@@ -39,6 +40,35 @@ class ModalSummaryMixin(object):
 
 class IndexView(ModalSummaryMixin, TemplateView):
     template_name = 'vsm/overview/index.html'
+
+#show osd summary
+def osd_summary(request):
+    return HttpResponse(json.dumps(summarys.osd()))
+
+#show monitor summary
+def monitor_summary(request):
+    return HttpResponse(json.dumps(summarys.monitor()))
+
+#show mds summary
+def mds_summary(request):
+    return HttpResponse(json.dumps(summarys.mds()))
+
+#show objects summary
+def objects_summary(request):
+    return HttpResponse(json.dumps(summarys.objects()))
+
+#show performance summary
+def performance_summary(request):
+    return HttpResponse(json.dumps(summarys.performance()))
+
+#show pg summary
+def pg_summary(request):
+    return HttpResponse(json.dumps(summarys.pg()))
+
+#show capacity summary
+def capacity_summary(request):
+    return HttpResponse(json.dumps(summarys.capactiy()))
+
 
 
 #handle the vsm_version
@@ -87,7 +117,6 @@ def get_vsm_version():
     except:
         out = '2.0'
     return out
-
 
 #get the vsm_version
 def get_version():
