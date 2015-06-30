@@ -141,12 +141,8 @@ def get_cluster():
     #HEALTH_OK HEALTH_WARN  HEALTH_ERROR
     cluster_status = cluster_summary.health_list[0]
     cluster_note = []
-    if cluster_status == "HEALTH_OK":
-        for note in cluster_summary.health_list[1:]:
-            cluster_note.append(note)
-    else:
-        for index, note in enumerate(cluster_summary.detail):
-            cluster_note.append(note)
+    for note in cluster_summary.health_list[1:]:
+        cluster_note.append(note)
 
     vsm_status_dict = { "name":cluster_name
                       , "status": cluster_status
