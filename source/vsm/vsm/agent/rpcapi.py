@@ -186,6 +186,12 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                          self.make_msg('get_ceph_health'),
                          topic, version='1.0', timeout=6000)
 
+    def get_ceph_health_list(self, context, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        return self.call(context,
+                         self.make_msg('get_ceph_health_list'),
+                         topic, version='1.0', timeout=6000)
+
     def get_osds_total_num(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         self.test_service(context, topic)

@@ -173,6 +173,11 @@ class ClusterController(wsgi.Controller):
         self.scheduler_api.stop_cluster(context,servers)
         return {"message":"Success"}
 
+    def get_ceph_health_list(self, req):
+        context = req.environ['vsm.context']
+        ceph_status = self.scheduler_api.get_ceph_health_list(context)
+        return {"ceph_status":ceph_status}
+
     @wsgi.serializers(xml=ClustersTemplate)
     def show(self, req, id):
         """update cluster."""

@@ -122,3 +122,6 @@ class API(object):
 
     def monitor_restart(self, context, body=None):
         return self.scheduler_rpcapi.monitor_restart(context, body)
+
+    def get_ceph_health_list(self, context, body=None):
+        return self.scheduler_rpcapi.get_ceph_health_list(context, body)

@@ -252,3 +252,11 @@ class ClusterManager(base.ManagerWithFind):
                            }}
         url = "/clusters/start_cluster"
         return self.api.client.post(url,body=body)
+
+    def get_ceph_health_list(self):
+        """
+        ceph_status
+        """
+        url = "/clusters/get_ceph_health_list"
+        ceph_status = self.api.client.get(url)
+        return ceph_status

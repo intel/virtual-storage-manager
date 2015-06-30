@@ -188,3 +188,6 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         ret = self.call(ctxt, self.make_msg('monitor_restart', monitor_id=body), \
                         version='1.0', timeout=6000)
         return ret
+
+    def get_ceph_health_list(self, ctxt, body=None):
+        return self.call(ctxt, self.make_msg('get_ceph_health_list', body=body))
