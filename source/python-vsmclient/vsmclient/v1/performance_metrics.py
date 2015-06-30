@@ -78,8 +78,9 @@ class PerformanceMetricsManager(base.ManagerWithFind):
 
         query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
 
-        ret = self._list("/performance_metrics/get_metrics%s" % (query_string),"metrics")
-        return ret
+        #ret = self._list("/performance_metrics/get_metrics%s" % (query_string),"metrics")
+        resp, body = self.api.client.get("/performance_metrics/get_metrics%s" % (query_string))
+        return body
 
 
 

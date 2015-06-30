@@ -258,5 +258,5 @@ class ClusterManager(base.ManagerWithFind):
         ceph_status
         """
         url = "/clusters/get_ceph_health_list"
-        ceph_status = self.api.client.get(url)
+        resp, ceph_status = self.api.client.get(url)
         return ceph_status
