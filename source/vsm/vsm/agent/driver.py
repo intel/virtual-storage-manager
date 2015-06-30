@@ -622,6 +622,11 @@ class CephDriver(object):
                           crush_dict,
                           osd_conf_dict,
                           osd_state)
+            try:
+                self.run_add_disk_hook(context)
+            except:
+                LOG.info('run add_disk error')
+
         return True
 
     def _add_osd(self,
@@ -1396,6 +1401,13 @@ class CephDriver(object):
                                  'll',
                                  run_as_root=True)
         LOG.info("get_smart_info:%s--%s"%(out,err))
+        return out
+
+    def run_add_disk_hook(self, context):
+        out, err = utils.execute('add_disk',
+                                 'll',
+                                 run_as_root=True)
+        LOG.info("run_add_disk_hook:%s--%s"%(out,err))
         return out
 
     def get_ceph_admin_keyring(self, context):
