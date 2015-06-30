@@ -49,23 +49,16 @@ class CreatePool(forms.SelfHandlingForm):
                                                  error_messages={'invalid': "You should choose \"Default: same as Primary\", if you want to use same storage group"})
     replication_factor = forms.IntegerField(label=_("Replication Factor"),
                                         min_value=1,
-                                        help_text=_('The replication'
-                                        ' required to set as an integer,'
-                                        'the default number is 3'),
+                                        initial=3,
                                         required=True)
     max_pg_num_per_osd = forms.IntegerField(label=_("PG Count Factor"),
-                                    help_text=_('max pg_num value for per OSD'
-                                    ' required to set as an integer,'
-                                    'the default number is 100'),
+                                    initial=100,
                                     required=True)
     tag = forms.CharField(label=_("Tag"),
                             max_length=16,
                             min_length=1,
                             error_messages={
                             'required': _('This field is required.'),},
-                            #'invalid': _("The string may only contain"
-                            #             " ASCII characters and numbers.")},
-                            #validators=[validators.validate_slug]
                             )
 
     enable_pool_quota = forms.BooleanField(label="Enable Pool Quota",required=False,initial=False)
