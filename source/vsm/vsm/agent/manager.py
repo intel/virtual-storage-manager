@@ -652,6 +652,10 @@ class AgentManager(manager.Manager):
     def get_ceph_health(self, context):
         return self.ceph_driver.get_ceph_health(context)
 
+    def get_ceph_health_list(self, context):
+        health_list = self.ceph_driver.get_ceph_health_list()
+        return health_list
+
     def get_osds_total_num(self, context):
         return self.ceph_driver.get_osds_total_num()
 

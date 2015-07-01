@@ -622,6 +622,11 @@ class CephDriver(object):
                           crush_dict,
                           osd_conf_dict,
                           osd_state)
+            try:
+                self.run_add_disk_hook(context)
+            except:
+                LOG.info('run add_disk error')
+
         return True
 
     def _add_osd(self,
@@ -1201,19 +1206,24 @@ class CephDriver(object):
             return True
 
         # Begin to start all the OSDs.
-        def __start_osd(osd_name):
-            osd_id = osd_name.split('.')[-1]
-            self.start_osd_daemon(context, osd_id)
-            values = {'state': FLAGS.osd_in_up, 'osd_name': osd_name}
+        def __start_osd(osd_id):
+            osd = db.get_zone_hostname_storagegroup_by_osd_id(context, osd_id)[0]
+            osd_name = osd['osd_name'].split('.')[-1]
+            self.start_osd_daemon(context, osd_name)
+            utils.execute("ceph", "osd", "crush", "create-or-move", osd['osd_name'], osd['weight'],
+                "host=%s_%s_%s" %(osd['service']['host'],osd['storage_group']['name'],osd['zone']['name']) ,
+                run_as_root=True)
+            values = {'state': FLAGS.osd_in_up, 'osd_name': osd['osd_name']}
             self._conductor_rpcapi.osd_state_update_or_create(context,
                                                               values)
 
         thd_list = []
         for item in osd_states:
-            osd_name = item['osd_name']
-            thd = utils.MultiThread(__start_osd, osd_name=osd_name)
+            osd_id = item['id']
+            thd = utils.MultiThread(__start_osd, osd_id=osd_id)
             thd_list.append(thd)
         utils.start_threads(thd_list)
+
 
         #TODO Unset osd noout when all osd started
         count = db.init_node_count_by_status(context, 'Stopped')
@@ -1391,6 +1401,13 @@ class CephDriver(object):
                                  'll',
                                  run_as_root=True)
         LOG.info("get_smart_info:%s--%s"%(out,err))
+        return out
+
+    def run_add_disk_hook(self, context):
+        out, err = utils.execute('add_disk',
+                                 'll',
+                                 run_as_root=True)
+        LOG.info("run_add_disk_hook:%s--%s"%(out,err))
         return out
 
     def get_ceph_admin_keyring(self, context):

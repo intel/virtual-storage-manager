@@ -58,6 +58,19 @@ class PerformanceMetricsController(wsgi.Controller):
         LOG.info("CEPH_LOG get performance metrics by search opts: %s" % search_opts)
         return {"metrics": metrics}
 
+
+    def get_metrics(self, req):
+        search_opts = {}
+        search_opts.update(req.GET)
+        metrics_name =  search_opts['metrics_name']
+        if metrics_name in ['ops_r','ops_w','ops_rw','bandwidth_out','bandwidth_on']:
+            result = self.get_iops_or_banwidth(req)
+        elif metrics_name in ['latency_rw','latency_r','latency_w']:
+            result = self.get_lantency(req)
+        else:
+            result = {"metrics":"no metric named %s data in DB"%metrics_name}
+        return result
+
     def get_iops_or_banwidth(self, req):
         """update cluster."""
         search_opts = {}

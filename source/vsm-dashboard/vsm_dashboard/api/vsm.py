@@ -258,3 +258,6 @@ def get_iops_or_width(request,search_opts):
 
 def add_osd_from_node_in_cluster(request,osd_states_id):
     return  vsmclient(request).osds.add_osd_from_node_in_cluster(osd_states_id)
+
+def get_ceph_health_list(request):
+    return  vsmclient(request).clusters.get_ceph_health_list()
