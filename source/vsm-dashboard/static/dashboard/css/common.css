@@ -65,29 +65,34 @@ h1.brand a{
     height: auto;
     overflow: hidden;
     text-align:center;
+    /*box-shadow: 2px 2px 3px #aaa;*/
 }
 
 .vsm-block1-content{
     text-align:left;
     padding:15px 15px;
-    margin-top:0px;
     border-radius:5px;
     border: 1px solid #ccc;
     overflow: hidden;
+    margin:5px;
+    margin-top: 0px;
+    box-shadow: 2px 2px 3px #aaa;
  }
 
  /**
  * block2: 1/2 screen block;
  */
 .vsm-block2{
-    width: 477px;
+    width: 469px;
     height: 250px;
     float: left;
     text-align: center;
-    margin-top:20px;
     padding:5px 15px;
     border-radius: 5px;
     border: 1px solid #ccc;
+    margin:5px;
+    margin-top:20px;
+    box-shadow: 2px 2px 3px #aaa;
 }
 
 
@@ -102,14 +107,16 @@ h1.brand a{
  * block3: 1/3 screen block;
  */
 .vsm-block3{
-    width: 316px;
+    width: 309px;
     height: 250px;
     float: left;
     text-align: center;
-    margin-top:20px;
     padding:5px 15px;
     border-radius:5px;
     border: 1px solid #ccc;
+    margin:5px;
+    margin-top:20px;
+    box-shadow: 2px 2px 3px #aaa;
 }
 
 .vsm-block3-content{
@@ -182,7 +189,7 @@ h1.brand a{
 }
 
 .vsm-rect-blue{
-    background-color: blue;
+    background-color: #0062a8;
 }
 
 
@@ -249,19 +256,29 @@ h1.brand a{
 }
 
 
-.vsm-page-panel{
-    width: 100%;
+.vsm-summary{
+    width: 400px;
     height: auto;
-    border: 1px solid #ccc;
-    margin-top: 20px;
+    /*border: 1px solid #ccc;*/
     margin-bottom: 20px;
+    display: inline-block;
 }
 
-.vsm-page-panel h3{
+.vsm-summary h3{
     font-family: anivers;
     font-weight: normal;
     font-size: 24px;
     margin: 10px;
+}
+
+.vsm-summary-content{
+    width: 400px;
+    height: auto;
+    padding: 10px;
+}
+
+.vsm-summary-content .form-group label{
+    min-width: 140px;
 }
 
 

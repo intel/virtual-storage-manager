@@ -1,11 +1,3 @@
-#divOSDSummaryContent{
-	width: 100%;
-	height: auto;
-	padding: 10px;
-	/*border: 1px solid red;*/
-}
-
-
 /**
  * OSD module
  */
@@ -26,4 +18,9 @@
 	padding: 5px;
 	border: 1px solid #ccc;
 	margin-bottom: 15px
+}
+
+#chkFilter{
+	margin-left: 20px;
+	margin-top: 8px;
 }

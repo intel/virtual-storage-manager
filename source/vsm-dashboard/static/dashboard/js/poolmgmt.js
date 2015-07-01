@@ -14,7 +14,23 @@ function InitCtrlCSS(){
 	}
 }
 
+
 $("#btnAddCacheTier").click(function(){
+	//Check the field is should not null
+	if(   $("#id_hit_set_count").val() == ""
+	   || $("#id_hit_set_period_s").val() == ""
+	   || $("#id_target_max_mem_mb").val() == ""
+	   || $("#id_target_dirty_ratio").val() == ""
+	   || $("#id_target_full_ratio").val() == ""
+	   || $("#id_target_max_objects").val() == ""
+	   || $("#id_target_min_flush_age_m").val() == ""
+	   || $("#id_target_min_evict_age_m").val() == "" ){
+
+		showTip("error","The field is marked as '*' should not be empty");
+		return  false;
+	}
+
+
 	var CachePoolID = $("#id_cache_tier_pool").val();
 	var StoragePoolID = $("#id_storage_tier_pool").val();
 
@@ -56,7 +72,8 @@ $("#btnAddCacheTier").click(function(){
 				window.location.href="/dashboard/vsm/poolsmanagement/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
-				showTip("error","Some error")
+				if(XMLHttpRequest.status == 500)
+                	showTip("error","INTERNAL SERVER ERROR")
 			},
 		headers: {
 			"X-CSRFToken": token
@@ -87,7 +104,8 @@ $("#btnRemoveCacheTier").click(function(){
 				window.location.href="/dashboard/vsm/poolsmanagement/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
-				showTip("error","Some error")
+				if(XMLHttpRequest.status == 500)
+                	showTip("error","INTERNAL SERVER ERROR")
 			},
 		headers: {
 			"X-CSRFToken": token
@@ -102,6 +120,18 @@ $("#btnRemoveCacheTier").click(function(){
 
 
 $("#btnAddReplicatedPool").click(function(){
+	//Check the field is should not null
+	if(   $("#id_name").val() == ""
+	   || $("#id_replication_factor").val() == ""
+	   || $("#id_max_pg_num_per_osd").val() == ""
+	   || $("#id_tag").val() == ""
+	   || $("#id_pool_quota").val() == "" ){
+
+		showTip("error","The field is marked as '*' should not be empty");
+		return  false;
+	}
+
+
 	var data = {
 			"pool":{
 				"name":$("#id_name").val(),
@@ -129,7 +159,8 @@ $("#btnAddReplicatedPool").click(function(){
 				window.location.href="/dashboard/vsm/poolsmanagement/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
-				showTip("error","Some error")
+				if(XMLHttpRequest.status == 500)
+                	showTip("error","INTERNAL SERVER ERROR")
 			},
 		headers: {
 			"X-CSRFToken": token
@@ -141,6 +172,16 @@ $("#btnAddReplicatedPool").click(function(){
 });
 
 $("#btnCreateErasureCodedPool").click(function(){
+	//Check the field is should not null
+	if(   $("#id_name").val() == ""
+	   || $("#id_tag").val() == ""
+	   || $("#id_pool_quota").val() == "" ){
+
+		showTip("error","The field is marked as '*' should not be empty");
+		return  false;
+	}
+
+
 	var data = {
 		"pool": {
             'name': $("#id_name").val(),
@@ -167,7 +208,8 @@ $("#btnCreateErasureCodedPool").click(function(){
 				window.location.href="/dashboard/vsm/poolsmanagement/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
-				showTip("error","Some error")
+				if(XMLHttpRequest.status == 500)
+                	showTip("error","INTERNAL SERVER ERROR")
 			},
 		headers: {
 			"X-CSRFToken": token

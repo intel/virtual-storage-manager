@@ -63,11 +63,8 @@ def create_storage_group(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print ""
-    print "============Create Storage Group==============="
-    print body
     try:
-        rsp = vsm_api.storage_group_create(request, body=body)
+        rsp = vsmapi.storage_group_create(request, body=body)
         status = "OK"
         msg = "Add Cache Tier Successfully!"
     except ex:

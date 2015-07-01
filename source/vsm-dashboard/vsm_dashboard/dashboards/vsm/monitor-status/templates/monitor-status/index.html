@@ -20,24 +20,37 @@
 {% block title %}{% trans "Monitor Status" %}{% endblock %}
 
 {% block page_header %}
-        {% include "horizon/common/_page_header.html" with title=cluster.title %}
-        <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
-        <link href="{{ STATIC_URL }}dashboard/css/monitorstatus.css" rel="stylesheet">
+  {% include "horizon/common/_page_header.html" with title=cluster.title %}
+  <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
+  <link href="{{ STATIC_URL }}dashboard/css/monitorstatus.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-	<div id="divMonitorSummary" class="vsm-page-panel" style="min-height: 220px;">
-		<h3 class="table_title">Monitor Summary</h3>
-		<div id="divMonitorSummaryContent">
-			<div>
-                <span id="lblMonitorEpoch" class="vsm-label">Epoch:--</span>
-                <span id="lblMonitorUpdate" class="vsm-label">Update:--</span>
-            </div>
-            <div id="divMonitorRect">
-
-            </div>
-		</div>
-	</div>
+	 <div class="vsm-summary" >
+    <h3 class="table_title">Monitor Summary</h3>
+    <div class = "vsm-summary-content">
+      <div class="form-group">
+        <label class="control-label">Monmap Epoch</label>
+        <label id ="lblMonmapEpoch" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Monitors</label>
+        <label id ="lblMonitors" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Election Epoch</label>
+        <label id ="lblElectionEpoch" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Quorum</label>
+        <label id ="lblQuorum" class="control-label">--</label>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Last Updated</label>
+        <label id ="lblUpdate" class="control-label">--</label>
+      </div>
+    </div>
+  </div>  
 
     {{ table.render }}
 {% endblock %}

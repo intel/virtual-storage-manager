@@ -99,7 +99,6 @@ def remove_cache_tier(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print body
     try:
         ret = vsmapi.remove_cache_tier(request,body=body)
         status = "OK"

@@ -40,19 +40,30 @@ function ReloadData(is_checked){
 
 //load OSD data
 function loadOSD(){
+    var token = $("input[name=csrfmiddlewaretoken]").val();
     $.ajax({
-        type: "get",
-        url: "/dashboard/vsm/osd/",
-        data: null,
+        type: "post",
+        url: "/dashboard/vsm/osd_summary/",
+        data: {"1":1},
         dataType:"json",
         success: function(data){
             //console.log(data);
-            $("#lblOSDEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
-            $("#lblOSDUpdate")[0].innerHTML ="Update:"+ data.update;
-            $("#divOSD_INUP")[0].innerHTML = data.in_up;
-            $("#divOSD_INDOWN")[0].innerHTML = data.in_down;
-            $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
-            $("#divOSD_OUTDOWN")[0].innerHTML = data.out_down;
+            $("#lblEpoch")[0].innerHTML = data.epoch;
+            $("#lblTotal")[0].innerHTML = data.total;
+            $("#lblIn")[0].innerHTML = data.in;
+            $("#lblUp")[0].innerHTML = data.up;
+            $("#lblUpdate")[0].innerHTML = data.update;
+
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+        },
+        headers: {
+            "X-CSRFToken": token
+        },
+        complete: function(){
+
         }
     });
 }
@@ -62,7 +73,6 @@ function loadInterval(){
         loadOSD();
     },15000);
 };
-
 
 
 function addOptionButton(){

@@ -27,3 +27,9 @@
     margin-right: auto;
     margin-left: auto;
 }
+
+.vsm-summary{
+    display: block;
+    height: 200px;
+    float: left;
+}

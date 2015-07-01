@@ -44,6 +44,7 @@ require(
             data: null,
             dataType:"json",
             success: function(data){
+                    $("#lblPGUpdate")[0].innerHTML ="Update:&nbsp&nbsp"+data.update;
                     cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
                 }
          });
@@ -259,12 +260,12 @@ function loadMDS(){
     		$("#lblMDSUpdate")[0].innerHTML ="Update:"+ data.update;
 
             if(data.MetaData == null)
-                $("#lblMDSMetaData")[0].innerHTML = "";
+                $("#lblMDSMetaData")[0].innerHTML = "--";
             else
                 $("#lblMDSMetaData")[0].innerHTML = data.MetaData;
 
             if(data.PoolData == null)
-                $("#lblMDSPoolData")[0].innerHTML = "";
+                $("#lblMDSPoolData")[0].innerHTML = "--";
             else
                 $("#lblMDSPoolData")[0].innerHTML = data.PoolData;
 

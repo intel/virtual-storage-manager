@@ -17,6 +17,7 @@
 from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import version,cluster,capacity,OSD,monitor,MDS,storage,IOPS,PG
+from .views import osd_summary,monitor_summary,mds_summary,objects_summary,performance_summary,pg_summary,capacity_summary
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
@@ -29,4 +30,12 @@ urlpatterns = patterns('',
     url(r'^storage/$', storage, name='storage'),
     url(r'^IOPS/$', IOPS, name='IOPS'),
     url(r'^PG/$', PG, name='PG'),
+
+    url(r'^osd_summary/$', osd_summary, name='osd_summary'),
+    url(r'^monitor_summary/$', monitor_summary, name='monitor_summary'),
+    url(r'^mds_summary/$', mds_summary, name='mds_summary'),
+    url(r'^objects_summary/$', objects_summary, name='objects_summary'),
+    url(r'^performance_summary/$', performance_summary, name='performance_summary'),
+    url(r'^pg_summary/$', pg_summary, name='pg_summary'),
+    url(r'^capacity_summary/$', capacity_summary, name='capacity_summary'),
 )
