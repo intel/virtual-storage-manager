@@ -8,3 +8,13 @@
 {% block content %}
   {% include 'auth/_login.html' %}
 {% endblock %}
+
+
+{% block js %}
+    {{ block.super }}
+    <script type="text/javascript">
+    	$(document).ready(function(){
+    		$(".form-control-feedback.glyphicon.glyphicon-eye-open").hide();
+    	})
+    </script>
+{% endblock %}
