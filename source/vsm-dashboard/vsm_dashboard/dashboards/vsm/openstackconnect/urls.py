@@ -18,9 +18,12 @@ from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import CreateView
 from .views import UpdateView
+from .views import create_action,update_action
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^(?P<appnode_id>[^/]+)/update/$', UpdateView.as_view(), name='update'),
     url(r'^create/$', CreateView.as_view(), name='create'),
+    url(r'^create_action/$', create_action, name='create_action'),
+    url(r'^update_action/$', update_action, name='update_action'),
 )

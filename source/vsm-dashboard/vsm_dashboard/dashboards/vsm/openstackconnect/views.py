@@ -58,8 +58,8 @@ class IndexView(tables.DataTableView):
 
 class CreateView(forms.ModalFormView):
     form_class = AddOpenstackIPForm
-    template_name = 'vsm/flocking/openstackconnect.html'
-    success_url = reverse_lazy('horizon:vsm:openstackconnect:index')
+    template_name = 'vsm/openstackconnect/create.html'
+    
 
 class UpdateView(forms.ModalFormView):
     form_class = UpdateOpenstackIPForm
@@ -100,3 +100,40 @@ class UpdateView(forms.ModalFormView):
         return {'id': appnode.id,
                 'ip': appnode.ip}
 
+def create_action(request):
+    status = ""
+    msg = ""
+    data = json.loads(request.body)
+    try:
+        ips = [data['ip'],]
+        vsmapi.add_appnodes(request,ips)
+        status = "OK"
+        msg = "Create Openstack Access Successfully!"
+    except ex:
+        print ex
+        status = "Failed"
+        msg = "Create Openstack Access  Failed!"
+
+    resp = dict(message=msg, status=status)
+    resp = json.dumps(resp)
+    return HttpResponse(resp)
+
+
+def update_action(request):
+    status = ""
+    msg = ""
+    data = json.loads(request.body)
+    try:
+        _id = data['id']
+        _ip = data['ip']
+        vsmapi.update_appnode(request, _id, ip=_ip, ssh_status="", log_info="")
+        status = "OK"
+        msg = "Update Openstack Access Successfully!"
+    except ex:
+        print ex
+        status = "Failed"
+        msg = "Update Openstack Access  Failed!"
+
+    resp = dict(message=msg, status=status)
+    resp = json.dumps(resp)
+    return HttpResponse(resp)
