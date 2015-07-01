@@ -139,4 +139,41 @@
 }
 
 
+.cluster-tip{
+    padding: 6px 12px;
+    /*width: 75px;*/
+    height: 30px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    display: inline-block;
+    text-align: center;
+    border-radius: 3px;
+}
+
+.cluster-tip:hover{
+    cursor: default;
+}
+
+.cluster-tip-health{
+    color: #fff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+
+.cluster-tip-warning{
+    color: #fff;
+    background-color: #f0ad4e;
+    border-color: #eea236;
+
+}
+
+.cluster-tip-error{
+    color: #fff;
+    background-color: #c9302c;
+    border-color: #ac2925;
+}
+
+
+
+
 
