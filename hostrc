@@ -1,5 +1,6 @@
-storage_ip_list="192.168.81.157 192.168.81.158"
-controller_ip="192.168.81.156"
+AGENT_ADDRESS_LIST="192.168.81.157 192.168.81.158 192.168.81.159"
+CONTROLLER_ADDRESS="192.168.81.156"
 
 # tips
-# storage_ip_list should be split by blank.
+# AGENT_ADDRESS_LIST should be split by blank.
+# AGENT_ADDRESS_LIST and CONTROLLER_ADDRESS can be set ip or hostname.

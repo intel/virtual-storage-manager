@@ -74,10 +74,14 @@ source $TOPDIR/hostrc
 
 is_controller=0
 for ip in $HOSTIP; do
-    if [ $ip == $controller_ip ]; then
+    if [ $ip == $CONTROLLER_ADDRESS ]; then
         is_controller=1
     fi
 done
+
+if [[ $HOSTNAME == $CONTROLLER_ADDRESS ]]; then
+    is_controller=1
+fi
 
 if [ $is_controller -eq 0 ]; then
     echo "[Info]: You run the tool in a third server."
@@ -127,7 +131,7 @@ function set_iptables_selinux() {
 }
 
 if [ $is_controller -eq 0 ]; then
-    set_iptables_selinux $controller_ip
+    set_iptables_selinux $CONTROLLER_ADDRESS
 else
     service iptables stop
     chkconfig iptables off
@@ -135,7 +139,7 @@ else
 #    setenforce 0
 fi
 
-for ip in $storage_ip_list; do
+for ip in $AGENT_ADDRESS_LIST; do
     set_iptables_selinux $ip
 done
 
@@ -161,8 +165,8 @@ if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
 fi
 
 if [ $is_controller -eq 0 ]; then
-    ssh $USER@$controller_ip "rm -rf /opt/vsm-dep-repo"
-    scp -r vsm-dep-repo $USER@$controller_ip:/opt
+    ssh $USER@$CONTROLLER_ADDRESS "rm -rf /opt/vsm-dep-repo"
+    scp -r vsm-dep-repo $USER@$CONTROLLER_ADDRESS:/opt
 else
     if [ -d vsm-dep-repo ]; then
         rm -rf /opt/vsm-dep-repo
@@ -194,11 +198,11 @@ proxy=_none_
 EOF
 
 oldurl="file:///opt/vsm-dep-repo"
-newurl="http://$controller_ip/vsm-dep-repo"
+newurl="http://$CONTROLLER_ADDRESS/vsm-dep-repo"
 if [ $is_controller -eq 0 ]; then
-    scp vsm.repo $USER@$controller_ip:/etc/yum.repos.d
-    ssh $USER@$controller_ip "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html"
-    ssh $USER@$controller_ip "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
+    scp vsm.repo $USER@$CONTROLLER_ADDRESS:/etc/yum.repos.d
+    ssh $USER@$CONTROLLER_ADDRESS "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html"
+    ssh $USER@$CONTROLLER_ADDRESS "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
 else
     cp vsm.repo /etc/yum.repos.d
     yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html
@@ -214,7 +218,7 @@ function set_repo() {
     ssh $USER@$1 "yum makecache"
 }
 
-for ip in $storage_ip_list; do
+for ip in $AGENT_ADDRESS_LIST; do
     set_repo $ip
 done
 
@@ -244,13 +248,13 @@ function install_vsm_storage() {
 }
 
 if [ $is_controller -eq 0 ]; then
-    install_vsm_controller $controller_ip
+    install_vsm_controller $CONTROLLER_ADDRESS
 else
     yum -y localinstall vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm
     preinstall
 fi
 
-for ip in $storage_ip_list; do
+for ip in $AGENT_ADDRESS_LIST; do
     install_vsm_storage $ip
 done
 
@@ -266,15 +270,15 @@ if [ -z $MANIFEST_PATH ]; then
 fi
 
 function setup_controller() {
-    ssh $USER@$controller_ip "rm -rf /etc/manifest/cluster_manifest"
-    scp $MANIFEST_PATH/$controller_ip/cluster.manifest $USER@$controller_ip:/etc/manifest
-    ssh $USER@$controller_ip "chown root:vsm /etc/manifest/cluster.manifest; chmod 755 /etc/manifest/cluster.manifest"
-    is_cluster_manifest_error=`ssh $USER@$controller_ip "cluster_manifest|grep error|wc -l"`
+    ssh $USER@$CONTROLLER_ADDRESS "rm -rf /etc/manifest/cluster_manifest"
+    scp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest $USER@$CONTROLLER_ADDRESS:/etc/manifest
+    ssh $USER@$CONTROLLER_ADDRESS "chown root:vsm /etc/manifest/cluster.manifest; chmod 755 /etc/manifest/cluster.manifest"
+    is_cluster_manifest_error=`ssh $USER@$CONTROLLER_ADDRESS "cluster_manifest|grep error|wc -l"`
     if [ $is_cluster_manifest_error -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        ssh $USER@$controller_ip "vsm-controller"
+        ssh $USER@$CONTROLLER_ADDRESS "vsm-controller"
     fi
 }
 
@@ -282,7 +286,7 @@ if [ $is_controller -eq 0 ]; then
     setup_controller
 else
     rm -rf /etc/manifest/cluster.manifest
-    cp $MANIFEST_PATH/$controller_ip/cluster.manifest /etc/manifest
+    cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
     chown root:vsm /etc/manifest/cluster.manifest
     chmod 755 /etc/manifest/cluster.manifest
     if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
@@ -299,7 +303,7 @@ fi
 #-------------------------------------------------------------------------------
 
 count_ip=0
-for ip in $storage_ip_list; do
+for ip in $AGENT_ADDRESS_LIST; do
     let count_ip=$count_ip+1
 done
 let count_ip=$count_ip+2+1
@@ -311,7 +315,7 @@ fi
 success=""
 failure=""
 if [ $is_controller -eq 0 ]; then
-    token=`ssh $USER@$controller_ip "agent-token"`
+    token=`ssh $USER@$CONTROLLER_ADDRESS "agent-token"`
 else
     token=`agent-token`
 fi
@@ -333,7 +337,7 @@ function setup_storage() {
     fi
 }
 
-for ip in $storage_ip_list; do
+for ip in $AGENT_ADDRESS_LIST; do
     setup_storage $ip
 done
 
