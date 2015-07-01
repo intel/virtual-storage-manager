@@ -1,7 +1,16 @@
 $(function(){
     //add the smart info icon
     addInfoNode();
+
+    //Init the dialog
+    InitDialog();
 })
+
+function InitDialog(){
+	var dialogTitle = "SmartInfo";
+ 	var dialogContent = $("#divOSDInfo")[0].innerHTML;
+ 	var modal = GenerateDialog(dialogTitle,dialogContent,true,"OK");
+}
 
 function addInfoNode(){
 
@@ -45,12 +54,8 @@ function addInfoNode(){
 }
 
 function getStateData(osd_id){
- 	var dialogTitle = "SmartInfo";
- 	var dialogContent = $("#divOSDInfo")[0].innerHTML;
- 	var modal = GenerateDialog(dialogTitle,dialogContent,true,"OK");
- 	modal.modal("show");
+	$("#modal_wrapper").modal("show");
 	$("#btnDialogCancel").hide();
-
 
 	$("#btnDialogSubmit").bind("click",function(){
 		$("#lblStatus")[0].innerHTML = "--";
@@ -63,9 +68,8 @@ function getStateData(osd_id){
 		$("#lblTemperature")[0].innerHTML = "--";
 		$("#lblUnitRead")[0].innerHTML = "--";
 		$("#lblUnitWRITE")[0].innerHTML = "--";
-		modal.modal("hide");
+		$("#modal_wrapper").modal("hide");
 	});
-
 
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
@@ -76,6 +80,12 @@ function getStateData(osd_id){
 		data: postData,
 		dataType:"json",
 		success: function(data){
+				//console.log(data);
+				$("#divOSDTip").hide();
+				if (data.data == ""){
+					return ;
+				}
+				
 	        	var basicInfo = data.basic;
 				var smartInfo = data.smart;
 				$("#lblStatus")[0].innerHTML = basicInfo.status;
@@ -89,13 +99,12 @@ function getStateData(osd_id){
 				$("#lblTemperature")[0].innerHTML = smartInfo.temperature;
 				$("#lblUnitRead")[0].innerHTML = smartInfo.unitRead;
 				$("#lblUnitWRITE")[0].innerHTML = smartInfo.unitWRITE;
-				modal.find(".modal-body")[0].innerHTML = $("#divOSDInfo")[0].innerHTML;
-				console.log(data);
+				$("#modal_wrapper").find(".modal-body")[0].innerHTML = $("#divOSDInfo")[0].innerHTML;
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){
-					$("#divOSDTip").append(XMLHttpRequest.statusText);
 					$("#divOSDTip").show();
+					$("#divOSDTip")[0].innerHTML = XMLHttpRequest.statusText;
 				}
 			},
 		headers: {
