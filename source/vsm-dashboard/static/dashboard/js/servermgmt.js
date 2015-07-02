@@ -18,9 +18,11 @@
 
 
 $(function(){
+    //Update the table status
+    UpdateServerStatus();
+
     //Open the TableCheckbox
     OpenTableCheckbox();
-    
 });
 
 function OpenTableCheckbox(){
@@ -36,6 +38,15 @@ function OpenTableCheckbox(){
             this.className = "multi_select_column";
         })
     }
+}
+
+function UpdateServerStatus(){
+    var tr_list = $("#server_list>tbody>tr");
+    for(var i=0;i<tr_list.length;i++){
+        tr_list[i].className = "ajax-update status_unknown odd";
+    }
+
+    setTimeout(horizon.datatables.update, 2000);
 }
 
 //Add Servers
