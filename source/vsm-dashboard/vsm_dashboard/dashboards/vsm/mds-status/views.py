@@ -48,8 +48,8 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
     def get_data(self):
         _servers = []
         #_servers= vsmapi.get_server_list(self.request,)
+        _mds_status = []
         try:
-            _mds_summary = vsmapi.mds_summary(self.request)
             _mds_status = vsmapi.mds_status(self.request)
         except:
             exceptions.handle(self.request,

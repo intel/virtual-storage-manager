@@ -56,8 +56,8 @@ function loadOSD(){
 
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
+        //    if(XMLHttpRequest.status == 500)
+        //        showTip("error","INTERNAL SERVER ERROR")
         },
         headers: {
             "X-CSRFToken": token
