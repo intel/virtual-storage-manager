@@ -126,7 +126,7 @@ class CephMetricsCollector(diamond.collector.Collector):
         for path in self._get_socket_paths(type='osd'):
             self.log.debug('checking %s', path)
             instance_name = path.split('.')[1]
-            osd_perf_value_dict = self._get_stats_from_socket(path)
+            osd_perf_value_dict = self._get_stats_from_socket(path)['osd']
             metrics = {
                     "osd%s.ops_r"%instance_name: osd_perf_value_dict['op_r'],
                     "osd%s.ops_w"%instance_name: osd_perf_value_dict['op_w'],
@@ -140,23 +140,4 @@ class CephMetricsCollector(diamond.collector.Collector):
             for key,value in metrics.items():
                 self.publish(key, value)
         return
-        # asoks = glob.glob("/var/run/ceph/ceph-osd.*.asok")
-        # for asok in asoks:
-        #     osd_name = asok.split('.')[1]
-        #     try:
-        #         osd_perf_value = commands.getoutput("ceph --admin-daemon %s perf dump"%asok)
-        #         osd_perf_value_dict = eval(osd_perf_value)['osd']
-        #         metrics = {
-        #             "osd%s.ops_r"%osd_name: osd_perf_value_dict['op_r'],
-        #             "osd%s.ops_w"%osd_name: osd_perf_value_dict['op_w'],
-        #             "osd%s.ops_rw"%osd_name: osd_perf_value_dict['op_rw'],
-        #             "osd%s.latency_r"%osd_name: osd_perf_value_dict['op_r_latency']['avgcount'] and osd_perf_value_dict['op_r_latency']['sum']/osd_perf_value_dict['op_r_latency']['avgcount'] or 0,
-        #             "osd%s.latency_w"%osd_name: osd_perf_value_dict['op_w_latency']['avgcount'] and osd_perf_value_dict['op_w_latency']['sum']/osd_perf_value_dict['op_w_latency']['avgcount'] or 0,
-        #             "osd%s.latency_rw"%osd_name: osd_perf_value_dict['op_rw_latency']['avgcount'] and osd_perf_value_dict['op_rw_latency']['sum']/osd_perf_value_dict['op_rw_latency']['avgcount'] or 0,
-        #             "osd%s.bandwidth_in"%osd_name: osd_perf_value_dict['op_in_bytes'],
-        #             "osd%s.bandwidth_out"%osd_name: osd_perf_value_dict['op_out_bytes'],
-        #         }
-        #         for key,value in metrics.items():
-        #             self.publish(key, value)
-        #     except:
-        #         import traceback;traceback.print_exc()
+
