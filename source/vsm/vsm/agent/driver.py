@@ -1953,11 +1953,10 @@ class CephDriver(object):
         except:
             uptime = ""
         ceph_version = self.get_ceph_version()
-        vsm_version = self.get_vsm_version()
         return json.dumps({
             'uptime': uptime,
             'ceph_version': ceph_version,
-            'vsm_version':vsm_version,
+            'vsm_version':" ",
         })
 
     def ceph_status(self):
