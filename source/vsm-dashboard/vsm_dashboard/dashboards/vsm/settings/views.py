@@ -40,9 +40,7 @@ class IndexView(TemplateView):
         return context
 
 def SettingsAction(request, action):
-
-    post_data = request.raw_post_data
-    data = json.loads(post_data)
+    data = json.loads(request.body)
     # TODO add cluster_id in data
     if not len(data):
         status = "error"
@@ -51,9 +49,9 @@ def SettingsAction(request, action):
         if action == "update":
             #vsmapi.add_servers(request, data)
             try:
-                setting_value = int(data['setting_value'])
+                setting_value = int(data['keyValue'])
                 if 0 < setting_value < 21600:
-                    vsmapi.update_setting(request, data['setting_name'], data['setting_value'])
+                    vsmapi.update_setting(request, data['keyName'], data['keyValue'])
                     status = "success"
                     msg = "Update Success"
                 else:

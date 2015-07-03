@@ -79,9 +79,7 @@ class AddServersView(tables.DataTableView):
     template_name = 'vsm/storageservermgmt/serversaction.html'
 
     def get_data(self):
-        servers = get_server_list(self.request, lambda x: x['status'] == "available" or 
-                                 ((x['type'].strip() == "monitor" or x['type'].strip() == "monitor,") \
-                                  and x['status'] == "Active"))
+        servers = get_server_list(self.request, lambda x: x['status'] == "available")
         zone_list = get_zone_list(self.request)
 
         for server in servers:
