@@ -34,8 +34,8 @@ echo '%debug_package %{nil}' >> ~/.debmacros
 # Load Function
 #---------------------------------------------
 
-VERSION="2015.03"
-RELEASE="2.0"
+#VERSION="2015.03"
+#RELEASE="2.0"
 SOURCE_DIR=source
 VSM_DIR=vsm
 VSMCLIENT_DIR=python-vsmclient
@@ -47,11 +47,11 @@ for n in `ls $TOPDIR/.lib/ | grep -v iptables`; do
     source $TOPDIR/.lib/$n
 done
 
-for pkg in vsm vsm-dashboard python-vsmclient vsm-deploy; do
-    for ph in /root /var /tmp /opt /mnt; do
-        find $ph -name "${pkg}*.deb" | xargs -i rm -rf {}
-    done
-done
+#for pkg in vsm vsm-dashboard python-vsmclient vsm-deploy; do
+#    for ph in /root /var /tmp /opt /mnt; do
+#        find $ph -name "${pkg}*.deb" | xargs -i rm -rf {}
+#    done
+#done
 
 # rm *.pyc and *.pyo
 find $TOPDIR -name "*.pyc" | xargs -i rm -rf {}
@@ -89,7 +89,7 @@ build_vsmdeploy_deb
 
 is_dpkg_dev=`dpkg -s dpkg-dev|grep "install ok installed"|wc -l`
 if [[ $is_dpkg_dev -eq 0 ]]; then
-    apt-get install dpkg-dev
+    sudo apt-get install dpkg-dev
 fi
 dpkg-scanpackages vsmrepo | gzip > vsmrepo/Packages.gz
 #apt-get update
