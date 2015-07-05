@@ -9,3 +9,6 @@ fsid = $fsid
 public network = $public_network
 cluster network = $cluster_network
 
+[osd]
+osd crush update on start = false
+
