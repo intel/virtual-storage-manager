@@ -1,5 +1,5 @@
 function _install_vsm_dashboard_dep_package() {
-    apt-get install -y debhelper
+    sudo apt-get install -y debhelper
 }
 
 function _setup_vsm_dashboard_deb() {

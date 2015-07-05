@@ -1,6 +1,6 @@
 function _install_vsm_dep_package() {
-    apt-get install -y debhelper
-    apt-get install -y python-setuptools python-webob python-sqlalchemy python-routes python-pastedeploy
+    sudo apt-get install -y debhelper
+    sudo apt-get install -y python-setuptools python-webob python-sqlalchemy python-routes python-pastedeploy
 }
 
 function _setup_vsm_deb() {
