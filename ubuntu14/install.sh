@@ -363,7 +363,7 @@ else
     if [[ $IS_AGENT_INSTALL == True ]]; then
         TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "sudo agent-token"`
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
-        for ip_or_hostname in $AGENT_ADDRESS_LIST; do
+        for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname
         done
     fi
