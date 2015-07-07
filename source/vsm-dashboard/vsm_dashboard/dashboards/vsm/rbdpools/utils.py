@@ -15,6 +15,8 @@
 # under the License.
 
 import time
+import json
+import urllib2
 
 from django.utils.dateparse import parse_datetime
 from django.utils.datastructures import SortedDict
@@ -98,3 +100,52 @@ def get_instances_data(request):
         calculate_ages(instances)
 
     return instances
+
+
+class GenAuthToken(object):
+    """Generate token from vsm-api WSGI service."""
+
+    def __init__(self, tenant_name, username, password, host):
+        """Initialized the url requestion and RUL."""
+        self._tenant_namt = tenant_name
+        self._username = username
+        self._password = password
+        self._auth_url = "http://%s:5000/v2.0/tokens" % host
+        self._token = None
+        self._url = None
+
+    def get_token(self):
+        """Get auth info from keystone."""
+        auth_data = {"auth": {"tenantName": self._tenant_namt,
+                           "passwordCredentials":{ "username": self._username,
+                           "password": self._password}}}
+
+        auth_request = urllib2.Request(self._auth_url)
+        auth_request.add_header("content-type", "application/json")
+        auth_request.add_header('Accept', 'application/json')
+        auth_request.add_header('User-Agent', 'python-mikeyp')
+        auth_request.add_data(json.dumps(auth_data))
+        auth_response = urllib2.urlopen(auth_request)
+        response_data = json.loads(auth_response.read())
+
+        self._token = response_data['access']['token']['id']
+
+        service_list = response_data['access']['serviceCatalog']
+        for s in service_list:
+            if s['type'] == 'volume' and s['name'] == 'cinder':
+                self._url = s['endpoints'][0]['publicURL']
+                break
+
+        url_id = self._url.split('/')[-1]
+        return self._token, url_id
+
+def list_cinder_service(host, token, tenant_id):
+    req_url = "http://%s:8776/v1/%s" % (host, tenant_id) + "/os-services"
+    req = urllib2.Request(req_url)
+    req.get_method = lambda: 'GET'
+    req.add_header("content-type", "application/json")
+    req.add_header("X-Auth-Token", token)
+    resp = urllib2.urlopen(req)
+    cinder_service_dict = json.loads(resp.read())
+    cinder_service_list = cinder_service_dict['services']
+    return cinder_service_list

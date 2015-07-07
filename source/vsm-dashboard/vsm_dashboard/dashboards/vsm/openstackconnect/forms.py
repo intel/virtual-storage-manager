@@ -33,14 +33,48 @@ from vsm_dashboard.api import vsm as vsm_api
 class AddOpenstackIPForm(forms.SelfHandlingForm):
 
     failure_url = 'horizon:vsm:openstackconnect:index'
-    ip = forms.CharField(label=_("IP"),
-                            max_length=255,
-                            min_length=1,
-                            error_messages={
-                            'required': _('This field is required.'),
-                            'invalid': _("The string may only contain"
-                                         " IP.")},
-                            validators=[validators.validate_ipv46_address,])
+    # ip = forms.CharField(label=_("IP"),
+    #                         max_length=255,
+    #                         min_length=1,
+    #                         error_messages={
+    #                         'required': _('This field is required.'),
+    #                         'invalid': _("The string may only contain"
+    #                                      " IP.")},
+    #                         validators=[validators.validate_ipv46_address,])
+
+    os_tenant_name = forms.CharField(
+        label = _("Tenant Name"),
+        max_length = 255,
+        min_length = 1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
+    os_username = forms.CharField(
+        label = _("UserName"),
+        max_length = 255,
+        min_length = 1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
+    os_password = forms.CharField(
+        label = _("Password"),
+        widget=forms.PasswordInput(render_value=False),
+        max_length=255,
+        min_length=1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
+    os_auth_url = forms.CharField(
+        label = _("Auth Url"),
+        max_length = 255,
+        min_length = 1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
 
     def handle(self, request, data):
         pass
@@ -73,14 +107,48 @@ class AddOpenstackIPForm(forms.SelfHandlingForm):
 class UpdateOpenstackIPForm(forms.SelfHandlingForm):
     id = forms.CharField(label=_("ID"), widget=forms.HiddenInput)
 
-    ip = forms.CharField(label=_("IP"),
-                            max_length=255,
-                            min_length=1,
-                            error_messages={
-                            'required': _('This field is required.'),
-                            'invalid': _("The string may only contain"
-                                         " IP.")},
-                            validators=[validators.validate_ipv46_address,])
+    # ip = forms.CharField(label=_("IP"),
+    #                         max_length=255,
+    #                         min_length=1,
+    #                         error_messages={
+    #                         'required': _('This field is required.'),
+    #                         'invalid': _("The string may only contain"
+    #                                      " IP.")},
+    #                         validators=[validators.validate_ipv46_address,])
+
+    os_tenant_name = forms.CharField(
+        label = _("Tenant Name"),
+        max_length = 255,
+        min_length = 1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
+    os_username = forms.CharField(
+        label = _("UserName"),
+        max_length = 255,
+        min_length = 1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
+    os_password = forms.CharField(
+        label = _("Password"),
+        widget=forms.PasswordInput(render_value=False),
+        max_length=255,
+        min_length=1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
+    os_auth_url = forms.CharField(
+        label = _("Auth Url"),
+        max_length = 255,
+        min_length = 1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
 
     def handle(self, request, data):
         pass

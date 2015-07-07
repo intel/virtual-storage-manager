@@ -71,7 +71,11 @@ class EditOpenstackIPAction(tables.LinkAction):
 class ListOpenstackIPTable(tables.DataTable):
 
     id = tables.Column("id", verbose_name=_("ID"), classes=("ip_list",), hidden=True)
-    ip = tables.Column("ip", verbose_name=_("IP"))
+    # ip = tables.Column("ip", verbose_name=_("IP"))
+    os_tenant_name = tables.Column("os_tenant_name", verbose_name=_("Tenant Name"))
+    os_username = tables.Column("os_username", verbose_name=_("UserName"))
+    os_password = tables.Column("os_password", verbose_name=_("Password"))
+    os_auth_url = tables.Column("os_auth_url", verbose_name=_("Auth Url"))
     ssh_status = tables.Column("ssh_status", verbose_name=_("Connection Status"))
     log_info = tables.Column("log_info", verbose_name=_("LOG INFO"))
 
@@ -87,8 +91,8 @@ class ListOpenstackIPTable(tables.DataTable):
         else:
             return datum["id"]
 
-    def get_object_display(self, datum):
-        if hasattr(datum, "ip"):
-            return datum.id
-        else:
-            return datum["ip"]
+    # def get_object_display(self, datum):
+    #     if hasattr(datum, "ip"):
+    #         return datum.id
+    #     else:
+    #         return datum["ip"]
