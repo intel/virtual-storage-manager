@@ -36,19 +36,19 @@ class AppNodeManager(base.ManagerWithFind):
     """
     resource_class = AppNode
 
-    def create(self, ips=None):
+    def create(self, auth_openstack):
 
         """
         Create a list of  app nodes.
         """
         #validate ip_list
-        if not isinstance(ips, list):
-            ip_list = list()
-            ip_list.append(ips)
-        else:
-            ip_list = ips
+        # if not isinstance(ips, list):
+        #     ip_list = list()
+        #     ip_list.append(ips)
+        # else:
+        #     ip_list = ips
 
-        body = {'appnodes':  ip_list}
+        body = {'appnodes':  auth_openstack}
         return self._create('/appnodes', body, 'appnodes')
 
     def list(self, detailed=False, search_opts=None):

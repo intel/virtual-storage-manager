@@ -17,8 +17,11 @@
 
 
 function setup_single() {
-    vsmapp_ip=$1
-    pool_name=$2
+    local tenant_name=$1
+    local username=$2
+    local password=$3
+    vsmapp_ip=$4
+    pool_name=$5
 
     source $TOPDIR/server/ceph
 

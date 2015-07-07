@@ -686,7 +686,11 @@ class Appnode(BASE, VsmBase):
     __tablename__ = 'appnodes'
 
     id = Column(Integer, primary_key=True, nullable=False)
-    ip = Column(String(length=50), nullable=False)
+    # ip = Column(String(length=50), nullable=False)
+    os_tenant_name = Column(String(length=50), nullable=False)
+    os_username = Column(String(length=50), nullable=False)
+    os_password = Column(String(length=50), nullable=False)
+    os_auth_url = Column(String(length=255), nullable=False)
     vsmapp_id = Column(Integer, ForeignKey(Vsmapp.id), nullable=False)
     ssh_status = Column(String(length=50), nullable=True)
     log_info = Column(Text, nullable=True)

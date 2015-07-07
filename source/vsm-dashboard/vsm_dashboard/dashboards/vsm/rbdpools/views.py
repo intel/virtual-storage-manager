@@ -27,6 +27,8 @@ from vsm_dashboard.dashboards.vsm.poolsmanagement import utils
 from .form import CreatePool
 from .tables import ListPoolTable
 from .tables import ListPresentPoolTable
+from .utils import GenAuthToken
+from .utils import list_cinder_service
 import os
 
 import json
@@ -88,7 +90,6 @@ class PresentPoolsView(tables.DataTableView):
     table_class = ListPresentPoolTable
     template_name = 'vsm/rbdpools/rbdsaction.html'
     verbose_name = "Present Pools"
-   
 
     def get_data(self):
         pools = []
@@ -146,3 +147,23 @@ def PoolsAction(request, action):
     resp = dict(message=msg, status=status, data="")
     resp = json.dumps(resp)
     return HttpResponse(resp)
+
+def get_select_data(request):
+    appnode = vsmapi.appnode_list(request)[0]
+    tenant_name = appnode.os_tenant_name
+    username = appnode.os_username
+    password = appnode.os_password
+    auth_url = appnode.os_auth_url
+    auth_host = auth_url.split(":")[1][2:]
+    genauthtoken = GenAuthToken(tenant_name, username, password, auth_host)
+    token, tenant_id = genauthtoken.get_token()
+    cinder_service_list = list_cinder_service(auth_host, token, tenant_id)
+    cinder_service = []
+    for cinder in cinder_service_list:
+        if cinder["binary"] == "cinder-volume":
+            value=1
+            cinder.update({"value": value})
+            value+=1
+            cinder_service.append(cinder)
+    data = tuple(cinder_service)
+    return HttpResponse(json.dumps(data))

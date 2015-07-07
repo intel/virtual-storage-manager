@@ -43,32 +43,31 @@ class AddOpenstackIPForm(forms.SelfHandlingForm):
                             validators=[validators.validate_ipv46_address,])
 
     def handle(self, request, data):
-        pass
         # TODO deliver a cluster id in data
-        # data['cluster_id'] = 1
-        # try:
-        #     LOG.info("CEPH_LOG in ADD ip, %s" % str(data))
-        #     appnodes = vsm_api.appnode_list(request)
-        #     for appnode in appnodes:
-        #         if data['ip'] == appnode.ip:
-        #             messages.error(request, "duplicate ip address")
-        #             return False
-        #     body = {
-        #             'appnodes': [data['ip'],]
-        #     }
-        #     ips = [data['ip'],]
-        #     LOG.info("CEPH_LOG in handle body %s" % str(body))
-        #     ret = vsm_api.add_appnodes(request, ips)
+        data['cluster_id'] = 1
+        try:
+            LOG.info("CEPH_LOG in ADD ip, %s" % str(data))
+            appnodes = vsm_api.appnode_list(request)
+            for appnode in appnodes:
+                if data['ip'] == appnode.ip:
+                    messages.error(request, "duplicate ip address")
+                    return False
+            body = {
+                    'appnodes': [data['ip'],]
+            }
+            ips = [data['ip'],]
+            LOG.info("CEPH_LOG in handle body %s" % str(body))
+            ret = vsm_api.add_appnodes(request, ips)
 
-        #     messages.success(request,
-        #              _('Successfully add ip: %s')
-        #              % data['ip'])
-        #     return ret
-        # except:
-        #     redirect = reverse("horizon:vsm:zonemgmt:index")
-        #     exceptions.handle(request,
-        #                       _('Unable to create zone.'),
-        #                       redirect=redirect)
+            messages.success(request,
+                     _('Successfully add ip: %s')
+                     % data['ip'])
+            return ret
+        except:
+            redirect = reverse("horizon:vsm:zonemgmt:index")
+            exceptions.handle(request,
+                              _('Unable to create zone.'),
+                              redirect=redirect)
 
 class UpdateOpenstackIPForm(forms.SelfHandlingForm):
     id = forms.CharField(label=_("ID"), widget=forms.HiddenInput)
@@ -84,17 +83,17 @@ class UpdateOpenstackIPForm(forms.SelfHandlingForm):
 
     def handle(self, request, data):
         pass
-        # failed, succeeded = [], []
-        # id = data.pop('id')
-        # ip = data.pop('ip')
-        # vsm_api.update_appnode(request, id, ip=ip, ssh_status="", log_info="")
+        failed, succeeded = [], []
+        id = data.pop('id')
+        ip = data.pop('ip')
+        vsm_api.update_appnode(request, id, ip=ip, ssh_status="", log_info="")
 
-        # messages.success(request, _('User has been updated successfully.'))
-        # return True
+        messages.success(request, _('User has been updated successfully.'))
+        return True
 
-        # if failed:
-        #     failed = map(force_unicode, failed)
-        #     messages.error(request,
-        #                    _('Unable to update %(attributes)s for the user.')
-        #                      % {"attributes": ", ".join(failed)})
-        # return True
+        if failed:
+            failed = map(force_unicode, failed)
+            messages.error(request,
+                           _('Unable to update %(attributes)s for the user.')
+                             % {"attributes": ", ".join(failed)})
+        return True
