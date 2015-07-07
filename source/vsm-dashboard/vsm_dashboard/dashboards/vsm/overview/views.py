@@ -29,6 +29,7 @@ import json
 import random
 import datetime
 import commands
+import time
 LOG = logging.getLogger(__name__)
 
 
@@ -104,10 +105,19 @@ def PG(request):
     return HttpResponse(get_PG())
 
 def IOPS(request):
-    IOPS_dict = {"line1":random.randint(0,15)
-                ,"line2":random.randint(0,15)}
-    IOPSdata = json.dumps(IOPS_dict)
-    return HttpResponse(IOPSdata)
+    # data = json.loads(request.body)
+    # timestamp = int(data["timestamp"])
+    return HttpResponse(get_performance_IOPs())
+
+def latency(request):
+    # data = json.loads(request.body)
+    # timestamp = int(data["timestamp"])
+    return HttpResponse(get_performance_Latency())
+
+def bandwidth(request):
+    # data = json.loads(request.body)
+    # timestamp = int(data["timestamp"])
+    return HttpResponse(get_performance_Bandwith())
 
 
 def get_vsm_version():
@@ -132,7 +142,6 @@ def get_version():
                     "ceph_version":ceph_version}
     versiondata = json.dumps(vsm_version)
     return versiondata
-
 
 #get the cluster data
 def get_cluster():
@@ -262,7 +271,7 @@ def get_PG():
     pg_summary = vsmapi.placement_group_summary(None)
     version = pg_summary.version
     update = get_time_delta(pg_summary.updated_at)
-    pg_total = pg_summary.num_pgs
+    pg_total = pg_summary.num_pgs   
     pg_active_clean = sum([pgs['count'] for pgs in pg_summary.pgs_by_state
                                         if pgs['state_name'] == "active+clean"])
     pg_not_active_clean = sum([pgs['count'] for pgs in pg_summary.pgs_by_state
@@ -275,4 +284,133 @@ def get_PG():
     pgdata = json.dumps(pg_dict)
     return pgdata
 
+def get_performance_IOPs():
+    end_time = int(time.time())
+    start_time = end_time - 15
+    # end_time = timestamp + 15
+    # start_time = timestamp 
 
+    ops_r_opts = {
+         "metrics_name":"ops_r"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+        ,"correct_cnt":None
+    }
+
+    ops_w_opts = {
+         "metrics_name":"ops_w"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+        ,"correct_cnt":None
+    }
+
+    ops_r_data = vsmapi.get_performance_metrics(None,ops_r_opts)["metrics"]
+    ops_w_data = vsmapi.get_performance_metrics(None,ops_w_opts)["metrics"]
+
+
+    metriclist = []
+    for r_metric in ops_r_data:
+        item = {"timestamp":r_metric["timestamp"],"r_value":r_metric["metrics_value"],"w_value":""}
+        metriclist.append(item)
+
+    for item in metriclist:
+        for w_metric in ops_w_data:
+            if item["timestamp"] == w_metric["timestamp"]:
+                item["w_value"] = w_metric["metrics_value"]
+                break
+
+    ops_data_dict = {"metrics":metriclist}
+    ops_data = json.dumps(ops_data_dict)
+    return ops_data
+
+def get_performance_Latency():
+    end_time = int(time.time())
+    start_time = end_time - 15
+    # end_time = timestamp + 15
+    # start_time = timestamp 
+
+    latency_r_opts = {
+         "metrics_name":"latency_r"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+        ,"correct_cnt":None
+    }
+
+    latency_w_opts = {
+         "metrics_name":"latency_w"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+        ,"correct_cnt":None
+    }
+
+    latency_rw_opts = {
+         "metrics_name":"latency_rw"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+        ,"correct_cnt":None
+    }
+
+    latency_r_data = vsmapi.get_performance_metrics(None,latency_r_opts)["metrics"]
+    latency_w_data = vsmapi.get_performance_metrics(None,latency_w_opts)["metrics"]
+    latency_rw_data = vsmapi.get_performance_metrics(None,latency_rw_opts)["metrics"]
+
+
+    metriclist = []
+    for r_metric in latency_r_data:
+        item = {"timestamp":r_metric["timestamp"],"r_value":r_metric["metrics_value"],"w_value":"","rw_value":""}
+        metriclist.append(item)
+
+    for item in metriclist:
+        for w_metric in latency_w_data:
+            if item["timestamp"] == w_metric["timestamp"]:
+                item["w_value"] = w_metric["metrics_value"]
+                break
+        for rw_metric in latency_rw_data:
+            if item["timestamp"] == rw_metric["timestamp"]:
+                item["rw_value"] = rw_metric["metrics_value"]
+                break
+
+    ops_data_dict = {"metrics":metriclist}
+    ops_data = json.dumps(ops_data_dict)
+    return ops_data
+
+
+def get_performance_Bandwith():
+    end_time = int(time.time())
+    start_time = end_time - 15
+    # end_time = timestamp + 15
+    # start_time = timestamp 
+
+    bandwidth_in_opts = {
+         "metrics_name":"bandwidth_in"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+        ,"correct_cnt":None
+    }
+
+    bandwidth_out_opts = {
+         "metrics_name":"bandwidth_out"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+        ,"correct_cnt":None
+    }
+
+
+    bandwidth_in_data = vsmapi.get_performance_metrics(None,bandwidth_in_opts)["metrics"]
+    bandwidth_out_data = vsmapi.get_performance_metrics(None,bandwidth_out_opts)["metrics"]
+
+    metriclist = []
+    for in_metric in bandwidth_in_data:
+        item = {"timestamp":in_metric["timestamp"],"in_value":in_metric["metrics_value"],"out_value":""}
+        metriclist.append(item)
+
+    for item in metriclist:
+        for out_metric in bandwidth_out_data:
+            if item["timestamp"] == out_metric["timestamp"]:
+                item["out_value"] = out_metric["metrics_value"]
+                break
+
+
+    ops_data_dict = {"metrics":metriclist}
+    ops_data = json.dumps(ops_data_dict)
+    return ops_data
