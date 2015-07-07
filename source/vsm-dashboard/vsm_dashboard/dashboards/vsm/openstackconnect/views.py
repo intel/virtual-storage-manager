@@ -110,16 +110,29 @@ class UpdateView(forms.ModalFormView):
         }
 
 def create_action(request):
-    status = ""
-    msg = ""
     data = json.loads(request.body)
+    # TODO deliver a cluster id in data
+    data['cluster_id'] = 1
     try:
-        ips = [data['ip'],]
-        vsmapi.add_appnodes(request,ips)
+        LOG.info("CEPH_LOG in ADD ip, %s" % str(data))
+        os_tenant_name = data['os_tenant_name']
+        os_username = data['os_username']
+        os_password = data['os_password']
+        os_auth_url = data['os_auth_url']
+
+        body = {
+            'appnodes': {
+                'os_tenant_name': os_tenant_name,
+                'os_username': os_username,
+                'os_password': os_password,
+                'os_auth_url': os_auth_url
+            }
+        }
+        LOG.info("CEPH_LOG in handle body %s" % str(body))
+        vsmapi.add_appnodes(request, body['appnodes'])
         status = "OK"
         msg = "Create Openstack Access Successfully!"
-    except ex:
-        print ex
+    except:
         status = "Failed"
         msg = "Create Openstack Access  Failed!"
 
@@ -129,17 +142,23 @@ def create_action(request):
 
 
 def update_action(request):
-    status = ""
-    msg = ""
     data = json.loads(request.body)
     try:
-        _id = data['id']
-        _ip = data['ip']
-        vsmapi.update_appnode(request, _id, ip=_ip, ssh_status="", log_info="")
+        id = data.pop('id')
+        os_tenant_name = data.pop('os_tenant_name')
+        os_username = data.pop('os_username')
+        os_password = data.pop('os_password')
+        os_auth_url = data.pop('os_auth_url')
+        vsmapi.update_appnode(request, id,
+                               os_tenant_name=os_tenant_name,
+                               os_username=os_username,
+                               os_password=os_password,
+                               os_auth_url=os_auth_url,
+                               ssh_status="",
+                               log_info="")
         status = "OK"
         msg = "Update Openstack Access Successfully!"
-    except ex:
-        print ex
+    except:
         status = "Failed"
         msg = "Update Openstack Access  Failed!"
 
