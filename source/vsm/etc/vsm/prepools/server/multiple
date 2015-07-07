@@ -17,7 +17,10 @@
 
 
 function setup_multiple() {
-    local vsmapp_ip=$1
+    local tenant_name=$1
+    local username=$2
+    local password=$3
+    local vsmapp_ip=$4
     local pool_iter=0
 
     source $TOPDIR/server/ceph
@@ -35,7 +38,7 @@ function setup_multiple() {
 
     BACKEND_LIST=""
     for n in $@; do
-        if [[ $pool_iter -eq 0 ]]; then
+        if [[ $pool_iter -lt 4 ]]; then
             let ++pool_iter
             continue
         fi
@@ -63,5 +66,5 @@ function setup_multiple() {
     echo $TYPE_LIST
     create_multiple_cinder
 
-    gen_tar_file $vsmapp_ip $TOPDIR/lib/multiple
+    gen_tar_file $tenant_name $username $password $vsmapp_ip $TOPDIR/lib/multiple
 }

@@ -17,14 +17,29 @@
 
 
 function gen_tar_file() {
-    local vsmapp_ip=$1
-    local install_file=$2
+    local tenant_name=$1
+    local username=$2
+    local password=$3
+    local vsmapp_ip=$4
+    local install_file=$5
 
     TEMP=`mktemp`; rm -rf $TEMP; mkdir -p $TEMP/prepools
     cp -rf /etc/vsm/prepools/* $TEMP/prepools/
     cp -rf /etc/ceph/ceph.conf $TEMP/prepools/lib/
     sed -i "s,keyring = /etc/ceph/keyring.admin,,g" $TEMP/prepools/lib/ceph.conf 
     cd $TEMP/prepools
+
+    cat <<"EOF" >cinderrc
+export OS_TENANT_NAME=%TENANT_NAME%
+export OS_USERNAME=%USER%
+export OS_PASSWORD=%PASSWORD%
+export OS_AUTH_URL=http://%KEYSTONE_HOST%:35357/v2.0/
+EOF
+    local file=cinderrc
+    sed -i "s,%TENANT_NAME%,$tenant_name,g" $file
+    sed -i "s,%USER%,$username,g" $file
+    sed -i "s,%PASSWORD%,$password,g" $file
+    sed -i "s,%KEYSTONE_HOST%,$vsmapp_ip,g" $file
 
 cat <<"EOF" > localrc
 AUTH_CINDER_USER=%AUTH_CINDER_USER%

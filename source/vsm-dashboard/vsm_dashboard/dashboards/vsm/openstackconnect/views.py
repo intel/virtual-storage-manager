@@ -49,7 +49,11 @@ class IndexView(tables.DataTableView):
         appnode_list = []
         for _appnode in _appnode_list:
             appnode = {"id": str(_appnode.id),
-                    "ip": _appnode.ip,
+                    # "ip": _appnode.ip,
+                    "os_tenant_name": _appnode.os_tenant_name,
+                    "os_username": _appnode.os_username,
+                    "os_password": _appnode.os_password,
+                    "os_auth_url": _appnode.os_auth_url,
                     "ssh_status": _appnode.ssh_status,
                     "log_info": _appnode.log_info}
             appnode_list.append(appnode)
@@ -97,6 +101,11 @@ class UpdateView(forms.ModalFormView):
         LOG.info("CEPH_LOG UPDATE VIEW GET INITIAL:%s"%self.kwargs)
         #LOG.error(self.kwargs)
         appnode = self.get_object()
-        return {'id': appnode.id,
-                'ip': appnode.ip}
+        return {
+            'id': appnode.id,
+            'os_tenant_name': appnode.os_tenant_name,
+            'os_username': appnode.os_username,
+            'os_password': appnode.os_password,
+            'os_auth_url': appnode.os_auth_url
+        }
 

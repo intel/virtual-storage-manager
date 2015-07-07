@@ -39,32 +39,33 @@ def get_all_nodes(contxt):
         LOG.exception(_("DB Error on getting Appnodes %s" % e))
         raise exception.AppNodeFailure()
 
-def create(contxt, ips=None, allow_duplicate=False):
+def create(contxt, auth_openstack=None, allow_duplicate=False):
     """create app node from a dict"""
     if contxt is None:
         contxt = context.get_admin_context()
 
-    if not ips:
+    if not auth_openstack:
         raise exception.AppNodeInvalidInfo()
 
     """validate Ipv4 address"""
     ref = []
-    for ip in ips:
-        if not utils.is_valid_ipv4(ip):
-            msg = _("Invalid Ipv4 address %s for app node." % ip)
-            raise exception.InvalidInput(reason=msg)
-        else:
-            attr = {
-                'ip': ip
-            }
-            try:
-                ref.append(db.appnodes_create(contxt, attr, allow_duplicate))
-            except db_exc.DBError as e:
-                LOG.exception(_("DB Error on creating Appnodes %s" % e))
-                raise exception.AppNodeFailure()
+    # for ip in ips:
+    #     if not utils.is_valid_ipv4(ip):
+    #         msg = _("Invalid Ipv4 address %s for app node." % ip)
+    #         raise exception.InvalidInput(reason=msg)
+    #     else:
+    #         attr = {
+    #             'ip': ip
+    #         }
+    try:
+        ref.append(db.appnodes_create(contxt, auth_openstack, allow_duplicate))
+    except db_exc.DBError as e:
+        LOG.exception(_("DB Error on creating Appnodes %s" % e))
+        raise exception.AppNodeFailure()
     return ref
 
-def update(contxt, appnode_id, ssh_status=None, log_info=None, ip=None):
+def update(contxt, appnode_id, ssh_status=None, log_info=None, os_tenant_name=None,
+           os_username=None, os_password=None, os_auth_url=None):
     """update app node ssh status, log info or deleted"""
     if contxt is None:
         contxt = context.get_admin_context()
@@ -73,8 +74,17 @@ def update(contxt, appnode_id, ssh_status=None, log_info=None, ip=None):
     LOG.debug('app node id: %s ' % id)
     kargs = {}
 
-    if ip:
-        kargs['ip'] = ip
+    if os_tenant_name:
+        kargs['os_tenant_name'] = os_tenant_name
+
+    if os_username:
+        kargs['os_username'] = os_username
+
+    if os_password:
+        kargs['os_password'] = os_password
+
+    if os_auth_url:
+        kargs['os_auth_url'] = os_auth_url
 
     if ssh_status:
         utils.check_string_length(ssh_status, 'ssh_status', 1, 50)

@@ -19,6 +19,9 @@
 $(function(){
     //Open the TableCheckbox
     OpenTableCheckbox();
+
+    //LoadSelected()
+    LoadSelected();
 });
 
 
@@ -35,6 +38,36 @@ function OpenTableCheckbox(){
             this.className = "multi_select_column";
         })
     }
+}
+
+
+function LoadSelected(){
+    $.ajax({
+        data: {},
+        type: "get",
+        dataType: "json",
+        url: "/dashboard/vsm/rbdpools/get_select_data/",
+        success: function (data) {
+            var html = "";
+            html += "<select style='width:80px'>";
+            for(var i=0;i<data.length;i++){
+                html += "<option value='"+data[i].value+"' >"+data[i].host+"</option>";
+            }
+            html += "</select>";
+
+             var ctrlSelected = $(".zone");
+            for(var i=1;i<ctrlSelected.length;i++){
+                ctrlSelected[i].innerHTML = html;
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+        },
+        complete: function(){
+
+        }
+    });
 }
 
 
