@@ -63,7 +63,6 @@ class IndexView(tables.DataTableView):
 class CreateView(forms.ModalFormView):
     form_class = AddOpenstackIPForm
     template_name = 'vsm/openstackconnect/create.html'
-    
 
 class UpdateView(forms.ModalFormView):
     form_class = UpdateOpenstackIPForm
