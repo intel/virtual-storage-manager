@@ -231,9 +231,10 @@ def get_MDS():
 
 #get the storage data
 def get_storage():
+    #get the threshold for storage group
+    settings = vsmapi.get_setting_dict(None)
     _sgs = vsmapi.storage_group_status(None)
-    _cfg = {"nearfull_threshold":65,
-            "full_threshold":85,}
+
     _num = 0
     _num_normal = 0
     _num_near_full = 0
@@ -241,9 +242,9 @@ def get_storage():
     for _sg in _sgs:
         _sg.capacity_total = 1 if not _sg.capacity_total else _sg.capacity_total
         capcity_percent_used = 0 if not _sg.capacity_total else _sg.capacity_used * 100 / _sg.capacity_total
-        if capcity_percent_used <_cfg["nearfull_threshold"]:
+        if capcity_percent_used < settings["storage_group_near_full_threshold"]:
             _num_normal+=1
-        elif capcity_percent_used < _cfg["full_threshold"]:
+        elif capcity_percent_used < settings["storage_group_full_threshold"]:
             _num_near_full+=1
         else:
             _num_full+=1
