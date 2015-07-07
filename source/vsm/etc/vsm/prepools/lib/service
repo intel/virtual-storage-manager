@@ -20,7 +20,9 @@ function is_service_running() {
     local file=`mktemp`
     service $1 status 1>$file 2>$file
     sleep 1
-    cnt=`cat $file | grep "is running" | wc -l`
+    cnt1=`cat $file | grep "is running" | wc -l`
+    cnt2=`cat $file | grep "start/running" | wc -l`
+    let cnt=$cnt1+$cnt2
     if [[ $cnt -gt 0 ]]; then
         echo 1
     else

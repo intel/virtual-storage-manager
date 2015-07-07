@@ -62,8 +62,7 @@ class IndexView(tables.DataTableView):
 
 class CreateView(forms.ModalFormView):
     form_class = AddOpenstackIPForm
-    template_name = 'vsm/flocking/openstackconnect.html'
-    success_url = reverse_lazy('horizon:vsm:openstackconnect:index')
+    template_name = 'vsm/openstackconnect/create.html'
 
 class UpdateView(forms.ModalFormView):
     form_class = UpdateOpenstackIPForm
