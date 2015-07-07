@@ -162,14 +162,14 @@ function download_dependencies() {
         mkdir -p $REPO_PATH
         cd $REPO_PATH
         for i in `cat $TOPDIR/debs.lst`; do
-            wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
+            wget https://github.com/01org/vsm-dependencies/blob/$DEPENDENCE_BRANCH/ubuntu14/$i
         done
         cd $TOPDIR
     elif [[ -d $REPO_PATH ]] && [[ $IS_CHECK_DEPENDENCE_PACKAGE == True ]]; then
         cd $REPO_PATH
         for i in `cat $TOPDIR/debs.lst`; do
             if [[ `ls |grep $i|wc -l` -eq 0 ]]; then
-                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
+                wget https://github.com/01org/vsm-dependencies/blob/$DEPENDENCE_BRANCH/ubuntu14/$i
             else
                 COUNT=0
                 for j in `ls |grep $i`; do
@@ -178,7 +178,7 @@ function download_dependencies() {
                     fi
                 done
                 if [[ $COUNT -eq 0 ]]; then
-                    wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
+                    wget https://github.com/01org/vsm-dependencies/blob/$DEPENDENCE_BRANCH/ubuntu14/$i
                 fi
             fi
         done
