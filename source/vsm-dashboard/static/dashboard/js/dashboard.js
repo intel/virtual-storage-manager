@@ -200,7 +200,8 @@ require(
                                 1,        //out
                                 metrics[i].out_value,
                                 false,    
-                                false,    
+                                false,
+                                axisData
                             ]
                         ]);
                     }
