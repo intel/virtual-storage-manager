@@ -23,10 +23,10 @@ USER=`whoami`
 
 source $TOPDIR/hostrc
 
-for ip in $controller_ip; do
+for ip in $CONTROLLER_ADDRESS; do
     ssh -t $ip "clean-data -f; yum -y erase ceph httpd librbd MariaDB-client MariaDB-devel MariaDB-server memcached openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
 done
 
-for ip in $storage_ip_list; do
+for ip in $AGENT_ADDRESS_LIST; do
     ssh -t $ip "clean-data -f; yum -y erase ceph httpd librbd MariaDB-client MariaDB-devel MariaDB-server memcached openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
 done
