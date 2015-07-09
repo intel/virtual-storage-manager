@@ -317,6 +317,43 @@ function install_controller() {
 #            agent
 #-------------------------------------------------------------------------------
 
+function install_setup_diamond() {
+    $SSH $USER@$1 "sudo apt-get install -y diamond"
+    DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
+    source $DEPLOYRC_FILE
+    VSM_PATH=`find /usr -name "vsm"|grep "python2.*"`
+    VSM_PATH=${VSM_PATH////\\/}
+    DIAMOND_CONFIG="/etc/diamond/diamond.conf"
+    $SSH $USER@$1 "$SUDO cp /etc/diamond/diamond.conf.example $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.mysql.MySQLHandler/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/^collectors_path = *.*/collectors_path = $VSM_PATH\/diamond\/collectors/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/^collectors_config_path = *.*/collectors_config_path = $VSM_PATH\/diamond\/collectors/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/^handlers_config_path = *.*/handlers_config_path = $VSM_PATH\/diamond\/handlers/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/^handlers_path = *.*/handlers_path = $VSM_PATH\/diamond\/handlers/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/password*=*.*/password    = $MYSQL_VSM_PASSWORD/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/database    = diamond/database    = vsm/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_instance = instance\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_hostname    = hostname\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/i\[\[SignalfxHandler\]\]\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/iauth_token = abcdefghijklmnopqrstuvwxyz\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/\# interval = 300/interval = 20/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[CPUCollector\]\]/\#\[\[CPUCollector\]\]/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/enabled = True/#enabled = True/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[DiskSpaceCollector\]\]/\#\[\[DiskSpaceCollector\]\]/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[DiskUsageCollector\]\]/\#\[\[DiskUsageCollector\]\]/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[LoadAverageCollector\]\]/\#\[\[LoadAverageCollector\]\]/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[MemoryCollector\]\]/\#\[\[MemoryCollector\]\]/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/i\[\[CephMetricsCollector\]\]\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "diamond"
+}
+
 function setup_remote_agent() {
     $SSH $USER@$1 "$SUDO rm -rf /etc/manifest/server.manifest"
     $SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
@@ -340,6 +377,7 @@ function install_agent() {
     $SSH $USER@$1 "$SUDO preinstall"
 
     setup_remote_agent $1
+    install_setup_diamond $1
 }
 
 #-------------------------------------------------------------------------------
@@ -362,9 +400,9 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
-        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "$SUDO agent-token"`
+        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token"`
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
-        for ip_or_hostname in $AGENT_ADDRESS_LIST; do
+        for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname
         done
     fi
