@@ -63,7 +63,7 @@ class PerformanceMetricsController(wsgi.Controller):
         search_opts = {}
         search_opts.update(req.GET)
         metrics_name =  search_opts['metrics_name']
-        if metrics_name in ['ops_r','ops_w','ops_rw','bandwidth_out','bandwidth_on']:
+        if metrics_name in ['ops_r','ops_w','ops_rw','bandwidth_out','bandwidth_in']:
             result = self.get_iops_or_banwidth(req)
         elif metrics_name in ['latency_rw','latency_r','latency_w']:
             result = self.get_lantency(req)

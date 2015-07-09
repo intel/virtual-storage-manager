@@ -7,9 +7,11 @@ require.config({
     }
 });
 
-var cThroughput;
-var cLatency;
 var cClusterGague;
+var cIOPs;
+var cLatency;
+var cBandwidth;
+var token = $("input[name=csrfmiddlewaretoken]").val();
 require(
     [
         'echarts',
@@ -19,81 +21,206 @@ require(
         'echarts/chart/gauge'
     ],
     function(ec){
-        cIOPs = ec.init(document.getElementById('divIOPsContent'));
-        cLatency = ec.init(document.getElementById('divLatencyContent'));
         cClusterGague = ec.init(document.getElementById('divClusterGauge'));
         cPGs = ec.init(document.getElementById('divPGRect'));
-        cIOPs.setOption(GenerateLineOption());
-        cLatency.setOption(GetAreaLineOption());
-        
-  
-	$.ajax({
-            type: "get",
-            url: "/dashboard/vsm/capcity/",
-            data: null,
-            dataType:"json",
-            success: function(data){
-		    //console.log(data.value);
-                    cClusterGague.setOption(GenerateGaugeOption(data.value));
-                }
-         });
-  
-	$.ajax({
-            type: "get",
-            url: "/dashboard/vsm/PG/",
-            data: null,
-            dataType:"json",
-            success: function(data){
-                    $("#lblPGUpdate")[0].innerHTML ="Update:&nbsp&nbsp"+data.update;
-                    cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
-                }
-         });
+        cIOPs = ec.init(document.getElementById('divIOPsContent'));
+        cLatency = ec.init(document.getElementById('divLatencyContent'));
+        cBandwidth = ec.init(document.getElementById('divBandwidthContent'));
        
-
-     setInterval(function(){
-         $.ajax({
-	     type: "get",
-	     url: "/dashboard/vsm/capcity/",
-	     data: null,
-	     dataType:"json",
-	     success: function(data){
-	             option.series[0].data[0].value = data.value;
-	             cClusterGague.setOption(option, true);
-	         }
-	     });
-     },15000);
-   
-	setInterval(function(){
-	     $.ajax({
-		    type: "get",
-		    url: "/dashboard/vsm/PG/",
-		    data: null,
-		    dataType:"json",
-		    success: function(data){
-		            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
-		    	}
-	   	  });
-	},15000);
-
-
-        /*var IOPsInterval = setInterval(function (){
-            $.ajax({
+        cIOPs.setOption(GenerateLineOption());
+        cLatency.setOption(GetLantencyOption());
+        cBandwidth.setOption(GetBandwidthOption());
+        
+    	$.ajax({
                 type: "get",
-                url: "/dashboard/vsm/IOPS/",
+                url: "/dashboard/vsm/capcity/",
                 data: null,
+                dataType:"json",
+                success: function(data){
+    		    //console.log(data.value);
+                        cClusterGague.setOption(GenerateGaugeOption(data.value));
+                    }
+             });
+  
+    	$.ajax({
+                type: "get",
+                url: "/dashboard/vsm/PG/",
+                data: null,
+                dataType:"json",
+                success: function(data){
+                        $("#lblPGUpdate")[0].innerHTML ="Update:&nbsp&nbsp"+data.update;
+                        cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
+                    }
+             });
+       
+        setInterval(function(){
+             $.ajax({
+    	     type: "get",
+    	     url: "/dashboard/vsm/capcity/",
+    	     data: null,
+    	     dataType:"json",
+    	     success: function(data){
+    	             option.series[0].data[0].value = data.value;
+    	             cClusterGague.setOption(option, true);
+    	         }
+    	     });
+         },15000);
+   
+    	setInterval(function(){
+    	     $.ajax({
+    		    type: "get",
+    		    url: "/dashboard/vsm/PG/",
+    		    data: null,
+    		    dataType:"json",
+    		    success: function(data){
+    		            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
+    		    	}
+    	   	  });
+    	},15000);
+
+        //IOPS
+        setInterval(function (){
+            $.ajax({
+                type: "post",
+                url: "/dashboard/vsm/IOPS/",
+                //data: JSON.stringify({"timestamp":timestamp1 }),
+                data:"",
                 dataType: "json",
                 success: function (data) {
-                    var axisData = (new Date()).toLocaleTimeString().replace(/^\D*//*, '');
-                    var line1Data =  [0,data.line1, false, false, axisData];
-                    var line2Data =  [1,data.line2, false, false, axisData];
-                    // 动态数据接口 addData
-                    cIOPs.addData([line1Data,line2Data]);
+                    metrics = data.metrics;
+                    var axisData = "00:00:00";
+                    for(var i=0;i<metrics.length;i++){
+                        var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+
+                        //add new node     
+                        cIOPs.addData([
+                            [
+                                0,        //read line
+                                metrics[i].r_value, 
+                                false,    
+                                false,
+                            ],
+                            [
+                                1,        //write line
+                                metrics[i].w_value,
+                                false,    
+                                false,    
+                                axisData 
+                            ]
+                        ]);
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+                },
+                headers: {
+                    "X-CSRFToken": token
+                },
+                complete: function(){
+
                 }
             });
-        }, 15000);*/
-    }
+        }, 15000);
 
+        //Lantency
+        setInterval(function (){
+            $.ajax({
+                type: "post",
+                url: "/dashboard/vsm/latency/",
+                //data: JSON.stringify({"timestamp":timestamp2 }),
+                data:"",
+                dataType: "json",
+                success: function (data) {
+                    metrics = data.metrics;
+                    var axisData = "00:00:00";
+                    for(var i=0;i<metrics.length;i++){
+                        //console.log(metrics[i]);
+                        var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+
+                        //add new node     
+                        cLatency.addData([
+                            [
+                                0,        //read line
+                                metrics[i].r_value, 
+                                false,    
+                                false,
+                            ],
+                            [
+                                1,        //write line
+                                metrics[i].w_value,
+                                false,    
+                                false,    
+                            ],
+                            [
+                                2,        //read_write line
+                                metrics[i].rw_value,
+                                false,    
+                                false,    
+                                axisData 
+                            ]
+                        ]);
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+                },
+                headers: {
+                    "X-CSRFToken": token
+                },
+                complete: function(){
+
+                }
+            });
+        }, 15000);
+
+        //Bandwith
+        setInterval(function (){
+            $.ajax({
+                type: "post",
+                url: "/dashboard/vsm/bandwidth/",
+                //data: JSON.stringify({"timestamp":timestamp2 }),
+                data:"",
+                dataType: "json",
+                success: function (data) {
+                    metrics = data.metrics;
+                    var axisData = "00:00:00";
+                    for(var i=0;i<metrics.length;i++){
+                        //console.log(metrics[i]);
+                        var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+
+                        //add new node     
+                        cBandwidth.addData([
+                            [
+                                0,        //in
+                                metrics[i].in_value, 
+                                false,    
+                                false,
+                            ],
+                            [
+                                1,        //out
+                                metrics[i].out_value,
+                                false,    
+                                false,
+                                axisData
+                            ]
+                        ]);
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+                },
+                headers: {
+                    "X-CSRFToken": token
+                },
+                complete: function(){
+
+                }
+            });
+        }, 15000);
+
+    }
 );
+
 
 
 $(document).ready(function(){
@@ -310,74 +437,6 @@ function loadStorage(){
      });
 }
 
-function GenerateLineOption(){
-   var option = {
-        tooltip : {
-            trigger: 'axis'
-        },
-        xAxis : [
-            {
-                type : 'category',
-                boundaryGap : false,
-                data :(function () {
-                    var now = new Date();
-                    var res = [];
-                    var len = 10;
-                    while (len--) {
-                        res.unshift(now.toLocaleTimeString().replace(/^\D*/, ''));
-                        now = new Date(now - 2000);
-                    }
-                    return res;
-                })()
-            }
-        ],
-        yAxis : [
-            {
-                type : 'value',
-                min:0,
-                max:15,
-                axisLabel : {
-                    formatter: '{value}'
-                }
-            }
-        ],
-        grid: {
-            x:30,
-            y:20,
-            x2:30,
-            y2:40,
-
-        },
-        series : [
-            {
-                name:'',
-                type:'line',
-                data:(function () {
-                    var res = [];
-                    var len = 10;
-                    while (len--) {
-                        res.push(0);
-                    }
-                    return res;
-                })()
-            },
-            {
-                name:'',
-                type:'line',
-                data:(function () {
-                    var res = [];
-                    var len = 10;
-                    while (len--) {
-                        res.push(0);
-                    }
-                    return res;
-                })()
-            },
-        ]
-    };
-    return option;
-}
-
 function GenerateGaugeOption(value) {
     option = {
         tooltip: {
@@ -428,61 +487,184 @@ function GenerateGaugeOption(value) {
     return option;
 }
 
-function GetAreaLineOption(){
-    option = {
+function GenerateLineOption(){
+    var option = {
+        grid :{
+            x:40,
+            y:20,
+            height:'80%',
+            width:'90%',
+        },
+        tooltip:{
+            trigger:'axis'
+        },
+        legend:{
+            data:["iops_r","iops_w"]
+        },
         xAxis : [
             {
                 type : 'category',
                 boundaryGap : false,
-                data : ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+                axisLabel:{
+                    show:true,
+                    interval:0,
+                },
+                data :InitAxis_X()
             }
         ],
         yAxis : [
             {
-                type : 'value'
+                type : 'value',
+                scale: false,
+                min:0,
+                //max:15,
+                axisLabel:{
+                    show:true,
+                    interval:'auto',
+                },
+                name : '',
+                boundaryGap: [0.5, 0.5]
             }
         ],
-         grid: {
-            x:30,
-            y:20,
-            x2:30,
-            y2:40,
-        },
         series : [
             {
-                name:'A',
+                name:'iops_r',
                 type:'line',
-                stack: 'A',
-                itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:[120, 132, 101, 134, 90, 230, 210]
+                smooth:true,
+                data:InitValues(0)
             },
             {
-                name:'B',
+                name:'iops_w',
+                type:'line',
+                smooth:true,
+                data:InitValues(0)
+            }
+        ]
+    };
+    return option;
+}
+
+function GetLantencyOption(){
+    option = {
+        grid :{
+            x:40,
+            y:20,
+            height:'80%',
+            width:'90%',
+        },
+        tooltip:{
+            trigger:'axis'
+        },
+        legend:{
+            data:["lantency_r","lantency_w","lantency_rw"]
+        },
+        xAxis : [
+            {
+                type : 'category',
+                boundaryGap : false,
+                axisLabel:{
+                    show:true,
+                    interval:0,
+                },
+                data : InitAxis_X()
+            }
+        ],
+        yAxis : [
+           {
+                type : 'value',
+                scale: false,
+                min:0,
+                //max:15,
+                axisLabel:{
+                    show:true,
+                    interval:'auto',
+                },
+                name : '',
+                boundaryGap: [0.5, 0.5]
+            }
+        ],
+        series : [
+            {
+                name:'lantency_r',
+                type:'line',
+                stack: 'A',
+                smooth:true,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                data:InitValues(3)
+            },
+            {
+                name:'lantency_w',
                 type:'line',
                 stack: 'B',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:[220, 182, 191, 234, 290, 330, 310]
+                data:InitValues(5)
             },
             {
-                name:'C',
+                name:'lantency_rw',
                 type:'line',
                 stack: 'C',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:[150, 232, 201, 154, 190, 330, 410]
+                data:InitValues(6)
+            }
+        ]
+    };
+    return option;
+}
+
+function GetBandwidthOption(){
+    option = {
+        grid :{
+            x:40,
+            y:20,
+            height:'80%',
+            width:'90%',
+        },
+        tooltip:{
+            trigger:'axis'
+        },
+        legend:{
+            data:["bandwidth_in","bandwidth_out"]
+        },
+        xAxis : [
+            {
+                type : 'category',
+                boundaryGap : false,
+                axisLabel:{
+                    show:true,
+                    interval:0,
+                },
+                data : InitAxis_X()
+            }
+        ],
+        yAxis : [
+           {
+                type : 'value',
+                scale: false,
+                min:0,
+                //max:15,
+                axisLabel:{
+                    show:true,
+                    interval:'auto',
+                },
+                name : '',
+                boundaryGap: [0.5, 0.5]
+            }
+        ],
+        series : [
+            {
+                name:'bandwidth_in',
+                type:'line',
+                stack: 'A',
+                smooth:true,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                data:InitValues(4)
             },
             {
-                name:'D',
+                name:'bandwidth_out',
                 type:'line',
-                stack: 'D',
+                stack: 'B',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:[320, 332, 301, 334, 390, 330, 320]
-            },
-            {
-                name:'E',
-                type:'line',
-                stack: 'E',
-                itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:[820, 932, 901, 934, 1290, 1330, 1320]
+                data:InitValues(7)
             }
         ]
     };
@@ -513,11 +695,25 @@ function GetPieOption(AC,NAC){
  	};
                     
 	return option;
-
 }
 
-//clearInterval(timeTicket);
-//    timeTicket = setInterval(function () {
-//        option.series[0].data[0].value = (Math.random() * 100).toFixed(2) - 0;
-//        myChart.setOption(option, true);
-//    }, 2000);
+
+function InitAxis_X(){
+    var now = new Date();
+    var res = [];
+    var len = 10;
+    while (len--) {
+        res.push("00:00:00");
+    }
+    return res;
+}
+
+
+function InitValues(value){
+    var res = [];
+    var len = 10;
+    while (len--) {
+        res.push(value);
+    }
+    return res;
+}
