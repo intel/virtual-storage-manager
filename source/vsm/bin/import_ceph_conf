@@ -29,12 +29,12 @@ from optparse import OptionParser
 import os
 
 if __name__ == "__main__":
-    usage = "usage: %prog [cluster name] [filename for ceph.conf]"
+    usage = "usage: %prog --cluster_name=... --file=... \nImport new ceph configuration file to VSM Database and ceph cluster"
     parser = OptionParser(usage=usage)
     parser.add_option("--cluster_name", dest="cluster_name",
             help = "which cluster to be modified.")
     parser.add_option("--ceph_conf_path", dest="ceph_conf_path",
-            help = "file path of ceph.conf you want to import")
+            help = "absolute path of the new ceph configuration file .\n Be careful:\n It can't be '/etc/ceph/ceph.conf' and Make sure you have access to the file.")
     options, args = parser.parse_args()
     ceph_conf_path = "/opt/ceph.conf"
     if not options.ceph_conf_path:
