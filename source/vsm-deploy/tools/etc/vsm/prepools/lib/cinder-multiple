@@ -74,22 +74,14 @@ function _add_type_key() {
 function _set_multiple_default_cinder() {
     local key=`echo $@ | awk -F "=" '{print $1}'`
     local value=`echo $@ | awk -F "=" '{print $2}'`
-    if test "$is_openstack_config"; then
-        ./lib/openstack-config --set /etc/cinder/cinder.conf DEFAULT $key $value
-    else
-        openstack-config --set /etc/cinder/cinder.conf DEFAULT $key $value
-    fi
+    crudini --set /etc/cinder/cinder.conf DEFAULT $key $value
 }
 
 function __set_section() {
     local sec_name=$1
     local key=`echo $2 | awk -F "=" '{print $1}'`
     local value=`echo $2 | awk -F "=" '{print $2}'`
-    if test "$is_openstack_config"; then
-        ./lib/openstack-config --set /etc/cinder/cinder.conf $sec_name $key $value
-    else
-        openstack-config --set /etc/cinder/cinder.conf $sec_name $key $value
-    fi
+    crudini --set /etc/cinder/cinder.conf $sec_name $key $value
 }
 
 function _set_backend_cinder() {
@@ -117,29 +109,17 @@ function _del_other_multiple_section() {
             sec_name=${n//[/ }
             sec_name=${sec_name//]/ }
             if [[ `echo $sec_name | grep vsm | wc -l` -gt 0 ]]; then
-                if test "$is_openstack_config"; then
-                    ./lib/openstack-config --del /etc/cinder/cinder.conf $sec_name
-                else
-                    openstack-config --del /etc/cinder/cinder.conf $sec_name
-                fi
+                crudini --del /etc/cinder/cinder.conf $sec_name
             fi
         fi
     done
-    if test "$is_openstack_config"; then
-        ./lib/openstack-config --del /etc/cinder/cinder.conf DEFAULT enabled_backends
-    else
-        openstack-config --del /etc/cinder/cinder.conf DEFAULT enabled_backends
-    fi
+    crudini --del /etc/cinder/cinder.conf DEFAULT enabled_backends
 }
 
 function _del_default_cinder() {
     local sec_name="DEFAULT"
     local key=`echo $@ | awk -F "=" '{print $1}'`
-    if test "$is_openstack_config"; then
-        ./lib/openstack-config --del /etc/cinder/cinder.conf $sec_name $key
-    else
-        openstack-config --del /etc/cinder/cinder.conf $sec_name $key
-    fi
+    crudini --del /etc/cinder/cinder.conf $sec_name $key
 }
 
 function _has_this_pool() {
@@ -157,7 +137,6 @@ function _has_this_pool() {
 }
 
 function configure_multiple_cinder() {
-    openstack-config --version >/dev/null 2>&1 || is_openstack_config=1
     local cinder_file=/etc/cinder/cinder.conf
     local ceph_file=/etc/cinder/ceph.conf
     local cnt=0

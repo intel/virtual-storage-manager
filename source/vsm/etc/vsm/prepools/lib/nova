@@ -19,15 +19,10 @@
 function _set_default_nova() {
     local key=`echo $@ | awk -F "=" '{print $1}'`
     local value=`echo $@ | awk -F "=" '{print $2}'`
-    if test "$is_openstack_config"; then
-        ./lib/openstack-config --set /etc/nova/nova.conf DEFAULT $key $value
-    else
-        openstack-config --set /etc/nova/nova.conf DEFAULT $key $value
-    fi
+    crudini --set /etc/nova/nova.conf DEFAULT $key $value
 }
 
 function configure_nova() {
-    openstack-config --version >/dev/null 2>&1 || is_openstack_config=1
     local nova_file=/etc/nova/nova.conf
     local ceph_file=/etc/nova/ceph.conf
     local libvirt_auth_key=""

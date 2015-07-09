@@ -30,8 +30,6 @@ source $TOPDIR/localrc
 source $TOPDIR/lib/update
 source $TOPDIR/lib/service
 
-chmod 755 $TOPDIR/lib/openstack-config
-
 #-----------------------------------
 # Pre-checking
 #-----------------------------------

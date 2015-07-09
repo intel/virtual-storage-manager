@@ -96,14 +96,14 @@ class AppnodesController(wsgi.Controller):
         #     raise webob.exc.HTTPBadRequest(explanation=expl)
         node_list = appnodes.create(context, auth_openstack)
         node_view = self._view_builder.index(node_list)
-        for node in node_list:
+        # for node in node_list:
             #LOG.info('Node %s, Node id: %s, Node ip: %s' % (node, node.id, node.ip))
             #ssh = utils.SSHClient(ip='10.239.131.170', user='root', key_file=r'~/.ssh/id_rsa')
             #ssh = utils.SSHClient(node.ip, 'root', '~/.ssh/id_rsa')
             #ret = ssh.check_ssh(retries=1)
             #status = 'reachable' if ret else 'unreachable'
-            status = 'reachable'
-            appnodes.update(context, node.id, status)
+            # status = 'reachable'
+            # appnodes.update(context, node.id, status)
 
         return node_view
 

@@ -19,15 +19,10 @@
 function _set_default_glance() {
     local key=`echo $@ | awk -F "=" '{print $1}'`
     local value=`echo $@ | awk -F "=" '{print $2}'`
-    if test "$is_openstack_config"; then
-        ./lib/openstack-config --set /etc/glance/glance-api.conf DEFAULT $key $value
-    else
-        openstack-config --set /etc/glance/glance-api.conf DEFAULT $key $value
-    fi
+    crudini --set /etc/glance/glance-api.conf DEFAULT $key $value
 }
 
 function configure_glance() {
-    openstack-config --version >/dev/null 2>&1 || is_openstack_config=1
     local glance_file=/etc/glance/glance-api.conf
     local ceph_file=/etc/glance/ceph.conf
 

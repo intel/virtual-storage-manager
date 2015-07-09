@@ -19,11 +19,7 @@
 function _set_default_cinder() {
     local key=`echo $@ | awk -F "=" '{print $1}'`
     local value=`echo $@ | awk -F "=" '{print $2}'`
-    if test "$is_openstack_config"; then
-        ./lib/openstack-config --set /etc/cinder/cinder.conf DEFAULT $key $value
-    else
-        openstack-config --set /etc/cinder/cinder.conf DEFAULT $key $value
-    fi
+    crudini --set /etc/cinder/cinder.conf DEFAULT $key $value
 }
 
 function _del_other_section() {
@@ -37,23 +33,14 @@ function _del_other_section() {
             sec_name=${n//[/ }
             sec_name=${sec_name//]/ }
             if [[ `echo $sec_name | grep vsm | wc -l` -gt 0 ]]; then
-                if test "$is_openstack_config"; then
-                    ./lib/openstack-config --del /etc/cinder/cinder.conf $sec_name
-                else
-                    openstack-config --del /etc/cinder/cinder.conf $sec_name
-                fi
+                crudini --del /etc/cinder/cinder.conf $sec_name
             fi
         fi
     done
-    if test "$is_openstack_config"; then
-        ./lib/openstack-config --del /etc/cinder/cinder.conf DEFAULT enabled_backends
-    else
-        openstack-config --del /etc/cinder/cinder.conf DEFAULT enabled_backends
-    fi
+    crudini --del /etc/cinder/cinder.conf DEFAULT enabled_backends
 }
 
 function configure_cinder() {
-    openstack-config --version >/dev/null 2>&1 || is_openstack_config=1
     local cinder_file=/etc/cinder/cinder.conf
     local ceph_file=/etc/cinder/ceph.conf
 
