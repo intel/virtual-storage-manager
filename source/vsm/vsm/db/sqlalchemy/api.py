@@ -3525,7 +3525,7 @@ def sp_usage_create(context, pools, session=None):
     if not vsmapp_id:
         raise exception.VsmappNotFound()
 
-    pools = [int(x) for x in pools]
+    pool_ids = [int(x['id']) for x in pools]
     #update pools
     old_pools = get_sp_usage_all_by_vsmapp_id(context, vsmapp_id, session)
     for pref in old_pools:
@@ -3533,13 +3533,17 @@ def sp_usage_create(context, pools, session=None):
         # Filter the deleted pools.
         pool_ref = pool_get_by_db_id(context, pool_id, session)
         if pool_ref:
-            pools.append(pref['pool_id'])
-    pools = list(set(pools))
+            pool_ids.append(pref['pool_id'])
+    pool_ids = list(set(pool_ids))
 
 
     pool_info_list = []
     pool_name_list = []
-    for pool_id in pools:
+    for pool_id in pool_ids:
+        host_name = None
+        for pool in pools:
+            if pool['id'] == pool_id:
+                host_name = pool['cinder_volume_host']
         pool_ref = pool_get_by_db_id(context, pool_id, session)
         storage_group = pool_ref['storage_group']
         #rule_id = pool_ref['crush_ruleset']
@@ -3549,7 +3553,8 @@ def sp_usage_create(context, pools, session=None):
         storage_class = storage_group['storage_class']
         info = {'name': pool_ref['name'],
                 'type': storage_class,
-                'id': pool_ref['id']}
+                'id': pool_ref['id'],
+                'host': host_name}
         pool_name_list.append(pool_ref['name'])
         pool_info_list.append(info)
 

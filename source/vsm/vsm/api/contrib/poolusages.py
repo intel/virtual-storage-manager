@@ -87,21 +87,25 @@ class PoolUsagesController(wsgi.Controller):
 
         context = req.environ['vsm.context']
         pools = body['poolusages']
-        cinder_volume_host_list = pools.values()
+        cinder_volume_host_list = [pool['cinder_volume_host'] for pool in pools]
+        id_list = [pool['id'] for pool in pools]
 
         # check openstack access
-        nodes = appnodes.get_all_nodes(context)
-        auth_host = nodes[0].get("os_auth_url").split(":")[1][2:]
+        host_list = []
+        count = 0
         for host in cinder_volume_host_list:
             (status, output) = commands.getstatusoutput('ssh %s "crudini --version"' % host)
             LOG.info(str(status) + "========" + output)
             if "command not found" in output:
-                return {'status': 'bad', 'host': host}
-        id_list = body['poolusages']
-        info = storagepoolusage.create(context, id_list)
-        LOG.info(' pools_info = %s' % info)
-        self.scheduler_api.present_storage_pools(context, info)
-        return {'status': 'ok'}
+                count = count + 1
+                host_list.append(host)
+        if count != 0:
+            return {'status': 'bad', 'host': list(set(host_list))}
+        else:
+            info = storagepoolusage.create(context, pools)
+            LOG.info(' pools_info = %s' % info)
+            self.scheduler_api.present_storage_pools(context, info)
+            return {'status': 'ok', 'host': host_list}
 
     @wsgi.serializers(xml=PoolUsagesTemplate)
     def update(self, req, id, body):

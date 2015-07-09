@@ -197,26 +197,27 @@ class CephDriver(object):
         tenant_name = info['os_tenant_name']
         username = info['os_username']
         password = info['os_password']
-        auth_url = info['os_auth_url']
 
-        vsmapp_ip = auth_url.split(":")[1][2:]
+        host_list = list(set([pool['host'] for pool in pool_infos]))
 
         pools_str = ""
-        for pinfo in pool_infos:
-            pool_type = pinfo['type'] + "-" + pinfo['name']
-            # We use "vsm-" key words to delete unused pools to openstack.
-            temp_str = pinfo['name'] + "," + pool_type
-            pools_str = pools_str + " " + temp_str
+        for host in host_list:
+            for pinfo in pool_infos:
+                if pinfo['host'] == host:
+                    pool_type = pinfo['type'] + "-" + pinfo['name']
+                    # We use "vsm-" key words to delete unused pools to openstack.
+                    temp_str = pinfo['name'] + "," + pool_type
+                    pools_str = pools_str + " " + temp_str
 
-        LOG.info('pools_str = %s' % pools_str)
-        out, err = utils.execute('presentpool',
-                                 tenant_name,
-                                 username,
-                                 password,
-                                 vsmapp_ip,
-                                 pools_str,
-                                 run_as_root=True)
-        LOG.info('running logs = %s' % out)
+                LOG.info('pools_str = %s' % pools_str)
+                out, err = utils.execute('presentpool',
+                                         tenant_name,
+                                         username,
+                                         password,
+                                         host,
+                                         pools_str,
+                                         run_as_root=True)
+                LOG.info('running logs = %s' % out)
         return out, err
 
     def _create_osd_state(self, context, strg, osd_id):
