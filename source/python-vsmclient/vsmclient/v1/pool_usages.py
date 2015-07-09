@@ -40,15 +40,15 @@ class PoolUsageManager(base.ManagerWithFind):
 
         """
         Create pool usages.
-        Param: a list of pool id.
+        Param: a dict of pool id and cinder_volume_host.
         """
-        if not isinstance(pools, list):
-            pool_list = list()
-            pool_list.append(pools)
+        if not isinstance(pools, dict):
+            pool_dict = dict()
+            pool_dict.update(pools)
         else:
-            pool_list = pools
+            pool_dict = pools
 
-        body = {'poolusages':  pool_list}
+        body = {'poolusages':  pool_dict}
         return self._create('/poolusages', body, 'poolusages')
 
     def list(self, detailed=False, search_opts=None):

@@ -31,16 +31,6 @@ source $TOPDIR/lib/update
 source $TOPDIR/lib/service
 
 #-----------------------------------
-# check command openstack-config
-#-----------------------------------
-
-#openstack-config --version >/dev/null 2>&1 || is_openstack_config=1
-#if test "$is_openstack_config"; then
-#    cp $TOPDIR/lib/openstack-config /usr/bin
-#fi
-chmod 755 $TOPDIR/lib/openstack-config
-
-#-----------------------------------
 # Pre-checking
 #-----------------------------------
 

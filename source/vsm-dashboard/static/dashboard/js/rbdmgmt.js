@@ -100,7 +100,10 @@ $("#btnSubmit").click(function(){
         url: "/dashboard/vsm/rbdpools/pools/present",
         success: function (data) {
             console.log(data);
-            window.location.href="/dashboard/vsm/rbdpools/";
+            if(data.status == "warning")
+                showTip(data.status,data.message);
+            else
+                window.location.href="/dashboard/vsm/rbdpools/";
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             if(XMLHttpRequest.status == 500)

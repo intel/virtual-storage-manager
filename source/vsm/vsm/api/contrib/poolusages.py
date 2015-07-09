@@ -16,10 +16,12 @@
 #    under the License.
 
 import webob
+import commands
 from webob import exc
 from vsm.api import extensions
 from vsm.api.openstack import wsgi
 from vsm.agent import storagepoolusage
+from vsm.agent import appnodes
 from vsm.api import xmlutil
 from vsm import flags
 from vsm.openstack.common import log as logging
@@ -84,6 +86,17 @@ class PoolUsagesController(wsgi.Controller):
         LOG.info(' Creating new pool usages')
 
         context = req.environ['vsm.context']
+        pools = body['poolusages']
+        cinder_volume_host_list = pools.values()
+
+        # check openstack access
+        nodes = appnodes.get_all_nodes(context)
+        auth_host = nodes[0].get("os_auth_url").split(":")[1][2:]
+        for host in cinder_volume_host_list:
+            (status, output) = commands.getstatusoutput('ssh %s "crudini --version"' % host)
+            LOG.info(str(status) + "========" + output)
+            if "command not found" in output:
+                return {'status': 'bad', 'host': host}
         id_list = body['poolusages']
         info = storagepoolusage.create(context, id_list)
         LOG.info(' pools_info = %s' % info)

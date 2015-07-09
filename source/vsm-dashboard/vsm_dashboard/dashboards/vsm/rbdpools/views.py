@@ -138,10 +138,18 @@ def PoolsAction(request, action):
 
         if action == "present":
             print data
+            pools = {}
+            for x in data:
+                pools.update({'id': x['id'], 'cinder_volume_host': x['cinder_volume_host']})
             print "========Start Present Pools==========="
-            vsmapi.present_pool(request, [x['id'] for x in data])
-            status = "info"
-            msg = "Begin to Present Pools!"
+            result = vsmapi.present_pool(request, pools)
+            print result
+            if result['status'] == "bad":
+                status = "warning"
+                msg = "Not found crudini commmand"
+            else:
+                status = "info"
+                msg = "Begin to Present Pools!"
             print "========End Present Pools==========="
 
     resp = dict(message=msg, status=status, data="")
