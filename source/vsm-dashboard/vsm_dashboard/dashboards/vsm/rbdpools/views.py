@@ -138,9 +138,9 @@ def PoolsAction(request, action):
 
         if action == "present":
             print data
-            pools = {}
+            pools = []
             for x in data:
-                pools.update({'id': x['id'], 'cinder_volume_host': x['cinder_volume_host']})
+                pools.append({'id': x['id'], 'cinder_volume_host': x['cinder_volume_host']})
             print "========Start Present Pools==========="
             result = vsmapi.present_pool(request, pools)
             print result
