@@ -350,7 +350,7 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
-    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "$SUDO agent-token"`
+    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token"`
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
     done
