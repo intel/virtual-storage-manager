@@ -1,6 +1,6 @@
-Metadata-Version: 1.0
+Metadata-Version: 2.0.0
 Name: vsm
-Version: 1.0
+Version: 2.0.0
 Summary: block storage service
 Home-page: http://www.openstack.org/
 Author: OpenStack

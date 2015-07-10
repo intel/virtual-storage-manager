@@ -61,7 +61,7 @@ TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 #DATE=`date "+%Y%m%d"`
 
-VERSION=`cat $TOPDIR\VERSION`
+VERSION=`cat $TOPDIR/VERSION`
 sed -i "s,Version: *.*,Version: $VERSION,g" $TOPDIR/source/python-vsmclient/PKG-INFO
 sed -i "s,Version: *.*,Version: $VERSION,g" $TOPDIR/source/vsm/PKG-INFO
 
