@@ -1,3 +1,11 @@
+2.0.0 (build 123)
+------------------------------------
+
+Special Notes
+---------------
+-	this is alpha 1 release for 2.0, which is not well verified yet, just for early preview.
+
+
 1.1_1
 ------------------------------------
 
