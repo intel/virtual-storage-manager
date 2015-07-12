@@ -1,8 +1,5 @@
-/**
- * Created by root on 15-7-10.
- */
  $(function(){
-
+ 	
  })
 
 
@@ -75,22 +72,59 @@ $("#btnAddOSD").click(function(){
 	var storage_group_id =$("#selStorageGroup").val();
 	var storage_group =$("#selStorageGroup")[0].options[$("#selStorageGroup")[0].selectedIndex].text;
 
-	var tbodyHtml = "";
-		tbodyHtml += "<tr class='new_osd' storage_group_id="+storage_group_id+">";
-		tbodyHtml += "	<td class='sortable normal_column hidden'></td>";
-		tbodyHtml += "	<td class='sortable normal_column'></td>";
-		tbodyHtml += "	<td class='sortable normal_column'>"+weight+"</td>";
-		tbodyHtml += "	<td class='sortable normal_column'>"+storage_group+"</td>";
-		tbodyHtml += "	<td class='sortable normal_column'>"+journal_device+"</td>";
-		tbodyHtml += "	<td class='sortable normal_column'>"+data_device+"</td>";
-		tbodyHtml += "	<td id='option_column' class='sortable normal_column'>";
-		// tbodyHtml += "		<button class='btn btn-primary'>Update</button>";
-		tbodyHtml += "		<button id='btnRemoveOSD' class='btn btn-danger remove-osd' >Remove</button>";
-		tbodyHtml += "	</td>";
-		tbodyHtml += "</tr>";
+	//Check the path
+	var token = $("input[name=csrfmiddlewaretoken]").val();
+	var server_id = $("#selServer").val()
+	var postData_json = {"server_id":server_id
+						,"journal_device_path":journal_device
+						,"data_device_path":data_device}
+	var postData = JSON.stringify(postData_json);
+	$.ajax({
+		type: "post",
+		url: "/dashboard/vsm/devices-management/check_device_path/",
+		data: postData,
+		dataType:"json",
+		success: function(data){
+				//console.log(data);
+				if(data.status == "OK"){
+					var tbodyHtml = "";
+					tbodyHtml += "<tr class='new_osd' storage_group_id="+storage_group_id+">";
+					tbodyHtml += "	<td class='sortable normal_column hidden'></td>";
+					tbodyHtml += "	<td class='sortable normal_column'></td>";
+					tbodyHtml += "	<td class='sortable normal_column'>"+weight+"</td>";
+					tbodyHtml += "	<td class='sortable normal_column'>"+storage_group+"</td>";
+					tbodyHtml += "	<td class='sortable normal_column'>"+journal_device+"</td>";
+					tbodyHtml += "	<td class='sortable normal_column'>"+data_device+"</td>";
+					tbodyHtml += "	<td id='option_column' class='sortable normal_column'>";
+					// tbodyHtml += "		<button class='btn btn-primary'>Update</button>";
+					tbodyHtml += "		<button id='btnRemoveOSD' class='btn btn-danger remove-osd' >Remove</button>";
+					tbodyHtml += "	</td>";
+					tbodyHtml += "</tr>";
 
-	$("#tbOSDList").append(tbodyHtml);
-	$(".table_count")[0].innerHTML = "Displaying "+$("#tbOSDList")[0].children.length+" item";
+					$("#tbOSDList").append(tbodyHtml);
+					$(".table_count")[0].innerHTML = "Displaying "+$("#tbOSDList")[0].children.length+" item";
+				}
+				else{
+					showTip("error","The device path is not validate")
+				}
+				
+
+		   	},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+				if(XMLHttpRequest.status == 500){
+					console.log("internal error");
+				}
+			},
+		headers: {
+			"X-CSRFToken": token
+			},
+		complete: function(){
+
+		}
+    });
+
+
+
 
 });
 
@@ -104,7 +138,7 @@ $("#btnSubmitAddOSD").click(function(){
 	var server_id = $("#selServer").val();
 	var new_osd_list = {"server_id":server_id,"osdinfo":[]};
 
-	if($(".new_osd").length == 0){
+	if($(".new_osd").length == 0){ 
 		showTip("error","Please add new osd");
 		return false;
 	}

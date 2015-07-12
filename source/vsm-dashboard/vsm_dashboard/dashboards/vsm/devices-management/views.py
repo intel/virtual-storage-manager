@@ -203,9 +203,35 @@ def add_new_osd_action(request):
     print data
 
     #TO DO: use huajing's method to add the osd 
-    
+
+
 
     status_json = {"status":"OK"}
+    status_data = json.dumps(status_json)
+    return HttpResponse(status_data)
+
+def check_device_path(request):
+    search_opts = json.loads(request.body)
+    server_id = search_opts["server_id"]
+    data_device_path = search_opts["data_device_path"]
+    journal_device_path = search_opts["journal_device_path"]
+
+
+    ret1 = vsmapi.get_available(None, search_opts={
+                "server_id": server_id
+                ,"path":data_device_path
+            })
+
+    ret2 = vsmapi.get_available(None, search_opts={
+                "server_id": server_id
+                ,"path":journal_device_path
+            })
+
+    if ret1["ret"] == 1 and ret1["ret"] == 1:
+        status_json = {"status":"OK"}
+    else:
+        status_json = {"status":"Failed"}
+
     status_data = json.dumps(status_json)
     return HttpResponse(status_data)
 
