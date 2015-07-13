@@ -463,6 +463,7 @@ class Zone(BASE, VsmBase):
     __tablename__ = 'zones'
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(length=255), nullable=False)
+    parent_id = Column(Integer, ForeignKey('zone.id'), nullable=False)
 
 class OsdState(BASE, VsmBase):
     """This table maintains the information about osd."""
