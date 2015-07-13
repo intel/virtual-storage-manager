@@ -76,6 +76,7 @@ class PerformanceMetricsController(wsgi.Controller):
         search_opts = {}
         search_opts.update(req.GET)
         context = req.environ['vsm.context']
+        search_opts ['metrics_name'] = 'osd_%s'%search_opts ['metrics_name']
         metrics = self.conductor_api.get_sum_performance_metrics(context, search_opts=search_opts)
         LOG.info("CEPH_LOG get performance metrics  iops or banwidth  by search opts: %s" % search_opts)
         return {"metrics": metrics}
@@ -85,6 +86,7 @@ class PerformanceMetricsController(wsgi.Controller):
         search_opts = {}
         search_opts.update(req.GET)
         context = req.environ['vsm.context']
+        search_opts ['metrics_name'] = 'osd_%s'%search_opts ['metrics_name']
         metrics = self.conductor_api.get_lantency(context, search_opts=search_opts)
         LOG.info("CEPH_LOG get performance metrics  lantency  by search opts: %s" % search_opts)
         return {"metrics": metrics}
