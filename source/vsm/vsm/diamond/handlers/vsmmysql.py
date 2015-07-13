@@ -8,7 +8,7 @@ from Handler import Handler
 import MySQLdb
 
 
-class MySQLHandler(Handler):
+class VSMMySQLHandler(Handler):
     """
     Implements the abstract Handler class, sending data to a mysql table
     """
@@ -16,7 +16,7 @@ class MySQLHandler(Handler):
 
     def __init__(self, config=None):
         """
-        Create a new instance of the MySQLHandler class
+        Create a new instance of the VSMMySQLHandler class
         """
         # Initialize Handler
         Handler.__init__(self, config)
@@ -41,7 +41,7 @@ class MySQLHandler(Handler):
         """
         Returns the help text for the configuration options for this handler
         """
-        config = super(MySQLHandler, self).get_default_config_help()
+        config = super(VSMMySQLHandler, self).get_default_config_help()
 
         config.update({
         })
@@ -52,7 +52,7 @@ class MySQLHandler(Handler):
         """
         Return the default config for the handler
         """
-        config = super(MySQLHandler, self).get_default_config()
+        config = super(VSMMySQLHandler, self).get_default_config()
 
         config.update({
         })
@@ -61,7 +61,7 @@ class MySQLHandler(Handler):
 
     def __del__(self):
         """
-        Destroy instance of the MySQLHandler class
+        Destroy instance of the VSMMySQLHandler class
         """
         self._close()
 
@@ -80,16 +80,20 @@ class MySQLHandler(Handler):
         data_name = data[0].split('.')
         try:
             cursor = self.conn.cursor()
+            # cursor.execute("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES(%%s, %%s, %%s ,%%s, %%s)"
+            #                % (self.table, self.col_metric, self.col_hostname, self.col_instance,
+            #                   self.col_time, self.col_value),
+            #                (data_name[4], data_name[1], data_name[3], data[2], data[1]))
             cursor.execute("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES(%%s, %%s, %%s ,%%s, %%s)"
                            % (self.table, self.col_metric, self.col_hostname, self.col_instance,
                               self.col_time, self.col_value),
-                           (data_name[4], data_name[1], data_name[3], data[2], data[1]))
+                           ('_'.join(data_name[6:]), data_name[1], '_'.join(data_name[4:6]), data[2], data[1]))
 
             cursor.close()
             self.conn.commit()
         except BaseException, e:
             # Log Error
-            self.log.error("MySQLHandler: Failed sending data. %s.", e)
+            self.log.error("VSMMySQLHandler: Failed sending data. %s.", e)
             # Attempt to restablish connection
             self._connect()
 
