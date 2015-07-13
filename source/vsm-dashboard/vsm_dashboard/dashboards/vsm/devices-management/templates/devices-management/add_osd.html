@@ -1,0 +1,134 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Add New OSD" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Add New OSD") %}
+  <link href="{{ STATIC_URL }}dashboard/css/devicemgmt.css" rel="stylesheet">
+{% endblock page_header %}
+
+{% block main %}
+
+{% csrf_token %}
+
+<div id="divServerPanel">
+    <label id="lblServer"  class="form-label">Server</label>
+    <select id="selServer" class="form-control">
+      {% for server in servers %}
+         <option value = "{{server.service_id}}">{{server.host}}</option>
+      {% endfor %}
+    </select>
+</div>
+
+<div id="divAddOSDForm">
+  <div class="left">
+      <div class="control-group required">
+        <label >Journal Device :</label>
+        <span class="form-required">*</span>
+        <div class="input">
+          <input id="txtJournalDevice" class="form-control" type="text" value="" >
+        </div>
+      </div>
+      <div class="control-group  required">
+        <label >Weight :</label>
+        <span class="form-required">*</span>
+        <div class="input">
+          <input id="txtWeight" class="form-control" type="text" value="" >
+        </div>
+      </div>
+  </div>
+  <div class="right">
+      <div class="control-group required">
+        <label >Data Device :</label>
+        <span class="form-required">*</span>
+        <div class="input">
+          <input id="txtDataDevice" class="form-control" type="text" value="" >
+        </div>
+      </div>
+
+      <div class="control-group required">
+        <label >Storage Group :</label>
+        <span class="form-required">*</span>
+        <div class="input">
+          <select id="selStorageGroup" class="form-control">
+            {% for sg in storage_group %}
+               <option value = "{{sg.id}}">{{sg.storage_class}}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+  </div>
+  <div id="divFormOptions" class="vsm-options-bar">
+        <button id="btnAddOSD" class="btn btn-primary">Add</button>
+  </div>
+</div>
+
+
+<div id="divAddOSDTable">
+   <table id="tOSDList" class="table table-bordered table-striped datatable">
+    <thead>
+      <tr>
+          <th  class="normal_column hidden"></th>
+          <th  class="normal_column">OSD Name</th>
+          <th  class="normal_column">Weight</th>
+          <th  class="normal_column">Storage Group</th>
+          <th  class="normal_column">Journal Device</th>
+          <th  class="normal_column">Data Device</th>      
+          <th  class="normal_column">Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="tbOSDList">
+{% for osd in OSDList %}
+      <tr id="tr_{{osd.id}}" name="{{osd.osd_name}}">
+          <td class="sortable normal_column hidden">{{osd.id}}</td>
+          <td class="sortable normal_column">{{ osd.osd_name }}</td>
+          <td class="sortable normal_column">{{ osd.weight }}</td>
+          <td class="sortable normal_column">{{ osd.device.device_type }}</td>
+          <td class="sortable normal_column">{{osd.device.journal}}</td>
+          <td class="sortable normal_column">{{ osd.device.path }}</td>
+          <td class="sortable normal_column">
+          </td>
+      </tr>
+{% endfor %}
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td colspan="8">
+          <span class="table_count"></span>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div id="divFormOptions" class="vsm-options-bar">
+        <button id="btnSubmitAddOSD" class="btn btn-primary">Submit</button>
+        <a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/devices-management/">Cancel</a>
+  </div>
+<div>
+
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/addnewosd.js' type='text/javascript' charset='utf-8'></script>
+{% endblock %}
+

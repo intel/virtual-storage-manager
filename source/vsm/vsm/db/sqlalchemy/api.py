@@ -3259,7 +3259,7 @@ def osd_state_get_by_service_id_and_storage_group_id(context, service_id,
 def osd_state_get_by_service_id(context, service_id):
     result = model_query(
         context, models.OsdState, read_deleted="no").\
-        filter_by(service_id=service_id).\
+        filter_by(service_id=service_id).options(joinedload('device')).\
         all()
     return result
 
