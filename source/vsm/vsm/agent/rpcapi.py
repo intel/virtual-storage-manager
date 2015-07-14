@@ -493,10 +493,10 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 
     def get_available_disks(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
-        self.test_service(context, topic)
         res = self.call(context,
                         self.make_msg('get_available_disks'),
                         topic, version='1.0', timeout=6000)
+        return res
 
     def add_new_disks_to_cluster(self, context, body, host):
         topic = rpc.queue_get_for(context, self.topic, host)

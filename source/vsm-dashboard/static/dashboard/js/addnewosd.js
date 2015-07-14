@@ -105,7 +105,7 @@ $("#btnAddOSD").click(function(){
 					$(".table_count")[0].innerHTML = "Displaying "+$("#tbOSDList")[0].children.length+" item";
 				}
 				else{
-					showTip("error","The device path is not validate")
+					showTip("error",data.message)
 				}
 				
 
@@ -147,8 +147,8 @@ $("#btnSubmitAddOSD").click(function(){
 		var osd = {
 			"storage_group_id":this.attributes["storage_group_id"].value
 			,"weight":this.children[2].innerHTML
-			,"journal":this.children[3].innerHTML
-			,"data":this.children[4].innerHTML
+			,"journal":this.children[4].innerHTML
+			,"data":this.children[5].innerHTML
 		};
 
 		new_osd_list.osdinfo.push(osd);

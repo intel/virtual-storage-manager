@@ -113,10 +113,10 @@ class Controller(wsgi.Controller):
 
     def get_available_disks(self,req,):
         context = req.environ['vsm.context']
-        server_id = device_id = req.GET.get('server_id',None)
-        body = {'server_id',server_id}
+        server_id = req.GET.get('server_id',None)
+        body = {'server_id':server_id}
         disk_list = self.scheduler_api.get_available_disks(context, body)
-        return disk_list
+        return {"available_disks":disk_list}
     #@wsgi.serializers(xml=ZonesTemplate)
     #def create(self, req, body):
     #    """create zone."""

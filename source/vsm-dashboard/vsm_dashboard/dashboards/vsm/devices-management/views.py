@@ -199,13 +199,7 @@ def get_osd_list(request):
 
 def add_new_osd_action(request):
     data = json.loads(request.body)
-    print "===========add new osd============"
-    print data
-
-    #TO DO: use huajing's method to add the osd 
-
-
-
+    vsmapi.add_new_disks_to_cluster(request,data)
     status_json = {"status":"OK"}
     status_data = json.dumps(status_json)
     return HttpResponse(status_data)
@@ -217,20 +211,16 @@ def check_device_path(request):
     journal_device_path = search_opts["journal_device_path"]
 
 
-    ret1 = vsmapi.get_available(None, search_opts={
+    ret = vsmapi.get_available_disks(request, search_opts={
                 "server_id": server_id
-                ,"path":data_device_path
+                ,"path":[data_device_path,journal_device_path]
             })
 
-    ret2 = vsmapi.get_available(None, search_opts={
-                "server_id": server_id
-                ,"path":journal_device_path
-            })
 
-    if ret1["ret"] == 1 and ret1["ret"] == 1:
+    if ret["ret"] == 1 :
         status_json = {"status":"OK"}
     else:
-        status_json = {"status":"Failed"}
+        status_json = {"status":"Failed",'message':ret.get('message')}
 
     status_data = json.dumps(status_json)
     return HttpResponse(status_data)
