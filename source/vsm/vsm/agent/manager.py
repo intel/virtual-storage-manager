@@ -109,11 +109,11 @@ class AgentManager(manager.Manager):
             if right_ref:
                 break
 
-            lan_list_1 = [cluster_ref['primary_public_network'],
-                        cluster_ref['secondary_public_network'],
+            lan_list_1 = [cluster_ref['management_network'],
+                        cluster_ref['ceph_public_network'],
                         cluster_ref['cluster_network']]
-            lan_list = cluster_ref['primary_public_network'].split(',') + \
-                        cluster_ref['secondary_public_network'].split(',') + \
+            lan_list = cluster_ref['management_network'].split(',') + \
+                        cluster_ref['ceph_public_network'].split(',') + \
                         cluster_ref['cluster_network'].split(',')
 
             LOG.info('Get vlan list = %s' % lan_list)

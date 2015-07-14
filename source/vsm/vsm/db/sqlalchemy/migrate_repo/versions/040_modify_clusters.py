@@ -21,17 +21,27 @@ def upgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
 
-    zones = Table('zone', meta, autoload=True)
+    clusters = Table('clusters', meta, autoload=True)
+    clusters.drop_column('primary_public_network')
+    clusters.drop_column('secondary_public_network')
 
-    parent_id = Column('parent_id"',Integer, nullable=False)
-    zones.create_column(parent_id)
-    type = Column("type", Integer, nullable=False)
-    zones.create_column(type)
+    management_network = Column('management_network', String(length=255))
+    ceph_public_network = Column('ceph_public_network', String(length=255))
+
+    clusters.create_column(management_network)
+    clusters.create_column(ceph_public_network)
+
 
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
-    zones = Table('zone', meta, autoload=True)
-    zones.drop_column('parent_id')
-    zones = Table('zone', meta, autoload=True)
-    zones.drop_column('type')
+
+    clusters = Table('clusters', meta, autoload=True)
+
+    clusters.drop_column('management_network')
+    clusters.drop_column('ceph_public_network')
+    primary_public_network = Column('primary_public_network', String(length=255))
+    secondary_public_network = Column('secondary_public_network', String(length=255))
+
+    clusters.create_column(primary_public_network)
+    clusters.create_column(secondary_public_network)

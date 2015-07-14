@@ -553,8 +553,8 @@ class ManifestParser(object):
             return
         info = self._map['cluster']
         self._map['cluster']['name'] = info["cluster_name"]
-        self._map['cluster']['primary_public_network'] = info["public_addr"]
-        self._map['cluster']['secondary_public_network'] = \
+        self._map['cluster']['management_network'] = info["public_addr"]
+        self._map['cluster']['ceph_public_network'] = \
             info["secondary_public_addr"]
         self._map['cluster']['cluster_network'] = info["cluster_addr"]
         self._map['cluster']['file_system'] = info["file_system"]
