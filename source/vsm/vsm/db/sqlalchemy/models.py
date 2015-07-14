@@ -373,50 +373,6 @@ def register_models():
     for model in models:
         model.metadata.create_all(engine)
 
-class ComputeNode(BASE, VsmBase):
-    """Represents a running compute service on a host."""
-
-    __tablename__ = 'compute_nodes'
-    id = Column(Integer, primary_key=True)
-    service_id = Column(Integer, ForeignKey('services.id'), nullable=True)
-    service = relationship(Service,
-                           backref=backref('compute_node'),
-                           foreign_keys=service_id,
-                           primaryjoin='and_('
-                                'ComputeNode.service_id == Service.id,'
-                                'ComputeNode.deleted == False)')
-
-    vcpus = Column(Integer)
-    memory_mb = Column(Integer)
-    local_gb = Column(Integer)
-    vcpus_used = Column(Integer)
-    memory_mb_used = Column(Integer)
-    local_gb_used = Column(Integer)
-
-    # Free Ram, amount of activity (resize, migration, boot, etc) and
-    # the number of running VM's are a good starting point for what's
-    # important when making scheduling decisions.
-    #
-    # NOTE(sandy): We'll need to make this extensible for other schedulers.
-    free_ram_mb = Column(Integer)
-    free_disk_gb = Column(Integer)
-    current_workload = Column(Integer)
-
-    # Note(masumotok): Expected Strings example:
-    #
-    # '{"arch":"x86_64",
-    #   "model":"Nehalem",
-    #   "topology":{"sockets":1, "threads":2, "cores":3},
-    #   "features":["tdtscp", "xtpr"]}'
-    #
-    # Points are "json translatable" and it must have all dictionary keys
-    # above, since it is copied from <cpu> tag of getCapabilities()
-    # (See libvirt.virtConnection).
-    cpu_info = Column(Text, nullable=True)
-    disk_available_least = Column(Integer)
-    cpu_utilization = Column(Float(), default=0.0)
-    #cluster_id = Column(Integer), nullable=True)
-
 class Device(BASE, VsmBase):
     """This table store the information about device on host"""
 
@@ -508,13 +464,6 @@ class OsdState(BASE, VsmBase):
     cluster_ip = Column(String(length=255))
     weight = Column(Float)
     operation_status = Column(String(length=255))
-
-class CrushMap(BASE, VsmBase):
-    """The table mainly store the content of crush map which encoded as text."""
-
-    __tablename__ = 'crushmaps'
-    id = Column(Integer, primary_key=True, nullable=False)
-    content = Column(Text, nullable=True)
 
 class Recipe(BASE, VsmBase):
     """This table store the recipes."""
@@ -826,14 +775,6 @@ class ErasureCodeProfile(BASE, VsmBase):
     pg_num = Column(Integer, nullable=False)
     plugin_kv_pair = Column(Text, nullable=False)
     
-
-class LongCalls(BASE, VsmBase):
-    """This table store the long_calls."""
-
-    __tablename__ = 'long_calls'
-    id = Column(Integer, primary_key=True, nullable=False)
-    uuid = Column(String(length=255), nullable=False)
-    status = Column(String(length=255), nullable=False)
 
 class CephPerformanceMetric(BASE, VsmBase):
     """ ceph performance metric and value from diamond
