@@ -1514,3 +1514,16 @@ class SchedulerManager(manager.Manager):
                 raise
         else:
             return False
+
+    def get_available_disks(self, context, body):
+        server_id = body['server_id']
+        server = db.init_node_get_by_id(context,id=server_id)
+        status = server['status']
+        if status == 'Active':
+            res = self._agent_rpcapi.get_available_disks(context,server['host'])
+            return res
+
+    def add_new_disks_to_cluster(self, context, body):
+        server_id = body['server_id']
+        server = db.init_node_get_by_id(context,id=server_id)
+        self._agent_rpcapi.add_new_disks_to_cluster(context, body, server['host'])

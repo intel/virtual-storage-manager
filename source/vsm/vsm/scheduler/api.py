@@ -125,3 +125,9 @@ class API(object):
 
     def get_ceph_health_list(self, context, body=None):
         return self.scheduler_rpcapi.get_ceph_health_list(context, body)
+
+    def get_available_disks(self, context, body=None):
+        return self.scheduler_rpcapi.get_available_disks(context, body)
+
+    def add_new_disks_to_cluster(self, context, body=None):
+        return self.scheduler_rpcapi.add_new_disks_to_cluster(context, body)

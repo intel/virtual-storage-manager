@@ -145,7 +145,8 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         controller=self.resources['osds'],
                         collection={"summary": "get",
                                     "refresh": "post",
-                                    "detail": "get"},
+                                    "detail": "get",
+                                    "add_new_disks_to_cluster":"post"},
                         member={'action':'POST'})
 
         self.resources['mdses'] = mdses.create_resource(ext_mgr)

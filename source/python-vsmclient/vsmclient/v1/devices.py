@@ -79,3 +79,22 @@ class DeviceManager(base.ManagerWithFind):
                          "devices")
         return ret
 
+    def get_available_disks(self, search_opts=None):
+        """
+        Get a list of available disks
+        """
+        if search_opts is None:
+            search_opts = {}
+
+        qparams = {}
+
+        for opt, val in search_opts.iteritems():
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+        resp, body = self.api.client.get("/devices/get_available_disks%s" % (query_string))
+        ret = {"ret":0}
+        if search_opts.get("path") and search_opts["path"] in body:
+            ret["ret"] = 1
+        return ret
