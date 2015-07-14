@@ -24,30 +24,14 @@ def upgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
 
-    long_calls = Table(
-        'long_calls', meta,
-        Column('id', Integer, primary_key=True, nullable=False),
-        #TODO add UUID for cluster. If there are same cluster name.
-        Column('uuid', String(length=255), nullable=False),
-        Column('status', String(length=255), nullable=False),
-        
-        Column('created_at', DateTime(timezone=False)),
-        Column('updated_at', DateTime(timezone=False)),
-        Column('deleted_at', DateTime(timezone=False)),
-        Column('deleted', Boolean(create_constraint=True, name=None)),
-    )
+    long_calls = Table('long_calls',
+                    meta,
+                    autoload=True)
+    long_calls.drop()
 
-    try:
-        long_calls.create()
-    except Exception:
-        meta.drop_all(tables=[long_calls])
-        raise
 
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
 
-    long_calls = Table('long_calls',
-                    meta,
-                    autoload=True)
-    long_calls.drop()
+
