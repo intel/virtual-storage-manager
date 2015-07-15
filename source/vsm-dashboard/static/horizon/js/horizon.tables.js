@@ -1,6 +1,11 @@
 /* Namespace for core functionality related to DataTables. */
 horizon.datatables = {
   update: function () {
+    //Shouan:if table have no data and using ajax to update, the page will be messy
+    var td = $(".ajax-update.status_unknown.odd>td");
+    if(td.length > 0 && td[0].innerHTML == "No items to display."){
+      return false;
+    }
     var $rows_to_update = $('tr.status_unknown.ajax-update');
     if ($rows_to_update.length) {
       var interval = $rows_to_update.attr('data-update-interval'),

@@ -1,5 +1,6 @@
 var labelTop = {
     normal : {
+        color:  '#ffff33',
         label : {
             show : true,
             position : 'center',
@@ -20,17 +21,18 @@ var labelFromatter = {
                 return (100 - params.value).toFixed(2) + '%'
             },
             textStyle: {
-                baseline : 'top'
+                baseline : 'top',color:  '#000',
             }
         }
     }
 }
 var labelBottom = {
     normal : {
-        color: '#ccc',
+        color:  '#00cc00',
         label : {
             show : true,
-            position : 'center'
+            position : 'center',
+
         },
         labelLine : {
             show : false
