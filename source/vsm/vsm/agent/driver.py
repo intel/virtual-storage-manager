@@ -37,6 +37,7 @@ from vsm.conductor import rpcapi as conductor_rpcapi
 from vsm.agent import rpcapi as agent_rpc
 from vsm.agent import cephconfigparser
 from vsm.openstack.common.rpc import common as rpc_exc
+import glob
 
 LOG = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
@@ -1402,6 +1403,10 @@ class CephDriver(object):
                                  run_as_root=True)
         LOG.info("get_smart_info:%s--%s"%(out,err))
         return out
+
+    def get_available_disks(self, context):
+        all_disk = glob.glob('/dev/disk/by-path/*')
+        return all_disk
 
     def run_add_disk_hook(self, context):
         out, err = utils.execute('add_disk',

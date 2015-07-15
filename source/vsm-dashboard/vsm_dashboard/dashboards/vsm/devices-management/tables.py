@@ -164,6 +164,12 @@ STATUS_DISPLAY_CHOICES = (
     ("restoring", "Restoring"),
 )
 
+class AddOSDAction(tables.LinkAction):
+    name = "add_osd"
+    verbose_name = _("Add New OSD")
+    url = "/dashboard/vsm/devices-management/add_new_osd/"
+    classes = ('btn-danger',)
+
 class OsdsTable(tables.DataTable):
     STATUS_CHOICES = (
         ("Present", True),
@@ -205,7 +211,7 @@ class OsdsTable(tables.DataTable):
         name = "osds"
         verbose_name = _("Device List")
         table_actions = (RestartOsdsAction, RemoveOsdsAction, \
-                         RestoreOsdsAction,AddOsdsAction)
+                         RestoreOsdsAction,AddOSDAction)
         status_columns = ['vsm_status']
         row_class = UpdateRow
 
