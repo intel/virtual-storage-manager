@@ -63,9 +63,9 @@ class PerformanceMetricsController(wsgi.Controller):
         search_opts = {}
         search_opts.update(req.GET)
         metrics_name =  search_opts['metrics_name']
-        if metrics_name in ['ops_r','ops_w','ops_rw','bandwidth_out','bandwidth_in']:
+        if metrics_name in ['op_r','op_w','op_rw','op_in_bytes','op_out_bytes']:
             result = self.get_iops_or_banwidth(req)
-        elif metrics_name in ['latency_rw','latency_r','latency_w']:
+        elif metrics_name in ['op_rw_latency','op_r_latency','op_w_latency']:
             result = self.get_lantency(req)
         else:
             result = {"metrics":"no metric named %s data in DB"%metrics_name}
@@ -76,7 +76,7 @@ class PerformanceMetricsController(wsgi.Controller):
         search_opts = {}
         search_opts.update(req.GET)
         context = req.environ['vsm.context']
-        search_opts ['metrics_name'] = 'osd_%s'%search_opts ['metrics_name']
+        search_opts ['metrics_name'] = 'osd_%s'%search_opts['metrics_name']
         metrics = self.conductor_api.get_sum_performance_metrics(context, search_opts=search_opts)
         LOG.info("CEPH_LOG get performance metrics  iops or banwidth  by search opts: %s" % search_opts)
         return {"metrics": metrics}
@@ -86,7 +86,7 @@ class PerformanceMetricsController(wsgi.Controller):
         search_opts = {}
         search_opts.update(req.GET)
         context = req.environ['vsm.context']
-        search_opts ['metrics_name'] = 'osd_%s'%search_opts ['metrics_name']
+        search_opts ['metrics_name'] = 'osd_%s'%search_opts['metrics_name']
         metrics = self.conductor_api.get_lantency(context, search_opts=search_opts)
         LOG.info("CEPH_LOG get performance metrics  lantency  by search opts: %s" % search_opts)
         return {"metrics": metrics}
