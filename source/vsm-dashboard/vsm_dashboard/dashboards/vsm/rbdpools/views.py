@@ -144,9 +144,15 @@ def PoolsAction(request, action):
             print "========Start Present Pools==========="
             result = vsmapi.present_pool(request, pools)
             print result
+            host_list = ""
+            for host in result['host']:
+                host_list = host + "," + host_list
             if result['status'] == "bad":
                 status = "warning"
-                msg = "Not found crudini commmand"
+                msg = "Not found crudini commmand in host: %s" % host_list
+            elif result['status'] == "unreachable":
+                status = "warning"
+                msg = "Please check ssh with no password between vsm controller and host: %s" % host_list
             else:
                 status = "info"
                 msg = "Begin to Present Pools!"
@@ -166,12 +172,34 @@ def get_select_data(request):
     genauthtoken = GenAuthToken(tenant_name, username, password, auth_host)
     token, tenant_id = genauthtoken.get_token()
     cinder_service_list = list_cinder_service(auth_host, token, tenant_id)
-    cinder_service = []
+
+    cinder_volume_down_list = []
     for cinder in cinder_service_list:
-        if cinder["binary"] == "cinder-volume":
-            value=1
-            cinder.update({"value": value})
-            value+=1
-            cinder_service.append(cinder)
+        if cinder["state"] == "down":
+            cinder_volume_down_list.append(cinder)
+
+    cinder_service = []
+    value = 0
+    if len(cinder_volume_down_list) == 0:
+        for cinder in cinder_service_list:
+            if cinder["binary"] == "cinder-volume":
+                cinder.update({"value": value})
+                value = value + 1
+                cinder_service.append(cinder)
+    else:
+        for cinder in cinder_service_list:
+            if cinder["binary"] == "cinder-volume" and \
+                            "@" in cinder["host"]:
+                host = cinder["host"].split("@")[0]
+                if host not in [x["host"] for x in cinder_service_list]:
+                    cinder.update({"value": value})
+                    value = value + 1
+                    cinder_service.append(cinder)
+            elif cinder["binary"] == "cinder-volume" and \
+                            "@" not in cinder["host"]:
+                cinder.update({"value": value})
+                value = value + 1
+                cinder_service.append(cinder)
+
     data = tuple(cinder_service)
     return HttpResponse(json.dumps(data))

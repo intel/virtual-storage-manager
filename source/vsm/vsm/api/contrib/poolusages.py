@@ -88,19 +88,25 @@ class PoolUsagesController(wsgi.Controller):
         context = req.environ['vsm.context']
         pools = body['poolusages']
         cinder_volume_host_list = [pool['cinder_volume_host'] for pool in pools]
-        id_list = [pool['id'] for pool in pools]
+        # id_list = [pool['id'] for pool in pools]
 
         # check openstack access
         host_list = []
-        count = 0
+        count_crudini = 0
+        count_ssh = 0
         for host in cinder_volume_host_list:
             (status, output) = commands.getstatusoutput('ssh %s "crudini --version"' % host)
             LOG.info(str(status) + "========" + output)
             if "command not found" in output:
-                count = count + 1
+                count_crudini = count_crudini + 1
                 host_list.append(host)
-        if count != 0:
+            if "Permission denied" in output:
+                count_ssh = count_ssh + 1
+                host_list.append(host)
+        if count_crudini != 0:
             return {'status': 'bad', 'host': list(set(host_list))}
+        elif count_ssh != 0:
+            return {'status': 'unreachable', 'host': list(set(host_list))}
         else:
             info = storagepoolusage.create(context, pools)
             LOG.info(' pools_info = %s' % info)
