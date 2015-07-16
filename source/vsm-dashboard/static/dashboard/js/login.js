@@ -15,4 +15,6 @@ function InitCSS(){
 	for(var i=0;i<ctrlText.length;i++){
 		ctrlText[i].className = "form-control";
 	}
+
+	$(".form-control-feedback.glyphicon.glyphicon-eye-open").hide();
 }
