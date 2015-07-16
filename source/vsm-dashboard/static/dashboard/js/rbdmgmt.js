@@ -49,7 +49,7 @@ function LoadSelected(){
         url: "/dashboard/vsm/rbdpools/get_select_data/",
         success: function (data) {
             var html = "";
-            html += "<select style='width:80px'>";
+            html += "<select class='cinder_volume_host' style='width:80px'>";
             for(var i=0;i<data.length;i++){
                 html += "<option value='"+data[i].value+"' >"+data[i].host+"</option>";
             }
@@ -77,10 +77,11 @@ $("#btnSubmit").click(function(){
     $("#tPools>tbody>tr").each(function(){
         var tr_id = this.id;
         var checkbox = $("#"+tr_id).find(".table-row-multi-select");
-        
         if(checkbox[0].checked){
             id = checkbox.val();
-            data = {id:id};
+            var sel_index = $("#"+tr_id).find(".cinder_volume_host").val();
+            cinder_volume_host = $("#"+tr_id).find(".cinder_volume_host")[0].options[sel_index].text;
+            data = {id:id, cinder_volume_host:cinder_volume_host};
             data_list.push(data);
         }
     })

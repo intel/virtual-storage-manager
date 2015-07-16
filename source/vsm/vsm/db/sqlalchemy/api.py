@@ -3540,10 +3540,6 @@ def sp_usage_create(context, pools, session=None):
     pool_info_list = []
     pool_name_list = []
     for pool_id in pool_ids:
-        host_name = None
-        for pool in pools:
-            if pool['id'] == pool_id:
-                host_name = pool['cinder_volume_host']
         pool_ref = pool_get_by_db_id(context, pool_id, session)
         storage_group = pool_ref['storage_group']
         #rule_id = pool_ref['crush_ruleset']
@@ -3553,12 +3549,11 @@ def sp_usage_create(context, pools, session=None):
         storage_class = storage_group['storage_class']
         info = {'name': pool_ref['name'],
                 'type': storage_class,
-                'id': pool_ref['id'],
-                'host': host_name}
+                'id': pool_ref['id']}
         pool_name_list.append(pool_ref['name'])
         pool_info_list.append(info)
 
-    for pool_id in pools:
+    for pool_id in pool_ids:
         ref = get_sp_usage_by_poolid_vsmappid(context, pool_id, vsmapp_id)
 
         kargs = {
