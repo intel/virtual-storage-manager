@@ -1531,3 +1531,68 @@ class AgentManager(manager.Manager):
     def monitor_restart(self, context, monitor_num):
         self.ceph_driver.start_mon_daemon(context, monitor_num)
         return True
+    def get_available_disks(self, context):
+        all_disk = self.ceph_driver.get_available_disks(context)
+        used_disk = db.device_get_all_by_service_id(context,
+                                                  self._service_id)
+        used_journal_disk = [disk.journal for disk in used_disk]
+        used_data_disk = [disk.path for disk in used_disk]
+        available_disk = list(set(all_disk)-set(used_journal_disk)-set(used_data_disk))
+        return available_disk
+
+    def add_new_disks_to_cluster(self, context, body):
+        for disk in body['osdinfo']:
+            osd_id = self.add_disk_to_db(context,disk)
+            self.osd_add(context,osd_id)
+        return True
+
+    def add_disk_to_db(self,context,device_info):
+        """add disk into devices."""
+        device_dict = {}
+        osd_id = None
+        device_dict['service_id'] = self._service_id
+        device_dict['state'] = 'MISSING'
+        device_dict['fs_type'] = 'xfs'
+        device_dict['total_capacity_kb'] = 0
+        zone_ref = db.zone_get_by_name(self._context, self._node_info['zone'])
+        zone_id = zone_ref['id']
+        storage_group_ref = db.storage_group_get(context,device_info["storage_group_id"])
+        if storage_group_ref:
+            device_type = storage_group_ref['storage_class']
+            device_dict['journal'] = device_info['journal']
+            device_dict['name'] = device_info['data']
+            device_dict['device_type'] = device_type
+            device_dict['mount_point'] = device_info['data']
+            device_dict['path'] = device_info['data']
+            self._drive_num_count += 1
+            try:
+                device_ref = db.\
+                    device_get_by_name_and_journal_and_service_id(\
+                            self._context,
+                            device_dict['name'],
+                            device_dict['journal'],
+                            device_dict['service_id'])
+                if not device_ref:
+                    device_dict['used_capacity_kb'] = 0
+                    device_dict['avail_capacity_kb'] = 0
+                    dev = db.device_create(self._context, device_dict)
+                    #LOG.info("storage_group_ref=%s=="%(dir(storage_group_ref)))
+                    osd_states_dict = {
+                        'osd_name':'osd.%s.%s'%(FLAGS.vsm_status_uninitialized, dev.id),
+                        'device_id': dev.id,
+                        'storage_group_id': storage_group_ref.id,
+                        'service_id':self._service_id,
+                        'cluster_id':self._cluster_id,
+                        'state':FLAGS.vsm_status_uninitialized,
+                        'operation_status':FLAGS.vsm_status_uninitialized,
+                        'weight':device_info['weight'],
+                        'public_ip':'',
+                        'cluster_ip':'',
+                        'zone_id':zone_id,
+
+                    }
+                    osd_ref = db.osd_state_create(self._context, osd_states_dict)
+                    osd_id = osd_ref.id
+            except exception.UpdateDBError, e:
+                LOG.error('%s:%s' % (e.code, e.message))
+        return osd_id

@@ -65,6 +65,134 @@
 }
 
 .smart-info-icon{
+	margin-left:10px; .demoHeaders {
+		margin-top: 2em;
+	}
+
+	#dialog-link {
+		padding: .4em 1em .4em 20px;
+		text-decoration: none;
+		position: relative;
+	}
+	#dialog-link span.ui-icon {
+		margin: 0 5px 0 0;
+		position: absolute;
+		left: .2em;
+		top: 50%;
+		margin-top: -8px;
+	}
+
+#imgOSDDialog:hover{
+	cursor: pointer;
+}
+
+
+#divOSDInfo{
+	width: 400px;
+	height: 600px;
+	/*border: 1px solid #ccc;*/
+	float:none;
+}
+
+#divBaiscInfo{
+	height:100px;
+}
+
+#tSmartInfo>thead>tr{
+	border:0px;
+}
+
+
+#tSmartInfo>thead>tr>th{
+	border:1px solid #ccc;
+	text-align:center;
+
+}
+
+
+
+.form-group{
+  display: block;
+  height: 20px;
+}
+
+.span-label{
+	min-width: 150px;
+	display:inline-block;
+}
+
+#tSmartInfo>tbody>tr>td{
+	width: 150px;
+	height:30px;
+	border: 1px solid #ccc
+}
+
+.page{
+	float:right;
+}
+
+.smart-info-icon{
 	margin-left:10px;
 	cursor:pointer;
+}
+	cursor:pointer;
+}
+
+
+#divServerPanel{
+	width: 500px;
+}
+
+.form-label{
+	width: 60px;
+}
+
+.form-required{
+	content: "*";
+  	font-weight: bold;
+  	line-height: 0;
+  	padding-left: 4px;
+  	color: #428bca;
+}
+
+#selServer{
+	width: 250px;
+	display: inline-block;
+}
+
+#divAddOSDForm{
+	width: 800px;
+	border:1px solid #ccc;
+	margin-top: 10px;
+	overflow: hidden;
+	padding: 5px;
+}
+
+.left{
+	margin-left: 25px;
+	margin-right: 50px;
+}
+
+.control-group{
+	margin-top: 10px;
+}
+
+label{
+	color:#555555;
+}
+
+#divFormOptions{
+	height: 50px;
+	line-height: 50px;
+	margin-top:5px;
+	clear: both;
+}
+
+
+#divAddOSDTable{
+	width: 100%;
+	border:1px solid #ccc;
+	margin-top: 10px;
+	overflow: hidden;
+	padding: 5px;
 }

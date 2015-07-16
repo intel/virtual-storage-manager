@@ -191,3 +191,9 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 
     def get_ceph_health_list(self, ctxt, body=None):
         return self.call(ctxt, self.make_msg('get_ceph_health_list', body=body))
+
+    def get_available_disks(self, ctxt, body=None):
+        return self.call(ctxt, self.make_msg('get_available_disks', body=body))
+
+    def add_new_disks_to_cluster(self, ctxt, body=None):
+        return self.call(ctxt, self.make_msg('add_new_disks_to_cluster', body=body))

@@ -126,16 +126,21 @@ class Controller(wsgi.Controller):
 
         """Get osd list."""
         context = req.environ['vsm.context']
-        limit = req.GET.get('limit', None)
-        marker = req.GET.get('marker', None)
-        sort_keys = req.GET.get('sort_keys', None)
-        sort_dir = req.GET.get('sort_dir', None)
-
+        service_id = req.GET.get('service_id', None)
         error = self.conductor_api.ceph_error(context)
-        osds = self.conductor_api.osd_state_get_all(context, limit,
-                                                    marker, sort_keys,
-                                                    sort_dir)
-
+        error = self.conductor_api.ceph_error(context)
+        LOG.info('vsm/api/v1/osds.py detailed service_id:%s' % service_id)
+        if service_id:
+            osds = db.osd_get_by_service_id(context, service_id)
+            LOG.info('device=%s'%osds[0].device)
+        else:
+            limit = req.GET.get('limit', None)
+            marker = req.GET.get('marker', None)
+            sort_keys = req.GET.get('sort_keys', None)
+            sort_dir = req.GET.get('sort_dir', None)
+            osds = self.conductor_api.osd_state_get_all(context, limit,
+                                                        marker, sort_keys,
+                                                        sort_dir)
         if error:
             for osd in osds:
                 osd['state'] = error
@@ -200,6 +205,12 @@ class Controller(wsgi.Controller):
         context = req.environ['vsm.context']
         LOG.info("osd_add osd_id = %s" % id)
         self.scheduler_api.osd_add(context, id)
+        return webob.Response(status_int=202)
+
+    def add_new_disks_to_cluster(self, req, body):
+        context = req.environ['vsm.context']
+        LOG.info("osd_add body= %s" % body)
+        self.scheduler_api.add_new_disks_to_cluster(context, body)
         return webob.Response(status_int=202)
 
     def summary(self, req, cluster_id = None):

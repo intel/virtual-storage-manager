@@ -20,6 +20,7 @@ import sys
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse_lazy
 from django.utils.datastructures import SortedDict
+from django.views.generic import TemplateView
 from horizon import exceptions
 from horizon import tables
 from horizon import forms
@@ -106,6 +107,34 @@ class IndexView(tables.DataTableView):
         return osds
 
 
+class AddOSDView(TemplateView):
+    template_name = 'vsm/devices-management/add_osd.html'
+    
+    def get_context_data(self, **kwargs):
+        context = {}
+        storage_group_list = vsmapi.storage_group_status(None,)
+        print "===========storage_group============="
+        print dir(storage_group_list)
+
+        storage_group = []
+        for _sg in storage_group_list:
+            sg = {
+                "id":_sg.id
+                ,"storage_class":_sg.storage_class
+            }
+            storage_group.append(sg)
+        context["storage_group"] = storage_group
+
+        servers = vsmapi.get_server_list(None, )
+        context["servers"] = servers;
+
+        if len(servers) > 0:
+            context["OSDList"] = vsmapi.osd_status(self.request, paginate_opts={
+                "service_id": servers[0].service_id
+            })
+        
+        return context
+
 def DevicesAction(request, action):
     data = json.loads(request.body)
 
@@ -140,3 +169,59 @@ def DevicesAction(request, action):
 
     devicedata = json.dumps(device_data_json)
     return HttpResponse(devicedata)
+
+
+def get_osd_list(request):
+    data = json.loads(request.body)
+    service_id = int(data["service_id"])
+    osds = vsmapi.osd_status(None, paginate_opts={
+                "service_id": service_id
+            })
+
+    osd_list = []
+    for _osd in osds:
+        osd = {
+            "id":_osd.id
+            ,"name":_osd.osd_name
+            ,"weight":_osd.weight
+            ,"storage_group":_osd.device['device_type']
+            ,"journal":_osd.device['journal']
+            ,"device":_osd.device['path']
+        }
+        print _osd
+        osd_list.append(osd)
+
+
+    osd_list_data_json = {"osdlist":osd_list}
+    osd_list_data = json.dumps(osd_list_data_json)
+    return HttpResponse(osd_list_data)
+
+
+def add_new_osd_action(request):
+    data = json.loads(request.body)
+    vsmapi.add_new_disks_to_cluster(request,data)
+    status_json = {"status":"OK"}
+    status_data = json.dumps(status_json)
+    return HttpResponse(status_data)
+
+def check_device_path(request):
+    search_opts = json.loads(request.body)
+    server_id = search_opts["server_id"]
+    data_device_path = search_opts["data_device_path"]
+    journal_device_path = search_opts["journal_device_path"]
+
+
+    ret = vsmapi.get_available_disks(request, search_opts={
+                "server_id": server_id
+                ,"path":[data_device_path,journal_device_path]
+            })
+
+
+    if ret["ret"] == 1 :
+        status_json = {"status":"OK"}
+    else:
+        status_json = {"status":"Failed",'message':ret.get('message')}
+
+    status_data = json.dumps(status_json)
+    return HttpResponse(status_data)
+
