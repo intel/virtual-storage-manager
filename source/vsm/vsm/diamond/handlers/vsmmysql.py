@@ -78,24 +78,26 @@ class VSMMySQLHandler(Handler):
         """
         data = data.strip().split(' ')
         data_name = data[0].split('.')
-        try:
-            cursor = self.conn.cursor()
-            # cursor.execute("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES(%%s, %%s, %%s ,%%s, %%s)"
-            #                % (self.table, self.col_metric, self.col_hostname, self.col_instance,
-            #                   self.col_time, self.col_value),
-            #                (data_name[4], data_name[1], data_name[3], data[2], data[1]))
-            cursor.execute("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES(%%s, %%s, %%s ,%%s, %%s)"
-                           % (self.table, self.col_metric, self.col_hostname, self.col_instance,
-                              self.col_time, self.col_value),
-                           ('_'.join(data_name[6:]), data_name[1], '_'.join(data_name[4:6]), data[2], data[1]))
+        metric_name = '_'.join(data_name[6:])
+        if metric_name in ['osd_op_r','osd_op_w','osd_op_rw','osd_op_in_bytes','osd_op_out_bytes','osd_op_rw_latency_avgcount','osd_op_r_latency_avgcount','osd_op_w_latency_avgcount','osd_op_rw_latency_sum','osd_op_r_latency_sum','osd_op_w_latency_sum']:
+            try:
+                cursor = self.conn.cursor()
+                # cursor.execute("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES(%%s, %%s, %%s ,%%s, %%s)"
+                #                % (self.table, self.col_metric, self.col_hostname, self.col_instance,
+                #                   self.col_time, self.col_value),
+                #                (data_name[4], data_name[1], data_name[3], data[2], data[1]))
+                cursor.execute("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES(%%s, %%s, %%s ,%%s, %%s)"
+                               % (self.table, self.col_metric, self.col_hostname, self.col_instance,
+                                  self.col_time, self.col_value),
+                               ('_'.join(data_name[6:]), data_name[1], '_'.join(data_name[4:6]), data[2], data[1]))
 
-            cursor.close()
-            self.conn.commit()
-        except BaseException, e:
-            # Log Error
-            self.log.error("VSMMySQLHandler: Failed sending data. %s.", e)
-            # Attempt to restablish connection
-            self._connect()
+                cursor.close()
+                self.conn.commit()
+            except BaseException, e:
+                # Log Error
+                self.log.error("VSMMySQLHandler: Failed sending data. %s.", e)
+                # Attempt to restablish connection
+                self._connect()
 
     def _connect(self):
         """
