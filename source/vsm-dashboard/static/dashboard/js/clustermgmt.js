@@ -98,8 +98,8 @@
         //$(this).closest('.modal').modal('hide');
     });
 
-    //Shouan: intergrate cluster
-    $(".IntergrateCluster-cluster-commit").click(function(){
+    //Shouan: integrate cluster
+    $(".IntegrateCluster-cluster-commit").click(function(){
     	var SelectedNodeCount = 0;
     	var SelectedNodeList = new Array();
     	$(".multi_select_column>input").each(function(i,item){
@@ -142,7 +142,7 @@
               data: strSelectedNodesJSON,
               type: "post",
               dataType: "json",
-              url: "/dashboard/vsm/clustermgmt/cluster/intergrate",
+              url: "/dashboard/vsm/clustermgmt/cluster/integrate",
               success: function (data) {
                 //console.log(data);
               },

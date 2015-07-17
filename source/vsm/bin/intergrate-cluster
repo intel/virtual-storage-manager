@@ -21,6 +21,6 @@ def get_vsmclient():
 
 def cluster_refresh():
     print 'get_vsmclient().clusters====',dir(get_vsmclient().clusters)
-    return get_vsmclient().clusters.intergrate()
+    return get_vsmclient().clusters.integrate()
 
 cluster_refresh()
