@@ -1785,6 +1785,22 @@ class CephDriver(object):
         else:
             return None
 
+    def get_osds_details(self):
+        args = ['ceph', 'osd', 'dump']
+        osd_dump = self._run_cmd_to_json(args)
+        if osd_dump:
+            return osd_dump['osds']
+        else:
+            return None
+
+    def get_osds_metadata(self):
+        args = ['ceph', 'report']
+        report = self._run_cmd_to_json(args)
+        if report:
+            return report['osd_metadata']
+        else:
+            return None
+
     def get_ceph_health_list(self):
         args = ['ceph', 'health']
         out, _err = utils.execute(*args, run_as_root=True)

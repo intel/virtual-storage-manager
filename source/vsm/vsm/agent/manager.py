@@ -902,6 +902,65 @@ class AgentManager(manager.Manager):
         self.sync_osd_states_from_ceph(context)
         return True
 
+    def sync_osd_states_from_cluster(self, context):
+        def _determine_status(osd):
+            if osd['in'] and osd['up']:
+                osd_status = FLAGS.osd_in_up
+            elif osd['in'] and not osd['up']:
+                osd_status = FLAGS.osd_in_down
+            elif not osd['in'] and osd['up']:
+                osd_status = FLAGS.osd_out_up
+            else:
+                if FLAGS.osd_state_autoout in osd['state']:
+                    osd_status = FLAGS.osd_out_down_autoout
+                else:
+                    osd_status = FLAGS.osd_out_down
+            return osd_status
+
+        def _get_storage_hostnames(self):
+            server_list = db.init_node_get_all(context)
+            hostnames = [server['host'] for server in server_list]
+            return hostnames
+
+        def _get_local_osds_metadata():
+            md = self.ceph_driver.get_osds_metadata()
+            return filter(lambda osd: osd['hostname'] == self.host, md)
+
+        def _get_osd_detail_by_id(osd_num):
+            osds_det = self.ceph_driver.get_osds_details()
+            return filter(lambda osd: osd['osd'] == osd_num, osds_det)[0]
+
+        for osd_md in _get_local_osds_metadata():
+            osd_num = osd_md['id']
+            osd_det = _get_osd_detail_by_id(osd_num)
+            osd_name = 'osd.' + str(osd_num)
+
+            values = {}
+            values['osd_name'] = osd_name
+            values['state'] =  _determine_status(osd_det)
+            node = db.init_node_get_by_host(context , self.host)
+            values['service_id'] = node['service_id']
+            values['cluster_ip'] = osd_det['cluster_addr']
+            values['public_ip'] = osd_det['public_addr']
+
+            #device = db.device_get_by_name(context,config_dict.get(osd_name)["devs"])
+            #values['device_id'] = device["id"]
+
+            values['cluster_id'] = 1
+            values['weight'] = 1.0
+            values['storage_group_id'] = 1
+            values['zone_id'] = 1
+            values['operation_status'] = 'Present'
+
+            #self._conductor_rpcapi.\
+            #    osd_state_update_or_create(context, values)
+            print values
+
+            device_values = {}
+            device_values['mount_point'] = osd_md['osd_data']
+            #db.device_update(context, device["id"], device_values)
+        return
+
     def sync_osd_states_from_ceph(self, context):
         osd_json = self.ceph_driver.get_osds_status()
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
