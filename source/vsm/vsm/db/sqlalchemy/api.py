@@ -4255,9 +4255,9 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
 
     return ret_list
 
-def lantency_performance_metrics(context, search_opts, session=None):#for iops bandwidth
+def lantency_performance_metrics(context, search_opts, session=None):#for lantency
     metrics_name = search_opts['metrics_name']
-    lantency_type = metrics_name.split('_')[1]
+    lantency_type = metrics_name.split('_')[2]
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     if timestamp_start is None and timestamp_end:
@@ -4268,15 +4268,18 @@ def lantency_performance_metrics(context, search_opts, session=None):#for iops b
     timestamp_cur = timestamp_start
     session = get_session()
     while timestamp_cur<timestamp_end:
-        sql_str = '''
-            select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency,iopstable.instance  from \
-            (\
-              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='ops_%s') as iopstable \
-              inner join (select  metric,hostname,instance,timestamp,value as lantency_value from metrics where metric='%s') as latencytable \
-            on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance \
-            )
-            where iopstable.timestamp > %s and  iopstable.timestamp < %s group by iopstable.instance;
-            '''%(lantency_type,metrics_name,timestamp_cur,timestamp_cur+15)
+        sql_str = '''select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency,iopstable.instance  from \
+ (              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='osd_op_%(latency_type)s' and timestamp>%(start_time)d and timestamp<%(end_time)d) as iopstable \
+ inner join \
+ ( \
+ select case when avgcount<>0 then sum_a/avgcount else 0 end as lantency_value,a.hostname,a.instance,a.timestamp from \
+ (select timestamp,value as sum_a,instance,hostname from metrics where metric ='%(metric_name)s_sum' and timestamp>%(start_time)d and timestamp<%(end_time)d) as a \
+ left join
+ (select timestamp,value as avgcount,instance,hostname from metrics where metric='%(metric_name)s_avgcount' and timestamp>%(start_time)d and timestamp<%(end_time)d) as b \
+ on b.timestamp = a.timestamp and a.instance = b.instance and a.hostname =  b.hostname) as latencytable \
+ on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance             ) \
+            where iopstable.timestamp > %(start_time)d and  iopstable.timestamp < %(end_time)d group by iopstable.instance;
+            '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur,'end_time':timestamp_cur+15}
         timestamp_cur = timestamp_cur + 15
         sql_ret = session.execute(sql_str).fetchall()
         for cell in sql_ret:

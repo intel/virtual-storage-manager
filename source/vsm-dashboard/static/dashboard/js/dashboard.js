@@ -178,10 +178,11 @@ require(
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/bandwidth/",
-                //data: JSON.stringify({"timestamp":timestamp2 }),
+                //data: JSON.stringify({"metrics_name":,"timestamp_start":,"timestamp_end":,"correct_cnt":None }),
                 data:"",
                 dataType: "json",
                 success: function (data) {
+                    //data {"metrics": metrics}
                     metrics = data.metrics;
                     var axisData = "00:00:00";
                     for(var i=0;i<metrics.length;i++){
@@ -590,21 +591,21 @@ function GetLantencyOption(){
                 stack: 'A',
                 smooth:true,
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:InitValues(3)
+                data:InitValues(0)
             },
             {
                 name:'lantency_w',
                 type:'line',
                 stack: 'B',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:InitValues(5)
+                data:InitValues(0)
             },
             {
                 name:'lantency_rw',
                 type:'line',
                 stack: 'C',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:InitValues(6)
+                data:InitValues(0)
             }
         ]
     };
@@ -657,14 +658,14 @@ function GetBandwidthOption(){
                 stack: 'A',
                 smooth:true,
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:InitValues(4)
+                data:InitValues(0)
             },
             {
                 name:'bandwidth_out',
                 type:'line',
                 stack: 'B',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
-                data:InitValues(7)
+                data:InitValues(0)
             }
         ]
     };
@@ -717,3 +718,31 @@ function InitValues(value){
     }
     return res;
 }
+
+Date.prototype.format = function(format) {
+    var o = {
+        "M+": this.getMonth() + 1,
+        // month
+        "d+": this.getDate(),
+        // day
+        "h+": this.getHours(),
+        // hour
+        "m+": this.getMinutes(),
+        // minute
+        "s+": this.getSeconds(),
+        // second
+        "q+": Math.floor((this.getMonth() + 3) / 3),
+        // quarter
+        "S": this.getMilliseconds()
+        // millisecond
+    };
+    if (/(y+)/.test(format) || /(Y+)/.test(format)) {
+        format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    }
+    for (var k in o) {
+        if (new RegExp("(" + k + ")").test(format)) {
+            format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+        }
+    }
+    return format;
+};
