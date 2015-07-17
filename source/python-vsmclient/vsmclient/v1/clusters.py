@@ -232,11 +232,11 @@ class ClusterManager(base.ManagerWithFind):
         url = "/clusters/import_ceph_conf"
         return self.api.client.post(url,body=body)
 
-    def intergrate(self,servers=[]):
+    def integrate(self,servers=[]):
         body = {'cluster': {
                             "servers": servers,
                            }}
-        url = "/clusters/intergrate"
+        url = "/clusters/integrate"
         return self.api.client.post(url)
 
     def stop_cluster(self,cluster_id):

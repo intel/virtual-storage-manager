@@ -1054,16 +1054,16 @@ class SchedulerManager(manager.Manager):
         LOG.info('import ceph conf from db to ceph nodes success ')
         return {"message":"success"}
 
-    def intergrate_cluster(self, context, server_list):
-        """ intergrate an exsiting cluster
+    def integrate_cluster(self, context, server_list):
+        """ integrate an exsiting cluster
         :param context:
         :param server_list:
         :return:
         """
-        LOG.info('intergrate cluster by refreshing cluster status')
+        LOG.info('integrate cluster by refreshing cluster status')
         active_server = self._set_active_server(context)
         #TODO db.update_mount_points()
-        return self._agent_rpcapi.intergrate_cluster_from_ceph(context, active_server['host'])
+        return self._agent_rpcapi.integrate_cluster_from_ceph(context, active_server['host'])
 
     @utils.single_lock
     def create_cluster(self, context, server_list):

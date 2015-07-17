@@ -891,8 +891,8 @@ class AgentManager(manager.Manager):
         self.update_all_status(context)
         return True
 
-    def intergrate_cluster_from_ceph(self, context):
-        LOG.info("intergrate cluster from ceph")
+    def integrate_cluster_from_ceph(self, context):
+        LOG.info("integrate cluster from ceph")
         self.update_all_status(context)
         self.sync_osd_states_from_ceph(context)
         return True
