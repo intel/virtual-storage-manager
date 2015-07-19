@@ -38,7 +38,7 @@ class AddOpenstackIPAction(tables.LinkAction):
     name = "add openstack ip"
     verbose_name = _("Add OpenStack Nova Controller")
     url = "horizon:vsm:openstackconnect:create"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
     def allowed(self, request, datum):
         return not len(vsmapi.appnode_list(request))
@@ -63,7 +63,7 @@ class EditOpenstackIPAction(tables.LinkAction):
     name = "edit openstack ip"
     verbose_name = _("Edit")
     url = "horizon:vsm:openstackconnect:update"
-    classes = ("ajax-modal", "btn-edit")
+    classes = ("ajax-modal", "btn-primary")
 
     def allowed(self, request, datum):
         return len([x for x in vsmapi.pool_usages(request) if x.attach_status=="success"]) == 0

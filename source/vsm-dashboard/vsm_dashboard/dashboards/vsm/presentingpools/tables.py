@@ -65,7 +65,7 @@ class CreateStoragePool(tables.LinkAction):
     name = "create pool"
     verbose_name = _("Create Pool")
     url = "horizon:project:volumes:create"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class DeleteStoragePool(tables.DeleteAction):
     data_type_singular = _("StoragePool")

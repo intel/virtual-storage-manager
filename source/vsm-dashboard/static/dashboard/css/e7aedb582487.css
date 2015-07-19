@@ -2814,6 +2814,8 @@ select[multiple].input-lg,
     color: #777777;
     text-decoration: none; }
 
+
+
 .btn-lg, .btn-group-lg > .btn {
   padding: 10px 16px;
   font-size: 17px;
@@ -5577,10 +5579,12 @@ dt {
   font-weight: bold; }
 
 .topbar {
-  background: #eeeeee;
-  border-bottom: 1px solid #cccccc;
+  background: #337ab7;
+  border-bottom: 1px solid #2e6da4;
   padding: 15px 0px 15px 0px; 
-  height: 55px; }
+  height: 55px;
+  box-shadow: 2px 2px 3px #aaa;
+   }
 
 .topbar .switcher_bar {
   display: inline-block;
@@ -5681,12 +5685,13 @@ dt {
   background-position: right center; }
 
 #user_info {
+  color: white;
   margin: auto 10px;
   padding-bottom: 15px;
   padding-right: 25px; }
 
 #user_info > a {
-  color: #333333;
+  color: white;
   margin-left: 15px;
   line-height: 20px;
   font-size: 13px !important; }

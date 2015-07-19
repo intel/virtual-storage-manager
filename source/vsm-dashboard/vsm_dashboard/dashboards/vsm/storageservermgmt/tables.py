@@ -93,37 +93,37 @@ class AddServersAction(tables.LinkAction):
     name = "add_servers"
     verbose_name = _("Add Servers")
     url = "horizon:vsm:storageservermgmt:addserversview"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class RemoveServersAction(tables.LinkAction):
     name = "remove_servers"
     verbose_name = _("Remove Servers")
     url = "horizon:vsm:storageservermgmt:removeserversview"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class AddMonitorsAction(tables.LinkAction):
     name = "add_monitors"
     verbose_name = _("Add Monitors")
     url = "horizon:vsm:storageservermgmt:addmonitorsview"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class RemoveMonitorsAction(tables.LinkAction):
     name = "remove_monitors"
     verbose_name = _("Remove Monitors")
     url = "horizon:vsm:storageservermgmt:removemonitorsview"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class StartServersAction(tables.LinkAction):
     name = "start_servers"
     verbose_name = _("Start Servers")
     url = "horizon:vsm:storageservermgmt:startserversview"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class StopServersAction(tables.LinkAction):
     name = "stop_servers"
     verbose_name = _("Stop Servers")
     url = "horizon:vsm:storageservermgmt:stopserversview"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class ListServerTableBase(tables.DataTable):
     STATUS_CHOICES = (
