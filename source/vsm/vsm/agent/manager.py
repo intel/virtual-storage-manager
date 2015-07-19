@@ -935,6 +935,10 @@ class AgentManager(manager.Manager):
             osds_det = self.ceph_driver.get_osds_details()
             return filter(lambda osd: osd['osd'] == osd_num, osds_det)[0]
 
+        def _extract_ip(report_ip_item):
+            items = report_ip_item.split(':')
+            return items[0]
+
         for osd_md in _get_local_osds_metadata():
             osd_num = osd_md['id']
             osd_det = _get_osd_detail_by_id(osd_num)
@@ -945,8 +949,8 @@ class AgentManager(manager.Manager):
             values['state'] = _determine_status(osd_det)
             node = db.init_node_get_by_host(context , self.host)
             values['service_id'] = node['service_id']
-            values['cluster_ip'] = osd_det['cluster_addr']
-            values['public_ip'] = osd_det['public_addr']
+            values['cluster_ip'] = _extract_ip(osd_det['cluster_addr'])
+            values['public_ip'] = _extract_ip(osd_det['public_addr'])
 
             #device = db.device_get_by_name(context,config_dict.get(osd_name)["devs"])
             #values['device_id'] = device["id"]
