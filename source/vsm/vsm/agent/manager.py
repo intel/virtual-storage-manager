@@ -980,7 +980,7 @@ class AgentManager(manager.Manager):
                 continue
 
             values['device_id'] = device['id']
-            values['cluster_id'] = 1
+            values['cluster_id'] = self._get_cluster_id(context)
             values['weight'] = 1.0
             values['storage_group_id'] = _get_storage_group_id_by_dev(osd_dev)
             values['zone_id'] = _get_zone_id()
