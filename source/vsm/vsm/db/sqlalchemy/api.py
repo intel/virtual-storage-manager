@@ -38,7 +38,7 @@ from vsm.openstack.common import log as logging
 from vsm.openstack.common import timeutils
 from vsm.openstack.common import uuidutils
 from vsm.openstack.common.db import exception as db_exc
-
+import time
 FLAGS = flags.FLAGS
 
 LOG = logging.getLogger(__name__)
@@ -3371,25 +3371,25 @@ def appnodes_get_all(context):
 def appnodes_create(context, values, allow_duplicate=False):
     vsmapp = vsmapps_get_by_project(context)
     vsmapp_id = vsmapp.id if vsmapp else None
-    LOG.debug('vsmapp get by project %s' % vsmapp_id)
+    LOG.info('vsmapp get by project %s' % vsmapp_id)
 
     if vsmapp_id is None:
         raise exception.VsmappNotFound()
     else:
         values['vsmapp_id'] = vsmapp_id
-
-    ip = values.get('ip', None)
-    if not ip:
-        raise exception.AppNodeInvalidInfo()
-
-    ref = appnodes_get_by_ip_vsmappid(context, ip, vsmapp_id)
-    if ref:
-        if not allow_duplicate:
-            # The node exists, return the node info straightaway.
-            raise exception.DuplicateVsmApp(ip=ip,
-                                            err='The app node already exists.')
-        else:
-            return ref
+    #
+    # ip = values.get('ip', None)
+    # if not ip:
+    #     raise exception.AppNodeInvalidInfo()
+    #
+    # ref = appnodes_get_by_ip_vsmappid(context, ip, vsmapp_id)
+    # if ref:
+    #     if not allow_duplicate:
+    #         # The node exists, return the node info straightaway.
+    #         raise exception.DuplicateVsmApp(ip=ip,
+    #                                         err='The app node already exists.')
+    #     else:
+    #         return ref
 
     values['created_at'] = timeutils.utcnow()
     values['deleted'] = 0
@@ -3399,7 +3399,7 @@ def appnodes_create(context, values, allow_duplicate=False):
         appnodes_ref.update(values)
         appnodes_ref.save()
     except db_exc.DBDuplicateEntry as e:
-        raise exception.DuplicateAppnode(ip=ip, err=e.message)
+        raise exception.DuplicateAppnode(ip=values['os_auth_url'], err=e.message)
 
     return appnodes_ref
 
@@ -3516,12 +3516,16 @@ def sp_usage_create(context, pools, session=None):
     vsmapp_id = vsmapp.id if vsmapp else None
 
     appnode = appnodes_get_all_by_vsmappid(context, vsmapp_id)
-    vsmapp_ip = appnode['ip']
+    # vsmapp_ip = appnode['ip']
+    os_tenant_name = appnode['os_tenant_name']
+    os_username = appnode['os_username']
+    os_password = appnode['os_password']
+    os_auth_url = appnode['os_auth_url']
 
     if not vsmapp_id:
         raise exception.VsmappNotFound()
 
-    pools = [int(x) for x in pools]
+    pool_ids = [int(x['id']) for x in pools]
     #update pools
     old_pools = get_sp_usage_all_by_vsmapp_id(context, vsmapp_id, session)
     for pref in old_pools:
@@ -3529,13 +3533,13 @@ def sp_usage_create(context, pools, session=None):
         # Filter the deleted pools.
         pool_ref = pool_get_by_db_id(context, pool_id, session)
         if pool_ref:
-            pools.append(pref['pool_id'])
-    pools = list(set(pools))
+            pool_ids.append(pref['pool_id'])
+    pool_ids = list(set(pool_ids))
 
 
     pool_info_list = []
     pool_name_list = []
-    for pool_id in pools:
+    for pool_id in pool_ids:
         pool_ref = pool_get_by_db_id(context, pool_id, session)
         storage_group = pool_ref['storage_group']
         #rule_id = pool_ref['crush_ruleset']
@@ -3549,7 +3553,7 @@ def sp_usage_create(context, pools, session=None):
         pool_name_list.append(pool_ref['name'])
         pool_info_list.append(info)
 
-    for pool_id in pools:
+    for pool_id in pool_ids:
         ref = get_sp_usage_by_poolid_vsmappid(context, pool_id, vsmapp_id)
 
         kargs = {
@@ -3570,10 +3574,15 @@ def sp_usage_create(context, pools, session=None):
             session.add(sp_usage_ref)
             sp_usage_ref.update(kargs)
 
-    return {'pool_infos': pool_info_list,
-            'pool_names': pool_name_list,
-            'vsmapp_ip': vsmapp_ip,
-            'vsmapp_id': vsmapp_id}
+    return {
+        'pool_infos': pool_info_list,
+        'pool_names': pool_name_list,
+        'vsmapp_id': vsmapp_id,
+        'os_tenant_name': os_tenant_name,
+        'os_username': os_username,
+        'os_password': os_password,
+        'os_auth_url': os_auth_url
+    }
 
 @require_context
 def get_sp_usage_by_poolid_vsmappid(context, poolid, vsmapp_id):
@@ -4232,7 +4241,8 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
     if timestamp_start is None and timestamp_end:
         timestamp_start = timestamp_end - 15
     elif timestamp_start  and  timestamp_end is None:
-        timestamp_end = timestamp_start + 15
+        timestamp_start = timestamp_start + 15
+        timestamp_end = int(time.time())
     ret_list = []
     timestamp_cur = timestamp_start
     session = get_session()
@@ -4240,7 +4250,7 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
         sql_str = '''
             SELECT   sum(metrics.value) AS sum_1, count(metrics.value) AS count_1,metrics.instance AS metrics_instance
             FROM metrics
-            WHERE metrics.metric = '%s' AND metrics.timestamp >= %s AND metrics.timestamp < %s GROUP BY metrics.instance
+            WHERE metrics.metric = '%s' AND metrics.timestamp >= %s AND metrics.timestamp <= %s
         '''%(metrics_name,timestamp_cur,timestamp_cur+15)
 
         sql_ret_set = session.execute(sql_str).fetchall()
@@ -4255,33 +4265,94 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
 
     return ret_list
 
-def lantency_performance_metrics(context, search_opts, session=None):#for iops bandwidth
+def lantency_performance_metrics(context, search_opts, session=None):#for lantency
     metrics_name = search_opts['metrics_name']
-    lantency_type = metrics_name.split('_')[1]
+    lantency_type = metrics_name.split('_')[2]
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     if timestamp_start is None and timestamp_end:
         timestamp_start = timestamp_end - 15
     elif timestamp_start  and  timestamp_end is None:
-        timestamp_end = timestamp_start + 15
+        timestamp_start = timestamp_start + 15
+        timestamp_end = int(time.time())
     ret_list = []
     timestamp_cur = timestamp_start
     session = get_session()
-    while timestamp_cur<timestamp_end:
-        sql_str = '''
-            select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency,iopstable.instance  from \
-            (\
-              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='ops_%s') as iopstable \
-              inner join (select  metric,hostname,instance,timestamp,value as lantency_value from metrics where metric='%s') as latencytable \
-            on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance \
-            )
-            where iopstable.timestamp > %s and  iopstable.timestamp < %s group by iopstable.instance;
-            '''%(lantency_type,metrics_name,timestamp_cur,timestamp_cur+15)
+    while timestamp_cur < timestamp_end:
+        sql_str = '''select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency,iopstable.instance  from \
+                 (              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='osd_op_%(latency_type)s' and timestamp>=%(start_time)d and timestamp<%(end_time)d) as iopstable \
+                 left join \
+                 ( \
+                 select case when avgcount<>0 then sum_a/avgcount else 0 end as lantency_value,a.hostname,a.instance,a.timestamp from \
+                 (select timestamp,value as sum_a,instance,hostname from metrics where metric ='%(metric_name)s_sum' and timestamp>=%(start_time)d and timestamp<%(end_time)d) as a \
+                 left join
+                 (select timestamp,value as avgcount,instance,hostname from metrics where metric='%(metric_name)s_avgcount' and timestamp>=%(start_time)d and timestamp<%(end_time)d) as b \
+                 on b.timestamp = a.timestamp and a.instance = b.instance and a.hostname =  b.hostname) as latencytable \
+                 on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance             ) \
+            '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur,'end_time':timestamp_cur+15}
         timestamp_cur = timestamp_cur + 15
         sql_ret = session.execute(sql_str).fetchall()
         for cell in sql_ret:
-            metrics_value = cell[0] and  cell[1]/cell[0] or 0
+            metrics_value = cell[0] and cell[1]/cell[0] or 0
             ret_list.append({'instance':cell[2], 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list
-#endregion
 
+
+def sum_performance_metrics_wrong(context, search_opts, session=None):#for iops bandwidth
+    metrics_name = search_opts['metrics_name']
+    timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
+    timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
+    correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
+    if timestamp_start is None and timestamp_end:
+        timestamp_start = timestamp_end - 20
+    elif timestamp_end is None:
+        timestamp_end = int(time.time())
+    ret_list = []
+    session = get_session()
+    if timestamp_start < timestamp_end:
+        sql_str = '''
+            SELECT   sum(metrics.value) AS sum_1, count(metrics.value) AS count_1,metrics.timestamp as timestamp
+            FROM metrics
+            WHERE metrics.metric = '%s' AND metrics.timestamp >= %s AND metrics.timestamp < %s GROUP BY metrics.timestamp  order by metrics.timestamp;
+        '''%(metrics_name,timestamp_start,timestamp_end)
+
+        sql_ret_set = session.execute(sql_str).fetchall()
+        for cell in sql_ret_set:
+            if correct_cnt:
+                metrics_value = cell[0]/cell[1]*correct_cnt
+            else:
+                metrics_value = cell[0]
+            sql_ret_dict = { 'timestamp': str(cell[2]), 'metrics_value': metrics_value, 'metrics': metrics_name,}
+            ret_list.append(sql_ret_dict)
+    return ret_list
+
+
+def lantency_performance_metrics_wrong(context, search_opts, session=None):#for lantency
+    metrics_name = search_opts['metrics_name']
+    lantency_type = metrics_name.split('_')[2]
+    timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
+    timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
+    if timestamp_start is None and timestamp_end:
+        timestamp_start = timestamp_end - 20
+    elif timestamp_end is None:
+        timestamp_end = int(time.time())
+    ret_list = []
+    session = get_session()
+    if timestamp_start < timestamp_end:
+        sql_str = '''select  sum(iops_value) as sum_iops,sum(lantency_value* iops_value) as total_lantency,iopstable.timestamp  from \
+                 (              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='osd_op_%(latency_type)s' and timestamp>%(start_time)d and timestamp<%(end_time)d) as iopstable \
+                 left join \
+                 ( \
+                 select case when avgcount<>0 then sum_a/avgcount else 0 end as lantency_value,a.hostname,a.instance,a.timestamp from \
+                 (select timestamp,value as sum_a,instance,hostname from metrics where metric ='%(metric_name)s_sum' and timestamp>%(start_time)d and timestamp<%(end_time)d) as a \
+                 left join
+                 (select timestamp,value as avgcount,instance,hostname from metrics where metric='%(metric_name)s_avgcount' and timestamp>%(start_time)d and timestamp<%(end_time)d) as b \
+                 on b.timestamp = a.timestamp and a.instance = b.instance and a.hostname =  b.hostname) as latencytable \
+                 on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance             ) \
+                            group by iopstable.timestamp order by iopstable.timestamp;
+            '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_start,'end_time':timestamp_end}
+        sql_ret = session.execute(sql_str).fetchall()
+        for cell in sql_ret:
+            metrics_value = cell[0] and cell[1]/cell[0] or 0
+            ret_list.append({'timestamp':str(cell[2]), 'metrics_value':metrics_value,'metrics':metrics_name,})
+    return ret_list

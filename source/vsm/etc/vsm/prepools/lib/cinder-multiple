@@ -44,23 +44,23 @@ function _get_type() {
 }
 
 function _cinder_rc() {
-cat <<"EOF">$TOPDIR/cinderrc
-export OS_USERNAME=%USER%
-export OS_TENANT_NAME=%TENANT_NAME%
-export OS_PASSWORD=%PASSWORD%
-export OS_AUTH_URL=http://%KEYSTONE_HOST%:35357/v2.0/
-export PS1='[\u@\h \W(keystone_admin)]\$ '
-EOF
-    local USER=`_admin_user`
-    local TENANT_NAME=`_tenant_name`
-    local PASSWORD=`_password`
-    local KEYSTONE_HOST=`_keystone_ip`
+#cat <<"EOF">$TOPDIR/cinderrc
+#export OS_USERNAME=%USER%
+#export OS_TENANT_NAME=%TENANT_NAME%
+#export OS_PASSWORD=%PASSWORD%
+#export OS_AUTH_URL=http://%KEYSTONE_HOST%:35357/v2.0/
+#export PS1='[\u@\h \W(keystone_admin)]\$ '
+#EOF
+#    local USER=`_admin_user`
+#    local TENANT_NAME=`_tenant_name`
+#    local PASSWORD=`_password`
+#    local KEYSTONE_HOST=`_keystone_ip`
     local file=$TOPDIR/cinderrc
-
-    sed -i "s,%USER%,$USER,g" $file
-    sed -i "s,%TENANT_NAME%,$TENANT_NAME,g" $file
-    sed -i "s,%PASSWORD%,$PASSWORD,g" $file
-    sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" $file
+#
+#    sed -i "s,%USER%,$USER,g" $file
+#    sed -i "s,%TENANT_NAME%,$TENANT_NAME,g" $file
+#    sed -i "s,%PASSWORD%,$PASSWORD,g" $file
+#    sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" $file
     source $file
 }
 
@@ -114,14 +114,14 @@ function _add_type_key() {
 function _set_multiple_default_cinder() {
     local key=`echo $@ | awk -F "=" '{print $1}'`
     local value=`echo $@ | awk -F "=" '{print $2}'`
-    openstack-config --set /etc/cinder/cinder.conf DEFAULT $key $value
+    crudini --set /etc/cinder/cinder.conf DEFAULT $key $value
 }
 
 function __set_section() {
     local sec_name=$1
     local key=`echo $2 | awk -F "=" '{print $1}'`
     local value=`echo $2 | awk -F "=" '{print $2}'`
-    openstack-config --set /etc/cinder/cinder.conf $sec_name $key $value
+    crudini --set /etc/cinder/cinder.conf $sec_name $key $value
 }
 
 function _set_backend_cinder() {
@@ -149,17 +149,17 @@ function _del_other_multiple_section() {
             sec_name=${n//[/ }
             sec_name=${sec_name//]/ }
             if [[ `echo $sec_name | grep vsm | wc -l` -gt 0 ]]; then
-                openstack-config --del /etc/cinder/cinder.conf $sec_name
+                crudini --del /etc/cinder/cinder.conf $sec_name
             fi
         fi
     done
-    openstack-config --del /etc/cinder/cinder.conf DEFAULT enabled_backends
+    crudini --del /etc/cinder/cinder.conf DEFAULT enabled_backends
 }
 
 function _del_default_cinder() {
     local sec_name="DEFAULT"
     local key=`echo $@ | awk -F "=" '{print $1}'`
-    openstack-config --del /etc/cinder/cinder.conf $sec_name $key
+    crudini --del /etc/cinder/cinder.conf $sec_name $key
 }
 
 function _has_this_pool() {
@@ -218,6 +218,14 @@ function configure_multiple_cinder() {
 
         if [[ `is_service_running openstack-cinder-volume` -gt 0 ]]; then
             service openstack-cinder-volume restart
+        fi
+
+        if [[ `is_service_running cinder-api` -gt 0 ]]; then
+            service cinder-api restart
+        fi
+
+        if [[ `is_service_running cinder-volume` -gt 0 ]]; then
+            service cinder-volume restart
         fi
     fi
 }

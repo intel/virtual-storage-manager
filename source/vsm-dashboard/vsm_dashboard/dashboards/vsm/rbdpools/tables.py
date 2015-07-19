@@ -20,6 +20,8 @@ from django.utils.translation import ugettext_lazy as _
 #from vsm_dashboard.dashboards.admin.instances.tables import \
 #        AdminUpdateRow
 
+from django import forms
+
 from horizon import tables
 from horizon import messages
 from vsm_dashboard.api import vsm as vsmapi
@@ -143,6 +145,8 @@ class ListPresentPoolTable(tables.DataTable):
     storageType = tables.Column("storageGroup", verbose_name=_("Storage Group"))
     pgNum = tables.Column("pgNum", verbose_name=_("Placement Group Count"))
     size = tables.Column("size", verbose_name=_("Replication Factor"))
+    cinder_volume_host = tables.Column("cinder_volume_host", verbose_name=_("Cinder Volume Host"),
+        classes=("zone",))
     status = tables.Column("status", verbose_name=_("Status"))
     createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
     tag = tables.Column("tag", verbose_name=_("Tag"))

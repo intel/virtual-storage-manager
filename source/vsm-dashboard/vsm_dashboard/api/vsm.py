@@ -86,8 +86,8 @@ def pool_usages(request):
 def present_pool(request, pools):
     return vsmclient(request).PoolUsageManager.create(pools=pools)
 
-def add_appnodes(request, ips):
-    return vsmclient(request).AppNodeManager.create(ips=ips)
+def add_appnodes(request, auth_openstack):
+    return vsmclient(request).AppNodeManager.create(auth_openstack)
 
 def del_appnode(request, appnode_id):
     return vsmclient(request).AppNodeManager.delete(appnode_id)
@@ -253,8 +253,8 @@ def get_setting_by_name(request, name):
 def update_setting(request, name, value):
     return vsmclient(request).vsm_settings.create({'name': name, 'value':value})
 
-def get_iops_or_width(request,search_opts):
-    return vsmclient(request).performance_metrics.get_iops_or_width(search_opts=search_opts)
+def get_metrics(request,search_opts):
+    return vsmclient(request).performance_metrics.get_metrics(search_opts=search_opts)
 
 def add_osd_from_node_in_cluster(request,osd_states_id):
     return  vsmclient(request).osds.add_osd_from_node_in_cluster(osd_states_id)

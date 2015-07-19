@@ -90,21 +90,20 @@ class AppnodesController(wsgi.Controller):
             raise exc.HTTPBadRequest()
 
         context = req.environ['vsm.context']
-        ip_list = body['appnodes']
-        if not isinstance(ip_list, list):
-            expl = _('Invalid Request body: should be a list of IP address.')
-            raise webob.exc.HTTPBadRequest(explanation=expl)
-
-        node_list = appnodes.create(context, ip_list)
+        auth_openstack = body['appnodes']
+        # if not isinstance(ip_list, list):
+        #     expl = _('Invalid Request body: should be a list of IP address.')
+        #     raise webob.exc.HTTPBadRequest(explanation=expl)
+        node_list = appnodes.create(context, auth_openstack)
         node_view = self._view_builder.index(node_list)
-        for node in node_list:
+        # for node in node_list:
             #LOG.info('Node %s, Node id: %s, Node ip: %s' % (node, node.id, node.ip))
             #ssh = utils.SSHClient(ip='10.239.131.170', user='root', key_file=r'~/.ssh/id_rsa')
             #ssh = utils.SSHClient(node.ip, 'root', '~/.ssh/id_rsa')
             #ret = ssh.check_ssh(retries=1)
             #status = 'reachable' if ret else 'unreachable'
-            status = 'reachable'
-            appnodes.update(context, node.id, status)
+            # status = 'reachable'
+            # appnodes.update(context, node.id, status)
 
         return node_view
 
@@ -138,13 +137,17 @@ class AppnodesController(wsgi.Controller):
         id = str(id)
         status = body.get('ssh_status', None)
         log = body.get('log_info', None)
-        ip = body.get('ip', None)
+        # ip = body.get('ip', None)
+        os_tenant_name = body.get('os_tenant_name', None)
+        os_username = body.get('os_username', None)
+        os_password = body.get('os_password', None)
+        os_auth_url = body.get('os_auth_url', None)
 
-        if not status and not log and not ip:
-            expl = _('Request body and URI mismatch: ssh_status or log_info required.')
+        if not os_tenant_name or not os_username or not os_password or not os_auth_url:
+            expl = _('Request body and URI mismatch: os_tenant_name or os_username or os_password or os_auth_url required.')
             raise webob.exc.HTTPBadRequest(explanation=expl)
 
-        appnodes.update(context, id, status, log, ip)
+        appnodes.update(context, id, status, log, os_tenant_name, os_username, os_password, os_auth_url)
         return webob.Response(status_int=201)
 
 def remove_invalid_options(context, search_options, allowed_search_options):

@@ -27,6 +27,8 @@ from vsm_dashboard.dashboards.vsm.poolsmanagement import utils
 from .form import CreatePool
 from .tables import ListPoolTable
 from .tables import ListPresentPoolTable
+from .utils import GenAuthToken
+from .utils import list_cinder_service
 import os
 
 import json
@@ -88,7 +90,6 @@ class PresentPoolsView(tables.DataTableView):
     table_class = ListPresentPoolTable
     template_name = 'vsm/rbdpools/rbdsaction.html'
     verbose_name = "Present Pools"
-   
 
     def get_data(self):
         pools = []
@@ -137,12 +138,68 @@ def PoolsAction(request, action):
 
         if action == "present":
             print data
+            pools = []
+            for x in data:
+                pools.append({'id': x['id'], 'cinder_volume_host': x['cinder_volume_host']})
             print "========Start Present Pools==========="
-            vsmapi.present_pool(request, [x['id'] for x in data])
-            status = "info"
-            msg = "Begin to Present Pools!"
+            result = vsmapi.present_pool(request, pools)
+            print result
+            host_list = ""
+            for host in result['host']:
+                host_list = host + "," + host_list
+            if result['status'] == "bad":
+                status = "warning"
+                msg = "Not found crudini commmand in host: %s" % host_list
+            elif result['status'] == "unreachable":
+                status = "warning"
+                msg = "Please check ssh with no password between vsm controller and host: %s" % host_list
+            else:
+                status = "info"
+                msg = "Begin to Present Pools!"
             print "========End Present Pools==========="
 
     resp = dict(message=msg, status=status, data="")
     resp = json.dumps(resp)
     return HttpResponse(resp)
+
+def get_select_data(request):
+    appnode = vsmapi.appnode_list(request)[0]
+    tenant_name = appnode.os_tenant_name
+    username = appnode.os_username
+    password = appnode.os_password
+    auth_url = appnode.os_auth_url
+    auth_host = auth_url.split(":")[1][2:]
+    genauthtoken = GenAuthToken(tenant_name, username, password, auth_host)
+    token, tenant_id = genauthtoken.get_token()
+    cinder_service_list = list_cinder_service(auth_host, token, tenant_id)
+
+    cinder_volume_down_list = []
+    for cinder in cinder_service_list:
+        if cinder["state"] == "down":
+            cinder_volume_down_list.append(cinder)
+
+    cinder_service = []
+    value = 0
+    if len(cinder_volume_down_list) == 0:
+        for cinder in cinder_service_list:
+            if cinder["binary"] == "cinder-volume":
+                cinder.update({"value": value})
+                value = value + 1
+                cinder_service.append(cinder)
+    else:
+        for cinder in cinder_service_list:
+            if cinder["binary"] == "cinder-volume" and \
+                            "@" in cinder["host"]:
+                host = cinder["host"].split("@")[0]
+                if host not in [x["host"] for x in cinder_service_list]:
+                    cinder.update({"value": value})
+                    value = value + 1
+                    cinder_service.append(cinder)
+            elif cinder["binary"] == "cinder-volume" and \
+                            "@" not in cinder["host"]:
+                cinder.update({"value": value})
+                value = value + 1
+                cinder_service.append(cinder)
+
+    data = tuple(cinder_service)
+    return HttpResponse(json.dumps(data))
