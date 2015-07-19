@@ -1060,10 +1060,13 @@ class SchedulerManager(manager.Manager):
         :param server_list:
         :return:
         """
-        LOG.info('integrate cluster by refreshing cluster status')
+        LOG.info('integrate cluster by syncing OSDs and refreshing status')
+        server_list = db.init_node_get_all(context)
+        for srv in server_list:
+            self._agent_rpcapi.integrate_cluster_sync_osd_states(context, srv['host'])
         active_server = self._set_active_server(context)
         #TODO db.update_mount_points()
-        return self._agent_rpcapi.integrate_cluster_from_ceph(context, active_server['host'])
+        return self._agent_rpcapi.integrate_cluster_update_status(context, active_server['host'])
 
     @utils.single_lock
     def create_cluster(self, context, server_list):
