@@ -939,6 +939,16 @@ class AgentManager(manager.Manager):
             items = report_ip_item.split(':')
             return items[0]
 
+        def _get_storage_group_id_by_dev(device):
+            for sc in self._node_info["storage_class"]:
+                if any(disk['osd'] == device for disk in sc['disk']):
+                    storage_group = \
+                        db.storage_group_get_by_storage_class(self._context,
+                                                              sc['name'])
+                    return storage_group['id']
+            else:
+                return None
+
         for osd_md in _get_local_osds_metadata():
             osd_num = osd_md['id']
             osd_det = _get_osd_detail_by_id(osd_num)
@@ -962,7 +972,7 @@ class AgentManager(manager.Manager):
             values['device_id'] = device['id']
             values['cluster_id'] = 1
             values['weight'] = 1.0
-            values['storage_group_id'] = 1
+            values['storage_group_id'] = _get_storage_group_id_by_dev(osd_dev)
             values['zone_id'] = 1
             values['operation_status'] = 'Present'
 
