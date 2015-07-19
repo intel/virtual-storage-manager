@@ -902,7 +902,12 @@ class AgentManager(manager.Manager):
         self.sync_osd_states_from_ceph(context)
         return True
 
-    def sync_osd_states_from_cluster(self, context):
+    def integrate_cluster_update_status(self, context):
+        LOG.info("integrating cluster: updatating global status")
+        self.update_all_status(context)
+        return True
+
+    def integrate_cluster_sync_osd_states(self, context):
         def _determine_status(osd):
             if osd['in'] and osd['up']:
                 osd_status = FLAGS.osd_in_up
@@ -937,7 +942,7 @@ class AgentManager(manager.Manager):
 
             values = {}
             values['osd_name'] = osd_name
-            values['state'] =  _determine_status(osd_det)
+            values['state'] = _determine_status(osd_det)
             node = db.init_node_get_by_host(context , self.host)
             values['service_id'] = node['service_id']
             values['cluster_ip'] = osd_det['cluster_addr']
