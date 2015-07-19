@@ -947,22 +947,27 @@ class AgentManager(manager.Manager):
             values['cluster_ip'] = _extract_ip(osd_det['cluster_addr'])
             values['public_ip'] = _extract_ip(osd_det['public_addr'])
 
-            #device = db.device_get_by_name(context,config_dict.get(osd_name)["devs"])
-            #values['device_id'] = device["id"]
+            osd_dev = self.ceph_driver.get_dev_by_mpoint(osd_md['osd_data'])
+            try:
+                device = db.device_get_by_name(context, osd_dev)
+            except:
+                LOG.warn("Cannot find device %s. Skipping this OSD" % osd_dev)
+                continue
 
+            values['device_id'] = device['id']
             values['cluster_id'] = 1
             values['weight'] = 1.0
             values['storage_group_id'] = 1
             values['zone_id'] = 1
             values['operation_status'] = 'Present'
 
-            #self._conductor_rpcapi.\
-            #    osd_state_update_or_create(context, values)
+            self._conductor_rpcapi.\
+                osd_state_update_or_create(context, values)
             print values
 
             device_values = {}
             device_values['mount_point'] = osd_md['osd_data']
-            #db.device_update(context, device["id"], device_values)
+            db.device_update(context, device['id'], device_values)
         return
 
     def sync_osd_states_from_ceph(self, context):
