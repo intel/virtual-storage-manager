@@ -482,6 +482,25 @@ class CephDriver(object):
         self.__format_devs(osd_disks + journal_disks, file_system)
         return {'status': 'ok'}
 
+    def get_dev_by_mpoint(self, directory):
+        def _parse_proc_partitions():
+            parts = {}
+            for line in file('/proc/partitions'):
+                fields = line.split()
+                try:
+                    dmaj = int(fields[0])
+                    dmin = int(fields[1])
+                    name = fields[3]
+                    parts[(dmaj, dmin)] = name
+                except:
+                    pass
+            return parts
+
+        dev = os.stat(directory).st_dev
+        major, minor = os.major(dev), os.minor(dev)
+        parts = _parse_proc_partitions()
+        return '/dev/' + parts[(major, minor)]
+
     def mount_disks(self, devices, fs_type):
         def __mount_disk(disk):
             utils.execute('mkdir',
