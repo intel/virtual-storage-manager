@@ -949,6 +949,16 @@ class AgentManager(manager.Manager):
             else:
                 return None
 
+        def _get_zone_id():
+            zone_ref = db.zone_get_by_name(self._context,
+                                           self._node_info['zone'])
+            if zone_ref:
+                zone_id = zone_ref['id']
+            else:
+                LOG.error("Can't find the zone in DB!")
+                raise
+            return zone_id
+
         for osd_md in _get_local_osds_metadata():
             osd_num = osd_md['id']
             osd_det = _get_osd_detail_by_id(osd_num)
@@ -973,7 +983,7 @@ class AgentManager(manager.Manager):
             values['cluster_id'] = 1
             values['weight'] = 1.0
             values['storage_group_id'] = _get_storage_group_id_by_dev(osd_dev)
-            values['zone_id'] = 1
+            values['zone_id'] = _get_zone_id()
             values['operation_status'] = 'Present'
 
             self._conductor_rpcapi.\
