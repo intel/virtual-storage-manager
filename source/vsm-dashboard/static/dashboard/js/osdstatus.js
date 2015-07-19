@@ -1,41 +1,38 @@
 $(function(){
-   //LoadFilterCheckbox
-    LoadFilterCheckbox();
+   //LoadFilterTextbox
+    LoadFilterTextbox();
 
     //load OSD data,5 min update
-    loadOSD();
-    loadInterval();
+     loadOSD();
+     loadInterval();
 
-    var trNodes = $("#server_list>tbody>tr");
-    if(trNodes){
-        pagerCount = parseInt(trNodes[0].children[15].innerHTML);
-        pagerIndex = parseInt(trNodes[0].children[16].innerHTML);
-        generatePager(pagerIndex,pagerCount);
-    } 
-    addOptionButton();
+     var trNodes = $("#server_list>tbody>tr");
+     if(trNodes){
+         pagerCount = parseInt(trNodes[0].children[15].innerHTML);
+         pagerIndex = parseInt(trNodes[0].children[16].innerHTML);
+         generatePager(pagerIndex,pagerCount);
+     }
+     addOptionButton();
 })
 
 //CheckFilterStatus
-function LoadFilterCheckbox(){
-    var chkBoxHtml = "";
-    chkBoxHtml += "<input id='chkFilter' type='checkbox'  {0} onclick='ReloadData(this.checked)' >show not up and in</input>";
+function LoadFilterTextbox(){
+    var filterRow = ""
+    filterRow += "  <div class='table_search client'>";
+    filterRow += "      <input id='txtFilter' type='text' class='form-control' placeHolder='name,status,server,zone' />";    
+    filterRow += "      <button id='btnFilter' class='btn btn-primary' onClick='search()'>filter</button>";
+    filterRow += "  </div>";
 
-    var pathname = window.location.pathname;
-    var _is_checked = ""
-    if(pathname.indexOf("not_up_in")>0){
-        _is_checked = "checked";
-    }
-
-    $("th[class='table_header']").append(chkBoxHtml.replace("{0}",_is_checked));
+    $(".table_actions.clearfix").append(filterRow);
 }
 
-function ReloadData(is_checked){
-    if(is_checked == true)
-        window.location.href = "/dashboard/vsm/osd-status/not_up_in/";
-    else
-        window.location.href = "/dashboard/vsm/osd-status/";
+function FilterReloadData(filterIndex){
+    alert(filterIndex);
 }
 
+function SortReloadData(sortIndex){
+    alert(sortIndex);
+}
 
 
 //load OSD data
@@ -67,6 +64,62 @@ function loadOSD(){
         }
     });
 }
+
+
+function search(){
+    if($("#txtFilter").val() == ""){
+        return false;
+    }
+
+    var token = $("input[name=csrfmiddlewaretoken]").val();
+    $.ajax({
+        type: "post",
+        url: "/dashboard/vsm/osd-status/filter_osd/",
+        data: JSON.stringify({"keyword":$("#txtFilter").val()}),
+        dataType:"json",
+        success: function(data){
+            console.log(data);
+            /*
+            <tr id="server_list__row__1">
+                <td class="hide sortable normal_column">1</td>
+                <td class="sortable osd_name normal_column">osd.0</td>
+                <td class="vsm_status status_up sortable normal_column">Present</td>
+                <td class="osd_state sortable normal_column">In-Up</td>
+                <td class="sortable normal_column">1.0</td>
+                <td class="sortable normal_column">20468</td>
+                <td class="sortable normal_column">43</td>
+                <td class="sortable normal_column">20424</td>
+                <td class="capacity_percent_used sortable normal_column">0</td>
+                <td class="sortable normal_column">node1</td>
+                <td class="sortable normal_column">performance</td>
+                <td class="sortable zone normal_column"></td>
+                <td class="normal_column sortable span2">137days, 10 hours ago</td>
+                <td class="hide normal_column sortable pageCount">1</td>
+                <td class="hide pageIndex sortable normal_column">1</td>
+                <td class="sortable hide pagerCount normal_column">1</td>
+                <td class="pagerIndex hide sortable normal_column">1</td>
+                <td class="sortable deviceInfo normal_column">
+                    <a href="/dashboard/vsm/devices-management/?osdid=1">
+                        <img style="margin-left:10px;cursor:pointer" src="/static/dashboard/img/info_32.png">
+                    </a>
+                </td>
+            </tr>
+            */
+
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+        //    if(XMLHttpRequest.status == 500)
+        //        showTip("error","INTERNAL SERVER ERROR")
+        },
+        headers: {
+            "X-CSRFToken": token
+        },
+        complete: function(){
+
+        }
+    });
+}
+
 
 function loadInterval(){
     setInterval(function(){

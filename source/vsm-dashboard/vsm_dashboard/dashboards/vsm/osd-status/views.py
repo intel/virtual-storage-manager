@@ -50,38 +50,17 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
         default_sort_dir = "asc";
         default_sort_keys = ['osd_name']
         marker = self.request.GET.get('marker', "")
-
         try:
             _osd_status = vsmapi.osd_status(self.request, paginate_opts={
                 "limit": default_limit,
                 "sort_dir": default_sort_dir,
                 "marker":   marker,
             })
-
             if _osd_status:
                 logging.debug("resp body in view: %s" % _osd_status)
         except:
             exceptions.handle(self.request,
                               _('Unable to retrieve osd list. '))
-
-        #filter the data list contain up_in or not
-        filter_data = []
-        check_num = self.request.path.find("not_up_in")
-        print check_num
-        if check_num == -1:
-            filter_data = _osd_status
-        else:
-            for _osd in _osd_status:
-                if _osd.state != "In-Up":
-                  filter_data.append(_osd)
-
-        print "==========filter data=================="
-        print filter_data
-
-        #if the fitler is empty then return
-        if(len(filter_data) == 0):
-            return []
-
 
         page_index = int(self.request.GET.get('pageIndex',1))
         page_size = 20
@@ -135,3 +114,19 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
 
             osd_status.append(osd)
         return osd_status
+
+def filter_osd(request):
+    status = ""
+    msg = ""
+    data = json.loads(request.body)
+    try:
+        status = "OK"
+        msg = "Successfully!"
+    except ex:
+        print ex
+        status = "Failed"
+        msg = "Failed!"
+
+    resp = dict(message=msg, status=status)
+    resp = json.dumps(resp)
+    return HttpResponse(resp)
