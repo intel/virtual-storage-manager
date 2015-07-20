@@ -321,15 +321,13 @@ function install_setup_diamond() {
     $SSH $USER@$1 "sudo apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
-    VSM_PATH=`find /usr -name "vsm"|grep "python2.*"`
-    VSM_PATH=${VSM_PATH////\\/}
+    VSMMYSQL_FILE_PATH=`find / -name vsmmysql.py|grep vsm/diamond`
+    HANDLER_PATH=`find / -name handler|grep python`
     DIAMOND_CONFIG="/etc/diamond/diamond.conf"
     $SSH $USER@$1 "$SUDO cp /etc/diamond/diamond.conf.example $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.mysql.MySQLHandler/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/^collectors_path = *.*/collectors_path = $VSM_PATH\/diamond\/collectors/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/^collectors_config_path = *.*/collectors_config_path = $VSM_PATH\/diamond\/collectors/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/^handlers_config_path = *.*/handlers_config_path = $VSM_PATH\/diamond\/handlers/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/^handlers_path = *.*/handlers_path = $VSM_PATH\/diamond\/handlers/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH"
+    $SSH $USER@$1 "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.vsmmysql.VSMMySQLHandler/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG"
@@ -349,7 +347,7 @@ function install_setup_diamond() {
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[LoadAverageCollector\]\]/\#\[\[LoadAverageCollector\]\]/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[MemoryCollector\]\]/\#\[\[MemoryCollector\]\]/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/i\[\[CephMetricsCollector\]\]\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "diamond"
 }
