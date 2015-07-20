@@ -1047,8 +1047,11 @@ def osd_state_create(context, values):
 def osd_state_get(context, osd_id):
     return IMPL.osd_state_get(context, osd_id)
 
-def osd_state_get_all(context, limit=None, marker=None, sort_keys=None, sort_dir=None):
-    return IMPL.osd_state_get_all(context, limit, marker, sort_keys, sort_dir)
+def osd_state_get_all(context, limit=None, marker=None, sort_keys=None, sort_dir=None, search_opts={}):
+    if search_opts:
+        return IMPL.osd_state_get_sort_filter(context, limit, marker, sort_keys, sort_dir,search_opts)
+    else:
+        return IMPL.osd_state_get_all(context, limit, marker, sort_keys, sort_dir,search_opts)
 
 def osd_state_get_by_name(context, osd):
     return IMPL.osd_state_get_by_name(context, osd)

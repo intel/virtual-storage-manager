@@ -168,6 +168,9 @@ def osd_restore(request, osd_id):
 def osd_status(request, paginate_opts=None):
     return vsmclient(request).osds.list(detailed=True, paginate_opts=paginate_opts)
 
+def osd_status_sort_and_filter(request, paginate_opts=None):
+    return vsmclient(request).osds.list(detailed='detail_filter_and_sort', paginate_opts=paginate_opts)
+
 def osd_summary(request):
     return vsmclient(request).osds.summary()
 

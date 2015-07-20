@@ -268,6 +268,13 @@ def service_get_all_by_host(context, host):
         all()
 
 @require_admin_context
+def service_get_all_by_host_like(context, host):
+    return model_query(
+        context, models.Service, read_deleted="no").\
+        filter(models.Service.host.like('%%%s%%'%host)).\
+        all()
+
+@require_admin_context
 def service_get_all_bmc_by_host(context, host):
     result = model_query(context, models.Service, read_deleted="no").\
                 options(joinedload('compute_node')).\
@@ -3085,6 +3092,12 @@ def zone_get_by_name(context, name, session=None):
         filter_by(name=name).\
         first()
 
+def zone_get_by_name_like(context, name, session=None):
+    return model_query(
+        context,
+        models.Zone, read_deleted="no").\
+        filter(models.Zone.name.like('%%%s%%'%name)).\
+        all()
 def init_node_get_by_id_and_type(context, id, type, session=None):
     field = models.InitNode.type
     return model_query(
@@ -3232,6 +3245,37 @@ def osd_state_get_all(context,
                                           limit, sort_keys=sort_keys,
                                           marker=marker_item, sort_dir=sort_dir)
 
+def osd_state_get_sort_filter(context,
+                      limit=None,
+                      marker=None,
+                      sort_keys=None,
+                      sort_dir=None,search_opts={}):
+    if search_opts:
+        services = service_get_all_by_host_like(context,host=search_opts.get('server_name'))
+        zones = zone_get_by_name_like(context,search_opts.get('zone_name'))
+        service_ids = [service.id for service in services]
+        zone_ids = [zone.id for zone in zones]
+        LOG.info("servie_ids===%s,zone_ids=%s"%(service_ids,zone_ids))
+    query = model_query(context, models.OsdState, read_deleted="no").\
+        options(joinedload('device')).\
+        options(joinedload('service')).\
+        options(joinedload('storage_group')).\
+        options(joinedload('zone'))
+    if search_opts:
+        query = query.filter(models.OsdState.osd_name.like("%%%s%%"%search_opts['osd_name']),models.OsdState.service_id.in_(service_ids),models.OsdState.zone_id.in_(zone_ids))
+    marker_item = None
+    if marker is not None:
+        marker_item = osd_get(context, marker)
+
+    if sort_keys is None:
+        sort_keys = ['id']
+    else:
+        if 'id' not in sort_keys:
+            sort_keys.insert(0, 'id')
+
+    return sqlalchemyutils.paginate_query(query, models.OsdState,
+                                          limit, sort_keys=sort_keys,
+                                          marker=marker_item, sort_dir=sort_dir)
 def get_zone_hostname_storagegroup_by_osd_id(context,osd_id):
     result = model_query(context, models.OsdState, read_deleted="no").\
         options(joinedload('device')).\

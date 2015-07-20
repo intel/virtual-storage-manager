@@ -148,9 +148,9 @@ class API(object):
         return self.conductor_rpcapi.\
                osd_remove(context, osd_id)
 
-    def osd_state_get_all(self, context, limit=None, marker=None, sort_keys=None, sort_dir=None):
+    def osd_state_get_all(self, context, limit=None, marker=None, sort_keys=None, sort_dir=None,search_opts={}):
         return self.conductor_rpcapi.\
-               osd_state_get_all(context, limit, marker, sort_keys, sort_dir)
+               osd_state_get_all(context, limit, marker, sort_keys, sort_dir, search_opts)
 
     def osd_state_update_or_create(self, context, values, create=None):
         return self.conductor_rpcapi.\
