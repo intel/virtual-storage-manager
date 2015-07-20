@@ -253,15 +253,15 @@ function loadBandwith(){
 }
 
 $(document).ready(function(){
-    //loadVersion();
-    //loadClusterStatus();
-    //loadOSD();
-    //loadMonitor();
-    //loadMDS();
-    //loadStorage();
+    loadVersion();
+    loadClusterStatus();
+    loadOSD();
+    loadMonitor();
+    loadMDS();
+    loadStorage();
 
     //Load Interval
-    //loadInterval();
+    loadInterval();
 })
 
 function loadInterval(){
@@ -271,7 +271,7 @@ function loadInterval(){
         loadMonitor();
         loadMDS();
 	    loadStorage();
-     } ,15000);
+     } ,30000);
 }
 
 function loadVersion(){
