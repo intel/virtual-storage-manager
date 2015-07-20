@@ -77,7 +77,7 @@ class PresentPoolAction(tables.LinkAction):
     name = "present pools"
     verbose_name = _("Present Pools")
     url = "horizon:vsm:rbdpools:presentpoolsview"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
     def allowed(self, request, datum):
         #LOG.error("CEPH_LOG PRESENTPOOL: ALLOW <")

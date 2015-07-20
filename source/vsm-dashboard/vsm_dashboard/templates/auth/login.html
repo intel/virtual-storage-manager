@@ -12,10 +12,5 @@
 
 {% block js %}
     {{ block.super }}
-    <script type="text/javascript">
-        <script src="{{ STATIC_URL }}dashboard/js/login.js"  type="text/javascript" charset="utf-8"></script>
-    	$(document).ready(function(){
-    		$(".form-control-feedback.glyphicon.glyphicon-eye-open").hide();
-    	})
-    </script>
+     <script src="{{ STATIC_URL }}dashboard/js/login.js"  type="text/javascript" charset="utf-8"></script>
 {% endblock %}

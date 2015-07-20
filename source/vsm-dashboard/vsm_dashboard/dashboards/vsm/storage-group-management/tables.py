@@ -38,7 +38,7 @@ class CreateStorageGroupAction(tables.LinkAction):
     name = "create storage group"
     verbose_name = _("Add Storage Group")
     url = "horizon:vsm:storage-group-management:create"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class ListStorageGroupTable(tables.DataTable):
 

@@ -80,7 +80,7 @@ class EditUser(tables.LinkAction):
     name = "edit"
     verbose_name = _("Change Password")
     url = "horizon:vsm:usermgmt:update"
-    classes = ("ajax-modal", "btn-edit")
+    classes = ("ajax-modal", "btn-primary")
 
     def allowed(self, request, user):
         return api.keystone.keystone_can_edit_user()
@@ -89,7 +89,7 @@ class CreateUserAction(tables.LinkAction):
     name = "create user"
     verbose_name = _("Create User")
     url = "horizon:vsm:usermgmt:create"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
     def allowed(self, request, datum):
         return (request.user.username == "admin")  
