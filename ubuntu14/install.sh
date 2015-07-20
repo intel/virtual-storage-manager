@@ -322,7 +322,7 @@ function install_setup_diamond() {
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
     VSMMYSQL_FILE_PATH=`find / -name vsmmysql.py|grep vsm/diamond`
-    HANDLER_PATH=`find / -name handler|grep python`
+    HANDLER_PATH=`$SSH $USER@$1 "find / -name handler|grep python"`
     DIAMOND_CONFIG="/etc/diamond/diamond.conf"
     $SSH $USER@$1 "$SUDO cp /etc/diamond/diamond.conf.example $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH"
