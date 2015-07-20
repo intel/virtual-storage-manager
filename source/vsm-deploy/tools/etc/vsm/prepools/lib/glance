@@ -19,7 +19,7 @@
 function _set_default_glance() {
     local key=`echo $@ | awk -F "=" '{print $1}'`
     local value=`echo $@ | awk -F "=" '{print $2}'`
-    openstack-config --set /etc/glance/glance-api.conf DEFAULT $key $value
+    crudini --set /etc/glance/glance-api.conf DEFAULT $key $value
 }
 
 function configure_glance() {
@@ -46,6 +46,14 @@ function configure_glance() {
 
         if [[ `is_service_running openstack-glance-registry` -gt 0 ]]; then
             service openstack-glance-registry restart
+        fi
+
+        if [[ `is_service_running glance-api` -gt 0 ]]; then
+            service glance-api restart
+        fi
+
+        if [[ `is_service_running glance-registry` -gt 0 ]]; then
+            service glance-registry restart
         fi
     fi
 }

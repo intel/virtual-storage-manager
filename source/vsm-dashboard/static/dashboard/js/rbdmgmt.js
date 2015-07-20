@@ -19,6 +19,9 @@
 $(function(){
     //Open the TableCheckbox
     OpenTableCheckbox();
+
+    //LoadSelected()
+    LoadSelected();
 });
 
 
@@ -38,16 +41,47 @@ function OpenTableCheckbox(){
 }
 
 
+function LoadSelected(){
+    $.ajax({
+        data: {},
+        type: "get",
+        dataType: "json",
+        url: "/dashboard/vsm/rbdpools/get_select_data/",
+        success: function (data) {
+            var html = "";
+            html += "<select class='cinder_volume_host' style='width:80px'>";
+            for(var i=0;i<data.length;i++){
+                html += "<option value='"+data[i].value+"' >"+data[i].host+"</option>";
+            }
+            html += "</select>";
+
+             var ctrlSelected = $(".zone");
+            for(var i=1;i<ctrlSelected.length;i++){
+                ctrlSelected[i].innerHTML = html;
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+        },
+        complete: function(){
+
+        }
+    });
+}
+
+
 $("#btnSubmit").click(function(){
     var data_list = new Array();
 
     $("#tPools>tbody>tr").each(function(){
         var tr_id = this.id;
         var checkbox = $("#"+tr_id).find(".table-row-multi-select");
-        
         if(checkbox[0].checked){
             id = checkbox.val();
-            data = {id:id};
+            var sel_index = $("#"+tr_id).find(".cinder_volume_host").val();
+            cinder_volume_host = $("#"+tr_id).find(".cinder_volume_host")[0].options[sel_index].text;
+            data = {id:id, cinder_volume_host:cinder_volume_host};
             data_list.push(data);
         }
     })
@@ -67,7 +101,10 @@ $("#btnSubmit").click(function(){
         url: "/dashboard/vsm/rbdpools/pools/present",
         success: function (data) {
             console.log(data);
-            window.location.href="/dashboard/vsm/rbdpools/";
+            if(data.status == "warning")
+                showTip(data.status,data.message);
+            else
+                window.location.href="/dashboard/vsm/rbdpools/";
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             if(XMLHttpRequest.status == 500)

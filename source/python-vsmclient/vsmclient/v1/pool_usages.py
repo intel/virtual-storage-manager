@@ -40,7 +40,7 @@ class PoolUsageManager(base.ManagerWithFind):
 
         """
         Create pool usages.
-        Param: a list of pool id.
+        Param: a list of pool id and cinder_volume_host.
         """
         if not isinstance(pools, list):
             pool_list = list()

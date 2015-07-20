@@ -193,8 +193,14 @@ class CephDriver(object):
         LOG.info(' agent present_storage_pools()')
         LOG.info(' body = %s' % info)
 
-        vsmapp_ip = info['vsmapp_ip']
+        # vsmapp_ip = info['vsmapp_ip']
         pool_infos = info['pool_infos']
+        tenant_name = info['os_tenant_name']
+        username = info['os_username']
+        password = info['os_password']
+        auth_url = info['os_auth_url']
+        auth_host = auth_url.split(":")[1][2:]
+
 
         pools_str = ""
         for pinfo in pool_infos:
@@ -205,7 +211,10 @@ class CephDriver(object):
 
         LOG.info('pools_str = %s' % pools_str)
         out, err = utils.execute('presentpool',
-                                 vsmapp_ip,
+                                 tenant_name,
+                                 username,
+                                 password,
+                                 auth_host,
                                  pools_str,
                                  run_as_root=True)
         LOG.info('running logs = %s' % out)

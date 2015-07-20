@@ -41,6 +41,7 @@ class CreatePool(forms.SelfHandlingForm):
                                          " ASCII characters and numbers.")},
                             validators=[validators.validate_slug])
     storage_group = forms.ChoiceField(label=_('Storage Group'))
+    cinder_volume_host = forms.ChoiceField(label=_('Cinder Volume Host'))
     replication_factor = forms.IntegerField(label=_("Replication Factor"),
                                         min_value=1,
                                         help_text=_('The replication'
@@ -69,6 +70,8 @@ class CreatePool(forms.SelfHandlingForm):
             exceptions.handle(request, msg, redirect=redirect)
             return False
         self.fields['storage_group'].choices = storage_group_list
+        self.fields['cinder_volume_host'].choices = [('host1', 'host1'),
+                                              ('host2', 'host2')]
 
     def handle(self, request, data):
         try:

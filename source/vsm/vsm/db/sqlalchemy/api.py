@@ -3371,25 +3371,25 @@ def appnodes_get_all(context):
 def appnodes_create(context, values, allow_duplicate=False):
     vsmapp = vsmapps_get_by_project(context)
     vsmapp_id = vsmapp.id if vsmapp else None
-    LOG.debug('vsmapp get by project %s' % vsmapp_id)
+    LOG.info('vsmapp get by project %s' % vsmapp_id)
 
     if vsmapp_id is None:
         raise exception.VsmappNotFound()
     else:
         values['vsmapp_id'] = vsmapp_id
-
-    ip = values.get('ip', None)
-    if not ip:
-        raise exception.AppNodeInvalidInfo()
-
-    ref = appnodes_get_by_ip_vsmappid(context, ip, vsmapp_id)
-    if ref:
-        if not allow_duplicate:
-            # The node exists, return the node info straightaway.
-            raise exception.DuplicateVsmApp(ip=ip,
-                                            err='The app node already exists.')
-        else:
-            return ref
+    #
+    # ip = values.get('ip', None)
+    # if not ip:
+    #     raise exception.AppNodeInvalidInfo()
+    #
+    # ref = appnodes_get_by_ip_vsmappid(context, ip, vsmapp_id)
+    # if ref:
+    #     if not allow_duplicate:
+    #         # The node exists, return the node info straightaway.
+    #         raise exception.DuplicateVsmApp(ip=ip,
+    #                                         err='The app node already exists.')
+    #     else:
+    #         return ref
 
     values['created_at'] = timeutils.utcnow()
     values['deleted'] = 0
@@ -3399,7 +3399,7 @@ def appnodes_create(context, values, allow_duplicate=False):
         appnodes_ref.update(values)
         appnodes_ref.save()
     except db_exc.DBDuplicateEntry as e:
-        raise exception.DuplicateAppnode(ip=ip, err=e.message)
+        raise exception.DuplicateAppnode(ip=values['os_auth_url'], err=e.message)
 
     return appnodes_ref
 
@@ -3516,12 +3516,16 @@ def sp_usage_create(context, pools, session=None):
     vsmapp_id = vsmapp.id if vsmapp else None
 
     appnode = appnodes_get_all_by_vsmappid(context, vsmapp_id)
-    vsmapp_ip = appnode['ip']
+    # vsmapp_ip = appnode['ip']
+    os_tenant_name = appnode['os_tenant_name']
+    os_username = appnode['os_username']
+    os_password = appnode['os_password']
+    os_auth_url = appnode['os_auth_url']
 
     if not vsmapp_id:
         raise exception.VsmappNotFound()
 
-    pools = [int(x) for x in pools]
+    pool_ids = [int(x['id']) for x in pools]
     #update pools
     old_pools = get_sp_usage_all_by_vsmapp_id(context, vsmapp_id, session)
     for pref in old_pools:
@@ -3529,13 +3533,13 @@ def sp_usage_create(context, pools, session=None):
         # Filter the deleted pools.
         pool_ref = pool_get_by_db_id(context, pool_id, session)
         if pool_ref:
-            pools.append(pref['pool_id'])
-    pools = list(set(pools))
+            pool_ids.append(pref['pool_id'])
+    pool_ids = list(set(pool_ids))
 
 
     pool_info_list = []
     pool_name_list = []
-    for pool_id in pools:
+    for pool_id in pool_ids:
         pool_ref = pool_get_by_db_id(context, pool_id, session)
         storage_group = pool_ref['storage_group']
         #rule_id = pool_ref['crush_ruleset']
@@ -3549,7 +3553,7 @@ def sp_usage_create(context, pools, session=None):
         pool_name_list.append(pool_ref['name'])
         pool_info_list.append(info)
 
-    for pool_id in pools:
+    for pool_id in pool_ids:
         ref = get_sp_usage_by_poolid_vsmappid(context, pool_id, vsmapp_id)
 
         kargs = {
@@ -3570,10 +3574,15 @@ def sp_usage_create(context, pools, session=None):
             session.add(sp_usage_ref)
             sp_usage_ref.update(kargs)
 
-    return {'pool_infos': pool_info_list,
-            'pool_names': pool_name_list,
-            'vsmapp_ip': vsmapp_ip,
-            'vsmapp_id': vsmapp_id}
+    return {
+        'pool_infos': pool_info_list,
+        'pool_names': pool_name_list,
+        'vsmapp_id': vsmapp_id,
+        'os_tenant_name': os_tenant_name,
+        'os_username': os_username,
+        'os_password': os_password,
+        'os_auth_url': os_auth_url
+    }
 
 @require_context
 def get_sp_usage_by_poolid_vsmappid(context, poolid, vsmapp_id):

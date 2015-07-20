@@ -86,8 +86,8 @@ def pool_usages(request):
 def present_pool(request, pools):
     return vsmclient(request).PoolUsageManager.create(pools=pools)
 
-def add_appnodes(request, ips):
-    return vsmclient(request).AppNodeManager.create(ips=ips)
+def add_appnodes(request, auth_openstack):
+    return vsmclient(request).AppNodeManager.create(auth_openstack)
 
 def del_appnode(request, appnode_id):
     return vsmclient(request).AppNodeManager.delete(appnode_id)

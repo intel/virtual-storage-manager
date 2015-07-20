@@ -9,21 +9,26 @@ function InitCtrlCSS(){
 	}
 
 	var ctrlText = $("input[type='text']");
-	for(var i=0;i<ctrlText.length;i++){
-		ctrlText[i].className = "form-control";
+	for(var i=0;i<ctrlText.length;i++) {
+        ctrlText[i].className = "form-control";
+    }
+
+    var ctrlPwd = $("input[type='password']");
+	for(var i=0;i<ctrlPwd.length;i++){
+		ctrlPwd[i].className = "form-control";
 	}
 }
 
 
 $("#btnCreate").click(function(){
-	var ip = $("#id_ip").val();
-	var re =  /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
-	if(re.test(ip) == false){
-		showTip("error","The IP is not validation");
-		return  false;
-	}
 
-	var data = {"ip":ip};
+	var os_tenant_name = $("#id_os_tenant_name").val();
+    var os_username = $("#id_os_username").val();
+    var os_password = $("#id_os_password").val();
+    var os_auth_url = $("#id_os_auth_url").val();
+
+	var data = {"os_tenant_name":os_tenant_name, "os_username":os_username,
+    "os_password":os_password, "os_auth_url":os_auth_url};
 	var postData = JSON.stringify(data);
 	token = $("input[name=csrfmiddlewaretoken]").val();
 
@@ -53,14 +58,13 @@ $("#btnCreate").click(function(){
 
 $("#btnUpdate").click(function(){
 	var id = $("#id_id").val();
-	var ip = $("#id_ip").val();
-	var re =  /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
-	if(re.test(ip) == false){
-		showTip("error","The IP is not validation");
-		return  false;
-	}
+    var os_tenant_name = $("#id_os_tenant_name").val();
+    var os_username = $("#id_os_username").val();
+    var os_password = $("#id_os_password").val();
+    var os_auth_url = $("#id_os_auth_url").val();
 
-	var data = {"id":id,"ip":ip};
+	var data = {"id":id,"os_tenant_name":os_tenant_name,"os_username":os_username,
+    "os_password":os_password,"os_auth_url":os_auth_url};
 	var postData = JSON.stringify(data);
 	token = $("input[name=csrfmiddlewaretoken]").val();
 

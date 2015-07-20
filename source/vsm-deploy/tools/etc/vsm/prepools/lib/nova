@@ -19,7 +19,7 @@
 function _set_default_nova() {
     local key=`echo $@ | awk -F "=" '{print $1}'`
     local value=`echo $@ | awk -F "=" '{print $2}'`
-    openstack-config --set /etc/nova/nova.conf DEFAULT $key $value
+    crudini --set /etc/nova/nova.conf DEFAULT $key $value
 }
 
 function configure_nova() {
@@ -49,6 +49,10 @@ function configure_nova() {
         add_auth_user ${AUTH_CINDER_USER} $libvirt_auth_key ${AUTH_CINDER_UUID}
         if [[ `is_service_running openstack-nova-compute` -gt 0 ]]; then
             service openstack-nova-compute restart
+        fi
+
+        if [[ `is_service_running nova-compute` -gt 0 ]]; then
+            service nova-compute restart
         fi
     fi
 }
