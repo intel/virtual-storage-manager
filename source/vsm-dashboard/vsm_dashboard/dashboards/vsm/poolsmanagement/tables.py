@@ -36,25 +36,25 @@ class CreateStoragePool(tables.LinkAction):
     name = "create pool"
     verbose_name = _("Create Replicated Pool")
     url = "horizon:vsm:poolsmanagement:create"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class CreateErasureCodedPool(tables.LinkAction):
     name = "create erasure coded pool"
     verbose_name = _("Create EC Pool")
     url = "horizon:vsm:poolsmanagement:create_ec_pool"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class AddCacheTier(tables.LinkAction):
     name = "add cache tier"
     verbose_name = _("Add Cache Tier")
     url = "horizon:vsm:poolsmanagement:add_cache_tier"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class RemoveCacheTier(tables.LinkAction):
     name = "remove cache tier"
     verbose_name = _("Remove Cache Tier")
     url = "horizon:vsm:poolsmanagement:remove_cache_tier"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
 class DeleteStoragePool(tables.DeleteAction):
     data_type_singular = _("StoragePool")

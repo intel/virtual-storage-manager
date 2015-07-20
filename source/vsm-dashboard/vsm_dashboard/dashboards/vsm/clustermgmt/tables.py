@@ -73,7 +73,7 @@ class CreateClusterAction(tables.LinkAction):
     name = "create cluster"
     verbose_name = _("Create Cluster")
     url = "horizon:vsm:clustermgmt:createclusterview"
-    classes = ("ajax-modal", "btn-create")
+    classes = ("ajax-modal", "btn-primary")
 
     def allowed(self, request, datum):
         return all([x['status']=="available" for x in self.table.data])
