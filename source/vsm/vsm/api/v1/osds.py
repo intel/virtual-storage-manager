@@ -128,7 +128,6 @@ class Controller(wsgi.Controller):
         context = req.environ['vsm.context']
         service_id = req.GET.get('service_id', None)
         error = self.conductor_api.ceph_error(context)
-        error = self.conductor_api.ceph_error(context)
         LOG.info('vsm/api/v1/osds.py detailed service_id:%s' % service_id)
         if service_id:
             osds = db.osd_get_by_service_id(context, service_id)
