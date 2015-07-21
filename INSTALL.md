@@ -203,7 +203,7 @@ This section will describe how to use the tool to conduct automation.
 
 9. Now we are ready to start the automatic procedure by executing this command line:
 	> 
-	> 	bash +x install.sh -v <version>
+	> 	sudo ./install.sh -u ubuntu -v <version>
 	> 	
 	
 	where *version* is the vsm version like 1.1, 2.0.
