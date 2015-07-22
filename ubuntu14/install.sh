@@ -321,7 +321,7 @@ function install_setup_diamond() {
     $SSH $USER@$1 "sudo apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
-    VSMMYSQL_FILE_PATH=`find / -name vsmmysql.py|grep vsm/diamond`
+    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "find / -name vsmmysql.py|grep vsm/diamond"`
     HANDLER_PATH=`$SSH $USER@$1 "find / -name handler|grep python"`
     DIAMOND_CONFIG="/etc/diamond/diamond.conf"
     $SSH $USER@$1 "$SUDO cp /etc/diamond/diamond.conf.example $DIAMOND_CONFIG"
@@ -349,7 +349,7 @@ function install_setup_diamond() {
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "diamond"
+    $SSH $USER@$1 "service diamond restart"
 }
 
 function setup_remote_agent() {
