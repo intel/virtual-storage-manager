@@ -80,7 +80,7 @@ function loadCapacity(){
             $("#lblDataCapacityUsed")[0].innerHTML = data.data_used;
             $("#lblTotalCapacityUsed")[0].innerHTML = data.total_used;
             $("#lblCapacityAvailable")[0].innerHTML = data.available;
-            ("#lblCapacityTotal")[0].innerHTML = data.total;
+            $("#lblCapacityTotal")[0].innerHTML = data.total;
         }
     });
 }
