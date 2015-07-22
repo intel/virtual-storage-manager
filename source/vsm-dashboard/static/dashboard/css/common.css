@@ -27,13 +27,15 @@ h1.brand a{
  * any labels
  */
 .vsm-block-title{
-    top:20px;    
+    top:24px;
     z-index:100;
     position:relative;
     display: inline-block;
     background-color:white;
     margin-right: auto;
     margin-left: auto;
+    /*font-family: "Ubuntu, Arial,libra sans, sans-serif";*/
+    font-size: 24px;
 }
 
 /**
@@ -194,7 +196,6 @@ h1.brand a{
 }
 
 .vsm-summary h3{
-    font-family: anivers;
     font-weight: normal;
     font-size: 24px;
     margin: 10px;
