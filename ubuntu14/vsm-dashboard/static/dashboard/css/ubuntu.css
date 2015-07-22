@@ -3771,7 +3771,9 @@ a.badge:hover, a.badge:focus {
             #user_info {
               margin: auto 10px;
               padding-bottom: 15px;
-              padding-right: 25px; }
+              padding-right: 25px;
+              margin-top: 10px;
+            }
 
               /*#user_info > a {
                 color: #333333;
