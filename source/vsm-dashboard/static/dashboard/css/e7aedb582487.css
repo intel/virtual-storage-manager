@@ -5596,10 +5596,10 @@ dt {
   margin-right: 10px;
   padding: 0;
   background-image: url('/static/dashboard/img/drop_arrow.png?2ec1100baed3');
-  background-color: #eeeeee;
+  background-color: #337ab7;
   background-repeat: no-repeat;
-  border: 1px solid #cccccc;
-  border-bottom-color: #b3b3b3;
+  border: 1px solid #2e6da4;
+  border-bottom-color: #2e6da4;
   border-radius: 4px; }
   .topbar .switcher_bar ul#tenant_list a {
     max-width: 160px;

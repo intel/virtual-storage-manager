@@ -11,9 +11,11 @@ var cClusterGague;
 var cIOPs;
 var cLatency;
 var cBandwidth;
-var IOP_EndTime = "";
-var Latency_EndTime = "";
-var Bandwidth_EndTime = "";
+var cCPU;
+var timestamp1 = 1435623484;
+var timestamp2 = 1435623484;
+var timestamp3 = 1435623484;
+var IOPs_EndTime = "00:00:00";
 var token = $("input[name=csrfmiddlewaretoken]").val();
 require(
     [
@@ -29,230 +31,45 @@ require(
         cIOPs = ec.init(document.getElementById('divIOPsContent'));
         cLatency = ec.init(document.getElementById('divLatencyContent'));
         cBandwidth = ec.init(document.getElementById('divBandwidthContent'));
+        cCPU = ec.init(document.getElementById('divCPUContent'));
        
         cIOPs.setOption(GenerateLineOption());
         cLatency.setOption(GetLantencyOption());
         cBandwidth.setOption(GetBandwidthOption());
         
-    	$.ajax({
-                type: "get",
-                url: "/dashboard/vsm/capcity/",
-                data: null,
-                dataType:"json",
-                success: function(data){
-    		    //console.log(data.value);
-                        cClusterGague.setOption(GenerateGaugeOption(data.value));
-                    }
-             });
-  
-    	$.ajax({
-                type: "get",
-                url: "/dashboard/vsm/PG/",
-                data: null,
-                dataType:"json",
-                success: function(data){
-                        $("#lblPGUpdate")[0].innerHTML ="Update:&nbsp&nbsp"+data.update;
-                        cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
-                    }
-             });
-       
+    	//load Capacity
+        loadCapacity();
         setInterval(function(){
-             $.ajax({
-    	     type: "get",
-    	     url: "/dashboard/vsm/capcity/",
-    	     data: null,
-    	     dataType:"json",
-    	     success: function(data){
-    	             option.series[0].data[0].value = data.value;
-    	             cClusterGague.setOption(option, true);
-    	         }
-    	     });
-         },15000);
-   
-    	setInterval(function(){
-    	     $.ajax({
-    		    type: "get",
-    		    url: "/dashboard/vsm/PG/",
-    		    data: null,
-    		    dataType:"json",
-    		    success: function(data){
-    		            cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
-    		    	}
-    	   	  });
-    	},15000);
+            loadCapacity();
+        },15000);
 
-        //IOPS
+  
+    	//load Capacity
+        loadPG();
+        setInterval(function(){
+            loadPG();
+        },15000);
+    
+
+        //IOPS  
         loadIOP();
 
         //Lantency
-        loadLantency();
+        loadLatency();
 
         //Bandwith
-        loadBandwith();
+        loadBandwidth();
+
+        //CPU
+        loadCPU();
     }
 );
 
 
-function loadIOP(){
-    setTimeout(function (){
-            $.ajax({
-                type: "post",
-                url: "/dashboard/vsm/IOPS/",
-                data: JSON.stringify({"timestamp":IOP_EndTime }),
-                //data:"",
-                dataType: "json",
-                success: function (data) {
-                    metrics = data.metrics;
-                    for(var i=0;i<metrics.length;i++){
-                        IOP_EndTime = metrics[i].timestamp;
-                        var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
-
-                        //add new node
-                        cIOPs.addData([
-                            [
-                                0,        //read line
-                                metrics[i].r_value,
-                                false,
-                                false,
-                            ],
-                            [
-                                1,        //write line
-                                metrics[i].w_value,
-                                false,
-                                false,
-                                axisData
-                            ],
-                            [
-                                1,        //write line
-                                metrics[i].rw_value,
-                                false,
-                                false,
-                            ]
-                        ]);
-                    }
-
-                    //Reload the data
-                    console.log((new Date()).getSeconds());
-                    loadIOP();
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-
-                },
-                headers: {
-                    "X-CSRFToken": token
-                },
-                complete: function(){
-
-                }
-            });
-    }, 15000);
-}
-
-function loadLantency(){
-    setTimeout(function (){
-        $.ajax({
-            type: "post",
-            url: "/dashboard/vsm/latency/",
-            data: JSON.stringify({"timestamp":Latency_EndTime }),
-            dataType: "json",
-            success: function (data) {
-                metrics = data.metrics;
-                var axisData = "00:00:00";
-                for(var i=0;i<metrics.length;i++){
-                    Latency_EndTime = metrics[i].timestamp;
-                    var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
-
-                    //add new node
-                    cLatency.addData([
-                        [
-                            0,        //read line
-                            metrics[i].r_value,
-                            false,
-                            false,
-                        ],
-                        [
-                            1,        //write line
-                            metrics[i].w_value,
-                            false,
-                            false,
-                        ],
-                        [
-                            2,        //read_write line
-                            metrics[i].rw_value,
-                            false,
-                            false,
-                            axisData
-                        ]
-                    ]);
-                }
-
-                //Reload the data
-                console.log((new Date()).getSeconds());
-                loadLantency();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-
-            },
-            headers: {
-                "X-CSRFToken": token
-            },
-            complete: function(){
-
-            }
-        });
-    }, 15000);
-}
-
-function loadBandwith(){
-    setTimeout(function (){
-            $.ajax({
-                type: "post",
-                url: "/dashboard/vsm/bandwidth/",
-                data: JSON.stringify({"timestamp":Bandwidth_EndTime }),
-                dataType: "json",
-                success: function (data) {
-                    //data {"metrics": metrics}
-                    metrics = data.metrics;
-                    var axisData = "00:00:00";
-                    for(var i=0;i<metrics.length;i++){
-                        Bandwidth_EndTime = metrics[i].timestamp
-                        var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
-
-                        //add new node
-                        cBandwidth.addData([
-                            [
-                                0,        //in
-                                metrics[i].in_value,
-                                false,
-                                false,
-                            ],
-                            [
-                                1,        //out
-                                metrics[i].out_value,
-                                false,
-                                false,
-                                axisData
-                            ]
-                        ]);
-                    }
-                    //Reload the data
-                    console.log((new Date()).getSeconds());
-                    loadBandwith();
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-
-                },
-                headers: {
-                    "X-CSRFToken": token
-                },
-                complete: function(){
-
-                }
-            });
-        }, 15000);
-}
-
 $(document).ready(function(){
+    //Hide Page Title
+    HidePageHeader();
+
     loadVersion();
     loadClusterStatus();
     loadOSD();
@@ -271,7 +88,11 @@ function loadInterval(){
         loadMonitor();
         loadMDS();
 	    loadStorage();
-     } ,30000);
+     } ,15000);
+}
+
+function HidePageHeader(){
+    $(".page-header").hide();
 }
 
 function loadVersion(){
@@ -282,65 +103,65 @@ function loadVersion(){
 	dataType:"json",
 	success: function(data){
          //console.log(data);
-        $("#lblVersionUpdate")[0].innerHTML ="Update:&nbsp&nbsp"+data.update;
+        $("#lblVersionUpdate")[0].innerHTML =data.update;
 
         if(data.version == null)
-            $("#lblVersion")[0].innerHTML= "VSM Version:&nbsp&nbsp--";
+            $("#lblVersion")[0].innerHTML= "--";
         else
-            $("#lblVersion")[0].innerHTML= "VSM Version:&nbsp&nbsp"+data.version;
+            $("#lblVersion")[0].innerHTML= data.version;
 
 	    if(data.ceph_version == null)
-            $("#lblCephVersion")[0].innerHTML= "Ceph Version:&nbsp&nbsp--";
+            $("#lblCephVersion")[0].innerHTML= "--";
         else
-            $("#lblCephVersion")[0].innerHTML= "Ceph Version:&nbsp&nbsp"+data.ceph_version;
+            $("#lblCephVersion")[0].innerHTML= data.ceph_version;
 	   }
     });
 }
 
 function loadClusterStatus(){
-        $.ajax({
-            type: "get",
-            url: "/dashboard/vsm/cluster/",
-            data: null,
-            dataType: "json",
-            success: function (data) {
-                var statusTip = "";
-                var statusClass = "";
-                var noteClass = "";
+    $.ajax({
+        type: "get",
+        url: "/dashboard/vsm/cluster/",
+        data: null,
+        dataType: "json",
+        success: function (data) {
+            var statusTip = "";
+            var statusClass = "";
+            var noteClass = "";
 
-               switch (data.status) {
-                    case "HEALTH_OK":
-                        statusTip = "health";
-                        statusClass = "cluster-tip cluster-tip-health";
-                        noteClass = "alert alert-success";
-                        break;
-                    case "HEALTH_WARN": //warning
-                        statusTip = "warning";
-                        statusClass = "cluster-tip cluster-tip-warning";
-                        noteClass = "alert alert-warning";
-                        break;
-                    case "HEALTH_ERROR": //error
-                        statusTip = "error";
-                        statusClass = "cluster-tip cluster-tip-error";
-                        noteClass = "alert alert-danger";
-                        break;
-                }
-
-		var note="";
-		for(var i=0;i<data.note.length;i++){
-                	note += data.note[i];
-			if(i!=data.note.length-1){
-				note +="<br />"
-			}
-		}
-
-		$("#lblClusterName")[0].innerHTML = "Cluster Name:"+data.name;
-                $("#lblClusterTip")[0].innerHTML = statusTip;
-                $("#lblClusterTip")[0].className = statusClass;
-                $("#divClusterContent")[0].innerHTML = note;
-                $("#divClusterContent")[0].className = noteClass;
+           switch (data.status) {
+                case "HEALTH_OK":
+                    statusTip = "health";
+                    statusClass = "cluster-tip cluster-tip-health";
+                    noteClass = "alert alert-success";
+                    break;
+                case "HEALTH_WARN": //warning
+                    statusTip = "warning";
+                    statusClass = "cluster-tip cluster-tip-warning";
+                    noteClass = "alert alert-warning";
+                    break;
+                case "HEALTH_ERROR": //error
+                    statusTip = "error";
+                    statusClass = "cluster-tip cluster-tip-error";
+                    noteClass = "alert alert-danger";
+                    break;
             }
-        });
+
+    		var note="";
+    		for(var i=0;i<data.note.length;i++){
+                    	note += data.note[i];
+    			if(i!=data.note.length-1){
+    				note +="<br />"
+    			}
+    		}
+
+		    $("#lblClusterName")[0].innerHTML = data.name;
+            $("#lblClusterTip")[0].innerHTML = statusTip;
+            $("#lblClusterTip")[0].className = statusClass;
+            $("#divClusterContent")[0].innerHTML = note;
+            $("#divClusterContent")[0].className = noteClass;
+        }
+    });
 }
 
 function loadOSD(){
@@ -351,8 +172,8 @@ function loadOSD(){
 	dataType:"json",
 	success: function(data){
 	    //console.log(data);
-	    $("#lblOSDEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
-	    $("#lblOSDUpdate")[0].innerHTML ="Update:"+ data.update;
+	    $("#lblOSDEpoch")[0].innerHTML = data.epoch;
+	    $("#lblOSDUpdate")[0].innerHTML = data.update;
 	    $("#divOSD_INUP")[0].innerHTML = data.in_up;
 	    $("#divOSD_INDOWN")[0].innerHTML = data.in_down;
 	    $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
@@ -387,9 +208,9 @@ function loadMonitor(){
             data: null,
             dataType:"json",
             success: function(data){
-		//console.log(data)                
-		$("#lblMonitorEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
-                $("#lblMonitorUpdate")[0].innerHTML ="Update:"+ data.update;
+        		//console.log(data)                
+        		$("#lblMonitorEpoch")[0].innerHTML = data.epoch;
+                $("#lblMonitorUpdate")[0].innerHTML = data.update;
 
                 var rect =null;
                 $("#divMonitorRect").empty();
@@ -400,6 +221,7 @@ function loadMonitor(){
                         rect = "<div class='vsm-rect vsm-rect-monitor'>"+data.quorum[i]+"</div>";
                     $("#divMonitorRect").append(rect);
                 }
+
             }
      });
 }
@@ -412,18 +234,18 @@ function loadMDS(){
 	    dataType:"json",
 	    success: function(data){
     		//console.log(data)
-    		$("#lblMDSEpoch")[0].innerHTML ="Epoch:"+ data.epoch;
-    		$("#lblMDSUpdate")[0].innerHTML ="Update:"+ data.update;
+    		$("#lblMDSEpoch")[0].innerHTML = data.epoch;
+    		$("#lblMDSUpdate")[0].innerHTML = data.update;
 
             if(data.MetaData == null)
-                $("#lblMDSMetaData")[0].innerHTML = "--";
+                $("#divMDS_Metadata")[0].innerHTML = "--";
             else
-                $("#lblMDSMetaData")[0].innerHTML = data.MetaData;
+                $("#divMDS_Metadata")[0].innerHTML = data.MetaData;
 
             if(data.PoolData == null)
-                $("#lblMDSPoolData")[0].innerHTML = "--";
+                $("#divMDS_Data")[0].innerHTML = "--";
             else
-                $("#lblMDSPoolData")[0].innerHTML = data.PoolData;
+                $("#divMDS_Data")[0].innerHTML = data.PoolData;
 
             
             $("#divMDS_IN")[0].innerHTML = data.In;
@@ -432,8 +254,7 @@ function loadMDS(){
             $("#divMDS_STOPPED")[0].innerHTML = data.Stopped;
 
             //init
-            $("#divMDS")[0].style.border = "1px solid #ccc";
-            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_health.png";
+            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_normal.png";
             //when error
             if(data.Failed>0){
                 $("#divMDS")[0].style.border = "1px solid red";
@@ -458,12 +279,230 @@ function loadStorage(){
             dataType:"json",
             success: function(data){
                 //console.log(data)
-                $("#lblStorageUpdate")[0].innerHTML = "Update:"+ data.update;
+                $("#lblStorageUpdate")[0].innerHTML = data.update;
                 $("#lblStorageNormal")[0].innerHTML = data.normal;
                 $("#lblStorageNearFull")[0].innerHTML = data.nearfull;
                 $("#lblStorageFull")[0].innerHTML = data.full;
             }
      });
+}
+
+function loadCapacity(){
+    $.ajax({
+        type: "get",
+        url: "/dashboard/vsm/capcity/",
+        data: null,
+        dataType:"json",
+        success: function(data){
+            cClusterGague.setOption(GenerateGaugeOption(data.value));
+        }
+     });
+}
+
+function loadPG(){
+    $.ajax({
+        type: "get",
+        url: "/dashboard/vsm/PG/",
+        data: null,
+        dataType:"json",
+        success: function(data){
+                $("#lblPGUpdate")[0].innerHTML = data.update;
+                cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
+            }
+     });
+}
+
+function loadIOP(){
+    setTimeout(function (){
+        timestamp1 = timestamp1 + 15
+        console.log(IOPs_EndTime);
+
+        $.ajax({
+            type: "post",
+            url: "/dashboard/vsm/IOPS/",
+            //data: JSON.stringify({"timestamp":timestamp1 }),
+            data:"",
+            dataType: "json",
+            success: function (data) {
+                metrics = data.metrics;
+                console.log(metrics);
+                console.log(cIOPs._optionRestore.legend.data.push("TEST"));
+                for(var i=0;i<metrics.length;i++){
+                    IOPs_EndTime = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+
+                    //add new node     
+                    cIOPs.addData([
+                        [
+                            0,        //read line
+                            metrics[i].r_value, 
+                            false,    
+                            false,
+                        ],
+                        [
+                            1,        //write line
+                            metrics[i].w_value,
+                            false,    
+                            false,    
+                            IOPs_EndTime 
+                        ]
+                    ]);
+                }
+
+                //load the IOP again
+                loadIOP();
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+            },
+            headers: {
+                "X-CSRFToken": token
+            },
+            complete: function(){
+
+            }
+        });
+    }, 15000);
+}
+
+function loadLatency(){
+    setTimeout(function (){
+        $.ajax({
+            type: "post",
+            url: "/dashboard/vsm/latency/",
+            //data: JSON.stringify({"timestamp":timestamp2 }),
+            data:"",
+            dataType: "json",
+            success: function (data) {
+                metrics = data.metrics;
+                var axisData = "00:00:00";
+                for(var i=0;i<metrics.length;i++){
+                    //console.log(metrics[i]);
+                    var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+
+                    //add new node     
+                    cLatency.addData([
+                        [
+                            0,        //read line
+                            metrics[i].r_value, 
+                            false,    
+                            false,
+                        ],
+                        [
+                            1,        //write line
+                            metrics[i].w_value,
+                            false,    
+                            false,    
+                        ],
+                        [
+                            2,        //read_write line
+                            metrics[i].rw_value,
+                            false,    
+                            false,    
+                            axisData 
+                        ]
+                    ]);
+                }
+
+                //reload latency
+                loadLatency();
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+            },
+            headers: {
+                "X-CSRFToken": token
+            },
+            complete: function(){
+
+            }
+        });
+    }, 15000);
+}
+
+function loadBandwidth(){
+    setTimeout(function (){
+        $.ajax({
+            type: "post",
+            url: "/dashboard/vsm/bandwidth/",
+            //data: JSON.stringify({"timestamp":timestamp2 }),
+            data:"",
+            dataType: "json",
+            success: function (data) {
+                metrics = data.metrics;
+                var axisData = "00:00:00";
+                for(var i=0;i<metrics.length;i++){
+                    //console.log(metrics[i]);
+                    var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+
+                    //add new node     
+                    cBandwidth.addData([
+                        [
+                            0,        //in
+                            metrics[i].in_value, 
+                            false,    
+                            false,
+                        ],
+                        [
+                            1,        //out
+                            metrics[i].out_value,
+                            false,    
+                            false, 
+                            axisData  
+                        ]
+                    ]);
+                }
+
+                //reload the bandwidth
+                loadBandwidth();
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+            },
+            headers: {
+                "X-CSRFToken": token
+            },
+            complete: function(){
+
+            }
+        });
+    }, 15000);
+}
+
+function loadCPU(){
+    setInterval(function (){
+        $.ajax({
+            type: "post",
+            url: "/dashboard/vsm/CPU/",
+            data: JSON.stringify({"timestamp":timestamp1 }),
+            dataType: "json",
+            success: function (data) {
+                cCPU.clear();       
+                var legendList = new Array();
+                var seriesList = new Array();
+                for(var i=0; i<data.metrics.length;i++){
+                    legendList.push(data.metrics[i].name);
+                    var series = {
+                        name:data.metrics[i].name,
+                        type:'line',
+                        smooth:true,
+                        data:data.metrics[i].data
+                    };
+                    seriesList.push(series);
+                }
+                cCPU.setOption(GenerateCPUOption(legendList,seriesList));
+                
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+            },
+            headers: {
+                "X-CSRFToken": token
+            },
+            complete: function(){
+
+            }
+        });
+    },2000);
 }
 
 function GenerateGaugeOption(value) {
@@ -507,7 +546,7 @@ function GenerateGaugeOption(value) {
                         type: 'solid'
                     }
                 },
-                radius:['30%', '95%'],
+                radius:['30%', '90%'],
                 center:['55%','50%']
             }
         ],
@@ -519,7 +558,7 @@ function GenerateGaugeOption(value) {
 function GenerateLineOption(){
     var option = {
         grid :{
-            x:40,
+            x:20,
             y:20,
             height:'80%',
             width:'90%',
@@ -528,7 +567,7 @@ function GenerateLineOption(){
             trigger:'axis'
         },
         legend:{
-            data:["op_r","op_w","op_rw"]
+            data:["iops_r","iops_w"]
         },
         xAxis : [
             {
@@ -557,19 +596,13 @@ function GenerateLineOption(){
         ],
         series : [
             {
-                name:'op_r',
+                name:'iops_r',
                 type:'line',
                 smooth:true,
                 data:InitValues(0)
             },
             {
-                name:'op_w',
-                type:'line',
-                smooth:true,
-                data:InitValues(0)
-            },
-            {
-                name:'op_rw',
+                name:'iops_w',
                 type:'line',
                 smooth:true,
                 data:InitValues(0)
@@ -579,10 +612,54 @@ function GenerateLineOption(){
     return option;
 }
 
+function GenerateCPUOption(legendList,seriesList){
+    var option = {
+        grid :{
+            x:20,
+            y:20,
+            height:'80%',
+            width:'90%',
+        },
+        tooltip:{
+            trigger:'axis'
+        },
+        legend:{
+            data:legendList
+        },
+        xAxis : [
+            {
+                type : 'category',
+                boundaryGap : false,
+                axisLabel:{
+                    show:true,
+                    interval:0,
+                },
+                data :InitAxis_X()
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value',
+                scale: false,
+                min:0,
+                //max:15,
+                axisLabel:{
+                    show:true,
+                    interval:'auto',
+                },
+                name : '',
+                boundaryGap: [0.5, 0.5]
+            }
+        ],
+        series : seriesList
+    };
+    return option;
+}
+
 function GetLantencyOption(){
     option = {
         grid :{
-            x:40,
+            x:20,
             y:20,
             height:'80%',
             width:'90%',
@@ -649,7 +726,7 @@ function GetLantencyOption(){
 function GetBandwidthOption(){
     option = {
         grid :{
-            x:60,
+            x:20,
             y:20,
             height:'80%',
             width:'90%',
@@ -732,7 +809,6 @@ function GetPieOption(AC,NAC){
 	return option;
 }
 
-
 function InitAxis_X(){
     var now = new Date();
     var res = [];
@@ -743,7 +819,6 @@ function InitAxis_X(){
     return res;
 }
 
-
 function InitValues(value){
     var res = [];
     var len = 10;
@@ -752,31 +827,3 @@ function InitValues(value){
     }
     return res;
 }
-
-Date.prototype.format = function(format) {
-    var o = {
-        "M+": this.getMonth() + 1,
-        // month
-        "d+": this.getDate(),
-        // day
-        "h+": this.getHours(),
-        // hour
-        "m+": this.getMinutes(),
-        // minute
-        "s+": this.getSeconds(),
-        // second
-        "q+": Math.floor((this.getMonth() + 3) / 3),
-        // quarter
-        "S": this.getMilliseconds()
-        // millisecond
-    };
-    if (/(y+)/.test(format) || /(Y+)/.test(format)) {
-        format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-    }
-    for (var k in o) {
-        if (new RegExp("(" + k + ")").test(format)) {
-            format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
-        }
-    }
-    return format;
-};

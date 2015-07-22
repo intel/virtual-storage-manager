@@ -4,47 +4,37 @@ h1.brand a{
 }
 
 
+.vsm-block{
+    height: auto;
+    overflow: hidden;
+    text-align:center;
+    float: left;
+}
+
+.vsm-block-content{
+    text-align:left;
+    padding:15px 15px;
+    border-radius:5px;
+    border: 1px solid #ccc;
+    overflow: hidden;
+    margin:5px;
+    margin-top: 0px;
+    box-shadow: 2px 2px 3px #aaa;
+ }
+
+
 /**
  * any labels
  */
-.vsm-block1-title{
+.vsm-block-title{
     top:20px;    
     z-index:100;
     position:relative;
     display: inline-block;
     background-color:white;
-}
-
-.vsm-block3-title{
-    top:-25px;
-    z-index:100;
-    position:relative;
-    display: inline-block;
-    background-color:white;
     margin-right: auto;
     margin-left: auto;
 }
-
-.vsm-block2-title{
-    top:-25px;
-    z-index:100;
-    position:relative;
-    display: inline-block;
-    background-color:white;
-    margin-right: auto;
-    margin-left: auto;
-}
-
-.vsm-block3-title{
-    top:-25px;
-    z-index:100;
-    position:relative;
-    display: inline-block;
-    background-color:white;
-    margin-right: auto;
-    margin-left: auto;
-}
-
 
 /**
  * block link: link to any other pages;
@@ -58,80 +48,6 @@ h1.brand a{
          text-decoration: none;
     }
 
-/**
- * block1: full screen block;
- */
-.vsm-block1{
-    height: auto;
-    overflow: hidden;
-    text-align:center;
-    /*box-shadow: 2px 2px 3px #aaa;*/
-}
-
-.vsm-block1-content{
-    text-align:left;
-    padding:15px 15px;
-    border-radius:5px;
-    border: 1px solid #ccc;
-    overflow: hidden;
-    margin:5px;
-    margin-top: 0px;
-    box-shadow: 2px 2px 3px #aaa;
- }
-
- /**
- * block2: 1/2 screen block;
- */
-.vsm-block2{
-    width: 469px;
-    height: 250px;
-    float: left;
-    text-align: center;
-    padding:5px 15px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    margin:5px;
-    margin-top:20px;
-    box-shadow: 2px 2px 3px #aaa;
-}
-
-
-.vsm-block2-content{
-    text-align: left;
-    margin-top: -20px;
-    /*border:1px solid #ccc;*/
-}
-
-
- /**
- * block3: 1/3 screen block;
- */
-.vsm-block3{
-    width: 309px;
-    height: 250px;
-    float: left;
-    text-align: center;
-    padding:5px 15px;
-    border-radius:5px;
-    border: 1px solid #ccc;
-    margin:5px;
-    margin-top:20px;
-    box-shadow: 2px 2px 3px #aaa;
-}
-
-.vsm-block3-content{
-    text-align: left;
-    margin-top: -20px;
-}
-
-
-
-/**
- * block offset
- */
-.vsm-block-offset{
-    margin-right: 6px;
-}
 
 /**
  * block chart
@@ -160,12 +76,11 @@ h1.brand a{
     text-align: center;
     border-radius: 5px;
     color:#ffffff;
-}
-
-.vsm-rect-2{
+    margin-bottom: 10px;
     margin-right: auto;
     margin-left: auto;
 }
+
 
 .vsm-rect-monitor{
     float: left;
@@ -196,11 +111,15 @@ h1.brand a{
 /**
  * table and anything
  */
-.td-80{
-    width: 80px;
+.td-60{
+    width: 60px;
 }
-.td-120{
-    width: 120px;
+.td-150{
+    width: 150px;
+}
+
+.td-100{
+    width: 100px;
 }
 
 
@@ -213,15 +132,25 @@ h1.brand a{
 
 
 .vsm-status-icon{
+    position: relative;
+    top: 50px;
+    right: 10px;
     float: right;
 }
 
 
-.vsm-label{
-    min-width: 120px;
+.vsm-label-90{
+    min-width: 90px;
     display:inline-block;
     margin-right: 10px;
 }
+
+.vsm-label-60{
+    min-width: 60px;
+    display:inline-block;
+    margin-right: 10px;
+}
+
 
 .info-link{
     float: right;

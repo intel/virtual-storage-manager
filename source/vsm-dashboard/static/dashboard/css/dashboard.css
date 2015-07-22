@@ -7,136 +7,197 @@
 
 #divMain{
     text-align: left;
-    width: 960px;
+    width: 1200px;
     height: auto;
 }
 
+
 /**
- * vsm module
+ * VSM Info module
  */
-#tVSMStatus>tbody>tr>td{
-    width:250px;
-    padding: 5px;
-    /*border: 1px solid #ccc;*/
+#divVSMVersion{
+    width: 280px;
 }
+
+#divVSMVersionContent{
+    height: 200px;
+}
+
 
 /**
  * cluster module
  */
-#btnClusterTip {
-    margin-bottom: 10px;
-    margin-left: 20px;
-}
-
-
-#divClusterNote{
-    margin:10px;
-    width: 70%;
-    height: auto;
-    float: left;
+#divCluster{
+    width: 600px;
 }
 
 #divClusterContent{
-    min-height: 150px;
-    margin-left: 0px;
+    height: 130px;
 }
 
+#lblClusterName{
+    font-size: 20px;
+}
+
+#btnClusterTip {
+    margin-bottom: 10px;
+}
+
+#divClusterNote{
+    width: 65%;
+    float: left;
+}
 
 #divClusterGauge{
-    margin-top:20px;
-    width: 25%;
+    width: 35%;
     height: 200px;
     float:left;
 }
 
+/**
+ * storage module
+ */
+#divStorage{
+    width: 300px;
+}
+
+#divStorageContent{
+    height: 200px;
+}
+
+#tStorage{
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+#trStorageLabel>td{
+    width: 80px;
+    height: 40px;
+    /*border: 1px solid #ccc;*/
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#trStorageMark{
+    height: 40px;
+}
 
 /**
  * OSD module
  */
+#divOSD{
+    width: 280px;
+    margin-top: -20px;
+}
+
+#divOSDContent{
+    height: 230px;
+}
+
+
 #tOSD>tbody>tr>td{
-    height: 45px;
+    height: 30px;
     font-size: 14px;
     font-weight: bold;
     text-align: center;
 }
 
+
+/**
+ * Monitor module
+ */
+#divMonitor{
+    width: 310px;
+    margin-top: -20px;
+}
+
+#divMonitorContent{
+    height: 230px;
+}
+
+#divMonitorRect{
+    margin-top:25px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 10px;
+    height:140px;
+    overflow-y:auto;
+}
+
+
 /**
  * MDS module
  */
+#divMDS{
+    width: 290px;
+    margin-top: -20px;
+}
+
+#divMDSContent{
+    height: 230px;
+}
+
 #divMDSRect{
-    margin-top:10px;
-    height:180px;
+    height:160px;
     overflow-y:auto;
     /*border:1px solid green;*/
 }
  
 #tMDS>tbody>tr>td{
-    height: auto;
+    height: 30px;
     text-align: center;
     font-size: 14px;
     font-weight: bold;
     /*border:1px solid #ccc;*/
 }
 
-.mds-svg{
-    width: 90px;
-    height: 55px;
-}
-
 
 /**
- * storage module
+ * PG module
  */
-#tStorage{
-    margin-top: 15px;
+#divPG{
+    width: 300px;
+    margin-top: -20px;
 }
-
-#trStorageTitle>td{
-    width: 200px;
-    height: 30px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: bold;
-    /*border: 1px solid #ccc;*/
-}
-
-#trStorageCircle>td{
-    width: 200px;
-    height: 150px;
-    text-align: center;
-    /*border: 1px solid #ccc;*/
-}
-
-#trStorageCircle>td>svg {
-    width: 120px;
-}
-
-
-#trMDSCircle>td>svg {
-    width: 160px;
-    height: 70px;
-}
-
-#divMonitorRect{
-    margin-top:40px;
-    height:160px;
-    overflow-y:auto;
-}
-
-
 
 #divPGRect{
     width:100%;
     height:180px;
 }
 
-#divMonitorOSDMDS{
-    overflow:hidden;
+/**
+ * IOPs module
+ */
+#divIOPs{
+    width: 590px;
+    margin-top: 0px;
 }
 
-#divStoragePool{
-    overflow:hidden;
+/**
+ * Latency module
+ */
+#divLatency{
+    width: 590px;
+    margin-top: 0px;
 }
+
+/**
+ * Bandwidth module
+ */
+#divBandwidth{
+    width: 590px;
+    margin-top: -20px;
+}
+
+/**
+ * CPU module
+ */
+#divCPU{
+    width: 590px;
+    margin-top: -20px;
+}
+
 
 
 .cluster-tip{

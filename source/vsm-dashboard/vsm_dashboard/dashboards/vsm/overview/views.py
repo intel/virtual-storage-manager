@@ -414,3 +414,24 @@ def get_performance_Bandwith(request):
     ops_data_dict = {"metrics": metric_list}
     ops_data = json.dumps(ops_data_dict)
     return ops_data
+
+
+def get_performance_cpu():
+    metrics = []
+    cpu_count = random.randint(2,5)
+    for i in range(0,cpu_count):
+        cpu_data = []
+        for data in range(0,10):
+            cpu_data.append(random.randint(1,10))
+
+        cpu = {
+            "name":"cpu"+str(i)
+            ,"data":cpu_data
+        }
+        metrics.append(cpu)
+
+
+
+    cpu_data_dict = {"metrics":metrics}
+    cpu_data = json.dumps(cpu_data_dict)
+    return cpu_data
