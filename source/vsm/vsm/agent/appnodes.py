@@ -42,6 +42,46 @@ def get_all_nodes(contxt):
         LOG.exception(_("DB Error on getting Appnodes %s" % e))
         raise exception.AppNodeFailure()
 
+def _get_token(tenant_name, username, password, auth_url, region_name):
+    """Get auth info from keystone."""
+    public_url = None
+    auth_url = auth_url + "/tokens"
+    auth_data = {
+        "auth": {
+            "tenantName": tenant_name,
+            "passwordCredentials": {
+                "username": username,
+                "password": password
+            }
+        }
+    }
+
+    auth_request = urllib2.Request(auth_url)
+    auth_request.add_header("content-type", "application/json")
+    auth_request.add_header('Accept', 'application/json')
+    auth_request.add_header('User-Agent', 'python-mikeyp')
+    auth_request.add_data(json.dumps(auth_data))
+    auth_response = urllib2.urlopen(auth_request)
+    response_data = json.loads(auth_response.read())
+
+    token = response_data['access']['token']['id']
+
+    service_list = response_data['access']['serviceCatalog']
+    for service in service_list:
+        if service['type'] == 'volume' and service['name'] == 'cinder':
+            for endpoint in service['endpoints']:
+                if region_name != None and endpoint['region'] == region_name:
+                    public_url = endpoint['publicURL']
+                    break
+                elif region_name == None or region_name == "" and len(service['endpoints']) == 1:
+                    public_url = endpoint['publicURL']
+                    break
+    if public_url != None:
+        url_id = public_url.split('/')[-1]
+        return token + "-" + url_id
+    else:
+        return None
+
 def create(contxt, auth_openstack=None, allow_duplicate=False):
     """create app node from a dict"""
     if contxt is None:
@@ -53,25 +93,18 @@ def create(contxt, auth_openstack=None, allow_duplicate=False):
     ref = []
 
     """validate openstack access info"""
-
-    auth_data = {
-        "auth": {
-            "tenantName": auth_openstack['os_tenant_name'],
-            "passwordCredentials": {
-                "username": auth_openstack['os_username'],
-                "password": auth_openstack['os_password']
-            }
-        }
-    }
-    auth_request = urllib2.Request(auth_openstack['os_auth_url'] + "/tokens")
-    auth_request.add_header("content-type", "application/json")
-    auth_request.add_header('Accept', 'application/json')
-    auth_request.add_header('User-Agent', 'python-mikeyp')
-    auth_request.add_data(json.dumps(auth_data))
     try:
-        auth_response = urllib2.urlopen(auth_request)
-        response_data = json.loads(auth_response.read())
-        auth_openstack['ssh_status'] = "reachable"
+        token_url_id = _get_token(
+            auth_openstack['os_tenant_name'],
+            auth_openstack['os_username'],
+            auth_openstack['os_password'],
+            auth_openstack['os_auth_url'],
+            auth_openstack['os_region_name']
+        )
+        if token_url_id != None:
+            auth_openstack['ssh_status'] = "reachable"
+        else:
+            auth_openstack['ssh_status'] = "no cinder-volume"
     except:
         LOG.exception(_("Error to access to openstack"))
         auth_openstack['ssh_status'] = "unreachable"
@@ -83,66 +116,42 @@ def create(contxt, auth_openstack=None, allow_duplicate=False):
         raise exception.AppNodeFailure()
     return ref
 
-def update(contxt, appnode_id, ssh_status=None, log_info=None, os_tenant_name=None,
-           os_username=None, os_password=None, os_auth_url=None):
+def update(contxt, appnode_id, appnode):
     """update app node ssh status, log info or deleted"""
     if contxt is None:
         contxt = context.get_admin_context()
 
     id = utils.int_from_str(appnode_id)
     LOG.debug('app node id: %s ' % id)
-    kargs = {}
 
-    if os_tenant_name:
-        kargs['os_tenant_name'] = os_tenant_name
-
-    if os_username:
-        kargs['os_username'] = os_username
-
-    if os_password:
-        kargs['os_password'] = os_password
-
-    if os_auth_url:
-        kargs['os_auth_url'] = os_auth_url
-
-    # if ssh_status:
-    #     utils.check_string_length(ssh_status, 'ssh_status', 1, 50)
-    #     kargs['ssh_status'] = ssh_status
+    os_tenant_name = appnode['os_tenant_name']
+    os_username = appnode['os_username']
+    os_password = appnode['os_password']
+    os_auth_url = appnode['os_auth_url']
+    os_region_name = appnode['os_region_name']
 
     """validate openstack access info"""
-
-    auth_data = {
-        "auth": {
-            "tenantName": os_tenant_name,
-            "passwordCredentials": {
-                "username": os_username,
-                "password": os_password
-            }
-        }
-    }
-    auth_request = urllib2.Request(os_auth_url + "/tokens")
-    auth_request.add_header("content-type", "application/json")
-    auth_request.add_header('Accept', 'application/json')
-    auth_request.add_header('User-Agent', 'python-mikeyp')
-    auth_request.add_data(json.dumps(auth_data))
     try:
-        auth_response = urllib2.urlopen(auth_request)
-        response_data = json.loads(auth_response.read())
-        kargs['ssh_status'] = "reachable"
+        token_url_id = _get_token(
+            os_tenant_name,
+            os_username,
+            os_password,
+            os_auth_url,
+            os_region_name
+        )
+        if token_url_id != None:
+            appnode['ssh_status'] = "reachable"
+        else:
+            appnode['ssh_status'] = "no cinder-volume"
     except:
         LOG.exception(_("Error to access to openstack"))
-        kargs['ssh_status'] = "unreachable"
+        appnode['ssh_status'] = "unreachable"
 
-    if log_info:
-        utils.check_string_length(log_info, 'log_info', 1, 65535)
-        kargs['log_info'] = log_info
-
-    if kargs:
-        try:
-            return db.appnodes_update(contxt, id, kargs)
-        except db_exc.DBError as e:
-            LOG.exception(_("DB Error on updating Appnodes %s" % e))
-            raise exception.AppNodeFailure()
+    try:
+        return db.appnodes_update(contxt, id, appnode)
+    except db_exc.DBError as e:
+        LOG.exception(_("DB Error on updating Appnodes %s" % e))
+        raise exception.AppNodeFailure()
 
 def destroy(contxt, appnode_id):
     if contxt is None:

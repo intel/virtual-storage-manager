@@ -35,6 +35,7 @@ class ViewBuilder(common.ViewBuilder):
                 "os_username": appnode.get("os_username", ""),
                 "os_password": appnode.get("os_password", ""),
                 "os_auth_url": appnode.get("os_auth_url", ""),
+                "os_region_name": appnode.get("os_region_name", ""),
                 "vsmapp_id": appnode.get("vsmapp_id", ""),
                 "ssh_status": appnode.get("ssh_status", ""),
                 "log_info": appnode.get("log_info", "")

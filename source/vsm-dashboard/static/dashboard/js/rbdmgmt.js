@@ -80,7 +80,9 @@ $("#btnSubmit").click(function(){
         if(checkbox[0].checked){
             id = checkbox.val();
             var sel_index = $("#"+tr_id).find(".cinder_volume_host").val();
-            cinder_volume_host = $("#"+tr_id).find(".cinder_volume_host")[0].options[sel_index].text;
+            var cinder_volume_host = null;
+            if(sel_index != null)
+                cinder_volume_host = $("#"+tr_id).find(".cinder_volume_host")[0].options[sel_index].text;
             data = {id:id, cinder_volume_host:cinder_volume_host};
             data_list.push(data);
         }
@@ -103,6 +105,8 @@ $("#btnSubmit").click(function(){
             console.log(data);
             if(data.status == "warning")
                 showTip(data.status,data.message);
+            else if(data.status == "error")
+                showTip(data.status,data.message);
             else
                 window.location.href="/dashboard/vsm/rbdpools/";
         },
@@ -118,3 +122,4 @@ $("#btnSubmit").click(function(){
         }
     });
 })
+

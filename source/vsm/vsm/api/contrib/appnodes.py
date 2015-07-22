@@ -135,9 +135,6 @@ class AppnodesController(wsgi.Controller):
             raise webob.exc.HTTPBadRequest(explanation=expl)
         # convert from unicode to str
         id = str(id)
-        status = body.get('ssh_status', None)
-        log = body.get('log_info', None)
-        # ip = body.get('ip', None)
         os_tenant_name = body.get('os_tenant_name', None)
         os_username = body.get('os_username', None)
         os_password = body.get('os_password', None)
@@ -147,7 +144,7 @@ class AppnodesController(wsgi.Controller):
             expl = _('Request body and URI mismatch: os_tenant_name or os_username or os_password or os_auth_url required.')
             raise webob.exc.HTTPBadRequest(explanation=expl)
 
-        appnodes.update(context, id, status, log, os_tenant_name, os_username, os_password, os_auth_url)
+        appnodes.update(context, id, body)
         return webob.Response(status_int=201)
 
 def remove_invalid_options(context, search_options, allowed_search_options):

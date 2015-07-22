@@ -105,20 +105,27 @@ def get_instances_data(request):
 class GenAuthToken(object):
     """Generate token from vsm-api WSGI service."""
 
-    def __init__(self, tenant_name, username, password, host):
+    def __init__(self, tenant_name, username, password, host, region_name):
         """Initialized the url requestion and RUL."""
         self._tenant_namt = tenant_name
         self._username = username
         self._password = password
         self._auth_url = "http://%s:5000/v2.0/tokens" % host
+        self._region_name = region_name
         self._token = None
         self._url = None
 
     def get_token(self):
         """Get auth info from keystone."""
-        auth_data = {"auth": {"tenantName": self._tenant_namt,
-                           "passwordCredentials":{ "username": self._username,
-                           "password": self._password}}}
+        auth_data = {
+            "auth": {
+                "tenantName": self._tenant_namt,
+                "passwordCredentials":{
+                    "username": self._username,
+                    "password": self._password
+                }
+            }
+        }
 
         auth_request = urllib2.Request(self._auth_url)
         auth_request.add_header("content-type", "application/json")
@@ -131,10 +138,15 @@ class GenAuthToken(object):
         self._token = response_data['access']['token']['id']
 
         service_list = response_data['access']['serviceCatalog']
-        for s in service_list:
-            if s['type'] == 'volume' and s['name'] == 'cinder':
-                self._url = s['endpoints'][0]['publicURL']
-                break
+        for service in service_list:
+            if service['type'] == 'volume' and service['name'] == 'cinder':
+                for endpoint in service['endpoints']:
+                    if self._region_name != None and endpoint['region'] == self._region_name:
+                        self._url = endpoint['publicURL']
+                        break
+                    elif self._region_name == None or self._region_name == "" and len(service['endpoints']) == 1:
+                        self._url = endpoint['publicURL']
+                        break
 
         url_id = self._url.split('/')[-1]
         return self._token, url_id
