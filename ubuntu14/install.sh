@@ -349,7 +349,7 @@ function install_setup_diamond() {
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "service diamond restart"
+    $SSH $USER@$1 "$SUDO diamond"
 }
 
 function setup_remote_agent() {
