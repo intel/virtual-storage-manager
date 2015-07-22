@@ -457,7 +457,7 @@ function loadBandwidth(){
 
             }
         });
-    }, 5000);
+    }, 15000);
 }
 
 function loadCPU(){
