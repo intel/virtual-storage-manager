@@ -82,7 +82,9 @@ class OsdManager(base.ManagerWithFind):
         query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
 
         detail = ""
-        if detailed:
+        if detailed == 'detail_filter_and_sort':
+            detail = "/detail_filter_and_sort"
+        elif detailed:
             detail = "/detail"
 
         ret = self._list("/osds%s%s" % (detail, query_string),

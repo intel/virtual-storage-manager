@@ -128,7 +128,6 @@ class Controller(wsgi.Controller):
         context = req.environ['vsm.context']
         service_id = req.GET.get('service_id', None)
         error = self.conductor_api.ceph_error(context)
-        error = self.conductor_api.ceph_error(context)
         LOG.info('vsm/api/v1/osds.py detailed service_id:%s' % service_id)
         if service_id:
             osds = db.osd_get_by_service_id(context, service_id)
@@ -152,6 +151,37 @@ class Controller(wsgi.Controller):
         LOG.info('vsm/api/v1/osds.py detailed osds:%s' % osds)
 
         return self._view_builder.detail(req, osds)
+    @wsgi.serializers(xml=OSDsTemplate)
+    def detail_filter_and_sort(self, req):
+
+        """Get osd list."""
+        context = req.environ['vsm.context']
+        limit = req.GET.get('limit', None)
+        marker = req.GET.get('marker', None)
+        sort_keys = req.GET.get('sort_keys', None)
+        sort_dir = req.GET.get('sort_dir', None)
+        search_opts = {
+            'osd_name':req.GET.get('osd_name', ''),
+            'server_name':req.GET.get('server_name', ''),
+            'zone_name':req.GET.get('zone_name', ''),
+        }
+        error = self.conductor_api.ceph_error(context)
+        osds = self.conductor_api.osd_state_get_all(context, limit,
+                                                    marker, sort_keys,
+                                                    sort_dir,search_opts)
+
+        if error:
+            for osd in osds:
+                osd['state'] = error
+                osd['operation_status'] = error
+                osd['device']['state'] = error
+                osd['device']['journal_state'] = error
+                osd['device']['osd_state'] = error
+
+        LOG.info('vsm/api/v1/osds.py detail_filter_and_sort osds:%s' % osds)
+
+        return self._view_builder.detail(req, osds)
+
 
     def refresh(self, req):
         """

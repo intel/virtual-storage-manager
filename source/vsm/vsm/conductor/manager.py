@@ -254,12 +254,14 @@ class ConductorManager(manager.Manager):
                           limit=None,
                           marker=None,
                           sort_keys=None,
-                          sort_dir=None):
+                          sort_dir=None,
+                          search_opts={}):
         all_osd = db.osd_state_get_all(context,
                                        limit,
                                        marker,
                                        sort_keys,
-                                       sort_dir)
+                                       sort_dir,
+                                       search_opts)
         return all_osd
 
     def osd_state_get_by_name(self, context, name):

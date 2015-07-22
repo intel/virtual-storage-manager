@@ -193,10 +193,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def osd_remove(self, context, osd_id):
         return self.call(context, self.make_msg('osd_remove', osd_id=osd_id))
 
-    def osd_state_get_all(self, context, limit, marker, sort_keys, sort_dir):
+    def osd_state_get_all(self, context, limit, marker, sort_keys, sort_dir,search_opts):
         return self.call(context, self.make_msg('osd_state_get_all', \
                          limit=limit, marker=marker, sort_keys=sort_keys, \
-                         sort_dir=sort_dir))
+                         sort_dir=sort_dir,search_opts=search_opts))
 
     def osd_state_create(self, context, values):
         return self.call(context, self.make_msg('osd_state_create', \
