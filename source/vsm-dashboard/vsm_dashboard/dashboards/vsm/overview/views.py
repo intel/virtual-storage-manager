@@ -118,6 +118,9 @@ def bandwidth(request):
     return HttpResponse(get_performance_Bandwith(request))
 
 
+def CPU(request):
+    return HttpResponse(get_performance_cpu())
+
 def get_vsm_version():
     try:
         (status, out) = commands.getstatusoutput('vsm --version')

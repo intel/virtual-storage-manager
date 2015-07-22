@@ -50,6 +50,7 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
         default_sort_dir = "asc";
         default_sort_keys = ['osd_name']
         marker = self.request.GET.get('marker', "")
+        _osd_status = ""
         try:
             _osd_status = vsmapi.osd_status(self.request, paginate_opts={
                 "limit": default_limit,
@@ -64,8 +65,8 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
 
         page_index = int(self.request.GET.get('pageIndex',1))
         page_size = 20
-        page_count = int(len(filter_data)/page_size)
-        page_mod = len(filter_data)%page_size
+        page_count = int(len(_osd_status)/page_size)
+        page_mod = len(_osd_status)%page_size
         if page_mod > 0:
             page_count = page_count + 1
         pager_size = 10
@@ -78,11 +79,11 @@ class IndexView(ModalSummaryMixin, tables.DataTableView):
 
         dataStartIndex = (page_index-1)*page_size
         dataEndIndex = dataStartIndex+page_size
-        filter_data = filter_data[dataStartIndex:dataEndIndex]
+        _osd_status = _osd_status[dataStartIndex:dataEndIndex]
 
 
         osd_status = []
-        for _osd in filter_data:
+        for _osd in _osd_status:
             LOG.info("DEVICE:%s"%_osd.device.keys())
             #LOG.error(_osd.device.keys())
             #LOG.error(">DEVICE")
