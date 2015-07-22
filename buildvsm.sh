@@ -30,8 +30,6 @@ Pack vsm:
 Options:
   --help | -h
     Print usage information.
-  --version | -v
-    The version of release vsm.
 EOF
     exit 0
 }
@@ -39,16 +37,16 @@ EOF
 VERSION=`cat VERSION`
 export VERSION
 RELEASE=`cat RELEASE`
-export RELEASE
 BUILD="${VERSION}-${RELEASE}"
 echo -n $BUILD
 echo -n $((++RELEASE)) > RELEASE
+RELEASE=$((--RELEASE))
+export RELEASE
 
 while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
-    -v| --version) shift; VERSION=$1 ;;
     *) shift ;;
   esac
   shift
@@ -61,7 +59,6 @@ TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 #DATE=`date "+%Y%m%d"`
 
-VERSION=`cat $TOPDIR/VERSION`
 sed -i "s,Version: *.*,Version: $VERSION,g" $TOPDIR/source/python-vsmclient/PKG-INFO
 sed -i "s,Version: *.*,Version: $VERSION,g" $TOPDIR/source/vsm/PKG-INFO
 
