@@ -32,6 +32,7 @@ def upgrade(migrate_engine):
     os_username = Column('os_username', String(length=50), nullable=False)
     os_password = Column('os_password', String(length=50), nullable=False)
     os_auth_url = Column('os_auth_url', String(length=255), nullable=False)
+    os_region_name = Column('os_region_name', String(length=255), nullable=True)
 
     try:
         appnodes.drop_column(ip)
@@ -39,6 +40,7 @@ def upgrade(migrate_engine):
         appnodes.create_column(os_username)
         appnodes.create_column(os_password)
         appnodes.create_column(os_auth_url)
+        appnodes.create_column(os_region_name)
     except Exception:
         raise
 
@@ -53,6 +55,7 @@ def downgrade(migrate_engine):
     os_username = Column('os_username', String(length=50), nullable=False)
     os_password = Column('os_password', String(length=50), nullable=False)
     os_auth_url = Column('os_auth_url', String(length=255), nullable=False)
+    os_region_name = Column('os_region_name', String(length=255), nullable=True)
 
     try:
         appnodes.create_column(ip)
@@ -60,5 +63,6 @@ def downgrade(migrate_engine):
         appnodes.drop_column(os_username)
         appnodes.drop_column(os_password)
         appnodes.drop_column(os_auth_url)
+        appnodes.drop_column(os_region_name)
     except Exception:
         raise

@@ -26,9 +26,10 @@ $("#btnCreate").click(function(){
     var os_username = $("#id_os_username").val();
     var os_password = $("#id_os_password").val();
     var os_auth_url = $("#id_os_auth_url").val();
+	var os_region_name = $("#id_os_region_name").val();
 
 	var data = {"os_tenant_name":os_tenant_name, "os_username":os_username,
-    "os_password":os_password, "os_auth_url":os_auth_url};
+    "os_password":os_password, "os_auth_url":os_auth_url, "os_region_name":os_region_name};
 	var postData = JSON.stringify(data);
 	token = $("input[name=csrfmiddlewaretoken]").val();
 
@@ -62,9 +63,10 @@ $("#btnUpdate").click(function(){
     var os_username = $("#id_os_username").val();
     var os_password = $("#id_os_password").val();
     var os_auth_url = $("#id_os_auth_url").val();
+	var os_region_name = $("#id_os_region_name").val();
 
 	var data = {"id":id,"os_tenant_name":os_tenant_name,"os_username":os_username,
-    "os_password":os_password,"os_auth_url":os_auth_url};
+    "os_password":os_password,"os_auth_url":os_auth_url,"os_region_name":os_region_name};
 	var postData = JSON.stringify(data);
 	token = $("input[name=csrfmiddlewaretoken]").val();
 

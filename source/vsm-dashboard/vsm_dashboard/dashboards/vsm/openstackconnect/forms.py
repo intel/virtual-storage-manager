@@ -75,6 +75,14 @@ class AddOpenstackIPForm(forms.SelfHandlingForm):
             'required': _('This field is required.')
         }
     )
+    os_region_name = forms.CharField(
+        label = _("Region Name"),
+        max_length = 255,
+        min_length = 0,
+        error_messages = {
+            'required': _('This field is not required.')
+        }
+    )
 
     def handle(self, request, data):
         pass
@@ -158,6 +166,14 @@ class UpdateOpenstackIPForm(forms.SelfHandlingForm):
         min_length = 1,
         error_messages = {
             'required': _('This field is required.')
+        }
+    )
+    os_region_name = forms.CharField(
+        label = _("Region Name"),
+        max_length = 255,
+        min_length = 0,
+        error_messages = {
+            'required': _('This field is not required.')
         }
     )
 

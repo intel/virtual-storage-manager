@@ -48,14 +48,16 @@ class IndexView(tables.DataTableView):
 
         appnode_list = []
         for _appnode in _appnode_list:
-            appnode = {"id": str(_appnode.id),
-                    # "ip": _appnode.ip,
-                    "os_tenant_name": _appnode.os_tenant_name,
-                    "os_username": _appnode.os_username,
-                    "os_password": _appnode.os_password,
-                    "os_auth_url": _appnode.os_auth_url,
-                    "ssh_status": _appnode.ssh_status,
-                    "log_info": _appnode.log_info}
+            appnode = {
+                "id": str(_appnode.id),
+                "os_tenant_name": _appnode.os_tenant_name,
+                "os_username": _appnode.os_username,
+                "os_password": _appnode.os_password,
+                "os_auth_url": _appnode.os_auth_url,
+                "os_region_name": _appnode.os_region_name,
+                "ssh_status": _appnode.ssh_status,
+                "log_info": _appnode.log_info
+            }
             appnode_list.append(appnode)
 
         return appnode_list
@@ -105,7 +107,8 @@ class UpdateView(forms.ModalFormView):
             'os_tenant_name': appnode.os_tenant_name,
             'os_username': appnode.os_username,
             'os_password': appnode.os_password,
-            'os_auth_url': appnode.os_auth_url
+            'os_auth_url': appnode.os_auth_url,
+            'os_region_name': appnode.os_region_name
         }
 
 def create_action(request):
@@ -118,13 +121,15 @@ def create_action(request):
         os_username = data['os_username']
         os_password = data['os_password']
         os_auth_url = data['os_auth_url']
+        os_region_name = data['os_region_name']
 
         body = {
             'appnodes': {
                 'os_tenant_name': os_tenant_name,
                 'os_username': os_username,
                 'os_password': os_password,
-                'os_auth_url': os_auth_url
+                'os_auth_url': os_auth_url,
+                'os_region_name': os_region_name
             }
         }
         LOG.info("CEPH_LOG in handle body %s" % str(body))
@@ -148,13 +153,17 @@ def update_action(request):
         os_username = data.pop('os_username')
         os_password = data.pop('os_password')
         os_auth_url = data.pop('os_auth_url')
-        vsmapi.update_appnode(request, id,
-                               os_tenant_name=os_tenant_name,
-                               os_username=os_username,
-                               os_password=os_password,
-                               os_auth_url=os_auth_url,
-                               ssh_status="",
-                               log_info="")
+        os_region_name = data.pop('os_region_name')
+        vsmapi.update_appnode(
+            request, id,
+            os_tenant_name=os_tenant_name,
+            os_username=os_username,
+            os_password=os_password,
+            os_auth_url=os_auth_url,
+            os_region_name=os_region_name,
+            ssh_status="",
+            log_info=""
+        )
         status = "OK"
         msg = "Update Openstack Access Successfully!"
     except:

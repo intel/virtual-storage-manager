@@ -36,7 +36,7 @@ LOG = logging.getLogger(__name__)
 
 class AddOpenstackIPAction(tables.LinkAction):
     name = "add openstack ip"
-    verbose_name = _("Add OpenStack Nova Controller")
+    verbose_name = _("Add OpenStack Endpoint")
     url = "horizon:vsm:openstackconnect:create"
     classes = ("ajax-modal", "btn-primary")
 
@@ -76,6 +76,7 @@ class ListOpenstackIPTable(tables.DataTable):
     os_username = tables.Column("os_username", verbose_name=_("UserName"))
     os_password = tables.Column("os_password", verbose_name=_("Password"))
     os_auth_url = tables.Column("os_auth_url", verbose_name=_("Auth Url"))
+    os_region_name = tables.Column("os_region_name", verbose_name=_("Region Name"))
     ssh_status = tables.Column("ssh_status", verbose_name=_("Connection Status"))
     log_info = tables.Column("log_info", verbose_name=_("LOG INFO"))
 

@@ -126,7 +126,8 @@ class CreateView(forms.ModalFormView):
 
 def PoolsAction(request, action):
     data = json.loads(request.body)
-    # TODO add cluster_id in data
+    msg = ""
+    status = ""
     if not len(data):
         status = "error"
         msg = "No pool selected"
@@ -134,29 +135,33 @@ def PoolsAction(request, action):
         # TODO add cluster_id in data
         for i in range(0, len(data)):
             data[i]['cluster_id'] = 1
-        # TODO add cluster_id in data
 
         if action == "present":
             print data
             pools = []
             for x in data:
-                pools.append({'id': x['id'], 'cinder_volume_host': x['cinder_volume_host']})
-            print "========Start Present Pools==========="
-            result = vsmapi.present_pool(request, pools)
-            print result
-            host_list = ""
-            for host in result['host']:
-                host_list = host + "," + host_list
-            if result['status'] == "bad":
-                status = "warning"
-                msg = "Not found crudini commmand in host: %s" % host_list
-            elif result['status'] == "unreachable":
-                status = "warning"
-                msg = "Please check ssh with no password between vsm controller and host: %s" % host_list
-            else:
-                status = "info"
-                msg = "Begin to Present Pools!"
-            print "========End Present Pools==========="
+                cinder_volume_host = x['cinder_volume_host']
+                if cinder_volume_host == "" or cinder_volume_host == None:
+                    status = "error"
+                    msg = "The Cinder Volume Host is null"
+                pools.append({'id': x['id'], 'cinder_volume_host': cinder_volume_host})
+            if msg == "" and status == "":
+                print "========Start Present Pools==========="
+                result = vsmapi.present_pool(request, pools)
+                print result
+                host_list = ""
+                for host in result['host']:
+                    host_list = host + "," + host_list
+                if result['status'] == "bad":
+                    status = "warning"
+                    msg = "Not found crudini commmand in host: %s" % host_list
+                elif result['status'] == "unreachable":
+                    status = "warning"
+                    msg = "Please check ssh with no password between vsm controller and host: %s" % host_list
+                else:
+                    status = "info"
+                    msg = "Begin to Present Pools!"
+                print "========End Present Pools==========="
 
     resp = dict(message=msg, status=status, data="")
     resp = json.dumps(resp)
@@ -168,38 +173,42 @@ def get_select_data(request):
     username = appnode.os_username
     password = appnode.os_password
     auth_url = appnode.os_auth_url
+    region_name = appnode.os_region_name
     auth_host = auth_url.split(":")[1][2:]
-    genauthtoken = GenAuthToken(tenant_name, username, password, auth_host)
-    token, tenant_id = genauthtoken.get_token()
-    cinder_service_list = list_cinder_service(auth_host, token, tenant_id)
-
-    cinder_volume_down_list = []
-    for cinder in cinder_service_list:
-        if cinder["state"] == "down":
-            cinder_volume_down_list.append(cinder)
-
     cinder_service = []
-    value = 0
-    if len(cinder_volume_down_list) == 0:
+    try:
+        genauthtoken = GenAuthToken(tenant_name, username, password, auth_host, region_name)
+        token, tenant_id = genauthtoken.get_token()
+        cinder_service_list = list_cinder_service(auth_host, token, tenant_id)
+
+        cinder_volume_down_list = []
         for cinder in cinder_service_list:
-            if cinder["binary"] == "cinder-volume":
-                cinder.update({"value": value})
-                value = value + 1
-                cinder_service.append(cinder)
-    else:
-        for cinder in cinder_service_list:
-            if cinder["binary"] == "cinder-volume" and \
-                            "@" in cinder["host"]:
-                host = cinder["host"].split("@")[0]
-                if host not in [x["host"] for x in cinder_service_list]:
+            if cinder["state"] == "down":
+                cinder_volume_down_list.append(cinder)
+
+        value = 0
+        if len(cinder_volume_down_list) == 0:
+            for cinder in cinder_service_list:
+                if cinder["binary"] == "cinder-volume":
                     cinder.update({"value": value})
                     value = value + 1
                     cinder_service.append(cinder)
-            elif cinder["binary"] == "cinder-volume" and \
-                            "@" not in cinder["host"]:
-                cinder.update({"value": value})
-                value = value + 1
-                cinder_service.append(cinder)
+        else:
+            for cinder in cinder_service_list:
+                if cinder["binary"] == "cinder-volume" and \
+                                "@" in cinder["host"]:
+                    host = cinder["host"].split("@")[0]
+                    if host not in [x["host"] for x in cinder_service_list]:
+                        cinder.update({"value": value})
+                        value = value + 1
+                        cinder_service.append(cinder)
+                elif cinder["binary"] == "cinder-volume" and \
+                                "@" not in cinder["host"]:
+                    cinder.update({"value": value})
+                    value = value + 1
+                    cinder_service.append(cinder)
+    except:
+        cinder_service = []
 
     data = tuple(cinder_service)
     return HttpResponse(json.dumps(data))
