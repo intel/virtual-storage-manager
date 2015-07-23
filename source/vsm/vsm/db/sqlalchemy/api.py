@@ -3279,6 +3279,7 @@ def osd_state_get_sort_filter(context,
     if sort_keys is None:
         sort_keys = ['id']
     else:
+        sort_keys = sort_keys.split(',')
         if 'id' not in sort_keys:
             sort_keys.insert(0, 'id')
 
