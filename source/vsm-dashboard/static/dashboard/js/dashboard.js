@@ -183,7 +183,6 @@ function loadOSD(){
         //data.out_up = 1;
 
         //init
-        $("#divOSD")[0].style.border = "1px solid #ccc";
         $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_health.png";
         //when error
         if(data.in_down>0){

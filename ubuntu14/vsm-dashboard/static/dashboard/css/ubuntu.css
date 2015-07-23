@@ -3713,8 +3713,8 @@ a.badge:hover, a.badge:focus {
                         font-weight: bold; }
 
                         .topbar {
-                          background: #eeeeee;
-                          border-bottom: 1px solid #cccccc;
+                          /*background: #eeeeee;*/
+                          /*border-bottom: 1px solid #cccccc;*/
                           padding: 10px 0px 15px 0px; }
 
                           .topbar .switcher_bar {
@@ -10814,7 +10814,9 @@ fieldset[disabled] .datepicker table tr td span.active.disabled:hover.active {
   font-weight: 300; }
 
   a, a:link, a:hover, a:focus, a:active {
-    color: #dd4814; }
+    /*color: #dd4814; */
+
+}
 
     .btn, .btn:link {
       -webkit-box-sizing: border-box;
@@ -10825,7 +10827,7 @@ fieldset[disabled] .datepicker table tr td span.active.disabled:hover.active {
       -webkit-border-radius: 3px;
       -moz-border-radius: 3px;
       border-radius: 3px;
-      background: #dd4814;
+      /*background: #dd4814;*/
       border: none;
       color: #fff;
       text-decoration: none;
@@ -10842,7 +10844,8 @@ fieldset[disabled] .datepicker table tr td span.active.disabled:hover.active {
       text-align: center; }
 
       .btn-primary.disabled, .btn-primary.disabled:hover {
-        background-color: #dd4814; }
+        /*background-color: #dd4814; */
+      }
 
         a.link-cta-inverted, button.cta-inverted {
           background: #fff;
@@ -10851,7 +10854,8 @@ fieldset[disabled] .datepicker table tr td span.active.disabled:hover.active {
           .btn:hover, .btn:focus, .btn:active {
             color: #fff;
             text-decoration: none;
-            background: #c03f11; }
+            /*background: #c03f11;*/
+          }
 
             .btn.close, .modal-footer .btn.close, .btn.cancel, .modal-footer .btn.cancel {
               color: #333333;
