@@ -205,7 +205,7 @@ class OsdsTable(tables.DataTable):
     full_status = tables.Column("full_status", \
                                verbose_name=_("Used(%)"))
     full_warn = tables.Column("full_warn", \
-                               verbose_name=_("Used Wran"))
+                               verbose_name=_("Used Wran"), hidden=True)
 
     class Meta:
         name = "osds"
