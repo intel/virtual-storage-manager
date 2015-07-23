@@ -164,6 +164,7 @@ class Controller(wsgi.Controller):
             'osd_name':req.GET.get('osd_name', ''),
             'server_name':req.GET.get('server_name', ''),
             'zone_name':req.GET.get('zone_name', ''),
+            'state':req.GET.get('state', ''),
         }
         error = self.conductor_api.ceph_error(context)
         osds = self.conductor_api.osd_state_get_all(context, limit,
