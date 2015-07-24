@@ -5688,7 +5688,9 @@ dt {
   color: white;
   margin: auto 10px;
   padding-bottom: 15px;
-  padding-right: 25px; }
+  padding-right: 25px;
+  margin-top:10px;
+}
 
 #user_info > a {
   color: white;

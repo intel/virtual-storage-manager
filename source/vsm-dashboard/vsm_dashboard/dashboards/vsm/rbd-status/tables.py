@@ -98,11 +98,7 @@ class ListRBDStatusTable(tables.DataTable):
         else:
             return datum["id"]
 
-    def get_object_display(self, datum):
-        if hasattr(datum, "name"):
-            return datum.id
-        else:
-            return datum["name"]
+
 
 def empty_value_maker(type, name, value, attrs=None):
     def _empty_value_caller(datum):

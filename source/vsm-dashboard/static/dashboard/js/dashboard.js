@@ -12,10 +12,9 @@ var cIOPs;
 var cLatency;
 var cBandwidth;
 var cCPU;
-var timestamp1 = 1435623484;
-var timestamp2 = 1435623484;
-var timestamp3 = 1435623484;
-var IOPs_EndTime = "00:00:00";
+var IOPs_EndTime = "";
+var Latency_EndTime = "";
+var BandWidth_EndTime = "";
 var token = $("input[name=csrfmiddlewaretoken]").val();
 require(
     [
@@ -237,14 +236,14 @@ function loadMDS(){
     		$("#lblMDSUpdate")[0].innerHTML = data.update;
 
             if(data.MetaData == null)
-                $("#divMDS_Metadata")[0].innerHTML = "--";
+                $("#divMDS_Metadata")[0].innerHTML = "0";
             else
                 $("#divMDS_Metadata")[0].innerHTML = data.MetaData;
 
             if(data.PoolData == null)
-                $("#divMDS_Data")[0].innerHTML = "--";
+                $("#divMDS_Data")[0].innerHTML = "0";
             else
-                $("#divMDS_Data")[0].innerHTML = data.PoolData;
+                $("#divMDS_Data")[0].innerHTML = data.PoolData.length;
 
             
             $("#divMDS_IN")[0].innerHTML = data.In;
@@ -279,9 +278,9 @@ function loadStorage(){
             success: function(data){
                 //console.log(data)
                 $("#lblStorageUpdate")[0].innerHTML = data.update;
-                $("#lblStorageNormal")[0].innerHTML = data.normal;
-                $("#lblStorageNearFull")[0].innerHTML = data.nearfull;
-                $("#lblStorageFull")[0].innerHTML = data.full;
+                $("#divStorageNormal")[0].innerHTML = data.normal;
+                $("#divStorageNearFull")[0].innerHTML = data.nearfull;
+                $("#divStorageFull")[0].innerHTML = data.full;
             }
      });
 }
@@ -313,21 +312,17 @@ function loadPG(){
 
 function loadIOP(){
     setTimeout(function (){
-        timestamp1 = timestamp1 + 15
-        console.log(IOPs_EndTime);
-
         $.ajax({
             type: "post",
             url: "/dashboard/vsm/IOPS/",
-            //data: JSON.stringify({"timestamp":timestamp1 }),
-            data:"",
+            data: JSON.stringify({"timestamp":IOPs_EndTime }),
             dataType: "json",
             success: function (data) {
                 metrics = data.metrics;
-                console.log(metrics);
-                console.log(cIOPs._optionRestore.legend.data.push("TEST"));
+                var axisData = "00:00:00";
                 for(var i=0;i<metrics.length;i++){
-                    IOPs_EndTime = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+                    IOPs_EndTime = metrics[i].timestamp;
+                    axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
 
                     //add new node     
                     cIOPs.addData([
@@ -342,7 +337,7 @@ function loadIOP(){
                             metrics[i].w_value,
                             false,    
                             false,    
-                            IOPs_EndTime 
+                            axisData 
                         ]
                     ]);
                 }
@@ -368,14 +363,13 @@ function loadLatency(){
         $.ajax({
             type: "post",
             url: "/dashboard/vsm/latency/",
-            //data: JSON.stringify({"timestamp":timestamp2 }),
-            data:"",
+            data: JSON.stringify({"timestamp":Latency_EndTime }),
             dataType: "json",
             success: function (data) {
                 metrics = data.metrics;
                 var axisData = "00:00:00";
                 for(var i=0;i<metrics.length;i++){
-                    //console.log(metrics[i]);
+                    Latency_EndTime = metrics[i].timestamp
                     var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
 
                     //add new node     
@@ -423,14 +417,13 @@ function loadBandwidth(){
         $.ajax({
             type: "post",
             url: "/dashboard/vsm/bandwidth/",
-            //data: JSON.stringify({"timestamp":timestamp2 }),
-            data:"",
+            data: JSON.stringify({"timestamp":BandWidth_EndTime }),
             dataType: "json",
             success: function (data) {
                 metrics = data.metrics;
                 var axisData = "00:00:00";
                 for(var i=0;i<metrics.length;i++){
-                    //console.log(metrics[i]);
+                    BandWidth_EndTime  = metrics[i].timestamp
                     var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
 
                     //add new node     
@@ -472,7 +465,7 @@ function loadCPU(){
         $.ajax({
             type: "post",
             url: "/dashboard/vsm/CPU/",
-            data: JSON.stringify({"timestamp":timestamp1 }),
+            data: "",
             dataType: "json",
             success: function (data) {
                 cCPU.clear();       
@@ -501,7 +494,7 @@ function loadCPU(){
 
             }
         });
-    },2000);
+    },15000);
 }
 
 function GenerateGaugeOption(value) {
@@ -826,3 +819,35 @@ function InitValues(value){
     }
     return res;
 }
+
+
+Date.prototype.format = function(format) {
+    var o = {
+        "M+": this.getMonth() + 1,
+        // month
+        "d+": this.getDate(),
+        // day
+        "h+": this.getHours(),
+        // hour
+        "m+": this.getMinutes(),
+        // minute
+        "s+": this.getSeconds(),
+        // second
+        "q+": Math.floor((this.getMonth() + 3) / 3),
+        // quarter
+        "S": this.getMilliseconds()
+        // millisecond
+    };
+    if (/(y+)/.test(format) || /(Y+)/.test(format)) {
+        format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    }
+    for (var k in o) {
+        if (new RegExp("(" + k + ")").test(format)) {
+            format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+        }
+    }
+    return format;
+};
+
+
+
