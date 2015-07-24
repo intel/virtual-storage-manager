@@ -1,7 +1,7 @@
 Source: vsm-dashboard
 Section: python
 Priority: optional
-Maintainer: intel <intel@intel.com>
+Maintainer: Yaguang Wang <yaguang.wang@intel.com>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.4
 XS-Python-Version: all
@@ -17,4 +17,4 @@ Depends: python, python-setuptools, python-mysqldb, python-compressor,
     python-prettytable, python-requests, python-simplejson, python-six, python-urllib3,
     python-versiontools, python-warlock, python-webob, python-vsmclient
 Description: The VSM Dashboard is a reference implementation of a Django site that
-    uses the Django project to provide web based interactions with the VSM cloud controller.
+    uses the Django project to provide web based UI for VSM Controller.

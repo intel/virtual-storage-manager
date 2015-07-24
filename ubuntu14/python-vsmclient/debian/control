@@ -1,7 +1,7 @@
 Source: python-vsmclient
 Section: python
 Priority: optional
-Maintainer: intel <intel@intel.com>
+Maintainer: Yaguang Wang <yaguang.wang@intel.com>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.4
 XS-Python-Version: all

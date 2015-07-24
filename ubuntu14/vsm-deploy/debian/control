@@ -1,11 +1,11 @@
 Source: vsm-deploy
 Section: unknown
 Priority: optional
-Maintainer: intel <intel@intel.com>
+Maintainer: Yaguang Wang <yaguang.wang@intel.com>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.4
 
 Package: vsm-deploy
 Architecture: amd64
 Depends: python
-Description: Intel VSM Storage System Tools Kit
+Description: Intel VSM Storage Manager
