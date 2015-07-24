@@ -4397,7 +4397,7 @@ def lantency_performance_metrics_wrong(context, search_opts, session=None):#for 
                  (              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='osd_op_%(latency_type)s' and timestamp>%(start_time)d and timestamp<%(end_time)d) as iopstable \
                  left join \
                  ( \
-                 select case when avgcount<>0 then sum_a/avgcount else 0 end as lantency_value,a.hostname,a.instance,a.timestamp from \
+                 select case when avgcount<>0 then sum_a*0.1/avgcount else 0 end as lantency_value,a.hostname,a.instance,a.timestamp from \
                  (select timestamp,value as sum_a,instance,hostname from metrics where metric ='%(metric_name)s_sum' and timestamp>%(start_time)d and timestamp<%(end_time)d) as a \
                  left join
                  (select timestamp,value as avgcount,instance,hostname from metrics where metric='%(metric_name)s_avgcount' and timestamp>%(start_time)d and timestamp<%(end_time)d) as b \
