@@ -31,7 +31,7 @@ class ClusterMgmt(horizon.PanelGroup):
 
 class ClusterMonitor(horizon.PanelGroup):
     slug = "clustermonitor"
-    name = _("Monitor Cluster")
+    name = _("Cluster Monitoring")
     panels = ('storage-group-status', 'pool-status', 'osd-status', 'monitor-status', 'mds-status', 'pg-status', 'rbd-status')
     #panels = ('ceph-server-management',)
 
@@ -42,13 +42,13 @@ class ServerMgmt(horizon.PanelGroup):
 
 class OpenstackMgmt(horizon.PanelGroup):
     slug = "openstackmgmt"
-    name = _("Manage OpenStack")
+    name = _("OpenStack Integration")
     panels = ('rbdpools', 'openstackconnect',) # 'presentingpools', )
     #panels = ('rbdpools', 'openstackconnect', 'presentingpools', )
 
 class UserMgmt(horizon.PanelGroup):
     slug = "usermgmt"
-    name = _("Manage VSM")
+    name = _("VSM Management")
     panels = ("usermgmt", 'settings')
 
 class VizDash(horizon.Dashboard):
