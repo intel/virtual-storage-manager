@@ -293,12 +293,16 @@ function install_controller() {
 
     if [[ $IS_CONTROLLER -eq 0 ]]; then
         set_remote_repo $CONTROLLER_ADDRESS
-        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond"
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO preinstall"
         setup_remote_controller
+        $SCP $USER@$CONTROLLER_ADDRESS:/var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
+        cd $REPO_PATH
+        dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
+        cd $TOPDIR
     else
         set_local_repo
-        $SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient
+        $SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond
         $SUDO preinstall
         $SUDO rm -rf /etc/manifest/cluster.manifest
         $SUDO cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
@@ -310,6 +314,10 @@ function install_controller() {
         else
             $SUDO vsm-controller
         fi
+        cp /var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
+        cd $REPO_PATH
+        dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
+        cd $TOPDIR
     fi
 }
 
@@ -369,6 +377,7 @@ function setup_remote_agent() {
 }
 
 function install_agent() {
+    $SSH $USER@$1 "if [[ -f /etc/apt/sources.list ]]; then $SUDO mv /etc/apt/sources.list /etc/apt/sources.list.bak; fi"
     check_manifest $1
     set_remote_repo $1
     $SSH $USER@$1 "$SUDO apt-get install -y vsm vsm-deploy"
@@ -376,6 +385,7 @@ function install_agent() {
 
     setup_remote_agent $1
     install_setup_diamond $1
+    $SSH $USER@$1 "if [[ -f /etc/apt/sources.list.bak ]]; then $SUDO mv /etc/apt/sources.list.bak /etc/apt/sources.list; fi"
 }
 
 #-------------------------------------------------------------------------------
