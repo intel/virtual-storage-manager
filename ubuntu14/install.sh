@@ -351,7 +351,7 @@ function install_setup_diamond() {
     $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = True\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "diamond"
+    $SSH $USER@$1 "$SUDO diamond"
 }
 
 function setup_remote_agent() {
