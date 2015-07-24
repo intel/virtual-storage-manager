@@ -84,7 +84,7 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/getip
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/get_storage
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/spot_info_list
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/vsm-reporter.py
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/intergrate-cluster
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/integrate-cluster
 mv $VSM_ROOT_PATH/usr/local/bin/vsm-reporter.py $VSM_ROOT_PATH/usr/local/bin/vsm-reporter
 rm -rf $VSM_ROOT_PATH/usr/local/bin/vsm-agent
 rm -rf $VSM_ROOT_PATH/usr/local/bin/vsm-all

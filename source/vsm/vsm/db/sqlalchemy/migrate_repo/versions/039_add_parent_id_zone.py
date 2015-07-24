@@ -14,24 +14,24 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from sqlalchemy import Boolean, Column, DateTime
-from sqlalchemy import Integer, MetaData, String, Table
-from sqlalchemy import Table, Text
+
+from sqlalchemy import and_, String, Column, MetaData, select, Table, Integer
 
 def upgrade(migrate_engine):
-    # Upgrade operations go here. Don't create your own engine;
-    # bind migrate_engine to your metadata
     meta = MetaData()
     meta.bind = migrate_engine
 
-    long_calls = Table('long_calls',
-                    meta,
-                    autoload=True)
-    long_calls.drop()
+    zones = Table('zone', meta, autoload=True)
 
+    parent_id = Column('parent_id"',Integer, nullable=False)
+    zones.create_column(parent_id)
+    type = Column("type", Integer, nullable=False)
+    zones.create_column(type)
 
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
-
-
+    zones = Table('zone', meta, autoload=True)
+    zones.drop_column('parent_id')
+    zones = Table('zone', meta, autoload=True)
+    zones.drop_column('type')

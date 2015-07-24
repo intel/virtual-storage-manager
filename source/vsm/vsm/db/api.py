@@ -130,66 +130,6 @@ def service_update(context, service_id, values):
     """
     return IMPL.service_update(context, service_id, values)
 
-###################
-
-def compute_node_get(context, compute_id):
-    """Get an computeNode or raise if it does not exist."""
-    return IMPL.compute_node_get(context, compute_id)
-
-def compute_node_get_all(context):
-    """Get all computeNodes."""
-    return IMPL.compute_node_get_all(context)
-
-def compute_node_create(context, values):
-    """Create a computeNode from the values dictionary."""
-    return IMPL.compute_node_create(context, values)
-
-def compute_node_update(context, compute_id, values, auto_adjust=True):
-    """Set the given properties on an computeNode and update it.
-
-    Raises NotFound if computeNode does not exist.
-    """
-    return IMPL.compute_node_update(context, compute_id, values, auto_adjust)
-
-def compute_node_get_by_host(context, host):
-    return IMPL.compute_node_get_by_host(context, host)
-
-def compute_node_utilization_update(context, host, free_ram_mb_delta=0,
-                          free_disk_gb_delta=0, work_delta=0, vm_delta=0):
-    return IMPL.compute_node_utilization_update(context, host,
-                          free_ram_mb_delta, free_disk_gb_delta, work_delta,
-                          vm_delta)
-
-def compute_node_utilization_set(context, host, free_ram_mb=None,
-                                 free_disk_gb=None, work=None, vms=None):
-    return IMPL.compute_node_utilization_set(context, host, free_ram_mb,
-                                             free_disk_gb, work, vms)
-
-###################
-# Standby Table
-def standby_service_create(context, values):
-    """Create a standby service info from the values dictionary."""
-    return IMPL.standby_service_create(context, values)
-
-def standby_service_update(context, host_name, values):
-    """Create a stadnby service info from the values dictionary."""
-    return IMPL.standby_service_update(context, host_name, values)
-
-def standby_service_get_by_hostname(context, host_name):
-    """Create a stadnby service info from the values dictionary."""
-    return IMPL.standby_service_get_by_hostname(context, host_name)
-
-def standby_service_get_all(context):
-    """Create a stadnby service info from the values dictionary."""
-    return IMPL.standby_service_get_all(context)
-
-def standby_setting_get_by_id(context, id):
-    """get standby setting by id"""
-    return IMPL.standby_setting_get_by_id(context, id)
-
-def standby_setting_update_by_id(context, id, data):
-    return IMPL.standby_setting_update_by_id(context, id, data)
-###################
 def migration_update(context, id, values):
     """Update a migration instance."""
     return IMPL.migration_update(context, id, values)
@@ -965,11 +905,6 @@ def zone_update(context, zone_id, values):
 def zone_get(context, zone_id):
     """Get an zone with zone_id"""
     return IMPL.zone_get(context, zone_id)
-
-#manage agent host info
-def compute_node_update_no_context(service_id, values):
-    """"""
-    return IMPL.compute_node_update_no_context(service_id, values)
 
 def service_get_by_host_and_topic_no_context(host, topic):
     """Get a service or raise if it does not exist."""

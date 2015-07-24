@@ -99,9 +99,9 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                       server_list=server_list))
         return ret
 
-    def intergrate_cluster(self, context, server_list):
+    def integrate_cluster(self, context, server_list):
         ret = self.cast(context,
-                        self.make_msg('intergrate_cluster',
+                        self.make_msg('integrate_cluster',
                                       server_list=server_list))
         return ret
 

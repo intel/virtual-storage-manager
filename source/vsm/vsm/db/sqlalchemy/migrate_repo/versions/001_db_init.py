@@ -25,42 +25,6 @@ def upgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
 
-    compute_nodes = Table('compute_nodes', meta,
-        Column('created_at', DateTime(timezone=False)),
-        Column('updated_at', DateTime(timezone=False)),
-        Column('deleted_at', DateTime(timezone=False)),
-        Column('deleted', Boolean(create_constraint=True, name=None)),
-        Column('id', Integer(), primary_key=True, nullable=False),
-        Column('service_id', Integer(), nullable=True),
-
-        Column('vcpus', Integer(), nullable=True),
-        Column('memory_mb', Integer(), nullable=True),
-        Column('local_gb', Integer(), nullable=True),
-        Column('vcpus_used', Integer(), nullable=True),
-        Column('memory_mb_used', Integer(), nullable=True),
-        Column('local_gb_used', Integer(), nullable=True),
-        Column('disk_available_least', Integer(), default=0),
-        Column('free_ram_mb', Integer(), nullable=True),
-        Column('free_disk_gb', Integer(), nullable=True),
-        Column('current_workload', Integer(), nullable=True),
-        Column('cpu_info',
-               Text(convert_unicode=False,
-                    unicode_error=None, _warn_on_bytestring=False),
-               nullable=True),
-        Column('cpu_utilization', Float(), default=0.0, nullable=True),
-
-        #Column('raw_ip', String(length=255), nullable=True),
-        #Column('data_drives_number', Integer(), nullable=True),
-        #Column('status', String(length=255), nullable=True),
-        #Column('primary_public_ip', String(length=255), nullable=True),
-        #Column('secondary_public_ip', String(length=255), nullable=True),
-        #Column('cluster_ip', String(length=255), nullable=True),
-        #Column('zone', String(length=255), nullable=True),
-        #Column('type', String(length=255), nullable=True),
-        #Column('cluster_id', Integer(), nullable=True),
-
-    )
-
     services = Table(
         'services', meta,
         Column('created_at', DateTime),
@@ -91,11 +55,6 @@ def upgrade(migrate_engine):
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
-
-    compute_nodes = Table('compute_nodes',
-                          meta,
-                          autoload=True)
-    compute_nodes.drop()
 
     services = Table('services',
                      meta,

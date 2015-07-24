@@ -101,28 +101,28 @@ class ManifestChecker(object):
             return False
 
     def __in_lan(self, ip):
-        primary_public_network = \
-            self._info['cluster']['primary_public_network']
-        secondary_public_network = \
-            self._info['cluster']['secondary_public_network']
+        management_network = \
+            self._info['cluster']['management_network']
+        ceph_public_network = \
+            self._info['cluster']['ceph_public_network']
         cluster_network = self._info['cluster']['cluster_network']
 
-        self._lan_list = [primary_public_network,
-                          secondary_public_network,
+        self._lan_list = [management_network,
+                          ceph_public_network,
                           cluster_network]
-        lan_list = primary_public_network.split(',') + \
-                          secondary_public_network.split(',') + \
+        lan_list = management_network.split(',') + \
+                          ceph_public_network.split(',') + \
                           cluster_network.split(',')
         for _lan in lan_list:
             if self._is_in_lan(ip, _lan):
                 return True
-            # if self._is_in_lan(ip, secondary_public_network):
+            # if self._is_in_lan(ip, ceph_public_network):
             #     return True
             # if self._is_in_lan(ip, cluster_network):
             #     return True
 
-        lan_list = primary_public_network.split(',') + \
-                          secondary_public_network.split(',') + \
+        lan_list = management_network.split(',') + \
+                          ceph_public_network.split(',') + \
                           cluster_network.split(',')
         for _lan in lan_list:
             if self._is_in_lan(ip, _lan):
@@ -131,34 +131,34 @@ class ManifestChecker(object):
         return False
 
     def _is_network_ok(self):
-        primary_public_network = \
-            self._info['cluster']['primary_public_network']
-        secondary_public_network = \
-            self._info['cluster']['secondary_public_network']
+        management_network = \
+            self._info['cluster']['management_network']
+        ceph_public_network = \
+            self._info['cluster']['ceph_public_network']
         cluster_network = self._info['cluster']['cluster_network']
 
-        self._lan_list = [primary_public_network,
-                          secondary_public_network,
+        self._lan_list = [management_network,
+                          ceph_public_network,
                           cluster_network]
-        lan_list = primary_public_network.split(',') + \
-                          secondary_public_network.split(',') + \
+        lan_list = management_network.split(',') + \
+                          ceph_public_network.split(',') + \
                           cluster_network.split(',')
         if len(cluster_network) == 0:
             error('Error: cluster_network not found')
 
-        if len(secondary_public_network) == 0:
-            error('Error: secondary_public_network not found')
+        if len(ceph_public_network) == 0:
+            error('Error: ceph_public_network not found')
 
-        if len(primary_public_network) == 0:
-            error('Error: primary_public_network not found!')
+        if len(management_network) == 0:
+            error('Error: management_network not found!')
 
-        if primary_public_network == secondary_public_network or\
-            secondary_public_network == cluster_network or\
-            cluster_network == primary_public_network:
+        if management_network == ceph_public_network or\
+            ceph_public_network == cluster_network or\
+            cluster_network == management_network:
             info_list = [
             'Warning: There are some networks be the same.',
-            'primary_public_network = %s' % primary_public_network,
-            'secondary_public_network = %s' % secondary_public_network,
+            'management_network = %s' % management_network,
+            'ceph_public_network = %s' % ceph_public_network,
             'cluster_network = %s' % cluster_network]
             for info in info_list:
                 print info

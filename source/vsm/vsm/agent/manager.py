@@ -109,11 +109,11 @@ class AgentManager(manager.Manager):
             if right_ref:
                 break
 
-            lan_list_1 = [cluster_ref['primary_public_network'],
-                        cluster_ref['secondary_public_network'],
+            lan_list_1 = [cluster_ref['management_network'],
+                        cluster_ref['ceph_public_network'],
                         cluster_ref['cluster_network']]
-            lan_list = cluster_ref['primary_public_network'].split(',') + \
-                        cluster_ref['secondary_public_network'].split(',') + \
+            lan_list = cluster_ref['management_network'].split(',') + \
+                        cluster_ref['ceph_public_network'].split(',') + \
                         cluster_ref['cluster_network'].split(',')
 
             LOG.info('Get vlan list = %s' % lan_list)
@@ -891,8 +891,8 @@ class AgentManager(manager.Manager):
         self.update_all_status(context)
         return True
 
-    def intergrate_cluster_from_ceph(self, context):
-        LOG.info("intergrate cluster from ceph")
+    def integrate_cluster_from_ceph(self, context):
+        LOG.info("integrate cluster from ceph")
         self.update_all_status(context)
         self.sync_osd_states_from_ceph(context)
         return True

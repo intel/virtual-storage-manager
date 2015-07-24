@@ -251,25 +251,25 @@ class ManifestChecker(object):
             return False
 
     def __in_lan(self, ip):
-        primary_public_network = \
-            self._rec_data['cluster']['primary_public_network']
-        secondary_public_network = \
-            self._rec_data['cluster']['secondary_public_network']
+        management_network = \
+            self._rec_data['cluster']['management_network']
+        ceph_public_network = \
+            self._rec_data['cluster']['ceph_public_network']
         cluster_network = self._rec_data['cluster']['cluster_network']
 
-        self._lan_list = [primary_public_network,
-                          secondary_public_network,
+        self._lan_list = [management_network,
+                          ceph_public_network,
                           cluster_network]
-        lan_list = primary_public_network.split(',') + \
-                          secondary_public_network.split(',') + \
+        lan_list = management_network.split(',') + \
+                          ceph_public_network.split(',') + \
                           cluster_network.split(',')
         for _lan in lan_list:
             if self._is_in_lan(ip, _lan):
                 return True
 
-        if self._is_in_lan(ip, primary_public_network):
+        if self._is_in_lan(ip, management_network):
             return True
-        if self._is_in_lan(ip, secondary_public_network):
+        if self._is_in_lan(ip, ceph_public_network):
             return True
         if self._is_in_lan(ip, cluster_network):
             return True

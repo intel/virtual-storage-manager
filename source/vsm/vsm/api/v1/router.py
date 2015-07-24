@@ -112,7 +112,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         collection={'summary': 'get',
                                     'refresh': 'post',
                                     'import_ceph_conf': 'post',
-                                    'intergrate': 'post',
+                                    'integrate': 'post',
                                     'start_cluster': 'post',
                                     'stop_cluster': 'post',
                                     'get_ceph_health_list':'get',

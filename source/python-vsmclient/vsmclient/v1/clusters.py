@@ -105,8 +105,8 @@ class ClusterManager(base.ManagerWithFind):
     resource_class = Cluster
 
     def create(self, name="default", file_system="xfs", journal_size=None, 
-                size=None, primary_public_network=None,
-                secondary_public_network=None, cluster_network=None,
+                size=None, management_network=None,
+                ceph_public_network=None, cluster_network=None,
                 primary_public_netmask=None, secondary_public_netmask=None,
                 cluster_netmask=None, servers=[]):
 
@@ -118,8 +118,8 @@ class ClusterManager(base.ManagerWithFind):
                             "file_system": file_system,
                             "journal_size": journal_size,
                             "size": size, 
-                            "primary_public_network": primary_public_network,
-                            "secondary_public_network": secondary_public_network,
+                            "management_network": management_network,
+                            "ceph_public_network": ceph_public_network,
                             "cluster_network": cluster_network,
                             "primary_public_netmask": primary_public_netmask,
                             "secondary_public_netmask": secondary_public_netmask,
@@ -232,11 +232,11 @@ class ClusterManager(base.ManagerWithFind):
         url = "/clusters/import_ceph_conf"
         return self.api.client.post(url,body=body)
 
-    def intergrate(self,servers=[]):
+    def integrate(self,servers=[]):
         body = {'cluster': {
                             "servers": servers,
                            }}
-        url = "/clusters/intergrate"
+        url = "/clusters/integrate"
         return self.api.client.post(url)
 
     def stop_cluster(self,cluster_id):
