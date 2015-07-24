@@ -340,16 +340,16 @@ function install_setup_diamond() {
     $SSH $USER@$1 "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/i\[\[SignalfxHandler\]\]\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/iauth_token = abcdefghijklmnopqrstuvwxyz\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/\# interval = 300/interval = 20/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[CPUCollector\]\]/\#\[\[CPUCollector\]\]/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/enabled = True/#enabled = True/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[DiskSpaceCollector\]\]/\#\[\[DiskSpaceCollector\]\]/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[DiskUsageCollector\]\]/\#\[\[DiskUsageCollector\]\]/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[LoadAverageCollector\]\]/\#\[\[LoadAverageCollector\]\]/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[MemoryCollector\]\]/\#\[\[MemoryCollector\]\]/g\" $DIAMOND_CONFIG"
     $SSH $USER@$1 "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\#\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO diamond"
+    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
+    $SSH $USER@$1 "diamond"
 }
 
 function setup_remote_agent() {

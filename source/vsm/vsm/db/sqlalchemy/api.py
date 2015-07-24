@@ -3262,7 +3262,16 @@ def osd_state_get_sort_filter(context,
         options(joinedload('storage_group')).\
         options(joinedload('zone'))
     if search_opts:
-        query = query.filter(models.OsdState.osd_name.like("%%%s%%"%search_opts['osd_name']),models.OsdState.service_id.in_(service_ids),models.OsdState.zone_id.in_(zone_ids))
+        filter_condition = []
+        if search_opts.get('osd_name'):
+            filter_condition.append((models.OsdState.osd_name.like("%%%s%%"%(search_opts.get('osd_name') or ''))))
+        if search_opts.get('state'):
+            filter_condition.append((models.OsdState.state.like("%%%s%%"%(search_opts.get('state') or '' ))))
+        if service_ids:
+            filter_condition.append((models.OsdState.service_id.in_(service_ids)))
+        if zone_ids:
+            filter_condition.append((models.OsdState.zone_id.in_(zone_ids)))
+        query = query.filter(or_(*filter_condition))
     marker_item = None
     if marker is not None:
         marker_item = osd_get(context, marker)
@@ -3270,6 +3279,7 @@ def osd_state_get_sort_filter(context,
     if sort_keys is None:
         sort_keys = ['id']
     else:
+        sort_keys = sort_keys.split(',')
         if 'id' not in sort_keys:
             sort_keys.insert(0, 'id')
 
