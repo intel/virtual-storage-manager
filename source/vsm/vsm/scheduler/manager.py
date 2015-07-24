@@ -1055,7 +1055,7 @@ class SchedulerManager(manager.Manager):
         return {"message":"success"}
 
     def integrate_cluster(self, context, server_list):
-        """ integrate an exsiting cluster
+        """ integrate an exsiting cluster previosuly created by VSM
         :param context:
         :param server_list:
         :return:
