@@ -74,7 +74,7 @@ $("#btnAddOSD").click(function(){
 
 	//Check the path
 	var token = $("input[name=csrfmiddlewaretoken]").val();
-	var server_id = $("#selServer").val()
+	var server_id = $("#selServer")[0].options[$("#selServer")[0].selectedIndex].getAttribute("node-id");
 	var postData_json = {"server_id":server_id
 						,"journal_device_path":journal_device
 						,"data_device_path":data_device}
@@ -135,7 +135,7 @@ $(document).on("click","#btnRemoveOSD",function(){
 
 
 $("#btnSubmitAddOSD").click(function(){
-	var server_id = $("#selServer").val();
+	var server_id = $("#selServer")[0].options[$("#selServer")[0].selectedIndex].getAttribute("node-id");
 	var new_osd_list = {"server_id":server_id,"osdinfo":[]};
 
 	if($(".new_osd").length == 0){ 

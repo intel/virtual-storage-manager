@@ -32,7 +32,7 @@
     <label id="lblServer"  class="form-label">Server</label>
     <select id="selServer" class="form-control">
       {% for server in servers %}
-         <option value = "{{server.service_id}}">{{server.host}}</option>
+        <option value = "{{server.service_id}}" node-id = "{{server.id}}" >{{server.host}}</option>
       {% endfor %}
     </select>
 </div>
