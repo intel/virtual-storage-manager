@@ -135,7 +135,7 @@ $(document).on("click","#btnRemoveOSD",function(){
 
 
 $("#btnSubmitAddOSD").click(function(){
-	var server_id = $("#selServer").val();
+	var server_id = $("#selServer")[0].options[$("#selServer")[0].selectedIndex].getAttribute("node-id");
 	var new_osd_list = {"server_id":server_id,"osdinfo":[]};
 
 	if($(".new_osd").length == 0){ 
