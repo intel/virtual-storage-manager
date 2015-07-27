@@ -21,7 +21,7 @@ def upgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
 
-    zones = Table('zone', meta, autoload=True)
+    zones = Table('zones', meta, autoload=True)
 
     parent_id = Column('parent_id"',Integer, nullable=False)
     zones.create_column(parent_id)
@@ -31,7 +31,7 @@ def upgrade(migrate_engine):
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
-    zones = Table('zone', meta, autoload=True)
+    zones = Table('zones', meta, autoload=True)
     zones.drop_column('parent_id')
-    zones = Table('zone', meta, autoload=True)
+    zones = Table('zones', meta, autoload=True)
     zones.drop_column('type')

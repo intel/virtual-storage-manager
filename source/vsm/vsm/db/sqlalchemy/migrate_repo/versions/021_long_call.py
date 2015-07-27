@@ -24,10 +24,13 @@ def upgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
 
-    long_calls = Table('long_calls',
-                    meta,
-                    autoload=True)
-    long_calls.drop()
+    try:
+        long_calls = Table('long_calls',
+                        meta,
+                        autoload=True)
+        long_calls.drop()
+    except Exception:
+        pass
 
 
 def downgrade(migrate_engine):
