@@ -1,14 +1,16 @@
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%define version %{getenv:VERSION}
+%define release %{getenv:RELEASE}
 
 Name:           vsm-dashboard
-Version:	    2015.01
-Release:	    1.0%{?dist}
+Version:        %{version}
+Release:        %{release}
 Url:            http://intel.com/itflex
-License:        Apache 2.0
+License:        Apache-2.0
 Group:          Development/Languages/Python
-Source:		    %{name}-%{version}.tar.gz
-BuildRoot:	    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-Summary:        web based management interface for VSM.
+Source:         %{name}-%{version}.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
+Summary:        Web based management interface for VSM
 
 BuildArch:      noarch
 BuildRequires:  python-devel
@@ -149,6 +151,4 @@ sed -i "s,%VSM_VERSION%,$VSM_VERSION,g" %{_datadir}/vsm-dashboard/vsm_dashboard/
 
 #%{_sysconfdir}/vsm-dashboard/*
 
-%changelog
-* Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
-- Initial release
+
