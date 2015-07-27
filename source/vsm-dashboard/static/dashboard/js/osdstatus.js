@@ -3,16 +3,11 @@ $(function(){
     LoadFilterTextbox();
 
     //load OSD data,5 min update
-     loadOSD();
-     loadInterval();
+     LoadOSDSummary();
+     LoadInterval();
 
-     var trNodes = $("#server_list>tbody>tr");
-     if(trNodes){
-         pagerCount = parseInt(trNodes[0].children[15].innerHTML);
-         pagerIndex = parseInt(trNodes[0].children[16].innerHTML);
-         generatePager(pagerIndex,pagerCount);
-     }
-     addOptionButton();
+     //the default page index is 1
+     LoadOSDTable(1);
 })
 
 //CheckFilterStatus
@@ -20,23 +15,20 @@ function LoadFilterTextbox(){
     var filterRow = ""
     filterRow += "  <div class='table_search client'>";
     filterRow += "      <input id='txtFilter' type='text' class='form-control' placeHolder='name,status,server,zone' />";    
-    filterRow += "      <button id='btnFilter' class='btn btn-primary' onClick='search()'>filter</button>";
+    filterRow += "      <button id='btnFilter' class='btn btn-primary' onClick='LoadOSDTable(1)'>filter</button>";
     filterRow += "  </div>";
 
     $(".table_actions.clearfix").append(filterRow);
 }
 
-function FilterReloadData(filterIndex){
-    alert(filterIndex);
-}
-
-function SortReloadData(sortIndex){
-    alert(sortIndex);
-}
-
+function LoadInterval(){
+    setInterval(function(){
+        LoadOSDSummary();
+    },15000);
+};
 
 //load OSD data
-function loadOSD(){
+function LoadOSDSummary(){
     var token = $("input[name=csrfmiddlewaretoken]").val();
     $.ajax({
         type: "post",
@@ -66,45 +58,52 @@ function loadOSD(){
 }
 
 
-function search(){
-    if($("#txtFilter").val() == ""){
-        return false;
-    }
-
+function LoadOSDTable(pageIndex){
     var token = $("input[name=csrfmiddlewaretoken]").val();
     $.ajax({
         type: "post",
-        url: "/dashboard/vsm/osd-status/filter_osd/",
-        data: JSON.stringify({"keyword":$("#txtFilter").val()}),
+        url: "/dashboard/vsm/osd-status/get_osd_data/",
+        data: JSON.stringify({"keyword":$("#txtFilter").val(),"pageIndex":pageIndex}),
         dataType:"json",
         success: function(data){
-            console.log(data);
-            /*
-            <tr id="server_list__row__1">
-                <td class="hide sortable normal_column">1</td>
-                <td class="sortable osd_name normal_column">osd.0</td>
-                <td class="vsm_status status_up sortable normal_column">Present</td>
-                <td class="osd_state sortable normal_column">In-Up</td>
-                <td class="sortable normal_column">1.0</td>
-                <td class="sortable normal_column">20468</td>
-                <td class="sortable normal_column">43</td>
-                <td class="sortable normal_column">20424</td>
-                <td class="capacity_percent_used sortable normal_column">0</td>
-                <td class="sortable normal_column">node1</td>
-                <td class="sortable normal_column">performance</td>
-                <td class="sortable zone normal_column"></td>
-                <td class="normal_column sortable span2">137days, 10 hours ago</td>
-                <td class="hide normal_column sortable pageCount">1</td>
-                <td class="hide pageIndex sortable normal_column">1</td>
-                <td class="sortable hide pagerCount normal_column">1</td>
-                <td class="pagerIndex hide sortable normal_column">1</td>
-                <td class="sortable deviceInfo normal_column">
-                    <a href="/dashboard/vsm/devices-management/?osdid=1">
-                        <img style="margin-left:10px;cursor:pointer" src="/static/dashboard/img/info_32.png">
-                    </a>
-                </td>
-            </tr>
-            */
+            osd_list = data.osd_list;
+            $("#server_list>tbody").empty();
+            for(var i=0;i<osd_list.length;i++){
+                var html_tr = "";
+                html_tr +="<tr id='server_list__row__"+ osd_list[i].id +"'>";
+                html_tr +="<td class='sortable normal_column hide'>"+osd_list[i].id+"</td>";
+                html_tr +="<td class='sortable normal_column osd_name'>"+osd_list[i].osd_name+"</td>";
+                html_tr +="<td class='sortable normal_column vsm_status'>"+osd_list[i].vsm_status+"</td>";
+                html_tr +="<td class='sortable normal_column osd_state'>"+osd_list[i].osd_state+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].crush_weight+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].capacity_total+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].capacity_used+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].capacity_avail+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].capacity_percent_used+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].server+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].storage_group+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].zone+"</td>";
+                html_tr +="<td class='sortable normal_column'>"+osd_list[i].updated_at+"</td>";
+                html_tr +="<td class='sortable normal_column hide'>"+osd_list[i].pageCount+"</td>";
+                html_tr +="<td class='sortable normal_column hide'>"+osd_list[i].pageIndex+"</td>";
+                html_tr +="<td class='sortable normal_column hide'>"+osd_list[i].pagerCount+"</td>";
+                html_tr +="<td class='sortable normal_column hide'>"+osd_list[i].pagerIndex+"</td>";
+                html_tr +="<td class='sortable normal_column'>";
+                html_tr +="     <a href='/dashboard/vsm/devices-management/?osdid="+osd_list[i].id+"'>";
+                html_tr +="         <img style='margin-left:10px;cursor:pointer' src='/static/dashboard/img/info_32.png'>";
+                html_tr +="     </a>";
+                html_tr +="</td>";
+
+                $("#server_list>tbody").append(html_tr);
+            }
+
+            //Generate the pager
+            var paginate = data.paginate;
+            $("#hfPageIndex").val(paginate.page_index);
+            $("#hfPageCount").val(paginate.page_count);
+            $("#hfPagerIndex").val(paginate.pager_index);
+            $("#hfPagerCount").val(paginate.pager_count);
+            generatePager(paginate.pager_index,paginate.pager_count);
 
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -120,27 +119,6 @@ function search(){
     });
 }
 
-
-function loadInterval(){
-    setInterval(function(){
-        loadOSD();
-    },15000);
-};
-
-
-function addOptionButton(){
-    var trNodes = $("#server_list>tbody>tr");
-
-    for(var i=0;i<trNodes.length;i++){
-        var osd_id = trNodes[i].children[0].innerHTML;
-        var tdOption = trNodes[i].children[17];
-        var linkDetail = "";
-        linkDetail += "<a href='/dashboard/vsm/devices-management/?osdid="+osd_id+"'>";
-        linkDetail += "<img style='margin-left:10px;cursor:pointer' src='/static/dashboard/img/info_32.png' />";
-        linkDetail += "</a>";
-        tdOption.innerHTML =  linkDetail;
-    }
-}
 
 
 function nextPager(){
@@ -164,8 +142,7 @@ function generatePager(pagerIndex,pagerCount){
     $("#hfPagerIndex").val(pagerIndex); 
 
     var trNodes = $("#server_list>tbody>tr");
-    var pageCount =parseInt(trNodes[0].children[13].innerHTML);
-    //var pageIndex = trNodes[0].children[15].innerHTML;
+    var pageCount =parseInt($("#hfPageCount").val());
 
     var pagerStart = 0;
     var pagerEnd = 0;
