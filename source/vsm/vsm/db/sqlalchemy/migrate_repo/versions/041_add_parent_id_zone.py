@@ -23,7 +23,7 @@ def upgrade(migrate_engine):
 
     zones = Table('zones', meta, autoload=True)
 
-    parent_id = Column('parent_id"',Integer, nullable=False)
+    parent_id = Column('parent_id',Integer, nullable=True)
     zones.create_column(parent_id)
     type = Column("type", Integer, nullable=False)
     zones.create_column(type)
