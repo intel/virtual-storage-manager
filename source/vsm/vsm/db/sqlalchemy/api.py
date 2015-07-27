@@ -3028,11 +3028,15 @@ def osd_state_get_sort_filter(context,
                       marker=None,
                       sort_keys=None,
                       sort_dir=None,search_opts={}):
+    service_ids = []
+    zone_ids = []
     if search_opts:
-        services = service_get_all_by_host_like(context,host=search_opts.get('server_name'))
-        zones = zone_get_by_name_like(context,search_opts.get('zone_name'))
-        service_ids = [service.id for service in services]
-        zone_ids = [zone.id for zone in zones]
+        if search_opts.get('server_name'):
+            services = service_get_all_by_host_like(context,host=search_opts.get('server_name'))
+            service_ids = [service.id for service in services]
+        if search_opts.get('zone_name'):
+            zones = zone_get_by_name_like(context,search_opts.get('zone_name'))
+            zone_ids = [zone.id for zone in zones]
         LOG.info("servie_ids===%s,zone_ids=%s"%(service_ids,zone_ids))
     query = model_query(context, models.OsdState, read_deleted="no").\
         options(joinedload('device')).\
