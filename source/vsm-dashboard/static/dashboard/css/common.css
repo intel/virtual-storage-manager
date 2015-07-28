@@ -13,7 +13,7 @@ h1.brand a{
 
 .vsm-block-content{
     text-align:left;
-    padding:15px 15px;
+    padding:15px 10px;
     border-radius:5px;
     border: 1px solid #ccc;
     overflow: hidden;
@@ -69,7 +69,7 @@ h1.brand a{
  * rect
  */
 .vsm-rect{
-    width: 60px;
+    width: 55px;
     height: 40px;
     line-height: 40px;
     background-color: #0062a8;
