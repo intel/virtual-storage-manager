@@ -336,8 +336,14 @@ function loadIOP(){
                             1,        //write line
                             metrics[i].w_value,
                             false,    
-                            false,    
-                            axisData 
+                            false,
+                        ],
+                        [
+                            2,        //read write line
+                            metrics[i].rw_value,
+                            false,
+                            false,
+                            axisData
                         ]
                     ]);
                 }
@@ -357,6 +363,7 @@ function loadIOP(){
         });
     }, 15000);
 }
+
 
 function loadLatency(){
     setTimeout(function (){
@@ -559,7 +566,7 @@ function GenerateLineOption(){
             trigger:'axis'
         },
         legend:{
-            data:["iops_r","iops_w"]
+            data:["iops_r","iops_w","iops_rw"]
         },
         xAxis : [
             {
@@ -595,6 +602,12 @@ function GenerateLineOption(){
             },
             {
                 name:'iops_w',
+                type:'line',
+                smooth:true,
+                data:InitValues(0)
+            },
+            {
+                name:'iops_rw',
                 type:'line',
                 smooth:true,
                 data:InitValues(0)

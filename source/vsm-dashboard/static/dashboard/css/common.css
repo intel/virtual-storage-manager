@@ -27,7 +27,7 @@ h1.brand a{
  * any labels
  */
 .vsm-block-title{
-    top:24px;
+    top:20px;
     z-index:100;
     position:relative;
     display: inline-block;
@@ -35,7 +35,7 @@ h1.brand a{
     margin-right: auto;
     margin-left: auto;
     /*font-family: "Ubuntu, Arial,libra sans, sans-serif";*/
-    font-size: 24px;
+    font-size: 18px;
 }
 
 /**
