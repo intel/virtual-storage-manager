@@ -15,6 +15,7 @@ var cCPU;
 var IOPs_EndTime = "";
 var Latency_EndTime = "";
 var BandWidth_EndTime = "";
+var CPU_EndTime = "";
 var token = $("input[name=csrfmiddlewaretoken]").val();
 require(
     [
@@ -468,28 +469,47 @@ function loadBandwidth(){
 }
 
 function loadCPU(){
-    setInterval(function (){
+    setTimeout(function (){
         $.ajax({
             type: "post",
             url: "/dashboard/vsm/CPU/",
-            data: "",
+            data: JSON.stringify({"timestamp":CPU_EndTime }),
             dataType: "json",
             success: function (data) {
-                cCPU.clear();       
+                cCPU.clear();
+                var timestampList = new Array();
                 var legendList = new Array();
                 var seriesList = new Array();
-                for(var i=0; i<data.metrics.length;i++){
-                    legendList.push(data.metrics[i].name);
+                //get the timestamp list
+                for (var i = 0; i < data.time.length; i++) {
+                    if(i == data.time.length - 1){
+                        CPU_EndTime = data.time[i]
+                    }
+                    var axisData = new Date(parseInt(data.time[i]) * 1000).format("hh:mm:ss")
+                    timestampList.push(axisData);
+                }
+
+                for(var i=0; i<data.cpus.length;i++){
+                    var cpu = data.cpus[i];
+                    //get the legend list
+                    legendList.push(cpu.name);
                     var series = {
-                        name:data.metrics[i].name,
-                        type:'line',
-                        smooth:true,
-                        data:data.metrics[i].data
+                            name:cpu.name,
+                            type:'line',
+                            smooth:true,
+                            data:[]
                     };
+
+
+                    for(var j=0;j<cpu.data.length;j++){
+                        series.data.push(cpu.data[j])
+                    }
                     seriesList.push(series);
                 }
-                cCPU.setOption(GenerateCPUOption(legendList,seriesList));
-                
+                cCPU.setOption(GenerateCPUOption(timestampList,legendList,seriesList));
+
+                //Reload the data
+                loadCPU();
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
 
@@ -617,7 +637,7 @@ function GenerateLineOption(){
     return option;
 }
 
-function GenerateCPUOption(legendList,seriesList){
+function GenerateCPUOption(timestampList,legendList,seriesList){
     var option = {
         grid :{
             x:20,
@@ -639,7 +659,7 @@ function GenerateCPUOption(legendList,seriesList){
                     show:true,
                     interval:0,
                 },
-                data :InitAxis_X()
+                data :timestampList
             }
         ],
         yAxis : [

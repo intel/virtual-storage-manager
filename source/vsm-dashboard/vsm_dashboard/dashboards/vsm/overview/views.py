@@ -434,7 +434,7 @@ def get_performance_cpu(request):
     #[{'host':'hostname1','timestamp':11101001,'metrics_value':45,'metrics':'cpu_usage'},...]
 
     cpu_data_dict = {"time":[],"cpus":[]}
-    cpu_data_dict['time'] = list(set([i['timestamp'] for i in cpu_data]))
+    cpu_data_dict['time'] = list(set([i['timestamp'] for i in cpu_data]))[-10:]
     _cpu = {}
     for _metric in cpu_data:
         if not _cpu.has_key(_metric['host']):
@@ -444,7 +444,7 @@ def get_performance_cpu(request):
     keys = _cpu.keys()
     keys.sort()
     for host_name in keys:
-        cpu_data_dict['cpus'].append({'name':host_name,'data':_cpu[host_name]})
+        cpu_data_dict['cpus'].append({'name':host_name,'data':_cpu[host_name][-10:]})
 
 
     cpu_data_json = json.dumps(cpu_data_dict)
