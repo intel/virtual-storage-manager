@@ -4192,3 +4192,23 @@ def lantency_performance_metrics_wrong(context, search_opts, session=None):#for 
             metrics_value = cell[0] and cell[1]/cell[0] or 0
             ret_list.append({'timestamp':str(cell[2]), 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list
+
+def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
+    metrics_name = search_opts['metrics_name']
+    timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
+    timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
+    if timestamp_start is None and timestamp_end:
+        timestamp_start = timestamp_end - 15
+    elif timestamp_start  and  timestamp_end is None:
+        timestamp_start = timestamp_start + 15
+        timestamp_end = int(time.time())
+    ret_list = []
+    session = get_session()
+    if timestamp_start < timestamp_end:
+        sql_str = '''select timestamp, hostname, sum(value) as metric_value from metrics where instance='cpu_total' and metric in ('user','system') and timestamp>=%(start_time)s and timestamp<%(end_time)s group by timestamp,hostname
+            '''%{'start_time':timestamp_start,'end_time':timestamp_end}
+        sql_ret = session.execute(sql_str).fetchall()
+        for cell in sql_ret:
+            metrics_value = cell[2] or 0
+            ret_list.append({'host':cell[1], 'timestamp':str(cell[0]), 'metrics_value':metrics_value,'metrics':metrics_name,})
+    return ret_list
