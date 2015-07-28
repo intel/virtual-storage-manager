@@ -419,7 +419,7 @@ class Zone(BASE, VsmBase):
     __tablename__ = 'zones'
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(length=255), nullable=False)
-    parent_id = Column(Integer, ForeignKey('zone.id'), nullable=False)
+    parent_id = Column(Integer, ForeignKey('zones.id'), nullable=True)
 
 class OsdState(BASE, VsmBase):
     """This table maintains the information about osd."""
@@ -503,7 +503,7 @@ class Cluster(BASE, VsmBase):
     management_network = Column(String(length=255), nullable=True)
     ceph_public_network = Column(String(length=255), nullable=True)
     cluster_network = Column(String(length=255), nullable=True)
-    journal_size = Column(Integer, default=0)
+    # journal_size = Column(Integer, default=0)
     deleted_times = Column(Integer, default=0)
     info_dict = Column(Text, nullable=True)
     ceph_conf = Column(String(length=10485760), nullable=True)
