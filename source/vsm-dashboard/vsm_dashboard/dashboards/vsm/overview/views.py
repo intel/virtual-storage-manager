@@ -419,22 +419,33 @@ def get_performance_Bandwith(request):
     return ops_data
 
 
-def get_performance_cpu():
-    metrics = []
-    cpu_count = random.randint(2,5)
-    for i in range(0,cpu_count):
-        cpu_data = []
-        for data in range(0,10):
-            cpu_data.append(random.randint(1,10))
+def get_performance_cpu(request):
+    data = json.loads(request.body)
+    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-60
+    end_time = None
+    cpu_opts = {
+         "metrics_name":"cpu_usage"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+    }
 
-        cpu = {
-            "name":"cpu"+str(i)
-            ,"data":cpu_data
-        }
-        metrics.append(cpu)
+    cpu_data = vsmapi.get_metrics(request,cpu_opts)["metrics"]
+
+    #[{'host':'hostname1', 'timestamp':11101001, 'metrics_value':45,'metrics':'cpu_usage'}，...]
+
+    cpu_data_dict = {"time":[],"cpus":[]}
+    cpu_data_dict['time'] = list(set([i['timestamp'] for i in cpu_data]))
+    _cpu = {}
+    for _metric in cpu_data:
+        if not _cpu.has_key(_metric['host']):
+            _cpu[_metric['host']] = []
+        _cpu[_metric['host']].append(_metric['metrics_value'])
+
+    keys = _cpu.keys()
+    keys.sort()
+    for host_name in keys:
+        cpu_data_dict['cpus'].append({'name':host_name,'data':_cpu[host_name]})
 
 
-
-    cpu_data_dict = {"metrics":metrics}
-    cpu_data = json.dumps(cpu_data_dict)
-    return cpu_data
+    cpu_data_json = json.dumps(cpu_data_dict)
+    return cpu_data_json

@@ -400,3 +400,7 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def get_lantency(self, context, search_opts):
         return self.call(context,self.make_msg('get_lantency', \
                                search_opts=search_opts))
+
+    def get_cpu_usage(self, context, search_opts):
+        return self.call(context,self.make_msg('get_cpu_usage', \
+                               search_opts=search_opts))
