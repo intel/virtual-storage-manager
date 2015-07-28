@@ -1,12 +1,15 @@
+%define version %{getenv:VERSION}
+%define release %{getenv:RELEASE}
+
 Name:             python-vsmclient
-Version:          2015.01
-Release:          1.0%{?dist}
+Version:          %{version}
+Release:          %{release}
 Summary:          Python API and CLI for  vsm
 
 Group:            Development/Languages
 License:          Intel Reserved
 URL:              http://intel.com/itflex
-Source0:          %{name}-%{version}.tar.gz
+Source:           %{name}-%{version}.tar.gz
 
 #
 # patches_base=1.0.1
@@ -44,7 +47,3 @@ rm -fr %{buildroot}%{python_sitelib}/tests
 %{_bindir}/vsm
 %{python_sitelib}/vsmclient
 %{python_sitelib}/*.egg-info
-
-%changelog
-* Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
-- Initial release
