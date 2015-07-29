@@ -24,9 +24,9 @@ USER=`whoami`
 source $TOPDIR/hostrc
 
 for ip in $CONTROLLER_ADDRESS; do
-    ssh -t $ip "sudo clean-data -f; sudo apt-get remove -y ceph httpd MariaDB-client MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
+    ssh -t $ip "sudo clean-data -f; sudo apt-get remove -y ceph httpd MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
 done
 
 for ip in $AGENT_ADDRESS_LIST; do
-    ssh -t $ip "sudo clean-data -f; sudo apt-get remove -y ceph httpd MariaDB-client MariaDB-devel MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
+    ssh -t $ip "sudo clean-data -f; sudo apt-get remove -y ceph httpd MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
 done
