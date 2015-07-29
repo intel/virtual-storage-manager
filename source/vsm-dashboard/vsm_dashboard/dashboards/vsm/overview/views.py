@@ -430,9 +430,6 @@ def get_performance_cpu(request):
     }
 
     cpu_data = vsmapi.get_metrics(request,cpu_opts)["metrics"]
-
-    #[{'host':'hostname1','timestamp':11101001,'metrics_value':45,'metrics':'cpu_usage'},...]
-
     cpu_data_dict = {"time":[],"cpus":[]}
     cpu_data_dict['time'] = list(set([i['timestamp'] for i in cpu_data]))[-10:]
     _cpu = {}
