@@ -513,7 +513,12 @@ function GenerateGaugeOption(value) {
             {
                 name: '',
                 type: 'gauge',
-                detail: {formatter: '{value}%'},
+                detail: {
+                    formatter: '{value}%',
+                    textStyle:{
+                        fontSize:20
+                    }
+                },
                 data: [{value: value, name: 'Capacity'}],
                 splitLine:{
                     show: true,
