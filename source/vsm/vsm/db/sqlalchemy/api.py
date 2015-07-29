@@ -4087,7 +4087,7 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
             SELECT   sum(metrics.value) AS sum_1, count(metrics.value) AS count_1,metrics.instance AS metrics_instance
             FROM metrics
             WHERE metrics.metric = '%s' AND metrics.timestamp >= %s AND metrics.timestamp < %s
-        '''%(metrics_name,timestamp_cur,timestamp_cur+15)
+        '''%(metrics_name,timestamp_cur-19,timestamp_cur+1)
 
         sql_ret_set = session.execute(sql_str).fetchall()
         for cell in sql_ret_set:
@@ -4119,18 +4119,19 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
                  (              (select  metric,hostname,instance,timestamp,value as iops_value from metrics where metric='osd_op_%(latency_type)s' and timestamp>=%(start_time)d and timestamp<%(end_time)d) as iopstable \
                  left join \
                  ( \
-                 select case when avgcount<>0 then sum_a/avgcount else 0 end as lantency_value,a.hostname,a.instance,a.timestamp from \
+                 select case when avgcount<>0 then sum_a*0.1/avgcount else 0 end as lantency_value,a.hostname,a.instance,a.timestamp from \
                  (select timestamp,value as sum_a,instance,hostname from metrics where metric ='%(metric_name)s_sum' and timestamp>=%(start_time)d and timestamp<%(end_time)d) as a \
                  left join
                  (select timestamp,value as avgcount,instance,hostname from metrics where metric='%(metric_name)s_avgcount' and timestamp>=%(start_time)d and timestamp<%(end_time)d) as b \
                  on b.timestamp = a.timestamp and a.instance = b.instance and a.hostname =  b.hostname) as latencytable \
                  on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance             ) \
-            '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur,'end_time':timestamp_cur+15}
-        timestamp_cur = timestamp_cur + 20
+            '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur-19,'end_time':timestamp_cur+1}
+
         sql_ret = session.execute(sql_str).fetchall()
         for cell in sql_ret:
             metrics_value = cell[0] and cell[1]/cell[0] or 0
             ret_list.append({'instance':cell[2], 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
+        timestamp_cur = timestamp_cur + 20
     return ret_list
 
 def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
@@ -4138,9 +4139,9 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - 15
+        timestamp_start = timestamp_end - 20
     elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + 15
+        timestamp_start = timestamp_start + 20
         timestamp_end = int(time.time())
     ret_list = []
     session = get_session()
@@ -4150,6 +4151,6 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
         sql_ret = session.execute(sql_str).fetchall()
         for cell in sql_ret:
             metrics_value = cell[2] or 0
-            timestamp = (cell[0]-timestamp_start)/15*15+timestamp_start
+            timestamp = (cell[0]-timestamp_start)/20*20+timestamp_start
             ret_list.append({'host':cell[1], 'timestamp':timestamp, 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list

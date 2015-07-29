@@ -119,7 +119,7 @@ def bandwidth(request):
 
 
 def CPU(request):
-    return HttpResponse(get_performance_cpu())
+    return HttpResponse(get_performance_cpu(request))
 
 def get_vsm_version():
     try:
@@ -373,7 +373,7 @@ def get_performance_Latency(request):
             items[w_metric["timestamp"]]["w_value"] =  w_metric["metrics_value"] or 0
     for rw_metric in latency_rw_data:
         if items.has_key(rw_metric["timestamp"]):
-            items[rw_metric["timestamp"]]["w_value"] = rw_metric["metrics_value"] or 0
+            items[rw_metric["timestamp"]]["rw_value"] = rw_metric["metrics_value"] or 0
 
     keys = items.keys()
     keys.sort()
@@ -420,8 +420,8 @@ def get_performance_Bandwith(request):
 
 
 def get_performance_cpu(request):
-    data = json.loads(request.body)
-    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-60
+    #data = json.loads(request.body)
+    start_time = int(time.time())-600
     end_time = None
     cpu_opts = {
          "metrics_name":"cpu_usage"
