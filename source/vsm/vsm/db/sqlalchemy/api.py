@@ -4075,9 +4075,9 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
     if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - 15
+        timestamp_start = timestamp_end - 20
     elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + 15
+        timestamp_start = timestamp_start + 20
         timestamp_end = int(time.time())
     ret_list = []
     timestamp_cur = timestamp_start
@@ -4086,7 +4086,7 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
         sql_str = '''
             SELECT   sum(metrics.value) AS sum_1, count(metrics.value) AS count_1,metrics.instance AS metrics_instance
             FROM metrics
-            WHERE metrics.metric = '%s' AND metrics.timestamp >= %s AND metrics.timestamp <= %s
+            WHERE metrics.metric = '%s' AND metrics.timestamp >= %s AND metrics.timestamp < %s
         '''%(metrics_name,timestamp_cur,timestamp_cur+15)
 
         sql_ret_set = session.execute(sql_str).fetchall()
@@ -4097,7 +4097,7 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
                 metrics_value = cell[0]
             sql_ret_dict = {'instance': cell[2], 'timestamp': str(timestamp_cur), 'metrics_value': metrics_value, 'metrics': metrics_name,}
             ret_list.append(sql_ret_dict)
-        timestamp_cur = timestamp_cur + 15
+        timestamp_cur = timestamp_cur + 20
 
     return ret_list
 
@@ -4107,9 +4107,9 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - 15
+        timestamp_start = timestamp_end - 20
     elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + 15
+        timestamp_start = timestamp_start + 20
         timestamp_end = int(time.time())
     ret_list = []
     timestamp_cur = timestamp_start
@@ -4126,7 +4126,7 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
                  on b.timestamp = a.timestamp and a.instance = b.instance and a.hostname =  b.hostname) as latencytable \
                  on iopstable.timestamp=latencytable.timestamp and iopstable.hostname=latencytable.hostname and iopstable.instance=latencytable.instance             ) \
             '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur,'end_time':timestamp_cur+15}
-        timestamp_cur = timestamp_cur + 15
+        timestamp_cur = timestamp_cur + 20
         sql_ret = session.execute(sql_str).fetchall()
         for cell in sql_ret:
             metrics_value = cell[0] and cell[1]/cell[0] or 0
