@@ -4141,7 +4141,7 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
                  ) as b \
             '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur-19,'end_time':timestamp_cur+1}
         sql_ret = session.execute(sql_str).fetchall()
-        LOG.info('latency--sql-str===%s'%sql_str)
+        #LOG.info('latency--sql-str===%s'%sql_str)
         for cell in sql_ret:
             metrics_value = cell[0] or 0
             ret_list.append({'instance':'', 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
