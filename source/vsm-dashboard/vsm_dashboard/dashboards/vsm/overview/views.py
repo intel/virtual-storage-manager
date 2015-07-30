@@ -325,7 +325,7 @@ def get_performance_IOPs(request):
             items[w_metric["timestamp"]]["w_value"] = w_metric["metrics_value"] or 0
     for rw_metric in ops_rw_data:
         if items.has_key(rw_metric["timestamp"]):
-            items[rw_metric["timestamp"]]["w_value"] = rw_metric["metrics_value"] or 0
+            items[rw_metric["timestamp"]]["rw_value"] = rw_metric["metrics_value"] or 0
 
     keys = items.keys()
     keys.sort()
@@ -367,13 +367,13 @@ def get_performance_Latency(request):
 
     items = {}
     for r_metric in latency_r_data:
-        items[r_metric["timestamp"]] = {"timestamp": r_metric["timestamp"], "r_value":  r_metric["metrics_value"] or 0, "w_value": 0, "rw_value": 0}
+        items[r_metric["timestamp"]] = {"timestamp": r_metric["timestamp"], "r_value":  r_metric["metrics_value"] and round( r_metric["metrics_value"],2) or 0, "w_value": 0, "rw_value": 0}
     for w_metric in latency_w_data:
         if items.has_key(w_metric["timestamp"]):
-            items[w_metric["timestamp"]]["w_value"] =  w_metric["metrics_value"] or 0
+            items[w_metric["timestamp"]]["w_value"] = w_metric["metrics_value"] and  round(w_metric["metrics_value"],2) or 0
     for rw_metric in latency_rw_data:
         if items.has_key(rw_metric["timestamp"]):
-            items[rw_metric["timestamp"]]["rw_value"] = rw_metric["metrics_value"] or 0
+            items[rw_metric["timestamp"]]["rw_value"] = rw_metric["metrics_value"] and round(rw_metric["metrics_value"],2) or 0
 
     keys = items.keys()
     keys.sort()
@@ -406,10 +406,10 @@ def get_performance_Bandwith(request):
     bandwidth_out_data = vsmapi.get_metrics(request,bandwidth_out_opts)["metrics"]
     items = {}
     for in_metric in bandwidth_in_data:
-        items[in_metric["timestamp"]] = {"timestamp": in_metric["timestamp"], "in_value": in_metric["metrics_value"] and int(in_metric["metrics_value"]) or 0, "out_value": 0}
+        items[in_metric["timestamp"]] = {"timestamp": in_metric["timestamp"], "in_value": in_metric["metrics_value"] and round(in_metric["metrics_value"],2) or 0, "out_value": 0}
     for out_metric in bandwidth_out_data:
         if items.has_key(out_metric["timestamp"]):
-            items[out_metric["timestamp"]]["out_value"] = out_metric["metrics_value"] and int(out_metric["metrics_value"]) or 0
+            items[out_metric["timestamp"]]["out_value"] = out_metric["metrics_value"] and round(out_metric["metrics_value"],2) or 0
 
     keys = items.keys()
     keys.sort()
