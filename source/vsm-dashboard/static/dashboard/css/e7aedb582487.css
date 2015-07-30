@@ -5715,12 +5715,13 @@ h2 {
 
 /* Login Splash Page */
 #splash .login {
-  background: url('/static/dashboard/img/logo-splash.png?53d2bb0c9cb5') no-repeat center 35px;
+  background-color: #337AB7;
+  background: url('/static/dashboard/img/logo-splash.png') no-repeat center 35px;
   position: absolute;
   top: 80px;
   left: 50%;
   margin: 0 0 0 -195px;
-  padding-top: 170px;
+  padding-top: 100px;
   width: 390px;
   border: 1px solid #dddddd;
   max-height: none;
