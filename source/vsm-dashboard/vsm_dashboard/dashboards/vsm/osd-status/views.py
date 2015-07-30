@@ -16,6 +16,7 @@
 
 import json
 from django.http import HttpResponse
+from django.views.generic import TemplateView
 from horizon import tables
 from vsm_dashboard.api import vsm as vsmapi
 from vsm_dashboard.utils import get_time_delta
@@ -26,12 +27,14 @@ class ModalSummaryMixin(object):
         context = super(ModalSummaryMixin, self).get_context_data(**kwargs)
         return context
 
-class IndexView(ModalSummaryMixin,tables.DataTableView):
+class IndexView(tables.DataTableView):
     table_class = ListOSDStatusTable
     template_name = 'vsm/osd-status/index.html'
 
     def get_data(self):
-        return []
+        keyword = self.request.GET.get("keyword","")
+        pagerIndex = int(self.request.GET.get("pagerIndex",1))
+        return get_datasource(pagerIndex,keyword)["osd_list"]
 
 def calculate_paginate(page_index,osd_list_count):
     page_size = 20
@@ -61,12 +64,7 @@ def calculate_paginate(page_index,osd_list_count):
     }
     return paginate
 
-
-def get_osd_data(request):
-    data = json.loads(request.body)
-    keyword = data["keyword"]
-    page_index = int(data["pageIndex"])
-
+def get_datasource(page_index,keyword):
     paginate_opts = {
         "limit":10000,
         "marker":0,
@@ -75,6 +73,7 @@ def get_osd_data(request):
         "osd_name":keyword,
         "server_name":keyword,
         "zone_name":keyword,
+        "state":keyword
     }
     #get the datasource
     datasource = vsmapi.osd_status_sort_and_filter(None,paginate_opts)
@@ -103,11 +102,18 @@ def get_osd_data(request):
             "storage_group": item.storage_group['name'],
             "zone": item.zone,
             "updated_at": get_time_delta(item.updated_at),
-            "deviceInfo":""
+            "deviceInfo":"",
+            "page_index":paginate["page_index"],
+            "page_count":paginate["page_count"],
+            "pager_index":paginate["pager_index"],
+            "pager_count":paginate["pager_count"],
         }
 
         osd_data["osd_list"].append(osd)
-    return HttpResponse(json.dumps(osd_data))
+    
+    return osd_data
+
+
 
 
 

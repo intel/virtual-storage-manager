@@ -16,11 +16,8 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView
-from .views import get_osd_data
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^get_osd_data/$', get_osd_data, name='get_osd_data'),
     url(r'/', IndexView.as_view(), name='index'),
-    
 )
