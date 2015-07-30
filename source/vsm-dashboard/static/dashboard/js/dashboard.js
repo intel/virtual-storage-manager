@@ -253,7 +253,7 @@ function loadMDS(){
             $("#divMDS_STOPPED")[0].innerHTML = data.Stopped;
 
             //init
-            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_normal.png";
+            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_health.png";
             //when error
             if(data.Failed>0){
                 $("#divMDS")[0].style.border = "1px solid red";
