@@ -613,6 +613,11 @@ function GenerateLineOption(){
                 boundaryGap: [0.5, 0.5]
             }
         ],
+        dataZoom:{
+            show:false,
+            start:30,
+            end:100
+        },
         series : [
             {
                 name:'iops_r',
@@ -720,6 +725,11 @@ function GetLantencyOption(){
                 boundaryGap: [0.5, 0.5]
             }
         ],
+        dataZoom:{
+            show:false,
+            start:30,
+            end:100
+        },
         series : [
             {
                 name:'lantency_r',
@@ -787,6 +797,11 @@ function GetBandwidthOption(){
                 boundaryGap: [0.5, 0.5]
             }
         ],
+        dataZoom:{
+            show:false,
+            start:30,
+            end:100
+        },
         series : [
             {
                 name:'bandwidth_in',
