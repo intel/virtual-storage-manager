@@ -33,6 +33,7 @@
 
 #divClusterContent{
     height: 130px;
+    overflow-y:auto;
 }
 
 /*#lblClusterName{
