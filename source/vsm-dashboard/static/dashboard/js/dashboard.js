@@ -732,6 +732,11 @@ function GenerateInitCPUOption(){
                 boundaryGap: [0.5, 0.5]
             }
         ],
+        dataZoom:{
+            show:false,
+            start:30,
+            end:100
+        },
         series : [
             {
                 name:'--',
