@@ -584,8 +584,8 @@ function GenerateLineOption(){
     var option = {
         grid :{
             x:40,
-            y:55,
-            height:'60%',
+            y:20,
+            height:'80%',
             width:'85%',
         },
         tooltip:{
@@ -652,8 +652,8 @@ function GenerateCPUOption(timestampList,legendList,seriesList){
     var option = {
         grid :{
             x:40,
-            y:55,
-            height:'60%',
+            y:20,
+            height:'80%',
             width:'85%',
         },
         tooltip:{
@@ -696,8 +696,8 @@ function GenerateInitCPUOption(){
     var option = {
         grid :{
             x:40,
-            y:55,
-            height:'60%',
+            y:20,
+            height:'80%',
             width:'85%',
         },
         tooltip:{
@@ -749,8 +749,8 @@ function GetLantencyOption(){
     option = {
         grid :{
             x:40,
-            y:55,
-            height:'60%',
+            y:20,
+            height:'80%',
             width:'85%',
         },
         tooltip:{
@@ -821,8 +821,8 @@ function GetBandwidthOption(){
     option = {
         grid :{
             x:40,
-            y:55,
-            height:'60%',
+            y:20,
+            height:'80%',
             width:'85%',
         },
         tooltip:{

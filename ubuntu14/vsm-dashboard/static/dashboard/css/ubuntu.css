@@ -3798,7 +3798,6 @@ h2 {
 
   #splash .login {
     background-color: #337AB7;
-    background: url('/static/dashboard/img/logo-splash.png?1465d65190df') no-repeat center 35px;
     position: absolute;
     top: 80px;
     left: 50%;

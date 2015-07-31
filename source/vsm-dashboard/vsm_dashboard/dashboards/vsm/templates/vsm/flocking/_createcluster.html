@@ -30,7 +30,7 @@
 {% endblock %}
 
 {% block modal-footer %}
-  <input class="btn btn-primary pull-right create-cluster-commit" type="submit" value="{% trans "CreateCluster" %}" />
-  <input class="btn btn-primary pull-right integrateCluster-cluster-commit" type="submit" value="{% trans "integrateCluster" %}" style="display:none" />
-  <a href="{% url 'horizon:vsm:clustermgmt:index' %}" class="btn secondary cancel close">{% trans "Cancel" %}</a>
+  <input class="btn btn-primary create-cluster-commit" type="submit" value="{% trans "CreateCluster" %}" /> 
+  <input class="btn btn-primary integrateCluster-cluster-commit" type="submit" value="{% trans "integrateCluster" %}" style="display:none" />
+  <a href="{% url 'horizon:vsm:clustermgmt:index' %}" class="btn btn-default">{% trans "Cancel" %}</a>
 {% endblock %}
