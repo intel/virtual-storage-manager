@@ -402,7 +402,7 @@ function install_agent() {
     $SSH $USER@$1 "preinstall"
 
     setup_remote_agent $1
-    install_setup_diamond $1
+#    install_setup_diamond $1
     $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ -d /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; rm -rf /tmp/backup; fi"
 }
 

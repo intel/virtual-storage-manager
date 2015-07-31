@@ -293,7 +293,7 @@ function install_controller() {
 
     if [[ $IS_CONTROLLER -eq 0 ]]; then
         set_remote_repo $CONTROLLER_ADDRESS
-        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond"
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO preinstall"
         setup_remote_controller
         $SCP $USER@$CONTROLLER_ADDRESS:/var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
@@ -302,7 +302,7 @@ function install_controller() {
         cd $TOPDIR
     else
         set_local_repo
-        $SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient
+        $SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond
         $SUDO preinstall
         $SUDO rm -rf /etc/manifest/cluster.manifest
         $SUDO cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
@@ -326,7 +326,7 @@ function install_controller() {
 #-------------------------------------------------------------------------------
 
 function install_setup_diamond() {
-    $SSH $USER@$1 "$SUDO easy_install pip; $SUDO pip install diamond"
+    $SSH $USER@$1 "$SUDO apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
     VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "find / -name vsmmysql.py|grep vsm/diamond"`
@@ -336,8 +336,6 @@ function install_setup_diamond() {
     "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
     "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.vsmmysql.VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"s/collectors_path = *.*collectors\/$/collectors_path = \/usr\/local\/share\/diamond\/collectors\//g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"s/handlers_path = *.*handlers\/$/handlers_path = \/usr\/local\/share\/diamond\/handlers\//g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
@@ -347,6 +345,8 @@ function install_setup_diamond() {
     "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_instance = instance\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_hostname    = hostname\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/i\[\[SignalfxHandler\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/iauth_token = abcdefghijklmnopqrstuvwxyz\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/\# interval = 300/interval = 20/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/enabled = True/#enabled = True/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/\[\[DiskSpaceCollector\]\]/\#\[\[DiskSpaceCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
@@ -359,8 +359,6 @@ function install_setup_diamond() {
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO mkdir -p /etc/diamond /var/log/diamond;" \
-    "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf /etc/diamond;" \
     "$SUDO diamond"
 }
 
