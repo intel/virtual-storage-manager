@@ -36,7 +36,8 @@ require(
         cIOPs.setOption(GenerateLineOption());
         cLatency.setOption(GetLantencyOption());
         cBandwidth.setOption(GetBandwidthOption());
-        
+        cCPU.setOption(GenerateInitCPUOption());
+
     	//load Capacity
         loadCapacity();
         setInterval(function(){
@@ -253,7 +254,7 @@ function loadMDS(){
             $("#divMDS_STOPPED")[0].innerHTML = data.Stopped;
 
             //init
-            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_normal.png";
+            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_health.png";
             //when error
             if(data.Failed>0){
                 $("#divMDS")[0].style.border = "1px solid red";
@@ -582,10 +583,10 @@ function GenerateGaugeOption(value) {
 function GenerateLineOption(){
     var option = {
         grid :{
-            x:20,
-            y:20,
-            height:'80%',
-            width:'90%',
+            x:40,
+            y:55,
+            height:'60%',
+            width:'85%',
         },
         tooltip:{
             trigger:'axis'
@@ -650,10 +651,10 @@ function GenerateLineOption(){
 function GenerateCPUOption(timestampList,legendList,seriesList){
     var option = {
         grid :{
-            x:20,
-            y:20,
-            height:'80%',
-            width:'90%',
+            x:40,
+            y:55,
+            height:'60%',
+            width:'85%',
         },
         tooltip:{
             trigger:'axis'
@@ -691,13 +692,66 @@ function GenerateCPUOption(timestampList,legendList,seriesList){
     return option;
 }
 
+function GenerateInitCPUOption(){
+    var option = {
+        grid :{
+            x:40,
+            y:55,
+            height:'60%',
+            width:'85%',
+        },
+        tooltip:{
+            trigger:'axis'
+        },
+        legend:{
+            data:[""]
+        },
+        xAxis : [
+            {
+                type : 'category',
+                boundaryGap : false,
+                axisLabel:{
+                    show:true,
+                    interval:0,
+                },
+                data :InitAxis_X()
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value',
+                scale: false,
+                min:0,
+                //max:15,
+                axisLabel:{
+                    show:true,
+                    interval:'auto',
+                    formatter: '{value}'
+                },
+                name : '',
+                boundaryGap: [0.5, 0.5]
+            }
+        ],
+        series : [
+            {
+                name:'--',
+                type:'line',
+                smooth:true,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                data:InitValues(0)
+            },
+        ]
+    };
+    return option;
+}
+
 function GetLantencyOption(){
     option = {
         grid :{
-            x:20,
-            y:20,
-            height:'80%',
-            width:'90%',
+            x:40,
+            y:55,
+            height:'60%',
+            width:'85%',
         },
         tooltip:{
             trigger:'axis'
@@ -766,10 +820,10 @@ function GetLantencyOption(){
 function GetBandwidthOption(){
     option = {
         grid :{
-            x:20,
-            y:20,
-            height:'80%',
-            width:'90%',
+            x:40,
+            y:55,
+            height:'60%',
+            width:'85%',
         },
         tooltip:{
             trigger:'axis'

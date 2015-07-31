@@ -66,17 +66,17 @@ class ListOSDStatusTable(tables.DataTable):
     storage_group = tables.Column("storage_group", verbose_name=_("Storage Group"))
     zone = tables.Column("zone", verbose_name=_("Zone"))
     updated_at = tables.Column("updated_at", verbose_name=_("Updated at"), classes=("span2",))
-    pageCount = tables.Column("pageCount", verbose_name=_("pageCount"), classes=("pageCount",),hidden=True)
-    pageIndex = tables.Column("pageIndex", verbose_name=_("pageIndex"), classes=("pageIndex",),hidden=True)
-    pagerCount = tables.Column("pagerCount", verbose_name=_("pagerCount"), classes=("pagerCount",),hidden=True)
-    pagerIndex = tables.Column("pagerIndex", verbose_name=_("pagerIndex"), classes=("pagerIndex",),hidden=True)
     deviceInfo = tables.Column("deviceInfo", verbose_name=_("deviceInfo"), classes=("deviceInfo",))
+    page_index = tables.Column("page_index", verbose_name=_("page_index"), classes=("page_index",),hidden=True)
+    page_count = tables.Column("page_count", verbose_name=_("page_count"), classes=("page_count",),hidden=True)
+    pager_index = tables.Column("pager_index", verbose_name=_("pager_index"),classes=("pager_index",),hidden=True)
+    pager_count = tables.Column("pager_count", verbose_name=_("pager_count"),classes=("pager_count",),hidden=True)
 
     class Meta:
         name = "server_list"
         verbose_name = _("OSD List")
         #status_columns = ['status']
-        row_class = UpdateRow
+        #row_class = UpdateRow
         multi_select = False
 
     def get_object_id(self, datum):
