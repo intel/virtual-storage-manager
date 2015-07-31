@@ -325,7 +325,23 @@ function install_controller() {
 #            agent
 #-------------------------------------------------------------------------------
 
+function kill_diamond() {
+    cat <<"EOF" >kill_diamond.sh
+#!/bin/bash
+diamond_pid=`ps -ef|grep diamond|grep -v grep|grep -v bash|awk -F " " '{print $2}'`
+for pid in $diamond_pid; do
+    sudo -E kill -9 $pid
+done
+EOF
+    $SCP kill_diamond.sh $USER@$1:/tmp
+    $SSH $USER@$1 "$SUDO chmod 755 /tmp/kill_diamond.sh;" \
+    "cd /tmp;" \
+    "./kill_diamond.sh;" \
+    "$SUDO rm -rf kill_diamond"
+}
+
 function install_setup_diamond() {
+    kill_diamond $1
     $SSH $USER@$1 "$SUDO apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
