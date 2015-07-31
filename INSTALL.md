@@ -3,17 +3,17 @@
 ==================================
 
 
-**Version:** 2.0.0.123
+**Version:** 2.0.0.149
 
-**Source:** 2015-07-10
+**Source:** 2015-07-31
 
-**Keywords:** Ceph, Virtual Storage Management
+**Keywords:** Ceph, Openstack, Virtual Storage Management
 
 **Supported Combo:** 
 
 	OS:			Ubuntu 14.04.2
-	Ceph: 		Hammer
-	OpenStack:	Icehouse
+	Ceph: 		Firefly/Giant/Hammer
+	OpenStack:	Havana/Icehouse/Juno
 
 	(Other combos might also be working, but we didn't try yet.)
 
@@ -165,6 +165,7 @@ This section will describe how to use the tool to conduct automation.
 	> 
 	> 	AGENT_ADDRESS_LIST="192.168.123.21 192.168.123.22 192.168.123.23"
 	> 	CONTROLLER_ADDRESS="192.168.123.10"
+*It's OK to use host name instead of ip addresses here.*
 
 3. VSM will sync /etc/hosts file from the controller node, make sure your controller node's /etc/hosts file follows below rules:
 	>
