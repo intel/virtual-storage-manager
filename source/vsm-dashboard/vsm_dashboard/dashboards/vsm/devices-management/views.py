@@ -113,8 +113,6 @@ class AddOSDView(TemplateView):
     def get_context_data(self, **kwargs):
         context = {}
         storage_group_list = vsmapi.storage_group_status(None,)
-        print "===========storage_group============="
-        print dir(storage_group_list)
 
         storage_group = []
         for _sg in storage_group_list:

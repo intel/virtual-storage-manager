@@ -26,20 +26,23 @@
 
 {% block main %}
     {{ table.render }}
-     	<div id="divOSDInfo" style="display:none">
+     <div id="divOSDInfo" style="display:none">
             <div >
                 <!-- some messages display here  -->
                 <div id="divOSDTip" class="alert alert-danger  alert-dismissible fade in" style="display:none" role="alert">   
                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">        
                     <span aria-hidden="true">x</span>   
                 </button>I
-
                 </div>
             </div>
 
             <h4>Basic information</h4>
             <hr />
             <div id="divBaiscInfo">
+                <div class="form-group">
+                    <span class="span-label">Data Device Path</span>
+                    <span id="lblDevicePath" class="span-label">--</span>
+                </div>
                 <div class="form-group">
                     <span class="span-label">Drive Status</span>
                     <span id="lblStatus" class="span-label">--</span>
@@ -64,44 +67,42 @@
                     <span class="span-label">Capacity in use(GB):</span>
                     <span id="lblUsedCapacity" class="span-label">--</span>
                 </div>
-        </div>
+            </div>
         <br/>
         <br/>
-        <h4>Smart information</h4>
-        <hr />
-        <div id="divSmartInfo">
-            <table id="tSmartInfo" class="table table-striped">
-                  <thead>
-                        <tr>
-                            <th>Counter</th>
-                            <th>Value</th>
+            <h4>Smart information</h4>
+            <hr />
+            <div id="divSmartInfo">
+                <table id="tSmartInfo" class="table table-striped">
+                      <thead>
+                            <tr>
+                                <th>Counter</th>
+                                <th>Value</th>
+                            </tr>
+                      </thead>
+                     <tbody>
+                      <tr>
+                            <td>Percentage Used</td>
+                            <td><span id="lblPercentageUsed" class="span-label">--</span></td>
                         </tr>
-                  </thead>
-                 <tbody>
-                  <tr>
-                        <td>Percentage Used</td>
-                        <td><span id="lblPercentageUsed" class="span-label">--</span></td>
-                    </tr>
-                     <tr>
-                        <td>Temperature</td>
-                        <td><span id="lblTemperature" class="span-label">--</span></td>
-                    </tr>
-                    <tr>
-                        <td>unitRead</td>
-                        <td><span id="lblUnitRead" class="span-label">--</span></td>
-                    </tr>
-                    <tr>
-                        <td>unitWRITE</td>
-                        <td><span id="lblUnitWRITE" class="span-label">--</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                         <tr>
+                            <td>Temperature</td>
+                            <td><span id="lblTemperature" class="span-label">--</span></td>
+                        </tr>
+                        <tr>
+                            <td>unitRead</td>
+                            <td><span id="lblUnitRead" class="span-label">--</span></td>
+                        </tr>
+                        <tr>
+                            <td>unitWRITE</td>
+                            <td><span id="lblUnitWRITE" class="span-label">--</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
     </div>
+
 {% endblock %}
-
-
-
 
 {% block js %}
     {{ block.super }}
