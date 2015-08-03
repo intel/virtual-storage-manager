@@ -27,8 +27,12 @@ class ViewBuilder(common.ViewBuilder):
 
     def basic(self, summary, sum_type):
         dict_root = sum_type + '-summary'
+        if not summary:
+            return {
+                dict_root: None
+            }
 
-        if (summary is None) | (not summary.get('summary_data')):
+        if not summary.get('summary_data'):
             return {
                 dict_root: None
             }
