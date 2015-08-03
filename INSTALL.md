@@ -477,29 +477,38 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 
 #Frequently Asked Questions
 
-**	Q: Executing "agent-token" is hung.**
+**Q: Executing "agent-token" is hung.**
 	
 	A: Please check http proxy setting to make sure no http_proxy variable is set in the enviornment.
 
 
-**	Q: "An error occurred authenticating. Please try again later." appears on the controller web ui after fresh installation.**
+**Q: "An error occurred authenticating. Please try again later." appears on the controller web ui after fresh installation.**
 
 	A: Firstly, please make sure the right password is entered, the password can be obtained from /etc/vsmdeploy/deployrc in "ADMIN_PASSWORD" field. Also make 	sure the firewall and SELinux settings are right. Special reminder: a reboot is required after changing SELinux settings.
 
 
-**	Q: keyring error on cluster creation.**
+**Q: keyring error on cluster creation.**
 	
 	A: The root cause is that the vsm controller has already updated a new token, but it is not applied on all agents.
 
-**  Q: Negative update time is showing on RBD list page.**
+**Q: Negative update time is showing on RBD list page.**
 	
 	A: Before creating the ceph cluster, please make sure all ceph nodes are time synchronized via NTP.
 
-**  Q: vsm-agent process causes one disk to be saturated with i/o load.**
+**Q: vsm-agent process causes one disk to be saturated with i/o load.**
 
 	A: A known case causes i/o saturation if multiple OSDs are defined on the same physical device, which is normally used in the demo case.
 
-**  Q: Can't replace node if ceph cluster contains only 3 nodes.**
+**Q: Can't replace node if ceph cluster contains only 3 nodes.**
 
 	A: This is an expected safeguard. A 3 node cluster minimum is needed to meet availability requirements.
+
+**Q: Can I define the ceph version I want to install?**
+
+	A: VSM can work with different Ceph releases like Firefly, Giant and Hammer. By default, it will use the ceph version provided by OS distro, often it’s an latest stable version. 
+	If user expects to use some specific ceph version, he need add the new ceph repo into /etc/apt/sources.list.d/ceph.list to override OS distro’s defaults before installation. For example, below commands could help setup a ceph repo for Firefly on ubuntu:
+		>
+		> sudo rm /etc/apt/sources.list.d/ceph.list
+		> echo deb http://ceph.com/debian-firefly/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
+		>
 
