@@ -53,7 +53,7 @@ class RestartOsdsAction(tables.BatchAction):
     action_past = _("Scheduled restart of")
     data_type_singular = _("Osd")
     data_type_plural = _("Osds")
-    classes = ('btn-danger',)
+    classes = ('btn-primary',)
     redirect_url = "horizon:vsm:devices-management:index"
 
     def allowed(self, request, osd=None):
@@ -75,12 +75,13 @@ class RestartOsdsAction(tables.BatchAction):
             redirect = reverse(self.redirect_url)
             exceptions.handle(request, msg, redirect=redirect)
 
-class RemoveOsdsAction(tables.DeleteAction):
+class RemoveOsdsAction(tables.BatchAction):
     name = "remove_osds"
     action_present = _("Remove")
     action_past = _("Removed")
     data_type_singular = _("Osd")
     data_type_plural = _("Osds")
+    classes = ('btn-primary',)
     redirect_url = "horizon:vsm:devices-management:index"
 
     def allowed(self, request, osd=None):
@@ -91,7 +92,7 @@ class RemoveOsdsAction(tables.DeleteAction):
                 return False
         return True
 
-    def delete(self, request, obj_id):
+    def action(self, request, obj_id):
         obj = self.table.get_object_by_id(obj_id)
         name = self.table.get_object_display(obj)
         try:
@@ -108,7 +109,7 @@ class RestoreOsdsAction(tables.BatchAction):
     action_past = _("Restored")
     data_type_singular = _("Osd")
     data_type_plural = _("Osds")
-    classes = ('btn-danger',)
+    classes = ('btn-primary',)
     redirect_url = "horizon:vsm:devices-management:index"
 
     def allowed(self, request, osd=None):
@@ -136,7 +137,7 @@ class AddOsdsAction(tables.BatchAction):
     action_past = _("Scheduled add of")
     data_type_singular = _("Osd")
     data_type_plural = _("Osds")
-    classes = ('btn-danger',)
+    classes = ('btn-primary',)
     redirect_url = "horizon:vsm:devices-management:index"
 
     def allowed(self, request, osd=None):
@@ -189,17 +190,17 @@ class OsdsTable(tables.DataTable):
                                   verbose_name=_("Storage Class"))
     zone = tables.Column("zone", verbose_name=_("Zone"))
     data_dev_path = tables.Column("data_dev_path", \
-                                  verbose_name=_("Data Device Path"))
+                                  verbose_name=_("Data Device Path"), hidden=True)
     data_dev_status = tables.Column("data_dev_status", \
                                     verbose_name=_("Data Device Status"))
     data_dev_capacity = tables.Column("data_dev_capacity", \
-                                      verbose_name=_("Data Device Capacity (MB)"))
+                                      verbose_name=_("Data Device Capacity (MB)"), hidden=True)
     data_dev_used = tables.Column("data_dev_used", \
-                                  verbose_name=_("Data Device Used (MB)"))
+                                  verbose_name=_("Data Device Used (MB)"), hidden=True)
     data_dev_available = tables.Column("data_dev_available", \
-                                       verbose_name=_("Data Device Available (MB)"))
+                                       verbose_name=_("Data Device Available (MB)"), hidden=True)
     journal_device_path = tables.Column("journal_device_path", \
-                                        verbose_name=_("Journal Device Path"))
+                                        verbose_name=_("Journal Device Path"), hidden=True)
     journal_device_status = tables.Column("journal_device_status", \
                                    verbose_name=_("Journal Device Status"))
     full_status = tables.Column("full_status", \

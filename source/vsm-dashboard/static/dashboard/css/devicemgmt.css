@@ -20,6 +20,11 @@
 }
 
 
+.imgOSDStatus:hover{
+	cursor: pointer;
+}
+
+
 #divOSDInfo{
 	width: 400px;
 	height: 600px;
