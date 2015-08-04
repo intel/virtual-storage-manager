@@ -130,11 +130,11 @@ mkdir -p /etc/vsm
 cp -rf $TOPDIR/tools/etc/vsm/* /etc/vsm/
 cp -rf /etc/vsm/vsm.conf.sample /etc/vsm/vsm.conf
 
-file=/etc/vsm/api-paste.ini
-sed -i "s,auth_host = 127.0.0.1,auth_host = $KEYSTONE_HOST,g" $file
-sed -i "s,%SERVICE_TENANT_NAME%,$SERVICE_TENANT_NAME,g" $file
-sed -i "s,%SERVICE_USER%,vsm,g" $file
-sed -i "s,%SERVICE_PASSWORD%,$KEYSTONE_VSM_SERVICE_PASSWORD,g" $file
+#file=/etc/vsm/api-paste.ini
+#sed -i "s,auth_host = 127.0.0.1,auth_host = $KEYSTONE_HOST,g" $file
+#sed -i "s,%SERVICE_TENANT_NAME%,$SERVICE_TENANT_NAME,g" $file
+#sed -i "s,%SERVICE_USER%,vsm,g" $file
+#sed -i "s,%SERVICE_PASSWORD%,$KEYSTONE_VSM_SERVICE_PASSWORD,g" $file
 
 file=/etc/vsm/rootwrap.conf
 sed -i "s,filters_path=.*,filters_path=/etc/vsm/rootwrap.d,g" $file
@@ -147,6 +147,8 @@ sed -i "s,%RABBITMQ_PORT%,$RABBITMQ_PORT,g" $file
 sed -i "s,%MYSQL_VSM_USER%,$MYSQL_VSM_USER,g" $file
 sed -i "s,%MYSQL_VSM_PASSWORD%,$MYSQL_VSM_PASSWORD,g" $file
 sed -i "s,%MYSQL_HOST%,$MYSQL_HOST,g" $file
+sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" $file
+sed -i "s,%KEYSTONE_VSM_SERVICE_PASSWORD%,$KEYSTONE_VSM_SERVICE_PASSWORD,g" $file
 
 mkdir -p /opt/stack/data/vsm
 chmod a+w -R /opt/stack/data/vsm

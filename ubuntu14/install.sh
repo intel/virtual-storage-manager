@@ -47,9 +47,11 @@ Options:
   --controller [ip or hostname]
     Installing the controller node only.
   --agent [ip,ip or hostname]
-    Install the agent node(s), like: --agnet ip,ip or hostname with no blank.
+    Install the agent node(s), like: --agent ip,ip or hostname with no blank.
   --check-dependence-package
     Check the dependence package if provided the dependence repo.
+  --shared-keystone
+    If the parameter is displayed, vsm will use openstack keystone.
 EOF
     exit 0
 }
@@ -60,13 +62,14 @@ DEPENDENCE_BRANCH="master"
 USER=`whoami`
 SSH='ssh'
 SCP='scp'
-SUDO='sudo -E' 
+SUDO='sudo -E'
 IS_PREPARE=False
 IS_CONTROLLER_INSTALL=False
 IS_AGENT_INSTALL=False
 NEW_CONTROLLER_ADDRESS=""
 NEW_AGENT_IPS=""
 IS_CHECK_DEPENDENCE_PACKAGE=False
+IS_SHARED_KEYSTONE=False
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -80,6 +83,7 @@ while [ $# -gt 0 ]; do
     --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_ADDRESS=$1 ;;
     --agent) shift; IS_AGENT_INSTALL=True; NEW_AGENT_IPS=$1 ;;
     --check-dependence-package) shift; IS_CHECK_DEPENDENCE_PACKAGE=True ;;
+    --shared-keystone) IS_SHARED_KEYSTONE=True ;;
     *) shift ;;
   esac
   shift
@@ -101,6 +105,35 @@ HOSTNAME=`hostname`
 HOSTIP=`hostname -I`
 
 source $TOPDIR/hostrc
+
+function input_auth_info() {
+    echo "Please enter your OpenStack Tenant Name: "
+    read -r OS_TENANT_NAME_INPUT
+    echo "Please enter your OpenStack Username: "
+    read -r OS_USERNAME_INPUT
+    echo "Please enter your OpenStack PASSWORD: "
+    read -r OS_PASSWORD_INPUT
+    echo "Please enter your OpenStack KEYSTONE HOST: "
+    read -r OS_KEYSTONE_HOST_INPUT
+    echo "Please enter your OpenStack ADMIN TOKEN, you can find it in /etc/keystone/keystone.conf: "
+    read -r OS_KEYSTONE_ADMIN_TOKEN_INPUT
+    echo "export OS_TENANT_NAME=$OS_TENANT_NAME_INPUT" >>$TOPDIR/openrc.sh
+    echo "export OS_USERNAME=$OS_USERNAME_INPUT" >>$TOPDIR/openrc.sh
+    echo "export OS_PASSWORD=$OS_TENANT_NAME_INPUT" >>$TOPDIR/openrc.sh
+    echo "export OS_KEYSTONE_HOST=$OS_KEYSTONE_HOST_INPUT" >>$TOPDIR/openrc.sh
+    echo "export OS_KEYSTONE_ADMIN_TOKEN=$OS_KEYSTONE_ADMIN_TOKEN_INPUT" >>$TOPDIR/openrc.sh
+    source $TOPDIR/openrc.sh
+}
+if [[ -f $TOPDIR/openrc.sh ]]; then
+    source $TOPDIR/openrc.sh
+    if [[ ! $OS_TENANT_NAME ]] || [[ ! $OS_USERNAME ]] || \
+        [[ ! $OS_PASSWORD ]] || [[ ! $OS_KEYSTONE_HOST ]] || [[ ! $OS_KEYSTONE_ADMIN_TOKEN ]]; then
+        input_auth_info
+    fi
+elif [[ $IS_SHARED_KEYSTONE == True ]]; then
+    input_auth_info
+fi
+
 
 if [ -z $MANIFEST_PATH ]; then
     MANIFEST_PATH="manifest"
@@ -284,7 +317,12 @@ function setup_remote_controller() {
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO vsm-controller"
+        if [[ $IS_SHARED_KEYSTONE == True ]]; then
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN"
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO service keystone stop"
+        else
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO vsm-controller"
+        fi
     fi
 }
 
@@ -312,7 +350,12 @@ function install_controller() {
             echo "please check the cluster.manifest, then try again"
             exit 1
         else
-            $SUDO vsm-controller
+            if [[ $IS_SHARED_KEYSTONE == True ]]; then
+                $SUDO vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN
+                $SUDO service keystone stop
+            else
+                $SUDO vsm-controller
+            fi
         fi
         cp /var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
         cd $REPO_PATH
@@ -414,7 +457,8 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
-    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token"`
+    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
     done
@@ -426,7 +470,8 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
-        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token"`
+        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname
