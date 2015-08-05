@@ -4074,10 +4074,16 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
+    setting_ref = vsm_settings_get_by_name(context, 'ceph_diamond_collect_interval', session=session)
+    if setting_ref:
+        diamond_collect_interval = int(setting_ref['value'])
+    else:
+        diamond_collect_interval = 15
+        vsm_settings_update_or_create(context, {'name':'ceph_diamond_collect_interval','value':diamond_collect_interval}, session=session)
     if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - 20
+        timestamp_start = timestamp_end - diamond_collect_interval
     elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + 20
+        timestamp_start = timestamp_start + diamond_collect_interval
         timestamp_end = int(time.time())
     ret_list = []
     timestamp_cur = timestamp_start
@@ -4088,10 +4094,10 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
             FROM
             (select m.value-m_pre.value_pre as value_real ,m.instance as instance_real
               from (select instance,hostname,value from metrics WHERE metrics.metric = '%(metrics_name)s' AND metrics.timestamp >= %(time_1)s AND metrics.timestamp < %(time_2)s) as m
-              left join (select instance,hostname,max(value) as value_pre from metrics WHERE metrics.metric = '%(metrics_name)s' AND metrics.timestamp >= %(time_1)s-40 AND metrics.timestamp < %(time_2)s-20 group by instance,hostname ) as m_pre
+              left join (select instance,hostname,max(value) as value_pre from metrics WHERE metrics.metric = '%(metrics_name)s' AND metrics.timestamp >= %(time_1)s-2*%(interval)d  AND metrics.timestamp < %(time_2)s-%(interval)d  group by instance,hostname ) as m_pre
               on  m.instance=m_pre.instance and m.hostname=m_pre.hostname
             ) as metrics_join
-        '''%{'metrics_name':metrics_name,'time_1':timestamp_cur-19,'time_2':timestamp_cur+1}
+        '''%{'metrics_name':metrics_name,'time_1':timestamp_cur-(diamond_collect_interval-1),'time_2':timestamp_cur+1,'interval':diamond_collect_interval}
         sql_ret_set = session.execute(sql_str).fetchall()
         for cell in sql_ret_set:
             if correct_cnt:
@@ -4099,10 +4105,10 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
             else:
                 metrics_value = cell[0]
             if metrics_name in ['osd_op_in_bytes','osd_op_out_bytes']:
-                metrics_value = metrics_value and metrics_value*1.0/1024/1024/20 or 0
+                metrics_value = metrics_value and metrics_value*1.0/1024/1024/diamond_collect_interval or 0
             sql_ret_dict = {'instance': cell[2], 'timestamp': str(timestamp_cur), 'metrics_value': metrics_value, 'metrics': metrics_name,}
             ret_list.append(sql_ret_dict)
-        timestamp_cur = timestamp_cur + 20
+        timestamp_cur = timestamp_cur + diamond_collect_interval
 
     return ret_list
 
@@ -4111,10 +4117,16 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
     lantency_type = metrics_name.split('_')[2]
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
+    setting_ref = vsm_settings_get_by_name(context, 'ceph_diamond_collect_interval', session=session)
+    if setting_ref:
+        diamond_collect_interval = int(setting_ref['value'])
+    else:
+        diamond_collect_interval = 15
+        vsm_settings_update_or_create(context, {'name':'ceph_diamond_collect_interval','value':diamond_collect_interval}, session=session)
     if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - 20
+        timestamp_start = timestamp_end - diamond_collect_interval
     elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + 20
+        timestamp_start = timestamp_start + diamond_collect_interval
         timestamp_end = int(time.time())
     ret_list = []
     timestamp_cur = timestamp_start
@@ -4126,7 +4138,7 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
                     (
                      (select instance,hostname,value as la_sum_cur from metrics where metric ='%(metric_name)s_sum' and timestamp>=%(start_time)d and timestamp<%(end_time)d )  as d
                      left join
-                     (select instance,hostname,max(value) as la_sum_pre from metrics where metric ='%(metric_name)s_sum' and timestamp>=%(start_time)d-40 and timestamp<%(end_time)d-20 group by instance,hostname ) as d_pre
+                     (select instance,hostname,max(value) as la_sum_pre from metrics where metric ='%(metric_name)s_sum' and timestamp>=%(start_time)d-2*%(interval)d  and timestamp<%(end_time)d-%(interval)d  group by instance,hostname ) as d_pre
                      on d.instance=d_pre.instance and d.hostname=d_pre.hostname
                      )
                   ) as a \
@@ -4135,27 +4147,36 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
                     (
                      (select instance,hostname,value as la_avgcount_cur from metrics where metric ='%(metric_name)s_avgcount' and timestamp>=%(start_time)d and timestamp<%(end_time)d )  as e
                      left join
-                     (select instance,hostname,max(value) as la_avgcount_pre from metrics where metric ='%(metric_name)s_avgcount' and timestamp>=%(start_time)d-40 and timestamp<%(end_time)d-20 group by instance,hostname ) as e_pre
+                     (select instance,hostname,max(value) as la_avgcount_pre from metrics where metric ='%(metric_name)s_avgcount' and timestamp>=%(start_time)d-2*%(interval)d and timestamp<%(end_time)d-%(interval)d  group by instance,hostname ) as e_pre
                      on e.instance=e_pre.instance and e.hostname=e_pre.hostname
                      )
                  ) as b \
-            '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur-19,'end_time':timestamp_cur+1}
+            '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur-(diamond_collect_interval-1),'end_time':timestamp_cur+1,'interval':diamond_collect_interval}
         sql_ret = session.execute(sql_str).fetchall()
         #LOG.info('latency--sql-str===%s'%sql_str)
         for cell in sql_ret:
             metrics_value = cell[0] or 0
             ret_list.append({'instance':'', 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
-        timestamp_cur = timestamp_cur + 20
+        timestamp_cur = timestamp_cur + diamond_collect_interval
     return ret_list
 
 def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
     metrics_name = search_opts['metrics_name']
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
+    setting_ref = vsm_settings_get_by_name(context, 'cpu_diamond_collect_interval', session=session)
+
+    if setting_ref:
+
+        diamond_collect_interval = int(setting_ref['value'])
+        LOG.info('cpu-diamond_collect_interval-%s-'%diamond_collect_interval)
+    else:
+        diamond_collect_interval = 15
+        vsm_settings_update_or_create(context, {'name':'cpu_diamond_collect_interval','value':diamond_collect_interval}, session=session)
     if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - 20
+        timestamp_start = timestamp_end - diamond_collect_interval
     elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + 20
+        timestamp_start = timestamp_start + diamond_collect_interval
         timestamp_end = int(time.time())
     ret_list = []
     session = get_session()
@@ -4165,6 +4186,6 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
         sql_ret = session.execute(sql_str).fetchall()
         for cell in sql_ret:
             metrics_value = cell[2] or 0
-            timestamp = (cell[0]-timestamp_start)/20*20+timestamp_start
+            timestamp = (cell[0]-timestamp_start)/diamond_collect_interval*diamond_collect_interval+timestamp_start
             ret_list.append({'host':cell[1], 'timestamp':timestamp, 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list

@@ -26,6 +26,7 @@ from vsm.openstack.common.db import exception as db_exc
 from vsm import db
 from vsm import utils
 from vsm import exception
+from vsm import scheduler
 
 LOG = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ class Controller(wsgi.Controller):
 
     def __init__(self, ext_mgr):
         super(Controller, self).__init__()
+        self.scheduler_api = scheduler.API()
 
     @wsgi.serializers(xml=SettingsTemplate)
     @wsgi.response(202)
@@ -134,6 +136,8 @@ class Controller(wsgi.Controller):
     def _create_setting(self, context, setting_dict):
 
         try:
+            if setting_dict.get('name') in ['cpu_diamond_collect_interval','ceph_diamond_collect_interval']:
+                 self.scheduler_api.reconfig_diamond(context, setting_dict)
             return db.vsm_settings_update_or_create(context, setting_dict)
 
         except db_exc.DBError as e:

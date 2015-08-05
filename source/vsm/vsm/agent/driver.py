@@ -38,6 +38,7 @@ from vsm.agent import rpcapi as agent_rpc
 from vsm.agent import cephconfigparser
 from vsm.openstack.common.rpc import common as rpc_exc
 import glob
+import re
 
 LOG = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
@@ -2574,5 +2575,62 @@ rule value_performance {
 # end crush map
 """
         self._write_to_crushmap(string)
+
+
+class DiamondDriver(object):
+    """Create diamond file"""
+    def __init__(self, execute=utils.execute, *args, **kwargs):
+        self._diamond_config_path = "/etc/diamond/collectors/"
+    def change_collector_conf(self,collector,values):
+        '''
+        :param collector:
+        :param values: {'enabled':True,
+                        'interval':15
+        }
+        :return:
+        '''
+        try:
+            out, err = utils.execute('kill_diamond',
+                                     'll',
+                                     run_as_root=True)
+        except:
+            LOG.info("kill_diamond error:%s--%s"%(out,err))
+        config_file = '%s/%s.conf'%(self._diamond_config_path,collector)
+        keys = values.keys()
+        if os.path.exists(config_file):
+            try:
+                out_put = open(config_file,'r')
+                content = out_put.readlines()
+                content_to_remove = []
+                for line in content:
+                    line_list = line.split('=')
+                    if line_list[0] in keys:
+                        content_to_remove.append(line)
+                for line in content_to_remove:
+                    content.remove(line)
+            except:
+                out_put.close()
+            finally:
+                out_put.close()
+        else:
+            content = []
+        for key in keys:
+            content.append('%s=%s\n'%(key,values[key]))
+
+        try:
+            in_put = open(config_file,'w')
+            in_put.writelines(content)
+        except:
+             in_put.close()
+        finally:
+             in_put.close()
+        out, err = utils.execute('diamond', 'll', run_as_root=True)
+        return out
+
+
+
+
+
+
 
 

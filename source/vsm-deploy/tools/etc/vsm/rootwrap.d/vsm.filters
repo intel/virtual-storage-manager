@@ -96,6 +96,11 @@ env: CommandFilter, /usr/bin/env, root
 
 # vsm/storage/driver.py: utils.read_file_as_root()
 cat: CommandFilter, /bin/cat, root
+get_smart_info: CommandFilter, /usr/bin/get_smart_info, root
+diamond: CommandFilter, /usr/local/bin/diamond, root
+
+kill_diamond: CommandFilter, /usr/bin/kill_diamond, root
+add_disk: CommandFilter, /usr/local/bin/tools/hooks/add_disk, root
 
 # vsm/storage/nfs.py
 stat: CommandFilter, /usr/bin/stat, root

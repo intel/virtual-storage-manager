@@ -505,3 +505,10 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                       body=body),
                         topic,
                         version='1.0', timeout=6000)
+
+    def reconfig_diamond(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.cast(context,
+                        self.make_msg('reconfig_diamond',
+                                      body=body),
+                        topic)

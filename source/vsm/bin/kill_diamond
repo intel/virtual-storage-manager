@@ -1,0 +1,2 @@
+#!/bin/bash
+for i in `pgrep diamond`;do kill -9 $i;done
