@@ -4051,6 +4051,12 @@ def ec_profile_get_by_name(context, name, session=None):
         filter_by(name=name).\
         first()
 
+def get_max_timestamp_by_metrics_name(context, metrics_name, session=None):
+    session = get_session()
+    sql_str = "select max(timestamp) from metrics where metric='%s'"%metrics_name
+    sql_ret = session.execute(sql_str).fetchall()
+    return sql_ret[0][0]
+
 def performance_metrics_query(context, search_opts, session=None):
     metrics_name = search_opts.has_key('metrics_name') and search_opts['metrics_name'] or ''
     host_name = search_opts.has_key('host_name') and search_opts['host_name'] or ''
@@ -4084,7 +4090,8 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
         timestamp_start = timestamp_end - diamond_collect_interval
     elif timestamp_start  and  timestamp_end is None:
         timestamp_start = timestamp_start + diamond_collect_interval
-        timestamp_end = int(time.time())
+        timestamp_end = get_max_timestamp_by_metrics_name(context, metrics_name)
+    if timestamp_start > timestamp_end : timestamp_start = timestamp_end - diamond_collect_interval
     ret_list = []
     timestamp_cur = timestamp_start
     session = get_session()
@@ -4127,7 +4134,8 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
         timestamp_start = timestamp_end - diamond_collect_interval
     elif timestamp_start  and  timestamp_end is None:
         timestamp_start = timestamp_start + diamond_collect_interval
-        timestamp_end = int(time.time())
+        timestamp_end = get_max_timestamp_by_metrics_name(context, '%s_sum'%metrics_name)
+    if timestamp_start > timestamp_end : timestamp_start = timestamp_end - diamond_collect_interval
     ret_list = []
     timestamp_cur = timestamp_start
     session = get_session()
@@ -4167,7 +4175,6 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
     setting_ref = vsm_settings_get_by_name(context, 'cpu_diamond_collect_interval', session=session)
     if setting_ref:
         diamond_collect_interval = int(setting_ref['value'])
-        LOG.info('cpu-diamond_collect_interval-%s-'%diamond_collect_interval)
     else:
         diamond_collect_interval = 15
         vsm_settings_update_or_create(context, {'name':'cpu_diamond_collect_interval','value':diamond_collect_interval}, session=session)
@@ -4175,15 +4182,14 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
         timestamp_start = timestamp_end - diamond_collect_interval
     elif timestamp_start  and  timestamp_end is None:
         timestamp_start = timestamp_start + diamond_collect_interval
-        timestamp_end = int(time.time())
     ret_list = []
     session = get_session()
-    if timestamp_start < timestamp_end:
-        sql_str = '''select timestamp, hostname, sum(value) as metric_value from metrics where instance='cpu_total' and metric in ('user','system') and timestamp>=%(start_time)s and timestamp<%(end_time)s group by timestamp,hostname
-            '''%{'start_time':timestamp_start,'end_time':timestamp_end}
+    if timestamp_start :
+        sql_str = '''select timestamp, hostname, sum(value) as metric_value from metrics where instance='cpu_total' and metric in ('user','system') and timestamp>=%(start_time)s  group by timestamp,hostname
+            '''%{'start_time':timestamp_start}
         sql_ret = session.execute(sql_str).fetchall()
         for cell in sql_ret:
             metrics_value = cell[2] or 0
-            timestamp = (cell[0]-timestamp_start)/diamond_collect_interval*diamond_collect_interval+timestamp_start
+            timestamp = cell[0]/diamond_collect_interval*diamond_collect_interval
             ret_list.append({'host':cell[1], 'timestamp':timestamp, 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list
