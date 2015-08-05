@@ -505,6 +505,12 @@ vsm_settings_opts = [
     cfg.IntOpt('ceph_mds_dump',
                default=60,
                help='ceph mds dump (secs)'),
+    cfg.IntOpt('cpu_diamond_collect_interval',
+               default=15,
+               help='cpu data collect interval (secs) with diamond'),
+    cfg.IntOpt('ceph_diamond_collect_interval',
+               default=15,
+               help='ceph perf data collect interval (secs) with diamond'),
 ]
 
 FLAGS.register_opts(vsm_settings_opts)
