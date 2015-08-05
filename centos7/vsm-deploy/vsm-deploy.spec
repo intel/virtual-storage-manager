@@ -1,14 +1,16 @@
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
+%define version %{getenv:VERSION}
+%define release %{getenv:RELEASE}
 
 Name:             vsm-deploy
-Version:          2015.01
-Release:          1.0%{?dist}
-Summary:          VSM-Deploy
+Version:          %{version}
+Release:          %{release}
+Summary:          Deployment tool for VSM
 
 Group:            Deploy/VSM
 License:          Intel
 URL:              http://intel.com
-Source0:          vsm-deploy-%{version}.tar.gz
+Source:           %{name}-%{version}.tar.gz
 #TODO Add ceph rpms.
 %description
 Intel VSM Storage System Tools Kit.
@@ -26,7 +28,7 @@ This package contains documentation files for vsm.
 %endif
 
 %prep
-%setup -q -n vsm-deploy-%{version}
+%setup -q -n %{name}-%{version}
 
 %build
 
@@ -44,14 +46,14 @@ install -d -m 755 %{buildroot}%{_usr}/local/bin/
 install -d -m 755 %{buildroot}%{_usr}/local/bin/tools
 
 install -p -D -m 755 vsm-controller %{buildroot}%{_usr}/local/bin/vsm-controller
+install -p -D -m 755 vsm-installer %{buildroot}%{_usr}/local/bin/vsm-installer
+install -p -D -m 755 vsm-node %{buildroot}%{_usr}/local/bin/vsm-node
 install -p -D -m 755 restart-all %{buildroot}%{_usr}/local/bin/restart-all
 install -p -D -m 755 sync-code %{buildroot}%{_usr}/local/bin/sync-code
 install -p -D -m 755 replace-str %{buildroot}%{_usr}/local/bin/replace-str
 
-install -p -D -m 755 vsm-node %{buildroot}%{_usr}/local/bin/vsm-node
 install -p -D -m 755 clean-data %{buildroot}%{_usr}/local/bin/clean-data
 install -p -D -m 755 __clean-data %{buildroot}%{_usr}/local/bin/__clean-data
-install -p -D -m 755 vsm-installer %{buildroot}%{_usr}/local/bin/vsm-installer
 install -p -D -m 755 downloadrepo  %{buildroot}%{_usr}/local/bin/downloadrepo
 install -p -D -m 755 preinstall %{buildroot}%{_usr}/local/bin/preinstall
 install -p -D -m 755 rpms_list %{buildroot}%{_usr}/local/bin/rpms_list
@@ -107,6 +109,3 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/manifest/server.manifest
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/manifest/cluster.manifest
 
-%changelog
-* Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
-- Initial release

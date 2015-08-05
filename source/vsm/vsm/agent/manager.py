@@ -897,6 +897,99 @@ class AgentManager(manager.Manager):
         self.sync_osd_states_from_ceph(context)
         return True
 
+    def integrate_cluster_update_status(self, context):
+        LOG.info("integrating cluster: updatating global status")
+        self.update_all_status(context)
+        return True
+
+    def integrate_cluster_sync_osd_states(self, context):
+        def _determine_status(osd):
+            if osd['in'] and osd['up']:
+                osd_status = FLAGS.osd_in_up
+            elif osd['in'] and not osd['up']:
+                osd_status = FLAGS.osd_in_down
+            elif not osd['in'] and osd['up']:
+                osd_status = FLAGS.osd_out_up
+            else:
+                if FLAGS.osd_state_autoout in osd['state']:
+                    osd_status = FLAGS.osd_out_down_autoout
+                else:
+                    osd_status = FLAGS.osd_out_down
+            return osd_status
+
+        def _get_storage_hostnames(self):
+            server_list = db.init_node_get_all(context)
+            hostnames = [server['host'] for server in server_list]
+            return hostnames
+
+        def _get_local_osds_metadata():
+            md = self.ceph_driver.get_osds_metadata()
+            return filter(lambda osd: osd['hostname'] == self.host, md)
+
+        def _get_osd_detail_by_id(osd_num):
+            osds_det = self.ceph_driver.get_osds_details()
+            return filter(lambda osd: osd['osd'] == osd_num, osds_det)[0]
+
+        def _extract_ip(report_ip_item):
+            items = report_ip_item.split(':')
+            return items[0]
+
+        def _get_storage_group_id_by_dev(device):
+            for sc in self._node_info["storage_class"]:
+                if any(disk['osd'] == device for disk in sc['disk']):
+                    storage_group = \
+                        db.storage_group_get_by_storage_class(self._context,
+                                                              sc['name'])
+                    return storage_group['id']
+            else:
+                return None
+
+        def _get_zone_id():
+            zone_ref = db.zone_get_by_name(self._context,
+                                           self._node_info['zone'])
+            if zone_ref:
+                zone_id = zone_ref['id']
+            else:
+                LOG.error("Can't find the zone in DB!")
+                raise
+            return zone_id
+
+        for osd_md in _get_local_osds_metadata():
+            osd_num = osd_md['id']
+            osd_det = _get_osd_detail_by_id(osd_num)
+            osd_name = 'osd.' + str(osd_num)
+
+            values = {}
+            values['osd_name'] = osd_name
+            values['state'] = _determine_status(osd_det)
+            node = db.init_node_get_by_host(context , self.host)
+            values['service_id'] = node['service_id']
+            values['cluster_ip'] = _extract_ip(osd_det['cluster_addr'])
+            values['public_ip'] = _extract_ip(osd_det['public_addr'])
+
+            osd_dev = self.ceph_driver.get_dev_by_mpoint(osd_md['osd_data'])
+            try:
+                device = db.device_get_by_name(context, osd_dev)
+            except:
+                LOG.warn("Cannot find device %s. Skipping this OSD" % osd_dev)
+                continue
+
+            values['device_id'] = device['id']
+            values['cluster_id'] = self._get_cluster_id(context)
+            values['weight'] = 1.0
+            values['storage_group_id'] = _get_storage_group_id_by_dev(osd_dev)
+            values['zone_id'] = _get_zone_id()
+            values['operation_status'] = 'Present'
+
+            self._conductor_rpcapi.\
+                osd_state_update_or_create(context, values)
+            print values
+
+            device_values = {}
+            device_values['mount_point'] = osd_md['osd_data']
+            db.device_update(context, device['id'], device_values)
+        return
+
     def sync_osd_states_from_ceph(self, context):
         osd_json = self.ceph_driver.get_osds_status()
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)

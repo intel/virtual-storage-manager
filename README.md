@@ -1,5 +1,7 @@
-VSM - Virtual Storage Manager
+VSM - Virtual Storage Manager 
 =============================
+Travis CI: [![Build Status](https://travis-ci.org/01org/virtual-storage-manager.svg?branch=master)](https://travis-ci.org/01org/virtual-storage-manager)
+
 ![](https://github.com/01org/virtual-storage-manager/blob/master/vsm_0.jpg "Virtual Storage Manager")
 
 Virtual Storage Manager (VSM) is software that Intel has developed to help manage Ceph clusters.  VSM simplifies 

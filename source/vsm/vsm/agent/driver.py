@@ -481,6 +481,25 @@ class CephDriver(object):
         self.__format_devs(osd_disks + journal_disks, file_system)
         return {'status': 'ok'}
 
+    def get_dev_by_mpoint(self, directory):
+        def _parse_proc_partitions():
+            parts = {}
+            for line in file('/proc/partitions'):
+                fields = line.split()
+                try:
+                    dmaj = int(fields[0])
+                    dmin = int(fields[1])
+                    name = fields[3]
+                    parts[(dmaj, dmin)] = name
+                except:
+                    pass
+            return parts
+
+        dev = os.stat(directory).st_dev
+        major, minor = os.major(dev), os.minor(dev)
+        parts = _parse_proc_partitions()
+        return '/dev/' + parts[(major, minor)]
+
     def mount_disks(self, devices, fs_type):
         def __mount_disk(disk):
             utils.execute('mkdir',
@@ -1706,6 +1725,22 @@ class CephDriver(object):
         if out != "":
             #LOG.info("osd_status:%s", out)
             return out
+        else:
+            return None
+
+    def get_osds_details(self):
+        args = ['ceph', 'osd', 'dump']
+        osd_dump = self._run_cmd_to_json(args)
+        if osd_dump:
+            return osd_dump['osds']
+        else:
+            return None
+
+    def get_osds_metadata(self):
+        args = ['ceph', 'report']
+        report = self._run_cmd_to_json(args)
+        if report:
+            return report['osd_metadata']
         else:
             return None
 

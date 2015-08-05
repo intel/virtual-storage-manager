@@ -41,12 +41,6 @@ def upgrade(migrate_engine):
     )
 
     try:
-        compute_nodes.create()
-    except Exception:
-        meta.drop_all(tables=[compute_nodes])
-        raise
-
-    try:
         services.create()
     except Exception:
         meta.drop_all(tables=[services])

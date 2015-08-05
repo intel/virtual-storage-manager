@@ -7,7 +7,7 @@
 
 #divMain{
     text-align: left;
-    width: 1200px;
+    width: 1024px;
     height: auto;
 }
 
@@ -16,7 +16,7 @@
  * VSM Info module
  */
 #divVSMVersion{
-    width: 280px;
+    width: 250px;
 }
 
 #divVSMVersionContent{
@@ -28,11 +28,12 @@
  * cluster module
  */
 #divCluster{
-    width: 600px;
+    width: 500px;
 }
 
 #divClusterContent{
     height: 130px;
+    overflow-y:auto;
 }
 
 /*#lblClusterName{
@@ -58,7 +59,7 @@
  * storage module
  */
 #divStorage{
-    width: 300px;
+    width: 250px;
 }
 
 #divStorageContent{
@@ -87,7 +88,7 @@
  * OSD module
  */
 #divOSD{
-    width: 280px;
+    width: 250px;
     margin-top: -20px;
 }
 
@@ -108,7 +109,7 @@
  * Monitor module
  */
 #divMonitor{
-    width: 310px;
+    width: 250px;
     margin-top: -20px;
 }
 
@@ -121,7 +122,7 @@
     margin-left: auto;
     margin-right: auto;
     padding-left: 10px;
-    height:140px;
+    height:120px;
     overflow-y:auto;
 }
 
@@ -130,7 +131,7 @@
  * MDS module
  */
 #divMDS{
-    width: 290px;
+    width: 250px;
     margin-top: -20px;
 }
 
@@ -156,12 +157,12 @@
  * PG module
  */
 #divPG{
-    width: 300px;
+    width: 250px;
     margin-top: -20px;
 }
 
 #divPGRect{
-    width:100%;
+    width:90%;
     height:180px;
 }
 
@@ -169,7 +170,7 @@
  * IOPs module
  */
 #divIOPs{
-    width: 590px;
+    width: 500px;
     margin-top: 0px;
 }
 
@@ -177,7 +178,7 @@
  * Latency module
  */
 #divLatency{
-    width: 590px;
+    width: 500px;
     margin-top: 0px;
 }
 
@@ -185,7 +186,7 @@
  * Bandwidth module
  */
 #divBandwidth{
-    width: 590px;
+    width: 500px;
     margin-top: -20px;
 }
 
@@ -193,7 +194,7 @@
  * CPU module
  */
 #divCPU{
-    width: 590px;
+    width: 500px;
     margin-top: -20px;
 }
 

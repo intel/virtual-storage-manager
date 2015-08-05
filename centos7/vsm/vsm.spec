@@ -1,14 +1,16 @@
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
+%define version %{getenv:VERSION}
+%define release %{getenv:RELEASE}
 
 Name:             vsm
-Version:          2015.01
-Release:          1.0%{?dist}
-Summary:          VSM
+Version:          %{version}
+Release:          %{release}
+Summary:          Virtual Storage Manager for managing Ceph clusters
 
 Group:            Storage/System
 License:          Intel
 URL:              http://intel.com
-Source0:          vsm-%{version}.tar.gz
+Source:           %{name}-%{version}.tar.gz
 
 BuildArch:        noarch
 BuildRequires:    MySQL-python
@@ -72,14 +74,14 @@ Requires:    python-psutil
 Requires:    mod_ssl
 
 %description
-Intel VSM Storage System.
+Virtual Storage Manager (VSM) is software that Intel has developed to help manage Ceph clusters. VSM simplifies the creation and day-to-day management of Ceph cluster for cloud and datacenter storage administrators.
 
 %if 0%{?with_doc}
 %package doc
-Summary:          Documentation for OpenStack Volume
+Summary:          Documentation for Virtual Storage Manager for Ceph
 Group:            Documentation
 
-Requires:         %{name} = %{version}-%{release}
+#Requires:         %{name} = %{version}-%{release}
 BuildRequires:    graphviz
 BuildRequires:    python-eventlet
 BuildRequires:    python-routes
@@ -96,7 +98,7 @@ This package contains documentation files for vsm.
 %endif
 
 %prep
-%setup -q -n vsm-%{version}
+%setup -q -n %{name}-%{version}
 sed -i '/setup_requires/d; /install_requires/d; /dependency_links/d' setup.py
 
 %build
@@ -166,7 +168,6 @@ install -d -m 755 %{buildroot}%{_bindir}/
 install -p -D -m 755 bin/vsm-api %{buildroot}%{_bindir}/vsm-api
 install -p -D -m 755 bin/vsm-agent %{buildroot}%{_bindir}/vsm-agent
 install -p -D -m 755 bin/vsm-physical %{buildroot}%{_bindir}/vsm-physical
-install -p -D -m 755 bin/vsm-rootwrap %{buildroot}%{_bindir}/vsm-rootwrap
 install -p -D -m 755 bin/vsm-conductor %{buildroot}%{_bindir}/vsm-conductor
 install -p -D -m 755 bin/vsm-scheduler %{buildroot}%{_bindir}/vsm-scheduler
 install -p -D -m 755 bin/vsm-rootwrap %{buildroot}%{_bindir}/vsm-rootwrap
@@ -184,12 +185,13 @@ install -p -D -m 755 bin/server_manifest  %{buildroot}%{_usr}/local/bin/server_m
 install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/local/bin/refresh-osd-status
 install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/local/bin/refresh-cluster-status
 install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/local/bin/getip
+install -p -D -m 755 bin/import_ceph_conf  %{buildroot}%{_usr}/local/bin/import_ceph_conf
 install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
 
 install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/local/bin/get_storage
 install -p -D -m 755 tools/spot_info_list %{buildroot}%{_usr}/local/bin/spot_info_list
 install -p -D -m 755 tools/vsm-reporter.py %{buildroot}%{_usr}/local/bin/vsm-reporter
-install -p -D -m 755 bin/integrate-cluster %{buildroot}%{_usr}/local/bin/integrate-cluster
+install -p -D -m 755 bin/intergrate-cluster %{buildroot}%{_usr}/local/bin/intergrate-cluster
 
 %pre
 getent group vsm >/dev/null || groupadd -r vsm --gid 165
@@ -202,7 +204,6 @@ mkdir -p /var/lib/vsm
 mkdir -p /etc/vsm/
 mkdir -p /etc/vsm/rootwrap.d
 chown -R vsm /var/run/vsm
-chown -R vsm /etc/vsm/
 chown -R vsm /var/log/vsm/
 chown -R vsm /var/lib/vsm
 chown -R vsm /etc/vsm/
@@ -222,7 +223,8 @@ exit 0
 
 %dir %{_sysconfdir}/logrotate.d
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/logrotate.d/vsmceph
-
+%dir %attr(-, vsm, vsm) /var/log/vsm
+%dir %attr(-, vsm, vsm) /var/lib/vsm
 %dir %{_sysconfdir}/vsm
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/vsm.conf
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/ceph.conf.template
@@ -263,7 +265,8 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-backup
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-restore
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/get_smart_info
-
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/intergrate-cluster
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/import_ceph_conf
 
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/getip
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/cluster_manifest
@@ -274,7 +277,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/get_storage
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/spot_info_list
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-reporter
-%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/integrate-cluster
+
 
 #-----------------------------
 # Prepools
@@ -282,7 +285,3 @@ exit 0
 %dir %{_sysconfdir}/vsm/prepools
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/prepools/*
 # TODO check this line whether needed
-
-%changelog
-* Mon Feb 17 2014 Ji You <ji.you@intel.com> - 2014.2.17-2
-- Initial release

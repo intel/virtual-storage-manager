@@ -119,7 +119,7 @@ def bandwidth(request):
 
 
 def CPU(request):
-    return HttpResponse(get_performance_cpu())
+    return HttpResponse(get_performance_cpu(request))
 
 def get_vsm_version():
     try:
@@ -325,7 +325,7 @@ def get_performance_IOPs(request):
             items[w_metric["timestamp"]]["w_value"] = w_metric["metrics_value"] or 0
     for rw_metric in ops_rw_data:
         if items.has_key(rw_metric["timestamp"]):
-            items[rw_metric["timestamp"]]["w_value"] = rw_metric["metrics_value"] or 0
+            items[rw_metric["timestamp"]]["rw_value"] = rw_metric["metrics_value"] or 0
 
     keys = items.keys()
     keys.sort()
@@ -367,13 +367,13 @@ def get_performance_Latency(request):
 
     items = {}
     for r_metric in latency_r_data:
-        items[r_metric["timestamp"]] = {"timestamp": r_metric["timestamp"], "r_value":  r_metric["metrics_value"] or 0, "w_value": 0, "rw_value": 0}
+        items[r_metric["timestamp"]] = {"timestamp": r_metric["timestamp"], "r_value":  r_metric["metrics_value"] and round( r_metric["metrics_value"],2) or 0, "w_value": 0, "rw_value": 0}
     for w_metric in latency_w_data:
         if items.has_key(w_metric["timestamp"]):
-            items[w_metric["timestamp"]]["w_value"] =  w_metric["metrics_value"] or 0
+            items[w_metric["timestamp"]]["w_value"] = w_metric["metrics_value"] and  round(w_metric["metrics_value"],2) or 0
     for rw_metric in latency_rw_data:
         if items.has_key(rw_metric["timestamp"]):
-            items[rw_metric["timestamp"]]["w_value"] = rw_metric["metrics_value"] or 0
+            items[rw_metric["timestamp"]]["rw_value"] = rw_metric["metrics_value"] and round(rw_metric["metrics_value"],2) or 0
 
     keys = items.keys()
     keys.sort()
@@ -406,10 +406,10 @@ def get_performance_Bandwith(request):
     bandwidth_out_data = vsmapi.get_metrics(request,bandwidth_out_opts)["metrics"]
     items = {}
     for in_metric in bandwidth_in_data:
-        items[in_metric["timestamp"]] = {"timestamp": in_metric["timestamp"], "in_value": in_metric["metrics_value"] and int(in_metric["metrics_value"]) or 0, "out_value": 0}
+        items[in_metric["timestamp"]] = {"timestamp": in_metric["timestamp"], "in_value": in_metric["metrics_value"] and round(in_metric["metrics_value"],2) or 0, "out_value": 0}
     for out_metric in bandwidth_out_data:
         if items.has_key(out_metric["timestamp"]):
-            items[out_metric["timestamp"]]["out_value"] = out_metric["metrics_value"] and int(out_metric["metrics_value"]) or 0
+            items[out_metric["timestamp"]]["out_value"] = out_metric["metrics_value"] and round(out_metric["metrics_value"],2) or 0
 
     keys = items.keys()
     keys.sort()
@@ -419,22 +419,30 @@ def get_performance_Bandwith(request):
     return ops_data
 
 
-def get_performance_cpu():
-    metrics = []
-    cpu_count = random.randint(2,5)
-    for i in range(0,cpu_count):
-        cpu_data = []
-        for data in range(0,10):
-            cpu_data.append(random.randint(1,10))
+def get_performance_cpu(request):
+    #data = json.loads(request.body)
+    start_time = int(time.time())-600
+    end_time = None
+    cpu_opts = {
+         "metrics_name":"cpu_usage"
+        ,"timestamp_start":start_time
+        ,"timestamp_end":end_time
+    }
 
-        cpu = {
-            "name":"cpu"+str(i)
-            ,"data":cpu_data
-        }
-        metrics.append(cpu)
+    cpu_data = vsmapi.get_metrics(request,cpu_opts)["metrics"]
+    cpu_data_dict = {"time":[],"cpus":[]}
+    cpu_data_dict['time'] = list(set([i['timestamp'] for i in cpu_data]))[-7:]
+    _cpu = {}
+    for _metric in cpu_data:
+        if not _cpu.has_key(_metric['host']):
+            _cpu[_metric['host']] = []
+        _cpu[_metric['host']].append(_metric['metrics_value'])
+
+    keys = _cpu.keys()
+    keys.sort()
+    for host_name in keys:
+        cpu_data_dict['cpus'].append({'name':host_name,'data':_cpu[host_name][-7:]})
 
 
-
-    cpu_data_dict = {"metrics":metrics}
-    cpu_data = json.dumps(cpu_data_dict)
-    return cpu_data
+    cpu_data_json = json.dumps(cpu_data_dict)
+    return cpu_data_json

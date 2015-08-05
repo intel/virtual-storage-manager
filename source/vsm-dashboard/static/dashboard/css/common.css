@@ -13,7 +13,7 @@ h1.brand a{
 
 .vsm-block-content{
     text-align:left;
-    padding:15px 15px;
+    padding:15px 10px;
     border-radius:5px;
     border: 1px solid #ccc;
     overflow: hidden;
@@ -27,7 +27,7 @@ h1.brand a{
  * any labels
  */
 .vsm-block-title{
-    top:24px;
+    top:20px;
     z-index:100;
     position:relative;
     display: inline-block;
@@ -35,7 +35,7 @@ h1.brand a{
     margin-right: auto;
     margin-left: auto;
     /*font-family: "Ubuntu, Arial,libra sans, sans-serif";*/
-    font-size: 24px;
+    font-size: 18px;
 }
 
 /**
@@ -69,7 +69,7 @@ h1.brand a{
  * rect
  */
 .vsm-rect{
-    width: 60px;
+    width: 55px;
     height: 40px;
     line-height: 40px;
     background-color: #0062a8;

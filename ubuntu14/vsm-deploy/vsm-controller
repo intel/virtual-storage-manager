@@ -149,7 +149,7 @@ if [[ ! $MYSQL_ROOT_PASSWORD ]]; then
                     source ~/.mysql_password
                 else
                     echo "You have installed and set MySQL ROOT password before."
-                    echo "Please provide it my -m|--mysql parameter."
+                    echo "Please provide it by -m|--mysql parameter."
                     exit 0
                 fi
             fi

@@ -25,31 +25,61 @@ Usage: install.sh
 
 Auto deploy vsm:
     The tool can help you to deploy the vsm envirement automatically.
-    Please run such as bash +x install.sh
+    Please run the command like: bash +x install.sh or ./install.sh
 
 Options:
   --help | -h
     Print usage information.
   --manifest [manifest directory] | -m [manifest directory]
     The directory to store the server.manifest and cluster.manifest.
+  --repo-path [dependencies path]
+    The path of dependencies.
   --version [master] | -v [master]
     The version of vsm dependences to download(Default=master).
+  --key [key file] | -k [key file]
+    The key file required for ssh/scp connection at the environment
+  where certificate based authentication is enabled.
   --user | -u
-    The user will be used to connect remote nodes to deploy vsm
+    The user will be used to connect remote nodes to deploy vsm.
+  --prepare
+    Preparing to install vsm. Checking vsm packages, downloading
+  the dependencies and setting the repository.
+  --controller [ip or hostname]
+    Installing the controller node only.
+  --agent [ip,ip or hostname]
+    Install the agent node(s), like: --agnet ip,ip or hostname with no blank.
+  --check-dependence-package
+    Check the dependence package if provided the dependence repo.
 EOF
     exit 0
 }
 
 MANIFEST_PATH=""
-dependence_version="master"
+REPO_PATH="vsm-dep-repo"
+DEPENDENCE_BRANCH="master"
 USER=`whoami`
+SSH='ssh'
+SCP='scp'
+SUDO='sudo -E' 
+IS_PREPARE=False
+IS_CONTROLLER_INSTALL=False
+IS_AGENT_INSTALL=False
+NEW_CONTROLLER_ADDRESS=""
+NEW_AGENT_IPS=""
+IS_CHECK_DEPENDENCE_PACKAGE=False
+
 while [ $# -gt 0 ]; do
   case "$1" in
-    -h) usage ;;
-    --help) usage ;;
+    -h| --help) usage ;;
     -m| --manifest) shift; MANIFEST_PATH=$1 ;;
-    -v| --version) shift; dependence_version=$1 ;;
+    -r| --repo-path) shift; REPO_PATH=$1 ;;
+    -v| --version) shift; DEPENDENCE_BRANCH=$1 ;;
     -u| --user) shift; USER=$1 ;;
+    -k| --key) shift; keyfile=$1; export SSH='ssh -i $keyfile'; export SCP='scp -i $keyfile' ;;
+    --prepare) IS_PREPARE=True ;;
+    --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_ADDRESS=$1 ;;
+    --agent) shift; IS_AGENT_INSTALL=True; NEW_AGENT_IPS=$1 ;;
+    --check-dependence-package) shift; IS_CHECK_DEPENDENCE_PACKAGE=True ;;
     *) shift ;;
   esac
   shift
@@ -72,290 +102,343 @@ HOSTIP=`hostname -I`
 
 source $TOPDIR/hostrc
 
-is_controller=0
+if [ -z $MANIFEST_PATH ]; then
+    MANIFEST_PATH="manifest"
+fi
+
+if [[ $NEW_CONTROLLER_ADDRESS != "" ]]; then
+    CONTROLLER_ADDRESS=$NEW_CONTROLLER_ADDRESS
+fi
+
+IS_CONTROLLER=0
 for ip in $HOSTIP; do
     if [ $ip == $CONTROLLER_ADDRESS ]; then
-        is_controller=1
+        IS_CONTROLLER=1
     fi
 done
 
 if [[ $HOSTNAME == $CONTROLLER_ADDRESS ]]; then
-    is_controller=1
+    IS_CONTROLLER=1
 fi
 
-if [ $is_controller -eq 0 ]; then
+if [ $IS_CONTROLLER -eq 0 ]; then
     echo "[Info]: You run the tool in a third server."
 else
     echo "[Info]: You run the tool in the controller server."
 fi
 
-
 #-------------------------------------------------------------------------------
-#            checking packages
-#-------------------------------------------------------------------------------
-
-echo "+++++++++++++++start checking packages+++++++++++++++"
-
-if [ ! -d vsmrepo ]; then
-    echo "You should have the vsmrepo folder, please check and try again"
-    exit 1
-fi
-
-cd vsmrepo
-is_python_vsmclient=`ls|grep python-vsmclient*.rpm|wc -l`
-is_vsm=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
-is_vsm_dashboard=`ls|grep vsm-dashboard*.rpm|wc -l`
-is_vsm_deploy=`ls|grep vsm-deploy*.rpm|wc -l`
-if [ $is_python_vsmclient -gt 0 ] && [ $is_vsm -gt 0 ] && [ $is_vsm_dashboard -gt 0 ] && [ $is_vsm_deploy -gt 0 ]; then
-    echo "The vsm pachages have been already prepared"
-else
-    echo "please check the vsm packages, then try again"
-    exit 1
-fi
-
-cd $TOPDIR
-echo "+++++++++++++++finish checking packages+++++++++++++++"
-
-
-#-------------------------------------------------------------------------------
-#            setting the iptables and selinux
+#            prepare
 #-------------------------------------------------------------------------------
 
-echo "+++++++++++++++start setting the iptables and selinux+++++++++++++++"
-
-function set_iptables_selinux() {
-    ssh $USER@$1 "service iptables stop"
-    ssh $USER@$1 "chkconfig iptables off"
-    ssh $USER@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
-#    ssh $USER@$1 "setenforce 0"
+function check_vsm_package() {
+    if [[ ! -d vsmrepo ]]; then
+        echo "You must have the vsmrepo folder, please check and try again."
+        exit 1
+    fi
+    cd vsmrepo
+    IS_PYTHON_VSMCLIENT=`ls|grep python-vsmclient*.rpm|wc -l`
+    IS_VSM=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
+    IS_VSM_DASHBOARD=`ls|grep vsm-dashboard*.rpm|wc -l`
+    IS_VSM_DEPLOY=`ls|grep vsm-deploy*.rpm|wc -l`
+    if [[ $IS_PYTHON_VSMCLIENT -gt 0 ]] && [[ $IS_VSM -gt 0 ]] &&\
+        [[ $IS_VSM_DASHBOARD -gt 0 ]] && [[ $IS_VSM_DEPLOY -gt 0 ]]; then
+        echo "The vsm pachages have been already prepared"
+    else
+        echo "please check the vsm packages, then try again"
+        exit 1
+    fi
+    cd $TOPDIR
 }
 
-if [ $is_controller -eq 0 ]; then
-    set_iptables_selinux $CONTROLLER_ADDRESS
-else
-    service iptables stop
-    chkconfig iptables off
-    sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
-#    setenforce 0
-fi
+function set_iptables_and_selinux() {
+    $SSH $USER@$1 "systemctl stop firewalld"
+    $SSH $USER@$1 "systemctl disable firewalld"
+    $SSH $USER@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
+    $SSH $USER@$1 "setenforce 0"
+}
 
-for ip in $AGENT_ADDRESS_LIST; do
-    set_iptables_selinux $ip
-done
+function download_dependencies() {
+    if [[ ! -d $REPO_PATH ]]; then
+        mkdir -p $REPO_PATH
+        cd $REPO_PATH
+        for i in `cat $TOPDIR/rpms.lst`; do
+            wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
+        done
+        cd $TOPDIR
+    elif [[ -d $REPO_PATH ]] && [[ $IS_CHECK_DEPENDENCE_PACKAGE == True ]]; then
+        cd $REPO_PATH
+        for i in `cat $TOPDIR/rpms.lst`; do
+            if [[ `ls |grep $i|wc -l` -eq 0 ]]; then
+                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
+            else
+                COUNT=0
+                for j in `ls |grep $i`; do
+                    if [[ $i == $j ]]; then
+                        let COUNT+=1
+                    fi
+                done
+                if [[ $COUNT -eq 0 ]]; then
+                    wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
+                fi
+            fi
+        done
+        $SUDO rm -rf *.rpm.*
+        cd $TOPDIR
+    fi
+}
 
-echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
-
-
-#-------------------------------------------------------------------------------
-#            downloading the dependences
-#-------------------------------------------------------------------------------
-
-if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
-    mkdir -p vsm-dep-repo
-    cd vsm-dep-repo
-    for i in `cat rpms.lst`; do
-        wget wget https://github.com/01org/vsm-dependencies/tree/2.0/centos7/$i
-    done
+function prepare_repo() {
+    $SUDO yum makecache
+    IS_CREATEREPO=`rpm -qa|grep -i createrepo|wc -l`
+    if [[ $IS_CREATEREPO -eq 0 ]]; then
+        $SUDO yum install -y createrepo
+    fi
+    mkdir -p $REPO_PATH/vsm-dep-repo
+    cd $REPO_PATH
+    cp *.rpm vsm-dep-repo
+    $SUDO createrepo vsm-dep-repo
     cd $TOPDIR
-    is_createrepo=`rpm -qa|grep createrepo|wc -l`
-    if [[ $is_createrepo -eq 0 ]]; then
-        yum install -y createrepo
-    fi
-    createrepo vsm-dep-repo
-fi
+    $SUDO createrepo vsmrepo
 
-if [ $is_controller -eq 0 ]; then
-    ssh $USER@$CONTROLLER_ADDRESS "rm -rf /opt/vsm-dep-repo"
-    scp -r vsm-dep-repo $USER@$CONTROLLER_ADDRESS:/opt
-else
-    if [ -d vsm-dep-repo ]; then
-        rm -rf /opt/vsm-dep-repo
-        cp -rf vsm-dep-repo /opt
-    fi
-fi
+    rm -rf vsm.repo vsm-dep.repo
 
+    cat <<"EOF" >vsm.repo
+[vsmrepo]
+name=vsmrepo
+baseurl=file:///opt/vsmrepo
+gpgcheck=0
+enabled=1
+proxy=_none_
+EOF
 
-#-------------------------------------------------------------------------------
-#            setting the repo
-#-------------------------------------------------------------------------------
-
-echo "+++++++++++++++start setting the repo+++++++++++++++"
-
-is_httpd=`rpm -qa|grep httpd|grep -v httpd-tools|wc -l`
-if [[ $is_httpd -gt 0 ]]; then
-    sed -i "s,#*Listen 80,Listen 80,g" /etc/httpd/conf/httpd.conf
-    service httpd restart
-fi
-
-rm -rf vsm.repo
-cat <<"EOF" >vsm.repo
-[vsm-dep-repo]
-name=vsm-dep-repo
+    cat <<"EOF" >vsm-dep.repo
+[vsmdeprepo]
+name=vsmdeprepo
 baseurl=file:///opt/vsm-dep-repo
 gpgcheck=0
 enabled=1
 proxy=_none_
 EOF
 
-oldurl="file:///opt/vsm-dep-repo"
-newurl="http://$CONTROLLER_ADDRESS/vsm-dep-repo"
-if [ $is_controller -eq 0 ]; then
-    scp vsm.repo $USER@$CONTROLLER_ADDRESS:/etc/yum.repos.d
-    ssh $USER@$CONTROLLER_ADDRESS "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html"
-    ssh $USER@$CONTROLLER_ADDRESS "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
-else
-    cp vsm.repo /etc/yum.repos.d
-    yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html
-    sed -i "s,$oldurl,$newurl,g" /etc/yum.repos.d/vsm.repo
-    yum makecache
-fi
-
-sed -i "s,$oldurl,$newurl,g" vsm.repo
-
-function set_repo() {
-    ssh $USER@$1 "rm -rf /etc/yum.repos.d/vsm.repo"
-    scp vsm.repo $USER@$1:/etc/yum.repos.d
-    ssh $USER@$1 "yum makecache"
 }
 
-for ip in $AGENT_ADDRESS_LIST; do
-    set_repo $ip
-done
-
-echo "+++++++++++++++finish setting the repo+++++++++++++++"
-
-
-#-------------------------------------------------------------------------------
-#            install vsm rpm and dependences
-#-------------------------------------------------------------------------------
-
-echo "+++++++++++++++install vsm rpm and dependences+++++++++++++++"
-
-function install_vsm_controller() {
-    ssh $USER@$1 "mkdir -p /opt/vsm_install"
-    scp vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm $USER@$1:/opt/vsm_install
-    ssh $USER@$1 "cd /opt/vsm_install; yum -y localinstall python-vsmclient*.rpm vsm*.rpm"
-    ssh $USER@$1 "preinstall"
-    ssh $USER@$1 "cd /opt; rm -rf /opt/vsm_install"
+function prepare() {
+    check_vsm_package
+#    set_iptables_and_selinux
+    download_dependencies
+    prepare_repo
 }
 
-function install_vsm_storage() {
-    ssh $USER@$1 "mkdir -p /opt/vsm_install"
-    scp vsmrepo/vsm*.rpm $USER@$1:/opt/vsm_install
-    ssh $USER@$1 "cd /opt/vsm_install; rm -rf vsm-dashboard*; yum -y localinstall vsm*.rpm"
-    ssh $USER@$1 "preinstall"
-    ssh $USER@$1 "cd /opt; rm -rf /opt/vsm_install"
+function set_remote_repo() {
+    $SSH $USER@$1 "$SUDO rm -rf /etc/yum.repos.d/vsm.repo /etc/yum.repos.d/vsm-dep.repo; \
+        $SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo"
+    $SCP -r $REPO_PATH/vsm-dep-repo $USER@$1:/tmp
+    $SSH $USER@$1 "$SUDO mv /tmp/vsm-dep-repo /opt"
+    $SCP -r vsmrepo $USER@$1:/tmp
+    $SSH $USER@$1 "$SUDO mv /tmp/vsmrepo /opt"
+    $SCP vsm.repo $USER@$1:/tmp
+    $SSH $USER@$1 "$SUDO mv /tmp/vsm.repo /etc/yum.repos.d"
+    $SCP vsm-dep.repo $USER@$1:/tmp
+    $SSH $USER@$1 "$SUDO mv /tmp/vsm-dep.repo /etc/yum.repos.d"
+    $SSH $USER@$1 "$SUDO yum makecache"
 }
 
-if [ $is_controller -eq 0 ]; then
-    install_vsm_controller $CONTROLLER_ADDRESS
-else
-    yum -y localinstall vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm
-    preinstall
-fi
-
-for ip in $AGENT_ADDRESS_LIST; do
-    install_vsm_storage $ip
-done
-
-echo "+++++++++++++++finish install vsm rpm and dependences+++++++++++++++"
-
+function set_local_repo() {
+    $SUDO rm -rf /etc/yum.repos.d/vsm.repo /etc/yum.repos.d/vsm-dep.repo
+    $SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo
+    $SUDO cp -r $REPO_PATH/vsm-dep-repo /opt
+    $SUDO cp -r vsmrepo /opt
+    $SUDO cp vsm.repo /etc/yum.repos.d
+    $SUDO cp vsm-dep.repo /etc/yum.repos.d
+    $SUDO yum makecache
+}
+function check_manifest() {
+    if [[ $1 == $CONTROLLER_ADDRESS ]]; then
+        if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/cluster.manifest ]]; then
+            echo "Please check the manifest, then try again."
+            exit 1
+        fi
+    else
+        if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/server.manifest ]]; then
+            echo "Please check the manifest, then try again."
+            exit 1
+        fi
+    fi
+}
 
 #-------------------------------------------------------------------------------
-#            setup vsm controller node
+#            controller
 #-------------------------------------------------------------------------------
 
-if [ -z $MANIFEST_PATH ]; then
-    MANIFEST_PATH="manifest"
-fi
-
-function setup_controller() {
-    ssh $USER@$CONTROLLER_ADDRESS "rm -rf /etc/manifest/cluster_manifest"
-    scp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest $USER@$CONTROLLER_ADDRESS:/etc/manifest
-    ssh $USER@$CONTROLLER_ADDRESS "chown root:vsm /etc/manifest/cluster.manifest; chmod 755 /etc/manifest/cluster.manifest"
-    is_cluster_manifest_error=`ssh $USER@$CONTROLLER_ADDRESS "cluster_manifest|grep error|wc -l"`
+function setup_remote_controller() {
+    $SSH $USER@$CONTROLLER_ADDRESS "$SUDO rm -rf /etc/manifest/cluster_manifest"
+    $SCP $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest $USER@$CONTROLLER_ADDRESS:/tmp
+    $SSH $USER@$CONTROLLER_ADDRESS "$SUDO mv /tmp/cluster.manifest /etc/manifest"
+    $SSH $USER@$CONTROLLER_ADDRESS "$SUDO chown root:vsm /etc/manifest/cluster.manifest; $SUDO chmod 755 /etc/manifest/cluster.manifest"
+    is_cluster_manifest_error=`$SSH $USER@$CONTROLLER_ADDRESS "cluster_manifest|grep error|wc -l"`
     if [ $is_cluster_manifest_error -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        ssh $USER@$CONTROLLER_ADDRESS "vsm-controller"
+        $SSH $USER@$CONTROLLER_ADDRESS "vsm-controller"
     fi
 }
 
-if [ $is_controller -eq 0 ]; then
-    setup_controller
-else
-    rm -rf /etc/manifest/cluster.manifest
-    cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
-    chown root:vsm /etc/manifest/cluster.manifest
-    chmod 755 /etc/manifest/cluster.manifest
-    if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
-        echo "please check the cluster.manifest, then try again"
-        exit 1
+function install_controller() {
+    check_manifest $CONTROLLER_ADDRESS
+
+    if [[ $IS_CONTROLLER -eq 0 ]]; then
+        set_remote_repo $CONTROLLER_ADDRESS
+        set_iptables_and_selinux $CONTROLLER_ADDRESS
+        $SSH $USER@$CONTROLLER_ADDRESS "sed -i \"s/keepcache=0/keepcache=1/g\" /etc/yum.conf"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
+        $SSH $USER@$CONTROLLER_ADDRESS "preinstall"
+        setup_remote_controller
+        $SSH $USER@CONTROLLER_ADDRESS "$SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
+        for i in `ls`; do if [[ -d $i/packages ]]; then $SUDO cp $i/packages/*.rpm /tmp/vsm-dep-repo >/dev/null 2>&1; fi; done"
+        $SCP $USER@$CONTROLLER_ADDRESS:/tmp/vsm-dep-repo/*.rpm $REPO_PATH/vsm-dep-repo
+        $SSH $USER@CONTROLLER_ADDRESS "$SUDO rm -rf /tmp/vsm-dep-repo"
+        cd $REPO_PATH
+        $SUDO createrepo vsm-dep-repo
+        cd $TOPDIR
     else
-        vsm-controller
+        set_local_repo
+        $SUDO systemctl stop firewalld
+        $SUDO systemctl disable firewalld
+        $SUDO sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
+        sed -i "s/keepcache=0/keepcache=1/g" /etc/yum.conf
+        $SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient
+        preinstall
+        $SUDO rm -rf /etc/manifest/cluster.manifest
+        $SUDO cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
+        $SUDO chown root:vsm /etc/manifest/cluster.manifest
+        $SUDO chmod 755 /etc/manifest/cluster.manifest
+        if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
+            echo "please check the cluster.manifest, then try again"
+            exit 1
+        else
+            vsm-controller
+        fi
+        $SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
+        for i in `ls`; do
+            if [[ -d $i/packages ]] && [[ `ls $i/packages|wc -l` -gt 0 ]]; then
+                $SUDO cp $i/packages/*.rpm /tmp/vsm-dep-repo >/dev/null 2>&1
+            fi
+        done
+        cd /tmp/vsm-dep-repo
+        cp *.rpm $TOPDIR/$REPO_PATH/vsm-dep-repo >/dev/null
+        cd $TOPDIR/$REPO_PATH
+        $SUDO createrepo vsm-dep-repo
+        cd $TOPDIR
     fi
-fi
-
+}
 
 #-------------------------------------------------------------------------------
-#            setup vsm storage node
+#            agent
 #-------------------------------------------------------------------------------
 
-count_ip=0
-for ip in $AGENT_ADDRESS_LIST; do
-    let count_ip=$count_ip+1
-done
-let count_ip=$count_ip+2+1
-if [ `ls $MANIFEST_PATH|wc -l` != $count_ip ]; then
-    echo "please check the manifest folder"
-    exit 1
-fi
+function install_setup_diamond() {
+    $SSH $USER@$1 "$SUDO easy_install pip; $SUDO pip install diamond"
+    DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
+    source $DEPLOYRC_FILE
+    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "find / -name vsmmysql.py|grep vsm/diamond"`
+    HANDLER_PATH=`$SSH $USER@$1 "find / -name handler|grep python"`
+    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "find / -name diamond|grep /etc/diamond"`
+    $SSH $USER@$1 "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
+    "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.vsmmysql.VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/collectors_path = *.*collectors\/$/collectors_path = \/usr\/local\/share\/diamond\/collectors\//g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/handlers_path = *.*handlers\/$/handlers_path = \/usr\/local\/share\/diamond\/handlers\//g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/password*=*.*/password    = $MYSQL_VSM_PASSWORD/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/database    = diamond/database    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_instance = instance\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_hostname    = hostname\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\# interval = 300/interval = 20/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/enabled = True/#enabled = True/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[DiskSpaceCollector\]\]/\#\[\[DiskSpaceCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[DiskUsageCollector\]\]/\#\[\[DiskUsageCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[LoadAverageCollector\]\]/\#\[\[LoadAverageCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[MemoryCollector\]\]/\#\[\[MemoryCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO mkdir -p /etc/diamond /var/log/diamond;" \
+    "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf /etc/diamond;" \
+    "$SUDO diamond"
+}
 
-success=""
-failure=""
-if [ $is_controller -eq 0 ]; then
-    token=`ssh $USER@$CONTROLLER_ADDRESS "agent-token"`
-else
-    token=`agent-token`
-fi
-
-function setup_storage() {
-    ssh $USER@$1 "rm -rf /etc/manifest/server.manifest"
-    sed -i "s/token-tenant/$token/g" $MANIFEST_PATH/$1/server.manifest
+function setup_remote_agent() {
+    $SSH $USER@$1 "$SUDO rm -rf /etc/manifest/server.manifest"
+    $SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
     old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
-    sed -i "s/$old_str/$token/g" $MANIFEST_PATH/$1/server.manifest
-    scp $MANIFEST_PATH/$1/server.manifest $USER@$1:/etc/manifest
-    ssh $USER@$1 "chown root:vsm /etc/manifest/server.manifest; chmod 755 /etc/manifest/server.manifest"
-    is_server_manifest_error=`ssh $USER@$1 "server_manifest|grep ERROR|wc -l"`
+    $SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
+    $SSH $USER@$1 "$SUDO mv /tmp/server.manifest /etc/manifest"
+    $SSH $USER@$1 "$SUDO chown root:vsm /etc/manifest/server.manifest; $SUDO chmod 755 /etc/manifest/server.manifest"
+    is_server_manifest_error=`$SSH $USER@$1 "server_manifest|grep ERROR|wc -l"`
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
-        failure=$failure"$1 "
     else
-        ssh $USER@$1 "vsm-node"
-        success=$success"$1 "
+        $SSH $USER@$1 "vsm-node"
     fi
 }
 
-for ip in $AGENT_ADDRESS_LIST; do
-    setup_storage $ip
-done
+function install_agent() {
+    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ `ls /etc/yum.repos.d|wc -l` -gt 0 ]]; then $SUDO mkdir -p /tmp/backup; $SUDO mv * /tmp/backup; fi"
+    check_manifest $1
+    set_remote_repo $1
+    set_iptables_and_selinux $1
+    $SSH $USER@$1 "$SUDO yum install -y vsm vsm-deploy"
+    $SSH $USER@$1 "preinstall"
 
+    setup_remote_agent $1
+#    install_setup_diamond $1
+    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ -d /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; rm -rf /tmp/backup; fi"
+}
+
+#-------------------------------------------------------------------------------
+#            start to install
+#-------------------------------------------------------------------------------
+
+if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
+    && [[ $IS_AGENT_INSTALL == False ]]; then
+    prepare
+    install_controller
+    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token"`
+    for ip_or_hostname in $AGENT_ADDRESS_LIST; do
+        install_agent $ip_or_hostname
+    done
+else
+    if [[ $IS_PREPARE == True ]]; then
+        prepare
+    fi
+    if [[ $IS_CONTROLLER_INSTALL == True ]]; then
+        install_controller
+    fi
+    if [[ $IS_AGENT_INSTALL == True ]]; then
+        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token"`
+        AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
+        for ip_or_hostname in $AGENT_IP_LIST; do
+            install_agent $ip_or_hostname
+        done
+    fi
+fi
 
 #-------------------------------------------------------------------------------
 #            finish auto deploy
 #-------------------------------------------------------------------------------
 
-echo "Successful storage node ip: $success"
-echo "Failure storage node ip: $failure"
+echo "Finished."
 
 set +o xtrace
-
-
-# change_log
-# Feb 12 2015 Zhu Boxiang <boxiangx.zhu@intel.com> - 2015.2.12-1
-# Initial release
-# 
-#
-# 
 
