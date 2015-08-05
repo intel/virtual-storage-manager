@@ -195,7 +195,8 @@ class APIRouter(vsm.api.openstack.APIRouter):
         mapper.resource("devices", "devices",
                         controller=self.resources['devices'],
                         collection={"detail": "get",
-                                    "get_available_disks":"get",},
+                                    "get_available_disks":"get",
+                                    "get_smart_info":"get",},
                         member={'action':'POST'})
 
         self.resources['licenses'] = licenses.create_resource(ext_mgr)

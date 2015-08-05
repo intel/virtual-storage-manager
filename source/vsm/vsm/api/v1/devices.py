@@ -85,31 +85,27 @@ class Controller(wsgi.Controller):
     def detail(self, req,search_opts=None):
         """Get device list."""
         context = req.environ['vsm.context']
-        #data = json.loads(request.raw_post_data)
-        device_id = req.GET.get('device_id',None)#str(data["osd_id"])
-        action = req.GET.get('action',None)#str(data["action"])
-        LOG.info('params--------- %s:%s'%(device_id,action))
+        device_id = req.GET.get('device_id',None)
         devices=[]
         if device_id:
-            if action == 'get_smart_info':
-                body = {'server':db.init_node_get_by_device_id(context,device_id)}
-                #return self.scheduler_api.get_smart_info(context, body)
-                device_data_str = self.scheduler_api.get_smart_info(context, body)
-                #LOG.info('get smart device info = %s:%s'%(device_id,device_data_str))
-                device_data_dict = {}
-                device_data_dict['id'] = device_id
-                device_data_dict['smart_info'] = 'YES'
-                device_data_dict['device_data'] = device_data_str
-                #devices = [device_data_dict]
-                devices = {"devices":[device_data_dict]}
-                #LOG.info('get smart device info222222 = %s:%s'%(device_id,devices))
-                return devices
-                #return HttpResponse(json.dumps(device_data_dict), content_type="application/json")
-            else:
-                devices =[(dict(db.device_get(context,device_id)))]
-                LOG.info('get device %s:%s'%(device_id,devices))
-
+            devices =[(dict(db.device_get(context,device_id)))]
+            LOG.info('get device %s:%s'%(device_id,devices))
         return self._view_builder.index(req, devices)
+
+    def get_smart_info(self, req, search_opts=None):
+        """Get device list."""
+        context = req.environ['vsm.context']
+        device_id = req.GET.get('device_id',None)
+        device_path = req.GET.get('device_path',None)
+        action = req.GET.get('action',None)
+        LOG.info('params--------- %s:%s'%(device_id,action))
+        if device_id:
+                body = {'server': db.init_node_get_by_device_id(context,device_id),
+                        'device_path': device_path
+                }
+                device_data_dict = self.scheduler_api.get_smart_info(context, body)
+                LOG.info('get smart device info = %s:%s'%(device_path,device_data_dict))
+        return {'smart_info':device_data_dict}
 
     def get_available_disks(self,req,):
         context = req.environ['vsm.context']

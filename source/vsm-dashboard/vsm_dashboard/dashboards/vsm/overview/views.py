@@ -430,18 +430,19 @@ def get_performance_cpu(request):
     }
 
     cpu_data = vsmapi.get_metrics(request,cpu_opts)["metrics"]
+
     cpu_data_dict = {"time":[],"cpus":[]}
     cpu_data_dict['time'] = list(set([i['timestamp'] for i in cpu_data]))[-7:]
     _cpu = {}
     for _metric in cpu_data:
         if not _cpu.has_key(_metric['host']):
             _cpu[_metric['host']] = []
-        _cpu[_metric['host']].append(_metric['metrics_value'])
+        _cpu[_metric['host']].append('%s_%s'%(_metric['timestamp'],_metric['metrics_value']))
 
     keys = _cpu.keys()
     keys.sort()
     for host_name in keys:
-        cpu_data_dict['cpus'].append({'name':host_name,'data':_cpu[host_name][-7:]})
+        cpu_data_dict['cpus'].append({'name':host_name,'data':[a.split("_")[1] for a in list(set(_cpu[host_name]))][-7:]})
 
 
     cpu_data_json = json.dumps(cpu_data_dict)

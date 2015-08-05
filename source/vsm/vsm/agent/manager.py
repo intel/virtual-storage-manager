@@ -361,9 +361,9 @@ class AgentManager(manager.Manager):
             LOG.info('Get error in update_ssh_keys')
         finally:
             self._is_update_ssh = False
-    def get_smart_info(self, context):
+    def get_smart_info(self, context, device):
         """When find new servers, insert new server's key."""
-        return self.ceph_driver.get_smart_info(context)
+        return self.ceph_driver.get_smart_info(context, device)
 
     def _set_ssh_chanel(self):
         # Get self id from init_node table.
