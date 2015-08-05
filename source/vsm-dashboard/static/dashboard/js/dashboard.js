@@ -15,6 +15,7 @@ var cCPU;
 var IOPs_EndTime = "";
 var Latency_EndTime = "";
 var BandWidth_EndTime = "";
+var CPU_EndTime = "";
 var token = $("input[name=csrfmiddlewaretoken]").val();
 require(
     [
@@ -35,7 +36,8 @@ require(
         cIOPs.setOption(GenerateLineOption());
         cLatency.setOption(GetLantencyOption());
         cBandwidth.setOption(GetBandwidthOption());
-        
+        cCPU.setOption(GenerateInitCPUOption());
+
     	//load Capacity
         loadCapacity();
         setInterval(function(){
@@ -252,7 +254,7 @@ function loadMDS(){
             $("#divMDS_STOPPED")[0].innerHTML = data.Stopped;
 
             //init
-            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_normal.png";
+            $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_health.png";
             //when error
             if(data.Failed>0){
                 $("#divMDS")[0].style.border = "1px solid red";
@@ -336,8 +338,14 @@ function loadIOP(){
                             1,        //write line
                             metrics[i].w_value,
                             false,    
-                            false,    
-                            axisData 
+                            false,
+                        ],
+                        [
+                            2,        //read write line
+                            metrics[i].rw_value,
+                            false,
+                            false,
+                            axisData
                         ]
                     ]);
                 }
@@ -357,6 +365,7 @@ function loadIOP(){
         });
     }, 15000);
 }
+
 
 function loadLatency(){
     setTimeout(function (){
@@ -461,28 +470,47 @@ function loadBandwidth(){
 }
 
 function loadCPU(){
-    setInterval(function (){
+    setTimeout(function (){
         $.ajax({
             type: "post",
             url: "/dashboard/vsm/CPU/",
-            data: "",
+            data: JSON.stringify({"timestamp":CPU_EndTime }),
             dataType: "json",
             success: function (data) {
-                cCPU.clear();       
+                cCPU.clear();
+                var timestampList = new Array();
                 var legendList = new Array();
                 var seriesList = new Array();
-                for(var i=0; i<data.metrics.length;i++){
-                    legendList.push(data.metrics[i].name);
+                //get the timestamp list
+                for (var i = 0; i < data.time.length; i++) {
+                    if(i == data.time.length - 1){
+                        CPU_EndTime = data.time[i]
+                    }
+                    var axisData = new Date(parseInt(data.time[i]) * 1000).format("hh:mm:ss")
+                    timestampList.push(axisData);
+                }
+
+                for(var i=0; i<data.cpus.length;i++){
+                    var cpu = data.cpus[i];
+                    //get the legend list
+                    legendList.push(cpu.name);
                     var series = {
-                        name:data.metrics[i].name,
-                        type:'line',
-                        smooth:true,
-                        data:data.metrics[i].data
+                            name:cpu.name,
+                            type:'line',
+                            smooth:true,
+                            data:[]
                     };
+
+
+                    for(var j=0;j<cpu.data.length;j++){
+                        series.data.push(cpu.data[j])
+                    }
                     seriesList.push(series);
                 }
-                cCPU.setOption(GenerateCPUOption(legendList,seriesList));
-                
+                cCPU.setOption(GenerateCPUOption(timestampList,legendList,seriesList));
+
+                //Reload the data
+                loadCPU();
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
 
@@ -506,7 +534,12 @@ function GenerateGaugeOption(value) {
             {
                 name: '',
                 type: 'gauge',
-                detail: {formatter: '{value}%'},
+                detail: {
+                    formatter: '{value}%',
+                    textStyle:{
+                        fontSize:20
+                    }
+                },
                 data: [{value: value, name: 'Capacity'}],
                 splitLine:{
                     show: true,
@@ -550,16 +583,16 @@ function GenerateGaugeOption(value) {
 function GenerateLineOption(){
     var option = {
         grid :{
-            x:20,
+            x:40,
             y:20,
             height:'80%',
-            width:'90%',
+            width:'85%',
         },
         tooltip:{
             trigger:'axis'
         },
         legend:{
-            data:["iops_r","iops_w"]
+            data:["iops_r","iops_w","iops_rw"]
         },
         xAxis : [
             {
@@ -586,6 +619,11 @@ function GenerateLineOption(){
                 boundaryGap: [0.5, 0.5]
             }
         ],
+        dataZoom:{
+            show:false,
+            start:30,
+            end:100
+        },
         series : [
             {
                 name:'iops_r',
@@ -598,19 +636,25 @@ function GenerateLineOption(){
                 type:'line',
                 smooth:true,
                 data:InitValues(0)
+            },
+            {
+                name:'iops_rw',
+                type:'line',
+                smooth:true,
+                data:InitValues(0)
             }
         ]
     };
     return option;
 }
 
-function GenerateCPUOption(legendList,seriesList){
+function GenerateCPUOption(timestampList,legendList,seriesList){
     var option = {
         grid :{
-            x:20,
+            x:40,
             y:20,
             height:'80%',
-            width:'90%',
+            width:'85%',
         },
         tooltip:{
             trigger:'axis'
@@ -626,7 +670,7 @@ function GenerateCPUOption(legendList,seriesList){
                     show:true,
                     interval:0,
                 },
-                data :InitAxis_X()
+                data :timestampList
             }
         ],
         yAxis : [
@@ -648,13 +692,71 @@ function GenerateCPUOption(legendList,seriesList){
     return option;
 }
 
+function GenerateInitCPUOption(){
+    var option = {
+        grid :{
+            x:40,
+            y:20,
+            height:'80%',
+            width:'85%',
+        },
+        tooltip:{
+            trigger:'axis'
+        },
+        legend:{
+            data:[""]
+        },
+        xAxis : [
+            {
+                type : 'category',
+                boundaryGap : false,
+                axisLabel:{
+                    show:true,
+                    interval:0,
+                },
+                data :InitAxis_X()
+            }
+        ],
+        yAxis : [
+            {
+                type : 'value',
+                scale: false,
+                min:0,
+                //max:15,
+                axisLabel:{
+                    show:true,
+                    interval:'auto',
+                    formatter: '{value}'
+                },
+                name : '',
+                boundaryGap: [0.5, 0.5]
+            }
+        ],
+        dataZoom:{
+            show:false,
+            start:30,
+            end:100
+        },
+        series : [
+            {
+                name:'--',
+                type:'line',
+                smooth:true,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}},
+                data:InitValues(0)
+            },
+        ]
+    };
+    return option;
+}
+
 function GetLantencyOption(){
     option = {
         grid :{
-            x:20,
+            x:40,
             y:20,
             height:'80%',
-            width:'90%',
+            width:'85%',
         },
         tooltip:{
             trigger:'axis'
@@ -687,6 +789,11 @@ function GetLantencyOption(){
                 boundaryGap: [0.5, 0.5]
             }
         ],
+        dataZoom:{
+            show:false,
+            start:30,
+            end:100
+        },
         series : [
             {
                 name:'lantency_r',
@@ -718,10 +825,10 @@ function GetLantencyOption(){
 function GetBandwidthOption(){
     option = {
         grid :{
-            x:20,
+            x:40,
             y:20,
             height:'80%',
-            width:'90%',
+            width:'85%',
         },
         tooltip:{
             trigger:'axis'
@@ -754,6 +861,11 @@ function GetBandwidthOption(){
                 boundaryGap: [0.5, 0.5]
             }
         ],
+        dataZoom:{
+            show:false,
+            start:30,
+            end:100
+        },
         series : [
             {
                 name:'bandwidth_in',

@@ -79,6 +79,7 @@ class AddOpenstackIPForm(forms.SelfHandlingForm):
         label = _("Region Name"),
         max_length = 255,
         min_length = 0,
+        required = False,
         error_messages = {
             'required': _('This field is not required.')
         }
@@ -172,6 +173,7 @@ class UpdateOpenstackIPForm(forms.SelfHandlingForm):
         label = _("Region Name"),
         max_length = 255,
         min_length = 0,
+        required = False,
         error_messages = {
             'required': _('This field is not required.')
         }

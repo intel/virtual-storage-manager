@@ -325,41 +325,57 @@ function install_controller() {
 #            agent
 #-------------------------------------------------------------------------------
 
+function kill_diamond() {
+    cat <<"EOF" >kill_diamond.sh
+#!/bin/bash
+diamond_pid=`ps -ef|grep diamond|grep -v grep|grep -v bash|awk -F " " '{print $2}'`
+for pid in $diamond_pid; do
+    sudo -E kill -9 $pid
+done
+EOF
+    $SCP kill_diamond.sh $USER@$1:/tmp
+    $SSH $USER@$1 "$SUDO chmod 755 /tmp/kill_diamond.sh;" \
+    "cd /tmp;" \
+    "./kill_diamond.sh;" \
+    "$SUDO rm -rf kill_diamond"
+}
+
 function install_setup_diamond() {
-    $SSH $USER@$1 "sudo apt-get install -y diamond"
+    kill_diamond $1
+    $SSH $USER@$1 "$SUDO apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
     VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "find / -name vsmmysql.py|grep vsm/diamond"`
     HANDLER_PATH=`$SSH $USER@$1 "find / -name handler|grep python"`
-    DIAMOND_CONFIG="/etc/diamond/diamond.conf"
-    $SSH $USER@$1 "$SUDO cp /etc/diamond/diamond.conf.example $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH"
-    $SSH $USER@$1 "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.vsmmysql.VSMMySQLHandler/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/password*=*.*/password    = $MYSQL_VSM_PASSWORD/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/database    = diamond/database    = vsm/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_instance = instance\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_hostname    = hostname\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/i\[\[SignalfxHandler\]\]\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/iauth_token = abcdefghijklmnopqrstuvwxyz\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/\# interval = 300/interval = 20/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/enabled = True/#enabled = True/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[DiskSpaceCollector\]\]/\#\[\[DiskSpaceCollector\]\]/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[DiskUsageCollector\]\]/\#\[\[DiskUsageCollector\]\]/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[LoadAverageCollector\]\]/\#\[\[LoadAverageCollector\]\]/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[MemoryCollector\]\]/\#\[\[MemoryCollector\]\]/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = True\" $DIAMOND_CONFIG"
-    $SSH $USER@$1 "$SUDO diamond"
+    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "find / -name diamond|grep /etc/diamond"`
+    $SSH $USER@$1 "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
+    "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.vsmmysql.VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/password*=*.*/password    = $MYSQL_VSM_PASSWORD/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/database    = diamond/database    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_instance = instance\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_hostname    = hostname\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/i\[\[SignalfxHandler\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/iauth_token = abcdefghijklmnopqrstuvwxyz\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\# interval = 300/interval = 20/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/enabled = True/#enabled = True/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[DiskSpaceCollector\]\]/\#\[\[DiskSpaceCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[DiskUsageCollector\]\]/\#\[\[DiskUsageCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[LoadAverageCollector\]\]/\#\[\[LoadAverageCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[MemoryCollector\]\]/\#\[\[MemoryCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO diamond"
 }
 
 function setup_remote_agent() {

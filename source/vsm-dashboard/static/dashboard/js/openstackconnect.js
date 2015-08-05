@@ -1,5 +1,7 @@
 $(function(){
 	InitCtrlCSS();
+
+	$(".form-control-feedback.glyphicon.glyphicon-eye-open").hide();
 });
 
 function InitCtrlCSS(){
