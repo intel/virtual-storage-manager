@@ -106,28 +106,7 @@
 
 {% block js %}
     {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
     <script src="{{ STATIC_URL }}dashboard/js/dialog.js" type="text/javascript" charset="utf-8"></script>
 	<script src="{{ STATIC_URL }}dashboard/js/devicemgmt.js" type="text/javascript" charset="utf-8"></script>
-    <script type="text/javascript">
-        // function searchToObject(){
-        //     var pairs = window.location.search.substring(1).split("&");
-        //     var obj = {};
-        //     var pair, i;
-        //     for(i in pairs){
-        //         if(paris[i] === "")continue;
-        //         pair = pairs[i].split("=");
-        //         obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
-        //     }
-        //     return obj;
-        // }
-        // var back = "";
-        // if(window.location.search){
-        //     document.body.scrollTop = 9999;
-        //     //var search = searchToObject();
-        //     back = "<a href='javascript:history.back(-1)'>previous</a>&nbsp;&nbsp;";
-        // }
-        // var marker = $('#osds tbody tr').last().find('input').first().val();
-        // var next_page_url = location.pathname + "?marker=" + marker;
-        // //$("tfoot tr td").append("<div class='page'>"+back+"<a href='"+next_page_url+"'>next</a></div>");
-    </script>
 {% endblock %}
