@@ -4165,7 +4165,6 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     setting_ref = vsm_settings_get_by_name(context, 'cpu_diamond_collect_interval', session=session)
-    LOG.info('555555555')
 
     if setting_ref:
 
