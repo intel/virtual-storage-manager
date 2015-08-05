@@ -26,7 +26,7 @@ class Dashboard(horizon.PanelGroup):
 class ClusterMgmt(horizon.PanelGroup):
     slug = "clustermgmt"
     name = _("Cluster Management")
-    panels = ('clustermgmt', 'poolsmanagement', 'storage-group-management')
+    panels = ('clustermgmt', 'cluster-import', 'poolsmanagement', 'storage-group-management')
     #panels = ('clustermgmt', 'poolsmanagement')
 
 class ClusterMonitor(horizon.PanelGroup):
