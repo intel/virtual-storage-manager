@@ -131,7 +131,7 @@ install -p -D -m 640 etc/vsm/api-paste.ini %{buildroot}%{_sysconfdir}/vsm/api-pa
 install -p -D -m 640 etc/vsm/policy.json %{buildroot}%{_sysconfdir}/vsm/policy.json
 install -p -D -m 640 etc/vsm/logging_sample.conf %{buildroot}%{_sysconfdir}/vsm/logging.conf
 install -p -D -m 640 etc/vsm/rootwrap.d/vsm.filters %{buildroot}%{_sysconfdir}/vsm/rootwrap.d/vsm.filters
-install -p -D -m 640 etc/sudoers.d/vsm %{buildroot}%{_sysconfdir}/sudoers.d/vsm
+install -p -D -m 440 etc/sudoers.d/vsm %{buildroot}%{_sysconfdir}/sudoers.d/vsm
 install -p -D -m 640 etc/logrotate.d/vsmceph %{buildroot}%{_sysconfdir}/logrotate.d/vsmceph
 
 #---------------------------
@@ -237,7 +237,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/vsm/rootwrap.d/vsm.filters
 
 #%dir %{_sysconfdir}/sudoers.d
-%config(noreplace) %attr(-, root, vsm) %{_sysconfdir}/sudoers.d/vsm
+%config(noreplace) %attr(-, root, root) %{_sysconfdir}/sudoers.d/vsm
 
 %dir %{_initrddir}
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-physical
