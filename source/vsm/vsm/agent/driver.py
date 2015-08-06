@@ -1848,7 +1848,7 @@ class CephDriver(object):
             cmd = self.make_cmd(args)
         else:
             cmd = args
-        #LOG.debug('command is %s' % cmd)
+        LOG.debug('command is %s' % cmd)
         (out, err) = utils.execute(*cmd, run_as_root=True)
         json_data = None
         if out:
