@@ -1456,6 +1456,19 @@ class CephDriver(object):
 
     def get_available_disks(self, context):
         all_disk = glob.glob('/dev/disk/by-path/*')
+        lines=[]
+        try:
+            f = open('/etc/mtab', "r")
+            lines = f.readlines()
+        except:
+            f.close()
+        finally:
+            f.close()
+        for line in lines:
+            if not line.startswith('/dev'):
+                continue
+            all_disk.append(line.split()[0])
+
         return all_disk
 
     def run_add_disk_hook(self, context):
