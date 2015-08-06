@@ -4703,7 +4703,9 @@ button.close {
 .modal-header {
   padding: 15px;
   border-bottom: 1px solid #e5e5e5;
-  min-height: 16.42857px; }
+  min-height: 16.42857px;
+  background-color: white;
+}
 
 .modal-header .close {
   margin-top: -2px; }
@@ -4714,12 +4716,16 @@ button.close {
 
 .modal-body {
   position: relative;
-  padding: 15px; }
+  padding: 15px;
+  background-color: white;
+}
 
 .modal-footer {
   padding: 15px;
   text-align: right;
-  border-top: 1px solid #e5e5e5; }
+  border-top: 1px solid #e5e5e5;
+  background-color: white;
+}
   .modal-footer:before, .modal-footer:after {
     content: " ";
     display: table; }
@@ -5715,8 +5721,7 @@ h2 {
 
 /* Login Splash Page */
 #splash .login {
-  background-color: #337AB7;
-  background: url('/static/dashboard/img/logo-splash.png') no-repeat left 35px;
+  background:#337AB7 url('/static/dashboard/img/logo-splash.png') no-repeat left 35px;
   position: absolute;
   top: 80px;
   left: 50%;
