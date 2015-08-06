@@ -50,8 +50,6 @@ Options:
     Install the agent node(s), like: --agent ip,ip or hostname with no blank.
   --check-dependence-package
     Check the dependence package if provided the dependence repo.
-  --shared-keystone
-    If the parameter is displayed, vsm will use openstack keystone.
 EOF
     exit 0
 }
@@ -69,7 +67,6 @@ IS_AGENT_INSTALL=False
 NEW_CONTROLLER_ADDRESS=""
 NEW_AGENT_IPS=""
 IS_CHECK_DEPENDENCE_PACKAGE=False
-IS_SHARED_KEYSTONE=False
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -83,7 +80,6 @@ while [ $# -gt 0 ]; do
     --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_ADDRESS=$1 ;;
     --agent) shift; IS_AGENT_INSTALL=True; NEW_AGENT_IPS=$1 ;;
     --check-dependence-package) shift; IS_CHECK_DEPENDENCE_PACKAGE=True ;;
-    --shared-keystone) IS_SHARED_KEYSTONE=True ;;
     *) shift ;;
   esac
   shift
@@ -104,36 +100,7 @@ HOSTNAME=`hostname`
 #HOSTIP=`hostname -I|sed s/[[:space:]]//g`
 HOSTIP=`hostname -I`
 
-source $TOPDIR/hostrc
-
-function input_auth_info() {
-    echo "Please enter your OpenStack Tenant Name: "
-    read -r OS_TENANT_NAME_INPUT
-    echo "Please enter your OpenStack Username: "
-    read -r OS_USERNAME_INPUT
-    echo "Please enter your OpenStack PASSWORD: "
-    read -r OS_PASSWORD_INPUT
-    echo "Please enter your OpenStack KEYSTONE HOST: "
-    read -r OS_KEYSTONE_HOST_INPUT
-    echo "Please enter your OpenStack ADMIN TOKEN, you can find it in /etc/keystone/keystone.conf: "
-    read -r OS_KEYSTONE_ADMIN_TOKEN_INPUT
-    echo "export OS_TENANT_NAME=$OS_TENANT_NAME_INPUT" >>$TOPDIR/openrc.sh
-    echo "export OS_USERNAME=$OS_USERNAME_INPUT" >>$TOPDIR/openrc.sh
-    echo "export OS_PASSWORD=$OS_TENANT_NAME_INPUT" >>$TOPDIR/openrc.sh
-    echo "export OS_KEYSTONE_HOST=$OS_KEYSTONE_HOST_INPUT" >>$TOPDIR/openrc.sh
-    echo "export OS_KEYSTONE_ADMIN_TOKEN=$OS_KEYSTONE_ADMIN_TOKEN_INPUT" >>$TOPDIR/openrc.sh
-    source $TOPDIR/openrc.sh
-}
-if [[ -f $TOPDIR/openrc.sh ]]; then
-    source $TOPDIR/openrc.sh
-    if [[ ! $OS_TENANT_NAME ]] || [[ ! $OS_USERNAME ]] || \
-        [[ ! $OS_PASSWORD ]] || [[ ! $OS_KEYSTONE_HOST ]] || [[ ! $OS_KEYSTONE_ADMIN_TOKEN ]]; then
-        input_auth_info
-    fi
-elif [[ $IS_SHARED_KEYSTONE == True ]]; then
-    input_auth_info
-fi
-
+source $TOPDIR/installrc
 
 if [ -z $MANIFEST_PATH ]; then
     MANIFEST_PATH="manifest"
@@ -259,8 +226,8 @@ function set_remote_repo() {
     $SSH $USER@$1 "$SUDO mv /tmp/vsm-dep-repo /opt"
     $SCP -r vsmrepo $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/vsmrepo /opt"
-    $SSH $USER@$1 "if [[ -f /etc/apt/apt.conf ]]; then $SUDO mv /etc/apt/apt.conf /tmp; \
-        $SUDO echo \"APT::Get::AllowUnauthenticated 1 ;\" >> /tmp/apt.conf; $SUDO mv /tmp/apt.conf /etc/apt; \
+    $SSH $USER@$1 "if [[ -f /etc/apt/apt.conf ]]; then $SUDO mv /etc/apt/apt.conf /tmp; $SUDO chown $USER /tmp/apt.conf; \
+        $SUDO echo \"APT::Get::AllowUnauthenticated 1 ;\" >> /tmp/apt.conf; $SUDO chown root /tmp/apt.conf; $SUDO mv /tmp/apt.conf /etc/apt; \
         else touch /tmp/apt.conf; echo \"APT::Get::AllowUnauthenticated 1 ;\" >> /tmp/apt.conf; \
         $SUDO mv /tmp/apt.conf /etc/apt; fi"
 #    $SCP apt.conf $USER@$1:/etc/apt
@@ -278,7 +245,9 @@ function set_local_repo() {
     $SUDO cp -r vsmrepo /opt
     if [[ -f /etc/apt/apt.conf ]]; then
         $SUDO mv /etc/apt/apt.conf /tmp
+        $SUDO chown $USER /tmp/apt.conf
         $SUDO echo "APT::Get::AllowUnauthenticated 1 ;" >> /tmp/apt.conf
+        $SUDO chown root /tmp/apt.conf
         $SUDO mv /tmp/apt.conf /etc/apt
     else
         touch /tmp/apt.conf
@@ -289,6 +258,7 @@ function set_local_repo() {
     $SUDO cp vsm-dep.list /etc/apt/sources.list.d
     $SUDO apt-get update
 }
+
 function check_manifest() {
     if [[ $1 == $CONTROLLER_ADDRESS ]]; then
         if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/cluster.manifest ]]; then
@@ -317,9 +287,9 @@ function setup_remote_controller() {
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        if [[ $IS_SHARED_KEYSTONE == True ]]; then
+        if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
             $SSH $USER@$CONTROLLER_ADDRESS "$SUDO vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN"
-            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO service keystone stop"
+            $SSH $USER@$CONTROLLER_ADDRESS "if [[ `$SUDO service keystone status|grep running|wc -l` == 1 ]]; then $SUDO service keystone stop; fi"
         else
             $SSH $USER@$CONTROLLER_ADDRESS "$SUDO vsm-controller"
         fi
@@ -350,9 +320,9 @@ function install_controller() {
             echo "please check the cluster.manifest, then try again"
             exit 1
         else
-            if [[ $IS_SHARED_KEYSTONE == True ]]; then
+            if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
                 $SUDO vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN
-                $SUDO service keystone stop
+                if [[ `$SUDO service keystone status|grep running|wc -l` == 1 ]]; then $SUDO service keystone stop; fi
             else
                 $SUDO vsm-controller
             fi
@@ -388,9 +358,9 @@ function install_setup_diamond() {
     $SSH $USER@$1 "$SUDO apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
-    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "find / -name vsmmysql.py|grep vsm/diamond"`
-    HANDLER_PATH=`$SSH $USER@$1 "find / -name handler|grep python"`
-    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "find / -name diamond|grep /etc/diamond"`
+    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
+    HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
+    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
     $SSH $USER@$1 "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
     "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
@@ -457,8 +427,12 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
-    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+    if [[ $IS_CONTROLLER -eq 0 ]]; then
+        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
 $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
+    else
+        TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
+    fi
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
     done
@@ -470,8 +444,12 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
-        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+        if [[ $IS_CONTROLLER -eq 0 ]]; then
+            TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
 $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
+        else
+            TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
+        fi
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname

@@ -73,6 +73,11 @@ Options:
   -p | --password
     password for manage other agents.
     Put it in /etc/vsmdeploy/deployrc
+  --keystone-host
+    The ip of the keystone server. If you provide the keystone-host,
+    you should provide keystone-admin-token, too.
+  --keystone-admin-token
+    The admin_token can be found in /etc/keystone/keystone.conf.
 EOF
     exit 0
 }
@@ -132,6 +137,8 @@ while [ $# -gt 0 ]; do
     -c|--controller-ip) shift; VSM_CONTROLLER_IP=$1 ;;
     -k|--token) shift; VSM_OLD_KEY_FILE=$1 ;;
     -p|--password) shift; AGENT_PASSWORD=$1;;
+    --keystone-host) shift; KEYSTONE_HOST=$1 ;;
+    --keystone-admin-token) shift; ADMIN_TOKEN=$1 ;;
     *) shift ;;
   esac
   shift
@@ -155,7 +162,7 @@ if [[ ! $MYSQL_ROOT_PASSWORD ]]; then
                     source ~/.mysql_password
                 else
                     echo "You have installed and set MySQL ROOT password before."
-                    echo "Please provide it my -m|--mysql parameter."
+                    echo "Please provide it by -m|--mysql parameter."
                     exit 0
                 fi
             fi
@@ -222,6 +229,11 @@ if [[ $VSM_ROLE == "controller" ]]; then
     file=/etc/vsmdeploy/deployrc
     cp -rf $TOPDIR/tools/controllerrc $file
     sed -i "s,%CONTROLLER_IP%,$VSM_CONTROLLER_IP,g" $file
+    if [[ $KEYSTONE_HOST ]]; then
+        sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" $file
+    else
+        sed -i "s,%KEYSTONE_HOST%,$VSM_CONTROLLER_IP,g" $file
+    fi
     set_password MYSQL_ROOT_PASSWORD
     set_password RABBITMQ_PASSWORD
     set_password MYSQL_KEYSTONE_PASSWORD
@@ -252,4 +264,3 @@ if [[ $VSM_ROLE == "allinone" ]]; then
 fi
 
 [[ -e /usr/local/bin/vsm-installer ]] && vsm-installer /etc/vsmdeploy/deployrc
-
