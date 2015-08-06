@@ -132,11 +132,12 @@ class AddOSDView(TemplateView):
             })
         
         return context
-
-def DevicesAction(request, action):
+def get_smart_info(request):
+#def DevicesAction(request, action):
     data = json.loads(request.body)
 
     device_data_dict = device_get_smartinfo(request,str(data["osd_id"]),data["device_path"])
+    print 'device_data_dict===',device_data_dict
     if device_data_dict == None:
         devicedata = json.dumps({"data":""})
         return HttpResponse(devicedata)
