@@ -132,34 +132,25 @@ class AddOSDView(TemplateView):
             })
         
         return context
+
 def get_smart_info(request):
-#def DevicesAction(request, action):
     data = json.loads(request.body)
 
     device_data_dict = device_get_smartinfo(request,str(data["osd_id"]),data["device_path"])
-    device_data_json = device_data_dict
-    #device_data_json
-    # for data in device_data_str.split("\n"):
-    #     data_list = data.split("=")
-    #     data_list_len = len(data_list)
-    #     if data_list_len == 1:
-    #         device_data_dict[data_list[0]] = ""
-    #     if data_list_len == 2:
-    #         device_data_dict[data_list[0]] = data_list[1]
-    #         device_data_json = {
-    #             "basic":{"status":device_data_dict["Drive Status"],
-    #                    "family":device_data_dict["Drive Family"],
-    #                    "seriesNumber":device_data_dict["Serial Number"],
-    #                    "firmware":device_data_dict["Firmware"],
-    #                    "totalCapacity":device_data_dict["Capacity in total"],
-    #                    "usedCapacity":device_data_dict["Capacity in use"],
-    #             },
-    #             "smart":{"percentageUsed":device_data_dict["Percentage Used"],
-    #                    "temperature":device_data_dict["Temperature"],
-    #                    "unitRead":str(int(device_data_dict["Data Units Read"],16)),
-    #                    "unitWRITE":device_data_dict["Data Units Written"],
-    #             }
-    #         }
+    device_data_json = {
+        "basic":{
+             "DriveFamily":device_data_dict["basic"].get("Drive Family")
+            ,"SerialNumber":device_data_dict["basic"].get("Serial Number")
+            ,"FirmwareVersion":device_data_dict["basic"].get("Firmware Version")
+            ,"DriveStatus":device_data_dict["basic"].get("Drive Status")
+        }
+        ,"smart":[]
+    }
+
+    for _smart_item in device_data_dict["smart"].iteritems():
+        _item = {"key":_smart_item[0],"value":_smart_item[1]}
+        device_data_json["smart"].append(_item)
+
     devicedata = json.dumps(device_data_json)
     return HttpResponse(devicedata)
 

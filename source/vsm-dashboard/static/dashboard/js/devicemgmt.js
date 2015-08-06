@@ -146,18 +146,21 @@ function getStateData(osd_id,device_tag){
 				
 	        	var basicInfo = data.basic;
 				var smartInfo = data.smart;
-				$("#lblStatus")[0].innerHTML = basicInfo.status;
-				$("#lblFamily")[0].innerHTML =  basicInfo.family;
-				$("#lblSeriesNumber")[0].innerHTML =  basicInfo.seriesNumber;
-				$("#lblFirmware")[0].innerHTML =  basicInfo.firmware;
-				$("#lblTotalCapacity")[0].innerHTML =  basicInfo.totalCapacity;
-				$("#lblUsedCapacity")[0].innerHTML =  basicInfo.usedCapacity;
+				$("#lblStatus")[0].innerHTML = basicInfo.DriveStatus;
+				$("#lblFamily")[0].innerHTML =  basicInfo.DriveFamily;
+				$("#lblSeriesNumber")[0].innerHTML =  basicInfo.SerialNumber;
+				$("#lblFirmware")[0].innerHTML =  basicInfo.FirmwareVersion;
 
-	            $("#lblPercentageUsed")[0].innerHTML = smartInfo.percentageUsed
-				$("#lblTemperature")[0].innerHTML = smartInfo.temperature;
-				$("#lblUnitRead")[0].innerHTML = smartInfo.unitRead;
-				$("#lblUnitWRITE")[0].innerHTML = smartInfo.unitWRITE;
-				$("#modal_wrapper").find(".modal-body")[0].innerHTML = $("#divOSDInfo")[0].innerHTML;
+                //Get smart info
+                $("#tSmartInfo>tbody").empty();
+                for(var i=0;i<smartInfo.length;i++) {
+                    var smart_row = "";
+                    smart_row += "<tr>";
+                    smart_row += "<td>" + smartInfo[i].key + "</td>";
+                    smart_row += "<td><span class='span-label'>" + smartInfo[i].value + "</span></td>";
+                    smart_row += "</tr>";
+                    $("#tSmartInfo>tbody").append(smart_row);
+                }
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){
