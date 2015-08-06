@@ -152,10 +152,10 @@ function check_vsm_package() {
 }
 
 function set_iptables_and_selinux() {
-    $SSH $USER@$1 "systemctl stop firewalld"
-    $SSH $USER@$1 "systemctl disable firewalld"
-    $SSH $USER@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
-    $SSH $USER@$1 "setenforce 0"
+    $SSH $USER@$1 "$SUDO systemctl stop firewalld"
+    $SSH $USER@$1 "$SUDO systemctl disable firewalld"
+    $SSH $USER@$1 "$SUDO sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
+    $SSH $USER@$1 "if [[ `$SUDO getenforce` != \"Disabled\" ]]; then $SUDO setenforce 0; fi"
 }
 
 function download_dependencies() {
@@ -283,10 +283,10 @@ function setup_remote_controller() {
         exit 1
     else
         if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
-            $SSH $USER@$CONTROLLER_ADDRESS "vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN"
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN"
             $SSH $USER@$CONTROLLER_ADDRESS "if [[ `$SUDO service openstack-keystone status|grep running|wc -l` == 1 ]]; then $SUDO service openstack-keystone stop; fi"
         else
-            $SSH $USER@$CONTROLLER_ADDRESS "vsm-controller"
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH vsm-controller"
         fi
     fi
 }
@@ -297,9 +297,9 @@ function install_controller() {
     if [[ $IS_CONTROLLER -eq 0 ]]; then
         set_remote_repo $CONTROLLER_ADDRESS
         set_iptables_and_selinux $CONTROLLER_ADDRESS
-        $SSH $USER@$CONTROLLER_ADDRESS "sed -i \"s/keepcache=0/keepcache=1/g\" /etc/yum.conf"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO sed -i \"s/keepcache=0/keepcache=1/g\" /etc/yum.conf"
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
-        $SSH $USER@$CONTROLLER_ADDRESS "preinstall"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH preinstall"
         setup_remote_controller
         $SSH $USER@CONTROLLER_ADDRESS "$SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
         for i in `ls`; do if [[ -d $i/packages ]]; then $SUDO cp $i/packages/*.rpm /tmp/vsm-dep-repo >/dev/null 2>&1; fi; done"
@@ -313,9 +313,10 @@ function install_controller() {
         $SUDO systemctl stop firewalld
         $SUDO systemctl disable firewalld
         $SUDO sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
-        sed -i "s/keepcache=0/keepcache=1/g" /etc/yum.conf
+        if [[ `$SUDO getenforce` != "Disabled" ]]; then $SUDO setenforce 0; fi
+        $SUDO sed -i "s/keepcache=0/keepcache=1/g" /etc/yum.conf
         $SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient
-        preinstall
+        $SUDO env PATH=$PATH preinstall
         $SUDO rm -rf /etc/manifest/cluster.manifest
         $SUDO cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
         $SUDO chown root:vsm /etc/manifest/cluster.manifest
@@ -325,10 +326,10 @@ function install_controller() {
             exit 1
         else
             if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
-                vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN
+                $SUDO env PATH=$PATH vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN
                 if [[ `$SUDO service openstack-keystone status|grep running|wc -l` == 1 ]]; then $SUDO service openstack-keystone stop; fi
             else
-                vsm-controller
+                $SUDO env PATH=$PATH vsm-controller
             fi
         fi
         $SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
@@ -414,7 +415,7 @@ function setup_remote_agent() {
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
     else
-        $SSH $USER@$1 "vsm-node"
+        $SSH $USER@$1 "$SUDO env PATH=$PATH vsm-node"
     fi
 }
 
@@ -424,11 +425,11 @@ function install_agent() {
     set_remote_repo $1
     set_iptables_and_selinux $1
     $SSH $USER@$1 "$SUDO yum install -y vsm vsm-deploy"
-    $SSH $USER@$1 "preinstall"
+    $SSH $USER@$1 "$SUDO env PATH=$PATH preinstall"
 
     setup_remote_agent $1
-#    install_setup_diamond $1
-    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ -d /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; rm -rf /tmp/backup; fi"
+    install_setup_diamond $1
+    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ -d /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; $SUDO rm -rf /tmp/backup; fi"
 }
 
 #-------------------------------------------------------------------------------
