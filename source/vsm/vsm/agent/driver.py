@@ -1426,13 +1426,23 @@ class CephDriver(object):
     def get_smart_info(self, context, device):
         attributes, err = utils.execute('smartctl', '-A', device, run_as_root=True)
         start_line = self.find_attr_start_line(attributes)
-        smart_info_dict = {}
+        smart_info_dict = {'basic':{},'smart':{}}
         if start_line < 10:
             for attr in attributes[start_line:]:
                 attribute = attr.split()
                 if attribute[1] != "Unknown_Attribute":
-                    smart_info_dict[attribute[1]] = attribute[9]
+                    smart_info_dict['smart'][attribute[1]] = attribute[9]
         LOG.info("get_smart_info_dict:%s"%(smart_info_dict))
+        basic_info, err = utils.execute('smartctl', '-i', device, run_as_root=True)
+        if len(basic_info)>=5:
+            for info in basic_info[4:]:
+                info_list = info.split(':')
+                if len(info_list) == 2:
+                    smart_info_dict['basic'][info_list[0]] = info_list[1]
+        status_info,err = utils.execute('smartctl', '-H', device, run_as_root=True)
+        if len(status_info)==5:
+            status_list = status_info[4].split(':')
+            if len(status_list)== 2:smart_info_dict['basic']['Device Status'] = status_info[4].split(':')
         return smart_info_dict
 
     def get_available_disks(self, context):
