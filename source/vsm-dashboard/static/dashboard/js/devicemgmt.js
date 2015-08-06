@@ -131,10 +131,10 @@ function getStateData(osd_id,device_tag){
 	});
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
-	var postData = JSON.stringify({"osd_id":osd_id,"action":"get_smart_info"});
+	var postData = JSON.stringify({"osd_id":osd_id,"device_path":device_path});
 	$.ajax({
 		type: "post",
-		url: "/dashboard/vsm/devices-management/devices/state",
+		url: "/dashboard/vsm/devices-management/get_smart_info/",
 		data: postData,
 		dataType:"json",
 		success: function(data){

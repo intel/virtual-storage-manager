@@ -97,8 +97,6 @@ class Controller(wsgi.Controller):
         context = req.environ['vsm.context']
         device_id = req.GET.get('device_id',None)
         device_path = req.GET.get('device_path',None)
-        action = req.GET.get('action',None)
-        LOG.info('params--------- %s:%s'%(device_id,action))
         if device_id:
                 body = {'server': db.init_node_get_by_device_id(context,device_id),
                         'device_path': device_path

@@ -16,7 +16,7 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView
-from .views import DevicesAction
+#from .views import DevicesAction
 from .views import AddOSDView,get_osd_list,add_new_osd_action,check_device_path,get_smart_info
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
@@ -25,7 +25,7 @@ urlpatterns = patterns('',
     url(r'^add_new_osd_action/$', add_new_osd_action, name='add_new_osd_action'),
     url(r'^check_device_path/$', check_device_path, name='check_device_path'),
     url(r'^get_smart_info/$', get_smart_info, name='get_smart_info'),
-    url(r'^devices/(?P<action>\w+)$', DevicesAction, name='devicesaction'),
+    #url(r'^devices/(?P<action>\w+)$', DevicesAction, name='devicesaction'),
     url(r'/', IndexView.as_view(), name='index'),
 )
 

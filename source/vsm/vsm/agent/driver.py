@@ -1402,7 +1402,6 @@ class CephDriver(object):
             out, err = utils.execute('vsm',
                                      '--version',
                                      run_as_root=True)
-            LOG.info("get_vsm_version:%s--%s"%(out,err))
         except:
             out = '2.0'
         return out
@@ -1426,13 +1425,13 @@ class CephDriver(object):
 
     def get_smart_info(self, context, device):
         attributes, err = utils.execute('smartctl', '-A', device, run_as_root=True)
-        LOG.info("get_smart_info:%s--%s"%(attributes,err))
         start_line = self.find_attr_start_line(attributes)
         smart_info_dict = {}
-        for attr in attributes[start_line:]:
-            attribute = attr.split()
-            if attribute[1] != "Unknown_Attribute":
-                smart_info_dict[attribute[1]] = attribute[9]
+        if start_line < 10:
+            for attr in attributes[start_line:]:
+                attribute = attr.split()
+                if attribute[1] != "Unknown_Attribute":
+                    smart_info_dict[attribute[1]] = attribute[9]
         LOG.info("get_smart_info_dict:%s"%(smart_info_dict))
         return smart_info_dict
 

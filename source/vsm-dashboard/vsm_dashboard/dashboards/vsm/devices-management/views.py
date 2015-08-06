@@ -137,10 +137,6 @@ def get_smart_info(request):
     data = json.loads(request.body)
 
     device_data_dict = device_get_smartinfo(request,str(data["osd_id"]),data["device_path"])
-    print 'device_data_dict===',device_data_dict
-    if device_data_dict == None:
-        devicedata = json.dumps({"data":""})
-        return HttpResponse(devicedata)
     device_data_json = device_data_dict
     #device_data_json
     # for data in device_data_str.split("\n"):
@@ -164,7 +160,6 @@ def get_smart_info(request):
     #                    "unitWRITE":device_data_dict["Data Units Written"],
     #             }
     #         }
-
     devicedata = json.dumps(device_data_json)
     return HttpResponse(devicedata)
 
