@@ -1432,7 +1432,7 @@ class CephDriver(object):
                 attribute = attr.split()
                 if attribute[1] != "Unknown_Attribute":
                     smart_info_dict['smart'][attribute[1]] = attribute[9]
-        LOG.info("get_smart_info_dict:%s"%(smart_info_dict))
+
 
         basic_info, err = utils.execute('smartctl', '-i', device, run_as_root=True)
         basic_info_dict = {}
@@ -1441,15 +1441,17 @@ class CephDriver(object):
                 info_list = info.split(':')
                 if len(info_list) == 2:
                     basic_info_dict[info_list[0]] = info_list[1]
-        smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('Device Model')
-        smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('Serial Number')
-        smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('Device Model')
+        smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('Device Model') or ''
+        smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('Serial Number') or ''
+        smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('Device Model') or ''
 
         status_info,err = utils.execute('smartctl', '-H', device, run_as_root=True)
+        smart_info_dict['basic']['Drive Status'] = ''
         if len(status_info)==5:
             status_list = status_info[4].split(':')
             if len(status_list)== 2:
-                smart_info_dict['basic']['Drive Status'] = status_info[4].split(':')
+                smart_info_dict['basic']['Drive Status'] = status_list[1]
+        LOG.info("get_smart_info_dict:%s"%(smart_info_dict))
         return smart_info_dict
 
     def get_available_disks(self, context):
