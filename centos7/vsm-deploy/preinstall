@@ -1,2 +1,1 @@
-yum install -y ceph httpd librbd* mariadb mariadb-devel mariadb-server memcached ntp openssh-server openssl openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy
-
+yum install -y ceph httpd librbd* mariadb mariadb-devel mariadb-server memcached ntp openssh-server openssl openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse

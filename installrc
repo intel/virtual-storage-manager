@@ -1,0 +1,21 @@
+# AGENT_ADDRESS_LIST should be split by blank.
+# AGENT_ADDRESS_LIST and CONTROLLER_ADDRESS can be set ip or hostname.
+#AGENT_ADDRESS_LIST="10.0.0.11 10.0.0.12 10.0.0.13"
+#CONTROLLER_ADDRESS="10.0.0.10"
+
+
+# If you want to use OpenStack Keystone, you should set as followed. The admin-token
+# can be found in /etc/keystone/keystone.conf.
+#OS_TENANT_NAME=admin
+#OS_USERNAME=admin
+#OS_PASSWORD=admin
+#OS_KEYSTONE_HOST=10.0.0.10
+#OS_KEYSTONE_ADMIN_TOKEN=9cce7e100280e928521b
+
+
+# If you want to use OpenStack MySQL, you should set as followed[not supported].
+#MYSQL_HOST=10.0.0.10
+
+
+# If you want to use OpenStack Message Queue, you should set as followed[not supported].
+#MQ_HOST=10.0.0.10

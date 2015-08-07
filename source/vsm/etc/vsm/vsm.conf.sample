@@ -10,3 +10,9 @@ sql_connection = mysql://%MYSQL_VSM_USER%:%MYSQL_VSM_PASSWORD%@%MYSQL_HOST%/vsm?
 verbose = True
 auth_strategy = keystone
 
+[keystone_authtoken]
+auth_uri = http://%KEYSTONE_HOST%:5000/v2.0
+identity_uri = http://%KEYSTONE_HOST%:35357
+admin_tenant_name = service
+admin_user = vsm
+admin_password = %KEYSTONE_VSM_SERVICE_PASSWORD%
