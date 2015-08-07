@@ -1602,9 +1602,8 @@ class AgentManager(manager.Manager):
         name = body.get('name')
         value = body.get('value')
         confs = {}
-        collect_name = ''
         if name in ['cpu_diamond_collect_interval','ceph_diamond_collect_interval']:
-            if value == 0:
+            if int(value) == 0:
                 confs['enabled'] = False
             else:
                 confs['enabled'] = True
