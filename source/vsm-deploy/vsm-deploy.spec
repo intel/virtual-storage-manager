@@ -62,6 +62,7 @@ install -p -D -m 755 etc/systemd/system/epmd.socket %{buildroot}%{_sysconfdir}/s
 install -p -D -m 755 restart-all %{buildroot}%{_usr}/bin/restart-all
 install -p -D -m 755 sync-code %{buildroot}%{_usr}/bin/sync-code
 install -p -D -m 755 replace-str %{buildroot}%{_usr}/bin/replace-str
+install -p -D -m 755 tools/hooks/add_disk.sh %{buildroot}%{_bindir}/add_disk
 
 install -p -D -m 755 clean-data %{buildroot}%{_usr}/bin/clean-data
 install -p -D -m 755 __clean-data %{buildroot}%{_usr}/bin/__clean-data

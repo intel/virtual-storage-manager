@@ -105,3 +105,21 @@ class DeviceManager(base.ManagerWithFind):
         if message:
             ret = {"ret":0,'message':'.'.join(message)}
         return ret
+
+    def get_smart_info(self, search_opts=None):
+        """
+        Get a dict of smart info
+        """
+        if search_opts is None:
+            search_opts = {}
+
+        qparams = {}
+
+        for opt, val in search_opts.iteritems():
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+        resp, body = self.api.client.get("/devices/get_smart_info%s" % (query_string))
+        smart_info = body.get("smart_info")
+        return smart_info

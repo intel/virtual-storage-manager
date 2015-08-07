@@ -51,6 +51,9 @@
           <td class="sortable normal_column">{{ setting.value }}</td>
           <td class="sortable normal_column">
               <input type="text" value="{{ setting.value }}" class="new_value"/>
+              {% if  setting.verbose_name  == 'CPU_DIAMOND_COLLECT_INTERVAL' or setting.verbose_name  == 'CEPH_DIAMOND_COLLECT_INTERVAL'  %}
+              <input id="id_enable_{{ setting.verbose_name }}" class="enable_or_disable" type="checkbox" name="enable_collect" > Disable
+              {% else %}{% endif %}
           </td>
           <td class="sortable normal_column">
               <a href="#" class="btn btn-primary update">Update</a>

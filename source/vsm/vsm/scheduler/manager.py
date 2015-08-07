@@ -1481,10 +1481,11 @@ class SchedulerManager(manager.Manager):
 
     def get_smart_info(self, context, body):
         ser = body['server']
+        device = body['device_path']
         status = ser['status']
         host =  ser['host']
         if status == 'Active' or status == 'available':
-            res = self._agent_rpcapi.get_smart_info(context,host)
+            res = self._agent_rpcapi.get_smart_info(context, host, device)
             return res
 
     @utils.single_lock

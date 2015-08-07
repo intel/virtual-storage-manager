@@ -50,7 +50,7 @@ def SettingsAction(request, action):
             #vsmapi.add_servers(request, data)
             try:
                 setting_value = int(data['keyValue'])
-                if 0 < setting_value < 21600:
+                if 0 < setting_value < 21600 or setting_value==0:
                     vsmapi.update_setting(request, data['keyName'], data['keyValue'])
                     status = "success"
                     msg = "Update Success"
