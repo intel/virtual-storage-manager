@@ -32,4 +32,18 @@ $(".update").click(function(){
     });
 });
 
+$(".enable_or_disable").click(function(){
+    //console.log('clicked checkbox:', this);
+    if (this.checked){
+        this.parentNode.children[0].value = 0;
+        this.parentNode.children[0].disabled= true;
+    }
+    else{
+        this.parentNode.children[0].value = this.parentNode.parentNode.children[1].innerHTML;
+        this.parentNode.children[0].disabled = false;
+    }
+});
+
+
+
 
