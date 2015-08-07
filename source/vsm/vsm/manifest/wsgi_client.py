@@ -37,8 +37,8 @@ class WSGIClient(object):
     def __init__(self, vsm_api_ip='vsm_api_ip', info='token-tenantid'):
         """Initialized the url requestion and RUL."""
         self._vsm_api_ip = vsm_api_ip
-        self._token = info.split('-')[0]
-        self._tenant_id = info.split('-')[1]
+        self._token = "-".join(info.split("-")[0:-1])
+        self._tenant_id = info.split("-")[-1]
         self._vsm_url = "http://%s:%s/v1/%s" % \
                         (self._vsm_api_ip,
                          8778,
