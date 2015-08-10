@@ -299,7 +299,7 @@ function install_controller() {
         set_iptables_and_selinux $CONTROLLER_ADDRESS
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO sed -i \"s/keepcache=0/keepcache=1/g\" /etc/yum.conf"
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
-        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH preinstall"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH preinstall controller"
         setup_remote_controller
         $SSH $USER@CONTROLLER_ADDRESS "$SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
         for i in `ls`; do if [[ -d $i/packages ]]; then $SUDO cp $i/packages/*.rpm /tmp/vsm-dep-repo >/dev/null 2>&1; fi; done"
@@ -316,7 +316,7 @@ function install_controller() {
         if [[ `$SUDO getenforce` != "Disabled" ]]; then $SUDO setenforce 0; fi
         $SUDO sed -i "s/keepcache=0/keepcache=1/g" /etc/yum.conf
         $SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient
-        $SUDO env PATH=$PATH preinstall
+        $SUDO env PATH=$PATH preinstall controller
         $SUDO rm -rf /etc/manifest/cluster.manifest
         $SUDO cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
         $SUDO chown root:vsm /etc/manifest/cluster.manifest
@@ -425,7 +425,7 @@ function install_agent() {
     set_remote_repo $1
     set_iptables_and_selinux $1
     $SSH $USER@$1 "$SUDO yum install -y vsm vsm-deploy"
-    $SSH $USER@$1 "$SUDO env PATH=$PATH preinstall"
+    $SSH $USER@$1 "$SUDO env PATH=$PATH preinstall agent"
 
     setup_remote_agent $1
     install_setup_diamond $1

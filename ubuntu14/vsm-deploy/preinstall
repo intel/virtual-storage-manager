@@ -1,6 +1,21 @@
 #!/bin/bash
 
-debconf-set-selections <<< 'maria-db-server mysql-server/root_password password root'
-debconf-set-selections <<< 'maria-db-server mysql-server/root_password_again password root'
+function preinstall_controller() {
+    debconf-set-selections <<< 'maria-db-server mysql-server/root_password password root'
+    debconf-set-selections <<< 'maria-db-server mysql-server/root_password_again password root'
+    apt-get install -y ceph ceph-mds apache2 libapache2-mod-wsgi librbd* mariadb-server memcached ntp openssh-server openssl keystone rabbitmq-server rbd-fuse expect  smartmontools
+}
 
-apt-get install -y ceph ceph-mds apache2 libapache2-mod-wsgi librbd* mariadb-server memcached ntp openssh-server openssl keystone rabbitmq-server rbd-fuse expect  smartmontools
+function preinstall_agent() {
+    apt-get install -y ceph ceph-mds librbd* rbd-fuse ntp openssh-server python-keystoneclient smartmontools
+}
+
+if [[ $1 ]]; then
+    if [[ $1 == "agent" ]]; then
+        preinstall_agent
+    else
+        preinstall_controller
+    fi
+else
+    preinstall_controller
+fi
