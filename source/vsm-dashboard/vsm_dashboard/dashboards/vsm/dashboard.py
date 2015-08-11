@@ -39,7 +39,7 @@ class ServerMgmt(horizon.PanelGroup):
     slug = "servermgmt"
     name = _("Server Management")
     panels = ('storageservermgmt', 'devices-management',)
-
+u
 class OpenstackMgmt(horizon.PanelGroup):
     slug = "openstackmgmt"
     name = _("OpenStack Integration")

@@ -99,7 +99,7 @@ class IndexView(tables.DataTableView):
             servers.append(server)
         return servers
 
-class CreateClusterView(ModalEditTableMixin, tables.DataTableView):
+class ImportClusterView(ModalEditTableMixin, tables.DataTableView):
     table_class = CreateClusterTable
     template_name = 'vsm/flocking/createcluster.html'
     #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
@@ -162,14 +162,10 @@ def ClusterAction(request, action):
         status = "error"
         msg = "No server selected"
     else:
-        if action == "create":
-            vsmapi.create_cluster(request, data)
+        if action == "import":
+            vsmapi.import_cluster(request, data)
             status = "info"
-            msg = "Began to Create Cluster"
-        elif action == "integrate":
-            vsmapi.integrate_cluster(request, data)
-            status = "info"
-            msg = "Began to integrate Cluster"
+            msg = "Began to import Cluster"
         else:
             status = "info"
             msg = "Began to Create Cluster"
