@@ -99,6 +99,7 @@ cat: CommandFilter, /bin/cat, root
 diamond: CommandFilter, /usr/local/bin/diamond, root
 smartctl: CommandFilter, /usr/sbin/smartctl, root
 kill_diamond: CommandFilter, /usr/bin/kill_diamond, root
+vsm-ceph-upgrade: CommandFilter, /usr/bin/vsm-ceph-upgrade, root
 add_disk: CommandFilter, /usr/local/bin/tools/hooks/add_disk, root
 
 # vsm/storage/nfs.py
