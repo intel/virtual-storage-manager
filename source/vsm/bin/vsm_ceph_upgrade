@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+set -e
+set -o xtrace
+
+
+#---------------------------------------------
+# Usage
+#---------------------------------------------
+
+function usage() {
+    cat << EOF
+Usage: vsm-ceph-upgrade
+
+for example:
+    Only upgrade  ceph in this host: vsm-ceph-upgrade -p http://ceph.com/debian-hammer/ -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+
+Options:
+  --help | -h
+    Print usage information.
+  --pkg_url | -p
+    pkg_url.
+  --key_url | -k
+    key_url.
+EOF
+    exit 0
+}
+
+for n in `ls $TOPDIR/tools/lib/check`; do
+    source $TOPDIR/tools/lib/check/$n
+done
+
+function ceph-upgrade() {
+wget -q -O- `$KEY_URL` | sudo apt-key add -
+echo deb $PKG_URL $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list;
+rm -rf /var/lib/dpkg/info-bak;
+mv /var/lib/dpkg/info/ /var/lib/dpkg/info-bak;
+mkdir -p /var/lib/dpkg/info;
+apt-get update && apt-get install -y ceph ceph-common ceph-mds;
+sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
+
+}
+
+#---------------------------------------------
+# Read Parameters.
+#---------------------------------------------
+
+parameter_count=$#
+echo '--parameter_count-'
+echo $parameter_count
+parameters=$*
+echo '--parameters-'
+echo $parameters
+PKG_URL=''
+KEY_URL=''
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h) usage ;;
+    --help) usage ;;
+    -p | --pkg_url) shift;PKG_URL=$1;;
+    -k | --key_url) shift;KEY_URL=$1;;
+    *) shift ;;
+  esac
+  shift
+done
+
+if [[ $parameter_count -eq 4) ]]; then
+	ceph-upgrade
+fi
+
+set +o xtrace
+
+

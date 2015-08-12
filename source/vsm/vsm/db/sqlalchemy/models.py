@@ -580,6 +580,7 @@ class InitNode(BASE, VsmBase):
     __tablename__ = 'init_nodes'
     id = Column(Integer, primary_key=True, nullable=False)
     host = Column(String(length=255), nullable=True)
+    ceph_ver = Column(String(length=255), nullable=True)
     service_id = Column(Integer, ForeignKey('services.id'), nullable=False)
     service = relationship(Service,
                             backref=backref('init_node'),

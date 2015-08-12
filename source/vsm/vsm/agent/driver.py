@@ -1373,6 +1373,23 @@ class CephDriver(object):
                                                 values)
         return True
 
+    def ceph_upgrade(self, context, node_id, key_url, pkg_url):
+        """ceph_upgrade
+        """
+        LOG.info('agent/driver.py ceph_upgrade')
+        err = 'error'
+        try:
+            out, err = utils.execute('vsm_ceph_upgrade','-k',
+                             key_url,'-p', pkg_url,
+                             run_as_root=True)
+            LOG.info("exec vsm_ceph_upgrade:%s--%s"%(out,err))
+            self.stop_server(context, node_id)
+            self.start_server(context, node_id)
+        except:
+            LOG.info("vsm_ceph_upgrade error:%s"%err)
+            return err
+        return True
+
     def get_ceph_health(self, context):
         out, err = utils.execute('ceph',
                                  'health',
@@ -1391,7 +1408,6 @@ class CephDriver(object):
             out, err = utils.execute('ceph',
                                      '--version',
                                      run_as_root=True)
-            LOG.info("get_ceph_version:%s--%s"%(out,err))
             out = out.split(' ')[2]
         except:
             out = ''

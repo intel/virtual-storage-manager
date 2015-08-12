@@ -126,7 +126,8 @@ class APIRouter(vsm.api.openstack.APIRouter):
                                     "remove": "post",
                                     "reset_status": "post",
                                     "start": "post",
-                                    "stop": "post"},
+                                    "stop": "post",
+                                    "ceph_upgrade": "post"},
                         member={'action':'post'})
 
         self.resources['agents'] = agents.create_resource(ext_mgr)

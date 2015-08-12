@@ -156,6 +156,13 @@ class ServerManager(base.ManagerWithFind):
         url = "/servers/stop"
         return self.api.client.post(url, body={"servers":servers})
 
+    def ceph_upgrade(self, servers=None):
+        """
+        Stop servers
+        """
+        url = "/servers/ceph_upgrade"
+        return self.api.client.post(url, body={"servers":servers})
+
     def initialize_connection(self, vsm, connector):
         """
         Initialize a vsm connection.

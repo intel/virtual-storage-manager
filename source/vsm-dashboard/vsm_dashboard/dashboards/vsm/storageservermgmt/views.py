@@ -72,7 +72,7 @@ class IndexView(tables.DataTableView):
         servers = get_server_list(self.request, )
         return servers
 
-#Edit the class by XuShouan
+
 class AddServersView(tables.DataTableView):
     table_class = AddServerTable
     verbose_name = "Add Servers"
@@ -89,7 +89,7 @@ class AddServersView(tables.DataTableView):
 
         return servers
 
-#Edit the class by XuShouan
+
 class RemoveServersView(tables.DataTableView):
     table_class = RemoveServerTable
     verbose_name = "Remove Servers"
@@ -99,7 +99,7 @@ class RemoveServersView(tables.DataTableView):
         return get_server_list(self.request, lambda x: x['status'] in ("Active", "999999999"))
 
 
-#Edit the class by XuShouan
+
 class AddMonitorsView(tables.DataTableView):
     table_class = AddMonitorTable
     template_name = 'vsm/storageservermgmt/serversaction.html'
@@ -112,7 +112,7 @@ class AddMonitorsView(tables.DataTableView):
             del server['is_monitor']
         return servers
 
-#Edit the class by XuShouan
+
 class RemoveMonitorsView(tables.DataTableView):
     table_class = RemoveMonitorTable
     template_name = 'vsm/storageservermgmt/serversaction.html'
@@ -125,7 +125,7 @@ class RemoveMonitorsView(tables.DataTableView):
         return servers
 
 
-#Edit the class by XuShouan
+
 class StartServersView(tables.DataTableView):
     table_class = StartServerTable
     template_name = 'vsm/storageservermgmt/serversaction.html'
@@ -133,7 +133,7 @@ class StartServersView(tables.DataTableView):
     def get_data(self):
         return get_server_list(self.request, lambda x:x['status'] == "Stopped")
 
-#Edit the class by XuShouan
+
 class StopServersView(tables.DataTableView):
     table_class = StopServerTable
     template_name = 'vsm/storageservermgmt/serversaction.html'
@@ -141,6 +141,9 @@ class StopServersView(tables.DataTableView):
     def get_data(self):
         return get_server_list(self.request, lambda x:x['status'] == "Active")
 
+class CephUpgradeView(tables.DataTableView):
+    template_name = 'vsm/storageservermgmt/cephupgrade.html'
+    verbose_name = "Ceph Upgrade"
 
 
 

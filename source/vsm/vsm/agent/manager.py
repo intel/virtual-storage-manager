@@ -826,6 +826,9 @@ class AgentManager(manager.Manager):
     def stop_server(self, context, node_id):
         return self.ceph_driver.stop_server(context, node_id)
 
+    def ceph_upgrade(self, context, node_id, key_url, pkg_url):
+        return self.ceph_driver.ceph_upgrade(context, node_id, key_url, pkg_url)
+
     def start_cluster(self, context):
         self.ceph_driver.start_cluster(context)
         utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
@@ -1077,9 +1080,10 @@ class AgentManager(manager.Manager):
         return pg_num
     @periodic_task(run_immediately=True,
                    service_topic=FLAGS.agent_topic,
-                   spacing=FLAGS.update_smartdev_info)
-    def update_smart_device(self, context):
-        pass#TODO modify the structrue of table devices and reflush values of column
+                   spacing=FLAGS.update_ceph_version_info)
+    def get_ceph_version_to_db(self, context):
+        ceph_ver = self.ceph_driver.get_ceph_version()
+        db.init_node_update(context,self._init_node_id,{'ceph_ver':ceph_ver})
     @periodic_task(run_immediately=True,
                    service_topic=FLAGS.agent_topic,
                    spacing=FLAGS.reset_pg_heart_beat)

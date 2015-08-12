@@ -921,6 +921,41 @@ class SchedulerManager(manager.Manager):
         return True
 
     @utils.single_lock
+    def ceph_upgrade(self, context, body=None):
+        """upgrade ceph.
+           body = {u'servers': [{u'cluster_id': 1, u'id': u'1','host':''},
+                        {u'cluster_id': 1, u'id': u'2','host':''}],
+                        'key_url':"https://...",
+                        'pkg_url':"https://..."}
+        """
+        LOG.info("DEBUG in ceph upgrade in scheduler manager.")
+        server_list = body.get['servers']
+        if not server_list:
+            server_list = db.init_node_get_all(context)
+        key_url = body['key_url']
+        pkg_url = body['pkg_url']
+        LOG.info("ceph upgrade of scheduer manager %s" % server_list)
+
+        for item in server_list:
+            self._conductor_api.init_node_update(context, item['id'],{"status": "ceph upgrading"})
+            try:
+                self._agent_rpcapi.ceph_upgrade(context, item['id'], item['host'], key_url, pkg_url)
+            except rpc_exc.Timeout:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'rpc timeout error: check network')
+            except rpc_exc.RemoteError:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'rpc remote error: check network')
+            except:
+                self._update_server_list_status(context,
+                                                server_list,
+                                                'ERROR')
+                raise
+        return True
+
+    @utils.single_lock
     def start_server(self, context, body=None):
         """Start all osd service, then start the server.
            body = {u'servers': [{u'cluster_id': 1, u'id': u'1'},

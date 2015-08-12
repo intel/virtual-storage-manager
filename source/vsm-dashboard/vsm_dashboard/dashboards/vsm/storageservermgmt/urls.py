@@ -26,6 +26,7 @@ from .views import RemoveMonitorsView
 from .views import StartServersView
 from .views import StopServersView
 from .views import ResetStatus
+from .views import CephUpgradeView
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
@@ -35,6 +36,7 @@ urlpatterns = patterns('',
     url(r'^removemonitorsview/$', RemoveMonitorsView.as_view(), name='removemonitorsview'),
     url(r'^startserversview/$', StartServersView.as_view(), name='startserversview'),
     url(r'^stopserversview/$', StopServersView.as_view(), name='stopserversview'),
+    url(r'^cephupgradeview/$', CephUpgradeView.as_view(), name='cephupgradeview'),
     url(r'^servers/(?P<action>\w+)$', ServersAction, name='serversaction'),
     url(r'^reset_status/(?P<server_id>\w+)$', ResetStatus, name='reset_status'),
 )
