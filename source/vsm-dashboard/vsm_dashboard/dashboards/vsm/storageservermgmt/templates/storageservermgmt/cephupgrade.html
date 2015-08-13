@@ -21,14 +21,31 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=_("All Servers") %}
+    <link href="{{ STATIC_URL }}dashboard/css/storageserver.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
     {% csrf_token %}
-    <div id="divFormOptions" class="vsm-options-bar">
-    	<button id="btnSubmit" class="btn btn-primary">Submit</button>
-    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/storageservermgmt/">Cancel</a>
+<div id="divCephUpgradeForm" >
+    <div class="left">
+        <form>
+            <fieldset>
+                {% include "horizon/common/_form_fields.html" %}
+            </fieldset>
+        </form>
     </div>
+    <div class="right">
+        <h3>{% trans "Description" %}:</h3>
+        <p>{% trans "From here you can upgrade ceph" %}</p>
+    </div>
+
+    <div class="table_title" hidden="hidden">Ceph Upgrade</div>
+
+     <div id="divFormOptions" class="vsm-options-bar" style="clear:both">
+        <button id="btnCephUpgrade" class="btn btn-primary">Submit</button>
+        <a id="btnCancel" class="btn btn-default" style="color:black" href="/dashboard/vsm/storageservermgmt/">Cancel</a>
+    </div>
+</div>
 
 {% endblock %}
 

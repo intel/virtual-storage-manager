@@ -1379,14 +1379,14 @@ class CephDriver(object):
         LOG.info('agent/driver.py ceph_upgrade')
         err = 'error'
         try:
-            out, err = utils.execute('vsm_ceph_upgrade','-k',
+            out, err = utils.execute('vsm-ceph-upgrade','-k',
                              key_url,'-p', pkg_url,
                              run_as_root=True)
-            LOG.info("exec vsm_ceph_upgrade:%s--%s"%(out,err))
+            LOG.info("exec vsm-ceph-upgrade:%s--%s"%(out,err))
             self.stop_server(context, node_id)
             self.start_server(context, node_id)
         except:
-            LOG.info("vsm_ceph_upgrade error:%s"%err)
+            LOG.info("vsm-ceph-upgrade error:%s"%err)
             return err
         return True
 

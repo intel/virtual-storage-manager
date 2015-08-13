@@ -38,6 +38,9 @@ from .tables import StopServerTable
 from django.http import HttpResponse
 from .utils import get_server_list
 from .utils import get_zone_list
+from django.views.generic import TemplateView
+from .form import CephUpgrade
+
 
 import json
 LOG = logging.getLogger(__name__)
@@ -141,11 +144,11 @@ class StopServersView(tables.DataTableView):
     def get_data(self):
         return get_server_list(self.request, lambda x:x['status'] == "Active")
 
-class CephUpgradeView(tables.DataTableView):
+
+class CephUpgradeView(forms.ModalFormView):
+    form_class = CephUpgrade
     template_name = 'vsm/storageservermgmt/cephupgrade.html'
-    verbose_name = "Ceph Upgrade"
-
-
+    success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
 
 class ServersActionViewBase(ModalEditTableMixin, tables.DataTableView):
     #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
@@ -211,7 +214,12 @@ class TextMixin(object):
 def ServersAction(request, action):
     data = json.loads(request.body)
     # TODO add cluster_id in data
-    if not len(data):
+    if action == "ceph_upgrade":
+        print "DEBUG in server action %s" % data
+        vsmapi.ceph_upgrade(request, data[0])
+        status = "info"
+        msg = "Began to upgrade ceph"
+    elif not len(data):
         status = "error"
         msg = "No server selected"
     else:
@@ -233,7 +241,6 @@ def ServersAction(request, action):
             status = "info"
             msg = "Began to Start Servers"
         elif action == "stop":
-            LOG.debug("DEBUG in server action %s" % data)
             vsmapi.stop_server(request, data)
             status = "info"
             msg = "Began to Stop Servers"

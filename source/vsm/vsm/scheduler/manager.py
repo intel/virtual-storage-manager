@@ -929,7 +929,7 @@ class SchedulerManager(manager.Manager):
                         'pkg_url':"https://..."}
         """
         LOG.info("DEBUG in ceph upgrade in scheduler manager.")
-        server_list = body.get['servers']
+        server_list = body.get('servers')
         if not server_list:
             server_list = db.init_node_get_all(context)
         key_url = body['key_url']
