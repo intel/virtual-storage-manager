@@ -1,8 +1,14 @@
 #!/usr/bin/expect -f
 
 spawn  apt-get install -y  ceph-common
-expect "(Y/I/N/O/D/Z) \[default=N\] ?"
-send "Y\r"
 
+set p_loop 1
 
-expect eof
+while { $p_loop } {
+        expect {
+                "default=N"  { send "Y\r" }
+                eof exit
+        }
+}
+
+exit

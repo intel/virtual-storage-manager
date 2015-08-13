@@ -42,11 +42,8 @@ EOF
 
 function ceph-upgrade() {
     log_dir=/tmp/ceph-upgrade
-    rm $log_dir
+    rm -rf $log_dir
     echo '----------------begin-----------------------------------------' >$log_dir
-    export ftp_proxy=http://proxy-shz.intel.com:911
-    export http_proxy=http://proxy-shz.intel.com:911
-    export https_proxy=http://proxy-shz.intel.com:911
     wget -q -O- $KEY_URL | sudo apt-key add -
     echo deb $PKG_URL $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list;
     echo '----------------ceph.list build success-------------------------' >>$log_dir;
@@ -56,8 +53,8 @@ function ceph-upgrade() {
     echo '----------------apt-get update begin--------------------------' >>$log_dir;
     apt-get update;
     echo '----------------apt-get update over and upgrade ceph begin----' >>$log_dir;
-    exp_ceph_upgrade >>$log_dir ;
     exp_ceph-common_upgrade >>$log_dir;
+    exp_ceph_upgrade >>$log_dir ;
     exp_ceph-mds_upgrade >>$log_dir ;
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
     sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
