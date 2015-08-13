@@ -1,6 +1,6 @@
 #!/usr/bin/expect -f
 
-spawn  apt-get install -y ceph
+spawn  apt-get install -y  ceph-common
 expect "(Y/I/N/O/D/Z) \[default=N\] ?"
 send "Y\r"
 

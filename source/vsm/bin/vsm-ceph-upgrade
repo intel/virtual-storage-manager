@@ -12,9 +12,6 @@
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 # KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations
-# under the License.
-
 
 set -e
 set -o xtrace
@@ -42,19 +39,29 @@ EOF
     exit 0
 }
 
-for n in `ls $TOPDIR/tools/lib/check`; do
-    source $TOPDIR/tools/lib/check/$n
-done
 
 function ceph-upgrade() {
-wget -q -O- `$KEY_URL` | sudo apt-key add -
-echo deb $PKG_URL $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list;
-rm -rf /var/lib/dpkg/info-bak;
-mv /var/lib/dpkg/info/ /var/lib/dpkg/info-bak;
-mkdir -p /var/lib/dpkg/info;
-apt-get update;
-exp_ceph_upgrade;
-sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
+    log_dir=/tmp/ceph-upgrade
+    rm $log_dir
+    echo '----------------begin-----------------------------------------' >$log_dir
+    export ftp_proxy=http://proxy-shz.intel.com:911
+    export http_proxy=http://proxy-shz.intel.com:911
+    export https_proxy=http://proxy-shz.intel.com:911
+    wget -q -O- $KEY_URL | sudo apt-key add -
+    echo deb $PKG_URL $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list;
+    echo '----------------ceph.list build success-------------------------' >>$log_dir;
+    rm -rf /var/lib/dpkg/info-bak;
+    mv /var/lib/dpkg/info/ /var/lib/dpkg/info-bak;
+    mkdir -p /var/lib/dpkg/info;
+    echo '----------------apt-get update begin--------------------------' >>$log_dir;
+    apt-get update;
+    echo '----------------apt-get update over and upgrade ceph begin----' >>$log_dir;
+    exp_ceph_upgrade >>$log_dir ;
+    exp_ceph-common_upgrade >>$log_dir;
+    exp_ceph-mds_upgrade >>$log_dir ;
+    echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
+    sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
+    echo '-----------------over-----------------------------------------' >>$log_dir ;
 
 }
 
@@ -63,28 +70,24 @@ sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
 #---------------------------------------------
 
 parameter_count=$#
-echo '--parameter_count-'
-echo $parameter_count
 parameters=$*
-echo '--parameters-'
-echo $parameters
-PKG_URL=''
-KEY_URL=''
+
+PKG_URL=""
+KEY_URL=""
 while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
-    -p | --pkg_url) shift;PKG_URL=$1;;
-    -k | --key_url) shift;KEY_URL=$1;;
+    -p | --pkg_url) shift;echo $1;PKG_URL=$1 ;;
+    -k | --key_url) shift;KEY_URL=$1  ;;
     *) shift ;;
   esac
   shift
 done
 
-if [[ $parameter_count -eq 4) ]]; then
-	ceph-upgrade
+if [[ $parameter_count -eq 4 ]]; then
+        ceph-upgrade
 fi
 
 set +o xtrace
-
 

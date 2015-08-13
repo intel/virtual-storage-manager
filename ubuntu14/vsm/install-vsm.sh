@@ -72,7 +72,10 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/admin-token
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/vsm-backup
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/vsm-restore
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/vsm-ceph-upgrade
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/exp_eph_upgrade
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/exp_ceph_upgrade
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/exp_ceph-common_upgrade
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/exp_ceph-mds_upgrade
+
 
 #---------------------------
 # usr/local/bin/
