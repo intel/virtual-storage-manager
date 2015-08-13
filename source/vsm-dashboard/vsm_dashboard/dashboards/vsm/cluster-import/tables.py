@@ -29,50 +29,16 @@ from .utils import checkbox_transform
 
 STRING_SEPARATOR = "__"
 
-class UpdateRow(tables.Row):
-    ajax = True
-
-    def get_data(self, request, id):
-        # todo update zone info in apiclient CEPH_LOG
-        try:
-            _zones = vsmapi.get_zone_list(request,)
-        except:
-            exceptions.handle(request,
-                              _('Unable to retrieve sever list. '))
-        zones = {}
-        for _zone in _zones:
-            zones.setdefault(_zone.id, _zone.name)
-
-        _server = vsmapi.get_server(request, id)
-        server = {"id": _server.id,
-                  "name": _server.host,
-                  "primary_public_ip": _server.primary_public_ip,
-                  "secondary_public_ip": _server.secondary_public_ip,
-                  "cluster_ip": _server.cluster_ip,
-                  "zone_id": _server.zone_id,
-                  "zone": "",
-                  "osds": _server.osds,
-                  "type": _server.type,
-                  "status": _server.status}
-        if "monitor" in _server.type:
-                server['is_monitor'] = "yes"
-        else:
-                server['is_monitor'] = "no"
-        if _server.zone_id in zones:
-            server['zone'] = zones[_server.zone_id]
-
-        return server
-
 STATUS_DISPLAY_CHOICES = (
     ("resize", "Resize/Migrate"),
     ("verify_resize", "Confirm or Revert Resize/Migrate"),
     ("revert_resize", "Revert Resize/Migrate"),
 )
 
-class CreateClusterAction(tables.LinkAction):
-    name = "create cluster"
-    verbose_name = _("Create Cluster")
-    url = "horizon:vsm:clustermgmt:createclusterview"
+class ImportClusterAction(tables.LinkAction):
+    name = "import cluster"
+    verbose_name = _("Import Cluster")
+    url = "horizon:vsm:clusterimport:importclusterview"
     classes = ("ajax-modal", "btn-primary")
 
     def allowed(self, request, datum):
@@ -97,15 +63,12 @@ class ListServerTable(tables.DataTable):
                             status_choices=STATUS_CHOICES,
                             display_choices=STATUS_DISPLAY_CHOICES,
                             verbose_name=_("Status"))
-#    createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
-#    cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
         name = "server_list"
         verbose_name = _("Cluster Server List")
-        table_actions = (CreateClusterAction,)
+        table_actions = (ImportClusterAction,)
         status_columns = ['status']
-        row_class = UpdateRow
         multi_select = False
 
     def get_object_id(self, datum):
@@ -137,7 +100,7 @@ def empty_value_maker(type, name, value, attrs=None):
         return data
     return _empty_value_caller
 
-class CreateClusterTable(tables.DataTable):
+class ImportClusterTable(tables.DataTable):
 
     server_id = tables.Column("id", verbose_name=_("ID"), classes=('server_id',))
     name = tables.Column("name", verbose_name=_("Name"))
@@ -159,7 +122,7 @@ class CreateClusterTable(tables.DataTable):
 
     class Meta:
         name = "clusteraction"
-        verbose_name = _("Create Cluster")
+        verbose_name = _("Import Cluster")
         multi_select = True
 
     def get_object_id(self, datum):

@@ -58,10 +58,13 @@ class ModalEditTableMixin(object):
 
 class IndexView(tables.DataTableView):
     table_class = ListServerTable
-    template_name = 'vsm/clustermgmt/index.html'
+    template_name = 'vsm/cluster-import/index.html'
 
     def get_data(self):
         _servers = []
+        _mon_host = None
+        _client_keyring = None
+
         #_servers= vsmapi.get_server_list(self.request,)
         try:
             _servers = vsmapi.get_server_list(self.request,)
@@ -155,7 +158,7 @@ class ImportClusterView(ModalEditTableMixin, tables.DataTableView):
 
 
 
-def ClusterAction(request, action):
+def connect_cluster_action(request, action):
     data = json.loads(request.body)
     
     if not len(data):
