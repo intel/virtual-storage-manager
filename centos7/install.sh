@@ -47,7 +47,7 @@ Options:
   --controller [ip or hostname]
     Installing the controller node only.
   --agent [ip,ip or hostname]
-    Install the agent node(s), like: --agnet ip,ip or hostname with no blank.
+    Install the agent node(s), like: --agent ip,ip or hostname with no blank.
   --check-dependence-package
     Check the dependence package if provided the dependence repo.
 EOF
@@ -60,7 +60,7 @@ DEPENDENCE_BRANCH="master"
 USER=`whoami`
 SSH='ssh'
 SCP='scp'
-SUDO='sudo -E' 
+SUDO='sudo -E'
 IS_PREPARE=False
 IS_CONTROLLER_INSTALL=False
 IS_AGENT_INSTALL=False
@@ -100,7 +100,7 @@ HOSTNAME=`hostname`
 #HOSTIP=`hostname -I|sed s/[[:space:]]//g`
 HOSTIP=`hostname -I`
 
-source $TOPDIR/hostrc
+source $TOPDIR/installrc
 
 if [ -z $MANIFEST_PATH ]; then
     MANIFEST_PATH="manifest"
@@ -152,10 +152,10 @@ function check_vsm_package() {
 }
 
 function set_iptables_and_selinux() {
-    $SSH $USER@$1 "systemctl stop firewalld"
-    $SSH $USER@$1 "systemctl disable firewalld"
-    $SSH $USER@$1 "sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
-    $SSH $USER@$1 "setenforce 0"
+    $SSH $USER@$1 "$SUDO systemctl stop firewalld"
+    $SSH $USER@$1 "$SUDO systemctl disable firewalld"
+    $SSH $USER@$1 "$SUDO sed -i \"s/SELINUX=enforcing/SELINUX=disabled/g\" /etc/selinux/config"
+    $SSH $USER@$1 "if [[ `$SUDO getenforce` != \"Disabled\" ]]; then $SUDO setenforce 0; fi"
 }
 
 function download_dependencies() {
@@ -253,6 +253,7 @@ function set_local_repo() {
     $SUDO cp vsm-dep.repo /etc/yum.repos.d
     $SUDO yum makecache
 }
+
 function check_manifest() {
     if [[ $1 == $CONTROLLER_ADDRESS ]]; then
         if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/cluster.manifest ]]; then
@@ -281,7 +282,12 @@ function setup_remote_controller() {
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        $SSH $USER@$CONTROLLER_ADDRESS "vsm-controller"
+        if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN"
+            $SSH $USER@$CONTROLLER_ADDRESS "if [[ `$SUDO service openstack-keystone status|grep running|wc -l` == 1 ]]; then $SUDO service openstack-keystone stop; fi"
+        else
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH vsm-controller"
+        fi
     fi
 }
 
@@ -291,9 +297,9 @@ function install_controller() {
     if [[ $IS_CONTROLLER -eq 0 ]]; then
         set_remote_repo $CONTROLLER_ADDRESS
         set_iptables_and_selinux $CONTROLLER_ADDRESS
-        $SSH $USER@$CONTROLLER_ADDRESS "sed -i \"s/keepcache=0/keepcache=1/g\" /etc/yum.conf"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO sed -i \"s/keepcache=0/keepcache=1/g\" /etc/yum.conf"
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
-        $SSH $USER@$CONTROLLER_ADDRESS "preinstall"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH preinstall"
         setup_remote_controller
         $SSH $USER@CONTROLLER_ADDRESS "$SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
         for i in `ls`; do if [[ -d $i/packages ]]; then $SUDO cp $i/packages/*.rpm /tmp/vsm-dep-repo >/dev/null 2>&1; fi; done"
@@ -307,9 +313,10 @@ function install_controller() {
         $SUDO systemctl stop firewalld
         $SUDO systemctl disable firewalld
         $SUDO sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
-        sed -i "s/keepcache=0/keepcache=1/g" /etc/yum.conf
+        if [[ `$SUDO getenforce` != "Disabled" ]]; then $SUDO setenforce 0; fi
+        $SUDO sed -i "s/keepcache=0/keepcache=1/g" /etc/yum.conf
         $SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient
-        preinstall
+        $SUDO env PATH=$PATH preinstall
         $SUDO rm -rf /etc/manifest/cluster.manifest
         $SUDO cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
         $SUDO chown root:vsm /etc/manifest/cluster.manifest
@@ -318,7 +325,12 @@ function install_controller() {
             echo "please check the cluster.manifest, then try again"
             exit 1
         else
-            vsm-controller
+            if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
+                $SUDO env PATH=$PATH vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN
+                if [[ `$SUDO service openstack-keystone status|grep running|wc -l` == 1 ]]; then $SUDO service openstack-keystone stop; fi
+            else
+                $SUDO env PATH=$PATH vsm-controller
+            fi
         fi
         $SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
         for i in `ls`; do
@@ -338,19 +350,33 @@ function install_controller() {
 #            agent
 #-------------------------------------------------------------------------------
 
+function kill_diamond() {
+    cat <<"EOF" >kill_diamond.sh
+#!/bin/bash
+diamond_pid=`ps -ef|grep diamond|grep -v grep|grep -v bash|awk -F " " '{print $2}'`
+for pid in $diamond_pid; do
+    sudo -E kill -9 $pid
+done
+EOF
+    $SCP kill_diamond.sh $USER@$1:/tmp
+    $SSH $USER@$1 "$SUDO chmod 755 /tmp/kill_diamond.sh;" \
+    "cd /tmp;" \
+    "./kill_diamond.sh;" \
+    "$SUDO rm -rf kill_diamond"
+}
+
 function install_setup_diamond() {
-    $SSH $USER@$1 "$SUDO easy_install pip; $SUDO pip install diamond"
+    kill_diamond $1
+    $SSH $USER@$1 "$SUDO yum install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
-    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "find / -name vsmmysql.py|grep vsm/diamond"`
-    HANDLER_PATH=`$SSH $USER@$1 "find / -name handler|grep python"`
-    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "find / -name diamond|grep /etc/diamond"`
+    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
+    HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
+    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
     $SSH $USER@$1 "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
     "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.vsmmysql.VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"s/collectors_path = *.*collectors\/$/collectors_path = \/usr\/local\/share\/diamond\/collectors\//g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"s/handlers_path = *.*handlers\/$/handlers_path = \/usr\/local\/share\/diamond\/handlers\//g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
@@ -360,6 +386,8 @@ function install_setup_diamond() {
     "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_instance = instance\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/a\# VARCHAR(255) NOT NULL\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\# INT UNSIGNED NOT NULL/acol_hostname    = hostname\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/i\[\[SignalfxHandler\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\# And any other config settings from GraphiteHandler are valid here/iauth_token = abcdefghijklmnopqrstuvwxyz\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/\# interval = 300/interval = 20/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/enabled = True/#enabled = True/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/\[\[DiskSpaceCollector\]\]/\#\[\[DiskSpaceCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
@@ -372,8 +400,6 @@ function install_setup_diamond() {
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO mkdir -p /etc/diamond /var/log/diamond;" \
-    "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf /etc/diamond;" \
     "$SUDO diamond"
 }
 
@@ -389,7 +415,7 @@ function setup_remote_agent() {
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
     else
-        $SSH $USER@$1 "vsm-node"
+        $SSH $USER@$1 "$SUDO env PATH=$PATH vsm-node"
     fi
 }
 
@@ -399,11 +425,11 @@ function install_agent() {
     set_remote_repo $1
     set_iptables_and_selinux $1
     $SSH $USER@$1 "$SUDO yum install -y vsm vsm-deploy"
-    $SSH $USER@$1 "preinstall"
+    $SSH $USER@$1 "$SUDO env PATH=$PATH preinstall"
 
     setup_remote_agent $1
-#    install_setup_diamond $1
-    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ -d /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; rm -rf /tmp/backup; fi"
+    install_setup_diamond $1
+    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ -d /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; $SUDO rm -rf /tmp/backup; fi"
 }
 
 #-------------------------------------------------------------------------------
@@ -414,7 +440,12 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
-    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token"`
+    if [[ $IS_CONTROLLER -eq 0 ]]; then
+        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
+    else
+        TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
+    fi
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
     done
@@ -426,7 +457,12 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
-        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token"`
+        if [[ $IS_CONTROLLER -eq 0 ]]; then
+            TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
+        else
+            TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
+        fi
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname

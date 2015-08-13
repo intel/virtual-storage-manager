@@ -131,3 +131,6 @@ class API(object):
 
     def add_new_disks_to_cluster(self, context, body=None):
         return self.scheduler_rpcapi.add_new_disks_to_cluster(context, body)
+
+    def reconfig_diamond(self, context, body=None):
+        return self.scheduler_rpcapi.reconfig_diamond(context, body)

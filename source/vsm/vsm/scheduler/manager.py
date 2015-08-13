@@ -1481,10 +1481,11 @@ class SchedulerManager(manager.Manager):
 
     def get_smart_info(self, context, body):
         ser = body['server']
+        device = body['device_path']
         status = ser['status']
         host =  ser['host']
         if status == 'Active' or status == 'available':
-            res = self._agent_rpcapi.get_smart_info(context,host)
+            res = self._agent_rpcapi.get_smart_info(context, host, device)
             return res
 
     @utils.single_lock
@@ -1527,3 +1528,8 @@ class SchedulerManager(manager.Manager):
         server_id = body['server_id']
         server = db.init_node_get_by_id(context,id=server_id)
         self._agent_rpcapi.add_new_disks_to_cluster(context, body, server['host'])
+
+    def reconfig_diamond(self, context, body):
+        servers = db.init_node_get_all(context)
+        for server in servers:
+            self._agent_rpcapi.reconfig_diamond(context, body, server['host'])

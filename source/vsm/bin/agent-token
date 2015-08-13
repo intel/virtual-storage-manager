@@ -27,19 +27,27 @@ import sys
 class GenAuthToken(object):
     """Generate token from vsm-api WSGI service."""
 
-    def __init__(self, host='localhost', password='agent'):
+    def __init__(self, tenant_name="agent", username="agent", password='agent', host='localhost'):
         """Initialized the url requestion and RUL."""
-        self._host = host
+        self._tenant_name = tenant_name
+        self._username = username
         self._password = password
+        self._host = host
         self._auth_url = "http://%s:5000/v2.0/tokens" % self._host
         self._token = None
         self._vsm_url = None
 
     def get_token(self):
         """Get auth info from keystone."""
-        auth_data = {"auth": {"tenantName": 'agent',
-                           "passwordCredentials":{ "username": 'agent',
-                           "password": self._password}}}
+        auth_data = {
+            "auth": {
+                "tenantName": self._tenant_name,
+                "passwordCredentials": {
+                    "username": self._username,
+                    "password": self._password
+                }
+            }
+        }
 
         auth_request = urllib2.Request(self._auth_url)
         auth_request.add_header("content-type", "application/json")
@@ -57,29 +65,34 @@ class GenAuthToken(object):
                 self._vsm_url = s['endpoints'][0]['publicURL']
                 break
 
-        url_id = self._vsm_url.split('/')[-1]
-        return self._token + "-" + url_id
+        tenant_id = self._vsm_url.split('/')[-1]
+        return self._token + "-" + tenant_id
 
 if __name__ == '__main__':
     # read AGENT_PASSWORD from /etc/vsmdeploy/deployrc
-    pwd = None
-    host = None
-    fd = open('/etc/vsmdeploy/deployrc').readlines()
-    for line in fd:
-        if line.find('AGENT_PASSWORD') != -1:
-            temp = line.split('=')
-            pwd = temp[-1].strip()
-        if line.find('KEYSTONE_HOST') != -1:
-            temp = line.split('=')
-            host = temp[-1].strip()
+    try:
+        tenant_name, username, password, host = sys.argv[1:]
+    except:
+        tenant_name = "agent"
+        username = "agent"
+        password = ""
+        host = ""
+        fd = open('/etc/vsmdeploy/deployrc').readlines()
+        for line in fd:
+            if line.find('AGENT_PASSWORD') != -1:
+                temp = line.split('=')
+                password = temp[-1].strip()
+            if line.find('KEYSTONE_HOST') != -1:
+                temp = line.split('=')
+                host = temp[-1].strip()
 
     # If not found, print Error info.
-    if (not pwd) or (not host):
+    if (not password) or (not host):
         msg = "No AGENT_PASSWORD/KEYSTONE_HOST" + \
               " in /etc/vsmdeploy/deployrc [ FAILED ]"
         print msg
         sys.exit(1)
 
-    token = GenAuthToken(host, pwd)
+    token = GenAuthToken(tenant_name, username, password, host)
     res = token.get_token()
     print res

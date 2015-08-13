@@ -60,6 +60,7 @@
 
 {% block js %}
     {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
     <script src="{{ STATIC_URL }}dashboard/js/user.js"></script> 
 {% endblock %}
 

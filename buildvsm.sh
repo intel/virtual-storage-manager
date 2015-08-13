@@ -106,6 +106,7 @@ function create_release() {
         bash +x buildrpm
         cp centos7/install.sh release/$BUILD
         cp uninstall.sh release/$BUILD
+        cp centos7/rpms.lst release/$BUILD
     elif [[ $OS =~ "SUSE" ]]; then
         cp -rf suse/python-vsmclient ./source
         cp -rf suse/vsm ./source
@@ -129,7 +130,7 @@ function create_release() {
     cp CHANGELOG.md release/$BUILD
     cp CHANGELOG.pdf release/$BUILD
     cp get_pass.sh release/$BUILD
-    cp hostrc release/$BUILD
+    cp installrc release/$BUILD
 #    cp -r manifest release/$BUILD
     mkdir -p release/$BUILD/manifest
     cp source/vsm/etc/vsm/cluster.manifest release/$BUILD/manifest/cluster.manifest.sample

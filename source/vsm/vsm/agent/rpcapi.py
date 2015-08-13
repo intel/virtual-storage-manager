@@ -232,11 +232,11 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         self.make_msg('update_ssh_keys'),
                         topic, version='1.0', timeout=6000)
         return res
-    def get_smart_info(self, context, host):
+    def get_smart_info(self, context, host, device):
         topic = rpc.queue_get_for(context, self.topic, host)
         self.test_service(context, topic)
         res = self.call(context,
-                        self.make_msg('get_smart_info'),
+                        self.make_msg('get_smart_info', device=device),
                         topic, version='1.0', timeout=6000)
         LOG.info("---agent-rpcapi return===%s"%res)
         return res
@@ -505,3 +505,10 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                       body=body),
                         topic,
                         version='1.0', timeout=6000)
+
+    def reconfig_diamond(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.cast(context,
+                        self.make_msg('reconfig_diamond',
+                                      body=body),
+                        topic)

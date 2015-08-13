@@ -70,10 +70,10 @@ class ManifestChecker(object):
         except:
             info_list = ['Can not connect to controller ip = %s' % \
                          self._server_host,
-                         'Maybe your auth_keys is error!',
-                         'check auth_key in server.manifest',
-                         'with /etc/vsmdeploy/deployrc AGENT_PASSWORD variable',
-                         'Check if you can ping this host']
+                         'Possible reasons: ',
+                         '(i) Maybe your auth_keys is error! please make sure the auth_keys is consistent '
+                         'with the output from agent_toekn command executed on controller node.',
+                         '(ii) Check if you can ping this host']
             error(info_list)
 
         self._secs_list = self._storage_class_list + ['vsm_controller_ip', 'role', 'auth_key', 'zone']
@@ -89,6 +89,8 @@ class ManifestChecker(object):
             if r.find('storage') != -1:
                 continue
             if r.find('monitor') != -1:
+                continue
+            if r.find('unspecified') != -1:
                 continue
 
             error('Can not define this role %s for VSM.' % r)
@@ -126,14 +128,7 @@ class ManifestChecker(object):
         if len(osd_list) != len(js_list):
             error('The OSD devices is not equal to journal devices!')
 
-        if len(osd_list) == 0:
-            role = self._info['role']
-            role = role.strip()
-            role = role.replace(',', ' ')
-            role = role.strip()
-            if role != 'monitor' or role.find('storage') != -1:
-                error('Error find for role %s, \
-                       there is node disks for ceph!' % role)
+
 
         self.__check_osd_devices(osd_list)
         self.__check_journal_devices(js_list)
@@ -271,6 +266,7 @@ class ManifestChecker(object):
         for _lan in lan_list:
             if self._is_in_lan(ip, _lan):
                 return True
+
         if self._is_in_lan(ip, management_network):
             return True
         if self._is_in_lan(ip, ceph_public_network):
@@ -296,7 +292,6 @@ class ManifestChecker(object):
                 self.__is_address_ok(ip)
                 ip_in_lan.append(ip)
         ip_in_lan_cnt = len(set(ip_in_lan))
-
 
         if ip_in_lan_cnt < len(set(self._lan_list)):
             info_list = ['Controller ip is not in LAN defined in',

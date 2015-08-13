@@ -225,8 +225,8 @@ def device_list(request):
     return vsmclient(request).devices.list()
 
 def device_get_smartinfo(request,search_opts=None):
-    ret = vsmclient(request).devices.list(detailed=True,search_opts=search_opts)
-    #print "vsm-dashboard get device =%s",ret
+    ret = vsmclient(request).devices.get_smart_info(search_opts=search_opts)
+    print "vsm-dashboard get device =%s",ret
     return ret
 
 #license api

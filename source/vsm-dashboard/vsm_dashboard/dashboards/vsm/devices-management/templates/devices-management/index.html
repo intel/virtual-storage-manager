@@ -26,20 +26,23 @@
 
 {% block main %}
     {{ table.render }}
-     	<div id="divOSDInfo" style="display:none">
+     <div id="divOSDInfo" style="display:none">
             <div >
                 <!-- some messages display here  -->
                 <div id="divOSDTip" class="alert alert-danger  alert-dismissible fade in" style="display:none" role="alert">   
                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">        
                     <span aria-hidden="true">x</span>   
                 </button>I
-
                 </div>
             </div>
 
             <h4>Basic information</h4>
             <hr />
             <div id="divBaiscInfo">
+                <div class="form-group">
+                    <span class="span-label">Data Device Path</span>
+                    <span id="lblDevicePath" class="span-label">--</span>
+                </div>
                 <div class="form-group">
                     <span class="span-label">Drive Status</span>
                     <span id="lblStatus" class="span-label">--</span>
@@ -56,77 +59,45 @@
                     <span class="span-label">Firmware:</span>
                     <span id="lblFirmware" class="span-label">--</span>
                 </div>
-                <div class="form-group">
-                    <span class="span-label">Capacity in total(GB):</span>
-                    <span id="lblTotalCapacity" class="span-label">--</span>
-                </div>
-                <div class="form-group">
-                    <span class="span-label">Capacity in use(GB):</span>
-                    <span id="lblUsedCapacity" class="span-label">--</span>
-                </div>
-        </div>
-        <br/>
-        <br/>
-        <h4>Smart information</h4>
-        <hr />
-        <div id="divSmartInfo">
-            <table id="tSmartInfo" class="table table-striped">
-                  <thead>
-                        <tr>
-                            <th>Counter</th>
-                            <th>Value</th>
+            </div>
+
+            <h4>Smart information</h4>
+            <hr />
+            <div id="divSmartInfo">
+                <table id="tSmartInfo" class="table table-striped">
+                      <thead>
+                            <tr>
+                                <th>Counter</th>
+                                <th>Value</th>
+                            </tr>
+                      </thead>
+                     <tbody>
+                      <tr>
+                            <td>Percentage Used</td>
+                            <td><span id="lblPercentageUsed" class="span-label">--</span></td>
                         </tr>
-                  </thead>
-                 <tbody>
-                  <tr>
-                        <td>Percentage Used</td>
-                        <td><span id="lblPercentageUsed" class="span-label">--</span></td>
-                    </tr>
-                     <tr>
-                        <td>Temperature</td>
-                        <td><span id="lblTemperature" class="span-label">--</span></td>
-                    </tr>
-                    <tr>
-                        <td>unitRead</td>
-                        <td><span id="lblUnitRead" class="span-label">--</span></td>
-                    </tr>
-                    <tr>
-                        <td>unitWRITE</td>
-                        <td><span id="lblUnitWRITE" class="span-label">--</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                         <tr>
+                            <td>Temperature</td>
+                            <td><span id="lblTemperature" class="span-label">--</span></td>
+                        </tr>
+                        <tr>
+                            <td>unitRead</td>
+                            <td><span id="lblUnitRead" class="span-label">--</span></td>
+                        </tr>
+                        <tr>
+                            <td>unitWRITE</td>
+                            <td><span id="lblUnitWRITE" class="span-label">--</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
     </div>
+
 {% endblock %}
-
-
-
 
 {% block js %}
     {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
     <script src="{{ STATIC_URL }}dashboard/js/dialog.js" type="text/javascript" charset="utf-8"></script>
 	<script src="{{ STATIC_URL }}dashboard/js/devicemgmt.js" type="text/javascript" charset="utf-8"></script>
-    <script type="text/javascript">
-        // function searchToObject(){
-        //     var pairs = window.location.search.substring(1).split("&");
-        //     var obj = {};
-        //     var pair, i;
-        //     for(i in pairs){
-        //         if(paris[i] === "")continue;
-        //         pair = pairs[i].split("=");
-        //         obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
-        //     }
-        //     return obj;
-        // }
-        // var back = "";
-        // if(window.location.search){
-        //     document.body.scrollTop = 9999;
-        //     //var search = searchToObject();
-        //     back = "<a href='javascript:history.back(-1)'>previous</a>&nbsp;&nbsp;";
-        // }
-        // var marker = $('#osds tbody tr').last().find('input').first().val();
-        // var next_page_url = location.pathname + "?marker=" + marker;
-        // //$("tfoot tr td").append("<div class='page'>"+back+"<a href='"+next_page_url+"'>next</a></div>");
-    </script>
 {% endblock %}

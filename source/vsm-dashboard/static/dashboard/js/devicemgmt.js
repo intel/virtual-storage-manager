@@ -6,19 +6,20 @@ $(function(){
     InitDialog();
 })
 
+
+
 function InitDialog(){
 	var dialogTitle = "SmartInfo";
  	var dialogContent = $("#divOSDInfo")[0].innerHTML;
  	var modal = GenerateDialog(dialogTitle,dialogContent,true,"OK");
+ 	$("#divOSDInfo").remove();
 }
+
 
 function addInfoNode(){
 
-	var htmlDeviceIcon = "";
-	htmlDeviceIcon += "<img id='imgOSDDialog' onClick='getStateData({0})'  src='/static/dashboard/img/{1}' />";
-	htmlDeviceIcon += "<img id='imgOSDDialog'  src='/static/dashboard/img/{2}' />";
-
-	var htmlJorunalDeviceIcon = "<img id='imgOSDDialog' onClick='getStateData({0})'  src='/static/dashboard/img/info_health.png' />"
+	var htmlDeviceIcon = "<img id='imgOSDDialog' onClick='getStateData({0},\"data\")'  src='/static/dashboard/img/{1}' />";
+	var htmlJorunalDeviceIcon = "<img id='imgOSDDialog' onClick='getStateData({0},\"jorunal\")'  src='/static/dashboard/img/info_health.png' />"
 
     var trNodes = $("#osds>tbody>tr");
 
@@ -47,17 +48,75 @@ function addInfoNode(){
         		iconOSDCapcityStatus = "osd_full.png";
         		break;
         }
-        tdDataDevice.innerHTML =   htmlDeviceIcon.replace("{0}",osd_id).replace("{1}",iconDeviceStatus).replace("{2}",iconOSDCapcityStatus);
+
+        //show capactiy values
+        var total_capacity = trNodes[i].children[10].innerHTML;
+        var used_capacity = trNodes[i].children[11].innerHTML;
+        var available_capacity = trNodes[i].children[12].innerHTML;
+        var html_capacity = "";
+        	html_capacity += "<span class=\"vsm-label-90\">Used:</span>";
+        	html_capacity += "<span class=\"vsm-label-90\">"+used_capacity+"(MB)</span>";
+			html_capacity += "<br />";
+			html_capacity += "<span class=\"vsm-label-90\">Available:</span>";
+        	html_capacity += "<span class=\"vsm-label-90\">"+available_capacity+"(MB)</span>";
+			html_capacity += "<br />";
+			html_capacity += "<span class=\"vsm-label-90\">Total:</span>";
+        	html_capacity += "<span class=\"vsm-label-90\">"+total_capacity+"(MB)</span>";
+			html_capacity += "<br />";
+
+        tdDataDevice.innerHTML = "";
+        tdDataDevice.innerHTML +=   htmlDeviceIcon.replace("{0}",osd_id).replace("{0}",osd_id).replace("{1}",iconDeviceStatus);
+        tdDataDevice.innerHTML +=   GenerateOSDStatusIcon(iconOSDCapcityStatus,'Capacity values',html_capacity);
         tdJorunalDevice.innerHTML = htmlJorunalDeviceIcon.replace("{0}",osd_id);
     }
-    var yep = false;
+
+    //register the popover
+    $("a[data-toggle=popover]").popover();
 }
 
-function getStateData(osd_id){
+function GenerateOSDStatusIcon(img_status,popover_title,popover_content){
+	var htmlOSDStatusIcon = "";
+		htmlOSDStatusIcon += "<a class='img_popover' tabindex='0' ";
+		htmlOSDStatusIcon += " role='button' ";
+		htmlOSDStatusIcon += " data-toggle='popover' ";
+		htmlOSDStatusIcon += " data-container='body' ";
+		htmlOSDStatusIcon += " data-placement='bottom' ";
+		htmlOSDStatusIcon += " data-trigger='click' ";
+		htmlOSDStatusIcon += " data-html='true' ";
+		htmlOSDStatusIcon += " onblur='HidePopover()' ";
+		htmlOSDStatusIcon += " title='"+popover_title+"' ";
+		htmlOSDStatusIcon += " data-content='"+popover_content+"' >";
+		htmlOSDStatusIcon += "<img class='imgOSDStatus' src='/static/dashboard/img/"+img_status+"' />"
+		htmlOSDStatusIcon += "</a>";
+	return htmlOSDStatusIcon;
+}
+
+function HidePopover(){
+	console.log("hide popover");
+	$(".popover").popover("hide");
+}
+
+
+function getStateData(osd_id,device_tag){
 	$("#modal_wrapper").modal("show");
 	$("#btnDialogCancel").hide();
 
+
+	//get the device path
+	var device_path = "--";
+	switch(device_tag){
+		case 'data':
+			device_path = $("#osds__row__"+osd_id)[0].children[8].innerHTML;
+			break;
+		case 'jorunal':
+			device_path = $("#osds__row__"+osd_id)[0].children[13].innerHTML;
+			break;
+	}
+	$("#lblDevicePath")[0].innerHTML = device_path;
+	
+
 	$("#btnDialogSubmit").bind("click",function(){
+		$("#lblDevicePath")[0].innerHTML = "--";
 		$("#lblStatus")[0].innerHTML = "--";
 		$("#lblFamily")[0].innerHTML =  "--";
 		$("#lblSeriesNumber")[0].innerHTML =  "--";
@@ -71,12 +130,11 @@ function getStateData(osd_id){
 		$("#modal_wrapper").modal("hide");
 	});
 
-
 	token = $("input[name=csrfmiddlewaretoken]").val();
-	var postData = JSON.stringify({"osd_id":osd_id,"action":"get_smart_info"});
+	var postData = JSON.stringify({"osd_id":osd_id,"device_path":device_path});
 	$.ajax({
 		type: "post",
-		url: "/dashboard/vsm/devices-management/devices/state",
+		url: "/dashboard/vsm/devices-management/get_smart_info/",
 		data: postData,
 		dataType:"json",
 		success: function(data){
@@ -88,18 +146,21 @@ function getStateData(osd_id){
 				
 	        	var basicInfo = data.basic;
 				var smartInfo = data.smart;
-				$("#lblStatus")[0].innerHTML = basicInfo.status;
-				$("#lblFamily")[0].innerHTML =  basicInfo.family;
-				$("#lblSeriesNumber")[0].innerHTML =  basicInfo.seriesNumber;
-				$("#lblFirmware")[0].innerHTML =  basicInfo.firmware;
-				$("#lblTotalCapacity")[0].innerHTML =  basicInfo.totalCapacity;
-				$("#lblUsedCapacity")[0].innerHTML =  basicInfo.usedCapacity;
+				$("#lblStatus")[0].innerHTML = basicInfo.DriveStatus;
+				$("#lblFamily")[0].innerHTML =  basicInfo.DriveFamily;
+				$("#lblSeriesNumber")[0].innerHTML =  basicInfo.SerialNumber;
+				$("#lblFirmware")[0].innerHTML =  basicInfo.FirmwareVersion;
 
-	            $("#lblPercentageUsed")[0].innerHTML = smartInfo.percentageUsed
-				$("#lblTemperature")[0].innerHTML = smartInfo.temperature;
-				$("#lblUnitRead")[0].innerHTML = smartInfo.unitRead;
-				$("#lblUnitWRITE")[0].innerHTML = smartInfo.unitWRITE;
-				$("#modal_wrapper").find(".modal-body")[0].innerHTML = $("#divOSDInfo")[0].innerHTML;
+                //Get smart info
+                $("#tSmartInfo>tbody").empty();
+                for(var i=0;i<smartInfo.length;i++) {
+                    var smart_row = "";
+                    smart_row += "<tr>";
+                    smart_row += "<td>" + smartInfo[i].key + "</td>";
+                    smart_row += "<td><span class='span-label'>" + smartInfo[i].value + "</span></td>";
+                    smart_row += "</tr>";
+                    $("#tSmartInfo>tbody").append(smart_row);
+                }
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){

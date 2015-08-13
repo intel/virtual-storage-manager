@@ -38,6 +38,7 @@ from vsm.agent import rpcapi as agent_rpc
 from vsm.agent import cephconfigparser
 from vsm.openstack.common.rpc import common as rpc_exc
 import glob
+import re
 
 LOG = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
@@ -1401,20 +1402,73 @@ class CephDriver(object):
             out, err = utils.execute('vsm',
                                      '--version',
                                      run_as_root=True)
-            LOG.info("get_vsm_version:%s--%s"%(out,err))
         except:
             out = '2.0'
         return out
 
-    def get_smart_info(self, context):
-        out, err = utils.execute('get_smart_info',
-                                 'll',
-                                 run_as_root=True)
-        LOG.info("get_smart_info:%s--%s"%(out,err))
-        return out
+    def find_attr_start_line(self, lines, min_line=4, max_line=9):
+        """
+        Return line number of the first real attribute and value.
+        The first line is 0.  If the 'ATTRIBUTE_NAME' header is not
+        found, return the index after max_line.
+        """
+        for idx, line in enumerate(lines[min_line:max_line]):
+            col = line.split()
+            if len(col) > 1 and col[1] == 'ATTRIBUTE_NAME':
+                return idx + min_line + 1
+
+        LOG.warn('ATTRIBUTE_NAME not found in second column of'
+                      ' smartctl output between lines %d and %d.'
+                      % (min_line, max_line))
+
+        return max_line + 1
+
+    def get_smart_info(self, context, device):
+        attributes, err = utils.execute('smartctl', '-A', device, run_as_root=True)
+        start_line = self.find_attr_start_line(attributes)
+        smart_info_dict = {'basic':{},'smart':{}}
+        if start_line < 10:
+            for attr in attributes[start_line:]:
+                attribute = attr.split()
+                if attribute[1] != "Unknown_Attribute":
+                    smart_info_dict['smart'][attribute[1]] = attribute[9]
+
+
+        basic_info, err = utils.execute('smartctl', '-i', device, run_as_root=True)
+        basic_info_dict = {}
+        if len(basic_info)>=5:
+            for info in basic_info[4:]:
+                info_list = info.split(':')
+                if len(info_list) == 2:
+                    basic_info_dict[info_list[0]] = info_list[1]
+        smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('Device Model') or ''
+        smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('Serial Number') or ''
+        smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('Device Model') or ''
+
+        status_info,err = utils.execute('smartctl', '-H', device, run_as_root=True)
+        smart_info_dict['basic']['Drive Status'] = ''
+        if len(status_info)==5:
+            status_list = status_info[4].split(':')
+            if len(status_list)== 2:
+                smart_info_dict['basic']['Drive Status'] = status_list[1]
+        LOG.info("get_smart_info_dict:%s"%(smart_info_dict))
+        return smart_info_dict
 
     def get_available_disks(self, context):
         all_disk = glob.glob('/dev/disk/by-path/*')
+        lines=[]
+        try:
+            f = open('/etc/mtab', "r")
+            lines = f.readlines()
+        except:
+            f.close()
+        finally:
+            f.close()
+        for line in lines:
+            if not line.startswith('/dev'):
+                continue
+            all_disk.append(line.split()[0])
+
         return all_disk
 
     def run_add_disk_hook(self, context):
@@ -2574,5 +2628,62 @@ rule value_performance {
 # end crush map
 """
         self._write_to_crushmap(string)
+
+
+class DiamondDriver(object):
+    """Create diamond file"""
+    def __init__(self, execute=utils.execute, *args, **kwargs):
+        self._diamond_config_path = "/etc/diamond/collectors/"
+    def change_collector_conf(self,collector,values):
+        '''
+        :param collector:
+        :param values: {'enabled':True,
+                        'interval':15
+        }
+        :return:
+        '''
+        try:
+            out, err = utils.execute('kill_diamond',
+                                     'll',
+                                     run_as_root=True)
+        except:
+            LOG.info("kill_diamond error:%s--%s"%(out,err))
+        config_file = '%s/%s.conf'%(self._diamond_config_path,collector)
+        keys = values.keys()
+        if os.path.exists(config_file):
+            try:
+                out_put = open(config_file,'r')
+                content = out_put.readlines()
+                content_to_remove = []
+                for line in content:
+                    line_list = line.split('=')
+                    if line_list[0] in keys:
+                        content_to_remove.append(line)
+                for line in content_to_remove:
+                    content.remove(line)
+            except:
+                out_put.close()
+            finally:
+                out_put.close()
+        else:
+            content = []
+        for key in keys:
+            content.append('%s=%s\n'%(key,values[key]))
+
+        try:
+            in_put = open(config_file,'w')
+            in_put.writelines(content)
+        except:
+             in_put.close()
+        finally:
+             in_put.close()
+        out, err = utils.execute('diamond', 'll', run_as_root=True)
+        return out
+
+
+
+
+
+
 
 

@@ -33,11 +33,11 @@ from django.http import HttpResponse
 import json
 LOG = logging.getLogger(__name__)
 
-def device_get_smartinfo(request,device_id=None,action='get_smart_info'):
+def device_get_smartinfo(request,device_id=None,device_path=None):
     search_opts = {}
-    #print 'device_id====',device_id
-    if device_id:search_opts['device_id'] = device_id
-    search_opts['action'] = action
+    print 'device_id====',device_id,'--device_path=',device_path
+    search_opts['device_id'] = device_id
+    search_opts['device_path'] = device_path
     ret = vsmapi.device_get_smartinfo(request,search_opts=search_opts)
     return ret
 
@@ -113,8 +113,6 @@ class AddOSDView(TemplateView):
     def get_context_data(self, **kwargs):
         context = {}
         storage_group_list = vsmapi.storage_group_status(None,)
-        print "===========storage_group============="
-        print dir(storage_group_list)
 
         storage_group = []
         for _sg in storage_group_list:
@@ -135,37 +133,23 @@ class AddOSDView(TemplateView):
         
         return context
 
-def DevicesAction(request, action):
+def get_smart_info(request):
     data = json.loads(request.body)
 
-    device_data_str = device_get_smartinfo(request,str(data["osd_id"]))
-    device_data_dict = {}
-    device_data_str = device_data_str[0].device_data
-    if device_data_str == None:
-        devicedata = json.dumps({"data":""})
-        return HttpResponse(devicedata)
+    device_data_dict = device_get_smartinfo(request,str(data["osd_id"]),data["device_path"])
+    device_data_json = {
+        "basic":{
+             "DriveFamily":device_data_dict["basic"].get("Drive Family")
+            ,"SerialNumber":device_data_dict["basic"].get("Serial Number")
+            ,"FirmwareVersion":device_data_dict["basic"].get("Firmware Version")
+            ,"DriveStatus":device_data_dict["basic"].get("Drive Status")
+        }
+        ,"smart":[]
+    }
 
-    for data in device_data_str.split("\n"):
-        data_list = data.split("=")
-        data_list_len = len(data_list)
-        if data_list_len == 1:
-            device_data_dict[data_list[0]] = ""
-        if data_list_len == 2:
-            device_data_dict[data_list[0]] = data_list[1]
-            device_data_json = {
-                "basic":{"status":device_data_dict["Drive Status"],
-                       "family":device_data_dict["Drive Family"],
-                       "seriesNumber":device_data_dict["Serial Number"],
-                       "firmware":device_data_dict["Firmware"],
-                       "totalCapacity":device_data_dict["Capacity in total"],
-                       "usedCapacity":device_data_dict["Capacity in use"],
-                },
-                "smart":{"percentageUsed":device_data_dict["Percentage Used"],
-                       "temperature":device_data_dict["Temperature"],
-                       "unitRead":str(int(device_data_dict["Data Units Read"],16)),
-                       "unitWRITE":device_data_dict["Data Units Written"],
-                }
-            }
+    for _smart_item in device_data_dict["smart"].iteritems():
+        _item = {"key":_smart_item[0],"value":_smart_item[1]}
+        device_data_json["smart"].append(_item)
 
     devicedata = json.dumps(device_data_json)
     return HttpResponse(devicedata)

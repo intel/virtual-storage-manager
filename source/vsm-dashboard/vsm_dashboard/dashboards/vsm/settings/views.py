@@ -36,7 +36,7 @@ class IndexView(TemplateView):
             setting.verbose_name = setting.name.upper()
         context['settings'] = [x for x in settings if
                                x.verbose_name in ("STORAGE_GROUP_NEAR_FULL_THRESHOLD",
-                                                  "STORAGE_GROUP_FULL_THRESHOLD","DISK_NEAR_FULL_THRESHOLD","DISK_FULL_THRESHOLD")]
+                                                  "STORAGE_GROUP_FULL_THRESHOLD","DISK_NEAR_FULL_THRESHOLD","DISK_FULL_THRESHOLD",'CPU_DIAMOND_COLLECT_INTERVAL','CEPH_DIAMOND_COLLECT_INTERVAL')]
         return context
 
 def SettingsAction(request, action):
@@ -50,7 +50,7 @@ def SettingsAction(request, action):
             #vsmapi.add_servers(request, data)
             try:
                 setting_value = int(data['keyValue'])
-                if 0 < setting_value < 21600:
+                if 0 < setting_value < 21600 or setting_value==0:
                     vsmapi.update_setting(request, data['keyName'], data['keyValue'])
                     status = "success"
                     msg = "Update Success"

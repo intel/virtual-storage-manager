@@ -77,6 +77,7 @@ class AgentManager(manager.Manager):
         self._driver = driver.DbDriver()
         self.ceph_driver = driver.CephDriver()
         self.crushmap_driver = driver.CreateCrushMapDriver()
+        self.diamond_driver= driver.DiamondDriver()
         self._smp = ManifestParser()
         self._node_info = self._smp.format_to_json()
         #TODO (jiyou)
@@ -360,9 +361,9 @@ class AgentManager(manager.Manager):
             LOG.info('Get error in update_ssh_keys')
         finally:
             self._is_update_ssh = False
-    def get_smart_info(self, context):
+    def get_smart_info(self, context, device):
         """When find new servers, insert new server's key."""
-        return self.ceph_driver.get_smart_info(context)
+        return self.ceph_driver.get_smart_info(context, device)
 
     def _set_ssh_chanel(self):
         # Get self id from init_node table.
@@ -1596,3 +1597,26 @@ class AgentManager(manager.Manager):
             except exception.UpdateDBError, e:
                 LOG.error('%s:%s' % (e.code, e.message))
         return osd_id
+
+    def reconfig_diamond(self, context, body):
+        name = body.get('name')
+        value = body.get('value')
+        confs = {}
+        if name in ['cpu_diamond_collect_interval','ceph_diamond_collect_interval']:
+            if int(value) == 0:
+                confs['enabled'] = False
+            else:
+                confs['enabled'] = True
+                confs['interval'] = value
+        if name == 'cpu_diamond_collect_interval':
+            collect_name = 'CPUCollector'
+        elif name == 'ceph_diamond_collect_interval':
+            collect_name = 'CephCollector'
+        else:
+            return
+        self.diamond_driver.change_collector_conf(collect_name,confs)
+
+
+
+
+
