@@ -302,7 +302,7 @@ function install_controller() {
     if [[ $IS_CONTROLLER -eq 0 ]]; then
         set_remote_repo $CONTROLLER_ADDRESS
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond"
-        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO preinstall"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO preinstall controller"
         setup_remote_controller
         $SCP $USER@$CONTROLLER_ADDRESS:/var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
         cd $REPO_PATH
@@ -311,7 +311,7 @@ function install_controller() {
     else
         set_local_repo
         $SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond
-        $SUDO preinstall
+        $SUDO preinstall controller
         $SUDO rm -rf /etc/manifest/cluster.manifest
         $SUDO cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
         $SUDO chown root:vsm /etc/manifest/cluster.manifest
@@ -412,7 +412,7 @@ function install_agent() {
     check_manifest $1
     set_remote_repo $1
     $SSH $USER@$1 "$SUDO apt-get install -y vsm vsm-deploy"
-    $SSH $USER@$1 "$SUDO preinstall"
+    $SSH $USER@$1 "$SUDO preinstall agent"
 
     setup_remote_agent $1
     install_setup_diamond $1
