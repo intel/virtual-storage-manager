@@ -52,7 +52,8 @@ echo deb $PKG_URL $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/cep
 rm -rf /var/lib/dpkg/info-bak;
 mv /var/lib/dpkg/info/ /var/lib/dpkg/info-bak;
 mkdir -p /var/lib/dpkg/info;
-apt-get update && apt-get install -y ceph ceph-common ceph-mds;
+apt-get update;
+exp_ceph_upgrade;
 sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
 
 }

@@ -1,0 +1,8 @@
+#!/usr/bin/expect -f
+
+spawn  apt-get install -y ceph ceph-common ceph-mds
+expect "(Y/I/N/O/D/Z) [default=N] ?"
+send "Y\r"
+
+
+expect eof
