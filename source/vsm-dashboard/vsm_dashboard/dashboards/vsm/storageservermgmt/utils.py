@@ -128,6 +128,7 @@ def get_server_list(request, filters=[]):
                         "secondary_public_ip": _server.secondary_public_ip,
                         "cluster_ip": _server.cluster_ip,
                         "zone_id": _server.zone_id,
+                        "ceph_ver": _server.ceph_ver,
                         "zone": "",
                         "osds": _server.osds,
                         "type": _server.type,

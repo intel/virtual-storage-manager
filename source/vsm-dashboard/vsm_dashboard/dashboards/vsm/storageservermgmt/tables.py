@@ -55,7 +55,7 @@ class UpdateRow(tables.Row):
                   "secondary_public_ip": _server.secondary_public_ip,
                   "cluster_ip": _server.cluster_ip,
                   "zone_id": _server.zone_id,
-                  "zone_id": _server.zone_id,
+                  "ceph_ver": _server.ceph_ver,
                   "zone": "",
                   "osds": _server.osds,
                   "type": _server.type,
@@ -161,7 +161,7 @@ class ListServerTableBase(tables.DataTable):
         name = "server_list_base"
         verbose_name = _("Cluster Server List")
         table_actions = (AddServersAction, RemoveServersAction, 
-                AddMonitorsAction, RemoveMonitorsAction)
+                AddMonitorsAction, RemoveMonitorsAction,CephUpgradeAction)
         status_columns = ['status']
         row_class = UpdateRow
 
@@ -202,7 +202,7 @@ class ListServerTable(ListServerTableBase):
         name = "server_list"
         verbose_name = _("Cluster Server List")
         table_actions = (AddServersAction, RemoveServersAction,
-                AddMonitorsAction, RemoveMonitorsAction, StartServersAction, StopServersAction)
+                AddMonitorsAction, RemoveMonitorsAction, StartServersAction, StopServersAction,CephUpgradeAction)
         status_columns = ['status']
         row_class = UpdateRow
         multi_select = False

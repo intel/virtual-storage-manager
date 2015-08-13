@@ -486,7 +486,7 @@ vsm_settings_opts = [
                help='reset pg_num heart beat(secs)'),
     cfg.IntOpt('update_ceph_version_info',
                default=600,
-               help='reset pg_num heart beat(secs)'),
+               help='update ceph version info(secs)'),
     cfg.IntOpt('ceph_osd_dump',
                default=600,
                help='ceph osd dump (secs)'),
