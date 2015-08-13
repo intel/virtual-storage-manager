@@ -17,50 +17,97 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Create Cluster" %}{% endblock %}
+{% block title %}{% trans "Import Cluster" %}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("Create Cluster") %}
+  {% include "horizon/common/_page_header.html" with title=_("Import Cluster") %}
 {% endblock page_header %}
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=cluster.title %}
-  <!-- <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet"> -->
-  <link href="{{ STATIC_URL }}dashboard/css/osdstatus.css" rel="stylesheet">
+  <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-    {% csrf_token %}
 
-<div id="divImportCluster" >
-  <div id="divWarningInfo" class="alert alert-warning" role="alert">
-      <!-- some warning info -->
-  </div>
+{% csrf_token %}
 
-      <form>
-        <div class="left">
-          <fieldset>
-          {% include "horizon/common/_form_fields.html" %}
-          </fieldset>
-        </div>
-        <div class="right">
-          <h3>{% trans "Description" %}:</h3>
-          <p>{% trans "From here you can edit the user's details." %}</p>
-          <p>{% trans "Your Password Must contain at least one number, one uppercase character, one lowercase character and one special character (eg !@#$%^&*().:;~\|[]{} )." %}</p>
-        </div>
-      </form>
-
-
-      <div id="divFormOptions" class="vsm-options-bar">
-          <input id="btnUpdateUser"  class="btn btn-primary" type="submit" value="Update User" />
-          <a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/usermgmt/">Cancel</a>
-      </div>
+<div id="divServerPanel">
+    <label id="lblClusterConnection"  class="form-label">Cluster Connection Information:</label>
 </div>
 
-{% endblock %}
+<div id="divConnectionForm">
+  <div class="left">
+      <div class="control-group required">
+        <label >Monitor Host :</label>
+        <span class="form-required">*</span>
+        <div class="input">
+          <input id="txtMonitorHost" class="form-control" type="text" value="" >
+        </div>
+      </div>
+  </div>
+  <div class="right">
+      <div class="control-group required">
+        <label >Admin Keyring :</label>
+        <span class="form-required">*</span>
+        <div class="input">
+          <input id="txtAdminKeyring" class="form-control" type="text" value="" >
+        </div>
+      </div>
+  </div>
+  <div id="divFormOptions" class="vsm-options-bar">
+        <button id="btnConnectCluster" class="btn btn-primary">Connect</button>
+  </div>
+</div>
 
-{% block main %}
-    {{ table.render }}
+
+<div id="divImportClusterTable">
+   <table id="tNodeList" class="table table-bordered table-striped datatable">
+    <thead>
+      <tr>
+          <th  class="normal_column hidden"></th>
+          <th  class="normal_column">ID</th>
+          <th  class="normal_column">Name</th>
+          <th  class="normal_column">Management Address</th>
+          <th  class="normal_column">Public Address</th>
+          <th  class="normal_column">Cluster Address</th>
+          <th  class="normal_column">Monitor</th>
+          <th  class="normal_column">Status</th>
+          <th  class="normal_column">Action</th>
+      </tr>
+    </thead>
+
+    <tbody id="tbNodeList">
+{% for node in NodeList %}
+      <tr id="tr_{{node.id}}" name="{{node.name}}">
+          <td class="sortable normal_column hidden">{{node.id}}</td>
+          <td class="sortable normal_column">{{ node.name }}</td>
+          <td class="sortable normal_column">{{ node.primary_public_ip }}</td>
+          <td class="sortable normal_column">{{ node.secondary_public_ip }}</td>
+          <td class="sortable normal_column">{{ node.cluster_ip }}</td>
+          <td class="sortable normal_column">{{ node.is_monitor }}</td>
+          <td class="sortable normal_column">{{ node.status }}</td>
+          <td class="sortable normal_column">
+          </td>
+      </tr>
+{% endfor %}
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td colspan="8">
+          <span class="table_count"></span>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div id="divFormOptions" class="vsm-options-bar">
+        <button id="btnSubmitImportCluster" class="btn btn-primary">Import</button>
+        <a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/cluster-import/">Cancel</a>
+  </div>
+<div>
+
 {% endblock %}
 
 {% block js %}
