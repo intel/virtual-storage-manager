@@ -393,9 +393,10 @@ function install_setup_diamond() {
 
 function setup_remote_agent() {
     $SSH $USER@$1 "$SUDO rm -rf /etc/manifest/server.manifest"
-    $SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
-    old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
-    $SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    #$SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    #old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
+    #$SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    $SUDO sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
     $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/server.manifest /etc/manifest"
     $SSH $USER@$1 "$SUDO chown root:vsm /etc/manifest/server.manifest; $SUDO chmod 755 /etc/manifest/server.manifest"
