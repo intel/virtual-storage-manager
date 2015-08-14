@@ -357,7 +357,12 @@ function install_setup_diamond() {
     kill_diamond $1
     $SSH $USER@$1 "$SUDO apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
-    source $DEPLOYRC_FILE
+    if [[ $IS_CONTROLLER -eq 0 ]]; then
+        $SCP $USER@$CONTROLLER_ADDRESS:$DEPLOYRC_FILE /tmp
+        source /tmp/deployrc
+    else
+        source $DEPLOYRC_FILE
+    fi
     VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
     HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
     DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
