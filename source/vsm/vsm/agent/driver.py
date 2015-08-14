@@ -1398,7 +1398,7 @@ class CephDriver(object):
         LOG.info('get version--after ceph upgrade==%s'%ceph_ver)
         db.init_node_update(context,node_id,{'ceph_ver':ceph_ver})
         db.init_node_update_status_by_id(context, node_id, pre_status)
-        return True
+        return ceph_ver
 
     def get_ceph_health(self, context):
         out, err = utils.execute('ceph',

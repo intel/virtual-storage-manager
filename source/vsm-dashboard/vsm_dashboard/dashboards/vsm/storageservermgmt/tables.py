@@ -161,7 +161,7 @@ class ListServerTableBase(tables.DataTable):
         name = "server_list_base"
         verbose_name = _("Cluster Server List")
         table_actions = (AddServersAction, RemoveServersAction, 
-                AddMonitorsAction, RemoveMonitorsAction,CephUpgradeAction)
+                AddMonitorsAction, RemoveMonitorsAction)
         status_columns = ['status']
         row_class = UpdateRow
 
@@ -202,7 +202,7 @@ class ListServerTable(ListServerTableBase):
         name = "server_list"
         verbose_name = _("Cluster Server List")
         table_actions = (AddServersAction, RemoveServersAction,
-                AddMonitorsAction, RemoveMonitorsAction, StartServersAction, StopServersAction,CephUpgradeAction)
+                AddMonitorsAction, RemoveMonitorsAction, StartServersAction, StopServersAction)
         status_columns = ['status']
         row_class = UpdateRow
         multi_select = False

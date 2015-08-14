@@ -54,7 +54,7 @@ class UserMgmt(horizon.PanelGroup):
 class UpgradeMgmt(horizon.PanelGroup):
     slug = "upgrademgmt"
     name = _("Manage Upgrade")
-    panels = ( "cephupgrade")
+    panels = ( "cephupgrade",)
 
 class VizDash(horizon.Dashboard):
     name = _("VSM")
