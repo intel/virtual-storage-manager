@@ -935,25 +935,34 @@ class SchedulerManager(manager.Manager):
         key_url = body['key_url']
         pkg_url = body['pkg_url']
         LOG.info("ceph upgrade of scheduer manager %s" % server_list)
-
-        for item in server_list:
-            self._conductor_api.init_node_update(context, item['id'],{"status": "ceph upgrading"})
-            try:
-                self._agent_rpcapi.ceph_upgrade(context, item['id'], item['host'], key_url, pkg_url)
-            except rpc_exc.Timeout:
-                self._update_server_list_status(context,
-                                                server_list,
-                                                'rpc timeout error: check network')
-            except rpc_exc.RemoteError:
-                self._update_server_list_status(context,
-                                                server_list,
-                                                'rpc remote error: check network')
-            except:
-                self._update_server_list_status(context,
-                                                server_list,
-                                                'ERROR')
-                raise
-        return True
+        status_all = [node['status'] for node in server_list ]
+        status_all = set(status_all)
+        message = "send commonds success"
+        if len(status_all)==1 and status_all[0] in ['available','Active']:
+            if status_all[0] == 'available':
+                restart = False
+            else:
+                restart = True
+            for item in server_list:
+                    self._conductor_api.init_node_update(context, item['id'],{"status": "ceph upgrading"})
+                    try:
+                        self._agent_rpcapi.ceph_upgrade(context, item['id'], item['host'], key_url, pkg_url,restart)
+                    except rpc_exc.Timeout:
+                        self._update_server_list_status(context,
+                                                        server_list,
+                                                        'rpc timeout error: check network')
+                    except rpc_exc.RemoteError:
+                        self._update_server_list_status(context,
+                                                        server_list,
+                                                        'rpc remote error: check network')
+                    except:
+                        self._update_server_list_status(context,
+                                                        server_list,
+                                                        'ERROR')
+                        raise
+        else:
+            message = 'Only available or Active server can perform the operation'
+        return {"message":message}
 
     @utils.single_lock
     def start_server(self, context, body=None):

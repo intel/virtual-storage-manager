@@ -51,10 +51,15 @@ class UserMgmt(horizon.PanelGroup):
     name = _("VSM Management")
     panels = ("usermgmt", 'settings')
 
+class UpgradeMgmt(horizon.PanelGroup):
+    slug = "upgrademgmt"
+    name = _("Manage Upgrade")
+    panels = ( "cephupgrade")
+
 class VizDash(horizon.Dashboard):
     name = _("VSM")
     slug = "vsm"
-    panels = (Dashboard, ServerMgmt, ClusterMgmt, ClusterMonitor, OpenstackMgmt, UserMgmt)
+    panels = (Dashboard, ServerMgmt, ClusterMgmt, ClusterMonitor, OpenstackMgmt, UserMgmt, UpgradeMgmt)
     #default_panel = 'flocking'
     default_panel = 'overview'
     #default_panel = 'poolsmanagement'

@@ -1373,7 +1373,7 @@ class CephDriver(object):
                                                 values)
         return True
 
-    def ceph_upgrade(self, context, node_id, key_url, pkg_url):
+    def ceph_upgrade(self, context, node_id, key_url, pkg_url,restart=True):
         """ceph_upgrade
         """
         LOG.info('agent/driver.py ceph_upgrade')
@@ -1383,8 +1383,9 @@ class CephDriver(object):
                              key_url,'-p', pkg_url,
                              run_as_root=True)
             LOG.info("exec vsm-ceph-upgrade:%s--%s"%(out,err))
-            self.stop_server(context, node_id)
-            self.start_server(context, node_id)
+            if restart:
+                self.stop_server(context, node_id)
+                self.start_server(context, node_id)
             err = 'success'
         except:
             LOG.info("vsm-ceph-upgrade error:%s"%err)
