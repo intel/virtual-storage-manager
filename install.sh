@@ -325,9 +325,10 @@ fi
 
 function setup_storage() {
     $SSH $USER@$1 "rm -rf /etc/manifest/server.manifest"
-    sed -i "s/token-tenant/$token/g" $MANIFEST_PATH/$1/server.manifest
-    old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
-    sed -i "s/$old_str/$token/g" $MANIFEST_PATH/$1/server.manifest
+    #sed -i "s/token-tenant/$token/g" $MANIFEST_PATH/$1/server.manifest
+    #old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
+    #sed -i "s/$old_str/$token/g" $MANIFEST_PATH/$1/server.manifest
+    sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
     $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/etc/manifest
     $SSH $USER@$1 "chown root:vsm /etc/manifest/server.manifest; chmod 755 /etc/manifest/server.manifest"
     is_server_manifest_error=`$SSH $USER@$1 "server_manifest|grep ERROR|wc -l"`
