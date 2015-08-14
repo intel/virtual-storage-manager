@@ -161,7 +161,9 @@ class ServerManager(base.ManagerWithFind):
         ceph_upgrade
         """
         url = "/servers/ceph_upgrade"
-        return self.api.client.post(url, body=body)
+        ret = self.api.client.post(url, body=body)
+        print 'vsclient ---ceph upgrade==',ret
+        return ret
 
     def initialize_connection(self, vsm, connector):
         """

@@ -34,8 +34,8 @@ function PostRequest(data){
         dataType: "json",
         url: "/dashboard/vsm/cephupgrade/ceph_upgrade/",
         success: function (data) {
-            console.log(data);
-            window.location.href="/dashboard/vsm/cephupgrade/";
+            showTip(data.status,data.message);
+            return false;
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
 

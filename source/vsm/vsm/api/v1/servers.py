@@ -196,8 +196,10 @@ class ServersController(wsgi.Controller):
     def ceph_upgrade(self, req, body=None):
         LOG.info('DEBUG ceph_upgrade body %s ' % body)
         context = req.environ['vsm.context']
-        self.scheduler_rpcapi.ceph_upgrade(context, body)
-        return webob.Response(status_int=202)
+        ret = self.scheduler_rpcapi.ceph_upgrade(context, body)
+        LOG.info('DEBUG ceph_upgrade ret %s ' % ret)
+        return ret
+        #return webob.Response(status_int=202)
 
 def create_resource(ext_mgr):
     return wsgi.Resource(ServersController(ext_mgr))

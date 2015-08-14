@@ -313,9 +313,7 @@ class AgentManager(manager.Manager):
         #TODO cluster_id may be deleted.
         values['cluster_id'] = cluster_id
         values['weight'] = '1.0'
-        LOG.info('ceph_ver---222-')
         values['ceph_ver'] = self.ceph_driver .get_ceph_version()  or ''
-        LOG.info('ceph_ver----111--=%s'%values.get('ceph_ver'))
         init_node_ref = db.init_node_get_by_host(self._context,
                                                  self.host)
 

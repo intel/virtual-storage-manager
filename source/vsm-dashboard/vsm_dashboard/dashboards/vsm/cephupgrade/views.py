@@ -20,9 +20,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 
 from horizon import forms
-
-
-from vsm_dashboard import api as vsmapi
+from vsm_dashboard.api import vsm as vsmapi
 from django.http import HttpResponse
 from .form import CephUpgrade
 
@@ -38,10 +36,9 @@ class CephUpgradeView(forms.ModalFormView):
 
 def ceph_upgrade(request):
     data = json.loads(request.body)
-    print "DEBUG in server action %s" % data
-    vsmapi.ceph_upgrade(request, data[0])
+    code,msg = vsmapi.ceph_upgrade(request, data[0])
     status = "info"
-    msg = "Began to upgrade ceph"
+    msg = msg.get('message')
 
     resp = dict(message=msg, status=status, data="")
     resp = json.dumps(resp)

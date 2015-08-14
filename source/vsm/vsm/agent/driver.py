@@ -1391,6 +1391,13 @@ class CephDriver(object):
             LOG.info("vsm-ceph-upgrade error:%s"%err)
             err = 'error'
         db.init_node_update_status_by_id(context, node_id, 'Ceph Upgrade:%s'%err)
+        pre_status = 'available'
+        if restart:
+            pre_status = 'Active'
+        ceph_ver = self.get_ceph_version()
+        LOG.info('get version--after ceph upgrade==%s'%ceph_ver)
+        db.init_node_update(context,node_id,{'ceph_ver':ceph_ver})
+        db.init_node_update_status_by_id(context, node_id, pre_status)
         return True
 
     def get_ceph_health(self, context):

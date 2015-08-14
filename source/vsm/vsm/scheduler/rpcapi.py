@@ -90,7 +90,7 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return ret
 
     def ceph_upgrade(self, ctxt, body=None):
-        ret = self.cast(ctxt, self.make_msg('ceph_upgrade', body=body))
+        ret = self.call(ctxt, self.make_msg('ceph_upgrade', body=body))
         return ret
 
     def get_cluster_list(self, ctxt):

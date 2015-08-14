@@ -936,7 +936,7 @@ class SchedulerManager(manager.Manager):
         pkg_url = body['pkg_url']
         LOG.info("ceph upgrade of scheduer manager %s" % server_list)
         status_all = [node['status'] for node in server_list ]
-        status_all = set(status_all)
+        status_all = list(set(status_all))
         message = "send commonds success"
         if len(status_all)==1 and status_all[0] in ['available','Active']:
             if status_all[0] == 'available':
