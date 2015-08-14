@@ -796,7 +796,7 @@ class CephDriver(object):
         host = node['host']
 
         # get config
-        LOG.info('>> removeing ceph mon')
+        LOG.info('>> removing ceph mon')
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
         config_dict = config.as_dict()
 
@@ -807,12 +807,12 @@ class CephDriver(object):
                 if config_dict[section]['host'] == host:
                     mon_id = section.replace("mon.", "")
         if not mon_id:
-            LOG.info('>> removeing ceph mon not found')
+            LOG.info('>> removing ceph mon not found')
             return True
 
         # step 1
-        LOG.info('>> removeing ceph mon %s' % mon_id)
-        LOG.info('>> removeing ceph mon step 1')
+        LOG.info('>> removing ceph mon %s' % mon_id)
+        LOG.info('>> removing ceph mon step 1')
         try:
             # test ssh service in case the server is down
             utils.execute('ssh', '-q', 'root@' + host, 'exit', run_as_root=True)
@@ -831,7 +831,7 @@ class CephDriver(object):
             # Go steps below.
 
         # step 2
-        LOG.info('>> removeing ceph mon step 2')
+        LOG.info('>> removing ceph mon step 2')
         utils.execute("ceph",
                       "mon",
                       "remove",
@@ -840,7 +840,7 @@ class CephDriver(object):
         if not is_stop:
             config.remove_mon(mon_id)
         # step 3
-        LOG.info('>> removeing ceph mon step 3')
+        LOG.info('>> removing ceph mon step 3')
 
         config.save_conf(FLAGS.ceph_conf)
         return True
