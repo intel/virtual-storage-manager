@@ -414,6 +414,7 @@ function install_agent() {
     set_remote_repo $1
     $SSH $USER@$1 "$SUDO apt-get install -y vsm vsm-deploy"
     $SSH $USER@$1 "$SUDO preinstall agent"
+    $SSH $USER@$1 "if [ -r /etc/init/ceph-all.conf ] && [ ! -e /etc/init/ceph.conf ]; then sudo ln -s /etc/init/ceph-all.conf /etc/init/ceph.conf; sudo initctl reload-configuration; fi"
 
     setup_remote_agent $1
     install_setup_diamond $1
