@@ -21,7 +21,7 @@
 TOPDIR=$(cd $(dirname "$0") && pwd)
 USER=`whoami`
 
-source $TOPDIR/hostrc
+source $TOPDIR/installrc
 
 for ip in $CONTROLLER_ADDRESS; do
     ssh -t $ip "sudo clean-data -f; sudo apt-get remove -y ceph httpd MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"

@@ -21,7 +21,7 @@
 TOPDIR=$(cd $(dirname "$0") && pwd)
 USER=`whoami`
 
-source $TOPDIR/hostrc
+source $TOPDIR/installrc
 
 for ip in $CONTROLLER_ADDRESS; do
     ssh -t $ip "clean-data -f; yum -y erase ceph httpd MariaDB-client MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
