@@ -3,13 +3,13 @@
 ==================================
 
 
-**Version:** 2.0.0.149
+**Version:** 2.0.0.153
 
-**Source:** 2015-07-31
+**Source:** 2015-08-14
 
 **Keywords:** Ceph, Openstack, Virtual Storage Management
 
-**Supported Combo:** 
+**Supported Combo:**
 
 	OS:			Ubuntu 14.04.2
 	Ceph: 		Firefly/Giant/Hammer
@@ -17,13 +17,13 @@
 
 	(Other combos might also be working, but we didn't try yet.)
 
-	
-	
+
+
 #Preparation
 
 Before you get ready to install VSM, you should prepare your environment. **_VSM CANNOT manage Ceph Cluster not created by it_**. The sections here are helpful for understanding the deployment concepts.
 
-**Note**: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster. 
+**Note**: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster.
 
 
 ##Roles
@@ -33,10 +33,10 @@ There are two roles for the nodes (servers) on your VSM created Ceph cluster.
 The controller node is used to run mariadb, rabbitmq, web ui services for the VSM cluster.
 
 ### Agent Node  (a.k.a Storage Node)
-The agent node is used to run the vsm-agent service which manages the Ceph and physical storage resources. These nodes are the Ceph storage and monitor nodes. 
+The agent node is used to run the vsm-agent service which manages the Ceph and physical storage resources. These nodes are the Ceph storage and monitor nodes.
 
 ##Network
-There are three kinds of networks defined in VSM, and the three networks can all be the same network or separate networks or subnets. VSM does not support split subnets - e.g. two or more different subnets that together make up the management network, or the ceph public network. or the ceph public network. 
+There are three kinds of networks defined in VSM, and the three networks can all be the same network or separate networks or subnets. VSM does not support split subnets - e.g. two or more different subnets that together make up the management network, or the ceph public network. or the ceph public network.
 
 ### Management Network
 Management Network is used to manage the VSM cluster, and interchanges VSM mangement data between vsm controller and agents.
@@ -50,7 +50,7 @@ Ceph Cluster Network is used to interchange data between ceph nodes like Monitor
 
 ##Recommendations
 - Controller node should have connectivity to:
-	
+
 	>     Management Network
 
 - Agent Node should have connectivity to:
@@ -80,10 +80,10 @@ The configuration for VSM in the `cluster.manifest` file should be:
 
 	>     [management_addr]
 	>     192.168.123.0/24
-	> 
+	>
 	>     [ceph_public_addr]
 	>     192.168.124.0/24
-	> 
+	>
 	>     [ceph_cluster_addr]
 	>     192.168.125.0/24
 
@@ -106,17 +106,17 @@ The configuration for VSM in `cluster.manifest` file would then be:
 
 	>     [management_addr]
 	>     192.168.123.0/24
-	> 
+	>
 	>     [ceph_public_addr]
 	>     192.168.124.0/24
-	> 
+	>
 	>     [ceph_cluster_addr]
 	>     192.168.123.0/24
 
 ### Sample 3
 It's quite common to have just one NIC in demo environment, then all nodes just have:
 
-	>   192.168.123.0/24 
+	>   192.168.123.0/24
 
 We may assign this network as below:
 
@@ -128,23 +128,23 @@ So all of the three VSM networks use the same subnet, The configurations in `clu
 
 	>     [management_addr]
 	>     192.168.123.0/24
-	> 
+	>
 	>     [ceph_public_addr]
 	>     192.168.123.0/24
-	> 
+	>
 	>     [ceph_cluster_addr]
 	>     192.168.123.0/24
 
 
 #Automatic Deployment
-Starting with VSM 1.1, an automatic deployment tool is provided which can simplify the deployment. This tool is still in development, so your feedback and JIRA reports of any problems are very welcome. 
+Starting with VSM 1.1, an automatic deployment tool is provided which can simplify the deployment. This tool is still in development, so your feedback and JIRA reports of any problems are very welcome.
 
 This section will describe how to use the tool to conduct automation.
 
-1. Firstly, a VSM binary release package should be acquired. It may be downloaded from binary repository, or built from source (see [Build VSM](#Build_VSM)). Then unpack the release package, the folder structure looks as following: 
+1. Firstly, a VSM binary release package should be acquired. It may be downloaded from binary repository, or built from source (see [Build VSM](#Build_VSM)). Then unpack the release package, the folder structure looks as following:
 	> 	.
 	> 	├── CHANGELOG
-	> 	├── hostrc
+	> 	├── installrc
 	> 	├── INSTALL.md
 	> 	├── install.sh
 	> 	├── uninstall.sh
@@ -161,8 +161,8 @@ This section will describe how to use the tool to conduct automation.
 	> 	    ├── vsm-dashboard-2.0.0-123_amd64.deb
 	> 	    └── vsm-deploy-2.0.0-123_amd64.deb
 
-2. Changing the *hostrc* file, set the *AGENT_ADDRESS_LIST* and the *CONTROLLER_ADDRESS*, the ip addresses in *AGENT_ADDRESS_LIST* is delimitered by space, and all ip addresses are used in management subnet. e.g.:
-	> 
+2. Changing the *installrc* file, set the *AGENT_ADDRESS_LIST* and the *CONTROLLER_ADDRESS*, the ip addresses in *AGENT_ADDRESS_LIST* is delimitered by space, and all ip addresses are used in management subnet. e.g.:
+	>
 	> 	AGENT_ADDRESS_LIST="192.168.123.21 192.168.123.22 192.168.123.23"
 	> 	CONTROLLER_ADDRESS="192.168.123.10"
 *It's OK to use host name instead of ip addresses here.*
@@ -198,18 +198,18 @@ This section will describe how to use the tool to conduct automation.
 	> 	└── server.manifest.sample
 
 8. If you want to upgrade vsm binary packages only, one approach is to build release package separately (see [Build Packages](#Build_Pkg)). The generated binary packages will be in *vsmrepo* folder after unpack the release package, then you can execute below command to install binary package:
-	> 
+	>
 	> 	dpkg -i <package>
-	> 
+	>
 
 9. Now we are ready to start the automatic procedure by executing this command line:
-	> 
+	>
 	> 	sudo ./install.sh -u ubuntu -v <version>
-	> 	
-	
+	>
+
 	where *version* is the vsm version like 1.1, 2.0.
 
-10. If execution is blocked at any point, please try to enter "y" and move ahead. 
+10. If execution is blocked at any point, please try to enter "y" and move ahead.
 
 11. If all goes well, you can then [login to the VSM Web UI](#VSM_Web_UI).
 
@@ -229,8 +229,8 @@ This section will describe how to use the tool to conduct automation.
 
 There are a few cases where you may expect to uninstall VSM, e.g, you expect to reinstall it with different configurations, you feel VSM doesn't work as you expected. You could take below steps to do the removal:
 
-1.	Go to the VSM folder where you start the installation procedure. 
-2.	Make sure the `hostrc` file is there, and the ip addresses for controller node and agent nodes are correctly set. Normally, if you correctly installed VSM, you should have already correctly set the file.
+1.	Go to the VSM folder where you start the installation procedure.
+2.	Make sure the `installrc` file is there, and the ip addresses for controller node and agent nodes are correctly set. Normally, if you correctly installed VSM, you should have already correctly set the file.
 3.	Execute below command:
 
 	>   ./uninstall.sh
@@ -243,7 +243,7 @@ There are two approaches to get a VSM release package, a direct way is to downlo
 
 	>    ./buildvsm.sh -v <version>
 
-where *version* is the vsm version like 1.1, 2.0. A release package named like *2.0.0-123.tar.gz* will be generated in *release* folder if all execute well. 
+where *version* is the vsm version like 1.1, 2.0. A release package named like *2.0.0-123.tar.gz* will be generated in *release* folder if all execute well.
 
 
 ##<a name="Configure_Cluster_Manifest"></a>cluster.manifest
@@ -253,7 +253,7 @@ The cluster.manifest file is under manifest/<controller_ip>/ folder, the three s
 ###**subnets**
 
 1. Modify the three IP addresses according to your environment.
-`management_addr` is used by VSM to communicate with different services, such as using rabbitmq to transfer messages, rpc.call/rpc.cast etc.`ceph_public_addr` is a public (front-side) network address. `ceph_cluster_addr` is a cluster (back-side) network address. 
+`management_addr` is used by VSM to communicate with different services, such as using rabbitmq to transfer messages, rpc.call/rpc.cast etc.`ceph_public_addr` is a public (front-side) network address. `ceph_cluster_addr` is a cluster (back-side) network address.
 
 Also, make sure the netmask is correctly set. In this sample, _netmask_=24 is fine, but with AWS instances, normally, *netmask*=16 are required.
 
@@ -268,8 +268,8 @@ Also, make sure the netmask is correctly set. In this sample, _netmask_=24 is fi
 
 Here is a complete list of all settings for cluster.manifest:
 
-- [**storage_class**] 
-	
+- [**storage_class**]
+
 	In this section, you can put you planned storage class name. One line for one class name, only names with numbers, alphabetic and underscore can be used for class name.
 
 - [**storage_group**]
@@ -288,12 +288,12 @@ Here is a complete list of all settings for cluster.manifest:
 
 - [**zone**]
 
-	In this section, you can add zone name under the section. 
-	- format: 
+	In this section, you can add zone name under the section.
+	- format:
 
 	> 	[zone-name]
 
-	- comments: 
+	- comments:
 		1. Only numbers, alphabetic and underscore can be used for zone name.
 		2. By default, this section is disabled, in this case, a default zone called *zone_one* will be used.
 
@@ -306,7 +306,7 @@ Here is a complete list of all settings for cluster.manifest:
 - [**ceph\_public\_addr**]
 
 - [**ceph\_cluster\_addr**]
-	
+
 	Those 3 sections will define the three subnets.
 
 - [**settings**]
@@ -315,8 +315,8 @@ Here is a complete list of all settings for cluster.manifest:
 
 > 	storage_group_near_full_threshold  65
 > 	storage_group_full_threshold  85
-> 	ceph_near_full_threshold  75 
-> 	ceph_full_threshold  90 
+> 	ceph_near_full_threshold  75
+> 	ceph_full_threshold  90
 > 	pg_count_factor 100
 > 	heartbeat_interval 5
 > 	osd_heartbeat_interval 10
@@ -328,13 +328,13 @@ Here is a complete list of all settings for cluster.manifest:
 - [**ec_profiles**]
 
 	In this section, you can define some erasure coded pool profile before you create the cluster.
-	- format: 
+	- format:
 
 	> 	profile-name] [path-to-plugin] [plugin-name] [pg_num value] [json format key/value]
 
-	- comments: 
+	- comments:
 		1. the key/value strings should not have spaces.
-		
+
 	- example:
 
 	> 	default_profile  /usr/lib64/ceph/erasure-code  jerasure  3  {"k":2,"m":1,"technique":"reed_sol_van"}
@@ -377,39 +377,39 @@ The server.manifest file is under manifest/<agent_ip>/ folder, below settings mu
 
 - [**auth_key**]
 
-	Replace the content with the key you get from controller by running the agent-token command on the controller. 
+	Replace the content with the key you get from controller by running the agent-token command on the controller.
 
 	**DON'T MODIFY IT**, the automatic deployment tool will fill this section.
 
 - **OSD definition under each storage group**
 
 	The storage you use for your Ceph cluster must have previously been provisioned by you with a label and a partition.
-	
+
 	For example:
 
 	>     parted /dev/sdb -- mklabel gpt
 	>     parted -a optimal /dev/sdb -- mkpart xfs 1MB 100%
 
-	Enter your primary and associated journal storage information in the server.manifest, remeber to fill them in right storage group. 
-	
+	Enter your primary and associated journal storage information in the server.manifest, remeber to fill them in right storage group.
+
 	For example, change the lines below:
 
 	>     [10krpm_sas]
-	>     #format [sas_device]  [journal_device] 
+	>     #format [sas_device]  [journal_device]
 	>     %osd-by-path-1%   %journal-by-path-1%
 	>     %osd-by-path-2%   %journal-by-path-2%
 	>     %osd-by-path-3%   %journal-by-path-3%
 
 	to be:
-	
+
 	>     [10krpm_sas]
-	>     #format [sas_device]  [journal_device] 
+	>     #format [sas_device]  [journal_device]
 	>     /dev/sdb1 /dev/sdc1
 	>     /dev/sdd1 /dev/sdc2
 	>     /dev/sde1 /dev/sdf
 
 	Then delete the redundant lines with %osd-by-path%, if you have fewer disks.
-	
+
 	We recommend though that you use disk-by-path instead for the disk paths. Use the command below to find the true by-path:
 
     >     ls -al /dev/disk/by-path/* | grep `disk-path` | awk '{print $9,$11}'
@@ -424,7 +424,7 @@ The server.manifest file is under manifest/<agent_ip>/ folder, below settings mu
 	**Warning:** It may cause an error when you add a disk without by-path. So, If you can not find the by-path for a normal disk, you should not use it. Or if you use it to create the cluster, and the create cluster fails, please delete it from the `/etc/manifest/server.manifest` file.
 
 	After that the disk list appears like this, here the storage group name `10krpm_sas` should have already defined in `[storage_group]` section in `cluster.manifest`.
-	
+
 	    [10krpm_sas]
 	    #format [sas_device]  [journal_device]
 	    /dev/disk/by-path/pci-0000:00:0c.0-virtio-pci-virtio3   /dev/disk/by-path/pci-0000:00:0d.0-virtio-pci-virtio4
@@ -435,7 +435,7 @@ The server.manifest file is under manifest/<agent_ip>/ folder, below settings mu
 ##Storage Groups
 
 If you have several kinds of storage media like 10krpm SAS drives & solid state drives, and you want these disks organized into different storage groups in VSM, then you may follow the operations below. Otherwise, you may skip this step and just put all the disks into the `[10krpm_sas]` section.
-	
+
 You may want to add disks into other sections in the `/etc/manifest/server.manifest` file after the `[10krpm_sas]` section. Take `[ssd]` as an example:
 
 - Add storage class in `/etc/manifest/cluster.manifest` in controller node.
@@ -466,19 +466,19 @@ If you encountered any issues, below files may give you hints:
 
 If you want to check that the vsm agent started correctly, you can look at the files in */var/log/vsm* on each storage node. The vsm.physical.log should have no errors and end with the line:
 
-	INFO [vsm.openstack.common.rpc.common] Connected to AMQP server on <vsm-controller-IP-address>:5673 
+	INFO [vsm.openstack.common.rpc.common] Connected to AMQP server on <vsm-controller-IP-address>:5673
 
 and you should see a similar message at the start of vsm.agent.log and ending with:
 
 	INFO [vsm.agent.manager] agent/manager.py update ceph.conf from db. OVER
 
-Likewise, you should see no errors in the three log files in /var/log/vsm on the controller node. 
+Likewise, you should see no errors in the three log files in /var/log/vsm on the controller node.
 
 
 #Frequently Asked Questions
 
 **Q: Executing "agent-token" is hung.**
-	
+
 	A: Please check http proxy setting to make sure no http_proxy variable is set in the enviornment.
 
 
@@ -488,11 +488,11 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 
 
 **Q: keyring error on cluster creation.**
-	
+
 	A: The root cause is that the vsm controller has already updated a new token, but it is not applied on all agents.
 
 **Q: Negative update time is showing on RBD list page.**
-	
+
 	A: Before creating the ceph cluster, please make sure all ceph nodes are time synchronized via NTP.
 
 **Q: vsm-agent process causes one disk to be saturated with i/o load.**
@@ -505,10 +505,9 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 
 **Q: Can I define the ceph version I want to install?**
 
-	A: VSM can work with different Ceph releases like Firefly, Giant and Hammer. By default, it will use the ceph version provided by OS distro, often it’s an latest stable version. 
+	A: VSM can work with different Ceph releases like Firefly, Giant and Hammer. By default, it will use the ceph version provided by OS distro, often it’s an latest stable version.
 	If user expects to use some specific ceph version, he need add the new ceph repo into /etc/apt/sources.list.d/ceph.list to override OS distro’s defaults before installation. For example, below commands could help setup a ceph repo for Firefly on ubuntu:
 		>
 		> sudo rm /etc/apt/sources.list.d/ceph.list
 		> echo deb http://ceph.com/debian-firefly/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
 		>
-
