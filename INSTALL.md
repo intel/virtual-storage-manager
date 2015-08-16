@@ -142,24 +142,24 @@ Starting with VSM 1.1, an automatic deployment tool is provided which can simpli
 This section will describe how to use the tool to conduct automation.
 
 1. Firstly, a VSM binary release package should be acquired. It may be downloaded from binary repository, or built from source (see [Build VSM](#Build_VSM)). Then unpack the release package, the folder structure looks as following:
-	> 	.
-	> 	├── CHANGELOG
-	> 	├── installrc
-	> 	├── INSTALL.md
-	> 	├── install.sh
-	> 	├── uninstall.sh
-	> 	├── LICENSE
-	> 	├── manifest
-	> 	│   ├── cluster.manifest.sample
-	> 	│   └── server.manifest.sample
-	> 	├── NOTICE
-	> 	├── README
-	> 	└── vsmrepo
-	> 	    ├── python-vsmclient_2.0.0-123_amd64.deb
-	> 	    ├── Packages.gz
-	> 	    ├── vsm_2.0.0-123_amd64.deb
-	> 	    ├── vsm-dashboard-2.0.0-123_amd64.deb
-	> 	    └── vsm-deploy-2.0.0-123_amd64.deb
+	>     .
+	>     ├── CHANGELOG
+	>     ├── installrc
+	>     ├── INSTALL.md
+	>     ├── install.sh
+	>     ├── uninstall.sh
+	>     ├── LICENSE
+	>     ├── manifest
+	>     │   ├── cluster.manifest.sample
+	>     │   └── server.manifest.sample
+	>     ├── NOTICE
+	>     ├── README
+	>     └── vsmrepo
+	>         ├── python-vsmclient_2.0.0-123_amd64.deb
+	>         ├── Packages.gz
+	>         ├── vsm_2.0.0-123_amd64.deb
+	>         ├── vsm-dashboard-2.0.0-123_amd64.deb
+	>         └── vsm-deploy-2.0.0-123_amd64.deb
 
 2. Changing the *installrc* file, set the *AGENT_ADDRESS_LIST* and the *CONTROLLER_ADDRESS*, the ip addresses in *AGENT_ADDRESS_LIST* is delimitered by space, and all ip addresses are used in management subnet. e.g.:
 	>
@@ -172,30 +172,30 @@ This section will describe how to use the tool to conduct automation.
 	> Lines with `localhost`, `127.0.0.1` and `::1` should not contains the actual hostname.
 
 4. Under the *manifest* folder, you should create the folders named by the management ip of the controller and storage nodes, and then the structure looks as follows:
-	> 	.
-	> 	├── 192.168.123.10
-	> 	├── 192.168.123.21
-	> 	├── 192.168.123.22
-	> 	├── 192.168.123.23
-	> 	├── cluster.manifest.sample
-	> 	└── server.manifest.sample
+	>      .
+	>      ├── 192.168.123.10
+	>      ├── 192.168.123.21
+	>      ├── 192.168.123.22
+	>      ├── 192.168.123.23
+	>      ├── cluster.manifest.sample
+	>      └── server.manifest.sample
 
 5. Copy the *cluster.manifest.sample* to the folder named by the management ip of controller node, then change the filename to *cluster.manifest* and edit it as required, refer [cluster.manifest](#Configure_Cluster_Manifest) for details.
 
 6. Copy the *server.manifest.sample* to the folders named by the management ip of storage nodes, then change the filename to *server.manifest* and edit it as required, refer [server.manifest](#Configure_Server_Manifest) for details.
 
 7. Finally, the manifest folder structure looks as follows:
-	> 	.
-	> 	├── 192.168.123.10
-	> 	│   └── cluster.manifest
-	> 	├── 192.168.123.21
-	> 	│   └── server.manifest
-	> 	├── 192.168.123.22
-	> 	│   └── server.manifest
-	> 	├── 192.168.123.23
-	> 	│   └── server.manifest
-	> 	├── cluster.manifest.sample
-	> 	└── server.manifest.sample
+	>      .
+	>      ├── 192.168.123.10
+	>      │   └── cluster.manifest
+	>      ├── 192.168.123.21
+	>      │   └── server.manifest
+	>      ├── 192.168.123.22
+	>      │   └── server.manifest
+	>      ├── 192.168.123.23
+	>      │   └── server.manifest
+	>      ├── cluster.manifest.sample
+	>      └── server.manifest.sample
 
 8. If you want to upgrade vsm binary packages only, one approach is to build release package separately (see [Build Packages](#Build_Pkg)). The generated binary packages will be in *vsmrepo* folder after unpack the release package, then you can execute below command to install binary package:
 	>
