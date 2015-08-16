@@ -114,17 +114,17 @@ class Controller(wsgi.Controller):
             if not vsm_data:
                 sum['uptime'] = None
 
-        try:
-            sum['created_at'] = vsm_sum['created_at'].strftime("%Y-%m-%d %H:%M:%S")
-        except:
-            pass
+        if sum:
+            try:
+                sum_data = {
+                    'summary_data': json.dumps(sum)
+                }
+                sum['created_at'] = vsm_sum['created_at'].strftime("%Y-%m-%d %H:%M:%S")
+            except:
+                pass
+        else:
+            sum_data = None
 
-        #str, error = utils.execute('rpm', '-qa', 'vsm')
-        #version = str.strip() 
-        #sum['version'] = version[4:-11]
-        sum_data = {
-            'summary_data': json.dumps(sum)
-        }
         LOG.info('vsm sum: %s' % sum_data)
         return sum_views.ViewBuilder().basic(sum_data, 'vsm')
 

@@ -32,7 +32,7 @@ class ViewBuilder(common.ViewBuilder):
                 dict_root: None
             }
 
-        if not summary.get('summary_data'):
+        if (not summary.get('summary_data')) | (summary.get('summary_data') == 'null'):
             return {
                 dict_root: None
             }
