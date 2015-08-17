@@ -364,9 +364,15 @@ function install_setup_diamond() {
     else
         source $DEPLOYRC_FILE
     fi
-    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
-    HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
-    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
+    #VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
+    #HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
+    #DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
+    PY_VER=`python -V 2>&1 |cut -d' ' -f2 |cut -d. -f1,2`
+    echo "Python version: $PY_VER"
+    VSMMYSQL_FILE_PATH="/usr/local/lib/python${PY_VER}/dist-packages/vsm/diamond/handlers/vsmmysql.py"
+    HANDLER_PATH="/usr/share/pyshared/diamond/handler"
+    DIAMOND_CONFIG_PATH="/etc/diamond"
+
     $SSH $USER@$1 "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
     "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
