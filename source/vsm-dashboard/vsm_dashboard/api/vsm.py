@@ -128,6 +128,12 @@ def stop_server(request, servers=None):
     LOG.debug("DEBUG in stop server of dashboard api")
     return vsmclient(request).servers.stop(servers)
 
+def ceph_upgrade(request, body=None):
+    """ceph_upgrade.
+       body = {'pkg_url':,'key_url':,}
+    """
+    return vsmclient(request).servers.ceph_upgrade(body)
+
 #zone api
 def get_zone_list(request):
     return vsmclient(request).zones.list()

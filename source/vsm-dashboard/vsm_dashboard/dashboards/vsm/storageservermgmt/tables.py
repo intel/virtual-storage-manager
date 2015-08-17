@@ -55,6 +55,7 @@ class UpdateRow(tables.Row):
                   "secondary_public_ip": _server.secondary_public_ip,
                   "cluster_ip": _server.cluster_ip,
                   "zone_id": _server.zone_id,
+                  "ceph_ver": _server.ceph_ver,
                   "zone": "",
                   "osds": _server.osds,
                   "type": _server.type,
@@ -125,6 +126,12 @@ class StopServersAction(tables.LinkAction):
     url = "horizon:vsm:storageservermgmt:stopserversview"
     classes = ("ajax-modal", "btn-primary")
 
+class CephUpgradeAction(tables.LinkAction):
+    name = "ceph_upgrade"
+    verbose_name = _("Ceph Upgrade")
+    url = "horizon:vsm:storageservermgmt:cephupgradeview"
+    classes = ("ajax-modal", "btn-primary")
+
 class ListServerTableBase(tables.DataTable):
     STATUS_CHOICES = (
         ("active", True),
@@ -138,6 +145,7 @@ class ListServerTableBase(tables.DataTable):
     primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"))
     secondary_public_ip = tables.Column("secondary_public_ip", verbose_name=_("Ceph Public Address"))
     cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph Cluster Address"))
+    ceph_ver = tables.Column("ceph_ver", verbose_name=_("Ceph Version"))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
     is_monitor = tables.Column("is_monitor", classes=("monitor_tag",), verbose_name=_("Monitor"))
     zone = tables.Column("zone", classes=("zone",), verbose_name=_("Zone"))
@@ -183,6 +191,7 @@ class ListServerTable(ListServerTableBase):
     secondary_public_ip = tables.Column("secondary_public_ip", verbose_name=_("Ceph Public Address"), attrs={"data-type": "ip"})
     cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph Cluster Address"), attrs={"data-type": "ip"})
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
+    ceph_ver = tables.Column("ceph_ver", verbose_name=_("Ceph Version"))
     is_monitor = tables.Column("is_monitor", classes=("monitor_tag",), verbose_name=_("Monitor"))
     zone = tables.Column("zone", classes=("zone",), verbose_name=_("Zone"))
     status = tables.Column("status", status=True,

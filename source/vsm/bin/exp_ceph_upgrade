@@ -1,0 +1,14 @@
+#!/usr/bin/expect -f
+
+spawn  apt-get install -y  ceph
+
+set p_loop 1
+
+while { $p_loop } {
+        expect {
+                "default=N"  { send "Y\r" }
+                eof exit
+        }
+}
+
+exit

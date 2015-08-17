@@ -85,6 +85,13 @@ $("#btnSubmit").click(function(){
     PostRequest(action,data);
 });
 
+//Upgrade Ceph
+$("#btnCephUpgrade").click(function(){
+    //invoke...
+    GenerateCephUpgradeData();
+
+})
+
 
 $(".reset-status-action").click(function() {
     var token = $("input[name=csrfmiddlewaretoken]").val();
@@ -215,6 +222,20 @@ function GenerateStopServerData(){
     return data;
 }
 
+function GenerateCephUpgradeData() {
+    var data_list = new Array();
+    var pkg_url = $("#id_package_url").val();
+    var key_url = $("#id_key_url").val();
+    var data = {pkg_url:pkg_url,key_url:key_url};
+    data_list.push(data);
+    data = JSON.stringify(data_list);
+
+    var action = {"index":7
+                 ,"action":"ceph_upgrade"}
+
+    PostRequest(action,data);
+}
+
 
 //1.Add Servers
 //2.Remove Servers
@@ -222,6 +243,7 @@ function GenerateStopServerData(){
 //4.Remove Monitors
 //5.Start Servers
 //6.Remove Servers
+//7.Ceph Upgrade
 //actually return the json data including postback_url 
 function CheckAction(){
     var tag = $(".table_title")[0].innerHTML;
@@ -251,6 +273,10 @@ function CheckAction(){
         case "Stop Servers":
             index = 6;
             action = "stop";
+            break;
+        case "Ceph Upgrade":
+            index = 7;
+            action = "ceph_upgrade";
             break;
         default:
             index = 0;

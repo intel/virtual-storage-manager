@@ -38,6 +38,9 @@ from .tables import StopServerTable
 from django.http import HttpResponse
 from .utils import get_server_list
 from .utils import get_zone_list
+from django.views.generic import TemplateView
+from .form import CephUpgrade
+
 
 import json
 LOG = logging.getLogger(__name__)
@@ -72,7 +75,7 @@ class IndexView(tables.DataTableView):
         servers = get_server_list(self.request, )
         return servers
 
-#Edit the class by XuShouan
+
 class AddServersView(tables.DataTableView):
     table_class = AddServerTable
     verbose_name = "Add Servers"
@@ -89,7 +92,7 @@ class AddServersView(tables.DataTableView):
 
         return servers
 
-#Edit the class by XuShouan
+
 class RemoveServersView(tables.DataTableView):
     table_class = RemoveServerTable
     verbose_name = "Remove Servers"
@@ -99,7 +102,7 @@ class RemoveServersView(tables.DataTableView):
         return get_server_list(self.request, lambda x: x['status'] in ("Active", "999999999"))
 
 
-#Edit the class by XuShouan
+
 class AddMonitorsView(tables.DataTableView):
     table_class = AddMonitorTable
     template_name = 'vsm/storageservermgmt/serversaction.html'
@@ -112,7 +115,7 @@ class AddMonitorsView(tables.DataTableView):
             del server['is_monitor']
         return servers
 
-#Edit the class by XuShouan
+
 class RemoveMonitorsView(tables.DataTableView):
     table_class = RemoveMonitorTable
     template_name = 'vsm/storageservermgmt/serversaction.html'
@@ -125,7 +128,7 @@ class RemoveMonitorsView(tables.DataTableView):
         return servers
 
 
-#Edit the class by XuShouan
+
 class StartServersView(tables.DataTableView):
     table_class = StartServerTable
     template_name = 'vsm/storageservermgmt/serversaction.html'
@@ -133,7 +136,7 @@ class StartServersView(tables.DataTableView):
     def get_data(self):
         return get_server_list(self.request, lambda x:x['status'] == "Stopped")
 
-#Edit the class by XuShouan
+
 class StopServersView(tables.DataTableView):
     table_class = StopServerTable
     template_name = 'vsm/storageservermgmt/serversaction.html'
@@ -142,7 +145,10 @@ class StopServersView(tables.DataTableView):
         return get_server_list(self.request, lambda x:x['status'] == "Active")
 
 
-
+class CephUpgradeView(forms.ModalFormView):
+    form_class = CephUpgrade
+    template_name = 'vsm/storageservermgmt/cephupgrade.html'
+    success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
 
 class ServersActionViewBase(ModalEditTableMixin, tables.DataTableView):
     #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
@@ -208,7 +214,12 @@ class TextMixin(object):
 def ServersAction(request, action):
     data = json.loads(request.body)
     # TODO add cluster_id in data
-    if not len(data):
+    if action == "ceph_upgrade":
+        print "DEBUG in server action %s" % data
+        vsmapi.ceph_upgrade(request, data[0])
+        status = "info"
+        msg = "Began to upgrade ceph"
+    elif not len(data):
         status = "error"
         msg = "No server selected"
     else:
@@ -230,7 +241,6 @@ def ServersAction(request, action):
             status = "info"
             msg = "Began to Start Servers"
         elif action == "stop":
-            LOG.debug("DEBUG in server action %s" % data)
             vsmapi.stop_server(request, data)
             status = "info"
             msg = "Began to Stop Servers"

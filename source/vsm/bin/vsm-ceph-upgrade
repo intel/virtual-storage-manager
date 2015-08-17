@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+
+set -e
+set -o xtrace
+
+
+#---------------------------------------------
+# Usage
+#---------------------------------------------
+
+function usage() {
+    cat << EOF
+Usage: vsm-ceph-upgrade
+
+for example:
+    Only upgrade  ceph in this host: vsm-ceph-upgrade -p http://ceph.com/debian-hammer/ -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+
+Options:
+  --help | -h
+    Print usage information.
+  --pkg_url | -p
+    pkg_url.
+  --key_url | -k
+    key_url.
+EOF
+    exit 0
+}
+
+
+function ceph-upgrade() {
+    log_dir=/tmp/ceph-upgrade
+    rm -rf $log_dir
+    echo '----------------begin-----------------------------------------' >$log_dir
+    wget -q -O- $KEY_URL | sudo apt-key add -
+    echo deb $PKG_URL $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list;
+    echo '----------------ceph.list build success-------------------------' >>$log_dir;
+    rm -rf /var/lib/dpkg/info-bak;
+    mv /var/lib/dpkg/info/ /var/lib/dpkg/info-bak;
+    mkdir -p /var/lib/dpkg/info;
+    echo '----------------apt-get update begin--------------------------' >>$log_dir;
+    apt-get update;
+    echo '----------------apt-get update over and upgrade ceph begin----' >>$log_dir;
+    exp_ceph-common_upgrade >>$log_dir;
+    exp_ceph_upgrade >>$log_dir ;
+    exp_ceph-mds_upgrade >>$log_dir ;
+    echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
+    sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
+    echo '-----------------over-----------------------------------------' >>$log_dir ;
+
+}
+
+#---------------------------------------------
+# Read Parameters.
+#---------------------------------------------
+
+parameter_count=$#
+parameters=$*
+
+PKG_URL=""
+KEY_URL=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h) usage ;;
+    --help) usage ;;
+    -p | --pkg_url) shift;echo $1;PKG_URL=$1 ;;
+    -k | --key_url) shift;KEY_URL=$1  ;;
+    *) shift ;;
+  esac
+  shift
+done
+
+if [[ $parameter_count -eq 4 ]]; then
+        ceph-upgrade
+fi
+
+set +o xtrace
+

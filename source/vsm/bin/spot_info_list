@@ -42,4 +42,4 @@ ceph mon dump;monmap
 ceph mds dump;mdsmap
 
 [vsm_check_result]
-vsm-check
+vsm-checker

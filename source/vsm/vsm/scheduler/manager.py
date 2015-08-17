@@ -921,6 +921,47 @@ class SchedulerManager(manager.Manager):
         return True
 
     @utils.single_lock
+    def ceph_upgrade(self, context, body=None):
+        """upgrade ceph.
+           body = {u'servers': [{u'cluster_id': 1, u'id': u'1','host':''},
+                        {u'cluster_id': 1, u'id': u'2','host':''}],
+                        'key_url':"https://...",
+                        'pkg_url':"https://..."}
+        """
+        LOG.info("DEBUG in ceph upgrade in scheduler manager.")
+        server_list = body.get('servers')
+        if not server_list:
+            server_list = db.init_node_get_all(context)
+        key_url = body['key_url']
+        pkg_url = body['pkg_url']
+        LOG.info("ceph upgrade of scheduer manager %s" % server_list)
+        status_all = [node['status'] for node in server_list ]
+        status_all = list(set(status_all))
+        message = "send commonds success"
+        if len(status_all)==1 and status_all[0] in ['available','Active']:
+            if status_all[0] == 'available':
+                restart = False
+            else:
+                restart = True
+            def __ceph_upgrade(context, node_id, host, key_url, pkg_url,restart):
+                self._agent_rpcapi.ceph_upgrade(context, node_id, host, key_url, pkg_url,restart)
+
+            thd_list=[]
+            self._update_server_list_status(context,
+                                                    server_list,
+                                                    'ceph upgrading')
+            for item in server_list:
+                thd = utils.MultiThread(__ceph_upgrade,context=context, node_id=item['id'], host=item['host'], key_url=key_url,pkg_url=pkg_url,restart=restart)
+                thd_list.append(thd)
+            utils.start_threads(thd_list)
+        pre_ceph_ver = server_list[0]['ceph_ver']
+        server_list_new = db.init_node_get_all(context)
+        new_ceph_ver = server_list_new[0]['ceph_ver']
+        if new_ceph_ver:
+            message = "ceph upgrade from %s to %s success"%(pre_ceph_ver,new_ceph_ver)
+        return {"message":message}
+
+    @utils.single_lock
     def start_server(self, context, body=None):
         """Start all osd service, then start the server.
            body = {u'servers': [{u'cluster_id': 1, u'id': u'1'},

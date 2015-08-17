@@ -35,6 +35,7 @@ class ViewBuilder(common.ViewBuilder):
                 "cluster_ip": server["cluster_ip"],
                 "raw_ip":"192.168.1.3,192.168.2.3,192.168.3.3",
                 "zone_id": server["zone_id"],
+                "ceph_ver": server["ceph_ver"],
                 "service_id": server["service_id"],
                 "osds": server['data_drives_number'],
                 "type": server['type'],

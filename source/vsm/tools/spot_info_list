@@ -40,5 +40,5 @@
 @monmap=ceph mon dump
 @mdsmap=ceph mds dump
 [vsm_check_result]
-@os=vsm-check
+@os=vsm-checker
 
