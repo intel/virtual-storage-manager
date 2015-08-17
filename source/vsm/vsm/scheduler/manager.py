@@ -939,32 +939,26 @@ class SchedulerManager(manager.Manager):
         status_all = list(set(status_all))
         message = "send commonds success"
         pre_ceph_ver = ''
-        new_ceph_ver = ''
         if len(status_all)==1 and status_all[0] in ['available','Active']:
             if status_all[0] == 'available':
                 restart = False
             else:
                 restart = True
+            def __ceph_upgrade(context, node_id, host, key_url, pkg_url,restart):
+                LOG.info('in22333')
+                self._agent_rpcapi.ceph_upgrade(context, node_id, host, key_url, pkg_url,restart)
+
+            thd_list=[]
+            self._update_server_list_status(context,
+                                                    server_list,
+                                                    'ceph upgrading')
             for item in server_list:
-                self._conductor_api.init_node_update(context, item['id'],{"status": "ceph upgrading"})
-                try:
-                    pre_ceph_ver = item['ceph_ver']
-                    new_ceph_ver = self._agent_rpcapi.ceph_upgrade(context, item['id'], item['host'], key_url, pkg_url,restart)
-                except rpc_exc.Timeout:
-                    self._update_server_list_status(context,
-                                                    server_list,
-                                                    'rpc timeout error: check network')
-                except rpc_exc.RemoteError:
-                    self._update_server_list_status(context,
-                                                    server_list,
-                                                    'rpc remote error: check network')
-                except:
-                    self._update_server_list_status(context,
-                                                    server_list,
-                                                    'ERROR')
-                    raise
-        else:
-            message = 'Only available or Active server can perform the operation'
+                pre_ceph_ver = item['ceph_ver']
+                thd = utils.MultiThread(__ceph_upgrade,context=context, node_id=item['id'], host=item['host'], key_url=key_url,pkg_url=pkg_url,restart=restart)
+                thd_list.append(thd)
+            utils.start_threads(thd_list)
+        server_list_new = db.init_node_get_all(context)
+        new_ceph_ver = server_list_new[0]['ceph_ver']
         if new_ceph_ver:
             message = "ceph upgrade from %s to %s success"%(pre_ceph_ver,new_ceph_ver)
         return {"message":message}
