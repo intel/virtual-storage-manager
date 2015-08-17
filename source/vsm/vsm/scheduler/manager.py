@@ -938,14 +938,12 @@ class SchedulerManager(manager.Manager):
         status_all = [node['status'] for node in server_list ]
         status_all = list(set(status_all))
         message = "send commonds success"
-        pre_ceph_ver = ''
         if len(status_all)==1 and status_all[0] in ['available','Active']:
             if status_all[0] == 'available':
                 restart = False
             else:
                 restart = True
             def __ceph_upgrade(context, node_id, host, key_url, pkg_url,restart):
-                LOG.info('in22333')
                 self._agent_rpcapi.ceph_upgrade(context, node_id, host, key_url, pkg_url,restart)
 
             thd_list=[]
@@ -953,10 +951,10 @@ class SchedulerManager(manager.Manager):
                                                     server_list,
                                                     'ceph upgrading')
             for item in server_list:
-                pre_ceph_ver = item['ceph_ver']
                 thd = utils.MultiThread(__ceph_upgrade,context=context, node_id=item['id'], host=item['host'], key_url=key_url,pkg_url=pkg_url,restart=restart)
                 thd_list.append(thd)
             utils.start_threads(thd_list)
+        pre_ceph_ver = server_list[0]['ceph_ver']
         server_list_new = db.init_node_get_all(context)
         new_ceph_ver = server_list_new[0]['ceph_ver']
         if new_ceph_ver:
