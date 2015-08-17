@@ -297,6 +297,7 @@ function setup_remote_controller() {
 }
 
 function install_controller() {
+    _make_me_super $USER $CONTROLLER_ADDRESS
     check_manifest $CONTROLLER_ADDRESS
 
     if [[ $IS_CONTROLLER -eq 0 ]]; then
@@ -396,7 +397,13 @@ function install_setup_diamond() {
     "$SUDO diamond"
 }
 
+function _make_me_super() { # _make_me_super <user> <node>
+    MKMESUPER="$1 ALL=(ALL) NOPASSWD: ALL"
+    $SSH $USER@$2 "$SUDO echo '$MKMESUPER' | $SUDO tee /etc/sudoers.d/$1; $SUDO chmod 0440 /etc/sudoers.d/$1"
+}
+
 function setup_remote_agent() {
+    _make_me_super $USER $1
     $SSH $USER@$1 "$SUDO rm -rf /etc/manifest/server.manifest"
     #$SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
     #old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
