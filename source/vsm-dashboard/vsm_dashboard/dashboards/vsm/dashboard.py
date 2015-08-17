@@ -26,7 +26,7 @@ class Dashboard(horizon.PanelGroup):
 class ClusterMgmt(horizon.PanelGroup):
     slug = "clustermgmt"
     name = _("Cluster Management")
-    panels = ('clustermgmt', 'poolsmanagement', 'storage-group-management')
+    panels = ('createcluster', 'upgradeceph', 'poolsmanagement', 'storage-group-management')
     #panels = ('clustermgmt', 'poolsmanagement')
 
 class ClusterMonitor(horizon.PanelGroup):
@@ -51,10 +51,10 @@ class UserMgmt(horizon.PanelGroup):
     name = _("VSM Management")
     panels = ("usermgmt", 'settings')
 
-class UpgradeMgmt(horizon.PanelGroup):
-    slug = "upgrademgmt"
-    name = _("Manage Upgrade")
-    panels = ( "cephupgrade",)
+#class UpgradeMgmt(horizon.PanelGroup):
+#    slug = "upgrademgmt"
+#    name = _("Manage Upgrade")
+#    panels = ( "cephupgrade",)
 
 class VizDash(horizon.Dashboard):
     name = _("VSM")

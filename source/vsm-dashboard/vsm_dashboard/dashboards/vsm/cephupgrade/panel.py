@@ -21,6 +21,6 @@ from vsm_dashboard.dashboards.vsm import dashboard
 
 class CephUpgrade(horizon.Panel):
     name = _("Ceph Upgrade")
-    slug = 'cephupgrade'
+    slug = 'upgradeceph'
 
 dashboard.VizDash.register(CephUpgrade)

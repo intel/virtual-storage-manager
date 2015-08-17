@@ -21,6 +21,6 @@ from vsm_dashboard.dashboards.vsm import dashboard
 
 class ClusterMgmt(horizon.Panel):
     name = _("Create Cluster")
-    slug = 'clustermgmt'
+    slug = 'createcluster'
 
 dashboard.VizDash.register(ClusterMgmt)
