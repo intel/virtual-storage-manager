@@ -177,7 +177,7 @@ class ManifestChecker(object):
                 break
 
             if len(line) < 2:
-                print 'Small line, skiped'
+#                print 'Small line, skiped'
                 continue
 
             if line.find('[') != -1 and\
