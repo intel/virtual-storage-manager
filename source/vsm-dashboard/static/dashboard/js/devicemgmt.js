@@ -131,10 +131,10 @@ function getStateData(osd_id,device_tag){
 	});
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
-	var postData = JSON.stringify({"osd_id":osd_id,"device_path":device_path});
+	var postData = JSON.stringify({"osd_id":osd_id,"action":"get_smart_info"});
 	$.ajax({
 		type: "post",
-		url: "/dashboard/vsm/devices-management/get_smart_info/",
+		url: "/dashboard/vsm/devices-management/devices/state",
 		data: postData,
 		dataType:"json",
 		success: function(data){
@@ -146,21 +146,18 @@ function getStateData(osd_id,device_tag){
 				
 	        	var basicInfo = data.basic;
 				var smartInfo = data.smart;
-				$("#lblStatus")[0].innerHTML = basicInfo.DriveStatus;
-				$("#lblFamily")[0].innerHTML =  basicInfo.DriveFamily;
-				$("#lblSeriesNumber")[0].innerHTML =  basicInfo.SerialNumber;
-				$("#lblFirmware")[0].innerHTML =  basicInfo.FirmwareVersion;
+				$("#lblStatus")[0].innerHTML = basicInfo.status;
+				$("#lblFamily")[0].innerHTML =  basicInfo.family;
+				$("#lblSeriesNumber")[0].innerHTML =  basicInfo.seriesNumber;
+				$("#lblFirmware")[0].innerHTML =  basicInfo.firmware;
+				$("#lblTotalCapacity")[0].innerHTML =  basicInfo.totalCapacity;
+				$("#lblUsedCapacity")[0].innerHTML =  basicInfo.usedCapacity;
 
-                //Get smart info
-                $("#tSmartInfo>tbody").empty();
-                for(var i=0;i<smartInfo.length;i++) {
-                    var smart_row = "";
-                    smart_row += "<tr>";
-                    smart_row += "<td>" + smartInfo[i].key + "</td>";
-                    smart_row += "<td><span class='span-label'>" + smartInfo[i].value + "</span></td>";
-                    smart_row += "</tr>";
-                    $("#tSmartInfo>tbody").append(smart_row);
-                }
+	            $("#lblPercentageUsed")[0].innerHTML = smartInfo.percentageUsed
+				$("#lblTemperature")[0].innerHTML = smartInfo.temperature;
+				$("#lblUnitRead")[0].innerHTML = smartInfo.unitRead;
+				$("#lblUnitWRITE")[0].innerHTML = smartInfo.unitWRITE;
+				$("#modal_wrapper").find(".modal-body")[0].innerHTML = $("#divOSDInfo")[0].innerHTML;
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){
@@ -177,4 +174,107 @@ function getStateData(osd_id,device_tag){
 
     });
 }
+
+
+//restart the osd
+$("#osds__action_restart_osds").click(function(){
+	var osd_id_list = {"osd_id_list":[]}
+	
+	$("#osds>tbody>tr").each(function(){
+		var osd_id = this.children[0].children[0].value;
+		osd_id_list["osd_id_list"].push(osd_id);
+	})
+
+	token = $("input[name=csrfmiddlewaretoken]").val();
+	$.ajax({
+		type: "post",
+		url: "/dashboard/vsm/devices-management/restart_osd/",
+		data: JSON.stringify(osd_id_list),
+		dataType:"json",
+		success: function(data){
+				console.log(data);
+		   	},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+				if(XMLHttpRequest.status == 500){
+					$("#divOSDTip").show();
+					$("#divOSDTip")[0].innerHTML = XMLHttpRequest.statusText;
+				}
+			},
+		headers: {
+			"X-CSRFToken": token
+			},
+		complete: function(){
+
+		}
+    });
+	return false;
+});
+
+//remove the osd
+$("#osds__action_remove_osds").click(function(){
+	var osd_id_list = {"osd_id_list":[]}
+	
+	$("#osds>tbody>tr").each(function(){
+		var osd_id = this.children[0].children[0].value;
+		osd_id_list["osd_id_list"].push(osd_id);
+	})
+
+	token = $("input[name=csrfmiddlewaretoken]").val();
+	$.ajax({
+		type: "post",
+		url: "/dashboard/vsm/devices-management/remove_osd/",
+		data: JSON.stringify(osd_id_list),
+		dataType:"json",
+		success: function(data){
+				console.log(data);
+		   	},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+				if(XMLHttpRequest.status == 500){
+					$("#divOSDTip").show();
+					$("#divOSDTip")[0].innerHTML = XMLHttpRequest.statusText;
+				}
+			},
+		headers: {
+			"X-CSRFToken": token
+			},
+		complete: function(){
+
+		}
+    });
+	return false;
+});
+
+//remove the osd
+$("#osds__action_restore_osds").click(function(){
+	var osd_id_list = {"osd_id_list":[]}
+	
+	$("#osds>tbody>tr").each(function(){
+		var osd_id = this.children[0].children[0].value;
+		osd_id_list["osd_id_list"].push(osd_id);
+	})
+
+	token = $("input[name=csrfmiddlewaretoken]").val();
+	$.ajax({
+		type: "post",
+		url: "/dashboard/vsm/devices-management/restore_osd/",
+		data: JSON.stringify(osd_id_list),
+		dataType:"json",
+		success: function(data){
+				console.log(data);
+		   	},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+				if(XMLHttpRequest.status == 500){
+					$("#divOSDTip").show();
+					$("#divOSDTip")[0].innerHTML = XMLHttpRequest.statusText;
+				}
+			},
+		headers: {
+			"X-CSRFToken": token
+			},
+		complete: function(){
+
+		}
+    });
+	return false;
+});
 
