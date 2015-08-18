@@ -145,11 +145,6 @@ class StopServersView(tables.DataTableView):
         return get_server_list(self.request, lambda x:x['status'] == "Active")
 
 
-class CephUpgradeView(forms.ModalFormView):
-    form_class = CephUpgrade
-    template_name = 'vsm/storageservermgmt/cephupgrade.html'
-    success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
-
 class ServersActionViewBase(ModalEditTableMixin, tables.DataTableView):
     #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
 
@@ -213,37 +208,28 @@ class TextMixin(object):
 
 def ServersAction(request, action):
     data = json.loads(request.body)
-    # TODO add cluster_id in data
-    if action == "ceph_upgrade":
-        print "DEBUG in server action %s" % data
-        vsmapi.ceph_upgrade(request, data[0])
-        status = "info"
-        msg = "Began to upgrade ceph"
-    elif not len(data):
-        status = "error"
-        msg = "No server selected"
-    else:
-        # TODO add cluster_id in data
-        for i in range(0, len(data)):
-            data[i]['cluster_id'] = 1
-        # TODO add cluster_id in data
 
-        if action == "add":
-            vsmapi.add_servers(request, data)
-            status = "info"
-            msg = "Began to Add Servers"
-        elif action == "remove":
-            vsmapi.remove_servers(request, data)
-            status = "info"
-            msg = "Began to Remove Servers"
-        elif action == "start":
-            vsmapi.start_server(request, data)
-            status = "info"
-            msg = "Began to Start Servers"
-        elif action == "stop":
-            vsmapi.stop_server(request, data)
-            status = "info"
-            msg = "Began to Stop Servers"
+    # TODO add cluster_id in data
+    for i in range(0, len(data)):
+        data[i]['cluster_id'] = 1
+    # TODO add cluster_id in data
+
+    if action == "add":
+        vsmapi.add_servers(request, data)
+        status = "info"
+        msg = "Began to Add Servers"
+    elif action == "remove":
+        vsmapi.remove_servers(request, data)
+        status = "info"
+        msg = "Began to Remove Servers"
+    elif action == "start":
+        vsmapi.start_server(request, data)
+        status = "info"
+        msg = "Began to Start Servers"
+    elif action == "stop":
+        vsmapi.stop_server(request, data)
+        status = "info"
+        msg = "Began to Stop Servers"
 
     resp = dict(message=msg, status=status, data="")
     resp = json.dumps(resp)
