@@ -47,89 +47,26 @@ class UpdateRow(tables.Row):
         osd = vsmapi.osd_get(request, osd_id)
         return osd
 
-class RestartOsdsAction(tables.BatchAction):
+class RestartOsdsAction(tables.LinkAction):
     name = "restart_osds"
-    action_present = _("Restart")
-    action_past = _("Scheduled restart of")
-    data_type_singular = _("Osd")
-    data_type_plural = _("Osds")
+    verbose_name = _("Restart")
     classes = ('btn-primary',)
-    redirect_url = "horizon:vsm:devices-management:index"
+    url = "horizon:vsm:devices-management:index"
 
-    def allowed(self, request, osd=None):
-        if osd is not None:
-            if osd['vsm_status'] not in ACTIVE_STATES:
-                msg = _('Only osd with VSM status "Present" will be restarted')
-                messages.error(request, msg)
-                return False
-        return True
 
-    def action(self, request, obj_id):
-        obj = self.table.get_object_by_id(obj_id)
-        name = self.table.get_object_display(obj)
-        try:
-            vsmapi.osd_restart(request, obj_id)
-        except Exception:
-            msg = _('Error restarting %s.' % name)
-            LOG.info(msg)
-            redirect = reverse(self.redirect_url)
-            exceptions.handle(request, msg, redirect=redirect)
-
-class RemoveOsdsAction(tables.BatchAction):
+class RemoveOsdsAction(tables.LinkAction):
     name = "remove_osds"
-    action_present = _("Remove")
-    action_past = _("Removed")
-    data_type_singular = _("Osd")
-    data_type_plural = _("Osds")
+    verbose_name = _("Remove")
     classes = ('btn-primary',)
-    redirect_url = "horizon:vsm:devices-management:index"
+    url = "horizon:vsm:devices-management:index"
 
-    def allowed(self, request, osd=None):
-        if osd is not None:
-            if osd['vsm_status'] not in ACTIVE_STATES:
-                msg = _('Only osd with VSM status "Present" will be removed')
-                messages.error(request, msg)
-                return False
-        return True
 
-    def action(self, request, obj_id):
-        obj = self.table.get_object_by_id(obj_id)
-        name = self.table.get_object_display(obj)
-        try:
-            vsmapi.osd_remove(request, obj_id)
-        except Exception:
-            msg = _('Error deleting %s.' % name)
-            LOG.info(msg)
-            redirect = reverse(self.redirect_url)
-            exceptions.handle(request, msg, redirect=redirect)
-
-class RestoreOsdsAction(tables.BatchAction):
+class RestoreOsdsAction(tables.LinkAction):
     name = "restore_osds"
-    action_present = _("Restore")
-    action_past = _("Restored")
-    data_type_singular = _("Osd")
-    data_type_plural = _("Osds")
+    verbose_name = _("Restore")
     classes = ('btn-primary',)
-    redirect_url = "horizon:vsm:devices-management:index"
+    url = "horizon:vsm:devices-management:index"
 
-    def allowed(self, request, osd=None):
-        if osd is not None:
-            if osd['vsm_status'] not in REMOVED_STATES:
-                msg = _('Only osd with VSM status "Removed" will be restored')
-                messages.error(request, msg)
-                return False
-        return True
-
-    def action(self, request, obj_id):
-        obj = self.table.get_object_by_id(obj_id)
-        name = self.table.get_object_display(obj)
-        try:
-            vsmapi.osd_restore(request, obj_id)
-        except Exception:
-            msg = _('Error restoring %s.' % name)
-            LOG.info(msg)
-            redirect = reverse(self.redirect_url)
-            exceptions.handle(request, msg, redirect=redirect)
 
 class AddOsdsAction(tables.BatchAction):
     name = "Add_osds"
@@ -204,14 +141,14 @@ class OsdsTable(tables.DataTable):
     journal_device_status = tables.Column("journal_device_status", \
                                    verbose_name=_("Journal Device Status"))
     full_status = tables.Column("full_status", \
-                               verbose_name=_("Used(%)"))
+                               verbose_name=_("Used(%)"), hidden=True)
     full_warn = tables.Column("full_warn", \
                                verbose_name=_("Used Wran"), hidden=True)
 
     class Meta:
         name = "osds"
         verbose_name = _("Device List")
-        table_actions = (RestartOsdsAction, RemoveOsdsAction, \
+        table_actions = (RestartOsdsAction, RemoveOsdsAction,
                          RestoreOsdsAction,AddOSDAction)
         status_columns = ['vsm_status']
         row_class = UpdateRow
