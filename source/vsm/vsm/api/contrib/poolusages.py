@@ -92,26 +92,26 @@ class PoolUsagesController(wsgi.Controller):
 
         # check openstack access
         host_list = []
-        count_crudini = 0
-        count_ssh = 0
-        for host in cinder_volume_host_list:
-            (status, output) = commands.getstatusoutput('ssh %s "crudini --version"' % host)
-            LOG.info(str(status) + "========" + output)
-            if "command not found" in output:
-                count_crudini = count_crudini + 1
-                host_list.append(host)
-            if "Permission denied" in output:
-                count_ssh = count_ssh + 1
-                host_list.append(host)
-        if count_crudini != 0:
-            return {'status': 'bad', 'host': list(set(host_list))}
-        elif count_ssh != 0:
-            return {'status': 'unreachable', 'host': list(set(host_list))}
-        else:
-            info = storagepoolusage.create(context, pools)
-            LOG.info(' pools_info = %s' % info)
-            self.scheduler_api.present_storage_pools(context, info)
-            return {'status': 'ok', 'host': host_list}
+        # count_crudini = 0
+        # count_ssh = 0
+        # for host in cinder_volume_host_list:
+        #     (status, output) = commands.getstatusoutput('ssh %s "crudini --version"' % host)
+        #     LOG.info(str(status) + "========" + output)
+        #     if "command not found" in output:
+        #         count_crudini = count_crudini + 1
+        #         host_list.append(host)
+        #     if "Permission denied" in output:
+        #         count_ssh = count_ssh + 1
+        #         host_list.append(host)
+        # if count_crudini != 0:
+        #     return {'status': 'bad', 'host': list(set(host_list))}
+        # elif count_ssh != 0:
+        #     return {'status': 'unreachable', 'host': list(set(host_list))}
+        # else:
+        info = storagepoolusage.create(context, pools)
+        LOG.info(' pools_info = %s' % info)
+        self.scheduler_api.present_storage_pools(context, info)
+        return {'status': 'ok', 'host': host_list}
 
     @wsgi.serializers(xml=PoolUsagesTemplate)
     def update(self, req, id, body):
