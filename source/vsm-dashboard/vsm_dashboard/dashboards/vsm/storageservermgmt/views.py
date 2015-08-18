@@ -39,7 +39,6 @@ from django.http import HttpResponse
 from .utils import get_server_list
 from .utils import get_zone_list
 from django.views.generic import TemplateView
-from .form import CephUpgrade
 
 
 import json
