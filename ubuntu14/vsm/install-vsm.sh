@@ -6,7 +6,7 @@ export VSM_ROOT_PATH=debian/vsm
 
 getent group vsm >/dev/null || groupadd -r vsm --gid 165
 if ! getent passwd vsm >/dev/null; then
-  useradd -u 165 -r -g vsm -G vsm,nogroup -d /var/lib/vsm -s /sbin/nologin -c "Vsm Storage Services" vsm
+  useradd -u 165 -r -g vsm -G vsm,nogroup -d /var/lib/vsm -s /usr/sbin/nologin -c "Vsm Storage Services" vsm
 fi
 
 python setup.py install -O1 --skip-build --root $VSM_ROOT_PATH
