@@ -16,16 +16,23 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView
-#from .views import DevicesAction
+from .views import DevicesAction
 from .views import AddOSDView,get_osd_list,add_new_osd_action,check_device_path,get_smart_info
+from .views import restart_osd,remove_osd,restore_osd
+
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^add_new_osd/$', AddOSDView.as_view(), name='add_new_osd'),
     url(r'^get_osd_list/$', get_osd_list, name='get_osd_list'),
     url(r'^add_new_osd_action/$', add_new_osd_action, name='add_new_osd_action'),
     url(r'^check_device_path/$', check_device_path, name='check_device_path'),
+    url(r'^devices/(?P<action>\w+)$', DevicesAction, name='devicesaction'),
     url(r'^get_smart_info/$', get_smart_info, name='get_smart_info'),
-    #url(r'^devices/(?P<action>\w+)$', DevicesAction, name='devicesaction'),
+
+    url(r'^restart_osd/$', restart_osd, name='restart_osd'),
+    url(r'^remove_osd/$', remove_osd, name='remove_osd'),
+    url(r'^restore_osd/$', restore_osd, name='restore_osd'),
+
     url(r'/', IndexView.as_view(), name='index'),
 )
 

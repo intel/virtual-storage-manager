@@ -33,11 +33,11 @@ from django.http import HttpResponse
 import json
 LOG = logging.getLogger(__name__)
 
-def device_get_smartinfo(request,device_id=None,device_path=None):
+def device_get_smartinfo(request,device_id=None,action='get_smart_info'):
     search_opts = {}
-    print 'device_id====',device_id,'--device_path=',device_path
-    search_opts['device_id'] = device_id
-    search_opts['device_path'] = device_path
+    #print 'device_id====',device_id
+    if device_id:search_opts['device_id'] = device_id
+    search_opts['action'] = action
     ret = vsmapi.device_get_smartinfo(request,search_opts=search_opts)
     return ret
 
@@ -65,8 +65,8 @@ class IndexView(tables.DataTableView):
             logging.debug("resp osds in view: %s" % _osds)
         osds = []
         settings = vsmapi.get_setting_dict(self.request)
-        disk_near_full_threshold = int(settings['disk_near_full_threshold'])
-        disk_full_threshold = int(settings['disk_full_threshold'])
+        disk_near_full_threshold = settings['disk_near_full_threshold']
+        disk_full_threshold = settings['disk_full_threshold']
         for _osd in _osds:
             osd = {
                     'id': _osd.id,
@@ -92,13 +92,12 @@ class IndexView(tables.DataTableView):
 
             if osd['data_dev_capacity']:
                 osd['full_status'] = round(osd['data_dev_used'] * 1.0 / osd['data_dev_capacity'] * 100, 2)
-                if osd['full_status'] >= disk_near_full_threshold and osd['full_status'] < disk_full_threshold:
-                    osd['full_warn'] = 1
-                elif osd['full_status'] >=disk_full_threshold:
-                    osd['full_warn'] = 2
             else:
                 osd['full_status'] = ''
-
+            if osd['full_status'] >= disk_near_full_threshold and osd['full_status'] < disk_full_threshold:
+                osd['full_warn'] = 1
+            elif osd['full_status'] >=disk_full_threshold:
+                osd['full_warn'] = 2
             if osd_id == "-1":
                 osds.append(osd)  #all of the deivces
             elif str(_osd.id) == str(osd_id):
@@ -134,23 +133,37 @@ class AddOSDView(TemplateView):
         
         return context
 
-def get_smart_info(request):
+def DevicesAction(request, action):
     data = json.loads(request.body)
 
-    device_data_dict = device_get_smartinfo(request,str(data["osd_id"]),data["device_path"])
-    device_data_json = {
-        "basic":{
-             "DriveFamily":device_data_dict["basic"].get("Drive Family")
-            ,"SerialNumber":device_data_dict["basic"].get("Serial Number")
-            ,"FirmwareVersion":device_data_dict["basic"].get("Firmware Version")
-            ,"DriveStatus":device_data_dict["basic"].get("Drive Status")
-        }
-        ,"smart":[]
-    }
+    device_data_str = device_get_smartinfo(request,str(data["osd_id"]))
+    device_data_dict = {}
+    device_data_str = device_data_str[0].device_data
+    if device_data_str == None:
+        devicedata = json.dumps({"data":""})
+        return HttpResponse(devicedata)
 
-    for _smart_item in device_data_dict["smart"].iteritems():
-        _item = {"key":_smart_item[0],"value":_smart_item[1]}
-        device_data_json["smart"].append(_item)
+    for data in device_data_str.split("\n"):
+        data_list = data.split("=")
+        data_list_len = len(data_list)
+        if data_list_len == 1:
+            device_data_dict[data_list[0]] = ""
+        if data_list_len == 2:
+            device_data_dict[data_list[0]] = data_list[1]
+            device_data_json = {
+                "basic":{"status":device_data_dict["Drive Status"],
+                       "family":device_data_dict["Drive Family"],
+                       "seriesNumber":device_data_dict["Serial Number"],
+                       "firmware":device_data_dict["Firmware"],
+                       "totalCapacity":device_data_dict["Capacity in total"],
+                       "usedCapacity":device_data_dict["Capacity in use"],
+                },
+                "smart":{"percentageUsed":device_data_dict["Percentage Used"],
+                       "temperature":device_data_dict["Temperature"],
+                       "unitRead":str(int(device_data_dict["Data Units Read"],16)),
+                       "unitWRITE":device_data_dict["Data Units Written"],
+                }
+            }
 
     devicedata = json.dumps(device_data_json)
     return HttpResponse(devicedata)
@@ -181,7 +194,6 @@ def get_osd_list(request):
     osd_list_data = json.dumps(osd_list_data_json)
     return HttpResponse(osd_list_data)
 
-
 def add_new_osd_action(request):
     data = json.loads(request.body)
     vsmapi.add_new_disks_to_cluster(request,data)
@@ -210,3 +222,36 @@ def check_device_path(request):
     status_data = json.dumps(status_json)
     return HttpResponse(status_data)
 
+
+def restart_osd(request):
+    data = json.loads(request.body)
+    osd_id_list = data["osd_id_list"]
+
+    for osd_id in osd_id_list:
+        vsmapi.osd_restart(request, osd_id)
+
+    rs = json.dumps({"status":0})
+    return HttpResponse(rs)
+
+
+def remove_osd(request):
+    data = json.loads(request.body)
+    osd_id_list = data["osd_id_list"]
+
+    for osd_id in osd_id_list:
+        vsmapi.osd_remove(request, osd_id)
+
+    rs = json.dumps({"status":0})
+    return HttpResponse(rs)
+
+
+def restore_osd(request):
+    data = json.loads(request.body)
+    osd_id_list = data["osd_id_list"]
+    print osd_id_list
+
+    for osd_id in osd_id_list:
+        vsmapi.osd_restore(request, osd_id)
+
+    rs = json.dumps({"status":0})
+    return HttpResponse(rs)
