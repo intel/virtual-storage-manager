@@ -44,23 +44,7 @@ function _get_type() {
 }
 
 function _cinder_rc() {
-#cat <<"EOF">$TOPDIR/cinderrc
-#export OS_USERNAME=%USER%
-#export OS_TENANT_NAME=%TENANT_NAME%
-#export OS_PASSWORD=%PASSWORD%
-#export OS_AUTH_URL=http://%KEYSTONE_HOST%:35357/v2.0/
-#export PS1='[\u@\h \W(keystone_admin)]\$ '
-#EOF
-#    local USER=`_admin_user`
-#    local TENANT_NAME=`_tenant_name`
-#    local PASSWORD=`_password`
-#    local KEYSTONE_HOST=`_keystone_ip`
     local file=$TOPDIR/cinderrc
-#
-#    sed -i "s,%USER%,$USER,g" $file
-#    sed -i "s,%TENANT_NAME%,$TENANT_NAME,g" $file
-#    sed -i "s,%PASSWORD%,$PASSWORD,g" $file
-#    sed -i "s,%KEYSTONE_HOST%,$KEYSTONE_HOST,g" $file
     source $file
 }
 
@@ -183,7 +167,7 @@ function configure_multiple_cinder() {
     local old_str=""
     _del_other_multiple_section
 
-    _cinder_rc
+#    _cinder_rc
     # If we find the cinder.conf, we change the configuration file.
     # Otherwise, skip.
     # NOTE: If do not find cinder.conf file, do not report error.
@@ -206,9 +190,9 @@ function configure_multiple_cinder() {
         for n in `_backend_list`; do
            let ++cnt
            _set_backend_cinder $n
-           types=`_get_type $cnt`
-           _add_type $types
-           _add_type_key $types $n
+#           types=`_get_type $cnt`
+#           _add_type $types
+#           _add_type_key $types $n
         done
 
         chown -R cinder:cinder /etc/cinder

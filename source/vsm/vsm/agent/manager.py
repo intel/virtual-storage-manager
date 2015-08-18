@@ -475,15 +475,15 @@ class AgentManager(manager.Manager):
         return res
 
     def present_storage_pools(self, context, body=None):
-        vsmapp_id = body['vsmapp_id']
+        vsmapp_id = body[0]['vsmapp_id']
         values = {'attach_status': 'success'}
         try:
             LOG.info(' PRESENT POOL BEGIN!')
             out, err = self.ceph_driver.present_storage_pools(context, body)
             LOG.info(' PRESENT POOL OVER!')
-            pool_infos = body['pool_infos']
-            for pinfo in pool_infos:
-                sp_usage_ref = db.get_sp_usage_by_poolid_vsmappid(context, pinfo['id'], vsmapp_id)
+            # pool_infos = body['pool_infos']
+            for pool in body:
+                sp_usage_ref = db.get_sp_usage_by_poolid_vsmappid(context, pool['pool_id'], vsmapp_id)
                 db.storage_pool_usage_update(context, sp_usage_ref['id'], values)
 
             LOG.info(' PRESENT POOL LOG = %s' % out)
@@ -492,9 +492,9 @@ class AgentManager(manager.Manager):
         except:
             LOG.info(' PRESENT POOL FAILED')
             values = {'attach_status': 'failed'}
-            pool_infos = body['pool_infos']
-            for pinfo in pool_infos:
-                sp_usage_ref = db.get_sp_usage_by_poolid_vsmappid(context, pinfo['id'], vsmapp_id)
+            # pool_infos = body['pool_infos']
+            for pool in body:
+                sp_usage_ref = db.get_sp_usage_by_poolid_vsmappid(context, pool['pool_id'], vsmapp_id)
                 db.storage_pool_usage_update(context, sp_usage_ref['id'], values)
             return values
 

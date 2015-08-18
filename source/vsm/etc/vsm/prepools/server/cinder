@@ -55,7 +55,7 @@ function _gen_rwx_str() {
     echo $old_str
 }
 
-function create_multiple_cinder() {
+function create_cinder_auth() {
     local file=/tmp/cinder.keyring
     rm -rf $file
     local str=""

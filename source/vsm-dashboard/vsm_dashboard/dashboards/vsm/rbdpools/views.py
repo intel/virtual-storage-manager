@@ -133,8 +133,8 @@ def PoolsAction(request, action):
         msg = "No pool selected"
     else:
         # TODO add cluster_id in data
-        for i in range(0, len(data)):
-            data[i]['cluster_id'] = 1
+        # for i in range(0, len(data)):
+        #     data[i]['cluster_id'] = 1
 
         if action == "present":
             print data
@@ -144,7 +144,7 @@ def PoolsAction(request, action):
                 if cinder_volume_host == "" or cinder_volume_host == None:
                     status = "error"
                     msg = "The Cinder Volume Host is null"
-                pools.append({'id': x['id'], 'cinder_volume_host': cinder_volume_host})
+                pools.append({'pool_id': x['id'], 'cinder_volume_host': cinder_volume_host, 'appnode_id': x['appnode_id']})
             if msg == "" and status == "":
                 print "========Start Present Pools==========="
                 result = vsmapi.present_pool(request, pools)
@@ -167,48 +167,80 @@ def PoolsAction(request, action):
     resp = json.dumps(resp)
     return HttpResponse(resp)
 
+
+def get_openstack_region_select_data(request):
+    appnodes = vsmapi.appnode_list(request)
+    print "================appnodes get_openstack_region_select_data=========="
+    print appnodes
+    appnode_list = []
+    for appnode in appnodes:
+        appnode_dict = {}
+        auth_host = appnode.os_auth_url.split(":")[1][2:]
+        appnode_dict.update({"display": auth_host + "/" + appnode.os_region_name,
+                             "id": appnode.id
+                             })
+        appnode_list.append(appnode_dict)
+
+    print appnode_list
+    data = tuple(appnode_list)
+    return HttpResponse(json.dumps(data))
+
+
 def get_select_data(request):
-    appnode = vsmapi.appnode_list(request)[0]
-    tenant_name = appnode.os_tenant_name
-    username = appnode.os_username
-    password = appnode.os_password
-    auth_url = appnode.os_auth_url
-    region_name = appnode.os_region_name
-    auth_host = auth_url.split(":")[1][2:]
-    cinder_service = []
-    try:
-        genauthtoken = GenAuthToken(tenant_name, username, password, auth_host, region_name)
-        token, tenant_id = genauthtoken.get_token()
-        cinder_service_list = list_cinder_service(auth_host, token, tenant_id)
+    print "===================================="
+    data = json.loads(request.body)
+    print data
+    appnode_id  = data["appnode_id"]
+    print appnode_id
 
-        cinder_volume_down_list = []
-        for cinder in cinder_service_list:
-            if cinder["state"] == "down":
-                cinder_volume_down_list.append(cinder)
+    service_list = []
+    data = {}
+    if appnode_id:
+        appnodes = vsmapi.appnode_list(request)
+        print appnodes
+        for appnode in appnodes:
+            print appnode.id
+            if int(appnode.id) == int(appnode_id):
+                print "====================here=============="
+                tenant_name = appnode.os_tenant_name
+                username = appnode.os_username
+                password = appnode.os_password
+                auth_url = appnode.os_auth_url
+                region_name = appnode.os_region_name
+                auth_host = auth_url.split(":")[1][2:]
+                try:
+                    genauthtoken = GenAuthToken(tenant_name, username, password, auth_host, region_name)
+                    token, tenant_id, cinder_api_host = genauthtoken.get_token()
+                    cinder_service_list = list_cinder_service(cinder_api_host, token, tenant_id)
 
-        value = 0
-        if len(cinder_volume_down_list) == 0:
-            for cinder in cinder_service_list:
-                if cinder["binary"] == "cinder-volume":
-                    cinder.update({"value": value})
-                    value = value + 1
-                    cinder_service.append(cinder)
-        else:
-            for cinder in cinder_service_list:
-                if cinder["binary"] == "cinder-volume" and \
-                                "@" in cinder["host"]:
-                    host = cinder["host"].split("@")[0]
-                    if host not in [x["host"] for x in cinder_service_list]:
-                        cinder.update({"value": value})
-                        value = value + 1
-                        cinder_service.append(cinder)
-                elif cinder["binary"] == "cinder-volume" and \
-                                "@" not in cinder["host"]:
-                    cinder.update({"value": value})
-                    value = value + 1
-                    cinder_service.append(cinder)
-    except:
-        cinder_service = []
+                    cinder_volume_down_list = []
+                    for cinder in cinder_service_list:
+                        if cinder["state"] == "down":
+                            cinder_volume_down_list.append(cinder)
 
-    data = tuple(cinder_service)
+                    if len(cinder_volume_down_list) == 0:
+                        for cinder in cinder_service_list:
+                            if cinder["binary"] == "cinder-volume":
+                                service_list.append(cinder["host"])
+                    else:
+                        for cinder in cinder_service_list:
+                            if cinder["binary"] == "cinder-volume" and \
+                                            "@" in cinder["host"]:
+                                host = cinder["host"].split("@")[0]
+                                if host not in [x["host"] for x in cinder_service_list]:
+                                    service_list.append(cinder["host"])
+                            elif cinder["binary"] == "cinder-volume" and \
+                                            "@" not in cinder["host"]:
+                                service_list.append(cinder["host"])
+                    print service_list
+                except:
+                    service_list = []
+
+        data = {"host": service_list}
+        print data
+    return HttpResponse(json.dumps(data))
+
+
+def get_select_data2(request):
+    data = ()
     return HttpResponse(json.dumps(data))

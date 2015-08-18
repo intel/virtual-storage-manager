@@ -643,6 +643,7 @@ class Appnode(BASE, VsmBase):
     os_password = Column(String(length=50), nullable=False)
     os_auth_url = Column(String(length=255), nullable=False)
     os_region_name = Column(String(length=255), nullable=True)
+    uuid = Column(String(length=255), nullable=False)
     vsmapp_id = Column(Integer, ForeignKey(Vsmapp.id), nullable=False)
     ssh_status = Column(String(length=50), nullable=True)
     log_info = Column(Text, nullable=True)
@@ -664,6 +665,8 @@ class StoragePoolUsage(BASE, VsmBase):
     vsmapp_id = Column(Integer,
                        ForeignKey(Vsmapp.id),
                        nullable=False)
+    appnode_id = Column(Integer, nullable=False)
+    cinder_volume_host = Column(String(length=255), nullable=False)
     attach_status = Column(String(length=255), nullable=False)
     pools = relationship(StoragePool,
                          backref=backref('storage_pool_usage'),

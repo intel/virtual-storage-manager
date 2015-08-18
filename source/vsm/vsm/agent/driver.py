@@ -38,6 +38,22 @@ from vsm.agent import rpcapi as agent_rpc
 from vsm.agent import cephconfigparser
 from vsm.openstack.common.rpc import common as rpc_exc
 import glob
+
+try:
+    from keystoneclient.v2_0 import client as kc
+except:
+    from keystoneclient.v3 import client as kc
+
+try:
+    from novaclient.v1_1 import client as nc
+except:
+    from novaclient.v2 import client as nc
+
+try:
+    from cinderclient.v1 import client as cc
+except:
+    from cinderclient.v2 import client as cc
+
 import re
 
 LOG = logging.getLogger(__name__)
@@ -194,32 +210,78 @@ class CephDriver(object):
         LOG.info(' agent present_storage_pools()')
         LOG.info(' body = %s' % info)
 
-        # vsmapp_ip = info['vsmapp_ip']
-        pool_infos = info['pool_infos']
-        tenant_name = info['os_tenant_name']
-        username = info['os_username']
-        password = info['os_password']
-        auth_url = info['os_auth_url']
-        auth_host = auth_url.split(":")[1][2:]
+        # one openstack with multi regions
+        appnode_id = info[0]['appnode_id']
+        appnode = db.appnodes_get_by_id(context, appnode_id)
+        tenant_name = appnode['os_tenant_name']
+        username = appnode['os_username']
+        password = appnode['os_password']
+        auth_url = appnode['os_auth_url']
+        uuid = appnode['uuid']
 
+        regions = []
+        for pool in info:
+            appnode = db.appnodes_get_by_id(context, pool['appnode_id'])
+            regions.append(appnode['os_region_name'])
+        regions = list(set(regions))
+        LOG.info("regions: " +  str(regions))
+
+        nova_compute_host = []
+        for region in regions:
+            novaclient = nc.Client(
+                username, password, tenant_name, auth_url, region_name=region
+            )
+            nova_services = novaclient.services.list()
+            LOG.info("nova_services: " +  str(nova_services))
+            for nova_service in nova_services:
+                if nova_service.binary == "nova-compute":
+                    nova_compute_host.append(nova_service.host)
+        LOG.info("nova_compute_host: " + str(nova_compute_host))
+        volume_host_list = list(set([x['cinder_volume_host'] for x in info]))
+        LOG.info("volume_host_list: " + str(volume_host_list))
 
         pools_str = ""
-        for pinfo in pool_infos:
-            pool_type = pinfo['type'] + "-" + pinfo['name']
-            # We use "vsm-" key words to delete unused pools to openstack.
-            temp_str = pinfo['name'] + "," + pool_type
-            pools_str = pools_str + " " + temp_str
+        for volume_host in volume_host_list:
+            for pool in info:
+                if pool['cinder_volume_host'] == volume_host:
+                    pool_type = pool['pool_type'] + "-" + pool['pool_name']
+                    temp_str = pool['pool_name'] + "," + pool_type
+                    pools_str = pools_str + " " + temp_str
+            LOG.info('pools_str = %s' % pools_str)
+            LOG.info("volume host = %s" % volume_host)
+            LOG.info("uuid = %s" % uuid)
+            out, err = utils.execute('presentpool',
+                                     "cinder",
+                                     uuid,
+                                     volume_host,
+                                     pools_str,
+                                     run_as_root=True)
+            LOG.info('running logs = %s' % out)
 
-        LOG.info('pools_str = %s' % pools_str)
-        out, err = utils.execute('presentpool',
-                                 tenant_name,
-                                 username,
-                                 password,
-                                 auth_host,
-                                 pools_str,
-                                 run_as_root=True)
-        LOG.info('running logs = %s' % out)
+        for compute_host in nova_compute_host:
+            out, err = utils.execute('presentpool',
+                                     "nova",
+                                     uuid,
+                                     compute_host,
+                                     run_as_root=True)
+            LOG.info('running logs = %s' % out)
+
+        for pool in info:
+            appnode_id = pool['appnode_id']
+            appnode = db.appnodes_get_by_id(context, appnode_id)
+            cinderclient = cc.Client(
+                appnode["os_tenant_name"],
+                appnode["os_username"],
+                appnode["os_password"],
+                appnode["os_auth_url"],
+                region_name=appnode["os_region_name"]
+            )
+            volume_type = pool['pool_type'] + "-" + pool['pool_name']
+            if volume_type not in cinderclient.volume_types.list():
+                cinderclient.volume_types.create(volume_type)
+
         return out, err
+
 
     def _create_osd_state(self, context, strg, osd_id):
         osd_state = {}

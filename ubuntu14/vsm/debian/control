@@ -13,5 +13,6 @@ Depends: python, python-mysqldb, python-pbr, python-decorator, python-tempita,
     python-lockfile, python-lxml, python-routes, python-webob, python-greenlet,
     python-pastedeploy, python-paste, python-migrate, python-stevedore, python-suds,
     python-paramiko, python-babel, python-iso8601, python-keystoneclient,
+    python-novaclient, python-cinderclient,
     python-oslo.config, python-numpy, xfsprogs, python-psutil, graphviz
 Description: VSM core module which provides storage management functionalities.

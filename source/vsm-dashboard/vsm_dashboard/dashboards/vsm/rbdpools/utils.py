@@ -149,7 +149,8 @@ class GenAuthToken(object):
                         break
 
         url_id = self._url.split('/')[-1]
-        return self._token, url_id
+        host = self._url.split('/')[2].split(':')[0]
+        return self._token, url_id, host
 
 def list_cinder_service(host, token, tenant_id):
     req_url = "http://%s:8776/v1/%s" % (host, tenant_id) + "/os-services"

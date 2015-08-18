@@ -22,6 +22,9 @@ $(function(){
 
     //LoadSelected()
     LoadSelected();
+
+    //LoadOpenStackRegionSelected()
+    LoadOpenStackRegionSelected();
 });
 
 
@@ -40,24 +43,21 @@ function OpenTableCheckbox(){
     }
 }
 
-
 function LoadSelected(){
     $.ajax({
         data: {},
         type: "get",
         dataType: "json",
-        url: "/dashboard/vsm/rbdpools/get_select_data/",
+        url: "/dashboard/vsm/rbdpools/get_select_data2/",
         success: function (data) {
             var html = "";
-            html += "<select class='cinder_volume_host' style='width:80px'>";
-            for(var i=0;i<data.length;i++){
-                html += "<option value='"+data[i].value+"' >"+data[i].host+"</option>";
-            }
+            html += "<select class='cinder_volume_host' name='{0}' style='width:80px'>";
+
             html += "</select>";
 
              var ctrlSelected = $(".zone");
             for(var i=1;i<ctrlSelected.length;i++){
-                ctrlSelected[i].innerHTML = html;
+                ctrlSelected[i].innerHTML = html.replace('{0}','sel_'+i);
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -71,6 +71,71 @@ function LoadSelected(){
 }
 
 
+function LoadOpenStackRegionSelected(){
+    $.ajax({
+        data: {},
+        type: "get",
+        dataType: "json",
+        url: "/dashboard/vsm/rbdpools/get_openstack_region_select_data/",
+        success: function (data) {
+            var html = "";
+            html += "<select class='openstack_region' name='{0}' onchange='SelectRegion(this)' style='width:80px'>";
+            html += "<option value='0' ></option>";
+            for(var i=0;i<data.length;i++){
+                html += "<option value='"+data[i].id+"' >"+data[i].display+"</option>";
+            }
+            html += "</select>";
+
+            var ctrlSelected =$(".openstack_region");
+            for(var i=1;i<ctrlSelected.length;i++){
+                ctrlSelected[i].innerHTML = html.replace('{0}','sel_'+i);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+        },
+        complete: function(){
+
+        }
+    });
+}
+
+function SelectRegion(obj){
+    console.log(obj);
+    console.log(obj.value);
+    var postdata = JSON.stringify({"appnode_id":obj.value});
+    var select_name = obj.name;
+    token = $("input[name=csrfmiddlewaretoken]").val();
+    $.ajax({
+        data: postdata,
+        type: "post",
+        dataType: "json",
+        url: "/dashboard/vsm/rbdpools/get_select_data/",
+        success: function (data) {
+            console.log(data.host);
+            $("select[name='"+select_name+"']")[1].options.length = 0;
+            for(var i=0;i<data.host.length;i++) {
+                var _option = new Option();
+                _option.value = i;
+                _option.text = data.host[i];
+                $("select[name='" + select_name + "']")[1].options.add(_option);
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+        },
+        headers: {
+            "X-CSRFToken": token
+        },
+        complete: function(){
+
+        }
+    });
+
+}
+
 $("#btnSubmit").click(function(){
     var data_list = new Array();
 
@@ -83,7 +148,10 @@ $("#btnSubmit").click(function(){
             var cinder_volume_host = null;
             if(sel_index != null)
                 cinder_volume_host = $("#"+tr_id).find(".cinder_volume_host")[0].options[sel_index].text;
-            data = {id:id, cinder_volume_host:cinder_volume_host};
+
+            var appnode_id = $("#"+tr_id).find("select[class='openstack_region']").val();
+
+            data = {id:id, cinder_volume_host:cinder_volume_host,appnode_id:appnode_id};
             data_list.push(data);
         }
     })

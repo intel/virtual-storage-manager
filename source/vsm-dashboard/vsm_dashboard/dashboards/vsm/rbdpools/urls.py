@@ -16,13 +16,15 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView, PresentPoolsView
-from .views import PoolsAction,get_select_data
+from .views import PoolsAction,get_select_data,get_openstack_region_select_data,get_select_data2
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^presentpools/$', PresentPoolsView.as_view(), name='presentpoolsview'),
     url(r'^pools/(?P<action>\w+)$', PoolsAction, name='poolsaction'),
     url(r'^get_select_data/$', get_select_data, name='get_select_data'),
+    url(r'^get_select_data2/$', get_select_data2, name='get_select_data2'),
+    url(r'^get_openstack_region_select_data/$', get_openstack_region_select_data, name='get_openstack_region_select_data'),
     #url(r'^create/$', CreateView.as_view(), name='create'),
     )
 

@@ -41,12 +41,9 @@ check_package
 # Cinder
 #-----------------------------------
 
-source $TOPDIR/lib/cinder-single
-configure_cinder
+source $TOPDIR/lib/cinder
+configure_multiple_cinder
 
-source $TOPDIR/lib/nova
-source $TOPDIR/lib/libvirt
-configure_nova
 
 rm -rf $lock_file
 set +o xtrace

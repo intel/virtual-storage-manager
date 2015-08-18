@@ -41,7 +41,8 @@ class AddOpenstackIPAction(tables.LinkAction):
     classes = ("ajax-modal", "btn-primary")
 
     def allowed(self, request, datum):
-        return not len(vsmapi.appnode_list(request))
+        # return not len(vsmapi.appnode_list(request))
+        return True
 
 class DelOpenstackIPAction(tables.DeleteAction):
     data_type_singular = ("IP")
