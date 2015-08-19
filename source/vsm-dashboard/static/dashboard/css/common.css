@@ -222,3 +222,11 @@ h1.brand a{
 .vsm-options-bar button{
     margin-left: 10px;
 }
+
+.spin-content{
+    height:100px;
+    width:150px;
+    top:250px;
+    margin-left: auto;
+    margin-right: auto;
+}
