@@ -21,6 +21,6 @@ from vsm_dashboard.dashboards.vsm import dashboard
 
 class ClusterImport(horizon.Panel):
     name = _("Import Cluster")
-    slug = 'clustermgmt'
+    slug = 'cluster-import'
 
-dashboard.VizDash.register(ClusterMgmt)
+dashboard.VizDash.register(ClusterImport)
