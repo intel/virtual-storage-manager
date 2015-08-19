@@ -1569,7 +1569,11 @@ class SchedulerManager(manager.Manager):
         server_id = body['server_id']
         server = db.init_node_get_by_id(context,id=server_id)
         self._agent_rpcapi.add_new_disks_to_cluster(context, body, server['host'])
-
+        new_osd_count = int(server["data_drives_number"]) + len(body['osdinfo'])
+        values = {"data_drives_number": new_osd_count}
+        self._conductor_rpcapi.init_node_update(context,
+                                        server["id"],
+                                        values)
     def reconfig_diamond(self, context, body):
         servers = db.init_node_get_all(context)
         for server in servers:

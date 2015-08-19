@@ -1234,17 +1234,13 @@ class CephDriver(object):
             thd = utils.MultiThread(__start_osd, osd_id=osd_id)
             thd_list.append(thd)
         utils.start_threads(thd_list)
-
-
-        #TODO Unset osd noout when all osd started
-        count = db.init_node_count_by_status(context, 'Stopped')
-        if count == 0:
-            utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
-
         # update init node status
         ret = self._conductor_rpcapi.\
                 init_node_update_status_by_id(context, node_id,
                                                 'Active')
+        count = db.init_node_count_by_status(context, 'Stopped')
+        if count == 0:
+            utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
         return True
 
     def track_monitors(self, mon_id):
