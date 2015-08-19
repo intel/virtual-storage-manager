@@ -6,7 +6,7 @@ export VSM_DEPLOY_ROOT_PATH=debian/vsm-deploy
 
 getent group vsm >/dev/null || sudo groupadd -r vsm --gid 165
 if ! getent passwd vsm >/dev/null; then
-  sudo useradd -u 165 -r -g vsm -G vsm,nogroup -d /var/lib/vsm -s /sbin/nologin -c "Vsm Storage Services" vsm
+  sudo useradd -u 165 -r -g vsm -G vsm,nogroup -d /var/lib/vsm -s /usr/sbin/nologin -c "Vsm Storage Services" vsm
 fi
 
 #---------------------------

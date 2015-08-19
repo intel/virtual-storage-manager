@@ -95,7 +95,7 @@ class PoolUsagesController(wsgi.Controller):
         count_crudini = 0
         count_ssh = 0
         for host in cinder_volume_host_list:
-            (status, output) = commands.getstatusoutput('ssh %s "crudini --version"' % host)
+            (status, output) = commands.getstatusoutput('sudo ssh root@%s "crudini --version"' % host)
             LOG.info(str(status) + "========" + output)
             if "command not found" in output:
                 count_crudini = count_crudini + 1
