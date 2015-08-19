@@ -32,9 +32,7 @@ function addInfoNode(){
         
         //show device status
         var iconDeviceStatus = "info_health.png";
-        if (tdDeviceStatus.innerHTML != "Present"){
-        	iconDeviceStatus = "info_error.png";
-        }
+
         //show osd capctiy status
         var iconOSDCapcityStatus = "osd_normal.png";
         switch(tdOSDCapcityStatus.innerHTML){
@@ -179,11 +177,20 @@ function getStateData(osd_id,device_tag){
 //restart the osd
 $("#osds__action_restart_osds").click(function(){
 	var osd_id_list = {"osd_id_list":[]}
-	
+
+    var is_selected = false;
 	$("#osds>tbody>tr").each(function(){
-		var osd_id = this.children[0].children[0].value;
-		osd_id_list["osd_id_list"].push(osd_id);
+        if(this.children[0].children[0].checked) {
+            is_selected = true;
+            var osd_id = this.children[0].children[0].value;
+            osd_id_list["osd_id_list"].push(osd_id);
+        }
 	})
+
+    if(is_selected == false){
+        showTip("warning","please select the OSD");
+        return false;
+    }
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
 	$.ajax({
@@ -193,6 +200,7 @@ $("#osds__action_restart_osds").click(function(){
 		dataType:"json",
 		success: function(data){
 				console.log(data);
+                window.location.href= "/dashboard/vsm/devices-management/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){
@@ -214,10 +222,19 @@ $("#osds__action_restart_osds").click(function(){
 $("#osds__action_remove_osds").click(function(){
 	var osd_id_list = {"osd_id_list":[]}
 	
+	  var is_selected = false;
 	$("#osds>tbody>tr").each(function(){
-		var osd_id = this.children[0].children[0].value;
-		osd_id_list["osd_id_list"].push(osd_id);
+        if(this.children[0].children[0].checked) {
+            is_selected = true;
+            var osd_id = this.children[0].children[0].value;
+            osd_id_list["osd_id_list"].push(osd_id);
+        }
 	})
+
+    if(is_selected == false){
+        showTip("warning","please select the OSD");
+        return false;
+    }
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
 	$.ajax({
@@ -227,6 +244,7 @@ $("#osds__action_remove_osds").click(function(){
 		dataType:"json",
 		success: function(data){
 				console.log(data);
+                window.location.href= "/dashboard/vsm/devices-management/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){
@@ -247,11 +265,20 @@ $("#osds__action_remove_osds").click(function(){
 //remove the osd
 $("#osds__action_restore_osds").click(function(){
 	var osd_id_list = {"osd_id_list":[]}
-	
+
+    var is_selected = false;
 	$("#osds>tbody>tr").each(function(){
-		var osd_id = this.children[0].children[0].value;
-		osd_id_list["osd_id_list"].push(osd_id);
+        if(this.children[0].children[0].checked) {
+            is_selected = true;
+            var osd_id = this.children[0].children[0].value;
+            osd_id_list["osd_id_list"].push(osd_id);
+        }
 	})
+
+    if(is_selected == false){
+        showTip("warning","please select the OSD");
+        return false;
+    }
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
 	$.ajax({
@@ -260,7 +287,8 @@ $("#osds__action_restore_osds").click(function(){
 		data: JSON.stringify(osd_id_list),
 		dataType:"json",
 		success: function(data){
-				console.log(data);
+				 console.log(data);
+                 window.location.href= "/dashboard/vsm/devices-management/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){

@@ -118,7 +118,7 @@ class OsdsTable(tables.DataTable):
                                status=True,
                                status_choices=STATUS_CHOICES,
                                display_choices=STATUS_DISPLAY_CHOICES,
-                               verbose_name=_("VSM Status"),
+                               verbose_name=_("VSM Status"), hidden=True
                                )
     osd_state = tables.Column("osd_state", verbose_name=_("OSD Status"))
     osd_weight = tables.Column("osd_weight", verbose_name=_("OSD Weight"))
