@@ -84,13 +84,13 @@ class PerformanceMetricsController(wsgi.Controller):
         return {"metrics": metrics}
 
     def get_lantency(self, req):
-        """get_lantency."""
+        """get_latency."""
         search_opts = {}
         search_opts.update(req.GET)
         context = req.environ['vsm.context']
         search_opts ['metrics_name'] = 'osd_%s'%search_opts['metrics_name']
         metrics = self.conductor_api.get_lantency(context, search_opts=search_opts)
-        LOG.info("CEPH_LOG get performance metrics  lantency  by search opts: %s" % search_opts)
+        LOG.info("CEPH_LOG get performance metrics  latency  by search opts: %s" % search_opts)
         return {"metrics": metrics}
 
     def get_cpu_usage(self, req):
