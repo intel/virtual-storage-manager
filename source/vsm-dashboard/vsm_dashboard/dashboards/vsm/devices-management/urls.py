@@ -17,6 +17,7 @@
 from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import DevicesAction
+from .views import get_smart_info
 from .views import AddOSDView,get_osd_list,add_new_osd_action,check_device_path,get_smart_info
 from .views import restart_osd,remove_osd,restore_osd
 

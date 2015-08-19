@@ -175,7 +175,7 @@ def check_storage_group(file_path):
             continue
 
         if len(line) < 4:
-            print 'Small line, skiped'
+#            print 'Small line, skiped'
             continue
 
         if line.find('[') != -1 and\
