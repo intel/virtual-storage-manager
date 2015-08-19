@@ -2909,14 +2909,14 @@ def osd_state_get(context, id, session=None):
 
     return result
 
-def osd_state_create(context, values, session=None):
+def osd_state_create(context, values, session=None,force_create=False):
     if not session:
         session = get_session()
-
-    ref = osd_state_get_by_name(context, values.get('osd_name'))
-    if ref:
-        ref = osd_state_update(context, ref['id'], values)
-        return ref
+    if not force_create:
+        ref = osd_state_get_by_name(context, values.get('osd_name'))
+        if ref:
+            ref = osd_state_update(context, ref['id'], values)
+            return ref
 
     with session.begin(subtransactions=True):
         osd_state_ref = models.OsdState()

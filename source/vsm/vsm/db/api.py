@@ -976,8 +976,8 @@ def init_node_count_by_status(context, status):
     return IMPL.init_node_count_by_status(context, status)
 
 #osd_state
-def osd_state_create(context, values):
-    return IMPL.osd_state_create(context, values)
+def osd_state_create(context, values,force_create=False):
+    return IMPL.osd_state_create(context, values,force_create=force_create)
 
 def osd_state_get(context, osd_id):
     return IMPL.osd_state_get(context, osd_id)
