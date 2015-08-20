@@ -29,6 +29,7 @@ class CephUpgrade(forms.SelfHandlingForm):
     package_url = forms.CharField(label=_("Package URL"),
                             max_length=255,
                             min_length=1,
+                            initial='http://ceph.com/debian-hammer/',
                             error_messages={
                             'required': _('This field is required.'),},
                             )
@@ -36,6 +37,7 @@ class CephUpgrade(forms.SelfHandlingForm):
     key_url  = forms.CharField(label=_("Key URL"),
                             max_length=255,
                             min_length=1,
+                            initial='https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc',
                             error_messages={
                             'required': _('This field is required.'),},
                             )

@@ -192,7 +192,7 @@ class AgentManager(manager.Manager):
                             dev = db.device_create(self._context, device_dict)
                             LOG.info("storage_group_ref=%s=="%(dir(storage_group_ref)))
                             osd_states_dict = {
-                                'osd_name':'osd.%s.%s'%(FLAGS.vsm_status_uninitialized, dev.id),
+                                'osd_name':'osd.x',
                                 'device_id': dev.id,
                                 'storage_group_id': storage_group_ref.id,
                                 'service_id':self._service_id,
@@ -205,7 +205,7 @@ class AgentManager(manager.Manager):
                                 'zone_id':zone_id,
 
                             }
-                            db.osd_state_create(self._context, osd_states_dict)
+                            db.osd_state_create(self._context, osd_states_dict,force_create=True)
                     except exception.UpdateDBError, e:
                         LOG.error('%s:%s' % (e.code, e.message))
             else:

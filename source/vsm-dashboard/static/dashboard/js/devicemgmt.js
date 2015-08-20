@@ -32,9 +32,7 @@ function addInfoNode(){
         
         //show device status
         var iconDeviceStatus = "info_health.png";
-        if (tdDeviceStatus.innerHTML != "Present"){
-        	iconDeviceStatus = "info_error.png";
-        }
+
         //show osd capctiy status
         var iconOSDCapcityStatus = "osd_normal.png";
         switch(tdOSDCapcityStatus.innerHTML){
@@ -121,20 +119,14 @@ function getStateData(osd_id,device_tag){
 		$("#lblFamily")[0].innerHTML =  "--";
 		$("#lblSeriesNumber")[0].innerHTML =  "--";
 		$("#lblFirmware")[0].innerHTML =  "--";
-		$("#lblTotalCapacity")[0].innerHTML =  "--";
-		$("#lblUsedCapacity")[0].innerHTML = "--";
-		$("#lblPercentageUsed")[0].innerHTML = "--";
-		$("#lblTemperature")[0].innerHTML = "--";
-		$("#lblUnitRead")[0].innerHTML = "--";
-		$("#lblUnitWRITE")[0].innerHTML = "--";
 		$("#modal_wrapper").modal("hide");
 	});
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
-	var postData = JSON.stringify({"osd_id":osd_id,"action":"get_smart_info"});
+	var postData = JSON.stringify({"osd_id":osd_id,"device_path":device_path});
 	$.ajax({
 		type: "post",
-		url: "/dashboard/vsm/devices-management/devices/state",
+		url: "/dashboard/vsm/devices-management/get_smart_info/",
 		data: postData,
 		dataType:"json",
 		success: function(data){
@@ -143,21 +135,24 @@ function getStateData(osd_id,device_tag){
 				if (data.data == ""){
 					return ;
 				}
-				
+
 	        	var basicInfo = data.basic;
 				var smartInfo = data.smart;
-				$("#lblStatus")[0].innerHTML = basicInfo.status;
-				$("#lblFamily")[0].innerHTML =  basicInfo.family;
-				$("#lblSeriesNumber")[0].innerHTML =  basicInfo.seriesNumber;
-				$("#lblFirmware")[0].innerHTML =  basicInfo.firmware;
-				$("#lblTotalCapacity")[0].innerHTML =  basicInfo.totalCapacity;
-				$("#lblUsedCapacity")[0].innerHTML =  basicInfo.usedCapacity;
+				$("#lblStatus")[0].innerHTML = basicInfo.DriveStatus;
+				$("#lblFamily")[0].innerHTML =  basicInfo.DriveFamily;
+				$("#lblSeriesNumber")[0].innerHTML =  basicInfo.SerialNumber;
+				$("#lblFirmware")[0].innerHTML =  basicInfo.FirmwareVersion;
 
-	            $("#lblPercentageUsed")[0].innerHTML = smartInfo.percentageUsed
-				$("#lblTemperature")[0].innerHTML = smartInfo.temperature;
-				$("#lblUnitRead")[0].innerHTML = smartInfo.unitRead;
-				$("#lblUnitWRITE")[0].innerHTML = smartInfo.unitWRITE;
-				$("#modal_wrapper").find(".modal-body")[0].innerHTML = $("#divOSDInfo")[0].innerHTML;
+                //Get smart info
+                $("#tSmartInfo>tbody").empty();
+                for(var i=0;i<smartInfo.length;i++) {
+                    var smart_row = "";
+                    smart_row += "<tr>";
+                    smart_row += "<td>" + smartInfo[i].key + "</td>";
+                    smart_row += "<td><span class='span-label'>" + smartInfo[i].value + "</span></td>";
+                    smart_row += "</tr>";
+                    $("#tSmartInfo>tbody").append(smart_row);
+                }
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){
@@ -179,11 +174,20 @@ function getStateData(osd_id,device_tag){
 //restart the osd
 $("#osds__action_restart_osds").click(function(){
 	var osd_id_list = {"osd_id_list":[]}
-	
+
+    var is_selected = false;
 	$("#osds>tbody>tr").each(function(){
-		var osd_id = this.children[0].children[0].value;
-		osd_id_list["osd_id_list"].push(osd_id);
+        if(this.children[0].children[0].checked) {
+            is_selected = true;
+            var osd_id = this.children[0].children[0].value;
+            osd_id_list["osd_id_list"].push(osd_id);
+        }
 	})
+
+    if(is_selected == false){
+        showTip("warning","please select the OSD");
+        return false;
+    }
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
 	$.ajax({
@@ -193,6 +197,7 @@ $("#osds__action_restart_osds").click(function(){
 		dataType:"json",
 		success: function(data){
 				console.log(data);
+                window.location.href= "/dashboard/vsm/devices-management/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){
@@ -214,10 +219,19 @@ $("#osds__action_restart_osds").click(function(){
 $("#osds__action_remove_osds").click(function(){
 	var osd_id_list = {"osd_id_list":[]}
 	
+	  var is_selected = false;
 	$("#osds>tbody>tr").each(function(){
-		var osd_id = this.children[0].children[0].value;
-		osd_id_list["osd_id_list"].push(osd_id);
+        if(this.children[0].children[0].checked) {
+            is_selected = true;
+            var osd_id = this.children[0].children[0].value;
+            osd_id_list["osd_id_list"].push(osd_id);
+        }
 	})
+
+    if(is_selected == false){
+        showTip("warning","please select the OSD");
+        return false;
+    }
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
 	$.ajax({
@@ -227,6 +241,7 @@ $("#osds__action_remove_osds").click(function(){
 		dataType:"json",
 		success: function(data){
 				console.log(data);
+                window.location.href= "/dashboard/vsm/devices-management/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){
@@ -247,11 +262,20 @@ $("#osds__action_remove_osds").click(function(){
 //remove the osd
 $("#osds__action_restore_osds").click(function(){
 	var osd_id_list = {"osd_id_list":[]}
-	
+
+    var is_selected = false;
 	$("#osds>tbody>tr").each(function(){
-		var osd_id = this.children[0].children[0].value;
-		osd_id_list["osd_id_list"].push(osd_id);
+        if(this.children[0].children[0].checked) {
+            is_selected = true;
+            var osd_id = this.children[0].children[0].value;
+            osd_id_list["osd_id_list"].push(osd_id);
+        }
 	})
+
+    if(is_selected == false){
+        showTip("warning","please select the OSD");
+        return false;
+    }
 
 	token = $("input[name=csrfmiddlewaretoken]").val();
 	$.ajax({
@@ -260,7 +284,8 @@ $("#osds__action_restore_osds").click(function(){
 		data: JSON.stringify(osd_id_list),
 		dataType:"json",
 		success: function(data){
-				console.log(data);
+				 console.log(data);
+                 window.location.href= "/dashboard/vsm/devices-management/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){

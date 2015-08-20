@@ -25,7 +25,7 @@ var spinner = new Spinner(spin_opts);
 
 function GenerateSpin(){
 	var html = "";
-		html += "<div class='modal-dialog' style='height:100px;width:150px;background-color:white;top:250px'>";
+		html += "<div class='modal-dialog'>";
 		html += "	<div class='modal-content spin-content'>";
 		html += "		<div class='spin-body'>";
 		html += "			<div id='divSpin'></div>";
@@ -34,15 +34,15 @@ function GenerateSpin(){
 		html += "</div>";
 
 
-		var dialogWrapper = $("#modal_wrapper")[0];
-		dialogWrapper.id = "modal_wrapper";
+		var dialogWrapper = $("#spin_wrapper")[0];
+		dialogWrapper.id = "spin_wrapper";
 		dialogWrapper.className = "modal fade";
 		dialogWrapper.innerHTML = html;
 
 		//Open modal
-		$("#modal_wrapper").modal("show");
+		$("#spin_wrapper").modal("show");
 		//remove the event from the modal
-		$("#modal_wrapper").off();
+		$("#spin_wrapper").off();
 }
 
 
@@ -57,7 +57,7 @@ function ShowSpin(){
 
 function CloseSpin(){
 	spinner.spin();
-	$("#modal_wrapper").modal("hide");
+	$("#spin_wrapper").modal("hide");
 }
 
 $(document).ajaxStart(function(){

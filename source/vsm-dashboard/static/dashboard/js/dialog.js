@@ -1,7 +1,7 @@
 function GenerateDialog(title,body,showSubmit,submitName){
 	var html = "";
-	html += "<div class='modal-dialog'>";
-	html += "	<div class='modal-content'>";
+	html += "<div class='modal-dialog' style='z-index:1045'>";
+	html += "	<div class='modal-content' >";
 	html += "		<div class='modal-header'>";
 	html += "			<button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
 	html += "			<h4 class='modal-title' id='myModalLabel'>";

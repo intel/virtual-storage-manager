@@ -23,7 +23,7 @@ from vsm_dashboard.api import vsm as vsmapi
 from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from vsm_dashboard.utils import get_time_delta
-from vsm_dashboard.utils import get_time_delta2
+from vsm_dashboard.utils import get_time_delta3
 import summarys
 import json
 import random
@@ -133,7 +133,7 @@ def get_version():
     vsm_version = get_vsm_version()
     try:
         vsm_summary = vsmapi.vsm_summary(None)
-        up_time = get_time_delta2(vsm_summary.created_at)
+        up_time = get_time_delta3(vsm_summary.uptime)
         ceph_version = vsm_summary.ceph_version
     except:
         up_time = ''
