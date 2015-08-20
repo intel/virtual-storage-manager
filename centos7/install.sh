@@ -58,7 +58,7 @@ MANIFEST_PATH=""
 REPO_PATH="vsm-dep-repo"
 DEPENDENCE_BRANCH="master"
 USER=`whoami`
-SSH='ssh'
+SSH='ssh -t'
 SCP='scp'
 SUDO='sudo -E'
 IS_PREPARE=False
@@ -109,6 +109,18 @@ fi
 if [[ $NEW_CONTROLLER_ADDRESS != "" ]]; then
     CONTROLLER_ADDRESS=$NEW_CONTROLLER_ADDRESS
 fi
+#
+#function _make_me_super() { # _make_me_super <user> <node>
+#    MKMESUPER="$1 ALL=(ALL) NOPASSWD: ALL"
+#    $SSH $USER@$2 "$SUDO echo '$MKMESUPER' | $SUDO tee /etc/sudoers.d/$1; $SUDO chmod 0440 /etc/sudoers.d/$1"
+#}
+#
+## enable no-password sudo
+#_make_me_super $USER $CONTROLLER_ADDRESS
+#
+#for node in $AGENT_ADDRESS_LIST; do
+#    _make_me_super $USER $node
+#done
 
 IS_CONTROLLER=0
 for ip in $HOSTIP; do
@@ -370,9 +382,15 @@ function install_setup_diamond() {
     $SSH $USER@$1 "$SUDO yum install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     source $DEPLOYRC_FILE
-    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
-    HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
-    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
+#    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
+#    HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
+#    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
+    PY_VER=`python -V 2>&1 |cut -d' ' -f2 |cut -d. -f1,2`
+    echo "Python version: $PY_VER"
+    VSMMYSQL_FILE_PATH="/usr/lib/python$PY_VER/site-packages/vsm/diamond/handlers/vsmmysql.py"
+    HANDLER_PATH="/usr/lib/python$PY_VER/site-packages/diamond/handler"
+    DIAMOND_CONFIG_PATH="/etc/diamond"
+
     $SSH $USER@$1 "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
     "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
@@ -405,9 +423,10 @@ function install_setup_diamond() {
 
 function setup_remote_agent() {
     $SSH $USER@$1 "$SUDO rm -rf /etc/manifest/server.manifest"
-    $SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
-    old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
-    $SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    #$SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    #old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
+    #$SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    $SUDO sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
     $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/server.manifest /etc/manifest"
     $SSH $USER@$1 "$SUDO chown root:vsm /etc/manifest/server.manifest; $SUDO chmod 755 /etc/manifest/server.manifest"
