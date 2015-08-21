@@ -1,3 +1,83 @@
+2.0.0 (build 163)
+------------------------------------
+Special Notes
+---------------
+-	this is a 2.0 beta 1 release, still plenty of changes in this release, and we did some initial tests  on it. 
+-	15 new features are added, and 41 bugs are fixed till this release.
+
+
+New Features
+---------------
+-	[VSM-135](https//01.org/jira/browse/VSM-135)	CentOS 6.5 and 7.0 Support			
+-	[VSM-296](https//01.org/jira/browse/VSM-296)	Show performance on the dashboard			
+-	[VSM-4](https//01.org/jira/browse/VSM-4)	Average Response Time" missing in dashboard Overview panel "VSM Status" section.			
+-	[VSM-159](https//01.org/jira/browse/VSM-159)	add issue reporting tool			
+-	[VSM-156](https//01.org/jira/browse/VSM-156)	add sanity check tool to help identify potential issues before or after deployment			
+-	[VSM-15](https//01.org/jira/browse/VSM-15)	VSM-backup prompt info not correct			
+-	[VSM-124](https//01.org/jira/browse/VSM-124)	[CDEK-1852] VSM | adding possibility to manipulate ceph values in cluster.manifest file			
+-	[VSM-242](https//01.org/jira/browse/VSM-242)	Allow user to modify ceph.conf outside VSM			
+-	[VSM-184](https//01.org/jira/browse/VSM-184)	add automated script to help deploy VSM on multiple nodes			
+-	[VSM-103](https//01.org/jira/browse/VSM-103)	Suport a Single Keystone Instance in OpenStack Environments			
+-	[VSM-303](https//01.org/jira/browse/VSM-303)	Ajust the UI like openstack dashboard			
+-	[VSM-54](https//01.org/jira/browse/VSM-54)	On OSD Status page: Provide filter option to only display OSDs that are not up and in			
+-	[VSM-190](https//01.org/jira/browse/VSM-190)	Add disks to cluster		
+-	[VSM-220](https//01.org/jira/browse/VSM-220)	Operator expects to know what's happending inside ceph cluster through performance counters
+-	[VSM-134](https//01.org/jira/browse/VSM-134)	Ubuntu 14.X Support
+
+
+Resolved bugs
+----------------
+-	[VSM-318](https//01.org/jira/browse/VSM-318)	"remove osd" doesn't work
+-	[VSM-325](https//01.org/jira/browse/VSM-325)	Monitor: negative update time shown on monitor status when removing an monitor.
+-	[VSM-269](https//01.org/jira/browse/VSM-269)	Smart info doesn't work in Device mgmt.
+-	[VSM-324](https//01.org/jira/browse/VSM-324)	Monitor: inconsistent monitor number on Monitor status page when removing one monitor
+-	[VSM-326](https//01.org/jira/browse/VSM-326)	UI: the progress indicator is not showing at the center of screen but the top-left
+-	[VSM-323](https//01.org/jira/browse/VSM-323)	Installer: when installing diamond on each agents, there are a lot of File or Folder not found issues
+-	[VSM-306](https//01.org/jira/browse/VSM-306)	when executing buildvsm on ubuntu, the script complains no vsm user created
+-	[VSM-263](https//01.org/jira/browse/VSM-263)	The pie chart in "Storage Group Status" page is disappeared.
+-	[VSM-320](https//01.org/jira/browse/VSM-320)	if installing from a node instead of the controller, the installation will be stopped at missing deployrc
+-	[VSM-176](https//01.org/jira/browse/VSM-176)	SSL certificate password is stored in a plain text file
+-	[VSM-230](https//01.org/jira/browse/VSM-230)	when presenting pool to openstack, cache tiering pools should be listed.
+-	[VSM-26](https//01.org/jira/browse/VSM-26)	[CDEK-1664] VSM | Not possible to replace node if ceph contain only 3 nodes.
+-	[VSM-51](https//01.org/jira/browse/VSM-51)	Install Fails for VSM 0.8.0 Engineering Build Release
+-	[VSM-236](https//01.org/jira/browse/VSM-236)	no way to check manifest correctness after editing them
+-	[VSM-29](https//01.org/jira/browse/VSM-29)	VSM-agent process causes high i/o on os disk
+-	[VSM-216](https//01.org/jira/browse/VSM-216)	Add storage group requires at least 3 nodes
+-	[VSM-33](https//01.org/jira/browse/VSM-33)	negative update time in RBD list
+-	[VSM-113](https//01.org/jira/browse/VSM-113)	[CDEK-1835] VSM | /var/log/httpd/error_log - constantly ongoing messages [error] <Response [200]>
+-	[VSM-179](https//01.org/jira/browse/VSM-179)	keep ceph.conf up to date when executing "remove server" operations.
+-	[VSM-177](https//01.org/jira/browse/VSM-177)	wrong /etc/fstab entry for osd device mount point
+-	[VSM-233](https//01.org/jira/browse/VSM-233)	console blocks when running automatic installation procedure
+-	[VSM-239](https//01.org/jira/browse/VSM-239)	with automatic deployment, the execution is blocked at asking if start mysql service
+-	[VSM-166](https//01.org/jira/browse/VSM-166)	cluster_manifest sanity check program gives incorrect advice for auth_keys
+-	[VSM-207](https//01.org/jira/browse/VSM-207)	can't assume eth0 device name
+-	[VSM-224](https//01.org/jira/browse/VSM-224)	Controller node error in /var/log/httpd/error_log - constantly ongoing messages [error] <Response [200]>
+-	[VSM-121](https//01.org/jira/browse/VSM-121)	Storage node unable to connect to controller although network is OK and all setting correct
+-	[VSM-244](https//01.org/jira/browse/VSM-244)	Internal server error when installing v1.1
+-	[VSM-123](https//01.org/jira/browse/VSM-123)	Storage node will not be able to contact controller node to install if http proxy set
+-	[VSM-171](https//01.org/jira/browse/VSM-171)	[CDEK1672] VSM_CLI | list shows Admin network in Public IP section
+-	[VSM-168](https//01.org/jira/browse/VSM-168)	[CDEK1800] VSM_CLI | remove mds - doesn't update vsm database
+-	[VSM-193](https//01.org/jira/browse/VSM-193)	hard-coded cluster id
+-	[VSM-260](https//01.org/jira/browse/VSM-260)	the check_network in server_manifest will be wrong when it has a single network card
+-	[VSM-317](https//01.org/jira/browse/VSM-317)	the update time in MDS block is empty
+-	[VSM-249](https//01.org/jira/browse/VSM-249)	can not open dashboard and get the debug infomation "Invalid block tag: 'horizon_nav'"
+-	[VSM-299](https//01.org/jira/browse/VSM-299)	when after installed vsm, but no ceph cluster deployed, there is still show 3 storage groups
+-	[VSM-310](https//01.org/jira/browse/VSM-310)	with Firefox, for all tables, the vertical separator between the first and second column gets disappered
+-	[VSM-313](https//01.org/jira/browse/VSM-313)	the logo is disappeared when running on IE 11
+-	[VSM-314](https//01.org/jira/browse/VSM-314)	there is no progress indicator when an operation is not returned.
+-	[VSM-316](https//01.org/jira/browse/VSM-316)	the button style in "device management" page is different from others.
+-	[VSM-311](https//01.org/jira/browse/VSM-311)	The blocks in dashboard are exceed out of the width of heading
+-	[VSM-315](https//01.org/jira/browse/VSM-315)	"add server" doesn't work in alpha 2
+
+
+Known issues
+-----------------
+-	[VSM-332](https//01.org/jira/browse/VSM-332) 	sometimes diamond service start failed 
+-	[VSM-330](https//01.org/jira/browse/VSM-330) 	When upgrading from Firefly to Giant, the upgrade complains missing python-rados package 
+
+
+
+
 2.0.0 (build 149)
 ------------------------------------
 Special Notes
