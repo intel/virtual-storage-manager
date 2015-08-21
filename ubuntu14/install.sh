@@ -102,6 +102,14 @@ HOSTIP=`hostname -I`
 
 source $TOPDIR/installrc
 
+if [ -z $MANIFEST_PATH ]; then
+    MANIFEST_PATH="manifest"
+fi
+
+if [[ $NEW_CONTROLLER_ADDRESS != "" ]]; then
+    CONTROLLER_ADDRESS=$NEW_CONTROLLER_ADDRESS
+fi
+
 function _make_me_super() { # _make_me_super <user> <node>
     MKMESUPER="$1 ALL=(ALL) NOPASSWD: ALL"
     $SSH $USER@$2 "$SUDO echo '$MKMESUPER' | $SUDO tee /etc/sudoers.d/$1; $SUDO chmod 0440 /etc/sudoers.d/$1"
@@ -113,14 +121,6 @@ _make_me_super $USER $CONTROLLER_ADDRESS
 for node in $AGENT_ADDRESS_LIST; do
     _make_me_super $USER $node
 done
-
-if [ -z $MANIFEST_PATH ]; then
-    MANIFEST_PATH="manifest"
-fi
-
-if [[ $NEW_CONTROLLER_ADDRESS != "" ]]; then
-    CONTROLLER_ADDRESS=$NEW_CONTROLLER_ADDRESS
-fi
 
 IS_CONTROLLER=0
 for ip in $HOSTIP; do
