@@ -2670,35 +2670,17 @@ class DiamondDriver(object):
                                      run_as_root=True)
         except:
             LOG.info("kill_diamond error:%s--%s"%(out,err))
-        config_file = '%s/%s.conf'%(self._diamond_config_path,collector)
+        config_file = '%s%s.conf'%(self._diamond_config_path,collector)
         keys = values.keys()
-        if os.path.exists(config_file):
-            try:
-                out_put = open(config_file,'r')
-                content = out_put.readlines()
-                content_to_remove = []
-                for line in content:
-                    line_list = line.split('=')
-                    if line_list[0] in keys:
-                        content_to_remove.append(line)
-                for line in content_to_remove:
-                    content.remove(line)
-            except:
-                out_put.close()
-            finally:
-                out_put.close()
-        else:
-            content = []
+        content = []
         for key in keys:
-            content.append('%s=%s\n'%(key,values[key]))
+            content.append('%s=%s'%(key,values[key]))
 
-        try:
-            in_put = open(config_file,'w')
-            in_put.writelines(content)
-        except:
-             in_put.close()
-        finally:
-             in_put.close()
+        out, err = utils.execute('rm','-rf', config_file, run_as_root=True)
+        out, err = utils.execute('cp','/etc/vsm/vsm.conf', config_file, run_as_root=True)
+        for line in content:
+            out, err = utils.execute('sed','-i','1i\%s'%line, config_file, run_as_root=True)
+        out, err = utils.execute('sed','-i','%s,$d'%(len(content)+1), config_file, run_as_root=True)
         out, err = utils.execute('diamond', 'll', run_as_root=True)
         return out
 
