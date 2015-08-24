@@ -165,7 +165,7 @@ function configure_multiple_cinder() {
     local ceph_file=/etc/cinder/ceph.conf
     local cnt=0
     local old_str=""
-    _del_other_multiple_section
+#    _del_other_multiple_section
 
 #    _cinder_rc
     # If we find the cinder.conf, we change the configuration file.
@@ -183,8 +183,8 @@ function configure_multiple_cinder() {
         _del_default_cinder rbd_user=${AUTH_CINDER_USER#*.}
         _del_default_cinder rbd_secret_uuid=${AUTH_CINDER_UUID}
 
-        if [[ `grep -q "enabled_backends" /etc/cinder/cinder.conf && echo "1"` ]]; then
-            enabled_backends_value=`crudini --get /etc/cinder/cinder.conf DEFAULT enabled_backends_value`
+        if [[ `cat $cinder_file|grep -c "enabled_backends = *"` -gt 0 ]]; then
+            enabled_backends_value=`crudini --get /etc/cinder/cinder.conf DEFAULT enabled_backends`
             BACKEND_LIST=${enabled_backends_value},${BACKEND_LIST}
         fi
         _set_multiple_default_cinder enabled_backends=${BACKEND_LIST}
