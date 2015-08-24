@@ -479,20 +479,16 @@ class AgentManager(manager.Manager):
         values = {'attach_status': 'success'}
         try:
             LOG.info(' PRESENT POOL BEGIN!')
-            out, err = self.ceph_driver.present_storage_pools(context, body)
+            self.ceph_driver.present_storage_pools(context, body)
             LOG.info(' PRESENT POOL OVER!')
-            # pool_infos = body['pool_infos']
             for pool in body:
                 sp_usage_ref = db.get_sp_usage_by_poolid_vsmappid(context, pool['pool_id'], vsmapp_id)
                 db.storage_pool_usage_update(context, sp_usage_ref['id'], values)
 
-            LOG.info(' PRESENT POOL LOG = %s' % out)
-            LOG.info(' PRESENT POOL ERR = %s' % err)
             return values
         except:
             LOG.info(' PRESENT POOL FAILED')
             values = {'attach_status': 'failed'}
-            # pool_infos = body['pool_infos']
             for pool in body:
                 sp_usage_ref = db.get_sp_usage_by_poolid_vsmappid(context, pool['pool_id'], vsmapp_id)
                 db.storage_pool_usage_update(context, sp_usage_ref['id'], values)

@@ -19,7 +19,7 @@ function setup_nova() {
     local app_type=$1
     local uuid=$2
     local vsmapp_ip=$3
-    
+
     source $TOPDIR/server/tarfile
 
     AUTH_CINDER_UUID=$uuid

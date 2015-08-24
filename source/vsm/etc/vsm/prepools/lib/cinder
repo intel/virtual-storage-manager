@@ -183,6 +183,10 @@ function configure_multiple_cinder() {
         _del_default_cinder rbd_user=${AUTH_CINDER_USER#*.}
         _del_default_cinder rbd_secret_uuid=${AUTH_CINDER_UUID}
 
+        if [[ `grep -q "enabled_backends" /etc/cinder/cinder.conf && echo "1"` ]]; then
+            enabled_backends_value=`crudini --get /etc/cinder/cinder.conf DEFAULT enabled_backends_value`
+            BACKEND_LIST=${enabled_backends_value},${BACKEND_LIST}
+        fi
         _set_multiple_default_cinder enabled_backends=${BACKEND_LIST}
         _set_multiple_default_cinder scheduler_driver=cinder.scheduler.filter_scheduler.FilterScheduler
 
