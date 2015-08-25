@@ -17,6 +17,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 import horizon
+
 from vsm_dashboard.dashboards.vsm import dashboard
 
 class OpenstackConnect(horizon.Panel):
