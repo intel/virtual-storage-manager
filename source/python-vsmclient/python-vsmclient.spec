@@ -8,7 +8,7 @@ Summary:          Python API and CLI for  vsm
 
 Group:            Development/Languages
 License:          Intel Reserved
-URL:              http://intel.com/itflex
+URL:              http://intel.com
 Source:           %{name}-%{version}.tar.gz
 
 #

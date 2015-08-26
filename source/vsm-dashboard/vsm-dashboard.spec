@@ -5,7 +5,7 @@
 Name:           vsm-dashboard
 Version:        %{version}
 Release:        %{release}
-Url:            http://intel.com/itflex
+Url:            http://intel.com
 License:        Apache-2.0
 Group:          Development/Languages/Python
 Source:         %{name}-%{version}.tar.gz
