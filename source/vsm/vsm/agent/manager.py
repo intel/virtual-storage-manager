@@ -414,7 +414,7 @@ class AgentManager(manager.Manager):
             find_error = False
             if etc_hosts.find(hname) == -1:
                 find_error = True
-                LOG.error('Can not find hname = %s in /etc/hosts' % hname)
+                LOG.error('Can not find hostname = %s in /etc/hosts' % hname)
 
             for ip in ip_list:
                 if etc_hosts.find(ip) == -1:
