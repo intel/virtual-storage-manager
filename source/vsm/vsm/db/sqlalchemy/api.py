@@ -3229,6 +3229,7 @@ def appnodes_create(context, values, allow_duplicate=False):
 
     values['created_at'] = timeutils.utcnow()
     values['deleted'] = 0
+    values['uuid'] = uuid.uuid4()
 
     try:
         appnodes_ref = models.Appnode()
@@ -3351,50 +3352,37 @@ def sp_usage_create(context, pools, session=None):
     vsmapp = vsmapps_get_by_project(context)
     vsmapp_id = vsmapp.id if vsmapp else None
 
-    appnode = appnodes_get_all_by_vsmappid(context, vsmapp_id)
-    # vsmapp_ip = appnode['ip']
-    os_tenant_name = appnode['os_tenant_name']
-    os_username = appnode['os_username']
-    os_password = appnode['os_password']
-    os_auth_url = appnode['os_auth_url']
-
     if not vsmapp_id:
         raise exception.VsmappNotFound()
 
-    pool_ids = [int(x['id']) for x in pools]
-    #update pools
-    old_pools = get_sp_usage_all_by_vsmapp_id(context, vsmapp_id, session)
-    for pref in old_pools:
-        pool_id = pref['pool_id']
-        # Filter the deleted pools.
+    old_pool_usages = get_sp_usage_all_by_vsmapp_id(context, vsmapp_id, session)
+    for old_pool_usage in old_pool_usages:
+        if old_pool_usage['attach_status'] != "success":
+            pool_id = old_pool_usage['pool_id']
+            pool_ref = pool_get_by_db_id(context, pool_id, session)
+            if pool_ref:
+                pools.append({
+                    'pool_id': pool_id,
+                    'appnode_id': pool_ref['appnode_id'],
+                    'cinder_volume_host': pool_ref['cinder_volume_host']
+                })
+
+    for pool in pools:
+        pool_id = pool['pool_id']
+
         pool_ref = pool_get_by_db_id(context, pool_id, session)
-        if pool_ref:
-            pool_ids.append(pref['pool_id'])
-    pool_ids = list(set(pool_ids))
+        pool.update({
+            'vsmapp_id': vsmapp_id,
+            'pool_name': pool_ref['name'],
+            'pool_type': pool_ref['storage_group']['storage_class']
+        })
 
-
-    pool_info_list = []
-    pool_name_list = []
-    for pool_id in pool_ids:
-        pool_ref = pool_get_by_db_id(context, pool_id, session)
-        storage_group = pool_ref['storage_group']
-        #rule_id = pool_ref['crush_ruleset']
-        #storage_group_ref = storage_group_get_by_rule_id(context,
-        #                                                 rule_id,
-        #                                                 session)
-        storage_class = storage_group['storage_class']
-        info = {'name': pool_ref['name'],
-                'type': storage_class,
-                'id': pool_ref['id']}
-        pool_name_list.append(pool_ref['name'])
-        pool_info_list.append(info)
-
-    for pool_id in pool_ids:
         ref = get_sp_usage_by_poolid_vsmappid(context, pool_id, vsmapp_id)
-
         kargs = {
             'pool_id': pool_id,
             'vsmapp_id': vsmapp_id,
+            'appnode_id': pool['appnode_id'],
+            'cinder_volume_host': pool['cinder_volume_host'],
             'attach_status': 'starting',
             'attach_at': timeutils.utcnow(),
             'deleted': 0
@@ -3410,15 +3398,7 @@ def sp_usage_create(context, pools, session=None):
             session.add(sp_usage_ref)
             sp_usage_ref.update(kargs)
 
-    return {
-        'pool_infos': pool_info_list,
-        'pool_names': pool_name_list,
-        'vsmapp_id': vsmapp_id,
-        'os_tenant_name': os_tenant_name,
-        'os_username': os_username,
-        'os_password': os_password,
-        'os_auth_url': os_auth_url
-    }
+    return pools
 
 @require_context
 def get_sp_usage_by_poolid_vsmappid(context, poolid, vsmapp_id):

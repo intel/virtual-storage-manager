@@ -15,27 +15,26 @@
 #    under the License.
 
 import logging
-import os
+import json
+
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse_lazy
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 
 from horizon import exceptions
 from horizon import tables
 from horizon import forms
-from horizon import views
 
 from vsm_dashboard.api import vsm as vsmapi
-from .tables import ListOpenstackIPTable
-from .forms import AddOpenstackIPForm
-from .forms import UpdateOpenstackIPForm
-from django.http import HttpResponse
+from .tables import ListOpenstackEndpointTable
+from .forms import AddOpenstackEndpointForm
+from .forms import UpdateOpenstackEndpointForm
 
-import json
 LOG = logging.getLogger(__name__)
 
 class IndexView(tables.DataTableView):
-    table_class = ListOpenstackIPTable
+    table_class = ListOpenstackEndpointTable
     template_name = 'vsm/openstackconnect/index.html'
 
     def get_data(self):
@@ -44,7 +43,7 @@ class IndexView(tables.DataTableView):
             _appnode_list = vsmapi.appnode_list(self.request)
         except:
             exceptions.handle(self.request,
-                   _('Unable to retrieve openstack ip list. '))
+                   _('Unable to retrieve openstack endpoint list. '))
 
         appnode_list = []
         for _appnode in _appnode_list:
@@ -63,33 +62,27 @@ class IndexView(tables.DataTableView):
         return appnode_list
 
 class CreateView(forms.ModalFormView):
-    form_class = AddOpenstackIPForm
+    form_class = AddOpenstackEndpointForm
     template_name = 'vsm/openstackconnect/create.html'
 
 class UpdateView(forms.ModalFormView):
-    form_class = UpdateOpenstackIPForm
+    form_class = UpdateOpenstackEndpointForm
     template_name = 'vsm/openstackconnect/update.html'
     success_url = reverse_lazy('horizon:vsm:openstackconnect:index')
 
     def get_object(self):
         LOG.info("CEPH_LOG UPDATE VIEW:%s"%self.kwargs)
-        #LOG.error(self.kwargs)
         if not hasattr(self, "_object"):
             try:
                 appnodes = vsmapi.appnode_list(self.request)
-                #LOG.error(appnodes)
                 for appnode in appnodes:
-                    #LOG.error("appnode.id")
-                    #LOG.error(type(appnode.id))
-                    #LOG.error(type(self.kwargs['appnode_id']))
                     if str(appnode.id) == self.kwargs['appnode_id']:
-                        #LOG.error("CEPH_LOG GET IT")
                         self._object = appnode
 
             except:
                 redirect = reverse("horizon:vsm:openstackconnect:index")
                 exceptions.handle(self.request,
-                                  _('Unable to Edit Access.'),
+                                  _('Unable to Edit OpenStack Access.'),
                                   redirect=redirect)
         return self._object
 
@@ -99,8 +92,7 @@ class UpdateView(forms.ModalFormView):
         return context
 
     def get_initial(self):
-        LOG.info("CEPH_LOG UPDATE VIEW GET INITIAL:%s"%self.kwargs)
-        #LOG.error(self.kwargs)
+        LOG.info("CEPH_LOG UPDATE VIEW GET INITIAL: %s" % self.kwargs)
         appnode = self.get_object()
         return {
             'id': appnode.id,
@@ -116,7 +108,7 @@ def create_action(request):
     # TODO deliver a cluster id in data
     data['cluster_id'] = 1
     try:
-        LOG.info("CEPH_LOG in ADD ip, %s" % str(data))
+        LOG.info("CEPH_LOG in ADD OpenStack Endpoint, %s" % str(data))
         os_tenant_name = data['os_tenant_name']
         os_username = data['os_username']
         os_password = data['os_password']
@@ -138,7 +130,7 @@ def create_action(request):
         msg = "Create Openstack Access Successfully!"
     except:
         status = "Failed"
-        msg = "Create Openstack Access  Failed!"
+        msg = "Create Openstack Access Failed!"
 
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
@@ -168,7 +160,7 @@ def update_action(request):
         msg = "Update Openstack Access Successfully!"
     except:
         status = "Failed"
-        msg = "Update Openstack Access  Failed!"
+        msg = "Update Openstack Access Failed!"
 
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)

@@ -38,11 +38,8 @@ source $TOPDIR/lib/package
 check_package
 
 #-----------------------------------
-# Cinder
+# Nova
 #-----------------------------------
-
-source $TOPDIR/lib/cinder-multiple
-configure_multiple_cinder
 
 source $TOPDIR/lib/nova
 source $TOPDIR/lib/libvirt

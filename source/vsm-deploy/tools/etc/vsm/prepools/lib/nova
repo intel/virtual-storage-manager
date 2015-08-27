@@ -44,7 +44,7 @@ function configure_nova() {
         _set_default_nova rbd_user=${AUTH_CINDER_USER#*.}
         _set_default_nova rbd_secret_uuid=${AUTH_CINDER_UUID}
 
-        libvirt_auth_key=`cat /etc/cinder/cinder.keyring  | grep key`
+        libvirt_auth_key=`cat $TOPDIR/files/cinder/cinder.keyring  | grep key`
         libvirt_auth_key=${libvirt_auth_key#*=}
         add_auth_user ${AUTH_CINDER_USER} $libvirt_auth_key ${AUTH_CINDER_UUID}
         if [[ `is_service_running openstack-nova-compute` -gt 0 ]]; then

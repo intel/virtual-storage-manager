@@ -17,7 +17,7 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{{ verbose_name }}{% endblock %}
+{% block title %}{% trans "Present RBD Pools" %}{% endblock %}
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=verbose_name %}

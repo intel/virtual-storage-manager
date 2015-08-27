@@ -48,6 +48,30 @@ function _cinder_rc() {
     source $file
 }
 
+function _tenant_name() {
+    local file=/etc/cinder/api-paste.ini
+    local name=`cat $file | grep admin_tenant_name | awk -F '=' '{print $2}'`
+    echo $name
+}
+
+function _keystone_ip() {
+    local file=/etc/cinder/api-paste.ini
+    local ip=`cat $file | grep auth_host | awk -F '=' '{print $2}'`
+    echo $ip
+}
+
+function _password() {
+    local file=/etc/cinder/api-paste.ini
+    local password=`cat $file | grep admin_password | awk -F '=' '{print $2}'`
+    echo $password
+}
+
+function _admin_user() {
+    local file=/etc/cinder/api-paste.ini
+    local user=`cat $file | grep admin_user | awk -F '=' '{print $2}'`
+    echo $user
+}
+
 function __is_type_exists() {
     local types=$1
     local cnt=`cinder type-list | awk '{print $4}' | grep "^$types$" | wc -l`
@@ -141,9 +165,9 @@ function configure_multiple_cinder() {
     local ceph_file=/etc/cinder/ceph.conf
     local cnt=0
     local old_str=""
-    _del_other_multiple_section
+#    _del_other_multiple_section
 
-    _cinder_rc
+#    _cinder_rc
     # If we find the cinder.conf, we change the configuration file.
     # Otherwise, skip.
     # NOTE: If do not find cinder.conf file, do not report error.
@@ -159,6 +183,10 @@ function configure_multiple_cinder() {
         _del_default_cinder rbd_user=${AUTH_CINDER_USER#*.}
         _del_default_cinder rbd_secret_uuid=${AUTH_CINDER_UUID}
 
+        if [[ `cat $cinder_file|grep -c "enabled_backends = *"` -gt 0 ]]; then
+            enabled_backends_value=`crudini --get /etc/cinder/cinder.conf DEFAULT enabled_backends`
+            BACKEND_LIST=${enabled_backends_value},${BACKEND_LIST}
+        fi
         _set_multiple_default_cinder enabled_backends=${BACKEND_LIST}
         _set_multiple_default_cinder scheduler_driver=cinder.scheduler.filter_scheduler.FilterScheduler
 
@@ -166,9 +194,9 @@ function configure_multiple_cinder() {
         for n in `_backend_list`; do
            let ++cnt
            _set_backend_cinder $n
-           types=`_get_type $cnt`
-           _add_type $types
-           _add_type_key $types $n
+#           types=`_get_type $cnt`
+#           _add_type $types
+#           _add_type_key $types $n
         done
 
         chown -R cinder:cinder /etc/cinder

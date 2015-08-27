@@ -15,20 +15,18 @@
 # specific language governing permissions and limitations
 # under the License.
 
-
-function setup_multiple() {
-    local tenant_name=$1
-    local username=$2
-    local password=$3
-    local vsmapp_ip=$4
+function setup_cinder() {
+    local app_type=$1
+    local uuid=$2
+    local vsmapp_ip=$3
     local pool_iter=0
 
     source $TOPDIR/server/ceph
     source $TOPDIR/lib/package
-    source $TOPDIR/server/cinder-multiple
+    source $TOPDIR/server/cinder
     source $TOPDIR/server/tarfile
 
-    AUTH_CINDER_UUID=`uuidgen`
+    AUTH_CINDER_UUID=$uuid
     AUTH_CINDER_USER=client.${AUTH_CINDER_UUID}
     AUTH_CINDER_POOL=$pool_name
 
@@ -38,7 +36,7 @@ function setup_multiple() {
 
     BACKEND_LIST=""
     for n in $@; do
-        if [[ $pool_iter -lt 4 ]]; then
+        if [[ $pool_iter -lt 3 ]]; then
             let ++pool_iter
             continue
         fi
@@ -64,7 +62,7 @@ function setup_multiple() {
 
     echo $BACKEND_LIST
     echo $TYPE_LIST
-    create_multiple_cinder
+    create_cinder_auth
 
-    gen_tar_file $tenant_name $username $password $vsmapp_ip $TOPDIR/lib/multiple
+    gen_tar_file $app_type $vsmapp_ip $TOPDIR/lib/config-cinder
 }

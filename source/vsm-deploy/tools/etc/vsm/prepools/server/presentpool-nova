@@ -15,35 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 
+function setup_nova() {
+    local app_type=$1
+    local uuid=$2
+    local vsmapp_ip=$3
 
-function setup_single() {
-    local tenant_name=$1
-    local username=$2
-    local password=$3
-    vsmapp_ip=$4
-    pool_name=$5
+    source $TOPDIR/server/tarfile
 
-    source $TOPDIR/server/ceph
-
-    #-----------------------------------
-    # Pre-checking
-    #-----------------------------------
-
-    source $TOPDIR/lib/package
-
-    #-----------------------------------
-    # Cinder
-    #-----------------------------------
-
-    source $TOPDIR/server/cinder-single
-    AUTH_CINDER_UUID=`uuidgen`
+    AUTH_CINDER_UUID=$uuid
     AUTH_CINDER_USER=client.${AUTH_CINDER_UUID}
     AUTH_CINDER_POOL=$pool_name
-    create_cinder
 
-    #-----------------------------------
-    # Gen client code
-    #-----------------------------------
-    source $TOPDIR/server/tarfile
-    gen_tar_file $vsmapp_ip $TOPDIR/lib/single
+    gen_tar_file $app_type $vsmapp_ip $TOPDIR/lib/config-nova
 }

@@ -14,33 +14,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from django.core import validators
-from django.core.urlresolvers import reverse
+import logging
+
 from django.utils.translation import ugettext_lazy as _
 
-from horizon import exceptions
 from horizon import forms
-from horizon import messages
-from horizon.utils.validators import validate_port_range
-# from horizon.utils import fields
-#from horizon.utils import validators
 
-import logging
 LOG = logging.getLogger(__name__)
 
-from vsm_dashboard.api import vsm as vsm_api
-
-class AddOpenstackIPForm(forms.SelfHandlingForm):
+class AddOpenstackEndpointForm(forms.SelfHandlingForm):
 
     failure_url = 'horizon:vsm:openstackconnect:index'
-    # ip = forms.CharField(label=_("IP"),
-    #                         max_length=255,
-    #                         min_length=1,
-    #                         error_messages={
-    #                         'required': _('This field is required.'),
-    #                         'invalid': _("The string may only contain"
-    #                                      " IP.")},
-    #                         validators=[validators.validate_ipv46_address,])
 
     os_tenant_name = forms.CharField(
         label = _("Tenant Name"),
@@ -79,10 +63,7 @@ class AddOpenstackIPForm(forms.SelfHandlingForm):
         label = _("Region Name"),
         max_length = 255,
         min_length = 0,
-        required = False,
-        error_messages = {
-            'required': _('This field is not required.')
-        }
+        required = False
     )
 
     def handle(self, request, data):
@@ -124,17 +105,8 @@ class AddOpenstackIPForm(forms.SelfHandlingForm):
         #                       _('Unable to create appnode.'),
         #                       redirect=redirect)
 
-class UpdateOpenstackIPForm(forms.SelfHandlingForm):
+class UpdateOpenstackEndpointForm(forms.SelfHandlingForm):
     id = forms.CharField(label=_("ID"), widget=forms.HiddenInput)
-
-    # ip = forms.CharField(label=_("IP"),
-    #                         max_length=255,
-    #                         min_length=1,
-    #                         error_messages={
-    #                         'required': _('This field is required.'),
-    #                         'invalid': _("The string may only contain"
-    #                                      " IP.")},
-    #                         validators=[validators.validate_ipv46_address,])
 
     os_tenant_name = forms.CharField(
         label = _("Tenant Name"),
@@ -173,10 +145,7 @@ class UpdateOpenstackIPForm(forms.SelfHandlingForm):
         label = _("Region Name"),
         max_length = 255,
         min_length = 0,
-        required = False,
-        error_messages = {
-            'required': _('This field is not required.')
-        }
+        required = False
     )
 
     def handle(self, request, data):

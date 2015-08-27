@@ -68,7 +68,7 @@ function get_os_version() {
             if [[ -n "`grep \"$r\" /etc/redhat-release`" ]]; then
                 ver=`sed -e 's/^.* \(.*\) (\(.*\)).*$/\1\|\2/' /etc/redhat-release`
                 os_CODENAME=${ver#*|}
-                os_RELEASE=${ver%|*}
+                os_RELEASE=${ver%|\*}
                 os_UPDATE=${os_RELEASE##*.}
                 os_RELEASE=${os_RELEASE%.*}
                 break
@@ -101,14 +101,24 @@ function get_distribution() {
 
 function check_package() {
     local os_ver=`get_os_version`
-    local cnt=`echo $os_ver | grep -i centos | wc -l`
-    if [[ $cnt -eq 0 ]];then
-        echo "ERROR: can not support ${os_ver}, Just CentOS."
-        return
+    local is_centos=`echo $os_ver | grep -i centos | wc -l`
+    local is_ubuntu=`echo $os_ver | grep -i ubuntu | wc -l`
+#    if [[ $cnt -eq 0 ]];then
+#        echo "ERROR: can not support ${os_ver}, Just CentOS."
+#        return
+#    fi
+
+    if [[ $is_centos -gt 0 ]]; then
+        if [[ `rpm -qa | grep ceph | wc -l` -eq 0 ]]; then
+            echo "ERROR: can not find ceph packages. Have to install Ceph."
+            return
+        fi
     fi
 
-    if [[ `rpm -qa | grep ceph | wc -l` -eq 0 ]]; then
-        echo "ERROR: can not find ceph packages. Have to install Ceph."
-        return
+    if [[ $is_ubuntu -gt 0 ]]; then
+        if [[ `dpkg -s ceph-common | grep "install ok installed" | wc -l` -eq 0 ]]; then
+            echo "ERROR: can not find ceph-common packages. Have to install ceph-common."
+            return
+        fi
     fi
 }

@@ -41,6 +41,7 @@ class CreatePool(forms.SelfHandlingForm):
                                          " ASCII characters and numbers.")},
                             validators=[validators.validate_slug])
     storage_group = forms.ChoiceField(label=_('Storage Group'))
+    openstack_region = forms.ChoiceField(label=_('OpenStack/Region'))
     cinder_volume_host = forms.ChoiceField(label=_('Cinder Volume Host'))
     replication_factor = forms.IntegerField(label=_("Replication Factor"),
                                         min_value=1,

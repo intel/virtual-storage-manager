@@ -145,6 +145,8 @@ class ListPresentPoolTable(tables.DataTable):
     storageType = tables.Column("storageGroup", verbose_name=_("Storage Group"))
     pgNum = tables.Column("pgNum", verbose_name=_("Placement Group Count"))
     size = tables.Column("size", verbose_name=_("Replication Factor"))
+    openstack_region = tables.Column("openstack_region", verbose_name=_("OpenStack/Region"),
+                                     classes=("openstack_region",))
     cinder_volume_host = tables.Column("cinder_volume_host", verbose_name=_("Cinder Volume Host"),
         classes=("zone",))
     status = tables.Column("status", verbose_name=_("Status"))
