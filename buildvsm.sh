@@ -131,6 +131,7 @@ function create_release() {
     cp CHANGELOG.pdf release/$BUILD
     cp get_pass.sh release/$BUILD
     cp installrc release/$BUILD
+    cp prov_node.sh release/$BUILD
 #    cp -r manifest release/$BUILD
     mkdir -p release/$BUILD/manifest
     cp source/vsm/etc/vsm/cluster.manifest release/$BUILD/manifest/cluster.manifest.sample
