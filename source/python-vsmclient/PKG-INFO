@@ -1,24 +1,24 @@
 Metadata-Version: 2.0.0-171
 Name: python-vsmclient
 Version: 2.0.0-171
-Summary: Client library for OpenStack Vsm API.
+Summary: Client library for Intel VSM API.
 Home-page: https://github.com/openstack/python-vsmclient
-Author: OpenStack Contributors
-Author-email: openstack-dev@lists.openstack.org
+Author: VSM Contributors
+Author-email: ml-node+s33411n1h81@n7.nabble.com
 License: Apache License, Version 2.0
-Description: Python bindings to the OpenStack Vsm API
+Description: Python bindings to the Intel VSM API
         ===========================================
         
-        This is a client for the OpenStack Vsm API. There's a Python API (the
+        This is a client for the Vsm API. There's a Python API (the
         ``vsmclient`` module), and a command-line script (``vsm``). Each
-        implements 100% of the OpenStack Vsm API.
+        implements 100% of the  Vsm API.
         
-        See the `OpenStack CLI guide`_ for information on how to use the ``vsm``
+        See the ` CLI guide`_ for information on how to use the ``vsm``
         command-line tool. You may also want to look at the
-        `OpenStack API documentation`_.
+        ` API documentation`_.
         
-        .. _OpenStack CLI Guide: http://docs.openstack.org/cli/quick-start/content/
-        .. _OpenStack API documentation: http://docs.openstack.org/api/
+        .. _ CLI Guide: http://docs.openstack.org/cli/quick-start/content/
+        .. _ API documentation: http://docs.openstack.org/api/
         
         The project is hosted on `Launchpad`_, where bugs can be filed. The code is
         hosted on `Github`_. Patches must be submitted using `Gerrit`_, *not* Github
@@ -30,7 +30,7 @@ Description: Python bindings to the OpenStack Vsm API
         
         This code a fork of `Jacobian's python-cloudservers`__ If you need API support
         for the Rackspace API solely or the BSD license, you should use that repository.
-        python-vsmclient is licensed under the Apache License like the rest of OpenStack.
+        python-vsmclient is licensed under the Apache License like the rest of .
         
         __ http://github.com/jacobian/python-cloudservers
         
@@ -41,9 +41,9 @@ Description: Python bindings to the OpenStack Vsm API
         ----------------
         
         Installing this package gets you a shell command, ``vsm``, that you
-        can use to interact with any Rackspace compatible API (including OpenStack).
+        can use to interact with any Rackspace compatible API (including ).
         
-        You'll need to provide your OpenStack username and password. You can do this
+        You'll need to provide your  username and password. You can do this
         with the ``--os-username``, ``--os-password`` and  ``--os-tenant-name``
         params, but it's easier to just set them as environment variables::
         
@@ -81,7 +81,7 @@ Description: Python bindings to the OpenStack Vsm API
                           [--os-cacert <ca-certificate>] [--retries <retries>]
                           <subcommand> ...
         
-            Command-line interface to the OpenStack Vsm API.
+            Command-line interface to the  Vsm API.
         
             Positional arguments:
               <subcommand>
@@ -160,7 +160,7 @@ Description: Python bindings to the OpenStack Vsm API
 Platform: UNKNOWN
 Classifier: Development Status :: 5 - Production/Stable
 Classifier: Environment :: Console
-Classifier: Environment :: OpenStack
+Classifier: Environment :: 
 Classifier: Intended Audience :: Developers
 Classifier: Intended Audience :: Information Technology
 Classifier: License :: OSI Approved :: Apache Software License
