@@ -345,6 +345,8 @@ function install_controller() {
         dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
         cd $TOPDIR
     fi
+    
+    generate_token
 }
 
 #-------------------------------------------------------------------------------
@@ -417,10 +419,13 @@ function install_setup_diamond() {
 
 function setup_remote_agent() {
 #    _make_me_super $USER $1
+    # update /etc/hosts
+    #update_hosts $1 
     $SSH $USER@$1 "$SUDO rm -rf /etc/manifest/server.manifest"
     #$SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
     #old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
     #$SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    TOKEN=`cat ./.token`
     $SUDO sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
     $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/server.manifest /etc/manifest"
@@ -446,6 +451,24 @@ function install_agent() {
     $SSH $USER@$1 "if [[ -f /etc/apt/sources.list.bak ]]; then $SUDO mv /etc/apt/sources.list.bak /etc/apt/sources.list; fi"
 }
 
+function generate_token() {
+    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST" |tr -d '\r'`
+    echo -n $TOKEN >./.token
+}
+
+function update_hosts() {
+    cp /etc/hosts ./.hosts
+    hostname=`$SSH $USER@$1 "hostname" |tr -d '\r'`
+    echo "$1    $hostname" >>./.hosts
+    cp ./.hosts /etc/hosts
+}
+
+function sync_hosts() {
+    $SCP /etc/hosts $USER@$1:~/.hosts
+    $SSH $USER@$1 "$SUDO mv ~/.hosts /etc/hosts"
+}
+
 #-------------------------------------------------------------------------------
 #            start to install
 #-------------------------------------------------------------------------------
@@ -454,12 +477,14 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
-    if [[ $IS_CONTROLLER -eq 0 ]]; then
-        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
-$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
-    else
-        TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
-    fi
+#    if [[ $IS_CONTROLLER -eq 0 ]]; then
+#        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+# $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
+#	echo -n $TOKEN >./.token
+#    else
+#        TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
+#	echo -n $TOKEN >./.token
+#    fi
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
     done
@@ -471,16 +496,30 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
-        if [[ $IS_CONTROLLER -eq 0 ]]; then
-            TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
-$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
-        else
-            TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
-        fi
+#        if [[ $IS_CONTROLLER -eq 0 ]]; then
+#            TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+# $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
+#	    echo -n $TOKEN >./.token
+#        else
+#            TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
+#	    echo -n $TOKEN >./.token
+#        fi
+
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname
         done
+	
+	# sync up /etc/hosts
+	if [[ $IS_CONTROLLER_INSTALL == False ]]; then
+       	    echo "sync /etc/hosts to controller"
+	    #sync_hosts $CONTROLLER_ADDRESS 
+	fi
+
+	for ip_or_hostname in $AGENT_IP_LIST; do
+	    echo "sync /etc/hosts to agents"
+	    #sync_hosts $ip_or_hostname
+	done
     fi
 fi
 
