@@ -45,13 +45,13 @@ weights = [
 
 setuptools.setup(
     name=project,
-    version=common_setup.get_version(project, '2013.1.1'),
-    description='Hardware Manage Service',
-    author='OpenStack',
-    author_email='vsm@lists.launchpad.net',
-    url='http://www.openstack.org/',
+    version=common_setup.get_version(project, '2.0.0'),
+    description='Virtual Storage Manager',
+    author='VSM Contributors',
+    author_email='ml-node+s33411n1h81@n7.nabble.com',
+    url='https://github.com/01org/virtual-storage-manager/',
     classifiers=[
-        'Environment :: OpenStack',
+        'Environment :: OpenStack/Ceph',
         'Intended Audience :: Information Technology',
         'Intended Audience :: System Administrators',
         'License :: OSI Approved :: Apache Software License',
