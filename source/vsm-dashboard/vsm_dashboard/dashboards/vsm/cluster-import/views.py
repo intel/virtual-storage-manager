@@ -26,8 +26,7 @@ from horizon import views
 
 from vsm_dashboard.api import vsm as vsmapi
 from .tables import ListServerTable
-from .tables import CreateClusterTable
-#from .form import ShouanForm
+from .tables import ImportClusterTable
 from django.http import HttpResponse
 
 
@@ -103,8 +102,8 @@ class IndexView(tables.DataTableView):
         return servers
 
 class ImportClusterView(ModalEditTableMixin, tables.DataTableView):
-    table_class = CreateClusterTable
-    template_name = 'vsm/flocking/createcluster.html'
+    table_class = ImportClusterTable
+    template_name = 'vsm/flocking/importcluster.html'
     #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
 
     def get_data(self):

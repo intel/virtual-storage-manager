@@ -24,7 +24,7 @@ from vsm_dashboard import api
 
 from horizon import exceptions
 
-from .test_data import json as test_json
+#from .test_data import json as test_json
 
 def correlate_tenants(request, instances):
     # Gather our tenants to correlate against IDs
