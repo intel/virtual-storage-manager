@@ -26,7 +26,7 @@ class Dashboard(horizon.PanelGroup):
 class ClusterMgmt(horizon.PanelGroup):
     slug = "clustermgmt"
     name = _("Cluster Management")
-    panels = ('clustermgmt', 'cephupgrade', 'poolsmanagement', 'storage-group-management')
+    panels = ('clustermgmt', 'cluster-import', 'cephupgrade', 'poolsmanagement', 'storage-group-management')
     #panels = ('clustermgmt', 'poolsmanagement')
 
 class ClusterMonitor(horizon.PanelGroup):
@@ -39,7 +39,7 @@ class ServerMgmt(horizon.PanelGroup):
     slug = "servermgmt"
     name = _("Server Management")
     panels = ('storageservermgmt', 'devices-management',)
-
+u
 class OpenstackMgmt(horizon.PanelGroup):
     slug = "openstackmgmt"
     name = _("OpenStack Integration")
