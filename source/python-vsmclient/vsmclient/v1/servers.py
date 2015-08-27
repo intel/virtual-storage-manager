@@ -162,7 +162,7 @@ class ServerManager(base.ManagerWithFind):
         """
         url = "/servers/ceph_upgrade"
         ret = self.api.client.post(url, body=body)
-        print 'vsclient ---ceph upgrade==',ret
+        print 'vsmclient ---ceph upgrade==',ret
         return ret
 
     def initialize_connection(self, vsm, connector):
