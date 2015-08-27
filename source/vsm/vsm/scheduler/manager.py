@@ -957,8 +957,10 @@ class SchedulerManager(manager.Manager):
         pre_ceph_ver = server_list[0]['ceph_ver']
         server_list_new = db.init_node_get_all(context)
         new_ceph_ver = server_list_new[0]['ceph_ver']
-        if new_ceph_ver:
+        if new_ceph_ver != pre_ceph_ver:
             message = "ceph upgrade from %s to %s success"%(pre_ceph_ver,new_ceph_ver)
+        else:
+            message = "ceph upgrade unsuccessful.Please make sure that the network is reachable.Please make sure the storage nodes can get apt-key by the commond 'wget'."
         return {"message":message}
 
     @utils.single_lock
