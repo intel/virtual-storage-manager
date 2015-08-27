@@ -1,4 +1,4 @@
-include AUTHORS
+include ../../AUTHORS
 include ChangeLog
 exclude .gitignore
 exclude .gitreview
