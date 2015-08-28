@@ -67,13 +67,14 @@ class ManifestChecker(object):
             self._storage_class_list = self._rec_data['storage_class']
             _write_etc_hosts(hosts_content)
             print json.dumps(self._rec_data, sort_keys=True, indent=2)
-        except:
+        except StandardError, e:
             info_list = ['Can not connect to controller ip = %s' % \
                          self._server_host,
                          'Possible reasons: ',
                          '(i) Maybe your auth_keys is error! please make sure the auth_keys is consistent '
                          'with the output from agent_toekn command executed on controller node.',
-                         '(ii) Check if you can ping this host']
+                         '(ii) Check if you can ping this host',
+                         e]
             error(info_list)
 
         self._secs_list = self._storage_class_list + ['vsm_controller_ip', 'role', 'auth_key', 'zone']
