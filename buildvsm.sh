@@ -59,8 +59,8 @@ TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 #DATE=`date "+%Y%m%d"`
 
-sed -i "s,Version: *.*,Version: $VERSION,g" $TOPDIR/source/python-vsmclient/PKG-INFO
-sed -i "s,Version: *.*,Version: $VERSION,g" $TOPDIR/source/vsm/PKG-INFO
+sed -i "s,Version: *.*,Version: $BUILD,g" $TOPDIR/source/python-vsmclient/PKG-INFO
+sed -i "s,Version: *.*,Version: $BUILD,g" $TOPDIR/source/vsm/PKG-INFO
 
 is_lsb_release=0
 lsb_release -a >/dev/null 2>&1 && is_lsb_release=1
@@ -131,6 +131,7 @@ function create_release() {
     cp CHANGELOG.pdf release/$BUILD
     cp get_pass.sh release/$BUILD
     cp installrc release/$BUILD
+    cp prov_node.sh release/$BUILD
 #    cp -r manifest release/$BUILD
     mkdir -p release/$BUILD/manifest
     cp source/vsm/etc/vsm/cluster.manifest release/$BUILD/manifest/cluster.manifest.sample

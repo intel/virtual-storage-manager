@@ -72,7 +72,7 @@ class ManifestChecker(object):
                          self._server_host,
                          'Possible reasons: ',
                          '(i) Maybe your auth_keys is error! please make sure the auth_keys is consistent '
-                         'with the output from agent_toekn command executed on controller node.',
+                         'with the output from agent_token command executed on controller node.',
                          '(ii) Check if you can ping this host',
                          e]
             error(info_list)

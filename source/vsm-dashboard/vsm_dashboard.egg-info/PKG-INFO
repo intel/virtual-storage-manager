@@ -1,11 +1,11 @@
 Metadata-Version: 1.0
 Name: vsm-dashboard
-Version: 20.14.2
-Summary: The OpenStack Dashboard.
-Home-page: https://github.com/openstack/horizon/
-Author: OpenStack
-Author-email: horizon@lists.launchpad.net
-License: Apache 2.0
+Version: 2.0.0
+Summary: The VSM Dashboard.
+Home-page: https://github.com/01org/virtual-storage-manager/
+Author: VSM Contributors
+Author-email: ml-node+s33411n1h81@n7.nabble.com
+License: Apache License 2.0
 Description: ====================================
         Horizon Customization Demo Dashboard
         ====================================
