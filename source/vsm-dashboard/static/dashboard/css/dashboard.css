@@ -93,7 +93,7 @@
 }
 
 #divOSDContent{
-    height: 230px;
+    height: 290px;
 }
 
 
@@ -102,6 +102,19 @@
     font-size: 14px;
     font-weight: bold;
     text-align: center;
+}
+
+#tDeviceCapacity{
+    margin-left: 10px;
+}
+
+#trDeviceCapacity>td{
+    width: 80px;
+    height: 30px;
+    /*border: 1px solid #ccc;*/
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 
@@ -114,7 +127,7 @@
 }
 
 #divMonitorContent{
-    height: 230px;
+    height: 290px;
 }
 
 #divMonitorRect{
@@ -136,7 +149,7 @@
 }
 
 #divMDSContent{
-    height: 230px;
+    height: 290px;
 }
 
 #divMDSRect{
@@ -163,7 +176,7 @@
 
 #divPGRect{
     width:90%;
-    height:180px;
+    height:240px;
 }
 
 /**
@@ -233,8 +246,6 @@
     background-color: #c9302c;
     border-color: #ac2925;
 }
-
-
 
 
 

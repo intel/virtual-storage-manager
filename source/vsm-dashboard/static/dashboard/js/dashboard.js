@@ -172,13 +172,16 @@ function loadOSD(){
 	data: null,
 	dataType:"json",
 	success: function(data){
-	    //console.log(data);
+	    // console.log(data);
 	    $("#lblOSDEpoch")[0].innerHTML = data.epoch;
 	    $("#lblOSDUpdate")[0].innerHTML = data.update;
 	    $("#divOSD_INUP")[0].innerHTML = data.in_up;
 	    $("#divOSD_INDOWN")[0].innerHTML = data.in_down;
 	    $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
 	    $("#divOSD_OUTDOWN")[0].innerHTML = data.out_down;
+        $("#lblOSDCapacityAvailable")[0].innerHTML = data.capacity_available_count;
+        $("#lblOSDCapacityNearFull")[0].innerHTML = data.capacity_near_full_count;
+        $("#lblOSDCapacityFull")[0].innerHTML = data.capacity_full_count;
 
         //data.in_down = 0;
         //data.out_up = 1;
