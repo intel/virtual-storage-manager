@@ -1,6 +1,6 @@
-Metadata-Version: 2.0.0-171
+Metadata-Version: 2.0.0-174
 Name: python-vsmclient
-Version: 2.0.0-171
+Version: 2.0.0-174
 Summary: Client library for Intel VSM API.
 Home-page: https://github.com/openstack/python-vsmclient
 Author: VSM Contributors
