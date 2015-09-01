@@ -65,6 +65,8 @@ Requires:    python-paramiko
 Requires:    python-babel
 Requires:    python-iso8601
 Requires:    python-keystoneclient
+Requires:    python-novaclient
+Requires:    python-cinderclient
 Requires:    python-oslo-config
 Requires:    numpy
 Requires:    ceph

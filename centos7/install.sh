@@ -99,6 +99,7 @@ TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 HOSTNAME=`hostname`
 #HOSTIP=`hostname -I|sed s/[[:space:]]//g`
 HOSTIP=`hostname -I`
+PATH_N="/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin"
 
 source $TOPDIR/installrc
 
@@ -289,21 +290,22 @@ function setup_remote_controller() {
     $SCP $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest $USER@$CONTROLLER_ADDRESS:/tmp
     $SSH $USER@$CONTROLLER_ADDRESS "$SUDO mv /tmp/cluster.manifest /etc/manifest"
     $SSH $USER@$CONTROLLER_ADDRESS "$SUDO chown root:vsm /etc/manifest/cluster.manifest; $SUDO chmod 755 /etc/manifest/cluster.manifest"
-    is_cluster_manifest_error=`$SSH $USER@$CONTROLLER_ADDRESS "cluster_manifest|grep error|wc -l"`
+    is_cluster_manifest_error=`$SSH $USER@$CONTROLLER_ADDRESS "env PATH=$PATH:$PATH_N cluster_manifest|grep error|wc -l"`
     if [ $is_cluster_manifest_error -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
         if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
-            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN"
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH:$PATH_N vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN"
             $SSH $USER@$CONTROLLER_ADDRESS "if [[ `$SUDO service openstack-keystone status|grep running|wc -l` == 1 ]]; then $SUDO service openstack-keystone stop; fi"
         else
-            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH vsm-controller"
+            $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH:$PATH_N vsm-controller"
         fi
     fi
 }
 
 function install_controller() {
+#    _make_me_super $USER $CONTROLLER_ADDRESS
     check_manifest $CONTROLLER_ADDRESS
 
     if [[ $IS_CONTROLLER -eq 0 ]]; then
@@ -311,7 +313,7 @@ function install_controller() {
         set_iptables_and_selinux $CONTROLLER_ADDRESS
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO sed -i \"s/keepcache=0/keepcache=1/g\" /etc/yum.conf"
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient"
-        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH preinstall controller"
+        $SSH $USER@$CONTROLLER_ADDRESS "$SUDO env PATH=$PATH:$PATH_N preinstall controller"
         setup_remote_controller
         $SSH $USER@CONTROLLER_ADDRESS "$SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
         for i in `ls`; do if [[ -d $i/packages ]]; then $SUDO cp $i/packages/*.rpm /tmp/vsm-dep-repo >/dev/null 2>&1; fi; done"
@@ -328,20 +330,20 @@ function install_controller() {
         if [[ `$SUDO getenforce` != "Disabled" ]]; then $SUDO setenforce 0; fi
         $SUDO sed -i "s/keepcache=0/keepcache=1/g" /etc/yum.conf
         $SUDO yum install -y vsm vsm-deploy vsm-dashboard python-vsmclient
-        $SUDO env PATH=$PATH preinstall controller
+        $SUDO env PATH=$PATH:$PATH_N preinstall controller
         $SUDO rm -rf /etc/manifest/cluster.manifest
         $SUDO cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
         $SUDO chown root:vsm /etc/manifest/cluster.manifest
         $SUDO chmod 755 /etc/manifest/cluster.manifest
-        if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
+        if [ `env PATH=$PATH:$PATH_N cluster_manifest|grep error|wc -l` -gt 0 ]; then
             echo "please check the cluster.manifest, then try again"
             exit 1
         else
             if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
-                $SUDO env PATH=$PATH vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN
+                $SUDO env PATH=$PATH:$PATH_N vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN
                 if [[ `$SUDO service openstack-keystone status|grep running|wc -l` == 1 ]]; then $SUDO service openstack-keystone stop; fi
             else
-                $SUDO env PATH=$PATH vsm-controller
+                $SUDO env PATH=$PATH:$PATH_N vsm-controller
             fi
         fi
         $SUDO mkdir -p /tmp/vsm-dep-repo; cd /var/cache/yum/x86_64/7;\
@@ -356,6 +358,8 @@ function install_controller() {
         $SUDO createrepo vsm-dep-repo
         cd $TOPDIR
     fi
+
+    generate_token
 }
 
 #-------------------------------------------------------------------------------
@@ -381,10 +385,15 @@ function install_setup_diamond() {
     kill_diamond $1
     $SSH $USER@$1 "$SUDO yum install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
-    source $DEPLOYRC_FILE
-#    VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
-#    HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
-#    DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
+    if [[ $IS_CONTROLLER -eq 0 ]]; then
+        $SCP $USER@$CONTROLLER_ADDRESS:$DEPLOYRC_FILE /tmp
+        source /tmp/deployrc
+    else
+        source $DEPLOYRC_FILE
+    fi
+    #VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
+    #HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
+    #DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
     PY_VER=`python -V 2>&1 |cut -d' ' -f2 |cut -d. -f1,2`
     echo "Python version: $PY_VER"
     VSMMYSQL_FILE_PATH="/usr/lib/python$PY_VER/site-packages/vsm/diamond/handlers/vsmmysql.py"
@@ -422,19 +431,23 @@ function install_setup_diamond() {
 }
 
 function setup_remote_agent() {
+#    _make_me_super $USER $1
+    # update /etc/hosts
+    #update_hosts $1
     $SSH $USER@$1 "$SUDO rm -rf /etc/manifest/server.manifest"
     #$SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
     #old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
     #$SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    TOKEN=`cat ./.token`
     $SUDO sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
     $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/server.manifest /etc/manifest"
     $SSH $USER@$1 "$SUDO chown root:vsm /etc/manifest/server.manifest; $SUDO chmod 755 /etc/manifest/server.manifest"
-    is_server_manifest_error=`$SSH $USER@$1 "server_manifest|grep ERROR|wc -l"`
+    is_server_manifest_error=`$SSH $USER@$1 "env PATH=$PATH:$PATH_N server_manifest|grep ERROR|wc -l"`
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
     else
-        $SSH $USER@$1 "$SUDO env PATH=$PATH vsm-node"
+        $SSH $USER@$1 "$SUDO env PATH=$PATH:$PATH_N vsm-node"
     fi
 }
 
@@ -444,11 +457,29 @@ function install_agent() {
     set_remote_repo $1
     set_iptables_and_selinux $1
     $SSH $USER@$1 "$SUDO yum install -y vsm vsm-deploy"
-    $SSH $USER@$1 "$SUDO env PATH=$PATH preinstall agent"
+    $SSH $USER@$1 "$SUDO env PATH=$PATH:$PATH_N preinstall agent"
 
     setup_remote_agent $1
     install_setup_diamond $1
     $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ -d /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; $SUDO rm -rf /tmp/backup; fi"
+}
+
+function generate_token() {
+    TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST" |tr -d '\r'`
+    echo -n $TOKEN >./.token
+}
+
+function update_hosts() {
+    cp /etc/hosts ./.hosts
+    hostname=`$SSH $USER@$1 "hostname" |tr -d '\r'`
+    echo "$1    $hostname" >>./.hosts
+    cp ./.hosts /etc/hosts
+}
+
+function sync_hosts() {
+    $SCP /etc/hosts $USER@$1:~/.hosts
+    $SSH $USER@$1 "$SUDO mv ~/.hosts /etc/hosts"
 }
 
 #-------------------------------------------------------------------------------
@@ -459,12 +490,14 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
-    if [[ $IS_CONTROLLER -eq 0 ]]; then
-        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
-$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
-    else
-        TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
-    fi
+#    if [[ $IS_CONTROLLER -eq 0 ]]; then
+#        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+# $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
+#	echo -n $TOKEN >./.token
+#    else
+#        TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
+#	echo -n $TOKEN >./.token
+#    fi
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
     done
@@ -476,16 +509,30 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
-        if [[ $IS_CONTROLLER -eq 0 ]]; then
-            TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
-$OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
-        else
-            TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
-        fi
+#        if [[ $IS_CONTROLLER -eq 0 ]]; then
+#            TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
+# $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
+#	    echo -n $TOKEN >./.token
+#        else
+#            TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
+#	    echo -n $TOKEN >./.token
+#        fi
+
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname
         done
+
+	# sync up /etc/hosts
+	if [[ $IS_CONTROLLER_INSTALL == False ]]; then
+       	    echo "sync /etc/hosts to controller"
+	    #sync_hosts $CONTROLLER_ADDRESS
+	fi
+
+	for ip_or_hostname in $AGENT_IP_LIST; do
+	    echo "sync /etc/hosts to agents"
+	    #sync_hosts $ip_or_hostname
+	done
     fi
 fi
 
