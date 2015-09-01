@@ -51,6 +51,8 @@ https_proxy = $PROXY
 http_proxy = $PROXY
 ftp_proxy = $PROXY
     " > ~/.wgetrc
+    echo "Acquire::http::Proxy \"$PROXY\" ;" >> /etc/apt/apt.conf
+    rm -rf /opt/ceph_upgrade
     mkdir -p  /opt/ceph_upgrade
     mkdir -p /opt/ceph_upgrade/ceph_repo
     cd /opt/ceph_upgrade
@@ -72,7 +74,9 @@ ftp_proxy = $PROXY
     exp_ceph-mds_upgrade >>$log_dir ;
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
     cp /var/cache/apt/archives/*.deb /opt/ceph_upgrade/ceph_repo/
-    dpkg-scanpackages /opt/ceph_upgrade/ceph_repo/ | gzip > /opt/ceph_upgrade/ceph_repo/Packages.gz
+    cd /opt/ceph_upgrade/
+    dpkg-scanpackages ceph_repo | gzip > ceph_repo/Packages.gz
+    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do ssh $node "rm -rf /opt/ceph_repo";done
     for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /opt/ceph_upgrade/ceph_repo $node:/opt/;done
 }
 

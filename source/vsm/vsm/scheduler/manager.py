@@ -935,6 +935,7 @@ class SchedulerManager(manager.Manager):
         server_list = body.get('servers')
         if not server_list:
             server_list = db.init_node_get_all(context)
+        pre_ceph_ver = server_list[0]['ceph_ver']
         hosts = [server['host'] for server in server_list]
         hosts = ','.join(hosts)
         key_url = body['key_url']
@@ -974,13 +975,12 @@ class SchedulerManager(manager.Manager):
                 thd = utils.MultiThread(__ceph_upgrade,context=context, node_id=item['id'], host=item['host'], key_url=key_url,pkg_url=pkg_url,restart=restart)
                 thd_list.append(thd)
             utils.start_threads(thd_list)
-        pre_ceph_ver = server_list[0]['ceph_ver']
         server_list_new = db.init_node_get_all(context)
         new_ceph_ver = server_list_new[0]['ceph_ver']
         if new_ceph_ver != pre_ceph_ver:
             message = "ceph upgrade from %s to %s success"%(pre_ceph_ver,new_ceph_ver)
         else:
-            message = "ceph upgrade unsuccessful.Please make sure that the URLs are reachable.Please make sure the storage nodes can get apt-key by the commond 'wget'."
+            message = "ceph upgrade unsuccessful.Please make sure that the URLs are reachable."
         return {"message":message}
 
     @utils.single_lock
