@@ -4345,11 +4345,11 @@ div.table_cell_wrapper {
                     .table-striped.datatable tbody tr:hover th {
                       background-color: #f5f5f5; }
 
-.table-striped tbody tr.status_unknown:nth-child(odd) td {
-  background-color: #ffffb5; }
+/*.table-striped tbody tr.status_unknown:nth-child(odd) td {*/
+  /*background-color: #ffffb5; }*/
 
-  .table-striped tbody tr.status_unknown:nth-child(even) td {
-    background-color: #ffffc6; }
+  /*.table-striped tbody tr.status_unknown:nth-child(even) td {*/
+    /*background-color: #ffffc6; }*/
 
     .nowrap-col {
       white-space: nowrap; }

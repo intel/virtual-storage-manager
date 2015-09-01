@@ -170,13 +170,38 @@ def get_capacity():
 
 #get the OSD data
 def get_OSD():
+    #get the full or near full threshold
+    settings = vsmapi.get_setting_dict(None)
+    disk_near_full_threshold = int(settings['disk_near_full_threshold'])
+    disk_full_threshold = int(settings['disk_full_threshold'])
+
     in_up = 0
     in_down = 0
     out_up = 0
     out_down = 0
+    available_count = 0
+    near_full_count = 0
+    full_count = 0
     osd_summary = vsmapi.osd_summary(None)
     _osd_status = vsmapi.osd_status(None)
+
     for _osd in _osd_status:
+        _osd_capacity_avaliable = 0 if not _osd.device['avail_capacity_kb']\
+            else int(_osd.device['avail_capacity_kb']/1024)
+        _osd_capacity_used = 0 if not _osd.device['used_capacity_kb']\
+            else int(_osd.device['used_capacity_kb']/1024)
+        _osd_capacity_total = 0 if not _osd.device['total_capacity_kb']\
+            else int(_osd.device['total_capacity_kb']/1024)
+
+        if _osd_capacity_total:
+            _osd_capacity_status = round(_osd_capacity_used * 1.0 / _osd_capacity_total * 100, 2)
+            if _osd_capacity_status >= disk_full_threshold:
+                full_count = full_count + 1
+            elif _osd_capacity_status >= disk_near_full_threshold:
+                near_full_count = near_full_count + 1
+            else:
+                available_count = available_count + 1
+
         print _osd.state
         if _osd.state == "In-Up":
             in_up=in_up+1
@@ -186,13 +211,16 @@ def get_OSD():
             out_up=out_up+1
         elif _osd.state == "Out-Down":
             out_down=out_down+1
-    
+
     OSD_dict = {"epoch":osd_summary.epoch
               ,"update":get_time_delta(osd_summary.updated_at)
               ,"in_up":in_up
               ,"in_down":in_down
               ,"out_up":out_up
               ,"out_down":out_down
+              ,"capacity_full_count":full_count
+              ,"capacity_near_full_count":near_full_count
+              ,"capacity_available_count":available_count
               }
     OSDdata = json.dumps(OSD_dict)
     return OSDdata
