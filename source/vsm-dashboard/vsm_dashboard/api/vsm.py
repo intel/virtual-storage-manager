@@ -130,7 +130,11 @@ def stop_server(request, servers=None):
 
 def ceph_upgrade(request, body=None):
     """ceph_upgrade.
-       body = {'pkg_url':,'key_url':,}
+       body = {         'key_url':"https://...",
+                        'proxy':"https://...",
+                        'proxy_user':"",
+                        'proxy_password':"",
+                        'pkg_url':"https://..."}}
     """
     return vsmclient(request).servers.ceph_upgrade(body)
 

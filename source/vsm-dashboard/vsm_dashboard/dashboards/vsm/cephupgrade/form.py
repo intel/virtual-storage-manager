@@ -41,7 +41,18 @@ class CephUpgrade(forms.SelfHandlingForm):
                             error_messages={
                             'required': _('This field is required.'),},
                             )
-
+    proxy  = forms.CharField(label=_("Proxy URL"),
+                            max_length=255,
+                            min_length=1,
+                            )
+    proxy_user  = forms.CharField(label=_("Proxy user name"),
+                            max_length=255,
+                            min_length=1,
+                            )
+    proxy_password  = forms.CharField(label=_("Proxy password"),
+                        max_length=255,
+                        min_length=1,
+                        )
 
     def __init__(self, request, *args, **kwargs):
         super(CephUpgrade, self).__init__(request, *args, **kwargs)
