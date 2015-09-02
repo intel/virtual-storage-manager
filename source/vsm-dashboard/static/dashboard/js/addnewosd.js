@@ -51,7 +51,32 @@
 		complete: function(){
 
 		}
-    });
+         });
+
+        var server_id = this.selectedOptions.item().getAttribute("node-id");
+        postData = JSON.stringify({"server_id":server_id});
+        $.ajax({
+		type: "post",
+		url:"/dashboard/vsm/devices-management/get_available_disks/",
+		data: postData,
+		dataType:"json",
+		success: function(data){
+            alert(data);
+				console.log(data);
+    	},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+				if(XMLHttpRequest.status == 500){
+					console.log("internal error");
+				}
+			},
+		headers: {
+			"X-CSRFToken": token
+			},
+		complete: function(){
+
+		}
+        });
+
 });
 
 
