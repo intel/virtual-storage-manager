@@ -26,7 +26,7 @@ function usage() {
 Usage: vsm-ceph-upgrade
 
 for example:
-    Step 1 get pakages needed by ceph upgrading in controller node: vsm-ceph-upgrade -p http://ceph.com/debian-hammer/ -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc --proxy http://proxy-shz.intel.com:911
+    Step 1 get pakages needed by ceph upgrading in controller node: vsm-ceph-upgrade -p http://ceph.com/debian-hammer/ -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc --proxy ...
     Step 2 upgrade ceph in agent nodes:vsm-ceph-upgrade
 Options:
   --help | -h
@@ -37,6 +37,10 @@ Options:
     key_url.
   --proxy
     proxy.
+  --proxy-user
+    proxy-user.
+  --proxy-pwd
+    proxy-password.
 EOF
     exit 0
 }
@@ -131,8 +135,8 @@ while [ $# -gt 0 ]; do
     -k | --key_url) shift;KEY_URL=$1  ;;
     -s | --storages) shift;STORAGE_NODE_LIST=$1  ;;
     --proxy) shift;PROXY=$1  ;;
-    --username) shift;PROXY_USER=$1  ;;
-    --password) shift;PROXY_PWD=$1  ;;
+    --proxy-user) shift;PROXY_USER=$1  ;;
+    --proxy-pwd) shift;PROXY_PWD=$1  ;;
     *) shift ;;
   esac
   shift
