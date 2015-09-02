@@ -130,6 +130,13 @@ class AddOSDView(TemplateView):
             context["OSDList"] = vsmapi.osd_status(self.request, paginate_opts={
                 "service_id": servers[0].service_id
             })
+            ret = vsmapi.get_available_disks(self.request, search_opts={
+                "server_id": servers[0].id ,
+                "result_mode":"get_disks",
+            })
+            disks = ret['disks']
+            disks_list = [disk for disk in disks if disk.find('by-path') != -1]
+            context["available_disks"] = disks_list
         
         return context
 
@@ -255,6 +262,19 @@ def restart_osd(request):
     rs = json.dumps({"status":0})
     return HttpResponse(rs)
 
+def get_available_disks(request):
+    search_opts = json.loads(request.body)
+    server_id = search_opts["server_id"]
+
+    ret = vsmapi.get_available_disks(request, search_opts={
+                "server_id": server_id
+                ,"result_mode":"get_disks",
+            })
+    disks = ret['disks']
+    disks_list = [disk for disk in disks if disk.find('by-path')!=-1]
+    disk_dict = {'disks':disks_list}
+    disk_data = json.dumps(disk_dict)
+    return HttpResponse(disk_data)
 
 def remove_osd(request):
     data = json.loads(request.body)

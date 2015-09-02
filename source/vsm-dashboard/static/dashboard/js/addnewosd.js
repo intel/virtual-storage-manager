@@ -2,6 +2,14 @@
  	
  })
 
+ function SelectJournalDevice(){
+     $("#txtJournalDevice").val($("#selJournalDevice").val());
+ }
+
+ function SelectDataDevice(){
+     $("#txtDataDevice").val($("#selDataDevice").val());
+ }
+
 
  $("#selServer").change(function(){
 	var service_id = this.value;
@@ -14,7 +22,6 @@
 		data: postData,
 		dataType:"json",
 		success: function(data){
-				console.log(data);
 				var osdlist = data.osdlist;
 
 				$("#tbOSDList").empty();
@@ -51,7 +58,43 @@
 		complete: function(){
 
 		}
-    });
+         });
+
+        var server_id = this.selectedOptions.item().getAttribute("node-id");
+        postData = JSON.stringify({"server_id":server_id});
+        $.ajax({
+		type: "post",
+		url:"/dashboard/vsm/devices-management/get_available_disks/",
+		data: postData,
+		dataType:"json",
+		success: function(data){
+			var path_list = data.disks;
+            $("#selJournalDevice")[0].options.length = 0;
+            $("#selDataDevice")[0].options.length = 0;
+            for(var i=0;i<path_list.length;i++){
+                var option1 = new Option();
+                var option2 = new Option();
+                option1.value =path_list[i];
+                option1.text = path_list[i];
+                option2.value =path_list[i];
+                option2.text = path_list[i];
+                $("#selJournalDevice")[0].options.add(option1);
+                $("#selDataDevice")[0].options.add(option2);
+            }
+    	},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+				if(XMLHttpRequest.status == 500){
+					console.log("internal error");
+				}
+			},
+		headers: {
+			"X-CSRFToken": token
+			},
+		complete: function(){
+
+		}
+        });
+
 });
 
 

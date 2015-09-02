@@ -18,7 +18,7 @@ from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import DevicesAction
 from .views import get_smart_info
-from .views import AddOSDView,get_osd_list,add_new_osd_action,check_device_path,get_smart_info
+from .views import AddOSDView,get_osd_list,add_new_osd_action,check_device_path,get_smart_info,get_available_disks
 from .views import restart_osd,remove_osd,restore_osd
 
 urlpatterns = patterns('',
@@ -27,6 +27,7 @@ urlpatterns = patterns('',
     url(r'^get_osd_list/$', get_osd_list, name='get_osd_list'),
     url(r'^add_new_osd_action/$', add_new_osd_action, name='add_new_osd_action'),
     url(r'^check_device_path/$', check_device_path, name='check_device_path'),
+    url(r'^get_available_disks/$', get_available_disks, name='get_available_disks'),
     url(r'^devices/(?P<action>\w+)$', DevicesAction, name='devicesaction'),
     url(r'^get_smart_info/$', get_smart_info, name='get_smart_info'),
 

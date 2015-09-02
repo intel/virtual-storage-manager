@@ -926,14 +926,35 @@ class SchedulerManager(manager.Manager):
            body = {u'servers': [{u'cluster_id': 1, u'id': u'1','host':''},
                         {u'cluster_id': 1, u'id': u'2','host':''}],
                         'key_url':"https://...",
+                        'proxy':"https://...",
+                        'proxy_user':"https://...",
+                        'proxy_password':"https://...",
                         'pkg_url':"https://..."}
         """
         LOG.info("DEBUG in ceph upgrade in scheduler manager.")
         server_list = body.get('servers')
         if not server_list:
             server_list = db.init_node_get_all(context)
+        pre_ceph_ver = server_list[0]['ceph_ver']
+        hosts = [server['host'] for server in server_list]
+        hosts = ','.join(hosts)
         key_url = body['key_url']
         pkg_url = body['pkg_url']
+        proxy = body['proxy']
+        proxy_user = body['proxy_user']
+        proxy_password = body['proxy_password']
+        #check network and get pakages from network
+        LOG.info('scheduler/manager.py ceph_upgrade')
+        err = 'success'
+        try:
+            out, err = utils.execute('vsm-ceph-upgrade','-k',
+                             key_url,'-p', pkg_url,'-s',hosts,'--proxy',proxy,'--proxy_user', proxy_user,'--proxy_password',proxy_password,
+                             run_as_root=True)
+            LOG.info("exec vsm-ceph-upgrade in controller node:%s--%s"%(out,err))
+            err = 'success'
+        except:
+            LOG.info("vsm-ceph-upgrade in controller node:%s"%err)
+            return {"message":"ceph upgrade unsuccessful.Please make sure that the URLs are reachable.%s"%err}
         LOG.info("ceph upgrade of scheduer manager %s" % server_list)
         status_all = [node['status'] for node in server_list ]
         status_all = list(set(status_all))
@@ -954,11 +975,12 @@ class SchedulerManager(manager.Manager):
                 thd = utils.MultiThread(__ceph_upgrade,context=context, node_id=item['id'], host=item['host'], key_url=key_url,pkg_url=pkg_url,restart=restart)
                 thd_list.append(thd)
             utils.start_threads(thd_list)
-        pre_ceph_ver = server_list[0]['ceph_ver']
         server_list_new = db.init_node_get_all(context)
         new_ceph_ver = server_list_new[0]['ceph_ver']
-        if new_ceph_ver:
+        if new_ceph_ver != pre_ceph_ver:
             message = "ceph upgrade from %s to %s success"%(pre_ceph_ver,new_ceph_ver)
+        else:
+            message = "ceph upgrade unsuccessful.Please make sure that the URLs are reachable."
         return {"message":message}
 
     @utils.single_lock

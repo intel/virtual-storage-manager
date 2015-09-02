@@ -95,6 +95,9 @@ class DeviceManager(base.ManagerWithFind):
         query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
         resp, body = self.api.client.get("/devices/get_available_disks%s" % (query_string))
         body = body.get("available_disks")
+        result_mode = search_opts.get('result_mode')
+        if result_mode == 'get_disks':
+            return {'disks': body}
         ret = {"ret":1}
         message = []
         paths = search_opts.get("path")
