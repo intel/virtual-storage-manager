@@ -42,8 +42,13 @@
       <div class="control-group required">
         <label >Journal Device :</label>
         <span class="form-required">*</span>
-        <div class="input">
-          <input id="txtJournalDevice" class="form-control" type="text" value="" >
+        <div class="input" style="position: relative;width: 350px;height: 40px;">
+          <select id="selJournalDevice"  class="form-control" style="z-index:88;" onchange="SelectJournalDevice()">
+            {% for path in available_disks %}
+                <option value="{{path}}">{{path}}</option>
+            {%endfor %}
+          </select>
+          <input id="txtJournalDevice" class="form-control" style="z-index:99;position: absolute;width: 320px;height: 30px;top: 1px;left: 2px;border: none;" type="text" value="" >
         </div>
       </div>
       <div class="control-group  required">
@@ -58,8 +63,13 @@
       <div class="control-group required">
         <label >Data Device :</label>
         <span class="form-required">*</span>
-        <div class="input">
-          <input id="txtDataDevice" class="form-control" type="text" value="" >
+        <div class="input" style="position: relative;width: 350px;height: 40px;">
+            <select id="selDataDevice"  class="form-control" style="z-index:88;" onchange="SelectDataDevice()">
+                {% for path in available_disks %}
+                <option value="{{path}}">{{path}}</option>
+                {%endfor %}
+            </select>
+          <input id="txtDataDevice" class="form-control" style="z-index:99;position: absolute;width: 320px;height: 30px;top: 1px;left: 2px;border: none;" type="text" value="" >
         </div>
       </div>
 
