@@ -615,7 +615,7 @@ class ConductorManager(manager.Manager):
     def get_sum_performance_metrics(self, context, search_opts):
         return db.get_sum_performance_metrics(context, search_opts=search_opts)
 
-    def get_lantency(self, context, search_opts):
+    def get_latency(self, context, search_opts):
         return db.get_lantency(context, search_opts=search_opts)
 
     def get_cpu_usage(self, context, search_opts):

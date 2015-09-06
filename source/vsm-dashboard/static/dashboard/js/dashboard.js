@@ -34,7 +34,7 @@ require(
         cCPU = ec.init(document.getElementById('divCPUContent'));
        
         cIOPs.setOption(GenerateLineOption());
-        cLatency.setOption(GetLantencyOption());
+        cLatency.setOption(GetLatencyOption());
         cBandwidth.setOption(GetBandwidthOption());
         cCPU.setOption(GenerateInitCPUOption());
 
@@ -55,7 +55,7 @@ require(
         //IOPS  
         loadIOP();
 
-        //Lantency
+        //Latency
         loadLatency();
 
         //Bandwith
@@ -753,7 +753,7 @@ function GenerateInitCPUOption(){
     return option;
 }
 
-function GetLantencyOption(){
+function GetLatencyOption(){
     option = {
         grid :{
             x:40,
@@ -765,7 +765,7 @@ function GetLantencyOption(){
             trigger:'axis'
         },
         legend:{
-            data:["lantency_r","lantency_w","lantency_rw"]
+            data:["latency_r","latency_w","latency_rw"]
         },
         xAxis : [
             {
@@ -799,7 +799,7 @@ function GetLantencyOption(){
         },
         series : [
             {
-                name:'lantency_r',
+                name:'latency_r',
                 type:'line',
                 stack: 'A',
                 smooth:true,
@@ -807,14 +807,14 @@ function GetLantencyOption(){
                 data:InitValues(0)
             },
             {
-                name:'lantency_w',
+                name:'latency_w',
                 type:'line',
                 stack: 'B',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},
                 data:InitValues(0)
             },
             {
-                name:'lantency_rw',
+                name:'latency_rw',
                 type:'line',
                 stack: 'C',
                 itemStyle: {normal: {areaStyle: {type: 'default'}}},

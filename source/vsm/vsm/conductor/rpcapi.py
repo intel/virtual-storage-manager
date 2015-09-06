@@ -397,7 +397,7 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return self.call(context,self.make_msg('get_sum_performance_metrics', \
                                search_opts=search_opts))
 
-    def get_lantency(self, context, search_opts):
+    def get_latency(self, context, search_opts):
         return self.call(context,self.make_msg('get_latency', \
                                search_opts=search_opts))
 

@@ -1242,8 +1242,8 @@ def get_performance_metrics(context, search_opts):
 def get_sum_performance_metrics(context, search_opts):
     return IMPL.sum_performance_metrics(context, search_opts=search_opts)
 
-def get_lantency(context, search_opts):
-    return IMPL.lantency_performance_metrics(context, search_opts=search_opts)
+def get_latency(context, search_opts):
+    return IMPL.latency_performance_metrics(context, search_opts=search_opts)
 
 def get_cpu_usage(context, search_opts):
     return IMPL.cpu_data_get_usage(context, search_opts=search_opts)

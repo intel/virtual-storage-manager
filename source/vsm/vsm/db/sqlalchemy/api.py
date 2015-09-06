@@ -4099,9 +4099,9 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
 
     return ret_list
 
-def lantency_performance_metrics(context, search_opts, session=None):#for lantency
+def latency_performance_metrics(context, search_opts, session=None):#for latency
     metrics_name = search_opts['metrics_name']
-    lantency_type = metrics_name.split('_')[2]
+    latency_type = metrics_name.split('_')[2]
     timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
     timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
     setting_ref = vsm_settings_get_by_name(context, 'ceph_diamond_collect_interval', session=session)
@@ -4139,7 +4139,7 @@ def lantency_performance_metrics(context, search_opts, session=None):#for lanten
                      on e.instance=e_pre.instance and e.hostname=e_pre.hostname
                      )
                  ) as b \
-            '''%{'latency_type':lantency_type,'metric_name':metrics_name,'start_time':timestamp_cur-(diamond_collect_interval-1),'end_time':timestamp_cur+1,'interval':diamond_collect_interval}
+            '''%{'latency_type':latency_type,'metric_name':metrics_name,'start_time':timestamp_cur-(diamond_collect_interval-1),'end_time':timestamp_cur+1,'interval':diamond_collect_interval}
         sql_ret = session.execute(sql_str).fetchall()
         #LOG.info('latency--sql-str===%s'%sql_str)
         for cell in sql_ret:

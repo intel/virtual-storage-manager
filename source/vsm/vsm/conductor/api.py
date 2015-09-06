@@ -302,8 +302,8 @@ class API(object):
     def get_sum_performance_metrics(self, context, search_opts):
         return self.conductor_rpcapi.get_sum_performance_metrics(context, search_opts)
 
-    def get_lantency(self, context, search_opts):
-        return self.conductor_rpcapi.get_lantency(context, search_opts)
+    def get_latency(self, context, search_opts):
+        return self.conductor_rpcapi.get_latency(context, search_opts)
 
     def get_cpu_usage(self, context, search_opts):
         return self.conductor_rpcapi.get_cpu_usage(context, search_opts)

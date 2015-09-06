@@ -66,7 +66,7 @@ class PerformanceMetricsController(wsgi.Controller):
         if metrics_name in ['op_r','op_w','op_rw','op_in_bytes','op_out_bytes']:
             result = self.get_iops_or_banwidth(req)
         elif metrics_name in ['op_rw_latency','op_r_latency','op_w_latency']:
-            result = self.get_lantency(req)
+            result = self.get_latency(req)
         elif  metrics_name in ["cpu_usage"]:
             result = self.get_cpu_usage(req)
         else:
@@ -83,13 +83,13 @@ class PerformanceMetricsController(wsgi.Controller):
         LOG.info("CEPH_LOG get performance metrics  iops or banwidth  by search opts: %s" % search_opts)
         return {"metrics": metrics}
 
-    def get_lantency(self, req):
+    def get_latency(self, req):
         """get_latency."""
         search_opts = {}
         search_opts.update(req.GET)
         context = req.environ['vsm.context']
         search_opts ['metrics_name'] = 'osd_%s'%search_opts['metrics_name']
-        metrics = self.conductor_api.get_lantency(context, search_opts=search_opts)
+        metrics = self.conductor_api.get_latency(context, search_opts=search_opts)
         LOG.info("CEPH_LOG get performance metrics  latency  by search opts: %s" % search_opts)
         return {"metrics": metrics}
 
