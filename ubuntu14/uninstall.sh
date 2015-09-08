@@ -24,9 +24,9 @@ USER=`whoami`
 source $TOPDIR/installrc
 
 for ip in $CONTROLLER_ADDRESS; do
-    ssh -t $ip "sudo clean-data -f; sudo apt-get remove -y ceph httpd MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
+    ssh -t $ip "sudo service vsm-api stop; sudo service vsm-scheduler stop; sudo service vsm-conductor stop; clean-data -f; yum -y erase ceph httpd MariaDB-client MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
 done
 
 for ip in $AGENT_ADDRESS_LIST; do
-    ssh -t $ip "sudo clean-data -f; sudo apt-get remove -y ceph httpd MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
+    ssh -t $ip "sudo service vsm-agent stop; sudo service vsm-physical stop; clean-data -f; yum -y erase ceph httpd librbd MariaDB-client MariaDB-devel MariaDB-server memcached openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
 done
