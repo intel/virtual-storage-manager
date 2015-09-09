@@ -90,7 +90,7 @@ function build_ceph_upgrade_repo() {
 }
 
 
-function ceph-upgrade-node() {
+function ceph_upgrade_node() {
     build_ceph_upgrade_repo
     log_dir=/tmp/ceph-upgrade
     rm -rf $log_dir
@@ -112,7 +112,68 @@ function ceph-upgrade-node() {
 
 
 
+function get_ceph_upgrade_pkgs_in_controller_centos() {
+    log_dir=/tmp/ceph-upgrade
+    rm -rf $log_dir
+    echo '----------------begin-----------------------------------------' >$log_dir
+    echo "
+https_proxy = $PROXY
+http_proxy = $PROXY
+ftp_proxy = $PROXY
+    " > ~/.wgetrc
+    rm -rf /opt/ceph_upgrade
+    mkdir -p  /opt/ceph_upgrade
+    mkdir -p /opt/ceph_upgrade/ceph_repo
+    cd /opt/ceph_upgrade
+    if [[ -n $PROXY_USER  && -n $PROXY_PWD ]]; then
+        wget  $KEY_URL --proxy-user=$PROXY_USER --proxy-password=$PROXY_PWD
+    else
+        wget  $KEY_URL
+    fi
+    rpm -ivh --replacepkgs ceph-release*.rpm
+    sed -i "/name=/a\proxy=$PROXY" /etc/yum.repos.d/ceph.repo
+    yum -y install ceph;
+    cd  /var/cache/yum/x86_64/7/
 
+    if [[ `ls -l Ceph/packages|grep "^-"|wc -l` -gt 0 ]];then
+         cp Ceph/packages/*.rpm /opt/ceph_upgrade/ceph_repo
+    fi
+    if [[ `ls -l base/packages|grep "^-"|wc -l` -gt 0 ]];then
+        cp base/packages/*.rpm /opt/ceph_upgrade/ceph_repo
+    fi
+    cd /opt/ceph_upgrade
+    createrepo ceph_repo
+    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do ssh $node "rm -rf /opt/ceph_repo";done
+    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /opt/ceph_upgrade/ceph_repo $node:/opt/;done
+}
+
+function build_ceph_upgrade_repo_centos() {
+    mkdir -p /etc/yum.repos.d/saved
+    mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/saved/
+    echo "
+[cephrepo]
+name=cephrepo
+baseurl=file:///opt/ceph_repo
+gpgcheck=0
+enabled=1
+proxy=_none_" > /etc/yum.repos.d/ceph-uprage.repo
+    }
+
+
+function ceph_upgrade_node_centos() {
+    build_ceph_upgrade_repo_centos
+    log_dir=/tmp/ceph-upgrade
+    rm -rf $log_dir
+    echo '----------------begin-----------------------------------------' >$log_dir
+    echo '---------------yum makecache  begin------------------------' >>$log_dir;
+    yum clean all;
+    yum makecache;
+    echo '---------------yum makecache done----' >>$log_dir;
+    yum -y install ceph;
+    echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
+    echo '-----------------over-----------------------------------------' >>$log_dir ;
+
+}
 
 #---------------------------------------------
 # Read Parameters.
@@ -142,10 +203,35 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-if [[ -n $STORAGE_NODE_LIST  && -n $KEY_URL  && -n $PKG_URL   ]]; then
-        get_ceph_upgrade_pkgs_in_controller
+is_lsb_release=0
+lsb_release -a >/dev/null 2>&1 && is_lsb_release=1
+OS=""
+OS_VERSION=""
+if [[ $is_lsb_release -gt 0 ]]; then
+    OS=`lsb_release -a|grep "Distributor ID:"|awk -F ' ' '{print $3}'`
+    OS_VERSION=`lsb_release -a|grep "Release"|awk -F ' ' '{print $2}'`
 else
-        ceph-upgrade-node
+    var=`cat /etc/os-release|grep "PRETTY_NAME"|awk -F "=" '{print $2}'`
+    if [[ $var =~ "CentOS Linux 7" ]]; then
+        OS="CentOS"
+        OS_VERSION="7"
+    fi
+fi
+
+if [[ -n $STORAGE_NODE_LIST  && -n $KEY_URL   ]]; then
+    if [[ $OS == "Ubuntu" && -n $PKG_URL ]]; then
+        get_ceph_upgrade_pkgs_in_controller
+    elif [[ $OS == "CentOS" ]]; then
+        get_ceph_upgrade_pkgs_in_controller_centos
+    fi
+
+else
+    if [[ $OS == "Ubuntu" ]]; then
+        ceph_upgrade_node
+    elif [[ $OS == "CentOS" ]]; then
+        ceph_upgrade_node_centos
+    fi
+
 fi
 
 set +o xtrace
