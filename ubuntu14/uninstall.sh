@@ -24,9 +24,15 @@ USER=`whoami`
 source $TOPDIR/installrc
 
 for ip in $CONTROLLER_ADDRESS; do
-    ssh -t $ip "sudo service vsm-api stop; sudo service vsm-scheduler stop; sudo service vsm-conductor stop; clean-data -f; yum -y erase ceph httpd MariaDB-client MariaDB-server memcached rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
+    ssh -t $ip "sudo service vsm-api stop; sudo service vsm-scheduler stop; sudo service vsm-conductor stop; sudo clean-data -f; sudo apt-get remove -y ceph httpd MariaDB-client MariaDB-server memcached rabbitmq-server openstack-keystone rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy; sudo apt-get autoclean"
 done
 
+sudo apt-get purge mysql* mariadb*
+sudo rm -fr /var/lib/mysql /etc/mysql /var/log/mysql ~/.mysql*
+sudo apt-get purge rabbitmq-server
+sudo rm -fr /var/lib/rabbitmq /etc/rabbitmq /var/log/rabbitmq
+
 for ip in $AGENT_ADDRESS_LIST; do
-    ssh -t $ip "sudo service vsm-agent stop; sudo service vsm-physical stop; clean-data -f; yum -y erase ceph httpd librbd MariaDB-client MariaDB-devel MariaDB-server memcached openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy"
+    ssh -t $ip "sudo service vsm-agent stop; sudo service vsm-physical stop; sudo clean-data -f; sudo apt-get remove -y ceph httpd librbd MariaDB-client MariaDB-devel MariaDB-server memcached openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse vsm vsm-dashboard python-vsmclient vsm-deploy; sudo apt-get autoclean"
 done
+
