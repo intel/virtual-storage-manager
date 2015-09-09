@@ -37,10 +37,6 @@ Options:
     key_url.
   --proxy
     proxy.
-  --proxy-user
-    proxy-user.
-  --proxy-pwd
-    proxy-password.
 EOF
     exit 0
 }
@@ -50,21 +46,12 @@ function get_ceph_upgrade_pkgs_in_controller() {
     log_dir=/tmp/ceph-upgrade
     rm -rf $log_dir
     echo '----------------begin-----------------------------------------' >$log_dir
-    echo "
-https_proxy = $PROXY
-http_proxy = $PROXY
-ftp_proxy = $PROXY
-    " > ~/.wgetrc
-    echo "Acquire::http::Proxy \"$PROXY\" ;" >> /etc/apt/apt.conf
+//    echo "Acquire::http::Proxy \"$PROXY\" ;" >> /etc/apt/apt.conf
     rm -rf /opt/ceph_upgrade
     mkdir -p  /opt/ceph_upgrade
     mkdir -p /opt/ceph_upgrade/ceph_repo
     cd /opt/ceph_upgrade
-    if [[ -n $PROXY_USER  && -n $PROXY_PWD ]]; then
-        wget -q -O- $KEY_URL --proxy-user=$PROXY_USER --proxy-password=$PROXY_PWD | sudo apt-key add -
-    else
-        wget -q -O- $KEY_URL | sudo apt-key add -
-    fi
+    wget -q -O- $KEY_URL | sudo apt-key add -
     echo deb $PKG_URL $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list;
     echo '----------------ceph.list build success-------------------------' >>$log_dir;
     rm -rf /var/lib/dpkg/info-bak;
@@ -116,22 +103,36 @@ function get_ceph_upgrade_pkgs_in_controller_centos() {
     log_dir=/tmp/ceph-upgrade
     rm -rf $log_dir
     echo '----------------begin-----------------------------------------' >$log_dir
-    echo "
-https_proxy = $PROXY
-http_proxy = $PROXY
-ftp_proxy = $PROXY
-    " > ~/.wgetrc
     rm -rf /opt/ceph_upgrade
     mkdir -p  /opt/ceph_upgrade
     mkdir -p /opt/ceph_upgrade/ceph_repo
     cd /opt/ceph_upgrade
-    if [[ -n $PROXY_USER  && -n $PROXY_PWD ]]; then
-        wget  $KEY_URL --proxy-user=$PROXY_USER --proxy-password=$PROXY_PWD
-    else
-        wget  $KEY_URL
-    fi
-    rpm -ivh --replacepkgs ceph-release*.rpm
-    sed -i "/name=/a\proxy=$PROXY" /etc/yum.repos.d/ceph.repo
+    rpm --import  $KEY_URL
+    echo "
+[Ceph]
+name=Ceph packages for $basearch
+baseurl=${PKG_URL}\$basearch
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=${KEY_URL}
+
+[Ceph-noarch]
+name=Ceph noarch packages
+baseurl=${PKG_URL}noarch
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=${KEY_URL}
+
+[ceph-source]
+name=Ceph source packages
+baseurl=${PKG_URL}SRPMS
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=${KEY_URL}
+   " > /etc/yum.repos.d/ceph.repo
     yum -y install ceph;
     cd  /var/cache/yum/x86_64/7/
 
@@ -185,8 +186,6 @@ parameters=$*
 PKG_URL=""
 KEY_URL=""
 PROXY=""
-PROXY_USER=""
-PROXY_PWD=""
 STORAGE_NODE_LIST=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -196,12 +195,16 @@ while [ $# -gt 0 ]; do
     -k | --key_url) shift;KEY_URL=$1  ;;
     -s | --storages) shift;STORAGE_NODE_LIST=$1  ;;
     --proxy) shift;PROXY=$1  ;;
-    --proxy-user) shift;PROXY_USER=$1  ;;
-    --proxy-pwd) shift;PROXY_PWD=$1  ;;
     *) shift ;;
   esac
   shift
 done
+
+if [[ -n $proxy ]]; then
+    export http_proxy=$proxy
+    export https_proxy=$proxy
+    export ftp_proxy=$proxy
+fi
 
 is_lsb_release=0
 lsb_release -a >/dev/null 2>&1 && is_lsb_release=1
