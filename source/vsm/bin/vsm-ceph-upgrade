@@ -130,10 +130,17 @@ ftp_proxy = $PROXY
     else
         wget  $KEY_URL
     fi
-    rpm -ivh ceph-release*.rpm
+    rpm -ivh --replacepkgs ceph-release*.rpm
+    sed -i "/name=/a\proxy=$PROXY" /etc/yum.repos.d/ceph.repo
+    yum -y install ceph;
     cd  /var/cache/yum/x86_64/7/
-    cp Ceph/packages/*.rpm /opt/ceph_upgrade/ceph_repo
-    cp base/packages/*.rpm /opt/ceph_upgrade/ceph_repo
+
+    if [[ `ls -l Ceph/packages|grep "^-"|wc -l` -gt 0 ]];then
+         cp Ceph/packages/*.rpm /opt/ceph_upgrade/ceph_repo
+    fi
+    if [[ `ls -l base/packages|grep "^-"|wc -l` -gt 0 ]];then
+        cp base/packages/*.rpm /opt/ceph_upgrade/ceph_repo
+    fi
     cd /opt/ceph_upgrade
     createrepo ceph_repo
     for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do ssh $node "rm -rf /opt/ceph_repo";done
@@ -162,7 +169,7 @@ function ceph_upgrade_node_centos() {
     yum clean all;
     yum makecache;
     echo '---------------yum makecache done----' >>$log_dir;
-    yum install ceph
+    yum -y install ceph;
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
     echo '-----------------over-----------------------------------------' >>$log_dir ;
 
@@ -212,16 +219,16 @@ else
 fi
 
 if [[ -n $STORAGE_NODE_LIST  && -n $KEY_URL   ]]; then
-    if [[ $OS == "Ubuntu" and -n $PKG_URL]]; then
+    if [[ $OS == "Ubuntu" && -n $PKG_URL ]]; then
         get_ceph_upgrade_pkgs_in_controller
-    elif [[ $OS == "CentOS"]]; then
+    elif [[ $OS == "CentOS" ]]; then
         get_ceph_upgrade_pkgs_in_controller_centos
     fi
 
 else
-    if [[ $OS == "Ubuntu"]]; then
+    if [[ $OS == "Ubuntu" ]]; then
         ceph_upgrade_node
-    elif [[ $OS == "CentOS"]]; then
+    elif [[ $OS == "CentOS" ]]; then
         ceph_upgrade_node_centos
     fi
 

@@ -291,6 +291,7 @@ install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/local/bin/getip
 install -p -D -m 755 bin/import_ceph_conf  %{buildroot}%{_usr}/local/bin/import_ceph_conf
 install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
 install -p -D -m 755 bin/vsm-ceph-upgrade %{buildroot}%{_bindir}/vsm-ceph-upgrade
+install -p -D -m 755 bin/kill_diamond %{buildroot}%{_bindir}/kill_diamond
 
 install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/local/bin/get_storage
 install -p -D -m 755 tools/spot_info_list %{buildroot}%{_usr}/local/bin/spot_info_list
