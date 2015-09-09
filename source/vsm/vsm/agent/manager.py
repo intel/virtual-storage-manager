@@ -1543,7 +1543,9 @@ class AgentManager(manager.Manager):
                                                   self._service_id)
         used_journal_disk = [disk.journal for disk in used_disk]
         used_data_disk = [disk.path for disk in used_disk]
-        available_disk = list(set(all_disk)-set(used_journal_disk)-set(used_data_disk))
+        used_data_disk_name_dict = self.ceph_driver.get_disks_name(context,used_data_disk)
+        used_data_disk_name = used_data_disk_name_dict.values()
+        available_disk = list(set(all_disk)-set(used_journal_disk)-set(used_data_disk)-set(used_data_disk_name))
         return available_disk
 
     def add_new_disks_to_cluster(self, context, body):

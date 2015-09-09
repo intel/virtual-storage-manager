@@ -1492,7 +1492,13 @@ class CephDriver(object):
             all_disk.append(line.split()[0])
 
         return all_disk
-
+    def get_disks_name(self, context,disk_bypath_list):
+        disk_name_dict = {}
+        for bypath in disk_bypath_list:
+            out, err = utils.execute('ls',bypath,'-l',
+                         run_as_root=True)
+            disk_name_dict[bypath] = '/dev/%s'%(out.split('../../')[1])
+        return disk_name_dict
     def run_add_disk_hook(self, context):
         out, err = utils.execute('add_disk',
                                  'll',
