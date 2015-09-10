@@ -15,9 +15,8 @@
  under the License.
  */
 
-//Upgrade Ceph
 $("#btnCephUpgrade").click(function(){
-    //invoke...
+
     GenerateCephUpgradeData();
 
 })

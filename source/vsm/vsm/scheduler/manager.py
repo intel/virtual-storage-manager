@@ -927,7 +927,6 @@ class SchedulerManager(manager.Manager):
                         {u'cluster_id': 1, u'id': u'2','host':''}],
                         'key_url':"https://...",
                         'proxy':"https://...",
-                        'proxy_user':"https://...",
                         'pkg_url':"https://..."}
         """
         LOG.info("DEBUG in ceph upgrade in scheduler manager.")
