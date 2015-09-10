@@ -200,10 +200,10 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-if [[ -n $proxy ]]; then
-    export http_proxy=$proxy
-    export https_proxy=$proxy
-    export ftp_proxy=$proxy
+if [[ -n $PROXY ]]; then
+    export http_proxy=$PROXY
+    export https_proxy=$PROXY
+    export ftp_proxy=$PROXY
 fi
 
 is_lsb_release=0
