@@ -269,6 +269,8 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/get_smart_info
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/intergrate-cluster
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/import_ceph_conf
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/kill_diamond
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-ceph-upgrade
 
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/getip
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/cluster_manifest

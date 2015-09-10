@@ -928,7 +928,6 @@ class SchedulerManager(manager.Manager):
                         'key_url':"https://...",
                         'proxy':"https://...",
                         'proxy_user':"https://...",
-                        'proxy_password':"https://...",
                         'pkg_url':"https://..."}
         """
         LOG.info("DEBUG in ceph upgrade in scheduler manager.")
@@ -941,14 +940,13 @@ class SchedulerManager(manager.Manager):
         key_url = body['key_url']
         pkg_url = body['pkg_url']
         proxy = body['proxy']
-        proxy_user = body['proxy_user']
-        proxy_password = body['proxy_password']
+
         #check network and get pakages from network
         LOG.info('scheduler/manager.py ceph_upgrade')
         err = 'success'
         try:
             out, err = utils.execute('vsm-ceph-upgrade','-k',
-                             key_url,'-p', pkg_url,'-s',hosts,'--proxy',proxy,'--proxy_user', proxy_user,'--proxy_password',proxy_password,
+                             key_url,'-p', pkg_url,'-s',hosts,'--proxy',proxy,
                              run_as_root=True)
             LOG.info("exec vsm-ceph-upgrade in controller node:%s--%s"%(out,err))
             err = 'success'
