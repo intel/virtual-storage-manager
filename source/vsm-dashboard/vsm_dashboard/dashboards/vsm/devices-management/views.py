@@ -65,8 +65,12 @@ class IndexView(tables.DataTableView):
             logging.debug("resp osds in view: %s" % _osds)
         osds = []
         settings = vsmapi.get_setting_dict(self.request)
-        disk_near_full_threshold = int(settings['disk_near_full_threshold'])
-        disk_full_threshold = int(settings['disk_full_threshold'])
+        if 'disk_near_full_threshold' not in settings.keys():
+            vsmapi.update_setting(self.request,'disk_near_full_threshold','75')
+        if 'disk_full_threshold' not in settings.keys():
+            vsmapi.update_setting(self.request,'disk_full_threshold','85')
+        disk_near_full_threshold = int(settings.get('disk_near_full_threshold',75))
+        disk_full_threshold = int(settings.get('disk_full_threshold',85))
         for _osd in _osds:
             osd = {
                     'id': _osd.id,

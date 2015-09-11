@@ -46,16 +46,7 @@ class CephUpgrade(forms.SelfHandlingForm):
                             min_length=1,
                             required=False,
                             )
-    proxy_user  = forms.CharField(label=_("Proxy user name"),
-                            max_length=255,
-                            min_length=1,
-                            required=False,
-                            )
-    proxy_password  = forms.CharField(label=_("Proxy password"),
-                            max_length=255,
-                            min_length=1,
-                            required=False,
-                            )
+
 
     def __init__(self, request, *args, **kwargs):
         super(CephUpgrade, self).__init__(request, *args, **kwargs)
