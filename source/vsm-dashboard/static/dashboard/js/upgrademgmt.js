@@ -15,9 +15,8 @@
  under the License.
  */
 
-//Upgrade Ceph
 $("#btnCephUpgrade").click(function(){
-    //invoke...
+
     GenerateCephUpgradeData();
 
 })
@@ -57,9 +56,7 @@ function GenerateCephUpgradeData() {
     var pkg_url = $("#id_package_url").val();
     var key_url = $("#id_key_url").val();
     var proxy = $("#id_proxy").val();
-    var proxy_user = $("#id_proxy_user").val();
-    var proxy_password = $("#id_proxy_password").val();
-    var data = {pkg_url:pkg_url,key_url:key_url,proxy:proxy,proxy_user:proxy_user,proxy_password:proxy_password};
+    var data = {pkg_url:pkg_url,key_url:key_url,proxy:proxy};
     data_list.push(data);
     data = JSON.stringify(data_list);
     PostRequest(data);
