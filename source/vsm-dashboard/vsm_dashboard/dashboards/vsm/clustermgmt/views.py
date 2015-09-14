@@ -153,7 +153,59 @@ class CreateClusterView(ModalEditTableMixin, tables.DataTableView):
 
         return servers
 
+class IntegrateClusterView(ModalEditTableMixin, tables.DataTableView):
+    table_class = CreateClusterTable
+    template_name = 'vsm/flocking/createcluster.html'
+    #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
 
+    def get_data(self):
+        _zones = []
+        _servers = []
+        #_servers= vsmapi.get_server_list(self.request,)
+        try:
+            _servers = vsmapi.get_server_list(self.request,)
+            _zones = vsmapi.get_zone_list(self.request,)
+            logging.debug("resp body in view: %s" % _servers)
+        except:
+            exceptions.handle(self.request,
+                              _('Unable to retrieve sever list. '))
+
+        zones = {}
+        for _zone in _zones:
+            zones.setdefault(_zone.id, _zone.name)
+        zone_list = zones.items()
+
+        servers = []
+        for _server in _servers:
+            if _server.status != 'available':
+                continue
+
+            server = {"id": _server.id,
+                        "name": _server.host,
+                        "primary_public_ip": _server.primary_public_ip,
+                        "secondary_public_ip": _server.secondary_public_ip,
+                        "cluster_ip": _server.cluster_ip,
+                        "zone_id": _server.zone_id,
+                        "osds": _server.osds,
+                        "type": _server.type,
+                        "status": _server.status}
+            if "monitor" in _server.type:
+                server['is_monitor'] = {"value": True}
+                server['monitor'] = "yes"
+            else:
+                server['is_monitor'] = {"value": False}
+                server['monitor'] = "no"
+            if "storage" in _server.type:
+                server['is_storage'] = {"value": True}
+                server['storage'] = "yes"
+            else:
+                server['is_storage'] = {"value": False}
+                server['storage'] = "no"
+            if _server.zone_id in zones:
+                server['zone'] = zones[_server.zone_id]
+            servers.append(server)
+
+        return servers
 
 def ClusterAction(request, action):
     data = json.loads(request.body)

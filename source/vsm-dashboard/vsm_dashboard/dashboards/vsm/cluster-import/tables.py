@@ -113,9 +113,9 @@ class ImportClusterTable(tables.DataTable):
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
     monitor = tables.Column("monitor", verbose_name=_("Monitor"),
         classes=('monitor',))
-    is_monitor = tables.Column("ismonitor", verbose_name=_("Monitor"), classes=('is_monitor',),
+    is_monitor = tables.Column("is_monitor", verbose_name=_("Monitor"), classes=('is_monitor',),
         empty_value=empty_value_maker("checkbox","is_monitor",1), hidden=True)
-    is_storage = tables.Column("isstorage", verbose_name=_("Storage"), classes=('is_storage',),
+    is_storage = tables.Column("is_storage", verbose_name=_("Storage"), classes=('is_storage',),
         empty_value=empty_value_maker("checkbox","is_storage",1),hidden=True)
     server_status = tables.Column("status", verbose_name=_("Server Status"), classes=('server_status',))
     #createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
