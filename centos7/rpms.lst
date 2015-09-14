@@ -2,6 +2,7 @@ apr-util-ldap-1.5.2-6.el7.x86_64.rpm
 openstack-keystone-2014.2.1-1.el7.centos.noarch.rpm
 openstack-utils-2014.2-1.el7.centos.noarch.rpm
 python-alembic-0.6.5-3.el7.centos.noarch.rpm
+python-cinderclient-1.1.1-1.el7.centos.noarch.rpm
 python-django-horizon-2014.2.1-1.el7.centos.noarch.rpm
 python-django-openstack-auth-1.1.7-1.el7.centos.noarch.rpm
 python-flask-0.10.1-4.el7.noarch.rpm
@@ -12,6 +13,7 @@ python-keystone-2014.2.1-1.el7.centos.noarch.rpm
 python-keystoneclient-0.11.1-1.el7.centos.noarch.rpm
 python-keystonemiddleware-1.2.0-1.el7.centos.noarch.rpm
 python-ldappool-1.0-4.el7.centos.noarch.rpm
+python-novaclient-2.20.0-1.el7.centos.noarch.rpm
 python-oslo-config-1.4.0-1.el7.centos.noarch.rpm
 python-oslo-db-1.0.2-2.el7.centos.noarch.rpm
 python-oslo-i18n-1.0.0-1.el7.centos.noarch.rpm
