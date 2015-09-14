@@ -99,7 +99,7 @@
     });
 
     //Shouan: integrate cluster
-    $(".IntegrateCluster-cluster-commit").click(function(){
+    $(".integrate-cluster-commit").click(function(){
     	var SelectedNodeCount = 0;
     	var SelectedNodeList = new Array();
     	$(".multi_select_column>input").each(function(i,item){

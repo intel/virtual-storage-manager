@@ -17,10 +17,12 @@
 from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import CreateClusterView
+from .views import IntegrateClusterView
 from .views import ClusterAction
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^createclusterview/$', CreateClusterView.as_view(), name='createclusterview'),
+    url(r'^integrateclusterview/$', IntegrateClusterView.as_view(), name='integrateclusterview'),
     url(r'^cluster/(?P<action>\w+)$', ClusterAction, name='clusteraction'),
 )
