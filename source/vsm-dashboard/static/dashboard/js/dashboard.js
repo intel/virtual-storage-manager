@@ -543,7 +543,7 @@ function GenerateGaugeOption(value) {
                         fontSize:20
                     }
                 },
-                data: [{value: value, name: 'Capacity'}],
+                data: [{value: value, name: ''}],
                 splitLine:{
                     show: true,
                     length :5,
