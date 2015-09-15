@@ -17,10 +17,10 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "Manage Servers" %}{% endblock %}
+{% block title %}{% trans "Ceph Upgrade" %}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("All Servers") %}
+  {% include "horizon/common/_page_header.html" with title=_("Ceph Upgrade") %}
     <link href="{{ STATIC_URL }}dashboard/css/storageserver.css" rel="stylesheet">
 {% endblock page_header %}
 
@@ -36,7 +36,7 @@
     </div>
     <div class="right">
         <h3>{% trans "Description" %}:</h3>
-        <p>{% trans "From here you can upgrade ceph.Before sumit,make sure  the network of VSM Controller Node is unobstructed" %}</p>
+        <p>{% trans "From here you can upgrade ceph.Before sumit,make sure  the network of VSM Controller Node is unobstructed.Notes:The formart of proxy is 'proxy=http://username:password@proxy_ip:port/'." %}</p>
     </div>
 
     <div class="table_title" hidden="hidden">Ceph Upgrade</div>

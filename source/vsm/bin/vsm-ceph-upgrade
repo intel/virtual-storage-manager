@@ -46,7 +46,6 @@ function get_ceph_upgrade_pkgs_in_controller() {
     log_dir=/tmp/ceph-upgrade
     rm -rf $log_dir
     echo '----------------begin-----------------------------------------' >$log_dir
-//    echo "Acquire::http::Proxy \"$PROXY\" ;" >> /etc/apt/apt.conf
     rm -rf /opt/ceph_upgrade
     mkdir -p  /opt/ceph_upgrade
     mkdir -p /opt/ceph_upgrade/ceph_repo
