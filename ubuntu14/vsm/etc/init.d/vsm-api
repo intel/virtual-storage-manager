@@ -11,6 +11,8 @@
 #		            * Cluster operations
 ### END INIT INFO
 
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
 . /lib/lsb/init-functions
 sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=osd.$id --keyring=$osd_keyring osd crush create-or-move -- $id ${osd_weight:-${defaultweight:-1}} $osd_location ||:",g' /etc/init.d/ceph;
 
@@ -19,11 +21,8 @@ DAEMON=/usr/bin/vsm-api
 CONFIGFILE=/etc/vsm/vsm.conf
 PIDFILE=/var/run/vsm-api.pid
 LOGFILE=/var/log/vsm/vsm-api.log
-DAEMON_OPTS="--config-file $CONFIGFILE --log-file $LOGFILE"
 
 test -x $DAEMON || exit 5
-
-[ -e /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 
 LOCKFILE=/var/lock/vsm-api
 
@@ -48,7 +47,7 @@ case $1 in
 	start)
 		log_daemon_msg "Starting VSM server" "vsm-api"
 		lock_vsmapi
-  		start-stop-daemon --start --quiet --oknodo --background --pidfile $PIDFILE --startas $DAEMON -- $DAEMON_OPTS
+  		start-stop-daemon --start --background --chuid $RUNASUSER --exec $DAEMON -- --config-file=$CONFIGFILE --log-file=$LOGFILE
   		PID=`ps -ef|grep vsm-api|awk -F ' ' '{ if($3==1) print $2 }'`
   		echo $PID > $PIDFILE
 
