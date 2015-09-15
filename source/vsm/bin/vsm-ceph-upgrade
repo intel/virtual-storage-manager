@@ -26,8 +26,13 @@ function usage() {
 Usage: vsm-ceph-upgrade
 
 for example:
+os==ubuntu14:
     Step 1 get pakages needed by ceph upgrading in controller node: vsm-ceph-upgrade -p http://ceph.com/debian-hammer/ -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc --proxy ...
     Step 2 upgrade ceph in agent nodes:vsm-ceph-upgrade
+os==centos7:
+    Step 1 get pakages needed by ceph upgrading in controller node: vsm-ceph-upgrade -p http://ceph.com/rpm-hammer/rhel7/ -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc --proxy ...
+    Step 2 upgrade ceph in agent nodes:vsm-ceph-upgrade
+
 Options:
   --help | -h
     Print usage information.

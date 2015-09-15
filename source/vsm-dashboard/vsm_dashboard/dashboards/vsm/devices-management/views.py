@@ -274,11 +274,13 @@ def get_available_disks(request):
                 "server_id": server_id
                 ,"result_mode":"get_disks",
             })
+
     disks = ret['disks']
+    if disks is None:disks=[]
     disks_list = [disk for disk in disks if disk.find('by-path')!=-1]
     disk_dict = {'disks':disks_list}
     disk_data = json.dumps(disk_dict)
-    print '22222'
+
     return HttpResponse(disk_data)
 
 def remove_osd(request):
