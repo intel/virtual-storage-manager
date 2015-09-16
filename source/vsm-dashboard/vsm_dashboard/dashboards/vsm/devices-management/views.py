@@ -138,7 +138,7 @@ class AddOSDView(TemplateView):
                 "server_id": servers[0].id ,
                 "result_mode":"get_disks",
             })
-            disks = ret['disks']
+            disks = ret['disks'] or []
             disks_list = [disk for disk in disks if disk.find('by-path') != -1]
             context["available_disks"] = disks_list
         
@@ -274,10 +274,13 @@ def get_available_disks(request):
                 "server_id": server_id
                 ,"result_mode":"get_disks",
             })
+
     disks = ret['disks']
+    if disks is None:disks=[]
     disks_list = [disk for disk in disks if disk.find('by-path')!=-1]
     disk_dict = {'disks':disks_list}
     disk_data = json.dumps(disk_dict)
+
     return HttpResponse(disk_data)
 
 def remove_osd(request):

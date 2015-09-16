@@ -1627,6 +1627,7 @@ class AgentManager(manager.Manager):
         self.ceph_driver.start_mon_daemon(context, monitor_num)
         return True
     def get_available_disks(self, context):
+        #LOG.info('333333333')
         all_disk = self.ceph_driver.get_available_disks(context)
         used_disk = db.device_get_all_by_service_id(context,
                                                   self._service_id)
@@ -1634,7 +1635,9 @@ class AgentManager(manager.Manager):
         used_data_disk = [disk.path for disk in used_disk]
         used_data_disk_name_dict = self.ceph_driver.get_disks_name(context,used_data_disk)
         used_data_disk_name = used_data_disk_name_dict.values()
-        available_disk = list(set(all_disk)-set(used_journal_disk)-set(used_data_disk)-set(used_data_disk_name))
+        used_journal_disk_name_dict = self.ceph_driver.get_disks_name(context,used_journal_disk)
+        used_journal_disk_name = used_journal_disk_name_dict.values()
+        available_disk = list(set(all_disk)-set(used_journal_disk)-set(used_data_disk)-set(used_data_disk_name)-set(used_journal_disk_name))
         return available_disk
 
     def add_new_disks_to_cluster(self, context, body):
