@@ -44,11 +44,11 @@ chown vsm:root $VSM_ROOT_PATH/etc/vsm/prepools/*
 # etc/init.d/
 #---------------------------
 install -g root -o root -v -m 755 -d $VSM_ROOT_PATH/etc/init.d
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-agent
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-api
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-conductor
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-physical
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-scheduler
+install -g root -o root -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-agent
+install -g root -o root -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-api
+install -g root -o root -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-conductor
+install -g root -o root -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-physical
+install -g root -o root -v -m 755 -t $VSM_ROOT_PATH/etc/init.d etc/init.d/vsm-scheduler
 
 #---------------------------
 # usr/bin/

@@ -60,7 +60,7 @@
 		}
          });
 
-        var server_id = this.selectedOptions.item().getAttribute("node-id");
+        var server_id = this.options[this.selectedIndex].getAttribute("node-id");
         postData = JSON.stringify({"server_id":server_id});
         $.ajax({
 		type: "post",
@@ -81,6 +81,10 @@
                 $("#selJournalDevice")[0].options.add(option1);
                 $("#selDataDevice")[0].options.add(option2);
             }
+
+            $("#txtJournalDevice").val( $("#selJournalDevice").val());
+            $("#txtDataDevice").val( $("#selDataDevice").val());
+
     	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500){

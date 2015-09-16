@@ -15,6 +15,17 @@
  under the License.
  */
 
+$(function(){
+    InitCtrlCSS();
+});
+
+function InitCtrlCSS(){
+    var ctrlText = $("input[type='text']");
+    for(var i=0;i<ctrlText.length;i++){
+        ctrlText[i].className = "form-control";
+    }
+}
+
 $("#btnCephUpgrade").click(function(){
 
     GenerateCephUpgradeData();

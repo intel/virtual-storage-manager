@@ -1601,6 +1601,10 @@ class CephDriver(object):
 
     def get_available_disks(self, context):
         all_disk = glob.glob('/dev/disk/by-path/*')
+        all_disk_name_dict = self.get_disks_name(context,all_disk)
+        all_disk_name = all_disk_name_dict.values()
+        all_disk = all_disk + all_disk_name
+        #LOG.info("all-disks===%s"%all_disk)
         lines=[]
         try:
             f = open('/etc/mtab', "r")
@@ -1612,15 +1616,21 @@ class CephDriver(object):
         for line in lines:
             if not line.startswith('/dev'):
                 continue
-            all_disk.append(line.split()[0])
+            if line.split()[0] in all_disk:
+                all_disk.remove(line.split()[0])
+                #LOG.info("removed=111==%s"%line.split()[0])
+            for key in all_disk_name_dict.keys():
+                if all_disk_name_dict[key] == line.split()[0]:
+                    #LOG.info("removed==222=%s"%key)
+                    all_disk.remove(key)
+        return list(set(all_disk))
 
-        return all_disk
     def get_disks_name(self, context,disk_bypath_list):
         disk_name_dict = {}
         for bypath in disk_bypath_list:
             out, err = utils.execute('ls',bypath,'-l',
                          run_as_root=True)
-            disk_name_dict[bypath] = '/dev/%s'%(out.split('../../')[1])
+            disk_name_dict[bypath] = '/dev/%s'%(out.split('../../')[1][:-1])
         return disk_name_dict
     def run_add_disk_hook(self, context):
         out, err = utils.execute('add_disk',

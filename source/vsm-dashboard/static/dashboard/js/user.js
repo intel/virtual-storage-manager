@@ -91,7 +91,14 @@ $("#btnUpdateUser").click(function(){
 		dataType:"json",
 		success: function(data){
 			console.log(data);
-			window.location.href="/dashboard/vsm/usermgmt/";
+			var updateUserName = $("#lblUpdateUser").val();
+			var loginUserName = $("#lblLoginUser").val();
+			if(updateUserName == loginUserName){
+				window.location.href="/dashboard/auth/logout/";
+			}
+			else{
+				window.location.href="/dashboard/vsm/usermgmt/";
+			}
 		},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 			if(XMLHttpRequest.status == 500)

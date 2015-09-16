@@ -9,6 +9,8 @@
 # Short-Description:    VSM Storage DB Service works on MySQL
 ### END INIT INFO
 
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
 . /lib/lsb/init-functions
 sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=osd.$id --keyring=$osd_keyring osd crush create-or-move -- $id ${osd_weight:-${defaultweight:-1}} $osd_location ||:",g' /etc/init.d/ceph;
 
@@ -17,11 +19,8 @@ DAEMON=/usr/bin/vsm-conductor
 CONFIGFILE=/etc/vsm/vsm.conf
 PIDFILE=/var/run/vsm-conductor.pid
 LOGFILE=/var/log/vsm/vsm-conductor.log
-DAEMON_OPTS="--config-file $CONFIGFILE --log-file $LOGFILE"
 
 test -x $DAEMON || exit 5
-
-[ -e /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 
 LOCKFILE=/var/lock/vsm-conductor
 
@@ -46,7 +45,7 @@ case $1 in
 	start)
 		log_daemon_msg "Starting VSM server" "vsm-conductor"
 		lock_vsmconductor
-  		start-stop-daemon --start --quiet --oknodo --background --pidfile $PIDFILE --startas $DAEMON -- $DAEMON_OPTS
+  		start-stop-daemon --start --background --chuid $RUNASUSER --exec $DAEMON -- --config-file=$CONFIGFILE --log-file=$LOGFILE
   		PID=`ps -ef|grep vsm-conductor|awk -F ' ' '{ if($3==1) print $2 }'`
   		echo $PID > $PIDFILE
 
