@@ -239,18 +239,19 @@ def check_device_path(request):
     server_id = search_opts["server_id"]
     data_device_path = search_opts["data_device_path"]
     journal_device_path = search_opts["journal_device_path"]
-
-
-    ret = vsmapi.get_available_disks(request, search_opts={
-                "server_id": server_id
-                ,"path":[data_device_path,journal_device_path]
-            })
-
-
-    if ret["ret"] == 1 :
-        status_json = {"status":"OK"}
+    if data_device_path == journal_device_path:
+        status_json = {"status":"Failed",'message':'data_device_path and journal_device_path can not be the same hard disk'}
     else:
-        status_json = {"status":"Failed",'message':ret.get('message')}
+        ret = vsmapi.get_available_disks(request, search_opts={
+                    "server_id": server_id
+                    ,"path":[data_device_path,journal_device_path]
+                })
+
+
+        if ret["ret"] == 1 :
+            status_json = {"status":"OK"}
+        else:
+            status_json = {"status":"Failed",'message':ret.get('message')}
 
     status_data = json.dumps(status_json)
     return HttpResponse(status_data)

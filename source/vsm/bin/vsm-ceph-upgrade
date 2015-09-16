@@ -30,7 +30,7 @@ os==ubuntu14:
     Step 1 get pakages needed by ceph upgrading in controller node: vsm-ceph-upgrade -p http://ceph.com/debian-hammer/ -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc --proxy ...
     Step 2 upgrade ceph in agent nodes:vsm-ceph-upgrade
 os==centos7:
-    Step 1 get pakages needed by ceph upgrading in controller node: vsm-ceph-upgrade -p http://ceph.com/rpm-hammer/rhel7/ -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc --proxy ...
+    Step 1 get pakages needed by ceph upgrading in controller node: vsm-ceph-upgrade -p http://ceph.com/rpm-hammer/rhel7 -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc --proxy ...
     Step 2 upgrade ceph in agent nodes:vsm-ceph-upgrade
 
 Options:
@@ -48,13 +48,13 @@ EOF
 
 
 function get_ceph_upgrade_pkgs_in_controller() {
-    log_dir=/tmp/ceph-upgrade
+    log_dir=/tmp/ceph-upgrade.log
     rm -rf $log_dir
     echo '----------------begin-----------------------------------------' >$log_dir
-    rm -rf /opt/ceph_upgrade
-    mkdir -p  /opt/ceph_upgrade
-    mkdir -p /opt/ceph_upgrade/ceph_repo
-    cd /opt/ceph_upgrade
+    rm -rf /tmp/ceph_upgrade
+    mkdir -p  /tmp/ceph_upgrade
+    mkdir -p /tmp/ceph_upgrade/ceph_repo
+    cd /tmp/ceph_upgrade
     wget -q -O- $KEY_URL | sudo apt-key add -
     echo deb $PKG_URL $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list;
     echo '----------------ceph.list build success-------------------------' >>$log_dir;
@@ -68,22 +68,21 @@ function get_ceph_upgrade_pkgs_in_controller() {
     exp_ceph_upgrade >>$log_dir ;
     exp_ceph-mds_upgrade >>$log_dir ;
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
-    cp /var/cache/apt/archives/*.deb /opt/ceph_upgrade/ceph_repo/
-    cd /opt/ceph_upgrade/
+    cp /var/cache/apt/archives/*.deb /tmp/ceph_upgrade/ceph_repo/
+    cd /tmp/ceph_upgrade/
     dpkg-scanpackages ceph_repo | gzip > ceph_repo/Packages.gz
-    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do ssh $node "rm -rf /opt/ceph_repo";done
-    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /opt/ceph_upgrade/ceph_repo $node:/opt/;done
+    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /tmp/ceph_upgrade/ceph_repo $node:/tmp/;done
 }
 
 function build_ceph_upgrade_repo() {
     rm -rf /etc/apt/sources.list.d/ceph-uprage.list
-    echo deb file:///opt ceph_repo/ > /etc/apt/sources.list.d/ceph-uprage.list
+    echo deb file:///tmp ceph_repo/ > /etc/apt/sources.list.d/ceph-uprage.list
 }
 
 
 function ceph_upgrade_node() {
     build_ceph_upgrade_repo
-    log_dir=/tmp/ceph-upgrade
+    log_dir=/tmp/ceph-upgrade.log
     rm -rf $log_dir
     echo '----------------begin-----------------------------------------' >$log_dir
     rm -rf /var/lib/dpkg/info-bak;
@@ -104,13 +103,13 @@ function ceph_upgrade_node() {
 
 
 function get_ceph_upgrade_pkgs_in_controller_centos() {
-    log_dir=/tmp/ceph-upgrade
+    log_dir=/tmp/ceph-upgrade.log
     rm -rf $log_dir
     echo '----------------begin-----------------------------------------' >$log_dir
-    rm -rf /opt/ceph_upgrade
-    mkdir -p  /opt/ceph_upgrade
-    mkdir -p /opt/ceph_upgrade/ceph_repo
-    cd /opt/ceph_upgrade
+    rm -rf /tmp/ceph_upgrade
+    mkdir -p  /tmp/ceph_upgrade
+    mkdir -p /tmp/ceph_upgrade/ceph_repo
+    cd /tmp/ceph_upgrade
     rpm --import  $KEY_URL
     echo "
 [Ceph]
@@ -141,15 +140,14 @@ gpgkey=${KEY_URL}
     cd  /var/cache/yum/x86_64/7/
 
     if [[ `ls -l Ceph/packages|grep "^-"|wc -l` -gt 0 ]];then
-         cp Ceph/packages/*.rpm /opt/ceph_upgrade/ceph_repo
+         cp Ceph/packages/*.rpm /tmp/ceph_upgrade/ceph_repo
     fi
     if [[ `ls -l base/packages|grep "^-"|wc -l` -gt 0 ]];then
-        cp base/packages/*.rpm /opt/ceph_upgrade/ceph_repo
+        cp base/packages/*.rpm /tmp/ceph_upgrade/ceph_repo
     fi
-    cd /opt/ceph_upgrade
+    cd /tmp/ceph_upgrade
     createrepo ceph_repo
-    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do ssh $node "rm -rf /opt/ceph_repo";done
-    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /opt/ceph_upgrade/ceph_repo $node:/opt/;done
+    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /tmp/ceph_upgrade/ceph_repo $node:/tmp/;done
 }
 
 function build_ceph_upgrade_repo_centos() {
@@ -158,7 +156,7 @@ function build_ceph_upgrade_repo_centos() {
     echo "
 [cephrepo]
 name=cephrepo
-baseurl=file:///opt/ceph_repo
+baseurl=file:///tmp/ceph_repo
 gpgcheck=0
 enabled=1
 proxy=_none_" > /etc/yum.repos.d/ceph-uprage.repo
@@ -167,7 +165,7 @@ proxy=_none_" > /etc/yum.repos.d/ceph-uprage.repo
 
 function ceph_upgrade_node_centos() {
     build_ceph_upgrade_repo_centos
-    log_dir=/tmp/ceph-upgrade
+    log_dir=/tmp/ceph-upgrade.log
     rm -rf $log_dir
     echo '----------------begin-----------------------------------------' >$log_dir
     echo '---------------yum makecache  begin------------------------' >>$log_dir;
