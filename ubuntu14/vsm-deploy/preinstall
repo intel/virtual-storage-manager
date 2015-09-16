@@ -7,7 +7,7 @@ function preinstall_controller() {
 }
 
 function preinstall_agent() {
-    apt-get install -y ceph ceph-mds librbd* rbd-fuse ntp openssh-server python-keystoneclient smartmontools
+    apt-get install -y ceph ceph-mds librbd* rbd-fuse ntp openssh-server python-keystoneclient smartmontools expect
 }
 
 if [[ $1 ]]; then
