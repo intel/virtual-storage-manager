@@ -9,7 +9,7 @@ $(function(){
 
 
 function InitDialog(){
-	var dialogTitle = "SmartInfo";
+	var dialogTitle = "Device Status";
  	var dialogContent = $("#divOSDInfo")[0].innerHTML;
  	var modal = GenerateDialog(dialogTitle,dialogContent,true,"OK");
  	$("#divOSDInfo").remove();
