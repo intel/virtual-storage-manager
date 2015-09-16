@@ -1570,6 +1570,7 @@ class CephDriver(object):
 
     def get_smart_info(self, context, device):
         attributes, err = utils.execute('smartctl', '-A', device, run_as_root=True)
+        attributes = attributes.split('\n')
         start_line = self.find_attr_start_line(attributes)
         smart_info_dict = {'basic':{},'smart':{}}
         if start_line < 10:
@@ -1580,6 +1581,7 @@ class CephDriver(object):
 
 
         basic_info, err = utils.execute('smartctl', '-i', device, run_as_root=True)
+        basic_info = basic_info.split('\n')
         basic_info_dict = {}
         if len(basic_info)>=5:
             for info in basic_info[4:]:
@@ -1591,8 +1593,9 @@ class CephDriver(object):
         smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('Device Model') or ''
 
         status_info,err = utils.execute('smartctl', '-H', device, run_as_root=True)
+        status_info = status_info.split('\n')
         smart_info_dict['basic']['Drive Status'] = ''
-        if len(status_info)==5:
+        if len(status_info)>4:
             status_list = status_info[4].split(':')
             if len(status_list)== 2:
                 smart_info_dict['basic']['Drive Status'] = status_list[1]
