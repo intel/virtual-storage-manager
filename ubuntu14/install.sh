@@ -346,7 +346,7 @@ function install_controller() {
         cd $TOPDIR
     fi
     
-    generate_token
+#    generate_token
 }
 
 #-------------------------------------------------------------------------------
@@ -477,6 +477,7 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
+    generate_token
 #    if [[ $IS_CONTROLLER -eq 0 ]]; then
 #        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
 # $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
@@ -496,6 +497,7 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
+        generate_token
 #        if [[ $IS_CONTROLLER -eq 0 ]]; then
 #            TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
 # $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
