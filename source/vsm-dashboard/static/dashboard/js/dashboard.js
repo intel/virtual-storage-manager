@@ -183,20 +183,17 @@ function loadOSD(){
         $("#lblOSDCapacityNearFull")[0].innerHTML = data.capacity_near_full_count;
         $("#lblOSDCapacityFull")[0].innerHTML = data.capacity_full_count;
 
-        //data.in_down = 0;
-        //data.out_up = 1;
+        //data.capacity_near_full_count = 1;
 
         //init
         $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_health.png";
         //when error
-        if(data.in_down>0){
-            $("#divOSD")[0].style.border = "1px solid red";
+        if(data.in_down>0 || data.capacity_full_count){
             $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_error.png";
             return;
-	    }
+        }
         //when warnning
-        if(data.out_up>0){
-            $("#divOSD")[0].style.border = "1px solid orange";
+        if(data.out_up>0 || data.capacity_near_full_count){
             $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_warning.png";
             return;
         }         
@@ -260,13 +257,11 @@ function loadMDS(){
             $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_health.png";
             //when error
             if(data.Failed>0){
-                $("#divMDS")[0].style.border = "1px solid red";
                 $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_error.png";
                 return;
             }
             //when warnning
             if(data.Stopped>0){
-                $("#divMDS")[0].style.border = "1px solid orange";
                 $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_warning.png";
                 return;
             }         
@@ -286,6 +281,18 @@ function loadStorage(){
                 $("#divStorageNormal")[0].innerHTML = data.normal;
                 $("#divStorageNearFull")[0].innerHTML = data.nearfull;
                 $("#divStorageFull")[0].innerHTML = data.full;
+
+                 //when error
+                if(data.full>0){
+                    $("#imgStorageInfo")[0].src = "/static/dashboard/img/info_error.png";
+                    return;
+                }
+                //when warnning
+                if(data.nearfull>0){
+                    $("#imgStorageInfo")[0].src = "/static/dashboard/img/info_warning.png";
+                    return;
+                }
+
             }
      });
 }
