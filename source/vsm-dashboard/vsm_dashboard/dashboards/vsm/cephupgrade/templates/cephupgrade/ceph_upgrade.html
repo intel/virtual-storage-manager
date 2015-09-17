@@ -36,7 +36,8 @@
     </div>
     <div class="right">
         <h3>{% trans "Description" %}:</h3>
-        <p>{% trans "From here you can upgrade ceph.Before sumit,make sure  the network of VSM Controller Node is unobstructed.Notes:The formart of proxy is 'proxy=http://username:password@proxy_ip:port/'." %}</p>
+        <p>{% trans "From here you can upgrade ceph.Before submit,please make sure the Controller can access the package and key url." %}</p>
+        <p>{% trans "Notes: <br>- The formart of proxy is 'proxy=http://username:password@proxy_ip:port/'.<br>- Make sure the ssh user has made mutual trust with all ceph nodes." %}</p>
     </div>
 
     <div class="table_title" hidden="hidden">Ceph Upgrade</div>
