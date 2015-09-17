@@ -104,9 +104,9 @@ STATUS_DISPLAY_CHOICES = (
 
 class AddOSDAction(tables.LinkAction):
     name = "add_osd"
-    verbose_name = _("Add New OSD")
+    verbose_name = _("New")
     url = "/dashboard/vsm/devices-management/add_new_osd/"
-    classes = ('btn-danger',)
+    classes = ('btn-primary',)
 
 class OsdsTable(tables.DataTable):
     STATUS_CHOICES = (
