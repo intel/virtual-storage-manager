@@ -44,15 +44,15 @@ require(
             loadCapacity();
         },15000);
 
-  
+
     	//load Capacity
         loadPG();
         setInterval(function(){
             loadPG();
         },15000);
-    
 
-        //IOPS  
+
+        //IOPS
         loadIOP();
 
         //Latency
@@ -167,42 +167,40 @@ function loadClusterStatus(){
 
 function loadOSD(){
     $.ajax({
-	type: "get",
-	url: "/dashboard/vsm/osd/",
-	data: null,
-	dataType:"json",
-	success: function(data){
-	    // console.log(data);
-	    $("#lblOSDEpoch")[0].innerHTML = data.epoch;
-	    $("#lblOSDUpdate")[0].innerHTML = data.update;
-	    $("#divOSD_INUP")[0].innerHTML = data.in_up;
-	    $("#divOSD_INDOWN")[0].innerHTML = data.in_down;
-	    $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
-	    $("#divOSD_OUTDOWN")[0].innerHTML = data.out_down;
+    type: "get",
+    url: "/dashboard/vsm/osd/",
+    data: null,
+    dataType:"json",
+    success: function(data){
+        // console.log(data);
+        $("#lblOSDEpoch")[0].innerHTML = data.epoch;
+        $("#lblOSDUpdate")[0].innerHTML = data.update;
+        $("#divOSD_INUP")[0].innerHTML = data.in_up;
+        $("#divOSD_INDOWN")[0].innerHTML = data.in_down;
+        $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
+        $("#divOSD_OUTDOWN")[0].innerHTML = data.out_down;
         $("#lblOSDCapacityAvailable")[0].innerHTML = data.capacity_available_count;
         $("#lblOSDCapacityNearFull")[0].innerHTML = data.capacity_near_full_count;
         $("#lblOSDCapacityFull")[0].innerHTML = data.capacity_full_count;
 
-        //data.in_down = 0;
-        //data.out_up = 1;
+        //data.capacity_near_full_count = 1;
 
         //init
         $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_health.png";
         //when error
-        if(data.in_down>0){
-            $("#divOSD")[0].style.border = "1px solid red";
+        if(data.in_down>0 || data.capacity_full_count){
             $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_error.png";
             return;
-	    }
+        }
         //when warnning
-        if(data.out_up>0){
-            $("#divOSD")[0].style.border = "1px solid orange";
+        if(data.out_up>0 || data.capacity_near_full_count){
             $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_warning.png";
             return;
-        }         
-	}
+        }
+    }
     });
 }
+
 
 function loadMonitor(){
         $.ajax({
@@ -211,7 +209,7 @@ function loadMonitor(){
             data: null,
             dataType:"json",
             success: function(data){
-        		//console.log(data)                
+        		//console.log(data)
         		$("#lblMonitorEpoch")[0].innerHTML = data.epoch;
                 $("#lblMonitorUpdate")[0].innerHTML = data.update;
 
@@ -230,27 +228,27 @@ function loadMonitor(){
 }
 
 function loadMDS(){
-	$.ajax({
-	    type: "get",
-	    url: "/dashboard/vsm/mds/",
-	    data: null,
-	    dataType:"json",
-	    success: function(data){
-    		//console.log(data)
-    		$("#lblMDSEpoch")[0].innerHTML = data.epoch;
-    		$("#lblMDSUpdate")[0].innerHTML = data.update;
+    $.ajax({
+        type: "get",
+        url: "/dashboard/vsm/mds/",
+        data: null,
+        dataType:"json",
+        success: function(data){
+            //console.log(data)
+            $("#lblMDSEpoch")[0].innerHTML = data.epoch;
+            $("#lblMDSUpdate")[0].innerHTML = data.update;
 
             if(data.MetaData == null)
                 $("#divMDS_Metadata")[0].innerHTML = "0";
             else
-                $("#divMDS_Metadata")[0].innerHTML = "1";
+                $("#divMDS_Metadata")[0].innerHTML = data.MetaData;
 
             if(data.PoolData == null)
                 $("#divMDS_Data")[0].innerHTML = "0";
             else
                 $("#divMDS_Data")[0].innerHTML = data.PoolData.length;
 
-            
+
             $("#divMDS_IN")[0].innerHTML = data.In;
             $("#divMDS_UP")[0].innerHTML = data.Up;
             $("#divMDS_FAILED")[0].innerHTML = data.Failed;
@@ -260,19 +258,18 @@ function loadMDS(){
             $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_health.png";
             //when error
             if(data.Failed>0){
-                $("#divMDS")[0].style.border = "1px solid red";
                 $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_error.png";
                 return;
             }
             //when warnning
             if(data.Stopped>0){
-                $("#divMDS")[0].style.border = "1px solid orange";
                 $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_warning.png";
                 return;
-            }         
+            }
          }
-	});
+    });
 }
+
 
 function loadStorage(){
         $.ajax({
@@ -286,6 +283,17 @@ function loadStorage(){
                 $("#divStorageNormal")[0].innerHTML = data.normal;
                 $("#divStorageNearFull")[0].innerHTML = data.nearfull;
                 $("#divStorageFull")[0].innerHTML = data.full;
+
+                //when error
+                if(data.full>0){
+                    $("#imgStorageInfo")[0].src = "/static/dashboard/img/info_error.png";
+                    return;
+                }
+                //when warnning
+                if(data.nearfull>0){
+                    $("#imgStorageInfo")[0].src = "/static/dashboard/img/info_warning.png";
+                    return;
+                }
             }
      });
 }
@@ -329,18 +337,18 @@ function loadIOP(){
                     IOPs_EndTime = metrics[i].timestamp;
                     axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
 
-                    //add new node     
+                    //add new node
                     cIOPs.addData([
                         [
                             0,        //read line
-                            metrics[i].r_value, 
-                            false,    
+                            metrics[i].r_value,
+                            false,
                             false,
                         ],
                         [
                             1,        //write line
                             metrics[i].w_value,
-                            false,    
+                            false,
                             false,
                         ],
                         [
@@ -384,26 +392,26 @@ function loadLatency(){
                     Latency_EndTime = metrics[i].timestamp
                     var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
 
-                    //add new node     
+                    //add new node
                     cLatency.addData([
                         [
                             0,        //read line
-                            metrics[i].r_value, 
-                            false,    
+                            metrics[i].r_value,
+                            false,
                             false,
                         ],
                         [
                             1,        //write line
                             metrics[i].w_value,
-                            false,    
-                            false,    
+                            false,
+                            false,
                         ],
                         [
                             2,        //read_write line
                             metrics[i].rw_value,
-                            false,    
-                            false,    
-                            axisData 
+                            false,
+                            false,
+                            axisData
                         ]
                     ]);
                 }
@@ -438,20 +446,20 @@ function loadBandwidth(){
                     BandWidth_EndTime  = metrics[i].timestamp
                     var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
 
-                    //add new node     
+                    //add new node
                     cBandwidth.addData([
                         [
                             0,        //in
-                            metrics[i].in_value, 
-                            false,    
+                            metrics[i].in_value,
+                            false,
                             false,
                         ],
                         [
                             1,        //out
                             metrics[i].out_value,
-                            false,    
-                            false, 
-                            axisData  
+                            false,
+                            false,
+                            axisData
                         ]
                     ]);
                 }
@@ -912,7 +920,7 @@ function GetPieOption(AC,NAC){
 	    ],
             color:["green","orange"]
  	};
-                    
+
 	return option;
 }
 
