@@ -40,6 +40,8 @@ Options:
     pkg_url.
   --key_url | -k
     key_url.
+  --ssh_user
+    ssh_user.
   --proxy
     proxy.
 EOF
@@ -71,7 +73,11 @@ function get_ceph_upgrade_pkgs_in_controller() {
     cp /var/cache/apt/archives/*.deb /tmp/ceph_upgrade/ceph_repo/
     cd /tmp/ceph_upgrade/
     dpkg-scanpackages ceph_repo | gzip > ceph_repo/Packages.gz
-    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /tmp/ceph_upgrade/ceph_repo $node:/tmp/;done
+    if [[ -n $SSH_USER ]];then
+        for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do su -s /bin/sh -c "scp -r /tmp/ceph_upgrade/ceph_repo $SSH_USER@$node:/tmp/" $SSH_USER;done
+    else
+        for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /tmp/ceph_upgrade/ceph_repo $node:/tmp/;done
+    fi
 }
 
 function build_ceph_upgrade_repo() {
@@ -147,7 +153,11 @@ gpgkey=${KEY_URL}
     fi
     cd /tmp/ceph_upgrade
     createrepo ceph_repo
-    for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /tmp/ceph_upgrade/ceph_repo $node:/tmp/;done
+    if [[ -n $SSH_USER ]];then
+        for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do su -s /bin/sh -c "scp -r /tmp/ceph_upgrade/ceph_repo $SSH_USER@$node:/tmp/" $SSH_USER;done
+    else
+        for node in `echo "$STORAGE_NODE_LIST"|sed "s/,/ /g"`;do scp -r /tmp/ceph_upgrade/ceph_repo $node:/tmp/;done
+    fi
 }
 
 function build_ceph_upgrade_repo_centos() {
@@ -189,6 +199,7 @@ PKG_URL=""
 KEY_URL=""
 PROXY=""
 STORAGE_NODE_LIST=""
+SSH_USER=""
 while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
@@ -197,6 +208,7 @@ while [ $# -gt 0 ]; do
     -k | --key_url) shift;KEY_URL=$1  ;;
     -s | --storages) shift;STORAGE_NODE_LIST=$1  ;;
     --proxy) shift;PROXY=$1  ;;
+    --ssh_user) shift;SSH_USER=$1  ;;
     *) shift ;;
   esac
   shift

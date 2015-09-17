@@ -46,7 +46,11 @@ class CephUpgrade(forms.SelfHandlingForm):
                             min_length=1,
                             required=False,
                             )
-
+    ssh_user  = forms.CharField(label=_("SSH User Name"),
+                            max_length=255,
+                            min_length=1,
+                            required=False,
+                            )
 
     def __init__(self, request, *args, **kwargs):
         super(CephUpgrade, self).__init__(request, *args, **kwargs)
