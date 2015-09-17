@@ -243,7 +243,7 @@ function loadMDS(){
             if(data.MetaData == null)
                 $("#divMDS_Metadata")[0].innerHTML = "0";
             else
-                $("#divMDS_Metadata")[0].innerHTML = data.MetaData;
+                $("#divMDS_Metadata")[0].innerHTML = "1";
 
             if(data.PoolData == null)
                 $("#divMDS_Data")[0].innerHTML = "0";

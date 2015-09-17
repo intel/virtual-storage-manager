@@ -1498,8 +1498,7 @@ class CephDriver(object):
         LOG.info('agent/driver.py ceph_upgrade')
         err = 'success'
         try:
-            out, err = utils.execute('vsm-ceph-upgrade','-k',
-                             key_url,'-p', pkg_url,
+            out, err = utils.execute('vsm-ceph-upgrade',
                              run_as_root=True)
             LOG.info("exec vsm-ceph-upgrade:%s--%s"%(out,err))
             if restart:
@@ -1570,6 +1569,7 @@ class CephDriver(object):
 
     def get_smart_info(self, context, device):
         attributes, err = utils.execute('smartctl', '-A', device, run_as_root=True)
+        attributes = attributes.split('\n')
         start_line = self.find_attr_start_line(attributes)
         smart_info_dict = {'basic':{},'smart':{}}
         if start_line < 10:
@@ -1580,19 +1580,21 @@ class CephDriver(object):
 
 
         basic_info, err = utils.execute('smartctl', '-i', device, run_as_root=True)
+        basic_info = basic_info.split('\n')
         basic_info_dict = {}
         if len(basic_info)>=5:
             for info in basic_info[4:]:
                 info_list = info.split(':')
                 if len(info_list) == 2:
                     basic_info_dict[info_list[0]] = info_list[1]
-        smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('Device Model') or ''
+        smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('Device Model') or basic_info_dict.get('Vendor') or ''
         smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('Serial Number') or ''
         smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('Device Model') or ''
 
         status_info,err = utils.execute('smartctl', '-H', device, run_as_root=True)
+        status_info = status_info.split('\n')
         smart_info_dict['basic']['Drive Status'] = ''
-        if len(status_info)==5:
+        if len(status_info)>4:
             status_list = status_info[4].split(':')
             if len(status_list)== 2:
                 smart_info_dict['basic']['Drive Status'] = status_list[1]
