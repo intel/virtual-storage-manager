@@ -23,9 +23,9 @@ function usage() {
     cat << EOF
 Usage: $0
 
-Pack vsm:
+Build VSM Release Package:
     The tool can help to pull all necessary documents, binaries into one place,
-    and maintain an expected folder structure for following release package generation.
+    and maintain an expected folder structure, then generate a release package.
 
 Options:
   --help | -h
@@ -33,15 +33,6 @@ Options:
 EOF
     exit 0
 }
-
-VERSION=`cat VERSION`
-export VERSION
-RELEASE=`cat RELEASE`
-BUILD="${VERSION}-${RELEASE}"
-echo -n $BUILD
-echo -n $((++RELEASE)) > RELEASE
-RELEASE=$((--RELEASE))
-export RELEASE
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -58,6 +49,12 @@ set -o xtrace
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 #DATE=`date "+%Y%m%d"`
+
+VERSION=`cat VERSION`
+export VERSION
+RELEASE=`cat RELEASE`
+export RELEASE
+BUILD="${VERSION}-${RELEASE}"
 
 sed -i "s,Version: *.*,Version: $BUILD,g" $TOPDIR/source/python-vsmclient/PKG-INFO
 sed -i "s,Version: *.*,Version: $BUILD,g" $TOPDIR/source/vsm/PKG-INFO
@@ -149,6 +146,9 @@ function create_release() {
 create_release
 
 rm -rf $TEMP_VSM
+
+cd ${TOPDIR}
+echo -n $((++RELEASE)) > RELEASE
 
 set +o xtrace
 
