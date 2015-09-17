@@ -67,7 +67,8 @@ function GenerateCephUpgradeData() {
     var pkg_url = $("#id_package_url").val();
     var key_url = $("#id_key_url").val();
     var proxy = $("#id_proxy").val();
-    var data = {pkg_url:pkg_url,key_url:key_url,proxy:proxy};
+    var ssh_user = $("#id_ssh_user").val();
+    var data = {pkg_url:pkg_url,key_url:key_url,proxy:proxy,ssh_user:ssh_user};
     data_list.push(data);
     data = JSON.stringify(data_list);
     PostRequest(data);

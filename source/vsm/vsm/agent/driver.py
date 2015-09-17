@@ -1498,8 +1498,7 @@ class CephDriver(object):
         LOG.info('agent/driver.py ceph_upgrade')
         err = 'success'
         try:
-            out, err = utils.execute('vsm-ceph-upgrade','-k',
-                             key_url,'-p', pkg_url,
+            out, err = utils.execute('vsm-ceph-upgrade',
                              run_as_root=True)
             LOG.info("exec vsm-ceph-upgrade:%s--%s"%(out,err))
             if restart:
