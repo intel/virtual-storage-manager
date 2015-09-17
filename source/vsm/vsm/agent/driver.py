@@ -2385,7 +2385,7 @@ class CreateCrushMapDriver(object):
         self.conductor_api = conductor.API()
         self.conductor_rpcapi = conductor_rpcapi.ConductorAPI()
         self.osd_num = 0
-        self._crushmap_path = "/tmp/crushmap"
+        self._crushmap_path = "/var/run/vsm/crushmap"
         fd = open(self._crushmap_path, 'w')
         fd.write("")
         fd.close()
@@ -2443,7 +2443,7 @@ class CreateCrushMapDriver(object):
                         run_as_root=True)
 
     def create_crushmap(self, context, server_list):
-        LOG.info("DEBUG Begin to create crushmap file in /tmp/crushmap")
+        LOG.info("DEBUG Begin to create crushmap file in %s" % self._crushmap_path)
         LOG.info("DEBUG in create_crushmap body is %s" % server_list)
         service_id = []
         for i in server_list:
@@ -2471,10 +2471,10 @@ class CreateCrushMapDriver(object):
 
     def set_crushmap(self, context):
         LOG.info("DEBUG Begin to set crushmap")
-        utils.execute('crushtool', '-c', '/tmp/crushmap', '-o',
-                        '/tmp/compiled_crushmap', run_as_root=True)
+        utils.execute('crushtool', '-c', self._crushmap_path, '-o',
+                        self._crushmap_path+"_compiled", run_as_root=True)
         utils.execute('ceph', 'osd', 'setcrushmap', '-i',
-                        '/tmp/compiled_crushmap', run_as_root=True)
+                        self._crushmap_path+"_compiled", run_as_root=True)
 
         #the following is zone version to solve "active_remaped" etc.Don't delete it! 
         #utils.execute('crushtool', '-c', '/tmp/crushmap', 
