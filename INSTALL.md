@@ -3,15 +3,15 @@
 ==================================
 
 
-**Version:** 2.0.0.153
+**Version:** 2.0.0.195
 
-**Source:** 2015-08-14
+**Source:** 2015-09-18
 
 **Keywords:** Ceph, Openstack, Virtual Storage Management
 
 **Supported Combo:**
 
-	OS:			Ubuntu 14.04.2
+	OS:			Ubuntu 14.04.2/CentOS 7
 	Ceph: 		Firefly/Giant/Hammer
 	OpenStack:	Havana/Icehouse/Juno
 
@@ -505,9 +505,45 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 
 **Q: Can I define the ceph version I want to install?**
 
-	A: VSM can work with different Ceph releases like Firefly, Giant and Hammer. By default, it will use the ceph version provided by OS distro, often it’s an latest stable version.
-	If user expects to use some specific ceph version, he need add the new ceph repo into /etc/apt/sources.list.d/ceph.list to override OS distro’s defaults before installation. For example, below commands could help setup a ceph repo for Firefly on ubuntu:
+	A: 
+	VSM can work with different Ceph releases like Firefly, Giant and Hammer. By default, it will use the ceph version provided by OS distro, often it’s an latest stable version.
+	If user expects to use some specific ceph version, he/she needs add the new ceph repo into system repository. 
+
+	For ubuntu, user could create /etc/apt/sources.list.d/ceph.list to override OS distro’s defaults before installation. For example, below commands could help setup a ceph repo for Hammer on ubuntu:
 		>
 		> sudo rm /etc/apt/sources.list.d/ceph.list
-		> echo deb http://ceph.com/debian-firefly/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
-		>
+		> echo deb http://ceph.com/debian-hammer/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
+
+
+	For CentOS, creating /etc/yum.repos.d/ceph.repo at first, then filling the ceph.repo shown below: 
+		###################
+		[ceph]
+		name=Ceph packages for $basearch
+		baseurl=http://ceph.com/rpm-hammer/el6/$basearch
+		enabled=1
+		priority=2
+		gpgcheck=1
+		type=rpm-md
+		gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+		 
+		[ceph-noarch]
+		name=Ceph noarch packages
+		baseurl=http://ceph.com/rpm-hammer/el6/noarch
+		enabled=1
+		priority=2
+		gpgcheck=1
+		type=rpm-md
+		gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+		 
+		[ceph-source]
+		name=Ceph source packages
+		baseurl=http://ceph.com/rpm-hammer/el6/SRPMS
+		enabled=0
+		priority=2
+		gpgcheck=1
+		type=rpm-md
+		gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+		##############
+
+	In 2.0, VSM also provides ceph upgrade feature from Web UI under "Cluster Management" menu.
+	
