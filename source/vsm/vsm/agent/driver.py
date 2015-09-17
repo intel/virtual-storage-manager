@@ -1587,7 +1587,7 @@ class CephDriver(object):
                 info_list = info.split(':')
                 if len(info_list) == 2:
                     basic_info_dict[info_list[0]] = info_list[1]
-        smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('Device Model') or ''
+        smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('Device Model') or basic_info_dict.get('Vendor') or ''
         smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('Serial Number') or ''
         smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('Device Model') or ''
 
