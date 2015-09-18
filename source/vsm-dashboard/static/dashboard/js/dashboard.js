@@ -487,40 +487,43 @@ function loadCPU(){
             data: JSON.stringify({"timestamp":CPU_EndTime }),
             dataType: "json",
             success: function (data) {
-                cCPU.clear();
-                var timestampList = new Array();
-                var legendList = new Array();
-                var seriesList = new Array();
-                //get the timestamp list
-                for (var i = 0; i < data.time.length; i++) {
-                    if(i == data.time.length - 1){
-                        CPU_EndTime = data.time[i]
+                if(data.time.length>0){
+                    cCPU.clear();
+                    var timestampList = new Array();
+                    var legendList = new Array();
+                    var seriesList = new Array();
+                    //get the timestamp list
+                    for (var i = 0; i < data.time.length; i++) {
+                        if(i == data.time.length - 1){
+                            CPU_EndTime = data.time[i]
+                        }
+                        var axisData = new Date(parseInt(data.time[i]) * 1000).format("hh:mm:ss")
+                        timestampList.push(axisData);
                     }
-                    var axisData = new Date(parseInt(data.time[i]) * 1000).format("hh:mm:ss")
-                    timestampList.push(axisData);
-                }
 
-                for(var i=0; i<data.cpus.length;i++){
-                    var cpu = data.cpus[i];
-                    //get the legend list
-                    legendList.push(cpu.name);
-                    var series = {
-                            name:cpu.name,
-                            type:'line',
-                            smooth:true,
-                            data:[]
-                    };
+                    for(var i=0; i<data.cpus.length;i++){
+                        var cpu = data.cpus[i];
+                        //get the legend list
+                        legendList.push(cpu.name);
+                        var series = {
+                                name:cpu.name,
+                                type:'line',
+                                smooth:true,
+                                data:[]
+                        };
 
 
-                    for(var j=0;j<cpu.data.length;j++){
-                        series.data.push(cpu.data[j])
+                        for(var j=0;j<cpu.data.length;j++){
+                            series.data.push(cpu.data[j])
+                        }
+                        seriesList.push(series);
                     }
-                    seriesList.push(series);
+                    cCPU.setOption(GenerateCPUOption(timestampList,legendList,seriesList));
                 }
-                cCPU.setOption(GenerateCPUOption(timestampList,legendList,seriesList));
 
                 //Reload the data
                 loadCPU();
+
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
 
