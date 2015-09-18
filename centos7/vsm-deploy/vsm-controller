@@ -153,10 +153,12 @@ if [[ ! $MYSQL_ROOT_PASSWORD ]]; then
     if [[ -e /etc/my.cnf ]]; then
         if [[ `cat /etc/my.cnf | grep firsttime | wc -l` -gt 0 ]]; then
             if [[ -e /etc/vsmdeploy/deployrc ]]; then
-                str=`cat /etc/vsmdeploy/deployrc |
+                MYSQL_ROOT_PASSWORD=`cat /etc/vsmdeploy/deployrc |
                     grep MYSQL_ROOT_PASSWORD |
                     awk -F "=" '{print $2}'`
-                MYSQL_ROOT_PASSWORD=$str
+                MYSQL_VSM_PASSWORD=`cat /etc/vsmdeploy/deployrc |
+                    grep MYSQL_VSM_PASSWORD |
+                    awk -F "=" '{print $2}'`
             else
                 if [[ -e ~/.mysql_password ]]; then
                     source ~/.mysql_password
