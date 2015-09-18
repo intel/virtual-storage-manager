@@ -1589,7 +1589,7 @@ class CephDriver(object):
                     basic_info_dict[info_list[0]] = info_list[1]
         smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('Device Model') or basic_info_dict.get('Vendor') or ''
         smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('Serial Number') or ''
-        smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('Device Model') or ''
+        smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('Firmware Version') or ''
 
         status_info,err = utils.execute('smartctl', '-H', device, run_as_root=True)
         status_info = status_info.split('\n')
