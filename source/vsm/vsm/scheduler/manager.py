@@ -580,7 +580,7 @@ class SchedulerManager(manager.Manager):
                 is_unavail = True if ser['status'] == 'unavailable' else False
                 self._remove_success(context,
                                      ser['id'],
-                                     "storage",
+                                     "mds",
                                      is_unavail=is_unavail)
         except rpc_exc.Timeout:
             for ser in remove_storage_list:
