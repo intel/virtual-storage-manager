@@ -291,12 +291,12 @@ class SchedulerManager(manager.Manager):
                and monitor_node['type'].find('monitor') != -1:
                 if not __is_in(monitor_node['host']):
                     active_monitor_list.append(monitor_node)
-        if len(active_monitor_list) < 2:
-            LOG.error('There must be 2 monitor in the cluster')
+        if len(active_monitor_list) < 1:
+            LOG.error('There must be 1 monitor in the cluster')
             try:
                 raise MonitorException
             except:
-                LOG.error("There must be 2 monitor in the monitor")
+                LOG.error("There must be 1 monitor in the cluster")
             return False
 
         # select an active monitor
