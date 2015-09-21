@@ -3125,7 +3125,7 @@ def osd_state_count_by_storage_group_id(context, storage_group_id):
         filter_by(storage_group_id=storage_group_id).\
         filter(models.OsdState.state!=FLAGS.vsm_status_uninitialized).\
         count()
-    LOG.info('osd cnt ====%s'%result)
+    #LOG.info('osd cnt ====%s'%result)
     return result
 
 def osd_state_count_service_id_by_storage_group_id(context, storage_group_id):

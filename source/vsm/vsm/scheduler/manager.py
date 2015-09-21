@@ -1174,7 +1174,6 @@ class SchedulerManager(manager.Manager):
             for ser in server_list:
                 if ser['is_monitor'] == True:
                     count += 1
-            LOG.info('is monitor--1111--%s'%count)
             if count < pool_default_size:
                 rest_mon_num = pool_default_size - count
             if rest_mon_num > 0:
