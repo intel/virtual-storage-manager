@@ -952,7 +952,7 @@ class SchedulerManager(manager.Manager):
             err = 'success'
         except:
             LOG.info("vsm-ceph-upgrade in controller node:%s"%err)
-            return {"message":"ceph upgrade unsuccessful.Please make sure that the URLs are reachable.%s"%err}
+            return {"message":"ceph upgrade unsuccessful.Please make sure that the URLs are reachable."}
         LOG.info("ceph upgrade of scheduer manager %s" % server_list)
         status_all = [node['status'] for node in server_list ]
         status_all = list(set(status_all))
