@@ -3,16 +3,16 @@
 ==================================
 
 
-**Version:** 2.0.0.195
+**Version:** 2.0.0.201
 
-**Source:** 2015-09-18
+**Source:** 2015-09-20
 
 **Keywords:** Ceph, Openstack, Virtual Storage Management
 
 **Supported Combo:**
 
 	OS:			Ubuntu 14.04.2/CentOS 7
-	Ceph: 		Firefly/Giant/Hammer
+	Ceph: 		Firefly/Giant*/Hammer
 	OpenStack:	Havana/Icehouse/Juno
 
 	(Other combos might also be working, but we didn't try yet.)
@@ -135,8 +135,169 @@ So all of the three VSM networks use the same subnet, The configurations in `clu
 	>     [ceph_cluster_addr]
 	>     192.168.123.0/24
 
+#Deployment
+Deployment involves building the four required Ceph cluster nodes, configuring them for Ceph/VSM deployment, and then deploying VSM (which also deploys Ceph).
 
-#Automatic Deployment
+##Pre-Flight Configuration
+
+Some pre-flight configuration steps are required before you attempt to deploy your newly built tarball:
+
+1.	Create four Ubuntu 14.04 virtual machines. One of them will be the VSM controller, the other three will be storage nodes in the cluster. VSM requires a minimum of three storage nodes and one controller. There are many configurations you could use, but this is the simplest that is still fully functional. Since the controller and storage nodes are nearly identical to each other, we'll just specify and install the controller node VM and then clone it for a storage node. We'll then add storage devices to the storage node and clone that one twice more for the other two storage nodes, as follows:
+	1.	Choose a user that will be the ceph/vsm user - something like cephuser.
+	2.	Ensure ntp is configured and refers to a good time source (this is pretty much automatic with Ubuntu).
+	3.	Ensure OpenSSH server software is installed:
+
+2.	Once the OS installation process has completed and the system has rebooted, login to the controller as cephuser and update and upgrade the system to ensure that the very latest Ubuntu software is installed (download this script):
+
+	**Update System**
+	>     $ sudo apt-get update
+	>     ...
+	>     $ sudo apt-get upgrade
+	>     ...
+	>     $ sudo apt-get dist-upgrade
+	>     ...
+	>     
+	Answer 'Y' to all the prompts (or just press 'enter' - most of them default to 'Y' anyway).
+
+3.	Edit the /etc/hosts file and remove any secondary localhost addresses (e.g., 127.0.1.1) and ensure the primary localhost address (127.0.0.1) does not refer to the actual host name, but rather only to "localhost". This is necessary (as explained in the VSM deployment wiki page in item 3 of the Automatic Deployment section) because VSM deployment will sync the /etc/hosts file to the cluster storage nodes - you don't want system A referring to localhost via system B's host name.
+
+4.	Make the cephuser a super user with respect to sudo (download this script):
+Make cephuser a Super User
+	>     $ echo "cephuser ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
+	>     $ sudo chmod 0440 /etc/sudoers.d/cephuser
+
+	**VERY IMPORTANT**: These commands add an effective line to the sudoers file that allows cephuser to do anything in sudo without a password. This is necessary because often the VSM deployment script performs remote operations using commands prefixed with ssh cephuser@remote-node sudo ...  which will fail if sudo requires a password, as there's no way to front sudo's interactive password prompt at the controller end of the command.
+
+5.	Shut down the controller and clone it for the first storage node.
+
+6.	Edit the VM settings for the clone and add two additional virtual hard drives (/dev/sdb and /dev/sdc); these will be the storage node's data store. Ceph likes to use the xfs file system with a separate journal. The journal drive can be smaller than the data drive. As per xfs documentation, the size of the journal drive depends on how you intend to use the storage space on the data drive but for this experiment a few GB is sufficient for journaling.
+
+7.	Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:
+
+	**Ubuntu Host Rename**
+	>     $ sudo hostname vsm-store1
+	>     Logout and reboot to allow the DNS server to pick up the new name.
+
+8.	Login again as cephuser and run the following commands to prepare the /dev/sdb and /dev/sdc devices for Ceph use as a storage device (download this script):
+
+	**Partition /dev/sdb for XFS**
+	>     $ sudo parted /dev/sdb -- mklabel gpt
+	>     [sudo] password for cephuser: ******
+	>     Information: You may need to update /etc/fstab.
+
+	>     $ sudo parted -a optimal /dev/sdb -- mkpart xfs 1MB 100%
+	>     Information: You may need to update /etc/fstab.
+
+	>     $ sudo parted /dev/sdc -- mklabel gpt
+	>     Information: You may need to update /etc/fstab.
+
+	>     $ sudo parted -a optimal /dev/sdc -- mkpart primary 1MB 100%
+	>     Information: You may need to update /etc/fstab.
+
+	This formats the /dev/sdb device and adds an XFS file system, and then formats the /dev/sdc device in preparation for use as an xfs journal.
+
+9.	Logout and shut down the first storage node and clone it twice more to create the remaining two storage nodes.
+
+10.	Power these system on one at a time and change the host names of each so they're unique (I named mine, vsm-controller, vsm-node1, vsm-node2, and vsm-node3, for instance). NOTE: This can be tricky in our dynamic DHCP environment where DNS is populated by querying hosts as they request addresses.
+
+11.	Power them on and edit the /etc/hosts files on each of the four VMs; append entries mapping each of the node names to their DHCP IP addresses:
+Additional Entries on Each Node's /etc/hosts File
+	>     ...
+	>     10.50.33.75 vsm-controller
+	>     10.50.33.76 vsm-node1
+	>     10.50.33.77 vsm-node2
+	>     10.50.33.78 vsm-node3
+
+	This step is only necessary to ensure a stable name-to-IP mapping among the nodes. Without doing this in a dynamic DHCP setting like ours, you could find the DNS server is not quick enough picking up the host names and mapping them to their DHCP provided IP addresses in the DNS database. The end result is that deployment tends to fail because DNS can't find the host (yet). This step is, of course, not needed if you're using static IP addresses.
+
+12.	On each of the four systems, create an ssh key for the cephuser account (don't set any passwords on the key), then copy the ssh identity on each of the four nodes to the other three. For instance, on the controller node:
+
+	**Create an SSH Key**
+	>     
+	>     cephuser@vsm-controller:~$ ssh-keygen
+	>     Generating public/private rsa key pair.
+	>     Enter file in which to save the key (/home/cephuser/.ssh/id_rsa):
+	>     Enter passphrase (empty for no passphrase):
+	>     Enter same passphrase again:
+	>     Your identification has been saved in /home/cephuser/.ssh/id_rsa.
+	>     Your public key has been saved in /home/cephuser/.ssh/id_rsa.pub.
+	>     The key fingerprint is:
+	>     ee:4d:85:19:69:26:0b:06:55:b5:f4:c6:7a:43:e2:2a cephuser@vsm->     
+	>     controller
+	>     The key's randomart image is:
+	>     +--[ RSA 2048]----+
+	>     |    ......o      |
+	>     |     .   . =     |
+	>     |      o . B =    |
+	>     |     . . * O     |
+	>     |        S = +    |
+	>     |       . . o .   |
+	>     |      E o .      |
+	>     |       o o       |
+	>     |        . .      |
+	>     +-----------------+
+
+	>     cephuser@vsm-controller:~$ ssh-copy-id vsm-node1
+	>     The authenticity of host 'vsm-node1 (10.50.33.75)' can't be established.
+	>     ECDSA key fingerprint is b6:29:c3:eb:3c:01:09:68:2b:bc:ab:29:f3:3c:15:58.
+	>     Are you sure you want to continue connecting (yes/no)? yes
+	>     /usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+	>     /usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+	>     cephuser@vsm-node1's password: ******
+	>     Number of key(s) added: 1
+	>     Now try logging into the machine, with:   "ssh 'vsm-node1'"
+	>     and check to make sure that only the key(s) you wanted were added.
+	>     cephuser@vsm-controller:~$ ssh-copy-id vsm-node2
+	>     ...
+	>     cephuser@vsm-controller:~$ ssh-copy-id vsm-node3
+	>     ...
+	>     Do the same on each of the other nodes; this will allow the deployment process to ssh from any node to any node without credentials.
+
+13.	On the controller node, set a root password and su into the root account, 	then copy the .ssh directory from /home/cephuser/.ssh to /root/.ssh so you 	can deploy as root (via sudo) and still have password-less access to the 	cephuser accounts on each of the other nodes:
+	>     Copy /home/cephuser/.ssh to /root/.ssh
+	>     cephuser@vsm-controller:~$ sudo passwd root
+	>     [sudo] password for cephuser:
+	>     Enter new UNIX password:
+	>     Retype new UNIX password:
+	>     passwd: password updated successfully
+	>     cephuser@vsm-controller:~$ su -
+	>     Password: ******
+	>     root@vsm-controller:~# cp -r /home/cephuser/.ssh .ssh
+
+14.	At this point, it might be a good idea to take a VMware snapshot of these four systems so you have a clean starting point if you wish to restart from scratch.
+
+15.	Copy the built tarball from your build system to the controller node's cephuser account home directory.
+
+16.	Extract the tarball (it will create its own root directory). It should expand to a directory that looks something like this:
+The Expanded Release Tarball
+
+	>     .
+	>     ├── CHANGELOG.md
+	>     ├── CHANGELOG.pdf
+	>     ├── debs.lst
+	>     ├── get_pass.sh
+	>     ├── INSTALL.md
+	>     ├── INSTALL.pdf
+	>     ├── installrc
+	>     ├── install.sh
+	>     ├── LICENSE
+	>     ├── manifest
+	>     │   ├── cluster.manifest.sample
+	>     │   └── server.manifest.sample
+	>     ├── NOTICE
+	>     ├── README.md
+	>     ├── RELEASE
+	>     ├── uninstall.sh
+	>     ├── VERSION
+	>     └── vsmrepo
+	>         ├── Packages.gz
+	>         ├── python-vsmclient_2.0.0-149_amd64.deb
+	>         ├── vsm_2.0.0-149_amd64.deb
+	>         ├── vsm-dashboard_2.0.0-149_amd64.deb
+	>         └── vsm-deploy_2.0.0-149_amd64.deb
+	>         
+
+##Automatic Deployment
 Starting with VSM 1.1, an automatic deployment tool is provided which can simplify the deployment. This tool is still in development, so your feedback and JIRA reports of any problems are very welcome.
 
 This section will describe how to use the tool to conduct automation.
@@ -204,7 +365,7 @@ This section will describe how to use the tool to conduct automation.
 
 9. Now we are ready to start the automatic procedure by executing this command line:
 	>
-	> 	sudo ./install.sh -u ubuntu -v <version>
+	> 	./install.sh -u ubuntu -v <version>
 	>
 
 	where *version* is the vsm version like 1.1, 2.0.
@@ -505,9 +666,9 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 
 **Q: Can I define the ceph version I want to install?**
 
-	A: 
+	A:
 	VSM can work with different Ceph releases like Firefly, Giant and Hammer. By default, it will use the ceph version provided by OS distro, often it’s an latest stable version.
-	If user expects to use some specific ceph version, he/she needs add the new ceph repo into system repository. 
+	If user expects to use some specific ceph version, he/she needs add the new ceph repo into system repository.
 
 	For ubuntu, user could create /etc/apt/sources.list.d/ceph.list to override OS distro’s defaults before installation. For example, below commands could help setup a ceph repo for Hammer on ubuntu:
 		>
@@ -515,7 +676,7 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 		> echo deb http://ceph.com/debian-hammer/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
 
 
-	For CentOS, creating /etc/yum.repos.d/ceph.repo at first, then filling the ceph.repo shown below: 
+	For CentOS, creating /etc/yum.repos.d/ceph.repo at first, then filling the ceph.repo shown below:
 		###################
 		[ceph]
 		name=Ceph packages for $basearch
@@ -525,7 +686,7 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 		gpgcheck=1
 		type=rpm-md
 		gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
-		 
+
 		[ceph-noarch]
 		name=Ceph noarch packages
 		baseurl=http://ceph.com/rpm-hammer/el6/noarch
@@ -534,7 +695,7 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 		gpgcheck=1
 		type=rpm-md
 		gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
-		 
+
 		[ceph-source]
 		name=Ceph source packages
 		baseurl=http://ceph.com/rpm-hammer/el6/SRPMS
@@ -546,4 +707,15 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 		##############
 
 	In 2.0, VSM also provides ceph upgrade feature from Web UI under "Cluster Management" menu.
-	
+
+**Q: Can VSM be installed on ubuntu desktop version?**
+
+	A: We don't well test it on ubuntu desktop, but we know this kind of case, one common issue to be encountered is:
+		Error: "Activation of org.freedesktop.secrets timed out"
+
+	The workaround is to execute below command to temporary disable gnome-keyring service.
+		mv /usr/share/dbus-1/services/org.freedesktop.secrets.service /usr/share/dbus-1/services/org.freedesktop.secrets.service.bak
+
+**Q: Why I can't upgrade from Firefly to Giant?**
+
+	A: There are a few missing packages in Giant repository like python-rados, librados2-devel, python-cephfs, python-rbd, librbd1-devel. you'd find out them and install in advance before upgrade. There is a ceph issue is for it at http://tracker.ceph.com/issues/10476#change-46231.
