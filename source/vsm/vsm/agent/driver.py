@@ -320,7 +320,19 @@ class CephDriver(object):
                 region_name = region_name
             )
             volume_type = pool_type + "-" + pool_name
-            if volume_type not in cinderclient.volume_types.list():
+            def _get_volume_type_list():
+                volume_type_list = []
+                i = 0
+                while i < 5:
+                    try:
+                        volume_type_list = cinderclient.volume_types.list()
+                        i = 5
+                    except:
+                        i = i + 1
+                        time.sleep(i)
+                return volume_type_list
+
+            if volume_type not in [type.name for type in _get_volume_type_list()]:
                 cinderclient.volume_types.create(volume_type)
                 LOG.info("creating volume type = %s" % volume_type)
 
@@ -1597,7 +1609,7 @@ class CephDriver(object):
         if len(status_info)>4:
             status_list = status_info[4].split(':')
             if len(status_list)== 2:
-                smart_info_dict['basic']['Drive Status'] = status_list[1]
+                smart_info_dict['basic']['Drive Status'] = len(status_list[1]) < 10 and status_list[1] or ''
         LOG.info("get_smart_info_dict:%s"%(smart_info_dict))
         return smart_info_dict
 

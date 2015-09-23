@@ -119,7 +119,7 @@ function get_ceph_upgrade_pkgs_in_controller_centos() {
     rpm --import  $KEY_URL
     echo "
 [Ceph]
-name=Ceph packages for $basearch
+name=Ceph packages for \$basearch
 baseurl=${PKG_URL}\$basearch
 enabled=1
 gpgcheck=1
