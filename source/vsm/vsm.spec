@@ -287,6 +287,7 @@ install -p -D -m 755 bin/cluster_manifest %{buildroot}%{_usr}/local/bin/cluster_
 install -p -D -m 755 bin/server_manifest  %{buildroot}%{_usr}/local/bin/server_manifest
 install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/local/bin/refresh-osd-status
 install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/local/bin/refresh-cluster-status
+install -p -D -m 755 bin/check_xtrust_crudini %{buildroot}%{_usr}/local/bin/check_xtrust_crudini
 install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/local/bin/getip
 install -p -D -m 755 bin/import_ceph_conf  %{buildroot}%{_usr}/local/bin/import_ceph_conf
 install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
@@ -478,6 +479,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/server_manifest
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/refresh-osd-status
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/refresh-cluster-status
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/check_xtrust_crudini
 
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/get_storage
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/spot_info_list

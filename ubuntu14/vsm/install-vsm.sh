@@ -85,6 +85,7 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/cluster_man
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/server_manifest
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/refresh-osd-status
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/refresh-cluster-status
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/check_xtrust_crudini
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/getip
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/get_storage
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/spot_info_list

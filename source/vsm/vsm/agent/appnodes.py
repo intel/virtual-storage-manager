@@ -28,6 +28,18 @@ from vsm.openstack.common.db import exception as db_exc
 
 import json
 import urllib2
+import os
+import commands
+
+try:
+    from novaclient.v1_1 import client as nc
+except:
+    from novaclient.v2 import client as nc
+
+try:
+    from cinderclient.v1 import client as cc
+except:
+    from cinderclient.v2 import client as cc
 
 LOG = logging.getLogger(__name__)
 
@@ -89,6 +101,49 @@ def create(contxt, auth_openstack=None, allow_duplicate=False):
 
     if not auth_openstack:
         raise exception.AppNodeInvalidInfo()
+
+    novaclient = nc.Client(
+        auth_openstack['os_username'],
+        auth_openstack['os_password'],
+        auth_openstack['os_tenant_name'],
+        auth_openstack['os_auth_url'],
+        region_name = auth_openstack['os_region_name']
+    )
+    nova_services = novaclient.services.list()
+    nova_compute_hosts = []
+    for nova_service in nova_services:
+        if nova_service.binary == "nova-compute":
+            nova_compute_hosts.append(nova_service.host)
+
+    cinderclient = cc.Client(
+        auth_openstack['os_username'],
+        auth_openstack['os_password'],
+        auth_openstack['os_tenant_name'],
+        auth_openstack['os_auth_url'],
+        region_name = auth_openstack['os_region_name']
+    )
+    cinder_services = cinderclient.services.list()
+    cinder_volume_hosts = []
+    for cinder_service in cinder_services:
+        if cinder_service.binary == "cinder-volume":
+            cinder_volume_hosts.append(cinder_service.host)
+
+    hosts = list(set(nova_compute_hosts + cinder_volume_hosts))
+    print hosts
+
+    for host in hosts:
+        result, err = utils.execute(
+                'check_xtrust_crudini',
+                auth_openstack['xtrust_user'],
+                host,
+                run_as_root = True
+        )
+        LOG.info("==============result: %s" % result)
+        LOG.info("==============result: %s" % err)
+        if "command not found" in err:
+            raise Exception("Command not found on %s" % host)
+        if "Permission denied" in err:
+            raise Exception("Please check the mutual trust between vsm nodes and openstack nodes")
 
     ref = []
 
