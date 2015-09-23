@@ -48,6 +48,8 @@
 		</div>
  	</form>
  <div id="divFormOptions" class="vsm-options-bar">
+          <input id="lblUpdateUser" type="hidden" value="{{ user.username }}"/>
+          <input id="lblLoginUser" type="hidden" value="{{ request.user.username }}"/>
           <input id="btnCreateUser"  class="btn btn-primary" type="submit" value="Create User" />
           <a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/usermgmt/">Cancel</a>
       </div>

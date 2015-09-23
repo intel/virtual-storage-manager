@@ -138,8 +138,6 @@ class UpdateView(forms.ModalFormView):
 
 def create_user(request):
     data = json.loads(request.body)
-    print "============create user================="
-    print data
 
     try:
         admin_tenant = get_admin_tenant(request)
@@ -164,8 +162,6 @@ def create_user(request):
 
 def update_pwd(request):
     data = json.loads(request.body)
-    print "=============update pwd================"
-    print data
 
     api.keystone.user_update_password(request, data["id"], data["pwd"])
     resp = dict(message="Update User", status="OK", data="")
