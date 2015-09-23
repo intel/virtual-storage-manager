@@ -2,6 +2,9 @@ $(function(){
 	//load css
 	InitCtrlCSS();
 
+	//check the login user
+	CheckLoginUser();
+
 	$(".form-control-feedback.glyphicon.glyphicon-eye-open").hide();
 })
 
@@ -14,6 +17,13 @@ function InitCtrlCSS(){
 	var ctrlPwd = $("input[type='password']");
 	for(var i=0;i<ctrlPwd.length;i++){
 		ctrlPwd[i].className = "form-control";
+	}
+}
+
+//the logining user can't delete himself
+function CheckLoginUser(){
+	if($("#lblLoginUser").val() != "admin"){
+		$(".btn.btn-small.dropdown-toggle").remove();
 	}
 }
 

@@ -21,8 +21,25 @@
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=_("Users") %}
+
 {% endblock page_header %}
 
 {% block main %}
     {{ table.render }}
+    <input id="lblUpdateUser" type="hidden" value="{{ user.username }}"/>
+    <input id="lblLoginUser" type="hidden" value="{{ request.user.username }}"/>
 {% endblock %}
+
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
+    <script src="{{ STATIC_URL }}dashboard/js/user.js"></script>
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
+    <script src="{{ STATIC_URL }}dashboard/js/user.js"></script>
+{% endblock %}
+

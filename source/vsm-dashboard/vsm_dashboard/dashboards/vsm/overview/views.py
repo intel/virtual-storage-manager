@@ -202,7 +202,6 @@ def get_OSD():
             else:
                 available_count = available_count + 1
 
-        print _osd.state
         if _osd.state == "In-Up":
             in_up=in_up+1
         elif _osd.state == "In-Down":

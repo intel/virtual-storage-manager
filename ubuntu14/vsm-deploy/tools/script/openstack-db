@@ -162,10 +162,10 @@ if ! service_running mysql; then
     esac
   fi
 
-  start_service 'mariadb'
+  start_service mysql
 
   # If we both installed and started, ensure it starts at boot
-  [ $NEW_MYSQL_INSTALL -eq 1 ] && systemctl enable mariadb.service
+#  [ $NEW_MYSQL_INSTALL -eq 1 ] && systemctl enable mariadb.service
 fi
 
 # Get MySQL root access.
