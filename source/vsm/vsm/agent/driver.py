@@ -1597,7 +1597,7 @@ class CephDriver(object):
         if len(status_info)>4:
             status_list = status_info[4].split(':')
             if len(status_list)== 2:
-                smart_info_dict['basic']['Drive Status'] = status_list[1]
+                smart_info_dict['basic']['Drive Status'] = len(status_list[1]) < 10 and status_list[1] or ''
         LOG.info("get_smart_info_dict:%s"%(smart_info_dict))
         return smart_info_dict
 
