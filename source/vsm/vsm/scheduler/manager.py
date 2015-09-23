@@ -952,7 +952,7 @@ class SchedulerManager(manager.Manager):
             err = 'success'
         except:
             LOG.info("vsm-ceph-upgrade in controller node:%s"%err)
-            return {"message":"ceph upgrade unsuccessful.Please make sure that the URLs are reachable.%s"%err}
+            return {"message":"ceph upgrade unsuccessful.Please make sure that the URLs are reachable."}
         LOG.info("ceph upgrade of scheduer manager %s" % server_list)
         status_all = [node['status'] for node in server_list ]
         status_all = list(set(status_all))
@@ -1174,7 +1174,6 @@ class SchedulerManager(manager.Manager):
             for ser in server_list:
                 if ser['is_monitor'] == True:
                     count += 1
-            LOG.info('is monitor--1111--%s'%count)
             if count < pool_default_size:
                 rest_mon_num = pool_default_size - count
             if rest_mon_num > 0:
