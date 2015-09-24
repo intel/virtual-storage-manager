@@ -1,0 +1,2 @@
+#!/bin/bash
+su -s /bin/bash -c "exec ssh $1@$2 crudini --version" $1

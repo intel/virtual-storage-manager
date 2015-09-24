@@ -65,6 +65,14 @@ class AddOpenstackEndpointForm(forms.SelfHandlingForm):
         min_length = 0,
         required = False
     )
+    xtrust_user = forms.CharField(
+        label = _("XTrust User"),
+        max_length = 255,
+        min_length = 1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
+    )
 
     def handle(self, request, data):
         pass
@@ -146,6 +154,14 @@ class UpdateOpenstackEndpointForm(forms.SelfHandlingForm):
         max_length = 255,
         min_length = 0,
         required = False
+    )
+    xtrust_user = forms.CharField(
+        label = _("XTrust User"),
+        max_length = 255,
+        min_length = 1,
+        error_messages = {
+            'required': _('This field is required.')
+        }
     )
 
     def handle(self, request, data):

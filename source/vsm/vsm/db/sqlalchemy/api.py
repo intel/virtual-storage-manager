@@ -3237,7 +3237,6 @@ def appnodes_create(context, values, allow_duplicate=False):
         appnodes_ref.save()
     except db_exc.DBDuplicateEntry as e:
         raise exception.DuplicateAppnode(ip=values['os_auth_url'], err=e.message)
-
     return appnodes_ref
 
 @require_context

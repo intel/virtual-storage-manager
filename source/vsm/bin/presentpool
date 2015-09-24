@@ -42,42 +42,12 @@ if [[ $1 == "nova" ]]; then
     exit 0
 fi
 
-
-#
-##------------------------------------------
-## Usage: ./main ip tenant_name username password pool,type
-##------------------------------------------
-#has_segma=`echo $4 | grep "," | wc -l`
-#if [[ $# -eq 4 && $has_segma -gt 0 ]]; then
-#    source $TOPDIR/server/multiple
-#    setup_multiple $@
-#    exit 0
-#fi
-#
-##------------------------------------------
-## Usage: ./main ip pool
-##------------------------------------------
-#if [[ $# -eq 4 && $has_segma -eq 0 ]]; then
-#    source $TOPDIR/server/single
-#    setup_single $@
-#    exit 0
-#fi
-#
-##------------------------------------------
-## Usage: ./main ip pool,type pool,type
-##------------------------------------------
-#if [[ $# -gt 4 && $has_segma -gt 0 ]]; then
-#    source $TOPDIR/server/multiple
-#    setup_multiple $@
-#    exit 0
-#fi
-
 #------------------------------------------
 # Report error.
 #------------------------------------------
-echo "The number of parameter can't less than 4."
-echo "Usage: ./presentpool type uuid volume_host pool_name,pool_type"
-echo "Usage: ./presentpool type uuid compute_host"
+echo "The number of parameter can't less than 5."
+echo "Usage: ./presentpool type xtrust_user uuid volume_host pool_name,pool_type"
+echo "Usage: ./presentpool type xtrust_user uuid compute_host"
 exit 0
 
 set +o xtrace
