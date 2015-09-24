@@ -28,6 +28,8 @@ from vsm.openstack.common import log as logging
 from vsm.api.views import poolusages as poolusages_views
 from vsm.openstack.common.gettextutils import _
 from vsm.scheduler.api import API as scheduler_api
+from vsm import db
+from vsm import utils
 
 """Storage pool usage API"""
 
@@ -87,31 +89,42 @@ class PoolUsagesController(wsgi.Controller):
 
         context = req.environ['vsm.context']
         pools = body['poolusages']
-        # cinder_volume_host_list = [pool['cinder_volume_host'] for pool in pools]
+
+        appnode_id = pools[0]['appnode_id']
+        appnode = db.appnodes_get_by_id(context, appnode_id)
+        xtrust_user = appnode['xtrust_user']
+
+        cinder_volume_host_list = [pool['cinder_volume_host'] for pool in pools]
         # id_list = [pool['id'] for pool in pools]
 
         # check openstack access
         host_list = []
-        # count_crudini = 0
-        # count_ssh = 0
-        # for host in cinder_volume_host_list:
-        #     (status, output) = commands.getstatusoutput('sudo ssh root@%s "crudini --version"' % host)
-        #     LOG.info(str(status) + "========" + output)
-        #     if "command not found" in output:
-        #         count_crudini = count_crudini + 1
-        #         host_list.append(host)
-        #     if "Permission denied" in output:
-        #         count_ssh = count_ssh + 1
-        #         host_list.append(host)
-        # if count_crudini != 0:
-        #     return {'status': 'bad', 'host': list(set(host_list))}
-        # elif count_ssh != 0:
-        #     return {'status': 'unreachable', 'host': list(set(host_list))}
-        # else:
-        info = storagepoolusage.create(context, pools)
-        LOG.info(' pools_info = %s' % info)
-        self.scheduler_api.present_storage_pools(context, info)
-        return {'status': 'ok', 'host': host_list}
+        count_crudini = 0
+        count_ssh = 0
+        for host in cinder_volume_host_list:
+            result, err = utils.execute(
+                'check_xtrust_crudini',
+                xtrust_user,
+                host,
+                run_as_root = True
+            )
+            LOG.info("========" + result)
+            LOG.info("========" + err)
+            if "command not found" in err:
+                count_crudini = count_crudini + 1
+                host_list.append(host)
+            if "Permission denied" in err:
+                count_ssh = count_ssh + 1
+                host_list.append(host)
+        if count_crudini != 0:
+            return {'status': 'bad', 'host': list(set(host_list))}
+        elif count_ssh != 0:
+            return {'status': 'unreachable', 'host': list(set(host_list))}
+        else:
+            info = storagepoolusage.create(context, pools)
+            LOG.info(' pools_info = %s' % info)
+            self.scheduler_api.present_storage_pools(context, info)
+            return {'status': 'ok', 'host': host_list}
 
     @wsgi.serializers(xml=PoolUsagesTemplate)
     def update(self, req, id, body):
