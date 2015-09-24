@@ -643,6 +643,7 @@ class Appnode(BASE, VsmBase):
     os_password = Column(String(length=50), nullable=False)
     os_auth_url = Column(String(length=255), nullable=False)
     os_region_name = Column(String(length=255), nullable=True)
+    xtrust_user = Column(String(length=255), nullable=False)
     uuid = Column(String(length=255), nullable=False)
     vsmapp_id = Column(Integer, ForeignKey(Vsmapp.id), nullable=False)
     ssh_status = Column(String(length=50), nullable=True)

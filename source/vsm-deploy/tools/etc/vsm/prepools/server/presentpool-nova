@@ -17,8 +17,9 @@
 
 function setup_nova() {
     local app_type=$1
-    local uuid=$2
-    local vsmapp_ip=$3
+    local xtrust_user=$2
+    local uuid=$3
+    local vsmapp_ip=$4
 
     source $TOPDIR/server/tarfile
 
@@ -26,5 +27,5 @@ function setup_nova() {
     AUTH_CINDER_USER=client.${AUTH_CINDER_UUID}
     AUTH_CINDER_POOL=$pool_name
 
-    gen_tar_file $app_type $vsmapp_ip $TOPDIR/lib/config-nova
+    gen_tar_file $app_type $xtrust_user $vsmapp_ip $TOPDIR/lib/config-nova
 }

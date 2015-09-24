@@ -105,7 +105,7 @@ class AppnodesController(wsgi.Controller):
             # status = 'reachable'
             # appnodes.update(context, node.id, status)
 
-        return node_view
+        return webob.Response(status_int=201)
 
     @wsgi.serializers(xml=AppnodesTemplate)
     def delete(self, req, id):

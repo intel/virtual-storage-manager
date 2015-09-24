@@ -18,8 +18,9 @@
 
 function gen_tar_file() {
     local app_type=$1
-    local vsmapp_ip=$2
-    local install_file=$3
+    local xtrust_user=$2
+    local vsmapp_ip=$3
+    local install_file=$4
 
     TEMP=`mktemp`; rm -rf $TEMP; mkdir -p $TEMP/prepools
     cp -rf /etc/vsm/prepools/* $TEMP/prepools/
@@ -59,8 +60,9 @@ EOF
 
     cd $TEMP
     tar zcf prepools.tar.gz prepools
-    ssh $vsmapp_ip "mkdir -p $TEMP"
-    scp -pr prepools.tar.gz $vsmapp_ip:/$TEMP
-    ssh $vsmapp_ip "cd $TEMP; tar zxf prepools.tar.gz"
-    ssh $vsmapp_ip "cd $TEMP/prepools/; ./install"
+    su -s /bin/bash -c "exec ssh $vsmapp_ip \"mkdir -p $TEMP\"" $xtrust_user
+    su -s /bin/bash -c "exec scp -pr prepools.tar.gz $vsmapp_ip:/$TEMP" $xtrust_user
+    su -s /bin/bash -c "exec scp -pr prepools.tar.gz $vsmapp_ip:/$TEMP" $xtrust_user
+    su -s /bin/bash -c "exec ssh $vsmapp_ip \"cd $TEMP; tar zxf prepools.tar.gz\"" $xtrust_user
+    su -s /bin/bash -c "exec ssh $vsmapp_ip \"cd $TEMP/prepools/; sudo ./install\"" $xtrust_user
 }

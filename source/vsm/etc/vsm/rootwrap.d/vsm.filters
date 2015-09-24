@@ -38,6 +38,7 @@ mkfs.xfs: CommandFilter, /sbin/mkfs.xfs, root
 key: CommandFilter, /usr/bin/key, root
 vsm-assist: CommandFilter, /usr/bin/vsm-assist, root
 presentpool: CommandFilter, /usr/bin/presentpool, root
+check_xtrust_crudini: CommandFilter, /usr/local/bin/check_xtrust_crudini, root
 start_osd: CommandFilter, /usr/local/bin/start_osd, root
 mkfs: CommandFilter, /sbin/mkfs, root
 mount: CommandFilter, /bin/mount, root
