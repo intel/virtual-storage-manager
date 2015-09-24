@@ -184,6 +184,50 @@ def update(contxt, appnode_id, appnode):
     os_password = appnode['os_password']
     os_auth_url = appnode['os_auth_url']
     os_region_name = appnode['os_region_name']
+    xtrust_user = appnode['xtrust_user']
+
+    novaclient = nc.Client(
+        os_username,
+        os_password,
+        os_tenant_name,
+        os_auth_url,
+        region_name = os_region_name
+    )
+    nova_services = novaclient.services.list()
+    nova_compute_hosts = []
+    for nova_service in nova_services:
+        if nova_service.binary == "nova-compute":
+            nova_compute_hosts.append(nova_service.host)
+
+    cinderclient = cc.Client(
+        os_username,
+        os_password,
+        os_tenant_name,
+        os_auth_url,
+        region_name = os_region_name
+    )
+    cinder_services = cinderclient.services.list()
+    cinder_volume_hosts = []
+    for cinder_service in cinder_services:
+        if cinder_service.binary == "cinder-volume":
+            cinder_volume_hosts.append(cinder_service.host)
+
+    hosts = list(set(nova_compute_hosts + cinder_volume_hosts))
+    print hosts
+
+    for host in hosts:
+        result, err = utils.execute(
+                'check_xtrust_crudini',
+                xtrust_user,
+                host,
+                run_as_root = True
+        )
+        LOG.info("==============result: %s" % result)
+        LOG.info("==============result: %s" % err)
+        if "command not found" in err:
+            raise Exception("Command not found on %s" % host)
+        if "Permission denied" in err:
+            raise Exception("Please check the mutual trust between vsm nodes and openstack nodes")
 
     """validate openstack access info"""
     try:
