@@ -122,7 +122,7 @@ class AddOSDView(TemplateView):
         for _sg in storage_group_list:
             sg = {
                 "id":_sg.id
-                ,"storage_class":_sg.storage_class
+                ,"name":_sg.name
             }
             storage_group.append(sg)
         context["storage_group"] = storage_group
