@@ -165,10 +165,14 @@
     font-weight: bold;
     /*border:1px solid #ccc;*/
 }
-
 /**
  * PG module
  */
+
+#divPGContent{
+    height: 290px;
+}
+
 #divPG{
     width: 250px;
     margin-top: -20px;
@@ -178,6 +182,7 @@
     width:90%;
     height:219px;
 }
+
 
 /**
  * IOPs module
