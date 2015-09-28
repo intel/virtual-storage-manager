@@ -4,7 +4,7 @@ horizon.addInitFunction(function() {
   allPanelGroupBodies.each(function(index, value) {
     var activePanels = $(this).find('li > a.active');
     if(activePanels.length === 0) {
-      //$(this).slideUp(0);
+      $(this).slideUp(0);
     }
   });
 
