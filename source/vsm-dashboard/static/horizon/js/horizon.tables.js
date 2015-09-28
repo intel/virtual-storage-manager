@@ -98,8 +98,10 @@ horizon.datatables = {
             horizon.datatables.validate_button();
           }
         });
+      });
 
-         // Set interval decay to this table, and increase if it already exist
+
+        // Set interval decay to this table, and increase if it already exist
         if(decay_constant === undefined) {
           decay_constant = 1;
         } else {
@@ -110,9 +112,8 @@ horizon.datatables = {
         next_poll = interval * decay_constant;
         // Limit the interval to 30 secs
         if(next_poll > 30 * 1000) { next_poll = 30 * 1000; }
-        setTimeout(horizon.datatables.update, next_poll);
+        setTimeout(horizon.datatables.update, 15000);
 
-      });
     }
   },
 
