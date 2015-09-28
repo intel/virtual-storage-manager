@@ -1247,4 +1247,7 @@ def get_latency(context, search_opts):
 
 def get_cpu_usage(context, search_opts):
     return IMPL.cpu_data_get_usage(context, search_opts=search_opts)
+
+def clean_performance_history_data(context,days):
+    return IMPL.clean_performance_history_data(context,days)
 #endregion
