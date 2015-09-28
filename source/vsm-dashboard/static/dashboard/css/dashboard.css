@@ -252,5 +252,13 @@
     border-color: #ac2925;
 }
 
+#imgExpandCollapse{
+    cursor: pointer;
+}
+
+#imgExpandCollapse:hover{
+    cursor: pointer;
+}
+
 
 

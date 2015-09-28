@@ -96,6 +96,17 @@ function HidePageHeader(){
     $(".page-header").hide();
 }
 
+function ShowPerformace(){
+    if($("#divPerformanceCantainer")[0].style.display == "none"){
+        $("#divPerformanceCantainer").show();
+        $("#imgExpandCollapse")[0].src = "/static/dashboard/img/collapse.png";
+    }
+    else{
+        $("#divPerformanceCantainer").hide();
+        $("#imgExpandCollapse")[0].src = "/static/dashboard/img/expand.png";
+    }
+}
+
 function loadVersion(){
     $.ajax({
 	type: "get",

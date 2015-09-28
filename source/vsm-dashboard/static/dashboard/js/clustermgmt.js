@@ -21,6 +21,11 @@
         checkboxCell[i].className = "multi_select_column";
     }
 
+    //Disable all the navigation
+    $(".nav_accordion>dd>div>ul>li>a").each(function(){
+        $(this).attr('href', '#');
+    });
+
     $(".create-cluster-commit").click(function(){
         var rows_num = $(".modal-body .zone").length - 1;
         console.log(rows_num);
