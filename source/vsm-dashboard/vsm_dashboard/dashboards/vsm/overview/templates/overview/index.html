@@ -255,33 +255,41 @@
                 
 
             <!--VSM Throughput & Latency-->
-            <div id="divIOPs" class="vsm-block">
-                <h4 class="vsm-block-title">IOPS</h4>
-                <div class="vsm-block-content">
-                     <div id="divIOPsContent" class="vsm-chart-rect">
-                     </div>
+            <div id="divPerformance" style="border:0px solid #ccc;overflow:hidden;float:left;width:100%">
+                <div id="divPerformanceOption" style="height:60px;line-height:30px;border-bottom:0px solid #ccc;padding:5px;overflow:hidden;width:100%">
+                     <h4 style="display:inline-block">Performance</h4>
+                     <img id="imgExpandCollapse" src="{{ STATIC_URL }}dashboard/img/collapse.png" onclick="ShowPerformace()" />
+                     <hr/>
                 </div>
-            </div>
-            <div id="divLatency" class="vsm-block">
-                 <h4 class="vsm-block-title">Latency (MilliSeconds)</h4>
-                 <div class="vsm-block-content">
-                    <div id="divLatencyContent" class="vsm-chart-rect">
+                <div id="divPerformanceCantainer" >
+                    <div id="divIOPs" class="vsm-block">
+                        <h4 class="vsm-block-title">IOPS</h4>
+                        <div class="vsm-block-content">
+                             <div id="divIOPsContent" class="vsm-chart-rect">
+                             </div>
+                        </div>
                     </div>
-                 </div>
-            </div>
-            <div id="divBandwidth" class="vsm-block">
-                 <h4 class="vsm-block-title">Bandwidth (MB/s)</h4>
-                 <div class="vsm-block-content"> 
-                    <div id="divBandwidthContent" class="vsm-chart-rect">
+                    <div id="divLatency" class="vsm-block">
+                         <h4 class="vsm-block-title">Latency (MilliSeconds)</h4>
+                         <div class="vsm-block-content">
+                            <div id="divLatencyContent" class="vsm-chart-rect">
+                            </div>
+                         </div>
                     </div>
-                 </div>
-            </div>
-            <div id="divCPU" class="vsm-block">
-                 <h4 class="vsm-block-title">CPU (%)</h4>
-                 <div class="vsm-block-content"> 
-                    <div id="divCPUContent" class="vsm-chart-rect">
+                    <div id="divBandwidth" class="vsm-block">
+                         <h4 class="vsm-block-title">Bandwidth (MB/s)</h4>
+                         <div class="vsm-block-content">
+                            <div id="divBandwidthContent" class="vsm-chart-rect">
+                            </div>
+                         </div>
                     </div>
-                 </div>
+                    <div id="divCPU" class="vsm-block">
+                         <h4 class="vsm-block-title">CPU (%)</h4>
+                         <div class="vsm-block-content">
+                            <div id="divCPUContent" class="vsm-chart-rect">
+                            </div>
+                         </div>
+                    </div>
             </div>
         </div>
     </div>

@@ -1,7 +1,7 @@
 /* Namespace for core functionality related to DataTables. */
 horizon.datatables = {
   update: function () {
-    //Shouan:if table have no data and using ajax to update, the page will be messy
+    //if table have no data and using ajax to update, the page will be messy
     var td = $(".ajax-update.status_unknown.odd>td");
     if(td.length > 0 && td[0].innerHTML == "No items to display."){
       return false;
@@ -96,22 +96,24 @@ horizon.datatables = {
           complete: function (jqXHR, textStatus) {
             // Revalidate the button check for the updated table
             horizon.datatables.validate_button();
-
-            // Set interval decay to this table, and increase if it already exist
-            if(decay_constant === undefined) {
-              decay_constant = 1;
-            } else {
-              decay_constant++;
-            }
-            $table.attr('decay_constant', decay_constant);
-            // Poll until there are no rows in an "unknown" state on the page.
-            next_poll = interval * decay_constant;
-            // Limit the interval to 30 secs
-            if(next_poll > 30 * 1000) { next_poll = 30 * 1000; }
-            setTimeout(horizon.datatables.update, next_poll);
           }
         });
       });
+
+
+        // Set interval decay to this table, and increase if it already exist
+        if(decay_constant === undefined) {
+          decay_constant = 1;
+        } else {
+          decay_constant++;
+        }
+        $table.attr('decay_constant', decay_constant);
+        // Poll until there are no rows in an "unknown" state on the page.
+        next_poll = interval * decay_constant;
+        // Limit the interval to 30 secs
+        if(next_poll > 30 * 1000) { next_poll = 30 * 1000; }
+        setTimeout(horizon.datatables.update, 15000);
+
     }
   },
 

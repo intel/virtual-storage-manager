@@ -16,6 +16,8 @@
 
 import logging
 import json
+import os
+import commands
 
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse_lazy
@@ -54,6 +56,7 @@ class IndexView(tables.DataTableView):
                 "os_password": _appnode.os_password,
                 "os_auth_url": _appnode.os_auth_url,
                 "os_region_name": _appnode.os_region_name,
+                "xtrust_user": _appnode.xtrust_user,
                 "ssh_status": _appnode.ssh_status,
                 "log_info": _appnode.log_info
             }
@@ -100,7 +103,8 @@ class UpdateView(forms.ModalFormView):
             'os_username': appnode.os_username,
             'os_password': appnode.os_password,
             'os_auth_url': appnode.os_auth_url,
-            'os_region_name': appnode.os_region_name
+            'os_region_name': appnode.os_region_name,
+            "xtrust_user": appnode.xtrust_user
         }
 
 def create_action(request):
@@ -114,6 +118,7 @@ def create_action(request):
         os_password = data['os_password']
         os_auth_url = data['os_auth_url']
         os_region_name = data['os_region_name']
+        xtrust_user = data['xtrust_user']
 
         body = {
             'appnodes': {
@@ -121,16 +126,17 @@ def create_action(request):
                 'os_username': os_username,
                 'os_password': os_password,
                 'os_auth_url': os_auth_url,
-                'os_region_name': os_region_name
+                'os_region_name': os_region_name,
+                'xtrust_user': xtrust_user
             }
         }
         LOG.info("CEPH_LOG in handle body %s" % str(body))
         vsmapi.add_appnodes(request, body['appnodes'])
-        status = "OK"
+        status = "info"
         msg = "Create Openstack Access Successfully!"
     except:
-        status = "Failed"
-        msg = "Create Openstack Access Failed!"
+        status = "error"
+        msg = "Create Openstack Access Failed! Please check crudini command and mutual trust"
 
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
@@ -146,6 +152,7 @@ def update_action(request):
         os_password = data.pop('os_password')
         os_auth_url = data.pop('os_auth_url')
         os_region_name = data.pop('os_region_name')
+        xtrust_user = data.pop('xtrust_user')
         vsmapi.update_appnode(
             request, id,
             os_tenant_name=os_tenant_name,
@@ -153,6 +160,7 @@ def update_action(request):
             os_password=os_password,
             os_auth_url=os_auth_url,
             os_region_name=os_region_name,
+            xtrust_user=xtrust_user,
             ssh_status="",
             log_info=""
         )

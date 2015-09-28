@@ -511,6 +511,9 @@ vsm_settings_opts = [
     cfg.IntOpt('ceph_diamond_collect_interval',
                default=15,
                help='ceph perf data collect interval (secs) with diamond'),
+    cfg.IntOpt('keep_performance_data_days',
+           default=7,
+           help='keep performance data days(days)'),
 ]
 
 FLAGS.register_opts(vsm_settings_opts)

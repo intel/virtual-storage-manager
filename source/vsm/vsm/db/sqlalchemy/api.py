@@ -3237,7 +3237,6 @@ def appnodes_create(context, values, allow_duplicate=False):
         appnodes_ref.save()
     except db_exc.DBDuplicateEntry as e:
         raise exception.DuplicateAppnode(ip=values['os_auth_url'], err=e.message)
-
     return appnodes_ref
 
 @require_context
@@ -4173,3 +4172,9 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
             timestamp = cell[0]/diamond_collect_interval*diamond_collect_interval
             ret_list.append({'host':cell[1], 'timestamp':timestamp, 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list
+
+def clean_performance_history_data(context,days):
+    session = get_session()
+    timestamp = time.time() - int(days) * 24 * 3600
+    sql_str = 'delete from metrics where timestamp<%s'%timestamp
+    session.execute(sql_str)
