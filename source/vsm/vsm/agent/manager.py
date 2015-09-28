@@ -1098,6 +1098,17 @@ class AgentManager(manager.Manager):
             values['state'] = osd_status
             self._conductor_rpcapi.\
                 osd_state_update(context, values)
+    @periodic_task(service_topic=FLAGS.agent_topic,
+                   spacing=10)
+    def clean_performance_history_data(self, context):
+        key = 'keep_performance_data_days'
+        setting = db.vsm_settings_get_by_name(CTXT, key)
+        if setting:
+            days = setting.get('value')
+        else:
+            days = '7'
+            db.vsm_settings_update_or_create(context, {'name':key,'value':days})
+        db.clean_performance_history_data(context,days)
 
     #@require_active_host
     @periodic_task(run_immediately=True, service_topic=FLAGS.agent_topic,

@@ -2189,15 +2189,22 @@ class CephDriver(object):
 
     def _mon_summary(self, sum_dict):
         if sum_dict:
+            quorum_leader_name = self.get_quorum_status().get('quorum_leader_name')
             mon_data = {
                 'monmap_epoch': sum_dict.get('monmap').get('epoch'),
                 'monitors': len(sum_dict.get('monmap').get('mons')),
                 'election_epoch': sum_dict.get('election_epoch'),
                 'quorum': json.dumps(' '.join(sum_dict.get('quorum_names'))).strip('"'),
-                'overall_status': json.dumps(sum_dict.get('health').get('overall_status')).strip('"')
+                'overall_status': json.dumps(sum_dict.get('health').get('overall_status')).strip('"'),
+                'quorum_leader_name':quorum_leader_name,
             }
             return json.dumps(mon_data)
+    def get_quorum_status(self):
+        args = ['ceph', 'quorum_status']
+        out = self._run_cmd_to_json(args)
+        return out
 
+        return out
     def _cluster_summary(self, sum_dict):
         if sum_dict:
             cluster_data = {
@@ -2855,6 +2862,8 @@ class DiamondDriver(object):
         out, err = utils.execute('sed','-i','%s,$d'%(len(content)+1), config_file, run_as_root=True)
         out, err = utils.execute('diamond', 'll', run_as_root=True)
         return out
+
+
 
 
 

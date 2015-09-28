@@ -163,7 +163,7 @@ def get_cluster():
 #get the capactiy data
 def get_capacity():
     pg_summary = vsmapi.placement_group_summary(None)
-    used_percent = ('%.2f'%((pg_summary.bytes_used/pg_summary.bytes_total)*100)); 
+    used_percent = ('%.2f'%((pg_summary.bytes_used/pg_summary.bytes_total)*100));
     capacity_dict = {"value":used_percent}
     capacitydata = json.dumps(capacity_dict)
     return capacitydata
@@ -230,12 +230,13 @@ def get_monitor():
     epoch = monitor_summary.monmap_epoch
     update = get_time_delta(monitor_summary.updated_at)
     quorumlist = monitor_summary.quorum.split(" ")
+    quorum_leader_name = monitor_summary.quorum_leader_name
+    leader_list_index = quorumlist.index(quorum_leader_name)
     #monitors = monitor_summary.monitors
-
     Monitor_dict = {"epoch":epoch
               ,"update":update
               ,"quorum":quorumlist
-              ,"selMonitor":1}
+              ,"selMonitor":leader_list_index}
     Monitordata = json.dumps(Monitor_dict)
     return Monitordata
 
@@ -300,11 +301,11 @@ def get_PG():
     pg_summary = vsmapi.placement_group_summary(None)
     version = pg_summary.version
     update = get_time_delta(pg_summary.updated_at)
-    pg_total = pg_summary.num_pgs   
+    pg_total = pg_summary.num_pgs
     pg_active_clean = sum([pgs['count'] for pgs in pg_summary.pgs_by_state
                                         if pgs['state_name'] == "active+clean"])
     pg_not_active_clean = sum([pgs['count'] for pgs in pg_summary.pgs_by_state
-                                        if pgs['state_name'] != "active+clean"])  
+                                        if pgs['state_name'] != "active+clean"])
     pg_dict = {"version":version
               ,"update":update
               ,"total":pg_total
