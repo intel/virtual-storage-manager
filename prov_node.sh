@@ -33,12 +33,12 @@ manifest=$1
 ip=$2
 host=$3
 
-server_manifest $manifest
+#server_manifest $manifest
 
-if [ $? ]; then
-	echo "some errors found in server manifest file, please correct them first"
-	exit -2
-fi
+#if [ $? ]; then
+#	echo "some errors found in server manifest file, please correct them first"
+#	exit -2
+#fi
 
 ssh-copy-id $ip
 
