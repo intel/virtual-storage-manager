@@ -205,7 +205,7 @@ def get_OSD():
         if _osd.state == "In-Up":
             in_up=in_up+1
         elif _osd.state == "In-Down":
-            in_dowm=in_down+1
+            in_down=in_down+1
         elif _osd.state == "Out-Up":
             out_up=out_up+1
         elif _osd.state == "Out-Down":
