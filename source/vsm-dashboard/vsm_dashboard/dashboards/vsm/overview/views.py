@@ -208,7 +208,7 @@ def get_OSD():
             in_down=in_down+1
         elif _osd.state == "Out-Up":
             out_up=out_up+1
-        elif _osd.state == "Out-Down":
+        elif _osd.state == "Out-Down" or _osd.state == "Out-Down-Autoout":
             out_down=out_down+1
 
     OSD_dict = {"epoch":osd_summary.epoch
