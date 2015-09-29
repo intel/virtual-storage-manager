@@ -204,7 +204,7 @@ function loadOSD(){
             return;
         }
         //when warnning
-        if(data.out_up>0 || data.capacity_near_full_count){
+        if(data.out_up>0 || data.out_down || data.capacity_near_full_count){
             $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_warning.png";
             return;
         }
