@@ -208,7 +208,7 @@ def get_OSD():
             in_down=in_down+1
         elif _osd.state == "Out-Up":
             out_up=out_up+1
-        elif _osd.state == "Out-Down":
+        elif _osd.state == "Out-Down" or _osd.state == "Out-Down-Autoout":
             out_down=out_down+1
 
     OSD_dict = {"epoch":osd_summary.epoch
@@ -280,12 +280,12 @@ def get_storage():
     for _sg in _sgs:
         _sg.capacity_total = 1 if not _sg.capacity_total else _sg.capacity_total
         capcity_percent_used = 0 if not _sg.capacity_total else _sg.capacity_used * 100 / _sg.capacity_total
-        if capcity_percent_used < settings["storage_group_near_full_threshold"]:
-            _num_normal+=1
-        elif capcity_percent_used < settings["storage_group_full_threshold"]:
+        if capcity_percent_used > settings["storage_group_full_threshold"]:
+             _num_full+=1
+        elif capcity_percent_used > settings["storage_group_near_full_threshold"]:
             _num_near_full+=1
         else:
-            _num_full+=1
+            _num_normal+=1
         _num+=1
 
     Storage_dict = {"nearfull":_num_near_full
