@@ -22,9 +22,12 @@
     }
 
     //Disable all the navigation
-    $(".nav_accordion>dd>div>ul>li>a").each(function(){
-        $(this).attr('href', '#');
-    });
+    if($("#server_list__action_create_cluster").length > 0){
+        //Disable all the navigation
+        $(".nav_accordion>dd>div>ul>li>a").each(function(){
+            $(this).attr('href', '#');
+        });
+    }
 
     $(".create-cluster-commit").click(function(){
         var rows_num = $(".modal-body .zone").length - 1;

@@ -70,7 +70,7 @@ STATUS_DISPLAY_CHOICES = (
 )
 
 class CreateClusterAction(tables.LinkAction):
-    name = "create cluster"
+    name = "create_cluster"
     verbose_name = _("Create Cluster")
     url = "horizon:vsm:clustermgmt:createclusterview"
     classes = ("ajax-modal", "btn-primary")
