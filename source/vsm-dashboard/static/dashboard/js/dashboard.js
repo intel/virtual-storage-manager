@@ -199,12 +199,12 @@ function loadOSD(){
         //init
         $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_health.png";
         //when error
-        if(data.in_down>0 || data.capacity_full_count ){
+        if(data.in_down>0 || data.capacity_full_count){
             $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_error.png";
             return;
         }
         //when warnning
-        if(data.out_up>0 || data.out_down || data.capacity_near_full_count){
+        if(data.out_up>0 || data.capacity_near_full_count){
             $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_warning.png";
             return;
         }
@@ -219,7 +219,7 @@ function loadMonitor(){
             data: null,
             dataType:"json",
             success: function(data){
-        		//console.log(data)                
+        		//console.log(data)
         		$("#lblMonitorEpoch")[0].innerHTML = data.epoch;
                 $("#lblMonitorUpdate")[0].innerHTML = data.update;
 
@@ -247,18 +247,9 @@ function loadMDS(){
     		//console.log(data)
     		$("#lblMDSEpoch")[0].innerHTML = data.epoch;
     		$("#lblMDSUpdate")[0].innerHTML = data.update;
-        //init
-        $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_health.png";
-        //when error
-        if(data.in_down>0 || data.capacity_full_count ){
-            $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_error.png";
-            return;
-        }
-        //when warnning
-        if(data.out_up>0 || data.out_down || data.capacity_near_full_count){
-            $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_warning.png";
-            return;
-        }
+
+
+            //show metadata
             if(data.MetaData == null)
                 $("#divMDS_Metadata")[0].innerHTML = "0";
             else
