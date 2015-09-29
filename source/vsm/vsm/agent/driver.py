@@ -1490,7 +1490,7 @@ class CephDriver(object):
             LOG.info('>> service ceph stop %s' % osd_name)
             utils.execute('service', 'ceph', 'stop', osd_name,
                             run_as_root=True)
-            values = {'state': 'DOWN', 'osd_name': osd_name}
+            values = {'state': 'In-Down', 'osd_name': osd_name}
             LOG.info('>> update status into db %s' % osd_name)
             self._conductor_rpcapi.\
                     osd_state_update_or_create(context, values)
