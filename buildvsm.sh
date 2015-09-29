@@ -94,7 +94,7 @@ function create_release() {
         cp ubuntu14/install.sh release/$BUILD
         cp ubuntu14/uninstall.sh release/$BUILD
         cp ubuntu14/debs.lst release/$BUILD
-    elif [[ $OS == "CentOS" && $OS_VERSION == "7" ]]; then
+    elif [[ $OS == "CentOS" && $OS_VERSION =~ "7" ]]; then
         cp -rf centos7/python-vsmclient ./source
         cp -rf centos7/vsm ./source
         cp -rf centos7/vsm-dashboard ./source
