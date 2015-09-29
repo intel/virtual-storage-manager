@@ -20,23 +20,12 @@
 {% block title %}Create Cluster{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("Create Cluster") %}
+  {% include "horizon/common/_page_header.html" with title=_("Add Hosts") %}
 {% endblock page_header %}
 
 {% block main %}
-    {% csrf_token %}
- 	{{ table.render }}
-
- 	<div id="divFormOptions" class="vsm-options-bar">
- 		<input id="server_list__action_create_cluster" class="btn btn-primary create-cluster-commit" type="submit" value="{% trans "CreateCluster" %}" /> 
-  <input class="btn btn-primary integrate-cluster-commit" type="submit" value="{% trans "integrateCluster" %}" />
-  <a href="{% url 'horizon:vsm:clustermgmt:index' %}" class="btn btn-default">{% trans "Cancel" %}</a>
- 	</div>
-
+    {% include 'vsm/flocking/_createcluster.html' %}
 {% endblock %}
-
-
-
 
 {% block js %}
     {{ block.super }}
