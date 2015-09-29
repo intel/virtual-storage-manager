@@ -1956,8 +1956,10 @@ def osd_get_all_up(context, session=None):
 
 @require_admin_context
 def osd_get_by_service_id(context, serviceid, session=None):
+    if not session:
+        session = get_session()
     return model_query(
-        context, models.OsdState, read_deleted="no").\
+        context, models.OsdState, read_deleted="no",session=session).\
         filter_by(service_id=serviceid).\
         all()
 
