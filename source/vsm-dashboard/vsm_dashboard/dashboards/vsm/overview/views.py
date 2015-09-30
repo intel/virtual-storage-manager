@@ -137,6 +137,7 @@ def get_version():
         ceph_version = vsm_summary.ceph_version
     except:
         up_time = ''
+        ceph_version = ''
     vsm_version = {"version": vsm_version,
                    "update": up_time,
                    "ceph_version":ceph_version,
