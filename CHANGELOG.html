@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>CHANGELOG</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+</head>
+<body>
+<h2>2.0.0 (build 216)</h2>
+<h2>Special Notes</h2>
+<ul>
+<li>This is the 2.0 final release, which includes both Ubuntu 14 and CentOS 7 packages. </li>
+<li>16 new features are added, and 33 bugs are fixed till this release.</li>
+</ul>
+<h2>New Features</h2>
+<ul>
+<li><a href="https//01.org/jira/browse/VSM-342">VSM-342</a>	support ceph upgrade on centos 7</li>
+<li><a href="https//01.org/jira/browse/VSM-88">VSM-88</a>	On monitor status page, report what server each monitor is running on.</li>
+<li><a href="https//01.org/jira/browse/VSM-162">VSM-162</a>	need to support typical openstack deployment with multiple cinder/nova/glance instances beside currrent all-in-one mode</li>
+<li><a href="https//01.org/jira/browse/VSM-246">VSM-246</a>	a separate tool to help make a node ready for addition into cluster</li>
+<li><a href="https//01.org/jira/browse/VSM-307">VSM-307</a>	the operator expects to upgrade ceph cluster</li>
+<li><a href="https//01.org/jira/browse/VSM-309">VSM-309</a>	Disk identification: the operator expects to identify physical location of failed disks for replacement</li>
+<li><a href="https//01.org/jira/browse/VSM-327">VSM-327</a>	Dashboard: it's required to have summary for device capacity status to show if full</li>
+<li><a href="https//01.org/jira/browse/VSM-358">VSM-358</a>	Support normal user instead of root to install vsm</li>
+<li><a href="https//01.org/jira/browse/VSM-355">VSM-355</a>	there are some used disk paths list in the data path field and journal dik path field on page 'add new osd'</li>
+<li><a href="https//01.org/jira/browse/VSM-352">VSM-352</a>	servermgmt page autorefrush too frequent</li>
+<li><a href="https//01.org/jira/browse/VSM-346">VSM-346</a>	Add complete set of Juno features in Horizon; pluggable settings, etc.</li>
+<li><a href="https//01.org/jira/browse/VSM-341">VSM-341</a>	expect to have some utilties to help make automation tests.</li>
+<li><a href="https//01.org/jira/browse/VSM-291">VSM-291</a>	The operator expects to present pools to multiple openstack clusters or regions</li>
+<li><a href="https//01.org/jira/browse/VSM-331">VSM-331</a>	it's necesary to monitor device utilization from dashboard</li>
+<li><a href="https//01.org/jira/browse/VSM-339">VSM-339</a>	Configuration Management: as more and more features are added, and different scenarios require different settings, configuration is requried.</li>
+<li><a href="https//01.org/jira/browse/VSM-337">VSM-337</a>	Upgrade: expect to upgrade from 1.0 to 2.0</li>
+</ul>
+<h2>Resolved bugs</h2>
+<ul>
+<li><a href="https//01.org/jira/browse/VSM-312">VSM-312</a>	vsm-node sets node status=&quot;Need more IP&quot; if a Monitor only node does not have a cluster IP address..</li>
+<li><a href="https//01.org/jira/browse/VSM-17">VSM-17</a>		[CDEK-1608] User can remove himself, but after command execution he is not automatically log out</li>
+<li><a href="https//01.org/jira/browse/VSM-329">VSM-329</a>	Remove Monitors button in Manage Servers hangs when Monitor node also has MDS daemon</li>
+<li><a href="https//01.org/jira/browse/VSM-274">VSM-274</a>	a new user logged in vsm and can delete himself</li>
+<li><a href="https//01.org/jira/browse/VSM-362">VSM-362</a>	there are a lot of &quot;in-Up&quot; log in apache error log</li>
+<li><a href="https//01.org/jira/browse/VSM-364">VSM-364</a>	when remove one monitor without MDS co-located, the operation keeps running and no end.</li>
+<li><a href="https//01.org/jira/browse/VSM-359">VSM-359</a>	get smart info inaccurate</li>
+<li><a href="https//01.org/jira/browse/VSM-363">VSM-363</a>	if removing a monitor where the MDS is co-located, after finished, the status has changed to &quot;available&quot; instead of &quot;active&quot;.</li>
+<li><a href="https//01.org/jira/browse/VSM-319">VSM-319</a>	performance monitor error when restart vsm processes on controller</li>
+<li><a href="https//01.org/jira/browse/VSM-322">VSM-322</a>	there are exceptions when request vsm dashboard</li>
+<li><a href="https//01.org/jira/browse/VSM-330">VSM-330</a>	When upgrading from Firefly to Giant, the upgrade complains missing python-rados package</li>
+<li><a href="https//01.org/jira/browse/VSM-360">VSM-360</a>	No servers list after newly installed with errors &quot; Permission denied: '/tmp/crushmap'&quot;</li>
+<li><a href="https//01.org/jira/browse/VSM-332">VSM-332</a>	sometimes diamond service start failed</li>
+<li><a href="https//01.org/jira/browse/VSM-333">VSM-333</a>	Error: &quot;Activation of org.freedesktop.secrets timed out&quot;, when installing with 2.0 beta 1</li>
+<li><a href="https//01.org/jira/browse/VSM-345">VSM-345</a>	remove server error：no pemssion to stop osd service</li>
+<li><a href="https//01.org/jira/browse/VSM-348">VSM-348</a>	deploy agent node after vsm cluster has been created, the token in .token file is invalid</li>
+<li><a href="https//01.org/jira/browse/VSM-361">VSM-361</a>	when one osd is full, the dashboard doesn't mark one osd is full</li>
+<li><a href="https//01.org/jira/browse/VSM-347">VSM-347</a>	When clicking on &quot;add new osd&quot; at device management, a server error page pops up</li>
+<li><a href="https//01.org/jira/browse/VSM-353">VSM-353</a>	changed the password of current user,an error page pops up</li>
+<li><a href="https//01.org/jira/browse/VSM-336">VSM-336</a>	On Dashboard, even no cluster is created, the VSM version and uptime should be displayed</li>
+<li><a href="https//01.org/jira/browse/VSM-343">VSM-343</a>	can't create cache tier with latest code</li>
+<li><a href="https//01.org/jira/browse/VSM-344">VSM-344</a>	after a few times install, clean-up, reinstall, we have seem some &quot;eaddrinuse&quot; errors on starting rabbitmq</li>
+<li><a href="https//01.org/jira/browse/VSM-357">VSM-357</a>	'add new disk':if data disk and journal disk is in the different partitions of the same disk, the opearation will be unsuccessful</li>
+<li><a href="https//01.org/jira/browse/VSM-350">VSM-350</a>	no response when get latency performance on dashboard</li>
+<li><a href="https//01.org/jira/browse/VSM-351">VSM-351</a>	ceph upgrade on ubuntu unsuccess</li>
+<li><a href="https//01.org/jira/browse/VSM-356">VSM-356</a>	I got warning info means that the number of pg in each osd is too large after upgrade ceph from a lower version to hammar</li>
+<li><a href="https//01.org/jira/browse/VSM-354">VSM-354</a>	when 'create cluster' page opened,other pages still can be opened</li>
+<li><a href="https//01.org/jira/browse/VSM-349">VSM-349</a>	click 'create cluster',I got the tip:there are some zones no monitor created</li>
+<li><a href="https//01.org/jira/browse/VSM-340">VSM-340</a>	Manifest: even using the same token generated from agent-token, server_manifest still complains connection error</li>
+<li><a href="https//01.org/jira/browse/VSM-328">VSM-328</a>	Dashboard: when one disk is full, the warning message is not showing correctly</li>
+<li><a href="https//01.org/jira/browse/VSM-338">VSM-338</a>	Upgrade: current ceph upgrade requires all agent nodes have internet connections, which normally is not true.</li>
+<li><a href="https//01.org/jira/browse/VSM-334">VSM-334</a>	upgrade: when set hammer url, then click &quot;submit&quot;, the final ceph version is still firefly.</li>
+<li><a href="https//01.org/jira/browse/VSM-335">VSM-335</a>	The version on UI only shows 2.0.0, but no build number</li>
+</ul>
+<h2>Known issues</h2>
+<h2>2.0.0 (build 163)</h2>
+<h2>Special Notes</h2>
+<ul>
+<li>this is a 2.0 beta 1 release, still plenty of changes in this release, and we did some initial tests  on it. </li>
+<li>15 new features are added, and 41 bugs are fixed till this release.</li>
+</ul>
+<h2>New Features</h2>
+<ul>
+<li><a href="https//01.org/jira/browse/VSM-135">VSM-135</a>	CentOS 6.5 and 7.0 Support			</li>
+<li><a href="https//01.org/jira/browse/VSM-296">VSM-296</a>	Show performance on the dashboard			</li>
+<li><a href="https//01.org/jira/browse/VSM-4">VSM-4</a>	Average Response Time&quot; missing in dashboard Overview panel &quot;VSM Status&quot; section.			</li>
+<li><a href="https//01.org/jira/browse/VSM-159">VSM-159</a>	add issue reporting tool			</li>
+<li><a href="https//01.org/jira/browse/VSM-156">VSM-156</a>	add sanity check tool to help identify potential issues before or after deployment			</li>
+<li><a href="https//01.org/jira/browse/VSM-15">VSM-15</a>	VSM-backup prompt info not correct			</li>
+<li><a href="https//01.org/jira/browse/VSM-124">VSM-124</a>	[CDEK-1852] VSM | adding possibility to manipulate ceph values in cluster.manifest file			</li>
+<li><a href="https//01.org/jira/browse/VSM-242">VSM-242</a>	Allow user to modify ceph.conf outside VSM			</li>
+<li><a href="https//01.org/jira/browse/VSM-184">VSM-184</a>	add automated script to help deploy VSM on multiple nodes			</li>
+<li><a href="https//01.org/jira/browse/VSM-103">VSM-103</a>	Suport a Single Keystone Instance in OpenStack Environments			</li>
+<li><a href="https//01.org/jira/browse/VSM-303">VSM-303</a>	Ajust the UI like openstack dashboard			</li>
+<li><a href="https//01.org/jira/browse/VSM-54">VSM-54</a>	On OSD Status page: Provide filter option to only display OSDs that are not up and in			</li>
+<li><a href="https//01.org/jira/browse/VSM-190">VSM-190</a>	Add disks to cluster		</li>
+<li><a href="https//01.org/jira/browse/VSM-220">VSM-220</a>	Operator expects to know what's happending inside ceph cluster through performance counters</li>
+<li><a href="https//01.org/jira/browse/VSM-134">VSM-134</a>	Ubuntu 14.X Support</li>
+</ul>
+<h2>Resolved bugs</h2>
+<ul>
+<li><a href="https//01.org/jira/browse/VSM-318">VSM-318</a>	&quot;remove osd&quot; doesn't work</li>
+<li><a href="https//01.org/jira/browse/VSM-325">VSM-325</a>	Monitor: negative update time shown on monitor status when removing an monitor.</li>
+<li><a href="https//01.org/jira/browse/VSM-269">VSM-269</a>	Smart info doesn't work in Device mgmt.</li>
+<li><a href="https//01.org/jira/browse/VSM-324">VSM-324</a>	Monitor: inconsistent monitor number on Monitor status page when removing one monitor</li>
+<li><a href="https//01.org/jira/browse/VSM-326">VSM-326</a>	UI: the progress indicator is not showing at the center of screen but the top-left</li>
+<li><a href="https//01.org/jira/browse/VSM-323">VSM-323</a>	Installer: when installing diamond on each agents, there are a lot of File or Folder not found issues</li>
+<li><a href="https//01.org/jira/browse/VSM-306">VSM-306</a>	when executing buildvsm on ubuntu, the script complains no vsm user created</li>
+<li><a href="https//01.org/jira/browse/VSM-263">VSM-263</a>	The pie chart in &quot;Storage Group Status&quot; page is disappeared.</li>
+<li><a href="https//01.org/jira/browse/VSM-320">VSM-320</a>	if installing from a node instead of the controller, the installation will be stopped at missing deployrc</li>
+<li><a href="https//01.org/jira/browse/VSM-176">VSM-176</a>	SSL certificate password is stored in a plain text file</li>
+<li><a href="https//01.org/jira/browse/VSM-230">VSM-230</a>	when presenting pool to openstack, cache tiering pools should be listed.</li>
+<li><a href="https//01.org/jira/browse/VSM-26">VSM-26</a>	[CDEK-1664] VSM | Not possible to replace node if ceph contain only 3 nodes.</li>
+<li><a href="https//01.org/jira/browse/VSM-51">VSM-51</a>	Install Fails for VSM 0.8.0 Engineering Build Release</li>
+<li><a href="https//01.org/jira/browse/VSM-236">VSM-236</a>	no way to check manifest correctness after editing them</li>
+<li><a href="https//01.org/jira/browse/VSM-29">VSM-29</a>	VSM-agent process causes high i/o on os disk</li>
+<li><a href="https//01.org/jira/browse/VSM-216">VSM-216</a>	Add storage group requires at least 3 nodes</li>
+<li><a href="https//01.org/jira/browse/VSM-33">VSM-33</a>	negative update time in RBD list</li>
+<li><a href="https//01.org/jira/browse/VSM-113">VSM-113</a>	[CDEK-1835] VSM | /var/log/httpd/error_log - constantly ongoing messages [error] &lt;Response [200]&gt;</li>
+<li><a href="https//01.org/jira/browse/VSM-179">VSM-179</a>	keep ceph.conf up to date when executing &quot;remove server&quot; operations.</li>
+<li><a href="https//01.org/jira/browse/VSM-177">VSM-177</a>	wrong /etc/fstab entry for osd device mount point</li>
+<li><a href="https//01.org/jira/browse/VSM-233">VSM-233</a>	console blocks when running automatic installation procedure</li>
+<li><a href="https//01.org/jira/browse/VSM-239">VSM-239</a>	with automatic deployment, the execution is blocked at asking if start mysql service</li>
+<li><a href="https//01.org/jira/browse/VSM-166">VSM-166</a>	cluster<em>manifest sanity check program gives incorrect advice for auth</em>keys</li>
+<li><a href="https//01.org/jira/browse/VSM-207">VSM-207</a>	can't assume eth0 device name</li>
+<li><a href="https//01.org/jira/browse/VSM-224">VSM-224</a>	Controller node error in /var/log/httpd/error_log - constantly ongoing messages [error] &lt;Response [200]&gt;</li>
+<li><a href="https//01.org/jira/browse/VSM-121">VSM-121</a>	Storage node unable to connect to controller although network is OK and all setting correct</li>
+<li><a href="https//01.org/jira/browse/VSM-244">VSM-244</a>	Internal server error when installing v1.1</li>
+<li><a href="https//01.org/jira/browse/VSM-123">VSM-123</a>	Storage node will not be able to contact controller node to install if http proxy set</li>
+<li><a href="https//01.org/jira/browse/VSM-171">VSM-171</a>	[CDEK1672] VSM_CLI | list shows Admin network in Public IP section</li>
+<li><a href="https//01.org/jira/browse/VSM-168">VSM-168</a>	[CDEK1800] VSM_CLI | remove mds - doesn't update vsm database</li>
+<li><a href="https//01.org/jira/browse/VSM-193">VSM-193</a>	hard-coded cluster id</li>
+<li><a href="https//01.org/jira/browse/VSM-260">VSM-260</a>	the check<em>network in server</em>manifest will be wrong when it has a single network card</li>
+<li><a href="https//01.org/jira/browse/VSM-317">VSM-317</a>	the update time in MDS block is empty</li>
+<li><a href="https//01.org/jira/browse/VSM-249">VSM-249</a>	can not open dashboard and get the debug infomation &quot;Invalid block tag: 'horizon_nav'&quot;</li>
+<li><a href="https//01.org/jira/browse/VSM-299">VSM-299</a>	when after installed vsm, but no ceph cluster deployed, there is still show 3 storage groups</li>
+<li><a href="https//01.org/jira/browse/VSM-310">VSM-310</a>	with Firefox, for all tables, the vertical separator between the first and second column gets disappered</li>
+<li><a href="https//01.org/jira/browse/VSM-313">VSM-313</a>	the logo is disappeared when running on IE 11</li>
+<li><a href="https//01.org/jira/browse/VSM-314">VSM-314</a>	there is no progress indicator when an operation is not returned.</li>
+<li><a href="https//01.org/jira/browse/VSM-316">VSM-316</a>	the button style in &quot;device management&quot; page is different from others.</li>
+<li><a href="https//01.org/jira/browse/VSM-311">VSM-311</a>	The blocks in dashboard are exceed out of the width of heading</li>
+<li><a href="https//01.org/jira/browse/VSM-315">VSM-315</a>	&quot;add server&quot; doesn't work in alpha 2</li>
+</ul>
+<h2>Known issues</h2>
+<ul>
+<li><a href="https//01.org/jira/browse/VSM-332">VSM-332</a> 	sometimes diamond service start failed </li>
+<li><a href="https//01.org/jira/browse/VSM-330">VSM-330</a> 	When upgrading from Firefly to Giant, the upgrade complains missing python-rados package </li>
+</ul>
+<h2>2.0.0 (build 149)</h2>
+<h2>Special Notes</h2>
+<ul>
+<li>this is a 2.0 alpha 2 release, we did some initial tests on it. </li>
+<li>29 new features are added, and 47 bugs are fixed till this release.</li>
+</ul>
+<h2>New Features</h2>
+<ul>
+<li><a href="https//01.org/jira/browse/VSM-63">VSM-63</a>	Filter/Identify OSDs that are not up and in</li>
+<li><a href="https//01.org/jira/browse/VSM-61">VSM-61</a>	Openstack Prod release alignment with VSM</li>
+<li><a href="https//01.org/jira/browse/VSM-55">VSM-55</a>	Paginate OSD pages</li>
+<li><a href="https//01.org/jira/browse/VSM-10">VSM-10</a>	VSM1.0 -[CDEK-1190] VSM &quot;Create cluster&quot; cannot select storage nodes or monito</li>
+<li><a href="https//01.org/jira/browse/VSM-304">VSM-304</a>	Support to present pool to Openstack Juno All in one</li>
+<li><a href="https//01.org/jira/browse/VSM-282">VSM-282</a>	current installer scripts only support ip address based, it's also required to support host name based</li>
+<li><a href="https//01.org/jira/browse/VSM-256">VSM-256</a>	current logic enforces 3 replicas, somethings user may require to loose or tighten the enforcement.</li>
+<li><a href="https//01.org/jira/browse/VSM-257">VSM-257</a>	reorganize functions inside installer to make it's possible to install controller or agent separately</li>
+<li><a href="https//01.org/jira/browse/VSM-243">VSM-243</a>	the &quot;create cluster&quot; button doesn't take in effect after click on ubuntu 14</li>
+<li><a href="https//01.org/jira/browse/VSM-235">VSM-235</a>	make scripts can support both rpm and deb packages</li>
+<li><a href="https//01.org/jira/browse/VSM-222">VSM-222</a>	It's necessary to import a VSM created cluster by VSM itself.</li>
+<li><a href="https//01.org/jira/browse/VSM-221">VSM-221</a>	upgrade vsm dependent openstack packages to juno</li>
+<li><a href="https//01.org/jira/browse/VSM-212">VSM-212</a>	request to support ceph hammer release</li>
+<li><a href="https//01.org/jira/browse/VSM-209">VSM-209</a>	support multiple subnets</li>
+<li><a href="https//01.org/jira/browse/VSM-189">VSM-189</a>	“Add Server” progress</li>
+<li><a href="https//01.org/jira/browse/VSM-163">VSM-163</a>	server_manifest does not check for local host in /etc/hosts</li>
+<li><a href="https//01.org/jira/browse/VSM-154">VSM-154</a>	Request to have a new column on storage-group-status page to have number of OSD's in each storage group.</li>
+<li><a href="https//01.org/jira/browse/VSM-143">VSM-143</a>	On OSD Status page, limit to 100 OSDs per page</li>
+<li><a href="https//01.org/jira/browse/VSM-144">VSM-144</a>	On OSD Status page, sort OSDs by status, server, % capacity used</li>
+<li><a href="https//01.org/jira/browse/VSM-130">VSM-130</a>	OpenStack Juno Support</li>
+<li><a href="https//01.org/jira/browse/VSM-94">VSM-94</a>	Implement Pass-through Parameters</li>
+<li><a href="https//01.org/jira/browse/VSM-85">VSM-85</a>	Storage Group Status improvements</li>
+<li><a href="https//01.org/jira/browse/VSM-89">VSM-89</a>	Full OS disk indication</li>
+<li><a href="https//01.org/jira/browse/VSM-84">VSM-84</a>	Improved server status reporting</li>
+<li><a href="https//01.org/jira/browse/VSM-83">VSM-83</a>	Restart stopped monitor</li>
+<li><a href="https//01.org/jira/browse/VSM-69">VSM-69</a>	Override default PG per OSD value</li>
+<li><a href="https//01.org/jira/browse/VSM-73">VSM-73</a>	Zone monitor warning</li>
+<li><a href="https//01.org/jira/browse/VSM-46">VSM-46</a>	overlay vsm with existing ceph cluster</li>
+<li><a href="https//01.org/jira/browse/VSM-23">VSM-23</a>	Create User UI should prompt more information</li>
+</ul>
+<h2>Resolved bugs</h2>
+<ul>
+<li><a href="https//01.org/jira/browse/VSM-305">VSM-305</a>	presenting pool should keep backward comatibility, say working with juno, icehouse, havana</li>
+<li><a href="https//01.org/jira/browse/VSM-300">VSM-300</a>	if no cluster is created, when open &quot;server management&quot;\&quot;manage servers&quot;, the Ui becomes messy</li>
+<li><a href="https//01.org/jira/browse/VSM-298">VSM-298</a>	on dashboard, when adding new monitors, the monitor block doesn't update accordingly</li>
+<li><a href="https//01.org/jira/browse/VSM-297">VSM-297</a>	on dashboard, the storage group balls have no data</li>
+<li><a href="https//01.org/jira/browse/VSM-293">VSM-293</a>	wrong version of vsm displayed in the dashboard</li>
+<li><a href="https//01.org/jira/browse/VSM-295">VSM-295</a>	the installation fails at downloading dependent packages if http proxy is required</li>
+<li><a href="https//01.org/jira/browse/VSM-292">VSM-292</a>	the background of tool tip is not clear to view</li>
+<li><a href="https//01.org/jira/browse/VSM-286">VSM-286</a>	present pools to openstack again after you have presented pools, the attach status is always starting</li>
+<li><a href="https//01.org/jira/browse/VSM-285">VSM-285</a>	present multi pools to openstack cinder, the cinder.conf is not complete</li>
+<li><a href="https//01.org/jira/browse/VSM-287">VSM-287</a>	messy login window if accessing https://<ip>/dashboard</li>
+<li><a href="https//01.org/jira/browse/VSM-284">VSM-284</a>	at cluster status monitor, it's expected to provide complete summary instead the partial information from dashboardard</li>
+<li><a href="https//01.org/jira/browse/VSM-283">VSM-283</a>	after restart ceph cluster, the osd tree becomes messy</li>
+<li><a href="https//01.org/jira/browse/VSM-280">VSM-280</a>	&quot;Internal Server Error&quot; when click on &quot;Data Device Status&quot;</li>
+<li><a href="https//01.org/jira/browse/VSM-278">VSM-278</a>	after I add a server by clicking 'add server',the osd tree become messy</li>
+<li><a href="https//01.org/jira/browse/VSM-279">VSM-279</a>	click 'restart osd' or 'restore osd',the osd tree will become messy</li>
+<li><a href="https//01.org/jira/browse/VSM-281">VSM-281</a>	on dashboard, the cluster status like &quot;warning&quot; shouldn't be clickable</li>
+<li><a href="https//01.org/jira/browse/VSM-276">VSM-276</a>	Allow agent to be deployed on nodes where no ceph role assigned</li>
+<li><a href="https//01.org/jira/browse/VSM-277">VSM-277</a>	click on &quot;add storage group&quot; will tigger &quot;something went wrong&quot; error on UI</li>
+<li><a href="https//01.org/jira/browse/VSM-272">VSM-272</a>	on OS with newer rabbitmq version like 3.4, message queue can't be accessed</li>
+<li><a href="https//01.org/jira/browse/VSM-273">VSM-273</a>	&quot;Import Error name Login&quot; received when try to login to web console</li>
+<li><a href="https//01.org/jira/browse/VSM-275">VSM-275</a>	the overview page is messy with Firefox</li>
+<li><a href="https//01.org/jira/browse/VSM-270">VSM-270</a>	reinstall the keystone when deploy the vsm</li>
+<li><a href="https//01.org/jira/browse/VSM-266">VSM-266</a>	Dashboard UI correction</li>
+<li><a href="https//01.org/jira/browse/VSM-265">VSM-265</a>	Click Manage VSM\&quot;Add/Remove User&quot;\&quot;Change Password&quot;, no page shows up</li>
+<li><a href="https//01.org/jira/browse/VSM-264">VSM-264</a>	on &quot;PG Status&quot; page, the text layout is messy.</li>
+<li><a href="https//01.org/jira/browse/VSM-267">VSM-267</a>	The logo is not fully shown.</li>
+<li><a href="https//01.org/jira/browse/VSM-268">VSM-268</a>	Can't create EC pool</li>
+<li><a href="https//01.org/jira/browse/VSM-262">VSM-262</a>	when clicking on &quot;device management&quot;, the page shows &quot;something went wrong&quot;</li>
+<li><a href="https//01.org/jira/browse/VSM-258">VSM-258</a>	wrong dependencies url</li>
+<li><a href="https//01.org/jira/browse/VSM-259">VSM-259</a>	script 'vsm-agent' missing LSB tags and overrides</li>
+<li><a href="https//01.org/jira/browse/VSM-253">VSM-253</a>	A lot of buttons is invalid such as “addmonitor”,“removemonitor”,“addserver”,“removeserver”,“restore osd”,“remove osd” and so on</li>
+<li><a href="https//01.org/jira/browse/VSM-254">VSM-254</a>	the successful tip boxes can't shut down such as &quot;Success: Successfully created storage pool: &quot;</li>
+<li><a href="https//01.org/jira/browse/VSM-255">VSM-255</a>	when creating ceph cluster with one zone defined, the ceph cluster keeps in health_warn status</li>
+<li><a href="https//01.org/jira/browse/VSM-252">VSM-252</a>	Most of the interface's auto refresh function is invalid</li>
+<li><a href="https//01.org/jira/browse/VSM-251">VSM-251</a>	after clicked clusterManagement-&gt;create cluster-&gt;create cluster,there is not mds created.</li>
+<li><a href="https//01.org/jira/browse/VSM-250">VSM-250</a>	Error when packing</li>
+<li><a href="https//01.org/jira/browse/VSM-245">VSM-245</a>	error creating cluster</li>
+<li><a href="https//01.org/jira/browse/VSM-231">VSM-231</a>	VSM | Not possible to choose the machines during cluster creation</li>
+<li><a href="https//01.org/jira/browse/VSM-229">VSM-229</a>	Error state displayed on green color</li>
+<li><a href="https//01.org/jira/browse/VSM-225">VSM-225</a>	VSM Creates Very Small pg<em>num and pg.</em>num Size for EC Pool</li>
+<li><a href="https//01.org/jira/browse/VSM-218">VSM-218</a>	on centos 7, the web layout is messy</li>
+<li><a href="https//01.org/jira/browse/VSM-195">VSM-195</a>	if no cluster initialized, the UI shouldn’t knock at ‘manage servers’.</li>
+<li><a href="https//01.org/jira/browse/VSM-194">VSM-194</a>	User experience: OSD Status and Manage Devices.</li>
+<li><a href="https//01.org/jira/browse/VSM-180">VSM-180</a>	When a cluster is destroyed and recreated, VSM controller increments the cluster id (aka database rowid)</li>
+<li><a href="https//01.org/jira/browse/VSM-153">VSM-153</a>	after clicked vsm-&gt;settings-&gt;update,there is no successful tip</li>
+<li><a href="https//01.org/jira/browse/VSM-68">VSM-68</a>	Veriffy there are enough discrete servers and/or zones to support a VSM requested replication level</li>
+<li><a href="https//01.org/jira/browse/VSM-5">VSM-5</a>	KB used in &quot;Pool status&quot; panel not consistent with &quot;ceph df&quot; in backend</li>
+</ul>
+<h2>Known issues</h2>
+<ul>
+<li><a href="https//01.org/jira/browse/VSM-313">VSM-313</a>	the logo is disappeared when running on IE 11</li>
+</ul>
+<h2>2.0.0 (build 123)</h2>
+<h2>Special Notes</h2>
+<ul>
+<li>this is alpha 1 release for 2.0, which is not well verified yet, just for early preview.</li>
+</ul>
+<h2>1.1_1</h2>
+<h2>Special Notes</h2>
+<ul>
+<li>this is a bugfix release for 1.1, which fixed the issues found in VSM-242 (&quot;Allow user to modify ceph.conf outside VSM&quot;). Also adding an new script uninstall.sh to help uninstall VSM in the case user expects to restart installation again.</li>
+</ul>
+<h2>New Features</h2>
+<ul>
+<li><a href="https://01.org/jira/browse/VSM-209">VSM-209</a>	support multiple subnets</li>
+</ul>
+<h2>Resolved bugs</h2>
+<ul>
+<li><a href="https://01.org/jira/browse/VSM-260">VSM-260</a>	the check<em>network in server</em>manifest will be wrong when it has a single network card</li>
+</ul>
+<h2>Known issues</h2>
+<p>-	</p>
+<h2>1.1</h2>
+<h2>Special Notes</h2>
+<ul>
+<li>starting from v1.1, the vsm dependencies are maintained on <a href="http://github.com/01org/vsm-dependencies">vsm-dependencies repository</a> for tracking and trouble shooting.</li>
+<li>starting from v1.1, an automatic deployment tool is provided to deploy whole vsm controller and agents from one placement.</li>
+</ul>
+<h2>New Features</h2>
+<ul>
+<li><a href="https://01.org/jira/browse/VSM-156">VSM-156</a>	add sanity check tool to help identify potential issues before or after deployment</li>
+<li><a href="https://01.org/jira/browse/VSM-159">VSM-159</a>	add issue reporting tool</li>
+<li><a href="https://01.org/jira/browse/VSM-184">VSM-184</a>	add automated script to help deploy VSM on multiple nodes</li>
+<li><a href="https://01.org/jira/browse/VSM-242">VSM-242</a>	Allow user to modify ceph.conf outside VSM</li>
+</ul>
+<h2>Resolved bugs</h2>
+<ul>
+<li><a href="https://01.org/jira/browse/VSM-4">VSM-4</a>	Average Response Time&quot; missing in dashboard Overview panel &quot;VSM Status&quot; section. </li>
+<li><a href="https://01.org/jira/browse/VSM-15">VSM-15</a>	VSM-backup prompt info not correct</li>
+<li><a href="https://01.org/jira/browse/VSM-25">VSM-25</a> VSM Dashboard | Capacity of hard drives is wrong and percentage used capacity is not correct.</li>
+<li><a href="https://01.org/jira/browse/VSM-26">VSM-26</a>	[CDEK-1664] VSM | Not possible to replace node if ceph contain only 3 nodes.</li>
+<li><a href="https://01.org/jira/browse/VSM-29">VSM-29</a>	vsm-agent process causes high i/o on os disk</li>
+<li><a href="https://01.org/jira/browse/VSM-33">VSM-33</a>	negative update time in RBD list</li>
+<li><a href="https://01.org/jira/browse/VSM-51">VSM-51</a>	Install Fails for VSM 0.8.0 Engineering Build Release</li>
+<li><a href="https://01.org/jira/browse/VSM-113">VSM-113</a>	[CDEK-1835] VSM | /var/log/httpd/error_log - constantly ongoing messages [error] &lt;Response [200]&gt;</li>
+<li><a href="https://01.org/jira/browse/VSM-121">VSM-121</a>	Storage node unable to connect to controller although network is OK and all setting correct</li>
+<li><a href="https://01.org/jira/browse/VSM-123">VSM-123</a>	Storage node will not be able to contact controller node to install if http proxy set</li>
+<li><a href="https://01.org/jira/browse/VSM-124">VSM-124</a>	[CDEK-1852] VSM | adding possibility to manipulate ceph values in cluster.manifest file</li>
+<li><a href="https://01.org/jira/browse/VSM-166">VSM-166</a>	cluster<em>manifest sanity check program gives incorrect advice for auth</em>keys</li>
+<li><a href="https://01.org/jira/browse/VSM-168">VSM-168</a>	[CDEK1800] VSM_CLI | remove mds - doesn't update vsm database</li>
+<li><a href="https://01.org/jira/browse/VSM-171">VSM-171</a>	[CDEK1672] VSM_CLI | list shows Admin network in Public IP section</li>
+<li><a href="https://01.org/jira/browse/VSM-176">VSM-176</a>	SSL certificate password is stored in a plain text file</li>
+<li><a href="https://01.org/jira/browse/VSM-177">VSM-177</a>	wrong /etc/fstab entry for osd device mount point</li>
+<li><a href="https://01.org/jira/browse/VSM-179">VSM-179</a>	keep ceph.conf up to date when executing &quot;remove server&quot; operations.</li>
+<li><a href="https://01.org/jira/browse/VSM-193">VSM-193</a>	hard-coded cluster id</li>
+<li><a href="https://01.org/jira/browse/VSM-207">VSM-207</a>	can't assume eth0 device name </li>
+<li><a href="https://01.org/jira/browse/VSM-216">VSM-216</a>	Add storage group requires at least 3 nodes</li>
+<li><a href="https://01.org/jira/browse/VSM-217">VSM-217</a> Problem with replication size on &quot;pool&quot; created on newly added storage group.</li>
+<li><a href="https://01.org/jira/browse/VSM-224">VSM-224</a>	Controller node error in /var/log/httpd/error_log - constantly ongoing messages [error] &lt;Response [200]&gt;</li>
+<li><a href="https://01.org/jira/browse/VSM-230">VSM-230</a>	when presenting pool to openstack, cache tiering pools should be listed. </li>
+<li><a href="https://01.org/jira/browse/VSM-233">VSM-233</a> console blocks when running automatic installation procedure</li>
+<li><a href="https://01.org/jira/browse/VSM-236">VSM-236</a> no way to check manifest correctness after editing them</li>
+<li><a href="https://01.org/jira/browse/VSM-239">VSM-239</a> with automatic deployment, the execution is blocked at asking if start mysql service</li>
+<li><a href="https://01.org/jira/browse/VSM-244">VSM-244</a> Internal server error when installing v1.1</li>
+</ul>
+<h2>Known issues</h2>
+<p>-	</p>
+<h2>1.0</h2>
+<p>Special Notes</p>
+<pre><code>For installation, please check the INSTALL.md on current release branch instead of the one on master branch.
+</code></pre>
+
+<p>New Features</p>
+<pre><code>Openstack Icehouse support
+</code></pre>
+
+<p>Fixed bugs</p>
+<pre><code>VSM-187 GUI shows always replication 3 when replicated pool is other than &quot;Same as Primary&quot;
+VSM-183 ct_target_max_mem_mb and ct_target_max_capacity_gb sets the same value in create cache tier
+VSM-182 add osd_heartbeat_grace and osd_heartbeat_interval to cluster.manifest
+VSM-173 Can select same storage group in create replicated pool -- which should not
+</code></pre>
+
+<p>Known issues</p>
+<pre><code>VSM-191 VSM does not display the replica storage group.
+VSM-192 force nonempty.
+VSM-188 Missing column in manage pool page.
+</code></pre>
+
+
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->

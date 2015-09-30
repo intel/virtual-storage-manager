@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>INSTALL</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* GitHub stylesheet for MarkdownPad (http://markdownpad.com) */
+/* Author: Nicolas Hery - http://nicolashery.com */
+/* Version: b13fe65ca28d2e568c6ed5d7f06581183df8f2ff */
+/* Source: https://github.com/nicolahery/markdownpad-github */
+
+/* RESET
+=============================================================================*/
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* BODY
+=============================================================================*/
+
+body {
+  font-family: Helvetica, arial, freesans, clean, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+  padding: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+body>*:first-child {
+  margin-top: 0 !important;
+}
+
+body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* BLOCKS
+=============================================================================*/
+
+p, blockquote, ul, ol, dl, table, pre {
+  margin: 15px 0;
+}
+
+/* HEADERS
+=============================================================================*/
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 tt, h1 code, h2 tt, h2 code, h3 tt, h3 code, h4 tt, h4 code, h5 tt, h5 code, h6 tt, h6 code {
+  font-size: inherit;
+}
+
+h1 {
+  font-size: 28px;
+  color: #000;
+}
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+h6 {
+  color: #777;
+  font-size: 14px;
+}
+
+body>h2:first-child, body>h1:first-child, body>h1:first-child+h2, body>h3:first-child, body>h4:first-child, body>h5:first-child, body>h6:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+h1+p, h2+p, h3+p, h4+p, h5+p, h6+p {
+  margin-top: 10px;
+}
+
+/* LINKS
+=============================================================================*/
+
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* LISTS
+=============================================================================*/
+
+ul, ol {
+  padding-left: 30px;
+}
+
+ul li > :first-child, 
+ol li > :first-child, 
+ul li ul:first-of-type, 
+ol li ol:first-of-type, 
+ul li ol:first-of-type, 
+ol li ul:first-of-type {
+  margin-top: 0px;
+}
+
+ul ul, ul ol, ol ol, ol ul {
+  margin-bottom: 0;
+}
+
+dl {
+  padding: 0;
+}
+
+dl dt {
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
+  padding: 0;
+  margin: 15px 0 5px;
+}
+
+dl dt:first-child {
+  padding: 0;
+}
+
+dl dt>:first-child {
+  margin-top: 0px;
+}
+
+dl dt>:last-child {
+  margin-bottom: 0px;
+}
+
+dl dd {
+  margin: 0 0 15px;
+  padding: 0 15px;
+}
+
+dl dd>:first-child {
+  margin-top: 0px;
+}
+
+dl dd>:last-child {
+  margin-bottom: 0px;
+}
+
+/* CODE
+=============================================================================*/
+
+pre, code, tt {
+  font-size: 12px;
+  font-family: Consolas, "Liberation Mono", Courier, monospace;
+}
+
+code, tt {
+  margin: 0 0px;
+  padding: 0px 0px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+pre>code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent;
+}
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px;
+}
+
+pre code, pre tt {
+  background-color: transparent;
+  border: none;
+}
+
+kbd {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #DDDDDD;
+    background-image: linear-gradient(#F1F1F1, #DDDDDD);
+    background-repeat: repeat-x;
+    border-color: #DDDDDD #CCCCCC #CCCCCC #DDDDDD;
+    border-image: none;
+    border-radius: 2px 2px 2px 2px;
+    border-style: solid;
+    border-width: 1px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height: 10px;
+    padding: 1px 4px;
+}
+
+/* QUOTES
+=============================================================================*/
+
+blockquote {
+  border-left: 4px solid #DDD;
+  padding: 0 15px;
+  color: #777;
+}
+
+blockquote>:first-child {
+  margin-top: 0px;
+}
+
+blockquote>:last-child {
+  margin-bottom: 0px;
+}
+
+/* HORIZONTAL RULES
+=============================================================================*/
+
+hr {
+  clear: both;
+  margin: 15px 0;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  border-bottom: 4px solid #ddd;
+  padding: 0;
+}
+
+/* TABLES
+=============================================================================*/
+
+table th {
+  font-weight: bold;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 6px 13px;
+}
+
+table tr {
+  border-top: 1px solid #ccc;
+  background-color: #fff;
+}
+
+table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+/* IMAGES
+=============================================================================*/
+
+img {
+  max-width: 100%
+}
+</style>
+</head>
+<body>
+<h1>  Virtual Storage Manager for Ceph</h1>
+<p><strong>Version:</strong> 2.0.0.216</p>
+<p><strong>Source:</strong> 2015-09-30</p>
+<p><strong>Keywords:</strong> Ceph, Openstack, Virtual Storage Management</p>
+<p><strong>Supported Combo:</strong></p>
+<pre><code>OS:         Ubuntu Server 14.04.2/CentOS 7 Server Basic
+Ceph:       Firefly/Giant*/Hammer
+OpenStack:  Havana/Icehouse/Juno
+
+(Other combos might also be working, but we didn't try yet.)
+</code></pre>
+
+<h1>Preparation</h1>
+<p>Before you get ready to install VSM, you should prepare your environment. <strong><em>VSM CANNOT manage Ceph Cluster not created by it</em></strong>. The sections here are helpful for understanding the deployment concepts.</p>
+<p><strong>Note</strong>: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster.</p>
+<h2>Roles</h2>
+<p>There are two roles for the nodes (servers) on your VSM created Ceph cluster.</p>
+<h3>Controller Node</h3>
+<p>The controller node is used to run mariadb, rabbitmq, web ui services for the VSM cluster.</p>
+<h3>Agent Node  (a.k.a Storage Node)</h3>
+<p>The agent node is used to run the vsm-agent service which manages the Ceph and physical storage resources. These nodes are the Ceph storage and monitor nodes.</p>
+<h2>Network</h2>
+<p>There are three kinds of networks defined in VSM, and the three networks can all be the same network or separate networks or subnets. VSM does not support split subnets - e.g. two or more different subnets that together make up the management network, or the ceph public network. or the ceph public network.</p>
+<h3>Management Network</h3>
+<p>Management Network is used to manage the VSM cluster, and interchanges VSM mangement data between vsm controller and agents.</p>
+<h3>Ceph Public Network</h3>
+<p>Ceph Public Network is used to serve IO operations between ceph nodes and clients.</p>
+<h3>Ceph Cluster Network</h3>
+<p>Ceph Cluster Network is used to interchange data between ceph nodes like Monitors and OSDs for replication and rebalancing.</p>
+<h2>Recommendations</h2>
+<ul>
+<li>
+<p>Controller node should have connectivity to:</p>
+<blockquote>
+<pre><code>Management Network
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>Agent Node should have connectivity to:</p>
+<blockquote>
+<pre><code>Management Network
+Ceph Public Network
+Ceph Cluster Network
+</code></pre>
+
+</blockquote>
+</li>
+</ul>
+<h3>Sample 1</h3>
+<ul>
+<li>
+<p><strong>Controller node</strong> contains the networks listed below:</p>
+<blockquote>
+<pre><code>192.168.123.0/24
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p><strong>Storage node</strong> contains networks below:</p>
+<blockquote>
+<pre><code>192.168.123.0/24
+192.168.124.0/24
+192.168.125.0/24
+</code></pre>
+
+</blockquote>
+</li>
+</ul>
+<p>Then we may assign these networks as below:</p>
+<pre><code>&gt;     Management network: 192.168.123.0/24
+&gt;     Ceph public netwok: 192.168.124.0/24
+&gt;     Ceph cluster network: 192.168.125.0/24
+</code></pre>
+
+<p>The configuration for VSM in the <code>cluster.manifest</code> file should be:</p>
+<pre><code>&gt;     [management_addr]
+&gt;     192.168.123.0/24
+&gt;
+&gt;     [ceph_public_addr]
+&gt;     192.168.124.0/24
+&gt;
+&gt;     [ceph_cluster_addr]
+&gt;     192.168.125.0/24
+</code></pre>
+
+<p>Refer <a href="#Configure_Cluster_Manifest">cluster.manifest</a> for details.</p>
+<h3>Sample 2</h3>
+<p>But how about when all the nodes just have two NICs. Such as a controller node and storage node having:</p>
+<pre><code>&gt;     192.168.123.0/24
+&gt;     192.168.124.0/24
+</code></pre>
+
+<p>We can assign these two networks as below:</p>
+<pre><code>&gt;     Management network: 192.168.123.0/24
+&gt;     Ceph public network: 192.168.124.0/24
+&gt;     Ceph cluster network: 192.168.123.0/24
+</code></pre>
+
+<p>The configuration for VSM in <code>cluster.manifest</code> file would then be:</p>
+<pre><code>&gt;     [management_addr]
+&gt;     192.168.123.0/24
+&gt;
+&gt;     [ceph_public_addr]
+&gt;     192.168.124.0/24
+&gt;
+&gt;     [ceph_cluster_addr]
+&gt;     192.168.123.0/24
+</code></pre>
+
+<h3>Sample 3</h3>
+<p>It's quite common to have just one NIC in demo environment, then all nodes just have:</p>
+<pre><code>&gt;   192.168.123.0/24
+</code></pre>
+
+<p>We may assign this network as below:</p>
+<pre><code>&gt;   Management network: 192.168.123.0/24
+&gt;   Ceph public network: 192.168.123.0/24
+&gt;   Ceph cluster network: 192.168.123.0/24
+</code></pre>
+
+<p>So all of the three VSM networks use the same subnet, The configurations in <code>cluster.manifest</code> file would then be:</p>
+<pre><code>&gt;     [management_addr]
+&gt;     192.168.123.0/24
+&gt;
+&gt;     [ceph_public_addr]
+&gt;     192.168.123.0/24
+&gt;
+&gt;     [ceph_cluster_addr]
+&gt;     192.168.123.0/24
+</code></pre>
+
+<h1>Deployment</h1>
+<p>Deployment involves building the Ceph cluster nodes and VSM controller node, configuring them for VSM deployment, and then deploying Ceph inside VSM. Below steps are for Ubuntu case, for CentOS case, the steps should be similar. </p>
+<h2>Pre-Flight Configuration</h2>
+<p>Some pre-flight configuration steps are required before you launch new deployment. Below are for VM case, but the general steps should also apply to bare metal:</p>
+<ol>
+<li>
+<p>VSM requires a minimum of three storage nodes and one controller, so creating four Ubuntu 14.04 virtual machines at first. One of them will be the VSM controller, the other three will be storage nodes in the cluster. There are many configurations you could use, but this is the simplest that is still fully functional. Since the controller and storage nodes are nearly identical to each other, we'll just specify and install the controller node VM and then clone it for a storage node. We'll then add storage devices to the storage node and clone that one twice more for the other two storage nodes, as follows:</p>
+<ul>
+<li>Choose a user that will be used for VSM deployment, here we use <em>cephuser</em>.</li>
+<li>Ensure ntp is configured and refers to a good time source (this is pretty much automatic with Ubuntu).</li>
+<li>Ensure OpenSSH server software is installed.</li>
+</ul>
+</li>
+<li>
+<p>VSM will sync /etc/hosts file from the controller node to storage nodes, below rules need follow for /etc/hosts on controller node:</p>
+<blockquote>
+<p>Lines with <code>localhost</code>, <code>127.0.0.1</code> and <code>::1</code> should not contains the actual hostname.
+No secondary localhost addresses (e.g., 127.0.1.1)
+No actual host name for primary localhost address (127.0.0.1) but &quot;localhost&quot;
+Add the ip addresses and host names for VSM nodes including controller and agents.
+If there are multiple ip addresses for VSM nodes, only those management ip addresses are required.</p>
+</blockquote>
+<p>An example /etc/hosts on controller node looks like:</p>
+<pre><code>127.0.0.1       localhost
+#127.0.1.1      localhost-To-be-filled-by-O-E-M
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+192.168.123.10 vsm-controller
+192.168.123.21 vsm-node1
+192.168.123.22 vsm-node2
+192.168.123.23 vsm-node3
+</code></pre>
+
+</li>
+<li>
+<p>Shut down the controller and clone it for the first storage node.</p>
+</li>
+<li>
+<p>Edit the VM settings for the clone and add two additional virtual hard drives (/dev/sdb and /dev/sdc); these will be the storage node's data store. Ceph likes to use the xfs file system with a separate journal. The journal drive can be smaller than the data drive. As per xfs documentation, the size of the journal drive depends on how you intend to use the storage space on the data drive but for this experiment a few GB is sufficient for journaling.</p>
+</li>
+<li>
+<p>Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:</p>
+<p><strong>Ubuntu Host Rename</strong></p>
+<blockquote>
+<pre><code>$ sudo hostname vsm-node1
+Logout and reboot to allow the DNS server to pick up the new name.
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>Login again as <em>cephuser</em> and run the following commands to prepare the /dev/sdb and /dev/sdc devices for Ceph use as a storage device (download this script):</p>
+<p><strong>Partition /dev/sdb for XFS</strong></p>
+<blockquote>
+<pre><code>$ sudo parted /dev/sdb -- mklabel gpt
+[sudo] password for cephuser: ******
+Information: You may need to update /etc/fstab.
+
+$ sudo parted -a optimal /dev/sdb -- mkpart xfs 1MB 100%
+Information: You may need to update /etc/fstab.
+
+$ sudo parted /dev/sdc -- mklabel gpt
+Information: You may need to update /etc/fstab.
+
+$ sudo parted -a optimal /dev/sdc -- mkpart primary 1MB 100%
+Information: You may need to update /etc/fstab.
+</code></pre>
+
+</blockquote>
+<p>This formats the /dev/sdb device and adds an XFS file system, and then formats the /dev/sdc device in preparation for use as an xfs journal.</p>
+</li>
+<li>
+<p>Logout and shut down the first storage node and clone it twice more to create the remaining two storage nodes.</p>
+</li>
+<li>
+<p>Power these system on one at a time and change the host names of each so they're unique like vsm-controller, vsm-node1, vsm-node2, and vsm-node3, for instance. </p>
+</li>
+<li>
+<p>On each of the four systems, create an ssh key for the <em>cephuser</em> account (don't set any passwords on the key), then copy the ssh identity on each of the four nodes to the other three. For instance, on the controller node:</p>
+<p><strong>Create an SSH Key</strong></p>
+<blockquote>
+<pre><code>cephuser@vsm-controller:~$ ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/cephuser/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/cephuser/.ssh/id_rsa.
+Your public key has been saved in /home/cephuser/.ssh/id_rsa.pub.
+The key fingerprint is:
+ee:4d:85:19:69:26:0b:06:55:b5:f4:c6:7a:43:e2:2a cephuser@vsm-&gt;     
+controller
+The key's randomart image is:
++--[ RSA 2048]----+
+|    ......o      |
+|     .   . =     |
+|      o . B =    |
+|     . . * O     |
+|        S = +    |
+|       . . o .   |
+|      E o .      |
+|       o o       |
+|        . .      |
++-----------------+
+
+cephuser@vsm-controller:~$ ssh-copy-id vsm-node1
+The authenticity of host 'vsm-node1 (192.168.123.21' can't be established.
+ECDSA key fingerprint is b6:29:c3:eb:3c:01:09:68:2b:bc:ab:29:f3:3c:15:58.
+Are you sure you want to continue connecting (yes/no)? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+cephuser@vsm-node1's password: ******
+Number of key(s) added: 1
+Now try logging into the machine, with:   &quot;ssh 'vsm-node1'&quot;
+and check to make sure that only the key(s) you wanted were added.
+cephuser@vsm-controller:~$ ssh-copy-id vsm-node2
+...
+cephuser@vsm-controller:~$ ssh-copy-id vsm-node3
+...
+Do the same on each of the other nodes; this will allow the deployment process to ssh from any node to any node without credentials.
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>At this point, it might be a good idea to take a VM snapshot of these four systems so you have a clean starting point if you wish to restart from scratch.</p>
+</li>
+</ol>
+<h2>Automatic Deployment</h2>
+<p>This section will describe how to automatically deploy VSM on all VSM nodes.</p>
+<ol>
+<li>
+<p>Firstly, a VSM binary release package should be acquired. It may be downloaded from binary repository, or built from source (see <a href="#Build_VSM">Build VSM</a>). Then unpack the release package, the folder structure looks as following (the real package version might be different):</p>
+<blockquote>
+<pre><code>.
+├── CHANGELOG
+├── installrc
+├── INSTALL.md
+├── install.sh
+├── uninstall.sh
+├── LICENSE
+├── manifest
+│   ├── cluster.manifest.sample
+│   └── server.manifest.sample
+├── NOTICE
+├── README
+└── vsmrepo
+    ├── python-vsmclient_2.0.0-123_amd64.deb
+    ├── Packages.gz
+    ├── vsm_2.0.0-123_amd64.deb
+    ├── vsm-dashboard-2.0.0-123_amd64.deb
+    └── vsm-deploy-2.0.0-123_amd64.deb
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>Changing the <em>installrc</em> file, set the <em>AGENT<em>ADDRESS</em>LIST</em> and the <em>CONTROLLER_ADDRESS</em>, the ip addresses in <em>AGENT<em>ADDRESS</em>LIST</em> is delimitered by space, and all ip addresses are used in management subnet. e.g.:</p>
+<blockquote>
+<pre><code>AGENT_ADDRESS_LIST=&quot;192.168.123.21 192.168.123.22 192.168.123.23&quot;
+CONTROLLER_ADDRESS=&quot;192.168.123.10&quot;
+</code></pre>
+
+<p><em>It's OK to use host name instead of ip addresses here.</em></p>
+</blockquote>
+</li>
+<li>
+<p>Under the <em>manifest</em> folder, you should create the folders named by the management ip of the controller and storage nodes, and then the structure looks as follows:</p>
+<blockquote>
+<pre><code> .
+ ├── 192.168.123.10
+ ├── 192.168.123.21
+ ├── 192.168.123.22
+ ├── 192.168.123.23
+ ├── cluster.manifest.sample
+ └── server.manifest.sample
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>Copy the <em>cluster.manifest.sample</em> to the folder named by the management ip of controller node, then change the filename to <em>cluster.manifest</em> and edit it as required. Simply, below sections need update in <em>cluster.manifest</em>:</p>
+<ul>
+<li>[storage_group] </li>
+<li>[management<em>addr]/[ceph</em>public_addr]/[ceph<em>cluster</em>addr]</li>
+</ul>
+<p>Here is an example snippet:</p>
+<pre><code>[storage_group]
+high_performance  &quot;High_Performance_SSD&quot;   ssd
+capacity          &quot;Economy_Disk&quot;           7200_rpm_sata
+performance       &quot;High_Performance_Disk&quot;  10krpm_sas
+
+[management_addr]
+192.168.123.0/24
+
+[ceph_public_addr]
+192.168.124.0/24
+
+[ceph_cluster_addr]
+192.168.125.0/24
+</code></pre>
+
+<p>Refer to <a href="#Configure_Cluster_Manifest">cluster.manifest</a> for details.</p>
+</li>
+<li>
+<p>Copy the <em>server.manifest.sample</em> to the folders named by the management ip of storage nodes, then change the filename to <em>server.manifest</em> and edit it as required. Simply, below sections need update in <em>server.manifest</em>:</p>
+<ul>
+<li>[vsm<em>controller</em>ip]</li>
+<li>[role]</li>
+<li>the OSD definitions for each storage group to be used. </li>
+</ul>
+<p>Here is an example snippet:</p>
+<pre><code>[vsm_controller_ip]
+192.168.123.10
+
+[role]
+storage
+monitor
+
+[ssd]
+#format [ssd_device]  [journal_device]
+/dev/sdb7       /dev/sdb3
+
+[7200_rpm_sata]
+#format [sata_device]  [journal_device]
+
+[10krpm_sas]
+#format [sas_device]  [journal_device]
+/dev/sdb5       /dev/sdb1
+/dev/sdb6       /dev/sdb2
+</code></pre>
+
+<p>Refer to <a href="#Configure_Server_Manifest">server.manifest</a> for details.</p>
+</li>
+<li>
+<p>Finally, the manifest folder structure looks as follows:</p>
+<blockquote>
+<pre><code> .
+ ├── 192.168.123.10
+ │   └── cluster.manifest
+ ├── 192.168.123.21
+ │   └── server.manifest
+ ├── 192.168.123.22
+ │   └── server.manifest
+ ├── 192.168.123.23
+ │   └── server.manifest
+ ├── cluster.manifest.sample
+ └── server.manifest.sample
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>If you want to upgrade vsm binary packages only, one approach is to build release package separately (see <a href="#Build_Pkg">Build Packages</a>). The generated binary packages will be in <em>vsmrepo</em> folder after unpack the release package, then you can execute below command to install binary package:</p>
+<blockquote>
+<pre><code>dpkg -i &lt;package&gt;
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>Now we are ready to start the automatic procedure by executing this command line:</p>
+<blockquote>
+<pre><code>./install.sh -u cephuser -v &lt;version&gt;
+</code></pre>
+
+</blockquote>
+<p>where <em>version</em> is the vsm version like 1.1, 2.0.</p>
+</li>
+<li>
+<p>If execution is blocked at any point, please try to enter &quot;y&quot; and move ahead.</p>
+</li>
+<li>
+<p>If all goes well, you can then <a href="#VSM_Web_UI">login to the VSM Web UI</a>.</p>
+</li>
+</ol>
+<h1><a name="VSM_Web_UI"></a>VSM Web UI</h1>
+<ol>
+<li>
+<p>Access https://vsm controller IP/dashboard/vsm.(for example <em>https://192.168.123.10/dashboard/vsm</em>)</p>
+</li>
+<li>
+<p>User name: admin, and password can be obtained from: <em>/etc/vsmdeploy/deployrc</em> in the ADMIN_PASSWORD field:</p>
+<blockquote>
+<p>./get_pass.sh</p>
+</blockquote>
+</li>
+<li>
+<p>Then you can switch to the <code>Cluster Management</code> item, then <code>Create Cluster</code> panel, and push the create cluster button to create a ceph cluster. At this point please refer to the VSM Manual, which is located at <code>https://01.org/virtual-storage-manager</code></p>
+</li>
+</ol>
+<h2>Uninstall</h2>
+<p>There are a few cases where you may expect to uninstall VSM, e.g, you expect to reinstall it with different configurations, you feel VSM doesn't work as you expected. You could take below steps to do the removal:</p>
+<ol>
+<li>Go to the VSM folder where you start the installation procedure.</li>
+<li>Make sure the <code>installrc</code> file is there, and the ip addresses for controller node and agent nodes are correctly set. Normally, if you correctly installed VSM, you should have already correctly set the file.</li>
+<li>
+<p>Execute below command:</p>
+<blockquote>
+<p>./uninstall.sh</p>
+</blockquote>
+</li>
+</ol>
+<hr />
+<h1>Reference</h1>
+<h2><a name="Build_Pkg"></a>Build Packages</h2>
+<p>There are two approaches to get a VSM release package, a direct way is to download release package from <a href="https://github.com/01org/virtual-storage-manager/releases">github</a>, or you can build release package from source code as following:</p>
+<pre><code>&gt;    ./buildvsm.sh
+</code></pre>
+
+<p>where <em>version</em> is the vsm version like 1.1, 2.0. A release package named like <em>2.0.0-123.tar.gz</em> will be generated in <em>release</em> folder if all execute well.</p>
+<h2><a name="Configure_Cluster_Manifest"></a>cluster.manifest</h2>
+<p>The cluster.manifest file is under manifest/<controller_ip>/ folder, the three subnets must be modified according to Ceph cluster network topology.</p>
+<h3><strong>subnets</strong></h3>
+<ol>
+<li>Modify the three IP addresses according to your environment.
+<code>management_addr</code> is used by VSM to communicate with different services, such as using rabbitmq to transfer messages, rpc.call/rpc.cast etc.<code>ceph_public_addr</code> is a public (front-side) network address. <code>ceph_cluster_addr</code> is a cluster (back-side) network address.</li>
+</ol>
+<p>Also, make sure the netmask is correctly set. In this sample, <em>netmask</em>=24 is fine, but with AWS instances, normally, <em>netmask</em>=16 are required.</p>
+<pre><code>[management_addr]
+192.168.123.0/24
+
+[ceph_public_addr]
+192.168.124.0/24
+
+[ceph_cluster_addr]
+192.168.125.0/24
+</code></pre>
+
+<p>Here is a complete list of all settings for cluster.manifest:</p>
+<ul>
+<li>
+<p>[<strong>storage_class</strong>]</p>
+<p>In this section, you can put you planned storage class name. One line for one class name, only names with numbers, alphabetic and underscore can be used for class name.</p>
+</li>
+<li>
+<p>[<strong>storage_group</strong>]</p>
+<p>In this section, you can put your storage group definition, in the below format, here [] is not needed. Only numbers, alphabetic and underscore can be used for any of them.</p>
+</li>
+</ul>
+<blockquote>
+<pre><code>[storage group name]  [user friendly storage group name] [storage class name]
+</code></pre>
+
+</blockquote>
+<ul>
+<li>
+<p>[<strong>cluster</strong>]</p>
+<p>In this section, you can put your cluster name. Only numbers, alphabetic and underscore can be used.</p>
+</li>
+<li>
+<p>[<strong>file_system</strong>]</p>
+<p>You can use the file system which ceph can support here. The default value is xfs</p>
+</li>
+<li>
+<p>[<strong>zone</strong>]</p>
+<p>In this section, you can add zone name under the section.</p>
+<ul>
+<li>format:</li>
+</ul>
+<blockquote>
+<pre><code>[zone]
+</code></pre>
+
+</blockquote>
+<ul>
+<li>
+<p>comments:</p>
+<ol>
+<li>Only numbers, alphabetic and underscore can be used for zone name.</li>
+<li>By default, this section is disabled, in this case, a default zone called <em>zone_one</em> will be used.</li>
+</ol>
+</li>
+<li>
+<p>example:</p>
+</li>
+</ul>
+<blockquote>
+<pre><code>zone1
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>[<strong>management_addr</strong>]</p>
+</li>
+<li>
+<p>[<strong>ceph_public_addr</strong>]</p>
+</li>
+<li>
+<p>[<strong>ceph_cluster_addr</strong>]</p>
+<p>Those 3 sections will define the three subnets. It's OK to set multiple subnets in [ceph_cluster_addr] or [ceph_public_addr], those subnets are delimitered by comma (,).</p>
+<ul>
+<li>example:</li>
+</ul>
+<blockquote>
+<pre><code>[ceph_cluster_addr]
+192.168.123.0/24,192.168.124.0/24
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>[<strong>settings</strong>]</p>
+<p>In the section, you can set values for these settings for ceph and VSM.</p>
+</li>
+</ul>
+<blockquote>
+<pre><code>storage_group_near_full_threshold  65
+storage_group_full_threshold  85
+ceph_near_full_threshold  75
+ceph_full_threshold  90
+pg_count_factor 100
+heartbeat_interval 5
+osd_heartbeat_interval 10
+osd_heartbeat_grace 10
+disk_near_full_threshold 75
+disk_full_threshold 90
+osd_pool_default_size 3
+</code></pre>
+
+</blockquote>
+<ul>
+<li>
+<p>[<strong>ec_profiles</strong>]</p>
+<p>In this section, you can define some erasure coded pool profile before you create the cluster.</p>
+<ul>
+<li>format:</li>
+</ul>
+<blockquote>
+<pre><code>profile-name] [path-to-plugin] [plugin-name] [pg_num value] [json format key/value]
+</code></pre>
+
+</blockquote>
+<ul>
+<li>
+<p>comments:</p>
+<ol>
+<li>the key/value strings should not have spaces.</li>
+</ol>
+</li>
+<li>
+<p>example:</p>
+</li>
+</ul>
+<blockquote>
+<pre><code>default_profile  /usr/lib64/ceph/erasure-code  jerasure  3  {&quot;k&quot;:2,&quot;m&quot;:1,&quot;technique&quot;:&quot;reed_sol_van&quot;}
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>[<strong>cache<em>tier</em>defaults</strong>]</p>
+<p>The default settings value for create cache tier in the web UI. You can also change them while you create cache tier for pools.</p>
+</li>
+</ul>
+<blockquote>
+<pre><code>ct_hit_set_count 1
+ct_hit_set_period_s 3600
+ct_target_max_mem_mb 1000000
+ct_target_dirty_ratio 0.4
+ct_target_full_ratio 0.8
+ct_target_max_objects 1000000
+ct_target_min_flush_age_m 10
+ct_target_min_evict_age_m 20
+</code></pre>
+
+</blockquote>
+<h2><a name="Configure_Server_Manifest"></a>server.manifest</h2>
+<p>The server.manifest file is under manifest/<agent_ip>/ folder, below settings must be modified based on your environment.</p>
+<ul>
+<li>
+<p>[<strong>vsm_controller_ip</strong>]</p>
+<p>Here <code>vsm_controller_ip</code> is the VSM controller's IP address under <code>management_addr</code> subnet.</p>
+<ul>
+<li>example:</li>
+</ul>
+<blockquote>
+<pre><code>[vsm_controller_ip]
+192.168.123.10
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>[<strong>role</strong>]</p>
+<p>Delete one if you don’t want this server act as this role. The default is that server will act as storage node and monitor at the same time.</p>
+<ul>
+<li>example:</li>
+</ul>
+<blockquote>
+<pre><code>[role]
+storage
+monitor
+</code></pre>
+
+</blockquote>
+</li>
+<li>
+<p>[<strong>auth_key</strong>]</p>
+<p>Replace the content with the key you get from controller by running the agent-token command on the controller.</p>
+<p><strong>DON'T MODIFY IT</strong>, the automatic deployment tool will fill this section.</p>
+</li>
+<li>
+<p><strong>OSD definition under each storage group</strong></p>
+<p>The storage you use for your Ceph cluster must have previously been provisioned by you with a label and a partition.</p>
+<p>For example:</p>
+<blockquote>
+<pre><code>parted /dev/sdb -- mklabel gpt
+parted -a optimal /dev/sdb -- mkpart xfs 1MB 100%
+</code></pre>
+
+</blockquote>
+<p>Enter your primary and associated journal storage information in the server.manifest, remeber to fill them in right storage group.</p>
+<p>For example, change the lines below:</p>
+<blockquote>
+<pre><code>[10krpm_sas]
+#format [sas_device]  [journal_device]
+%osd-by-path-1%   %journal-by-path-1%
+%osd-by-path-2%   %journal-by-path-2%
+%osd-by-path-3%   %journal-by-path-3%
+</code></pre>
+
+</blockquote>
+<p>to be:</p>
+<blockquote>
+<pre><code>[10krpm_sas]
+#format [sas_device]  [journal_device]
+/dev/sdb1 /dev/sdc1
+/dev/sdd1 /dev/sdc2
+/dev/sde1 /dev/sdf
+</code></pre>
+
+</blockquote>
+<p>Then delete the redundant lines with %osd-by-path%, if you have fewer disks.</p>
+<p>We recommend though that you use disk-by-path instead for the disk paths. Use the command below to find the true by-path:</p>
+<blockquote>
+<pre><code>ls -al /dev/disk/by-path/* | grep `disk-path` | awk '{print $9,$11}'
+</code></pre>
+
+</blockquote>
+<p>For example:</p>
+<blockquote>
+<pre><code>$&gt; ls -al /dev/disk/by-path/* | grep sdb | awk '{print $9,$11}'
+/dev/disk/by-path/pci-0000:00:0c.0-virtio-pci-virtio3 ../../sdb
+</code></pre>
+
+</blockquote>
+<p>Then replace the /dev/sdb with <code>/dev/disk/by-path/pci-0000:00:0c.0-virtio-pci-virtio3</code> in <code>/etc/manifest/server.manifest</code> file. Do this also for all the other disks listed in this file.</p>
+<p><strong>Warning:</strong> It may cause an error when you add a disk without by-path. So, If you can not find the by-path for a normal disk, you should not use it. Or if you use it to create the cluster, and the create cluster fails, please delete it from the <code>/etc/manifest/server.manifest</code> file.</p>
+<p>After that the disk list appears like this, here the storage group name <code>10krpm_sas</code> should have already defined in <code>[storage_group]</code> section in <code>cluster.manifest</code>.</p>
+<pre><code>[10krpm_sas]
+#format [sas_device]  [journal_device]
+/dev/disk/by-path/pci-0000:00:0c.0-virtio-pci-virtio3   /dev/disk/by-path/pci-0000:00:0d.0-virtio-pci-virtio4
+/dev/disk/by-path/pci-0000:00:0e.0-virtio-pci-virtio5   /dev/disk/by-path/pci-0000:00:0f.0-virtio-pci-virtio6
+/dev/disk/by-path/pci-0000:00:10.0-virtio-pci-virtio7   /dev/disk/by-path/pci-0000:00:11.0-virtio-pci-virtio8
+</code></pre>
+
+</li>
+</ul>
+<h2>Storage Groups</h2>
+<p>If you have several kinds of storage media like 10krpm SAS drives &amp; solid state drives, and you want these disks organized into different storage groups in VSM, then you may follow the operations below. Otherwise, you may skip this step and just put all the disks into the <code>[10krpm_sas]</code> section.</p>
+<p>You may want to add disks into other sections in the <code>/etc/manifest/server.manifest</code> file after the <code>[10krpm_sas]</code> section. Take <code>[ssd]</code> as an example:</p>
+<ul>
+<li>
+<p>Add storage class in <code>/etc/manifest/cluster.manifest</code> in controller node.</p>
+<p>[storage<em>class]
+ssd # add this line
+10krpm</em>sas</p>
+</li>
+<li>
+<p>Add storage group in <code>/etc/manifest/cluster.manifest</code> on the controller node.</p>
+<p>[storage<em>group]
+high</em>performance<em>test  High<em>Performance</em>SSD</em>test ssd</p>
+</li>
+<li>
+<p>Add disks under <code>/etc/manifest/server.manifest</code> on the storage node(s) which have SSD, such as:</p>
+<blockquote>
+<pre><code>[ssd]
+/dev/disk/by-path/pci-0000:00:0c.0-virtio-pci-virtio9   /dev/disk/by-path/pci-0000:00:0d.0-virtio-pci-virtio1
+/dev/disk/by-path/pci-0000:00:0e.0-virtio-pci-virtio11   /dev/disk/by-path/pci-0000:00:0f.0-virtio-pci-virtio14
+/dev/disk/by-path/pci-0000:00:10.0-virtio-pci-virtio23  /dev/disk/by-path/pci-0000:00:11.0-virtio-pci-virtio10
+</code></pre>
+
+</blockquote>
+</li>
+</ul>
+<h2>Trouble shooting</h2>
+<p>If you encountered any issues, below files may give you hints:</p>
+<pre><code>&gt; /var/log/vsm/*.log
+&gt; /var/log/httpd/*.log
+&gt; /var/log/syslog
+</code></pre>
+
+<p>If you want to check that the vsm agent started correctly, you can look at the files in <em>/var/log/vsm</em> on each storage node. The vsm.physical.log should have no errors and end with the line:</p>
+<pre><code>INFO [vsm.openstack.common.rpc.common] Connected to AMQP server on &lt;vsm-controller-IP-address&gt;:5673
+</code></pre>
+
+<p>and you should see a similar message at the start of vsm.agent.log and ending with:</p>
+<pre><code>INFO [vsm.agent.manager] agent/manager.py update ceph.conf from db. OVER
+</code></pre>
+
+<p>Likewise, you should see no errors in the three log files in /var/log/vsm on the controller node.</p>
+<h1>Frequently Asked Questions</h1>
+<p><strong>Q: Executing &quot;agent-token&quot; is hung.</strong></p>
+<pre><code>A: Please check http proxy setting to make sure no http_proxy variable is set in the enviornment.
+</code></pre>
+
+<p><strong>Q: &quot;An error occurred authenticating. Please try again later.&quot; appears on the controller web ui after fresh installation.</strong></p>
+<pre><code>A: Firstly, please make sure the right password is entered, the password can be obtained from /etc/vsmdeploy/deployrc in &quot;ADMIN_PASSWORD&quot; field. Also make  sure the firewall and SELinux settings are right. Special reminder: a reboot is required after changing SELinux settings.
+</code></pre>
+
+<p><strong>Q: keyring error on cluster creation.</strong></p>
+<pre><code>A: The root cause is that the vsm controller has already updated a new token, but it is not applied on all agents.
+</code></pre>
+
+<p><strong>Q: Negative update time is showing on RBD list page.</strong></p>
+<pre><code>A: Before creating the ceph cluster, please make sure all ceph nodes are time synchronized via NTP.
+</code></pre>
+
+<p><strong>Q: vsm-agent process causes one disk to be saturated with i/o load.</strong></p>
+<pre><code>A: A known case causes i/o saturation if multiple OSDs are defined on the same physical device, which is normally used in the demo case.
+</code></pre>
+
+<p><strong>Q: Can't replace node if ceph cluster contains only 3 nodes.</strong></p>
+<pre><code>A: This is an expected safeguard. A 3 node cluster minimum is needed to meet availability requirements.
+</code></pre>
+
+<p><strong>Q: Can I define the ceph version I want to install?</strong></p>
+<pre><code>A:
+VSM can work with different Ceph releases like Firefly, Giant and Hammer. By default, it will use the ceph version provided by OS distro, often it’s an latest stable version.
+If user expects to use some specific ceph version, he/she needs add the new ceph repo into system repository.
+
+For ubuntu, user could create /etc/apt/sources.list.d/ceph.list to override OS distro’s defaults before installation. For example, below commands could help setup a ceph repo for Hammer on ubuntu:
+    &gt;
+    &gt; sudo rm /etc/apt/sources.list.d/ceph.list
+    &gt; echo deb http://ceph.com/debian-hammer/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
+
+
+For CentOS, creating /etc/yum.repos.d/ceph.repo at first, then filling the ceph.repo shown below:
+    ###################
+    [ceph]
+    name=Ceph packages for $basearch
+    baseurl=http://ceph.com/rpm-hammer/rhel7/$basearch
+    enabled=1
+    priority=2
+    gpgcheck=1
+    type=rpm-md
+    gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+
+    [ceph-noarch]
+    name=Ceph noarch packages
+    baseurl=http://ceph.com/rpm-hammer/rhel7/noarch
+    enabled=1
+    priority=2
+    gpgcheck=1
+    type=rpm-md
+    gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+
+    [ceph-source]
+    name=Ceph source packages
+    baseurl=http://ceph.com/rpm-hammer/rhel7/SRPMS
+    enabled=0
+    priority=2
+    gpgcheck=1
+    type=rpm-md
+    gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+    ##############
+
+In 2.0, VSM also provides ceph upgrade feature from Web UI under &quot;Cluster Management&quot; menu.
+</code></pre>
+
+<p><strong>Q: Can VSM be installed on ubuntu desktop version?</strong></p>
+<pre><code>A: We don't well test it on ubuntu desktop, but we know this kind of case, one common issue to be encountered is:
+    Error: &quot;Activation of org.freedesktop.secrets timed out&quot;
+
+The workaround is to execute below command to temporary disable gnome-keyring service.
+    mv /usr/share/dbus-1/services/org.freedesktop.secrets.service /usr/share/dbus-1/services/org.freedesktop.secrets.service.bak
+</code></pre>
+
+<p><strong>Q: Why I can't upgrade from Firefly to Giant?</strong></p>
+<pre><code>A: There are a few missing packages in Giant repository like python-rados, librados2-devel, python-cephfs, python-rbd, librbd1-devel. you'd find out them 
+and install in advance before upgrade. There is a ceph issue is for it at http://tracker.ceph.com/issues/10476#change-46231.
+</code></pre>
+
+<p><strong>Q: How can I present pool to Openstack?</strong></p>
+<pre><code>A: One criticle factor is to make sure VSM nodes can ssh into openstack nodes without passwords. the establish of mutual trust between nodes needs to be done
+outside VSM. in VSM, user needs set the SSH user name when creating Openstack Access.
+</code></pre>
+
+<p><strong>Q: Can I add an node without VSM software installed into Ceph Cluster?</strong></p>
+<pre><code>A: It's possible. One pre-condition is to make sure the new node has finished all pre-flight configurations. VSM provides a tool named *prov_node.sh*, 
+which will automatically provision VSM software on it, then user can discover the new server on Web UI, and add it into cluster. 
+</code></pre>
+
+
+</body>
+</html>
+<!-- This document was created with MarkdownPad, the Markdown editor for Windows (http://markdownpad.com) -->
