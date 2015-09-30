@@ -89,8 +89,13 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/check_xtrus
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/getip
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/get_storage
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/spot_info_list
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/vsm-reporter.py
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/integrate-cluster
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/vsm-reporter
+
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/import_ceph_conf
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/get_smart_info
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/kill_diamond
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/vsm-ceph-upgrade
+
 mv $VSM_ROOT_PATH/usr/local/bin/vsm-reporter.py $VSM_ROOT_PATH/usr/local/bin/vsm-reporter
 rm -rf $VSM_ROOT_PATH/usr/local/bin/vsm-agent
 rm -rf $VSM_ROOT_PATH/usr/local/bin/vsm-all
