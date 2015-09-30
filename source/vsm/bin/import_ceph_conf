@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 from vsmclient.v1 import client as vsm_client
 
@@ -23,32 +23,26 @@ def get_vsmclient():
 def import_ceph_conf(cluster_name,ceph_conf_path = "/opt/ceph.conf"):
     return get_vsmclient().clusters.import_ceph_conf(cluster_name=cluster_name,ceph_conf_path=ceph_conf_path)
 
-
-
 from optparse import OptionParser
 import os
 
 if __name__ == "__main__":
-    usage = "usage: %prog --cluster_name=... --file=... \nImport new ceph configuration file to VSM Database and ceph cluster"
+    usage = "usage: %prog --cluster_name=<cluster name>. --ceph_conf_path=<ceph.conf path> \nImport new ceph configuration file to VSM Database and ceph cluster"
     parser = OptionParser(usage=usage)
     parser.add_option("--cluster_name", dest="cluster_name",
-            help = "which cluster to be modified.")
+            help = "Which cluster to be modified.")
     parser.add_option("--ceph_conf_path", dest="ceph_conf_path",
-            help = "absolute path of the new ceph configuration file .\n Be careful:\n It can't be '/etc/ceph/ceph.conf' and Make sure you have access to the file.")
+            help = "The absolute path of the new ceph configuration file .\n Be careful:\n It can't be '/etc/ceph/ceph.conf' and Make sure you have access to the file.")
     options, args = parser.parse_args()
+    cluster_name = "cluster_a"
     ceph_conf_path = "/opt/ceph.conf"
-    if not options.ceph_conf_path:
-        print '-'*80
-        print 'default value of ceph_conf_path is /opt/ceph.conf.\n  \
-               Please make sure the file already exists if you have not specified any other file path.'
-        print '-'*80
-    else:
+    if options.cluster_name:
+        cluster_name = options.cluster_name
+    if options.ceph_conf_path:
         ceph_conf_path = options.ceph_conf_path
     if ceph_conf_path and not os.path.exists(ceph_conf_path):
         parser.error("No such file %s"%ceph_conf_path)
-    if not options.cluster_name:
-        print '-'*80
-        print 'ERROR:Please  specify a cluster name!'
-    else:
-        code,message = import_ceph_conf(options.cluster_name, ceph_conf_path)
-        print message
+    print '-'*80
+    print "Trying to update ceph.conf for cluster %s with %s ..." %(cluster_name, ceph_conf_path)
+    code,message = import_ceph_conf(options.cluster_name, ceph_conf_path)
+    print message
