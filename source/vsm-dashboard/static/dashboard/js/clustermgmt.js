@@ -29,6 +29,19 @@
     //    });
     //}
 
+
+    if($("#clusteraction").length>0){
+       
+        $("#clusteraction>tbody>tr").each(function(){
+            var colIsMonitor = this.children[8];
+            var value = colIsMonitor.innerText;
+            if(value == "yes")
+                colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0' checked='true'>";
+            else
+                colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0'>";
+            
+        })
+    }
     $(".create-cluster-commit").click(function(){
         var rows_num = $(".modal-body .zone").length - 1;
         console.log(rows_num);
@@ -36,7 +49,7 @@
 
 
 
-        //get the zone_id which monitor == true
+
         var zone_id_has_monitor_list = new Array();
         var zone_id_all = new Array();
 
@@ -51,7 +64,7 @@
             checked = row.find(".multi_select_column").find("input").is(":checked");
             if(checked == true ){
                 id = row.find(".server_id").html();
-                is_monitor = row.find(".is_monitor").find("input").attr("checked") ? true : false;
+                is_monitor = row.find(".chkIsMonitor")[0].checked; 
                 is_storage = row.find(".is_storage").find("input").attr("checked") ? true : false;
                 zone_id = row.find(".zone").find("select").val();
                 zone_name = row.find(".zone").html();
@@ -74,44 +87,40 @@
         console.log(data_list);
         token = $("input[name=csrfmiddlewaretoken]").val();
         modal_stack = $("#modal_wrapper .modal");
-        //horizon.modals.modal_spinner(gettext("Working"));
+
         $.ajax({
             data: data_list_json,
             type: "post",
             dataType: "json",
             url: "/dashboard/vsm/clustermgmt/cluster/create",
             success: function (data) {
-                //prepare refresh status
+
                 for( x in data_list){
                     $("#server_list__row__"+data_list[x]['id']).addClass("status_unknown").removeClass("status_up");
                     $("#server_list__row__"+data_list[x]['id']).find(".status_up").addClass("status_unknown").removeClass("status_up");
                 }
-                //console.log(data.status);
-                //horizon.alert(data.status, data.message);
-                //setTimeout(horizon.datatables.update, 2000);
+
                 window.location.href="/dashboard/vsm/clustermgmt/";
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-                //horizon.alert("error", "Network Error");
-                //horizon.modals.spinner.modal('hide');
+
             },
             headers: {
               "X-CSRFToken": token
             },
             complete: function(){
-                //horizon.modals.spinner.modal('hide');
-                //modal_stack.remove();
+
             }
         });
-        //$(this).closest('.modal').modal('hide');
+
     });
 
-    //Shouan: integrate cluster
+   
     $(".integrate-cluster-commit").click(function(){
     	var SelectedNodeCount = 0;
     	var SelectedNodeList = new Array();
     	$(".multi_select_column>input").each(function(i,item){
-    		//Ignore the first checkbox which is used to check all | none
+
     		if(item.checked==true && i!=0)
     			{
     				SelectedNodeCount++;
@@ -152,7 +161,7 @@
               dataType: "json",
               url: "/dashboard/vsm/clustermgmt/cluster/integrate",
               success: function (data) {
-                //console.log(data);
+
               },
               error: function (XMLHttpRequest, textStatus, errorThrown) {
 
