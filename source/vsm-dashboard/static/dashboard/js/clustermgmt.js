@@ -29,19 +29,6 @@
     //    });
     //}
 
-
-    if($("#clusteraction").length>0){
-       
-        $("#clusteraction>tbody>tr").each(function(){
-            var colIsMonitor = this.children[8];
-            var value = colIsMonitor.innerText;
-            if(value == "yes")
-                colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0' checked='true'>";
-            else
-                colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0'>";
-            
-        })
-    }
     $(".create-cluster-commit").click(function(){
         var rows_num = $(".modal-body .zone").length - 1;
         console.log(rows_num);
@@ -64,7 +51,7 @@
             checked = row.find(".multi_select_column").find("input").is(":checked");
             if(checked == true ){
                 id = row.find(".server_id").html();
-                is_monitor = row.find(".chkIsMonitor")[0].checked; 
+                is_monitor = row.find(".is_monitor").find("input").attr("checked") ? true : false;
                 is_storage = row.find(".is_storage").find("input").attr("checked") ? true : false;
                 zone_id = row.find(".zone").find("select").val();
                 zone_name = row.find(".zone").html();
