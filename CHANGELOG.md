@@ -1,3 +1,73 @@
+2.0.0 (build 216)
+------------------------------------
+Special Notes
+---------------
+-	This is the 2.0 final release, which includes both Ubuntu 14 and CentOS 7 packages. 
+-	16 new features are added, and 33 bugs are fixed till this release.
+
+
+New Features
+---------------
+-	[VSM-342](https//01.org/jira/browse/VSM-342)	support ceph upgrade on centos 7
+-	[VSM-88](https//01.org/jira/browse/VSM-88)	On monitor status page, report what server each monitor is running on.
+-	[VSM-162](https//01.org/jira/browse/VSM-162)	need to support typical openstack deployment with multiple cinder/nova/glance instances beside currrent all-in-one mode
+-	[VSM-246](https//01.org/jira/browse/VSM-246)	a separate tool to help make a node ready for addition into cluster
+-	[VSM-307](https//01.org/jira/browse/VSM-307)	the operator expects to upgrade ceph cluster
+-	[VSM-309](https//01.org/jira/browse/VSM-309)	Disk identification: the operator expects to identify physical location of failed disks for replacement
+-	[VSM-327](https//01.org/jira/browse/VSM-327)	Dashboard: it's required to have summary for device capacity status to show if full
+-	[VSM-358](https//01.org/jira/browse/VSM-358)	Support normal user instead of root to install vsm
+-	[VSM-355](https//01.org/jira/browse/VSM-355)	there are some used disk paths list in the data path field and journal dik path field on page 'add new osd'
+-	[VSM-352](https//01.org/jira/browse/VSM-352)	servermgmt page autorefrush too frequent
+-	[VSM-346](https//01.org/jira/browse/VSM-346)	Add complete set of Juno features in Horizon; pluggable settings, etc.
+-	[VSM-341](https//01.org/jira/browse/VSM-341)	expect to have some utilties to help make automation tests.
+-	[VSM-291](https//01.org/jira/browse/VSM-291)	The operator expects to present pools to multiple openstack clusters or regions
+-	[VSM-331](https//01.org/jira/browse/VSM-331)	it's necesary to monitor device utilization from dashboard
+-	[VSM-339](https//01.org/jira/browse/VSM-339)	Configuration Management: as more and more features are added, and different scenarios require different settings, configuration is requried.
+-	[VSM-337](https//01.org/jira/browse/VSM-337)	Upgrade: expect to upgrade from 1.0 to 2.0
+
+
+Resolved bugs
+----------------
+-	[VSM-312](https//01.org/jira/browse/VSM-312)	vsm-node sets node status="Need more IP" if a Monitor only node does not have a cluster IP address..
+-	[VSM-17](https//01.org/jira/browse/VSM-17)		[CDEK-1608] User can remove himself, but after command execution he is not automatically log out
+-	[VSM-329](https//01.org/jira/browse/VSM-329)	Remove Monitors button in Manage Servers hangs when Monitor node also has MDS daemon
+-	[VSM-274](https//01.org/jira/browse/VSM-274)	a new user logged in vsm and can delete himself
+-	[VSM-362](https//01.org/jira/browse/VSM-362)	there are a lot of "in-Up" log in apache error log
+-	[VSM-364](https//01.org/jira/browse/VSM-364)	when remove one monitor without MDS co-located, the operation keeps running and no end.
+-	[VSM-359](https//01.org/jira/browse/VSM-359)	get smart info inaccurate
+-	[VSM-363](https//01.org/jira/browse/VSM-363)	if removing a monitor where the MDS is co-located, after finished, the status has changed to "available" instead of "active".
+-	[VSM-319](https//01.org/jira/browse/VSM-319)	performance monitor error when restart vsm processes on controller
+-	[VSM-322](https//01.org/jira/browse/VSM-322)	there are exceptions when request vsm dashboard
+-	[VSM-330](https//01.org/jira/browse/VSM-330)	When upgrading from Firefly to Giant, the upgrade complains missing python-rados package
+-	[VSM-360](https//01.org/jira/browse/VSM-360)	No servers list after newly installed with errors " Permission denied: '/tmp/crushmap'"
+-	[VSM-332](https//01.org/jira/browse/VSM-332)	sometimes diamond service start failed
+-	[VSM-333](https//01.org/jira/browse/VSM-333)	Error: "Activation of org.freedesktop.secrets timed out", when installing with 2.0 beta 1
+-	[VSM-345](https//01.org/jira/browse/VSM-345)	remove server error：no pemssion to stop osd service
+-	[VSM-348](https//01.org/jira/browse/VSM-348)	deploy agent node after vsm cluster has been created, the token in .token file is invalid
+-	[VSM-361](https//01.org/jira/browse/VSM-361)	when one osd is full, the dashboard doesn't mark one osd is full
+-	[VSM-347](https//01.org/jira/browse/VSM-347)	When clicking on "add new osd" at device management, a server error page pops up
+-	[VSM-353](https//01.org/jira/browse/VSM-353)	changed the password of current user,an error page pops up
+-	[VSM-336](https//01.org/jira/browse/VSM-336)	On Dashboard, even no cluster is created, the VSM version and uptime should be displayed
+-	[VSM-343](https//01.org/jira/browse/VSM-343)	can't create cache tier with latest code
+-	[VSM-344](https//01.org/jira/browse/VSM-344)	after a few times install, clean-up, reinstall, we have seem some "eaddrinuse" errors on starting rabbitmq
+-	[VSM-357](https//01.org/jira/browse/VSM-357)	'add new disk':if data disk and journal disk is in the different partitions of the same disk, the opearation will be unsuccessful
+-	[VSM-350](https//01.org/jira/browse/VSM-350)	no response when get latency performance on dashboard
+-	[VSM-351](https//01.org/jira/browse/VSM-351)	ceph upgrade on ubuntu unsuccess
+-	[VSM-356](https//01.org/jira/browse/VSM-356)	I got warning info means that the number of pg in each osd is too large after upgrade ceph from a lower version to hammar
+-	[VSM-354](https//01.org/jira/browse/VSM-354)	when 'create cluster' page opened,other pages still can be opened
+-	[VSM-349](https//01.org/jira/browse/VSM-349)	click 'create cluster',I got the tip:there are some zones no monitor created
+-	[VSM-340](https//01.org/jira/browse/VSM-340)	Manifest: even using the same token generated from agent-token, server_manifest still complains connection error
+-	[VSM-328](https//01.org/jira/browse/VSM-328)	Dashboard: when one disk is full, the warning message is not showing correctly
+-	[VSM-338](https//01.org/jira/browse/VSM-338)	Upgrade: current ceph upgrade requires all agent nodes have internet connections, which normally is not true.
+-	[VSM-334](https//01.org/jira/browse/VSM-334)	upgrade: when set hammer url, then click "submit", the final ceph version is still firefly.
+-	[VSM-335](https//01.org/jira/browse/VSM-335)	The version on UI only shows 2.0.0, but no build number
+
+
+Known issues
+-----------------
+
+
+
 2.0.0 (build 163)
 ------------------------------------
 Special Notes

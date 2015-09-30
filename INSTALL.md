@@ -3,20 +3,19 @@
 ==================================
 
 
-**Version:** 2.0.0.201
+**Version:** 2.0.0.216
 
-**Source:** 2015-09-20
+**Source:** 2015-09-30
 
 **Keywords:** Ceph, Openstack, Virtual Storage Management
 
 **Supported Combo:**
 
-	OS:			Ubuntu 14.04.2/CentOS 7
+	OS:			Ubuntu Server 14.04.2/CentOS 7 Server Basic
 	Ceph: 		Firefly/Giant*/Hammer
 	OpenStack:	Havana/Icehouse/Juno
 
 	(Other combos might also be working, but we didn't try yet.)
-
 
 
 #Preparation
@@ -136,49 +135,52 @@ So all of the three VSM networks use the same subnet, The configurations in `clu
 	>     192.168.123.0/24
 
 #Deployment
-Deployment involves building the four required Ceph cluster nodes, configuring them for Ceph/VSM deployment, and then deploying VSM (which also deploys Ceph).
+Deployment involves building the Ceph cluster nodes and VSM controller node, configuring them for VSM deployment, and then deploying Ceph inside VSM. Below steps are for Ubuntu case, for CentOS case, the steps should be similar. 
 
 ##Pre-Flight Configuration
+Some pre-flight configuration steps are required before you launch new deployment. Below are for VM case, but the general steps should also apply to bare metal:
 
-Some pre-flight configuration steps are required before you attempt to deploy your newly built tarball:
+1.	VSM requires a minimum of three storage nodes and one controller, so creating four Ubuntu 14.04 virtual machines at first. One of them will be the VSM controller, the other three will be storage nodes in the cluster. There are many configurations you could use, but this is the simplest that is still fully functional. Since the controller and storage nodes are nearly identical to each other, we'll just specify and install the controller node VM and then clone it for a storage node. We'll then add storage devices to the storage node and clone that one twice more for the other two storage nodes, as follows:
+	-	Choose a user that will be used for VSM deployment, here we use *cephuser*.
+	-	Ensure ntp is configured and refers to a good time source (this is pretty much automatic with Ubuntu).
+	-	Ensure OpenSSH server software is installed.
 
-1.	Create four Ubuntu 14.04 virtual machines. One of them will be the VSM controller, the other three will be storage nodes in the cluster. VSM requires a minimum of three storage nodes and one controller. There are many configurations you could use, but this is the simplest that is still fully functional. Since the controller and storage nodes are nearly identical to each other, we'll just specify and install the controller node VM and then clone it for a storage node. We'll then add storage devices to the storage node and clone that one twice more for the other two storage nodes, as follows:
-	1.	Choose a user that will be the ceph/vsm user - something like cephuser.
-	2.	Ensure ntp is configured and refers to a good time source (this is pretty much automatic with Ubuntu).
-	3.	Ensure OpenSSH server software is installed:
+2.	VSM will sync /etc/hosts file from the controller node to storage nodes, below rules need follow for /etc/hosts on controller node:
+	>
+	> Lines with `localhost`, `127.0.0.1` and `::1` should not contains the actual hostname.
+	> No secondary localhost addresses (e.g., 127.0.1.1)
+	> No actual host name for primary localhost address (127.0.0.1) but "localhost"
+	> Add the ip addresses and host names for VSM nodes including controller and agents.
+	> If there are multiple ip addresses for VSM nodes, only those management ip addresses are required.
 
-2.	Once the OS installation process has completed and the system has rebooted, login to the controller as cephuser and update and upgrade the system to ensure that the very latest Ubuntu software is installed (download this script):
+	An example /etc/hosts on controller node looks like:
 
-	**Update System**
-	>     $ sudo apt-get update
-	>     ...
-	>     $ sudo apt-get upgrade
-	>     ...
-	>     $ sudo apt-get dist-upgrade
-	>     ...
-	>     
-	Answer 'Y' to all the prompts (or just press 'enter' - most of them default to 'Y' anyway).
+		127.0.0.1       localhost
+		#127.0.1.1      localhost-To-be-filled-by-O-E-M
+		
+		# The following lines are desirable for IPv6 capable hosts
+		::1     ip6-localhost ip6-loopback
+		fe00::0 ip6-localnet
+		ff00::0 ip6-mcastprefix
+		ff02::1 ip6-allnodes
+		ff02::2 ip6-allrouters
+		
+		192.168.123.10 vsm-controller
+		192.168.123.21 vsm-node1
+		192.168.123.22 vsm-node2
+		192.168.123.23 vsm-node3
 
-3.	Edit the /etc/hosts file and remove any secondary localhost addresses (e.g., 127.0.1.1) and ensure the primary localhost address (127.0.0.1) does not refer to the actual host name, but rather only to "localhost". This is necessary (as explained in the VSM deployment wiki page in item 3 of the Automatic Deployment section) because VSM deployment will sync the /etc/hosts file to the cluster storage nodes - you don't want system A referring to localhost via system B's host name.
+3.	Shut down the controller and clone it for the first storage node.
 
-4.	Make the cephuser a super user with respect to sudo (download this script):
-Make cephuser a Super User
-	>     $ echo "cephuser ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
-	>     $ sudo chmod 0440 /etc/sudoers.d/cephuser
+4.	Edit the VM settings for the clone and add two additional virtual hard drives (/dev/sdb and /dev/sdc); these will be the storage node's data store. Ceph likes to use the xfs file system with a separate journal. The journal drive can be smaller than the data drive. As per xfs documentation, the size of the journal drive depends on how you intend to use the storage space on the data drive but for this experiment a few GB is sufficient for journaling.
 
-	**VERY IMPORTANT**: These commands add an effective line to the sudoers file that allows cephuser to do anything in sudo without a password. This is necessary because often the VSM deployment script performs remote operations using commands prefixed with ssh cephuser@remote-node sudo ...  which will fail if sudo requires a password, as there's no way to front sudo's interactive password prompt at the controller end of the command.
-
-5.	Shut down the controller and clone it for the first storage node.
-
-6.	Edit the VM settings for the clone and add two additional virtual hard drives (/dev/sdb and /dev/sdc); these will be the storage node's data store. Ceph likes to use the xfs file system with a separate journal. The journal drive can be smaller than the data drive. As per xfs documentation, the size of the journal drive depends on how you intend to use the storage space on the data drive but for this experiment a few GB is sufficient for journaling.
-
-7.	Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:
+5.	Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:
 
 	**Ubuntu Host Rename**
-	>     $ sudo hostname vsm-store1
+	>     $ sudo hostname vsm-node1
 	>     Logout and reboot to allow the DNS server to pick up the new name.
 
-8.	Login again as cephuser and run the following commands to prepare the /dev/sdb and /dev/sdc devices for Ceph use as a storage device (download this script):
+6.	Login again as *cephuser* and run the following commands to prepare the /dev/sdb and /dev/sdc devices for Ceph use as a storage device (download this script):
 
 	**Partition /dev/sdb for XFS**
 	>     $ sudo parted /dev/sdb -- mklabel gpt
@@ -196,21 +198,11 @@ Make cephuser a Super User
 
 	This formats the /dev/sdb device and adds an XFS file system, and then formats the /dev/sdc device in preparation for use as an xfs journal.
 
-9.	Logout and shut down the first storage node and clone it twice more to create the remaining two storage nodes.
+7.	Logout and shut down the first storage node and clone it twice more to create the remaining two storage nodes.
 
-10.	Power these system on one at a time and change the host names of each so they're unique (I named mine, vsm-controller, vsm-node1, vsm-node2, and vsm-node3, for instance). NOTE: This can be tricky in our dynamic DHCP environment where DNS is populated by querying hosts as they request addresses.
+8.	Power these system on one at a time and change the host names of each so they're unique like vsm-controller, vsm-node1, vsm-node2, and vsm-node3, for instance. 
 
-11.	Power them on and edit the /etc/hosts files on each of the four VMs; append entries mapping each of the node names to their DHCP IP addresses:
-Additional Entries on Each Node's /etc/hosts File
-	>     ...
-	>     10.50.33.75 vsm-controller
-	>     10.50.33.76 vsm-node1
-	>     10.50.33.77 vsm-node2
-	>     10.50.33.78 vsm-node3
-
-	This step is only necessary to ensure a stable name-to-IP mapping among the nodes. Without doing this in a dynamic DHCP setting like ours, you could find the DNS server is not quick enough picking up the host names and mapping them to their DHCP provided IP addresses in the DNS database. The end result is that deployment tends to fail because DNS can't find the host (yet). This step is, of course, not needed if you're using static IP addresses.
-
-12.	On each of the four systems, create an ssh key for the cephuser account (don't set any passwords on the key), then copy the ssh identity on each of the four nodes to the other three. For instance, on the controller node:
+9.	On each of the four systems, create an ssh key for the *cephuser* account (don't set any passwords on the key), then copy the ssh identity on each of the four nodes to the other three. For instance, on the controller node:
 
 	**Create an SSH Key**
 	>     
@@ -238,7 +230,7 @@ Additional Entries on Each Node's /etc/hosts File
 	>     +-----------------+
 
 	>     cephuser@vsm-controller:~$ ssh-copy-id vsm-node1
-	>     The authenticity of host 'vsm-node1 (10.50.33.75)' can't be established.
+	>     The authenticity of host 'vsm-node1 (192.168.123.21' can't be established.
 	>     ECDSA key fingerprint is b6:29:c3:eb:3c:01:09:68:2b:bc:ab:29:f3:3c:15:58.
 	>     Are you sure you want to continue connecting (yes/no)? yes
 	>     /usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
@@ -253,56 +245,13 @@ Additional Entries on Each Node's /etc/hosts File
 	>     ...
 	>     Do the same on each of the other nodes; this will allow the deployment process to ssh from any node to any node without credentials.
 
-13.	On the controller node, set a root password and su into the root account, 	then copy the .ssh directory from /home/cephuser/.ssh to /root/.ssh so you 	can deploy as root (via sudo) and still have password-less access to the 	cephuser accounts on each of the other nodes:
-	>     Copy /home/cephuser/.ssh to /root/.ssh
-	>     cephuser@vsm-controller:~$ sudo passwd root
-	>     [sudo] password for cephuser:
-	>     Enter new UNIX password:
-	>     Retype new UNIX password:
-	>     passwd: password updated successfully
-	>     cephuser@vsm-controller:~$ su -
-	>     Password: ******
-	>     root@vsm-controller:~# cp -r /home/cephuser/.ssh .ssh
+10.	At this point, it might be a good idea to take a VM snapshot of these four systems so you have a clean starting point if you wish to restart from scratch.
 
-14.	At this point, it might be a good idea to take a VMware snapshot of these four systems so you have a clean starting point if you wish to restart from scratch.
-
-15.	Copy the built tarball from your build system to the controller node's cephuser account home directory.
-
-16.	Extract the tarball (it will create its own root directory). It should expand to a directory that looks something like this:
-The Expanded Release Tarball
-
-	>     .
-	>     ├── CHANGELOG.md
-	>     ├── CHANGELOG.pdf
-	>     ├── debs.lst
-	>     ├── get_pass.sh
-	>     ├── INSTALL.md
-	>     ├── INSTALL.pdf
-	>     ├── installrc
-	>     ├── install.sh
-	>     ├── LICENSE
-	>     ├── manifest
-	>     │   ├── cluster.manifest.sample
-	>     │   └── server.manifest.sample
-	>     ├── NOTICE
-	>     ├── README.md
-	>     ├── RELEASE
-	>     ├── uninstall.sh
-	>     ├── VERSION
-	>     └── vsmrepo
-	>         ├── Packages.gz
-	>         ├── python-vsmclient_2.0.0-149_amd64.deb
-	>         ├── vsm_2.0.0-149_amd64.deb
-	>         ├── vsm-dashboard_2.0.0-149_amd64.deb
-	>         └── vsm-deploy_2.0.0-149_amd64.deb
-	>         
 
 ##Automatic Deployment
-Starting with VSM 1.1, an automatic deployment tool is provided which can simplify the deployment. This tool is still in development, so your feedback and JIRA reports of any problems are very welcome.
+This section will describe how to automatically deploy VSM on all VSM nodes.
 
-This section will describe how to use the tool to conduct automation.
-
-1. Firstly, a VSM binary release package should be acquired. It may be downloaded from binary repository, or built from source (see [Build VSM](#Build_VSM)). Then unpack the release package, the folder structure looks as following:
+1. Firstly, a VSM binary release package should be acquired. It may be downloaded from binary repository, or built from source (see [Build VSM](#Build_VSM)). Then unpack the release package, the folder structure looks as following (the real package version might be different):
 	>     .
 	>     ├── CHANGELOG
 	>     ├── installrc
@@ -328,11 +277,7 @@ This section will describe how to use the tool to conduct automation.
 	> 	CONTROLLER_ADDRESS="192.168.123.10"
 *It's OK to use host name instead of ip addresses here.*
 
-3. VSM will sync /etc/hosts file from the controller node, make sure your controller node's /etc/hosts file follows below rules:
-	>
-	> Lines with `localhost`, `127.0.0.1` and `::1` should not contains the actual hostname.
-
-4. Under the *manifest* folder, you should create the folders named by the management ip of the controller and storage nodes, and then the structure looks as follows:
+3. Under the *manifest* folder, you should create the folders named by the management ip of the controller and storage nodes, and then the structure looks as follows:
 	>      .
 	>      ├── 192.168.123.10
 	>      ├── 192.168.123.21
@@ -341,11 +286,57 @@ This section will describe how to use the tool to conduct automation.
 	>      ├── cluster.manifest.sample
 	>      └── server.manifest.sample
 
-5. Copy the *cluster.manifest.sample* to the folder named by the management ip of controller node, then change the filename to *cluster.manifest* and edit it as required, refer [cluster.manifest](#Configure_Cluster_Manifest) for details.
+4. Copy the *cluster.manifest.sample* to the folder named by the management ip of controller node, then change the filename to *cluster.manifest* and edit it as required. Simply, below sections need update in *cluster.manifest*:
+	- [storage_group] 
+	- [management_addr]/[ceph_public_addr]/[ceph_cluster_addr]
 
-6. Copy the *server.manifest.sample* to the folders named by the management ip of storage nodes, then change the filename to *server.manifest* and edit it as required, refer [server.manifest](#Configure_Server_Manifest) for details.
+	Here is an example snippet:
 
-7. Finally, the manifest folder structure looks as follows:
+		[storage_group]
+		high_performance  "High_Performance_SSD"   ssd
+		capacity          "Economy_Disk"           7200_rpm_sata
+		performance       "High_Performance_Disk"  10krpm_sas
+		
+		[management_addr]
+		192.168.123.0/24
+		
+		[ceph_public_addr]
+		192.168.124.0/24
+		
+		[ceph_cluster_addr]
+		192.168.125.0/24
+	
+	Refer to [cluster.manifest](#Configure_Cluster_Manifest) for details.
+
+5. Copy the *server.manifest.sample* to the folders named by the management ip of storage nodes, then change the filename to *server.manifest* and edit it as required. Simply, below sections need update in *server.manifest*:
+	- [vsm_controller_ip]
+	- [role]
+	- the OSD definitions for each storage group to be used. 
+
+	Here is an example snippet:
+
+		[vsm_controller_ip]
+		192.168.123.10
+		
+		[role]
+		storage
+		monitor
+		
+		[ssd]
+		#format [ssd_device]  [journal_device]
+		/dev/sdb7       /dev/sdb3
+		
+		[7200_rpm_sata]
+		#format [sata_device]  [journal_device]
+		
+		[10krpm_sas]
+		#format [sas_device]  [journal_device]
+		/dev/sdb5       /dev/sdb1
+		/dev/sdb6       /dev/sdb2
+
+	Refer to [server.manifest](#Configure_Server_Manifest) for details.
+
+6. Finally, the manifest folder structure looks as follows:
 	>      .
 	>      ├── 192.168.123.10
 	>      │   └── cluster.manifest
@@ -358,21 +349,21 @@ This section will describe how to use the tool to conduct automation.
 	>      ├── cluster.manifest.sample
 	>      └── server.manifest.sample
 
-8. If you want to upgrade vsm binary packages only, one approach is to build release package separately (see [Build Packages](#Build_Pkg)). The generated binary packages will be in *vsmrepo* folder after unpack the release package, then you can execute below command to install binary package:
+7. If you want to upgrade vsm binary packages only, one approach is to build release package separately (see [Build Packages](#Build_Pkg)). The generated binary packages will be in *vsmrepo* folder after unpack the release package, then you can execute below command to install binary package:
 	>
 	> 	dpkg -i <package>
 	>
 
-9. Now we are ready to start the automatic procedure by executing this command line:
+8. Now we are ready to start the automatic procedure by executing this command line:
 	>
-	> 	./install.sh -u ubuntu -v <version>
+	> 	./install.sh -u cephuser -v <version>
 	>
 
 	where *version* is the vsm version like 1.1, 2.0.
 
-10. If execution is blocked at any point, please try to enter "y" and move ahead.
+9. If execution is blocked at any point, please try to enter "y" and move ahead.
 
-11. If all goes well, you can then [login to the VSM Web UI](#VSM_Web_UI).
+10. If all goes well, you can then [login to the VSM Web UI](#VSM_Web_UI).
 
 
 #<a name="VSM_Web_UI"></a>VSM Web UI
@@ -397,12 +388,14 @@ There are a few cases where you may expect to uninstall VSM, e.g, you expect to 
 	>   ./uninstall.sh
 
 
+----------
+
 #Reference
 
 ##<a name="Build_Pkg"></a>Build Packages
 There are two approaches to get a VSM release package, a direct way is to download release package from [github](https://github.com/01org/virtual-storage-manager/releases), or you can build release package from source code as following:
 
-	>    ./buildvsm.sh -v <version>
+	>    ./buildvsm.sh
 
 where *version* is the vsm version like 1.1, 2.0. A release package named like *2.0.0-123.tar.gz* will be generated in *release* folder if all execute well.
 
@@ -452,7 +445,7 @@ Here is a complete list of all settings for cluster.manifest:
 	In this section, you can add zone name under the section.
 	- format:
 
-	> 	[zone-name]
+	> 	[zone]
 
 	- comments:
 		1. Only numbers, alphabetic and underscore can be used for zone name.
@@ -468,7 +461,12 @@ Here is a complete list of all settings for cluster.manifest:
 
 - [**ceph\_cluster\_addr**]
 
-	Those 3 sections will define the three subnets.
+	Those 3 sections will define the three subnets. It's OK to set multiple subnets in [ceph\_cluster\_addr] or [ceph\_public\_addr], those subnets are delimitered by comma (,).
+
+	- example:
+
+	> 	[ceph_cluster_addr]
+	> 	192.168.123.0/24,192.168.124.0/24
 
 - [**settings**]
 
@@ -680,7 +678,7 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 		###################
 		[ceph]
 		name=Ceph packages for $basearch
-		baseurl=http://ceph.com/rpm-hammer/el6/$basearch
+		baseurl=http://ceph.com/rpm-hammer/rhel7/$basearch
 		enabled=1
 		priority=2
 		gpgcheck=1
@@ -689,7 +687,7 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 
 		[ceph-noarch]
 		name=Ceph noarch packages
-		baseurl=http://ceph.com/rpm-hammer/el6/noarch
+		baseurl=http://ceph.com/rpm-hammer/rhel7/noarch
 		enabled=1
 		priority=2
 		gpgcheck=1
@@ -698,7 +696,7 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 
 		[ceph-source]
 		name=Ceph source packages
-		baseurl=http://ceph.com/rpm-hammer/el6/SRPMS
+		baseurl=http://ceph.com/rpm-hammer/rhel7/SRPMS
 		enabled=0
 		priority=2
 		gpgcheck=1
@@ -718,4 +716,15 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 
 **Q: Why I can't upgrade from Firefly to Giant?**
 
-	A: There are a few missing packages in Giant repository like python-rados, librados2-devel, python-cephfs, python-rbd, librbd1-devel. you'd find out them and install in advance before upgrade. There is a ceph issue is for it at http://tracker.ceph.com/issues/10476#change-46231.
+	A: There are a few missing packages in Giant repository like python-rados, librados2-devel, python-cephfs, python-rbd, librbd1-devel. you'd find out them 
+	and install in advance before upgrade. There is a ceph issue is for it at http://tracker.ceph.com/issues/10476#change-46231.
+
+**Q: How can I present pool to Openstack?**
+
+	A: One criticle factor is to make sure VSM nodes can ssh into openstack nodes without passwords. the establish of mutual trust between nodes needs to be done
+	outside VSM. in VSM, user needs set the SSH user name when creating Openstack Access.
+
+**Q: Can I add an node without VSM software installed into Ceph Cluster?**
+	
+	A: It's possible. One pre-condition is to make sure the new node has finished all pre-flight configurations. VSM provides a tool named *prov_node.sh*, 
+	which will automatically provision VSM software on it, then user can discover the new server on Web UI, and add it into cluster. 
