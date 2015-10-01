@@ -40,13 +40,23 @@ VSM_RC_FILE=$1
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
 [[ -e $VSM_RC_FILE ]] && source $VSM_RC_FILE
-source /usr/lib/vsm/tools/lib/services
-source /usr/lib/vsm/tools/lib/mysql
-source /usr/lib/vsm/tools/lib/ntp
 
-for n in `ls /usr/lib/vsm/tools/lib/ | grep -v services | grep -v manifest| grep -v check`; do
-    source /usr/lib/vsm/tools/lib/$n
-done
+echo "KEYSTONE_HOST: $KEYSTONE_HOST"
+source /usr/lib/vsm/tools/lib/createrepo
+source /usr/lib/vsm/tools/lib/dir
+source /usr/lib/vsm/tools/lib/keystone
+source /usr/lib/vsm/tools/lib/mysql
+source /usr/lib/vsm/tools/lib/network
+source /usr/lib/vsm/tools/lib/ntp
+source /usr/lib/vsm/tools/lib/rabbitmq
+source /usr/lib/vsm/tools/lib/repo
+source /usr/lib/vsm/tools/lib/services
+source /usr/lib/vsm/tools/lib/user
+source /usr/lib/vsm/tools/lib/vsm
+source /usr/lib/vsm/tools/lib/vsmdash
+
+echo "KEYSTONE_HOST: $KEYSTONE_HOST"
+
 cluster_manifest
 
 #---------------------------------------------
@@ -59,7 +69,8 @@ cluster_manifest
 # Repo
 #---------------------------------------------
 
-HOST_IP=`nic_ip ${NET_DEV}`
+#HOST_IP=`nic_ip ${NET_DEV}`
+HOST_IP=`hostname -i`
 REPO_HOST=${REPO_HOST:-$HOST_IP}
 STACK_USER=${STACK_USER:-stack}
 
@@ -91,6 +102,10 @@ setup_rabbitmq
 #---------------------------------------------
 # Keystone
 #---------------------------------------------
+
+# KEYSTONE_HOST=%KEYSTONE_HOST% because setup_vsmdash has not yet run below
+# to change the value in /etc/vsmdeploy/deployrc
+unset KEYSTONE_HOST
 
 MYSQL_KEYSTONE_USER=${MYSQL_KEYSTONE_USER:-keystone}
 MYSQL_KEYSTONE_PASSWORD=${MYSQL_KEYSTONE_PASSWORD:-keystone_password}

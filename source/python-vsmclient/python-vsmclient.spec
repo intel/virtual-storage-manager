@@ -2,8 +2,13 @@
 %define release %{getenv:RELEASE}
 
 Name:             python-vsmclient
+%if 0%{?suse_version}
+Version:          2.0.0
+Release:          217
+%else
 Version:          %{version}
 Release:          %{release}
+%endif
 Summary:          Python API and CLI for VSM
 
 Group:            Development/Languages

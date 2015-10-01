@@ -3,8 +3,13 @@
 %define release %{getenv:RELEASE}
 
 Name:             vsm
+%if 0%{?suse_version}
+Version:          2.0.0
+Release:          217
+%else
 Version:          %{version}
 Release:          %{release}
+%endif
 Summary:          Virtual Storage Manager for managing Ceph clusters
 
 Group:            Storage/System
@@ -274,14 +279,14 @@ install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/bin/refresh-
 install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/bin/getip
 install -p -D -m 755 bin/import_ceph_conf  %{buildroot}%{_usr}/bin/import_ceph_conf
 install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
-install -p -D -m 755 bin/kill_diamond %{buildroot}%{_bindir}/kill_diamond
 install -p -D -m 755 bin/vsm-ceph-upgrade %{buildroot}%{_bindir}/vsm-ceph-upgrade
+#install -p -D -m 755 bin/kill_diamond %{buildroot}%{_bindir}/kill_diamond
 
 
 install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/bin/get_storage
 install -p -D -m 644 tools/spot_info_list %{buildroot}%{_usr}/bin/spot_info_list
 install -p -D -m 755 tools/vsm-reporter.py %{buildroot}%{_usr}/bin/vsm-reporter
-install -p -D -m 755 bin/integrate-cluster %{buildroot}%{_usr}/bin/integrate-cluster
+install -p -D -m 755 bin/intergrate-cluster %{buildroot}%{_usr}/bin/intergrate-cluster
 %else
 install -p -D -m 755 bin/cluster_manifest %{buildroot}%{_usr}/local/bin/cluster_manifest
 install -p -D -m 755 bin/server_manifest  %{buildroot}%{_usr}/local/bin/server_manifest
@@ -297,7 +302,7 @@ install -p -D -m 755 bin/kill_diamond %{buildroot}%{_bindir}/kill_diamond
 install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/local/bin/get_storage
 install -p -D -m 755 tools/spot_info_list %{buildroot}%{_usr}/local/bin/spot_info_list
 install -p -D -m 755 tools/vsm-reporter.py %{buildroot}%{_usr}/local/bin/vsm-reporter
-install -p -D -m 755 bin/integrate-cluster %{buildroot}%{_usr}/local/bin/integrate-cluster
+install -p -D -m 755 bin/intergrate-cluster %{buildroot}%{_usr}/local/bin/intergrate-cluster
 %endif
 
 %if 0%{?suse_version}
@@ -359,8 +364,8 @@ exit 0
 %dir %attr(-, root, root) /var/log/vsm
 %dir %attr(-, root, root) /var/lib/vsm
 ##%%dir %%attr(-, root, root) /var/run/vsm
-%dir %attr(-, root, root) /etc/vsm
-%dir %attr(-, root, root) /etc/vsm/rootwrap.d
+##%dir %attr(-, root, root) /etc/vsm
+##%dir %attr(-, root, root) /etc/vsm/rootwrap.d
 %dir %{_sysconfdir}/vsm
 %config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/vsm.conf
 %config(noreplace) %attr(-, root, root) %{_sysconfdir}/vsm/ceph.conf.template
@@ -439,7 +444,8 @@ exit 0
 %attr(-, root, root) %{_bindir}/vsm-backup
 %attr(-, root, root) %{_bindir}/vsm-restore
 %attr(-, root, root) %{_bindir}/get_smart_info
-%attr(-, root, root) %{_bindir}/integrate-cluster
+%attr(-, root, root) %{_bindir}/vsm-ceph-upgrade
+%attr(-, root, root) %{_bindir}/intergrate-cluster
 %attr(-, root, root) %{_usr}/bin/import_ceph_conf
 
 %attr(-, root, root) %{_usr}/bin/getip
@@ -471,7 +477,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-backup
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-restore
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/get_smart_info
-%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/integrate-cluster
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/intergrate-cluster
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/import_ceph_conf
 
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/getip
