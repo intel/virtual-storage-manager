@@ -3,8 +3,13 @@
 %define release %{getenv:RELEASE}
 
 Name:           vsm-dashboard
+%if 0%{?suse_version}
+Version:          2.0.0
+Release:          217
+%else
 Version:        %{version}
 Release:        %{release}
+%endif
 Url:            http://intel.com
 License:        Apache-2.0
 Group:          Development/Languages/Python
@@ -44,6 +49,12 @@ Requires:    apache2
 Requires:    python-pyparsing
 Requires:    python-backports.ssl_match_hostname
 Requires:    python-horizon
+# SLE 12
+%if 0%{?suse_version} == 1315
+Requires:    python-cyordereddict
+%else
+Requires:    python-ordereddict
+%endif
 %else
 Requires:    Django14
 Requires:    python-django-openstack-auth
@@ -60,6 +71,7 @@ Requires:    python-backports-ssl_match_hostname
 Requires:    python-django-horizon
 Requires:    python-httplib2
 Requires:    python-urllib3
+Requires:    python-ordereddict
 %endif
 Requires:    mod_wsgi
 Requires:    python-argparse
@@ -71,7 +83,6 @@ Requires:    python-iso8601
 Requires:    python-jsonschema
 Requires:    python-keyring
 Requires:    python-keystoneclient
-Requires:    python-ordereddict
 Requires:    python-oslo-config
 Requires:    python-prettytable
 Requires:    python-requests
