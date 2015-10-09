@@ -229,7 +229,11 @@ class AgentManager(manager.Manager):
                 return False
 
         ip = values.get('cluster_ip', None)
+        roles = values.get('type','')
         if not ip:
+            roles_list = [x.strip() for x in roles.split(",") if len(x.strip())]
+            if len(roles_list) == 1 and roles_list[0] == 'monitor':
+                return True
             return False
         for ip_single in ip.split(','):
             if len(ip_single.split('.')) != 4:
@@ -297,7 +301,7 @@ class AgentManager(manager.Manager):
         values['raw_ip'] = self._node_info['ip']
         self._set_net_add_seq(values)
         values['data_drives_number'] = self._drive_num_count
-
+        values['type'] = self._node_info['role']
         ip_ready = self._check_ip_address(values)
         if ip_ready:
             values['status'] = 'available'
@@ -305,7 +309,7 @@ class AgentManager(manager.Manager):
             values['status'] = 'Need More IP'
         values['mds'] = 'no'
         values['zone_id'] = zone_id
-        values['type'] = self._node_info['role']
+        #values['type'] = self._node_info['role']
         values['host'] = self.host
         values['id_rsa_pub'] = self._node_info["id_rsa_pub"]
         values['raw_ip'] = self._node_info['ip']
@@ -407,7 +411,10 @@ class AgentManager(manager.Manager):
             pri_ip = node['primary_public_ip']
             sed_ip = node['secondary_public_ip']
             thr_ip = node['cluster_ip']
-            ip_list = pri_ip.split(',')+sed_ip.split(',')+thr_ip.split(',')
+            ip_list = pri_ip.split(',') + sed_ip.split(',')
+            if thr_ip:
+                ip_list = ip_list + thr_ip.split(',')
+            #ip_list = pri_ip.split(',')+sed_ip.split(',')+thr_ip.split(',')
             ip_list = [x for x in ip_list if x]
             LOG.info('host = %s ip = %s' % (hname, ip_list))
 

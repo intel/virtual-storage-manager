@@ -1351,6 +1351,9 @@ class CephDriver(object):
                 osd_state_get_by_service_id(context, service_id)
         if not len(osd_states) > 0:
             LOG.info("There is no osd on node %s" % node_id)
+            self._conductor_rpcapi.\
+                init_node_update_status_by_id(context, node_id,
+                                                'Active')
             return True
 
         # Begin to start all the OSDs.
@@ -1481,6 +1484,9 @@ class CephDriver(object):
                 osd_state_get_by_service_id(context, service_id)
         if not len(osd_states) > 0:
             LOG.info("There is no osd on node %s" % node_id)
+            self._conductor_rpcapi.\
+                init_node_update_status_by_id(context, node_id,
+                                                'Stopped')
             return True
 
         LOG.info('Step 2. ceph osd set noout')
