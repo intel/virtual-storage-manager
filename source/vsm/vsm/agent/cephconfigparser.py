@@ -296,7 +296,10 @@ class CephConfigParser(manager.Manager):
                    cfth=None,
                    heartbeat_interval=None,
                    osd_heartbeat_interval=None,
-                   osd_heartbeat_grace=None, 
+                   osd_heartbeat_grace=None,
+                   mon_lease=None,
+                   mon_lease_renew_interval=None,
+                   mon_lease_ack_timeout=None,
                    is_cephx=True,
                    max_file=131072,
                    down_out_interval=90):
@@ -325,6 +328,12 @@ class CephConfigParser(manager.Manager):
             self._parser.set('global', 'osd heartbeat interval', str(osd_heartbeat_interval))
         if osd_heartbeat_grace:
             self._parser.set('global', 'osd heartbeat grace', str(osd_heartbeat_grace))
+        if mon_lease:
+            self._parser.set('global', 'mon lease', str(mon_lease))
+        if mon_lease_renew_interval:
+            self._parser.set('global', 'mon lease renew interval', str(mon_lease_renew_interval))
+        if mon_lease_ack_timeout:
+            self._parser.set('global', 'mon lease ack timeout', str(mon_lease_ack_timeout))
 
         # Must add fsid for create cluster in newer version of ceph.
         # In order to support lower version of vsm.

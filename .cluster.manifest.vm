@@ -40,6 +40,9 @@ pg_count_factor 100
 heartbeat_interval 10
 osd_heartbeat_interval 12
 osd_heartbeat_grace 40
+mon_lease 20
+mon_lease_renew_interval 12
+mon_lease_ack_timeout 40
 
 [ec_profiles]
 #format: [profile-name] [path-to-plugin] [plugin-name] [pg_num value] [json format key/value]

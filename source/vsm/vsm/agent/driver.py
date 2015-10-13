@@ -267,7 +267,14 @@ class CephDriver(object):
                 osd_heartbeat_interval = setting['value']
             elif setting['name'] == 'osd_heartbeat_grace':
                 osd_heartbeat_grace = setting['value']
-            
+            elif setting['name'] == 'mon_lease':
+                osd_heartbeat_grace = setting['value']
+            elif setting['name'] == 'mon_lease_renew_interval':
+                osd_heartbeat_grace = setting['value']
+            elif setting['name'] == 'mon_lease_ack_timeout':
+                osd_heartbeat_grace = setting['value']
+            elif setting['name'] == ''
+
 
         pg_num = osd_num * pg_count_factor / 2
         config.add_global(pg_num=pg_num, \
