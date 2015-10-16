@@ -95,7 +95,8 @@ class IndexView(tables.DataTableView):
                 server['is_monitor'] = "no"
             if _server.zone_id in zones:
                 server['zone'] = zones[_server.zone_id]
-
+                server['ismonitor'] = ''
+                server['isstorage'] = ''
             servers.append(server)
         return servers
 
@@ -149,7 +150,8 @@ class CreateClusterView(ModalEditTableMixin, tables.DataTableView):
                 server['storage'] = "no"
             if _server.zone_id in zones:
                 server['zone'] = zones[_server.zone_id]
-
+            server['ismonitor'] = ''
+            server['isstorage'] = ''
             servers.append(server)
 
         return servers
