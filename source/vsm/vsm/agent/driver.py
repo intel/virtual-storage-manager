@@ -315,9 +315,9 @@ class CephDriver(object):
                                        )
 
             cinderclient = cc.Client(
-                tenant_name,
                 username,
                 password,
+                tenant_name,
                 auth_url,
                 region_name = region_name
             )
