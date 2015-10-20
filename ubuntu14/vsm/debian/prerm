@@ -1,26 +1,26 @@
 #!/bin/bash
 
-if [[ -f /var/run/vsm-agent.pid ]]; then
+if [[ -f /var/run/vsm/vsm-agent.pid ]]; then
   update-rc.d -f vsm-agent remove
   sudo service vsm-agent stop
 fi
 
-if [[ -f /var/run/vsm-api.pid ]]; then
+if [[ -f /var/run/vsm/vsm-api.pid ]]; then
   update-rc.d -f vsm-api remove
   sudo service vsm-api stop
 fi
 
-if [[ -f /var/run/vsm-conductor.pid ]]; then
+if [[ -f /var/run/vsm/vsm-conductor.pid ]]; then
   update-rc.d -f vsm-conductor remove
   sudo service vsm-conductor stop
 fi
 
-if [[ -f /var/run/vsm-physical.pid ]]; then
+if [[ -f /var/run/vsm/vsm-physical.pid ]]; then
   update-rc.d -f vsm-physical remove
   sudo service vsm-physical stop
 fi
 
-if [[ -f /var/run/vsm-scheduler.pid ]]; then
+if [[ -f /var/run/vsm/vsm-scheduler.pid ]]; then
   update-rc.d -f vsm-scheduler remove
   sudo service vsm-scheduler stop
 fi
