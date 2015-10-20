@@ -317,7 +317,10 @@ function install_controller() {
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond"
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO preinstall controller"
         setup_remote_controller
-        $SCP $USER@$CONTROLLER_ADDRESS:/var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
+        $SSH $USER@$CONTROLLER_ADDRESS "ls /var/cache/apt/archives/*.deb"
+        if [ ! $? ]; then
+            $SCP $USER@$CONTROLLER_ADDRESS:/var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
+        fi
         cd $REPO_PATH
         dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
         cd $TOPDIR
@@ -340,7 +343,9 @@ function install_controller() {
                 $SUDO vsm-controller
             fi
         fi
-        cp /var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
+        if [ -e /var/cache/apt/archives/*.deb ]; then
+            cp /var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
+        fi
         cd $REPO_PATH
         dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
         cd $TOPDIR
