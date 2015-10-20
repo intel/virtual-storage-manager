@@ -23,7 +23,7 @@ from django.core.exceptions import ValidationError
 _user_name_re = re.compile("^[A-Za-z0-9\@\.\_]+$")
 validate_user_name = RegexValidator(_user_name_re, _("Enter a valid User name! "), "invalid")
 
-password_validate_regrex = "^(?=.*[a-z].*)(?=.*[A-Z].*)(?=.*[0-9].*)(?=.*[!@#$%^&*()\.:;~\\\|\[\]\{\}].*).{8,255}$"
+password_validate_regrex = "^(?=.*[a-z].*)(?=.*[A-Z].*)(?=.*[0-9].*)(?=.*[@#$%^&*\.:;~\\\|\[\]\{\}].*).{8,255}$"
 
 _zone_name_re = re.compile("^[A-Za-z0-9\.\_]+$")
 validate_zone_name = RegexValidator(_zone_name_re, _("Enter a valid Zone name! "), "invalid")
