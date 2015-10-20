@@ -22,7 +22,8 @@ function is_service_running() {
     sleep 1
     cnt1=`cat $file | grep "is running" | wc -l`
     cnt2=`cat $file | grep "start/running" | wc -l`
-    let cnt=$cnt1+$cnt2
+    cnt3=`cat $file | grep "active (running)" | wc -l`
+    let cnt=$cnt1+$cnt2+$cnt3
     if [[ $cnt -gt 0 ]]; then
         echo 1
     else
