@@ -23,6 +23,10 @@ LOGFILE=/var/log/vsm/vsm-conductor.log
 test -x $DAEMON || exit 5
 
 LOCKFILE=/var/lock/vsm-conductor
+if [ ! -d /var/run/vsm ]; then
+    sudo mkdir -p /var/run/vsm
+    sudo chown -R vsm /var/run/vsm
+fi
 
 lock_vsmconductor() {
 	if [ -x /usr/bin/lockfile-create ]; then

@@ -23,6 +23,10 @@ LOGFILE=/var/log/vsm/vsm-physical.log
 test -x $DAEMON || exit 5
 
 LOCKFILE=/var/lock/vsm-physical
+if [ ! -d /var/run/vsm ]; then
+    sudo mkdir -p /var/run/vsm
+    sudo chown -R vsm /var/run/vsm
+fi
 
 lock_vsmphysical() {
 	if [ -x /usr/bin/lockfile-create ]; then

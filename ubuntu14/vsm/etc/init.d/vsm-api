@@ -25,6 +25,10 @@ LOGFILE=/var/log/vsm/vsm-api.log
 test -x $DAEMON || exit 5
 
 LOCKFILE=/var/lock/vsm-api
+if [ ! -d /var/run/vsm ]; then
+    sudo mkdir -p /var/run/vsm
+    sudo chown -R vsm /var/run/vsm
+fi
 
 lock_vsmapi() {
 	if [ -x /usr/bin/lockfile-create ]; then
