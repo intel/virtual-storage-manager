@@ -16,6 +16,10 @@ pidfile="/var/run/vsm/$prog.pid"
 logfile=/var/log/vsm/vsm-scheduler.log
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
+if [ ! -d /var/run/vsm ]; then
+    sudo mkdir -p /var/run/vsm
+    sudo chown -R vsm /var/run/vsm
+fi
 
 lockfile=/var/lock/subsys/$prog
 
