@@ -61,7 +61,7 @@ class ListOpenstackEndpointTable(tables.DataTable):
     id = tables.Column("id", verbose_name=_("ID"), classes=("ip_list",), hidden=True)
     os_tenant_name = tables.Column("os_tenant_name", verbose_name=_("Tenant Name"))
     os_username = tables.Column("os_username", verbose_name=_("UserName"))
-    os_password = tables.Column("os_password", verbose_name=_("Password"))
+    os_password = tables.Column("os_password", verbose_name=_("Password"), hidden=True)
     os_auth_url = tables.Column("os_auth_url", verbose_name=_("Auth Url"))
     os_region_name = tables.Column("os_region_name", verbose_name=_("Region Name"))
     xtrust_user = tables.Column("xtrust_user", verbose_name=_("SSH User Name"))
