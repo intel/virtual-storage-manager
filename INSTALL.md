@@ -177,9 +177,9 @@ Some pre-flight configuration steps are required before you launch new deploymen
 5.	Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:
 
 	**Ubuntu Host Rename**
-	>     $ sudo hostname vsm-node1
-	>     Logout and reboot to allow the DNS server to pick up the new name.
-
+	>     $ sudo hostnamectl set-hostname vsm-node1
+	>     $ su -l
+    
 6.	Login again as *cephuser* and run the following commands to prepare the /dev/sdb and /dev/sdc devices for Ceph use as a storage device (download this script):
 
 	**Partition /dev/sdb for XFS**
