@@ -314,27 +314,34 @@ class CephDriver(object):
                                        xtrust_user = xtrust_user
                                        )
 
-            cinderclient = cc.Client(
-                username,
-                password,
-                tenant_name,
-                auth_url,
-                region_name = region_name
-            )
             volume_type = pool_type + "-" + pool_name
             def _get_volume_type_list():
                 volume_type_list = []
                 i = 0
-                while i < 5:
+                while i < 60:
                     try:
+                        cinderclient = cc.Client(
+                            username,
+                            password,
+                            tenant_name,
+                            auth_url,
+                            region_name=region_name
+                        )
                         volume_type_list = cinderclient.volume_types.list()
-                        i = 5
+                        i = 60
                     except:
                         i = i + 1
                         time.sleep(i)
                 return volume_type_list
 
             if volume_type not in [type.name for type in _get_volume_type_list()]:
+                cinderclient = cc.Client(
+                    username,
+                    password,
+                    tenant_name,
+                    auth_url,
+                    region_name=region_name
+                )
                 cinderclient.volume_types.create(volume_type)
                 LOG.info("creating volume type = %s" % volume_type)
 
