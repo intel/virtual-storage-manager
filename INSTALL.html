@@ -475,8 +475,14 @@ ff02::2 ip6-allrouters
 <p>Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:</p>
 <p><strong>Ubuntu Host Rename</strong></p>
 <blockquote>
-<pre><code>$ sudo hostname vsm-node1
-Logout and reboot to allow the DNS server to pick up the new name.
+<pre><code>$ sudo hostnamectl set-hostname vsm-node1
+$ su -l
+</code></pre>
+
+</blockquote>
+<p>For CentOS, beside changing host name, it's also required to add EPEL repository as following:</p>
+<blockquote>
+<pre><code>yum install http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm 
 </code></pre>
 
 </blockquote>
