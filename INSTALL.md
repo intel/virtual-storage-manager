@@ -180,6 +180,9 @@ Some pre-flight configuration steps are required before you launch new deploymen
 	>     $ sudo hostnamectl set-hostname vsm-node1
 	>     $ su -l
     
+	For CentOS, beside changing host name, it's also required to add EPEL repository as following:
+    >     yum install http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm 
+
 6.	Login again as *cephuser* and run the following commands to prepare the /dev/sdb and /dev/sdc devices for Ceph use as a storage device (download this script):
 
 	**Partition /dev/sdb for XFS**
