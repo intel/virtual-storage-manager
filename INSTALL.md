@@ -190,7 +190,7 @@ Some pre-flight configuration steps are required before you launch new deploymen
 	>     [sudo] password for cephuser: ******
 	>     Information: You may need to update /etc/fstab.
 
-	>     $ sudo parted -a optimal /dev/sdb -- mkpart xfs 1MB 100%
+	>     $ sudo parted -a optimal /dev/sdb -- mkpart primary 1MB 100%
 	>     Information: You may need to update /etc/fstab.
 
 	>     $ sudo parted /dev/sdc -- mklabel gpt
