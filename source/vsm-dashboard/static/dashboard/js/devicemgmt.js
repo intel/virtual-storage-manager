@@ -1,4 +1,8 @@
 $(function(){
+	//remove the splash from this module
+	$("script[src='/static/dashboard/js/vsm.spin.js']").remove();
+
+
     //add the smart info icon
     addInfoNode();
 
