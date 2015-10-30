@@ -17,15 +17,15 @@
 
 
 function gen_tar_file() {
-    local app_type=$1
-    local xtrust_user=$2
-    local vsmapp_ip=$3
+    local xtrust_user=$1
+    local vsmapp_ip=$2
+    local os_controller_host=$3
     local install_file=$4
 
     TEMP=`mktemp`; rm -rf $TEMP; mkdir -p $TEMP/prepools
     cp -rf /etc/vsm/prepools/* $TEMP/prepools/
     cp -rf /etc/ceph/ceph.conf $TEMP/prepools/lib/
-    sed -i "s,keyring = /etc/ceph/keyring.admin,,g" $TEMP/prepools/lib/ceph.conf 
+    sed -i "s,keyring = /etc/ceph/keyring.admin,,g" $TEMP/prepools/lib/ceph.conf
     cd $TEMP/prepools
 
 
@@ -60,9 +60,10 @@ EOF
 
     cd $TEMP
     tar zcf prepools.tar.gz prepools
-    su -s /bin/bash -c "exec ssh $vsmapp_ip \"mkdir -p $TEMP\"" $xtrust_user
-    su -s /bin/bash -c "exec scp -pr prepools.tar.gz $vsmapp_ip:/$TEMP" $xtrust_user
-    su -s /bin/bash -c "exec scp -pr prepools.tar.gz $vsmapp_ip:/$TEMP" $xtrust_user
-    su -s /bin/bash -c "exec ssh $vsmapp_ip \"cd $TEMP; tar zxf prepools.tar.gz\"" $xtrust_user
-    su -s /bin/bash -c "exec ssh $vsmapp_ip \"cd $TEMP/prepools/; sudo ./install\"" $xtrust_user
+    su -s /bin/bash -c "exec ssh $os_controller_host mkdir -p $TEMP" $xtrust_user
+    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip mkdir -p $TEMP" $xtrust_user
+    su -s /bin/bash -c "exec scp -pr prepools.tar.gz $os_controller_host:$TEMP" $xtrust_user
+    su -s /bin/bash -c "exec ssh $os_controller_host scp $TEMP/prepools.tar.gz $vsmapp_ip:$TEMP" $xtrust_user
+    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip tar zxf $TEMP/prepools.tar.gz -C $TEMP" $xtrust_user
+    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip sudo bash +x $TEMP/prepools/install" $xtrust_user
 }

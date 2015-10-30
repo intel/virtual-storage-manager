@@ -208,10 +208,13 @@ class CephDriver(object):
         pool_type = kwargs.pop('pool_type', None)
         pool_name = kwargs.pop('pool_name', None)
         xtrust_user = kwargs.pop('xtrust_user', None)
+        os_controller_host = kwargs.pop('os_controller_host', None)
 
         pool_str = pool_name + "," + pool_type + "-" + pool_name
-        LOG.info("volume host = %s, uuid = %s, pool type = %s, pool name = %s" %
-                 (volume_host, uuid, pool_type, pool_name))
+        LOG.info("volume host = %s, uuid = %s, pool type = %s, pool name = %s, "
+                 "xtrust_user = %s, os_controller_host = %s" %
+                 (volume_host, uuid, pool_type, pool_name, xtrust_user,
+                  os_controller_host))
         LOG.info("present pool info = %s" % pool_str)
 
         try:
@@ -221,6 +224,7 @@ class CephDriver(object):
                 xtrust_user,
                 uuid,
                 volume_host,
+                os_controller_host,
                 pool_str,
                 run_as_root = True
             )
@@ -239,10 +243,12 @@ class CephDriver(object):
         auth_url = kwargs.pop('auth_url', "")
         region_name = kwargs.pop('region_name', "")
         xtrust_user = kwargs.pop('xtrust_user', None)
+        os_controller_host = kwargs.pop('os_controller_host', None)
 
         LOG.info("uuid = %s, username = %s, password = %s, tenant name = %s, "
-        "auth url = %s, region name = %s" % (uuid, username, password, tenant_name,
-                                             auth_url, region_name))
+        "auth url = %s, region name = %s, xtrust_user = %s, os_controller_host = %s" %
+                 (uuid, username, password, tenant_name, auth_url, region_name,
+                  xtrust_user, os_controller_host))
 
         novaclient = nc.Client(
             username, password, tenant_name, auth_url, region_name=region_name
@@ -264,6 +270,7 @@ class CephDriver(object):
                     xtrust_user,
                     uuid,
                     nova_compute_host,
+                    os_controller_host,
                     run_as_root = True
                 )
                 LOG.info("present pool on nova-compute host logs = %s" % out)
@@ -286,7 +293,7 @@ class CephDriver(object):
             password = appnode['os_password']
             auth_url = appnode['os_auth_url']
             region_name = appnode['os_region_name']
-            host = auth_url.split(":")[1][2:]
+            os_controller_host = auth_url.split(":")[1][2:]
             pool_type = pool['pool_type']
             pool_name = pool['pool_name']
             uuid = appnode['uuid']
@@ -297,21 +304,23 @@ class CephDriver(object):
                                      volume_host = volume_host,
                                      pool_type = pool_type,
                                      pool_name = pool_name,
-                                     xtrust_user = xtrust_user
+                                     xtrust_user = xtrust_user,
+                                     os_controller_host = os_controller_host
                                      )
 
             # only config nova.conf at the first time
             if region_name not in regions.keys() or (
                 region_name in regions.keys() and
-                            host != regions.get(region_name)):
-                regions.update({region_name: host})
+                            os_controller_host != regions.get(region_name)):
+                regions.update({region_name: os_controller_host})
                 self._config_nova_conf(uuid = uuid,
                                        username = username,
                                        password = password,
                                        tenant_name = tenant_name,
                                        auth_url = auth_url,
                                        region_name = region_name,
-                                       xtrust_user = xtrust_user
+                                       xtrust_user = xtrust_user,
+                                       os_controller_host = os_controller_host
                                        )
 
             volume_type = pool_type + "-" + pool_name

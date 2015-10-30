@@ -102,48 +102,22 @@ def create(contxt, auth_openstack=None, allow_duplicate=False):
     if not auth_openstack:
         raise exception.AppNodeInvalidInfo()
 
-    novaclient = nc.Client(
-        auth_openstack['os_username'],
-        auth_openstack['os_password'],
-        auth_openstack['os_tenant_name'],
-        auth_openstack['os_auth_url'],
-        region_name = auth_openstack['os_region_name']
+    os_controller_host = auth_openstack['os_auth_url'].split(":")[1][2:]
+    result, err = utils.execute(
+            'check_xtrust_crudini',
+            auth_openstack['xtrust_user'],
+            os_controller_host,
+            run_as_root = True
     )
-    nova_services = novaclient.services.list()
-    nova_compute_hosts = []
-    for nova_service in nova_services:
-        if nova_service.binary == "nova-compute":
-            nova_compute_hosts.append(nova_service.host)
-
-    cinderclient = cc.Client(
-        auth_openstack['os_username'],
-        auth_openstack['os_password'],
-        auth_openstack['os_tenant_name'],
-        auth_openstack['os_auth_url'],
-        region_name = auth_openstack['os_region_name']
-    )
-    cinder_services = cinderclient.services.list()
-    cinder_volume_hosts = []
-    for cinder_service in cinder_services:
-        if cinder_service.binary == "cinder-volume":
-            cinder_volume_hosts.append(cinder_service.host)
-
-    hosts = list(set(nova_compute_hosts + cinder_volume_hosts))
-    print hosts
-
-    for host in hosts:
-        result, err = utils.execute(
-                'check_xtrust_crudini',
-                auth_openstack['xtrust_user'],
-                host,
-                run_as_root = True
-        )
-        LOG.info("==============result: %s" % result)
-        LOG.info("==============result: %s" % err)
-        if "command not found" in err:
-            raise Exception("Command not found on %s" % host)
-        if "Permission denied" in err:
-            raise Exception("Please check the mutual trust between vsm nodes and openstack nodes")
+    LOG.info("==============result: %s" % result)
+    LOG.info("==============err: %s" % err)
+    if "command not found" in err:
+        raise Exception("Command not found on %s" % os_controller_host)
+    if "Permission denied" in err:
+        raise Exception("Please check the mutual trust between vsm controller node "
+                        "and openstack controller node")
+    if "No passwd entry" in err:
+        raise Exception("Please check the trust user")
 
     ref = []
 
@@ -179,64 +153,31 @@ def update(contxt, appnode_id, appnode):
     id = utils.int_from_str(appnode_id)
     LOG.debug('app node id: %s ' % id)
 
-    os_tenant_name = appnode['os_tenant_name']
-    os_username = appnode['os_username']
-    os_password = appnode['os_password']
-    os_auth_url = appnode['os_auth_url']
-    os_region_name = appnode['os_region_name']
-    xtrust_user = appnode['xtrust_user']
-
-    novaclient = nc.Client(
-        os_username,
-        os_password,
-        os_tenant_name,
-        os_auth_url,
-        region_name = os_region_name
+    os_controller_host = appnode['os_auth_url'].split(":")[1][2:]
+    result, err = utils.execute(
+            'check_xtrust_crudini',
+            appnode['xtrust_user'],
+            os_controller_host,
+            run_as_root = True
     )
-    nova_services = novaclient.services.list()
-    nova_compute_hosts = []
-    for nova_service in nova_services:
-        if nova_service.binary == "nova-compute":
-            nova_compute_hosts.append(nova_service.host)
-
-    cinderclient = cc.Client(
-        os_username,
-        os_password,
-        os_tenant_name,
-        os_auth_url,
-        region_name = os_region_name
-    )
-    cinder_services = cinderclient.services.list()
-    cinder_volume_hosts = []
-    for cinder_service in cinder_services:
-        if cinder_service.binary == "cinder-volume":
-            cinder_volume_hosts.append(cinder_service.host)
-
-    hosts = list(set(nova_compute_hosts + cinder_volume_hosts))
-    print hosts
-
-    for host in hosts:
-        result, err = utils.execute(
-                'check_xtrust_crudini',
-                xtrust_user,
-                host,
-                run_as_root = True
-        )
-        LOG.info("==============result: %s" % result)
-        LOG.info("==============result: %s" % err)
-        if "command not found" in err:
-            raise Exception("Command not found on %s" % host)
-        if "Permission denied" in err:
-            raise Exception("Please check the mutual trust between vsm nodes and openstack nodes")
+    LOG.info("==============result: %s" % result)
+    LOG.info("==============err: %s" % err)
+    if "command not found" in err:
+        raise Exception("Command not found on %s" % os_controller_host)
+    if "Permission denied" in err:
+        raise Exception("Please check the mutual trust between vsm controller node "
+                        "and openstack controller node")
+    if "No passwd entry" in err:
+        raise Exception("Please check the trust user")
 
     """validate openstack access info"""
     try:
         token_url_id = _get_token(
-            os_tenant_name,
-            os_username,
-            os_password,
-            os_auth_url,
-            os_region_name
+            appnode['os_tenant_name'],
+            appnode['os_username'],
+            appnode['os_password'],
+            appnode['os_auth_url'],
+            appnode['os_region_name']
         )
         if token_url_id != None:
             appnode['ssh_status'] = "reachable"
