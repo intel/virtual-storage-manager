@@ -141,6 +141,9 @@
     	var strSelectedNodesJSON = "[";
     	for(var i=0;i<SelectedNodeList.length;i++)
     		{
+    		    if(i>0) {
+                    strSelectedNodesJSON+=",";
+                }
     			node = SelectedNodeList[i];
     			strSelectedNodesJSON+="{";
     			strSelectedNodesJSON+="\"id\":\""+node.children[1].innerText+"\",";
@@ -151,8 +154,8 @@
     			strSelectedNodesJSON+="\"zone\":\""+node.children[6].innerText+"\",";
     			strSelectedNodesJSON+="\"OSDs\":\""+node.children[7].innerText+"\",";
     			strSelectedNodesJSON+="\"monitor\":\""+node.children[8].innerText+"\",";
-    			strSelectedNodesJSON+="\"tatus\":\""+node.children[11].innerText+"\"";
-    			strSelectedNodesJSON+="},";
+    			strSelectedNodesJSON+="\"status\":\""+node.children[11].innerText+"\"";
+    			strSelectedNodesJSON+="}";
     		}
     	strSelectedNodesJSON = strSelectedNodesJSON.substring(0,strSelectedNodesJSON.length);
     	strSelectedNodesJSON+="]";
