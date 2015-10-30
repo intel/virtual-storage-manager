@@ -19,7 +19,7 @@ sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=
 NAME=vsm-api
 DAEMON=/usr/bin/vsm-api
 CONFIGFILE=/etc/vsm/vsm.conf
-PIDFILE=/var/run/vsm-api.pid
+PIDFILE=/var/run/vsm/vsm-api.pid
 LOGFILE=/var/log/vsm/vsm-api.log
 
 test -x $DAEMON || exit 5
