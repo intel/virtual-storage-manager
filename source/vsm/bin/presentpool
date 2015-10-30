@@ -22,6 +22,29 @@ set -o xtrace
 TOPDIR=/etc/vsm/prepools/
 
 #------------------------------------------
+# check parameters
+#------------------------------------------
+
+if [[ $1 == "cinder" ]]; then
+    if [[ $# -lt 6 ]]; then
+        echo "The number of parameters can't less than 6."
+        echo "Usage: sudo presendpool <type> <xtrust_user> <uuid> \
+<volume_host> <os_controller_host> <pool_name,pool_type>*n"
+        exit 0
+    fi
+elif [[ $1 == "nova" ]]; then
+    if [[ $# -lt 5 ]]; then
+        echo "The number of parameters can't less than 5."
+        echo "Usage: sudo presentpool <type> <xtrust_user> <uuid> \
+<compute_host> <os_controller_host>"
+        exit 0
+    fi
+else
+    echo "The first parameter should be cinder or nova."
+    exit 0
+fi
+
+#------------------------------------------
 # Usage: present pools for cinder
 #------------------------------------------
 
@@ -30,7 +53,6 @@ if [[ $1 == "cinder" ]]; then
     setup_cinder $@
     exit 0
 fi
-
 
 #------------------------------------------
 # Usage: present pools for nova
@@ -41,13 +63,5 @@ if [[ $1 == "nova" ]]; then
     setup_nova $@
     exit 0
 fi
-
-#------------------------------------------
-# Report error.
-#------------------------------------------
-echo "The number of parameter can't less than 5."
-echo "Usage: ./presentpool type xtrust_user uuid volume_host pool_name,pool_type"
-echo "Usage: ./presentpool type xtrust_user uuid compute_host"
-exit 0
 
 set +o xtrace
