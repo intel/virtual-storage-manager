@@ -139,7 +139,7 @@ class AddOSDView(TemplateView):
                 "result_mode":"get_disks",
             })
             disks = ret['disks'] or []
-            disks_list = [disk for disk in disks if disk.find('by-path') != -1]
+            disks_list = [disk for disk in disks if disk.find('by-path') == -1]
             context["available_disks"] = disks_list
         
         return context
