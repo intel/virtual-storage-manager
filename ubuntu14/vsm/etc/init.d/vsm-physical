@@ -17,7 +17,7 @@ sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=
 NAME=vsm-physical
 DAEMON=/usr/bin/vsm-physical
 CONFIGFILE=/etc/vsm/vsm.conf
-PIDFILE=/var/run/vsm-physical.pid
+PIDFILE=/var/run/vsm/vsm-physical.pid
 LOGFILE=/var/log/vsm/vsm-physical.log
 
 test -x $DAEMON || exit 5

@@ -17,7 +17,7 @@ sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=
 NAME=vsm-scheduler
 DAEMON=/usr/bin/vsm-scheduler
 CONFIGFILE=/etc/vsm/vsm.conf
-PIDFILE=/var/run/vsm-scheduler.pid
+PIDFILE=/var/run/vsm/vsm-scheduler.pid
 LOGFILE=/var/log/vsm/vsm-scheduler.log
 
 test -x $DAEMON || exit 5
