@@ -278,7 +278,7 @@ def get_available_disks(request):
 
     disks = ret['disks']
     if disks is None:disks=[]
-    disks_list = [disk for disk in disks if disk.find('by-path')!=-1]
+    disks_list = [disk for disk in disks if disk.find('by-path')==-1]
     disk_dict = {'disks':disks_list}
     disk_data = json.dumps(disk_dict)
 
