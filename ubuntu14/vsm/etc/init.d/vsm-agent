@@ -17,7 +17,7 @@ sed -i 's,do_cmd.* 30 $BINDIR.*,do_cmd "timeout 30 $BINDIR/ceph -c $conf --name=
 NAME=vsm-agent
 DAEMON=/usr/bin/vsm-agent
 CONFIGFILE=/etc/vsm/vsm.conf
-PIDFILE=/var/run/vsm-agent.pid
+PIDFILE=/var/run/vsm/vsm-agent.pid
 LOGFILE=/var/log/vsm/vsm-agent.log
 
 test -x $DAEMON || exit 5
