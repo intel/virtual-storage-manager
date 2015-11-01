@@ -90,32 +90,30 @@ class PoolUsagesController(wsgi.Controller):
         context = req.environ['vsm.context']
         pools = body['poolusages']
 
-        appnode_id = pools[0]['appnode_id']
-        appnode = db.appnodes_get_by_id(context, appnode_id)
-        xtrust_user = appnode['xtrust_user']
-
-        cinder_volume_host_list = [pool['cinder_volume_host'] for pool in pools]
-        # id_list = [pool['id'] for pool in pools]
-
-        # check openstack access
         host_list = []
         count_crudini = 0
         count_ssh = 0
-        for host in cinder_volume_host_list:
-            result, err = utils.execute(
-                'check_xtrust_crudini',
-                xtrust_user,
-                host,
-                run_as_root = True
-            )
-            LOG.info("========" + result)
-            LOG.info("========" + err)
-            if "command not found" in err:
-                count_crudini = count_crudini + 1
-                host_list.append(host)
-            if "Permission denied" in err:
-                count_ssh = count_ssh + 1
-                host_list.append(host)
+        host = []
+        for pool in pools:
+            appnode_id = pool['appnode_id']
+            appnode = db.appnodes_get_by_id(context, appnode_id)
+            auth_url = appnode['os_auth_url']
+            os_controller_host = auth_url.split(":")[1][2:]
+            xtrust_user = appnode['xtrust_user']
+            if os_controller_host not in host:
+                host.append(os_controller_host)
+                result, err = utils.execute('check_xtrust_crudini',
+                                            xtrust_user, os_controller_host,
+                                            run_as_root = True)
+                LOG.info("==============result: %s" % result)
+                LOG.info("==============err: %s" % err)
+                if "command not found" in err:
+                    count_crudini = count_crudini + 1
+                    host_list.append(host)
+                if "Permission denied" in err or "No passwd entry" in err:
+                    count_ssh = count_ssh + 1
+                    host_list.append(host)
+
         if count_crudini != 0:
             return {'status': 'bad', 'host': list(set(host_list))}
         elif count_ssh != 0:

@@ -16,10 +16,6 @@
 # under the License.
 
 function setup_cinder() {
-    local app_type=$1
-    local xtrust_user=$2
-    local uuid=$3
-    local vsmapp_ip=$4
     local pool_iter=0
 
     source $TOPDIR/server/ceph
@@ -27,7 +23,7 @@ function setup_cinder() {
     source $TOPDIR/server/cinder
     source $TOPDIR/server/tarfile
 
-    AUTH_CINDER_UUID=$uuid
+    AUTH_CINDER_UUID=$3
     AUTH_CINDER_USER=client.${AUTH_CINDER_UUID}
     AUTH_CINDER_POOL=$pool_name
 
@@ -37,7 +33,7 @@ function setup_cinder() {
 
     BACKEND_LIST=""
     for n in $@; do
-        if [[ $pool_iter -lt 4 ]]; then
+        if [[ $pool_iter -lt 5 ]]; then
             let ++pool_iter
             continue
         fi
@@ -65,5 +61,5 @@ function setup_cinder() {
     echo $TYPE_LIST
     create_cinder_auth
 
-    gen_tar_file $app_type $xtrust_user $vsmapp_ip $TOPDIR/lib/config-cinder
+    gen_tar_file $2 $4 $5 $TOPDIR/lib/config-cinder
 }
