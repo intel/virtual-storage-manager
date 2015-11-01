@@ -43,6 +43,7 @@ from vsm.openstack.common.periodic_task import periodic_task
 from vsm.openstack.common.rpc import common as rpc_exc
 from vsm.agent import rpcapi as agent_rpc
 from vsm import context
+import glob
 CTXT = context.get_admin_context()
 
 LOG = logging.getLogger(__name__)
@@ -1659,7 +1660,14 @@ class AgentManager(manager.Manager):
         return available_disk
 
     def add_new_disks_to_cluster(self, context, body):
+        all_disk = glob.glob('/dev/disk/by-path/*')
+        all_disk_name_dict = self.ceph_driver.get_disks_name(context,all_disk)
         for disk in body['osdinfo']:
+            for key,value in all_disk_name_dict.items():
+                if value == disk['data']:
+                    disk['data'] = key
+                if value == disk['journal']:
+                    disk['journal'] = key
             osd_id = self.add_disk_to_db(context,disk)
             self.osd_add(context,osd_id)
         return True
