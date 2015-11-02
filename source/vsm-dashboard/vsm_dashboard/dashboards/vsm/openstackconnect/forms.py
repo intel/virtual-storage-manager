@@ -65,8 +65,8 @@ class AddOpenstackEndpointForm(forms.SelfHandlingForm):
         min_length = 0,
         required = False
     )
-    xtrust_user = forms.CharField(
-        label = _("XTrust User"),
+    ssh_user = forms.CharField(
+        label = _("SSH User Name"),
         max_length = 255,
         min_length = 1,
         error_messages = {
@@ -155,8 +155,8 @@ class UpdateOpenstackEndpointForm(forms.SelfHandlingForm):
         min_length = 0,
         required = False
     )
-    xtrust_user = forms.CharField(
-        label = _("XTrust User"),
+    ssh_user = forms.CharField(
+        label = _("SSH User Name"),
         max_length = 255,
         min_length = 1,
         error_messages = {

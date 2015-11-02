@@ -207,13 +207,13 @@ class CephDriver(object):
         volume_host = kwargs.pop('volume_host', None)
         pool_type = kwargs.pop('pool_type', None)
         pool_name = kwargs.pop('pool_name', None)
-        xtrust_user = kwargs.pop('xtrust_user', None)
+        ssh_user = kwargs.pop('ssh_user', None)
         os_controller_host = kwargs.pop('os_controller_host', None)
 
         pool_str = pool_name + "," + pool_type + "-" + pool_name
         LOG.info("volume host = %s, uuid = %s, pool type = %s, pool name = %s, "
-                 "xtrust_user = %s, os_controller_host = %s" %
-                 (volume_host, uuid, pool_type, pool_name, xtrust_user,
+                 "ssh_user = %s, os_controller_host = %s" %
+                 (volume_host, uuid, pool_type, pool_name, ssh_user,
                   os_controller_host))
         LOG.info("present pool info = %s" % pool_str)
 
@@ -221,7 +221,7 @@ class CephDriver(object):
             out, err = utils.execute(
                 'presentpool',
                 'cinder',
-                xtrust_user,
+                ssh_user,
                 uuid,
                 volume_host,
                 os_controller_host,
@@ -242,13 +242,13 @@ class CephDriver(object):
         tenant_name = kwargs.pop('tenant_name', "")
         auth_url = kwargs.pop('auth_url', "")
         region_name = kwargs.pop('region_name', "")
-        xtrust_user = kwargs.pop('xtrust_user', None)
+        ssh_user = kwargs.pop('ssh_user', None)
         os_controller_host = kwargs.pop('os_controller_host', None)
 
         LOG.info("uuid = %s, username = %s, password = %s, tenant name = %s, "
-        "auth url = %s, region name = %s, xtrust_user = %s, os_controller_host = %s" %
+        "auth url = %s, region name = %s, ssh_user = %s, os_controller_host = %s" %
                  (uuid, username, password, tenant_name, auth_url, region_name,
-                  xtrust_user, os_controller_host))
+                  ssh_user, os_controller_host))
 
         novaclient = nc.Client(
             username, password, tenant_name, auth_url, region_name=region_name
@@ -267,7 +267,7 @@ class CephDriver(object):
                 out, err = utils.execute(
                     'presentpool',
                     'nova',
-                    xtrust_user,
+                    ssh_user,
                     uuid,
                     nova_compute_host,
                     os_controller_host,
@@ -297,14 +297,14 @@ class CephDriver(object):
             pool_type = pool['pool_type']
             pool_name = pool['pool_name']
             uuid = appnode['uuid']
-            xtrust_user = appnode['xtrust_user']
+            ssh_user = appnode['ssh_user']
 
             # present pool for openstack cinder
             self._config_cinder_conf(uuid = uuid,
                                      volume_host = volume_host,
                                      pool_type = pool_type,
                                      pool_name = pool_name,
-                                     xtrust_user = xtrust_user,
+                                     ssh_user = ssh_user,
                                      os_controller_host = os_controller_host
                                      )
 
@@ -319,7 +319,7 @@ class CephDriver(object):
                                        tenant_name = tenant_name,
                                        auth_url = auth_url,
                                        region_name = region_name,
-                                       xtrust_user = xtrust_user,
+                                       ssh_user = ssh_user,
                                        os_controller_host = os_controller_host
                                        )
 
