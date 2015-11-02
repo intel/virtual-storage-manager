@@ -28,14 +28,14 @@ TOPDIR=/etc/vsm/prepools/
 if [[ $1 == "cinder" ]]; then
     if [[ $# -lt 6 ]]; then
         echo "The number of parameters can't less than 6."
-        echo "Usage: sudo presendpool <type> <xtrust_user> <uuid> \
+        echo "Usage: sudo presentpool <type> <ssh_user> <uuid> \
 <volume_host> <os_controller_host> <pool_name,pool_type>*n"
         exit 0
     fi
 elif [[ $1 == "nova" ]]; then
     if [[ $# -lt 5 ]]; then
         echo "The number of parameters can't less than 5."
-        echo "Usage: sudo presentpool <type> <xtrust_user> <uuid> \
+        echo "Usage: sudo presentpool <type> <ssh_user> <uuid> \
 <compute_host> <os_controller_host>"
         exit 0
     fi

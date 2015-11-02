@@ -17,7 +17,7 @@
 
 
 function gen_tar_file() {
-    local xtrust_user=$1
+    local ssh_user=$1
     local vsmapp_ip=$2
     local os_controller_host=$3
     local install_file=$4
@@ -60,10 +60,10 @@ EOF
 
     cd $TEMP
     tar zcf prepools.tar.gz prepools
-    su -s /bin/bash -c "exec ssh $os_controller_host mkdir -p $TEMP" $xtrust_user
-    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip mkdir -p $TEMP" $xtrust_user
-    su -s /bin/bash -c "exec scp -pr prepools.tar.gz $os_controller_host:$TEMP" $xtrust_user
-    su -s /bin/bash -c "exec ssh $os_controller_host scp $TEMP/prepools.tar.gz $vsmapp_ip:$TEMP" $xtrust_user
-    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip tar zxf $TEMP/prepools.tar.gz -C $TEMP" $xtrust_user
-    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip sudo bash +x $TEMP/prepools/install" $xtrust_user
+    su -s /bin/bash -c "exec ssh $os_controller_host mkdir -p $TEMP" $ssh_user
+    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip mkdir -p $TEMP" $ssh_user
+    su -s /bin/bash -c "exec scp -pr prepools.tar.gz $os_controller_host:$TEMP" $ssh_user
+    su -s /bin/bash -c "exec ssh $os_controller_host scp $TEMP/prepools.tar.gz $vsmapp_ip:$TEMP" $ssh_user
+    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip tar zxf $TEMP/prepools.tar.gz -C $TEMP" $ssh_user
+    su -s /bin/bash -c "exec ssh $os_controller_host ssh $vsmapp_ip sudo bash +x $TEMP/prepools/install" $ssh_user
 }
