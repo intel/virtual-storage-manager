@@ -127,10 +127,10 @@ cp -rf /usr/lib/vsm/tools/etc/sudoers.d/vsm  /etc/sudoers.d/
 # Start services.
 #---------------------------------------------
 
-#sed -i '/exit/d' /etc/rc.local
-#echo "service vsm-agent restart" >> /etc/rc.local
-#echo "service vsm-physical restart" >> /etc/rc.local
-#echo "exit 0" >> /etc/rc.local
+#sed -i '/exit/d' /etc/rc.d/rc.local
+#echo "service vsm-agent restart" >> /etc/rc.d/rc.local
+#echo "service vsm-physical restart" >> /etc/rc.d/rc.local
+#echo "exit 0" >> /etc/rc.d/rc.local
 chmod +x /etc/vsm/prepools/main
 echo "..."
 systemctl restart vsm-agent
