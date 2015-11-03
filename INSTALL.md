@@ -174,7 +174,11 @@ Some pre-flight configuration steps are required before you launch new deploymen
 
 4.	Edit the VM settings for the clone and add two additional virtual hard drives (/dev/sdb and /dev/sdc); these will be the storage node's data store. Ceph likes to use the xfs file system with a separate journal. The journal drive can be smaller than the data drive. As per xfs documentation, the size of the journal drive depends on how you intend to use the storage space on the data drive but for this experiment a few GB is sufficient for journaling.
 
-5.	Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:
+5.	Make the **cephuser** a super user with respect to sudo:
+	>     $ echo "cephuser ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/cephuser
+	>     $ sudo chmod 0440 /etc/sudoers.d/cephuser 
+
+6.	Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:
 
 	**Ubuntu Host Rename**
 	>     $ sudo hostnamectl set-hostname vsm-node1
@@ -183,7 +187,7 @@ Some pre-flight configuration steps are required before you launch new deploymen
 	For CentOS, beside changing host name, it's also required to add EPEL repository as following:
     >     yum install http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm 
 
-6.	Login again as *cephuser* and run the following commands to prepare the /dev/sdb and /dev/sdc devices for Ceph use as a storage device (download this script):
+7.	Login again as *cephuser* and run the following commands to prepare the /dev/sdb and /dev/sdc devices for Ceph use as a storage device (download this script):
 
 	**Partition /dev/sdb for XFS**
 	>     $ sudo parted /dev/sdb -- mklabel gpt
@@ -201,11 +205,11 @@ Some pre-flight configuration steps are required before you launch new deploymen
 
 	This formats the /dev/sdb device and adds an XFS file system, and then formats the /dev/sdc device in preparation for use as an xfs journal.
 
-7.	Logout and shut down the first storage node and clone it twice more to create the remaining two storage nodes.
+8.	Logout and shut down the first storage node and clone it twice more to create the remaining two storage nodes.
 
-8.	Power these system on one at a time and change the host names of each so they're unique like vsm-controller, vsm-node1, vsm-node2, and vsm-node3, for instance. 
+9.	Power these system on one at a time and change the host names of each so they're unique like vsm-controller, vsm-node1, vsm-node2, and vsm-node3, for instance. 
 
-9.	On each of the four systems, create an ssh key for the *cephuser* account (don't set any passwords on the key), then copy the ssh identity on each of the four nodes to the other three. For instance, on the controller node:
+10.	On each of the four systems, create an ssh key for the *cephuser* account (don't set any passwords on the key), then copy the ssh identity on each of the four nodes to the other three. For instance, on the controller node:
 
 	**Create an SSH Key**
 	>     
@@ -248,7 +252,7 @@ Some pre-flight configuration steps are required before you launch new deploymen
 	>     ...
 	>     Do the same on each of the other nodes; this will allow the deployment process to ssh from any node to any node without credentials.
 
-10.	At this point, it might be a good idea to take a VM snapshot of these four systems so you have a clean starting point if you wish to restart from scratch.
+11.	At this point, it might be a good idea to take a VM snapshot of these four systems so you have a clean starting point if you wish to restart from scratch.
 
 
 ##Automatic Deployment

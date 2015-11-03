@@ -472,6 +472,15 @@ ff02::2 ip6-allrouters
 <p>Edit the VM settings for the clone and add two additional virtual hard drives (/dev/sdb and /dev/sdc); these will be the storage node's data store. Ceph likes to use the xfs file system with a separate journal. The journal drive can be smaller than the data drive. As per xfs documentation, the size of the journal drive depends on how you intend to use the storage space on the data drive but for this experiment a few GB is sufficient for journaling.</p>
 </li>
 <li>
+<p>Make the <strong>cephuser</strong> a super user with respect to sudo:</p>
+<blockquote>
+<pre><code>$ echo &quot;cephuser ALL=(ALL) NOPASSWD:ALL&quot; | sudo tee /etc/sudoers.d/cephuser
+$ sudo chmod 0440 /etc/sudoers.d/cephuser 
+</code></pre>
+
+</blockquote>
+</li>
+<li>
 <p>Boot up the first storage node and rename it - on Ubuntu, host rename can be done with the following command:</p>
 <p><strong>Ubuntu Host Rename</strong></p>
 <blockquote>
@@ -495,7 +504,7 @@ $ su -l
 [sudo] password for cephuser: ******
 Information: You may need to update /etc/fstab.
 
-$ sudo parted -a optimal /dev/sdb -- mkpart xfs 1MB 100%
+$ sudo parted -a optimal /dev/sdb -- mkpart primary 1MB 100%
 Information: You may need to update /etc/fstab.
 
 $ sudo parted /dev/sdc -- mklabel gpt
