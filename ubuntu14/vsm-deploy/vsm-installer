@@ -128,16 +128,10 @@ sed -i "/exit/d" /etc/rc.local
 sed -i "/service vsm-api restart/d" /etc/rc.local
 sed -i "/service vsm-scheduler restart/d" /etc/rc.local
 sed -i "/service vsm-conductor restart/d" /etc/rc.local
-sed -i "/service apache2 restart/d" /etc/rc.local
-sed -i "/service rabbitmq-server restart/d" /etc/rc.local
-sed -i "/service mysql restart/d" /etc/rc.local
 
-echo "service mysql restart" >> /etc/rc.local
-echo "service rabbitmq-server restart" >> /etc/rc.local
 echo "service vsm-api restart" >> /etc/rc.local
 echo "service vsm-scheduler restart" >> /etc/rc.local
 echo "service vsm-conductor restart" >> /etc/rc.local
-echo "service apache2 restart" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 
 chmod +x /etc/rc.local
