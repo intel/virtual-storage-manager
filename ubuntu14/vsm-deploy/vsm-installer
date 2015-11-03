@@ -140,5 +140,7 @@ echo "service vsm-conductor restart" >> /etc/rc.local
 echo "service apache2 restart" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local
 
+chmod +x /etc/rc.local
+
 set +o xtrace
 
