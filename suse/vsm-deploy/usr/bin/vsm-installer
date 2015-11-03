@@ -165,7 +165,7 @@ then
   sed -i "/service httpd restart/d" /etc/rc.d/rc.local
   sed -i "/service rabbitmq-server restart/d" /etc/rc.d/rc.local
   sed -i "/service mysql restart/d" /etc/rc.d/rc.local
-  
+
   echo "service mysql restart" >> /etc/rc.d/rc.local
   echo "service rabbitmq-server restart" >> /etc/rc.d/rc.local
   echo "service vsm-api restart" >> /etc/rc.d/rc.local
