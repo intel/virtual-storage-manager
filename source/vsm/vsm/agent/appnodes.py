@@ -105,7 +105,7 @@ def create(contxt, auth_openstack=None, allow_duplicate=False):
     os_controller_host = auth_openstack['os_auth_url'].split(":")[1][2:]
     result, err = utils.execute(
             'check_xtrust_crudini',
-            auth_openstack['xtrust_user'],
+            auth_openstack['ssh_user'],
             os_controller_host,
             run_as_root = True
     )
@@ -156,7 +156,7 @@ def update(contxt, appnode_id, appnode):
     os_controller_host = appnode['os_auth_url'].split(":")[1][2:]
     result, err = utils.execute(
             'check_xtrust_crudini',
-            appnode['xtrust_user'],
+            appnode['ssh_user'],
             os_controller_host,
             run_as_root = True
     )

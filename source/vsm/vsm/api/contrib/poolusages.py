@@ -99,11 +99,11 @@ class PoolUsagesController(wsgi.Controller):
             appnode = db.appnodes_get_by_id(context, appnode_id)
             auth_url = appnode['os_auth_url']
             os_controller_host = auth_url.split(":")[1][2:]
-            xtrust_user = appnode['xtrust_user']
+            ssh_user = appnode['ssh_user']
             if os_controller_host not in host:
                 host.append(os_controller_host)
                 result, err = utils.execute('check_xtrust_crudini',
-                                            xtrust_user, os_controller_host,
+                                            ssh_user, os_controller_host,
                                             run_as_root = True)
                 LOG.info("==============result: %s" % result)
                 LOG.info("==============err: %s" % err)
