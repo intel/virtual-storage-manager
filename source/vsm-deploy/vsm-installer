@@ -149,5 +149,7 @@ echo "exit 0" >> /etc/rc.d/rc.local
 
 chmod +x /etc/rc.d/rc.local
 
+chmod +x /etc/rc.local
+
 set +o xtrace
 
