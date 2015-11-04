@@ -1599,4 +1599,5 @@ class SchedulerManager(manager.Manager):
     def reconfig_diamond(self, context, body):
         servers = db.init_node_get_all(context)
         for server in servers:
-            self._agent_rpcapi.reconfig_diamond(context, body, server['host'])
+            if server['status'] == 'Active':
+                self._agent_rpcapi.reconfig_diamond(context, body, server['host'])
