@@ -415,10 +415,10 @@ function install_setup_diamond() {
     "$SUDO sed -i \"s/\[\[MemoryCollector\]\]/\#\[\[MemoryCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/\[\[VMStatCollector\]\]/\#\[\[VMStatCollector\]\]/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[CephCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = False\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = True\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = False\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = False\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO diamond"
 }
 
