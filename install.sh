@@ -331,7 +331,7 @@ function setup_storage() {
     sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
     $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/etc/manifest
     $SSH $USER@$1 "chown root:vsm /etc/manifest/server.manifest; chmod 755 /etc/manifest/server.manifest"
-    is_server_manifest_error=`$SSH $USER@$1 "server_manifest|grep ERROR|wc -l"`
+    is_server_manifest_error=`$SSH $USER@$1 "server_manifest" |grep ERROR|wc -l`
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
         failure=$failure"$1 "
