@@ -88,7 +88,7 @@ class ResetStatus(tables.BatchAction):
 
     def action(self, request, obj_id):
         LOG.info("RESET_STATUS")
-        vsmapi.servers.reset_status(request, [obj_id])
+        vsmapi.reset_status(request, [obj_id])
 
 class AddServersAction(tables.LinkAction):
     name = "add_servers"
