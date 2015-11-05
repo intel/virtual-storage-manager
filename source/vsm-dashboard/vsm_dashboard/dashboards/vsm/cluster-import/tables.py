@@ -39,11 +39,10 @@ STATUS_DISPLAY_CHOICES = (
 class ImportClusterAction(tables.LinkAction):
     name = "import cluster"
     verbose_name = _("Import Cluster")
-    url = "horizon:vsm:clusterimport:importclusterview"
+    url = "horizon:vsm:cluster-import:importcluster"
     classes = ("ajax-modal", "btn-primary")
 
-    def allowed(self, request, datum):
-        return all([x['status']=="available" for x in self.table.data])
+    
 
 class ListServerTable(tables.DataTable):
     STATUS_CHOICES = (
@@ -84,56 +83,3 @@ class ListServerTable(tables.DataTable):
         else:
             return datum["name"]
 
-def empty_value_maker(type, name, value, attrs=None):
-    def _empty_value_caller(datum):
-        if type == "text":
-            widget = forms.TextInput()
-        elif type == "choice":
-            widget = forms.ChoiceField().widget
-        elif type == "checkbox":
-            widget = forms.CheckboxInput()
-        data = dict(name=name, value=value)
-        if name in datum.keys():
-            data.update(datum[name])
-        if attrs:
-            data.update(dict(attrs=attrs))
-        data = widget.render(**data)
-        return data
-    return _empty_value_caller
-
-class ImportClusterTable(tables.DataTable):
-
-    server_id = tables.Column("id", verbose_name=_("ID"), classes=('server_id',))
-    name = tables.Column("name", verbose_name=_("Name"))
-    primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"))
-    secondary_public_ip = tables.Column("secondary_public_ip",
-        verbose_name=_("Ceph Public Address"))
-    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph cluster Address"))
-    zone = tables.Column("zone", classes=("zone",), verbose_name=_("Zone"))
-    osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
-    monitor = tables.Column("monitor", verbose_name=_("Monitor"),
-        classes=('monitor',))
-    is_monitor = tables.Column("is_monitor", verbose_name=_("Monitor"), classes=('is_monitor',),
-        empty_value=empty_value_maker("checkbox","is_monitor",1), hidden=True)
-    is_storage = tables.Column("is_storage", verbose_name=_("Storage"), classes=('is_storage',),
-        empty_value=empty_value_maker("checkbox","is_storage",1),hidden=True)
-    server_status = tables.Column("status", verbose_name=_("Server Status"), classes=('server_status',))
-    #createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
-    #cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
-
-    class Meta:
-        name = "clusteraction"
-        verbose_name = _("Import Cluster")
-        multi_select = True
-
-    def get_object_id(self, datum):
-        if hasattr(datum, "id"):
-            return datum.id
-        else:
-            return datum["id"]
-
-    def get_object_display(self, datum):
-        if hasattr(datum, "name"):
-            return datum.id
-        else:
-            return datum["name"]
