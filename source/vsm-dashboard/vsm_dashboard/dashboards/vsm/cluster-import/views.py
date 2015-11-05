@@ -1,19 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
-# Copyright 2014 Intel Corporation, All Rights Reserved.
-#
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
-#
-#         http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
-
 import logging
 import os
 from django.utils.translation import ugettext_lazy as _
@@ -26,7 +10,7 @@ from horizon import views
 
 from vsm_dashboard.api import vsm as vsmapi
 from .tables import ListServerTable
-from .tables import ImportClusterTable
+from .form import ImportCluster
 from django.http import HttpResponse
 
 
@@ -34,37 +18,12 @@ import json
 LOG = logging.getLogger(__name__)
 
 
-
-
-class ModalEditTableMixin(object):
-    def get_template_names(self):
-        if self.request.is_ajax():
-            if not hasattr(self, "ajax_template_name"):
-                # Transform standard template name to ajax name (leading "_")
-                bits = list(os.path.split(self.template_name))
-                bits[1] = "".join(("_", bits[1]))
-                self.ajax_template_name = os.path.join(*bits)
-            template = self.ajax_template_name
-        else:
-            template = self.template_name
-        return template
-
-    def get_context_data(self, **kwargs):
-        context = super(ModalEditTableMixin, self).get_context_data(**kwargs)
-        if self.request.is_ajax():
-            context['hide'] = True
-        return context
-
 class IndexView(tables.DataTableView):
     table_class = ListServerTable
     template_name = 'vsm/cluster-import/index.html'
 
     def get_data(self):
         _servers = []
-        _mon_host = None
-        _client_keyring = None
-
-        #_servers= vsmapi.get_server_list(self.request,)
         try:
             _servers = vsmapi.get_server_list(self.request,)
             _zones = vsmapi.get_zone_list(self.request)
@@ -97,81 +56,31 @@ class IndexView(tables.DataTableView):
                 server['is_monitor'] = "no"
             if _server.zone_id in zones:
                 server['zone'] = zones[_server.zone_id]
-
+                server['ismonitor'] = ''
+                server['isstorage'] = ''
             servers.append(server)
         return servers
 
-class ImportClusterView(ModalEditTableMixin, tables.DataTableView):
-    table_class = ImportClusterTable
-    template_name = 'vsm/flocking/importcluster.html'
-    #success_url = reverse_lazy('horizon:vsm:storageservermgmt:index')
-
-    def get_data(self):
-        _zones = []
-        _servers = []
-        #_servers= vsmapi.get_server_list(self.request,)
-        try:
-            _servers = vsmapi.get_server_list(self.request,)
-            _zones = vsmapi.get_zone_list(self.request,)
-            logging.debug("resp body in view: %s" % _servers)
-        except:
-            exceptions.handle(self.request,
-                              _('Unable to retrieve sever list. '))
-
-        zones = {}
-        for _zone in _zones:
-            zones.setdefault(_zone.id, _zone.name)
-        zone_list = zones.items()
-
-        servers = []
-        for _server in _servers:
-            if _server.status != 'available':
-                continue
-
-            server = {"id": _server.id,
-                        "name": _server.host,
-                        "primary_public_ip": _server.primary_public_ip,
-                        "secondary_public_ip": _server.secondary_public_ip,
-                        "cluster_ip": _server.cluster_ip,
-                        "zone_id": _server.zone_id,
-                        "osds": _server.osds,
-                        "type": _server.type,
-                        "status": _server.status}
-            if "monitor" in _server.type:
-                server['is_monitor'] = {"value": True}
-                server['monitor'] = "yes"
-            else:
-                server['is_monitor'] = {"value": False}
-                server['monitor'] = "no"
-            if "storage" in _server.type:
-                server['is_storage'] = {"value": True}
-                server['storage'] = "yes"
-            else:
-                server['is_storage'] = {"value": False}
-                server['storage'] = "no"
-            if _server.zone_id in zones:
-                server['zone'] = zones[_server.zone_id]
-            servers.append(server)
-
-        return servers
+class ImportClusterView(forms.ModalFormView):
+    form_class = ImportCluster
+    template_name = 'vsm/cluster-import/import_cluster.html'
+    success_url = reverse_lazy('horizon:vsm:poolsmanagement:index')
 
 
+def import_cluster(request):
+    status = ""
+    msg = ""
+    body = json.loads(request.body)
+    print "=========import cluster data========"
+    print body
+    try:
+        #ret = vsmapi.add_cache_tier(request,body=body)
+        status = "OK"
+        msg = "Import Cluster Successfully!"
+    except:
+        status = "Failed"
+        msg = "Import Cluster Failed!"
 
-def connect_cluster_action(request, action):
-    data = json.loads(request.body)
-    
-    if not len(data):
-        status = "error"
-        msg = "No server selected"
-    else:
-        if action == "import":
-            vsmapi.import_cluster(request, data)
-            status = "info"
-            msg = "Began to import Cluster"
-        else:
-            status = "info"
-            msg = "Began to Create Cluster"
-
-    resp = dict(message=msg, status=status, data="")
+    resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
     return HttpResponse(resp)

@@ -22,140 +22,39 @@ from horizon import exceptions
 from horizon import forms
 from horizon import messages
 from horizon.utils.validators import validate_port_range
-from horizon.utils import fields
 import logging
 
 from vsm_dashboard.api import vsm as vsm_api
 
 LOG = logging.getLogger(__name__)
 
-class AddHost(forms.SelfHandlingForm):
-
-    failure_url = 'horizon:vsm:storageservermgmt:index'
-    host_name = forms.CharField(label=_("Host name"),
-                            max_length=255,
-                            min_length=1,
-                            error_messages={
-                            'required': _('This field is required.'),
-                            'invalid': _("The string may only contain"
-                                         " ASCII characters and numbers.")},
-                            validators=[validators.validate_slug])
-
-    password = forms.CharField(label=_("Password"),
-                            widget=forms.PasswordInput(),
-                            max_length=255,
-                            min_length=1,
-                            error_messages={
-                            'required': _('This field is required.'),
-                            'invalid': _("The string may only contain"
-                                         " ASCII characters and numbers.")},
-                            validators=[validators.validate_slug])
-
-    server_type = forms.ChoiceField(label=_('Server Type'))
-    zone = forms.ChoiceField(label=_('Zone'))
-
+class ImportCluster(forms.SelfHandlingForm):
+    failure_url = 'horizon:vsm:cluster-import:index'
+    monitor_host = forms.ChoiceField(label=_("Monitor Host"),
+                                    required=True)
+    monitor_keyring = forms.CharField(label=_("Monitor Keyring"),
+                                    max_length=255,
+                                    min_length=1,
+                                    required=True)
+    cluster_conf = forms.CharField(label=_("Cluster Conf"),
+                                    max_length=255,
+                                    min_length=1,
+                                    required=True)
     def __init__(self, request, *args, **kwargs):
-        super(AddHost, self).__init__(request, *args, **kwargs)
-
-        self.fields['server_type'].choices = [('storage', 'storage'),
-                                              ('monitor', 'monitor'),
-                                              ('mixed', 'storage, monitor')]
-        self.fields['zone'].choices = [('zone_a', 'zone_a'),
-                                              ('zone_b', 'zone_b')]
-
-    def handle(self, request, data):
+        super(ImportCluster, self).__init__(request, *args, **kwargs)
+        monitor_list = []
         try:
-
-            body = {
-                    'pool': {
-                        'name': data['name'],
-                        'storageGroupId': data['storage_group'],
-                        'replicationFactor': data['replication_factor'],
-                        'clusterId': '0',
-                        'createdBy': 'VSM'
-                    }
-            }
-            rsp, ret = vsm_api.create_storage_pool(request,body=body)
-
-            res = str(ret['message']).strip( )
-            if res.startswith('pool') and res.endswith('created'):
-                messages.success(request,
-                                _('Successfully created storage pool: %s')
-                                % data['name'])
-            else:
-                messages.error(request,
-                                _('Because %s, failed to create storage pool')
-                                % ret['message'])
-
-            return ret
+            #get the serverlist
+            _servers = vsm_api.get_server_list(self.request,)
+            for _server in _servers:
+                if "monitor" in _server.type:
+                    monitor_list.append((_server.id,_server.host))
         except:
-            redirect = reverse("horizon:vsm:poolsmanagement:index")
-            exceptions.handle(request,
-                              _('Unable to create storage pool.'),
-                              redirect=redirect)
+            msg = _('Failed to get server_list.')
+            redirect = reverse(self.failure_url)
+            exceptions.handle(request, msg, redirect=redirect)
+            return False
+        self.fields["monitor_host"].choices = monitor_list
 
-class AddHosts(forms.SelfHandlingForm):
-
-    failure_url = 'horizon:vsm:storageservermgmt:index'
-    host_name = forms.CharField(label=_("Host name"),
-                            max_length=255,
-                            min_length=1,
-                            error_messages={
-                            'required': _('This field is required.'),
-                            'invalid': _("The string may only contain"
-                                         " ASCII characters and numbers.")},
-                            validators=[validators.validate_slug])
-
-    password = forms.CharField(label=_("Password"),
-                            widget=forms.PasswordInput(),
-                            max_length=255,
-                            min_length=1,
-                            error_messages={
-                            'required': _('This field is required.'),
-                            'invalid': _("The string may only contain"
-                                         " ASCII characters and numbers.")},
-                            validators=[validators.validate_slug])
-
-    server_type = forms.ChoiceField(label=_('Server Type'))
-    zone = forms.ChoiceField(label=_('Zone'))
-
-    def __init__(self, request, *args, **kwargs):
-        super(AddHosts, self).__init__(request, *args, **kwargs)
-
-        self.fields['server_type'].choices = [('storage', 'storage'),
-                                              ('monitor', 'monitor'),
-                                              ('mixed', 'storage, monitor')]
-        self.fields['zone'].choices = [('zone_a', 'zone_a'),
-                                              ('zone_b', 'zone_b')]
-
-    def handle(self, request, data):
-        try:
-
-            body = {
-                    'pool': {
-                        'name': data['name'],
-                        'storageGroupId': data['storage_group'],
-                        'replicationFactor': data['replication_factor'],
-                        'clusterId': '0',
-                        'createdBy': 'VSM'
-                    }
-            }
-            rsp, ret = vsm_api.create_storage_pool(request,body=body)
-
-            res = str(ret['message']).strip( )
-            if res.startswith('pool') and res.endswith('created'):
-                messages.success(request,
-                                _('Successfully created storage pool: %s')
-                                % data['name'])
-            else:
-                messages.error(request,
-                                _('Because %s, failed to create storage pool')
-                                % ret['message'])
-
-            return ret
-        except:
-            redirect = reverse("horizon:vsm:poolsmanagement:index")
-            exceptions.handle(request,
-                              _('Unable to create storage pool.'),
-                              redirect=redirect)
-
+    def handle(self,request,data):
+        pass

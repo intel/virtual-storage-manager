@@ -1,114 +1,13 @@
-
-<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
-
- Licensed under the Apache License, Version 2.0 (the"License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing,
- software distributed under the License is distributed on an
- "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- KIND, either express or implied. See the License for the
- specific language governing permissions and limitations
- under the License.
- --> 
-
 {% extends 'base.html' %}
 {% load i18n %}
 {% block title %}{% trans "Import Cluster" %}{% endblock %}
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=_("Import Cluster") %}
-  <link href="{{ STATIC_URL }}dashboard/css/importcluster.css" rel="stylesheet">
-{% endblock page_header %}
-
-{% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=cluster.title %}
-  <link href="{{ STATIC_URL }}dashboard/css/common.css" rel="stylesheet">
 {% endblock page_header %}
 
 {% block main %}
-
-{% csrf_token %}
-
-<div id="divServerPanel">
-    <label id="lblClusterConnection"  class="form-label">Cluster Connection Information:</label>
-</div>
-
-<div id="divConnectionForm">
-  <div class="left">
-      <div class="control-group required">
-        <label >Monitor Host :</label>
-        <span class="form-required">*</span>
-        <div class="input">
-          <input id="txtMonitorHost" class="form-control" type="text" value="" >
-        </div>
-      </div>
-  </div>
-  <div class="right">
-      <div class="control-group required">
-        <label >Admin Keyring :</label>
-        <span class="form-required">*</span>
-        <div class="input">
-          <input id="txtAdminKeyring" class="form-control" type="text" value="" >
-        </div>
-      </div>
-  </div>
-  <div id="divFormOptions" class="vsm-options-bar">
-        <button id="btnConnectCluster" class="btn btn-primary">Connect</button>
-  </div>
-</div>
-
-
-<div id="divImportClusterTable">
-   <table id="tNodeList" class="table table-bordered table-striped datatable">
-    <thead>
-      <tr>
-          <th  class="normal_column hidden"></th>
-          <th  class="normal_column">ID</th>
-          <th  class="normal_column">Name</th>
-          <th  class="normal_column">Management Address</th>
-          <th  class="normal_column">Public Address</th>
-          <th  class="normal_column">Cluster Address</th>
-          <th  class="normal_column">Monitor</th>
-          <th  class="normal_column">Status</th>
-          <th  class="normal_column">Action</th>
-      </tr>
-    </thead>
-
-    <tbody id="tbNodeList">
-{% for node in NodeList %}
-      <tr id="tr_{{node.id}}" name="{{node.name}}">
-          <td class="sortable normal_column hidden">{{node.id}}</td>
-          <td class="sortable normal_column">{{ node.name }}</td>
-          <td class="sortable normal_column">{{ node.primary_public_ip }}</td>
-          <td class="sortable normal_column">{{ node.secondary_public_ip }}</td>
-          <td class="sortable normal_column">{{ node.cluster_ip }}</td>
-          <td class="sortable normal_column">{{ node.is_monitor }}</td>
-          <td class="sortable normal_column">{{ node.status }}</td>
-          <td class="sortable normal_column">
-          </td>
-      </tr>
-{% endfor %}
-    </tbody>
-
-    <tfoot>
-      <tr>
-        <td colspan="8">
-          <span class="table_count"></span>
-        </td>
-      </tr>
-    </tfoot>
-  </table>
-
-  <div id="divFormOptions" class="vsm-options-bar">
-        <button id="btnSubmitImportCluster" class="btn btn-primary">Import</button>
-        <a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/cluster-import/">Cancel</a>
-  </div>
-<div>
-
+   {{table.render}}
 {% endblock %}
 
 {% block js %}
