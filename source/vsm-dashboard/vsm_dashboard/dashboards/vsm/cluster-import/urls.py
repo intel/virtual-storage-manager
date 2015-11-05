@@ -17,10 +17,10 @@
 from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import ImportClusterView
-from .views import connect_cluster_action
+from .views import import_cluster
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^importclusterview/$', ImportClusterView.as_view(), name='importclusterview'),
-    url(r'^connect_cluster_action/$', connect_cluster_action, name='connect_cluster_action'),
+    url(r'^importcluster/$', ImportClusterView.as_view(), name='importcluster'),
+    url(r'^import_cluster/$', import_cluster, name='import_cluster'),
 )
