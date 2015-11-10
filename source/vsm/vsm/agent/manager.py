@@ -43,11 +43,9 @@ from vsm.openstack.common.periodic_task import periodic_task
 from vsm.openstack.common.rpc import common as rpc_exc
 from vsm.agent import rpcapi as agent_rpc
 from vsm import context
-<<<<<<< HEAD
+
 import operator
 from crushmap_parser import CrushMap
-=======
->>>>>>> 308e6e1b30f56636211c70add3c002e16f34d6c1
 import glob
 CTXT = context.get_admin_context()
 

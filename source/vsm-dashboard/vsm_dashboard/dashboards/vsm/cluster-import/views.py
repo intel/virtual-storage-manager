@@ -74,7 +74,6 @@ def import_cluster(request):
     print "=========import cluster data========"
     print body
     try:
-<<<<<<< HEAD
         code,ret = vsmapi.import_cluster(request,body=body)
         print '============='
         print ret
@@ -116,11 +115,6 @@ def check_cluster_tobe_import(request):
         else:
             status = "OK"
             msg = "Import Cluster Successfully!"
-=======
-        #ret = vsmapi.add_cache_tier(request,body=body)
-        status = "OK"
-        msg = "Import Cluster Successfully!"
->>>>>>> 308e6e1b30f56636211c70add3c002e16f34d6c1
     except:
         status = "Failed"
         msg = "Import Cluster Failed!"
