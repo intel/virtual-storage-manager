@@ -24,17 +24,22 @@ Parse crush map in json format, and identify storage groups from ruleset.
 """
 import json
 
+
 class CrushMap():
 
-    def __init__(self, json_file):
-        with open(json_file, 'r') as fh:
-            crush_map = json.load(fh)
-            self._tunables = crush_map['tunables']
-            self._devices = crush_map['devices']
-            self._rules = crush_map['rules']
-            self._types = crush_map['types']
-            self._buckets = crush_map['buckets']
-        pass
+    def __init__(self, json_file=None, json_context=None):
+        if json_file:
+            with open(json_file, 'r') as fh:
+                crush_map = json.load(fh)
+            pass
+        elif json_context:
+            crush_map = json.loads(json_context)
+        self._tunables = crush_map['tunables']
+        self._devices = crush_map['devices']
+        self._rules = crush_map['rules']
+        self._types = crush_map['types']
+        self._buckets = crush_map['buckets']
+
 
     def get_all_tunables(self):
         return self._tunables
@@ -50,6 +55,17 @@ class CrushMap():
 
     def get_all_buckets(self):
         return self._buckets
+
+    def get_weight_by_osd_name(self,osd_name):
+        osds = self._devices
+        osd_id = [osd['id'] for osd in osds if osd['name'] == osd_name]
+        buckets = self._buckets
+        for bucket in buckets:
+            for item in bucket['items']:
+                if item['id'] == osd_id:
+                    return item['weight']
+        return 'no osd:%s'%osd_name
+
 
     def get_bucket_by_id(self, id):
         return filter(lambda item: id == item['id'], self._buckets)[0]
@@ -150,6 +166,33 @@ class CrushMap():
 
         print storage_groups
         return storage_groups
+
+    def get_storage_groups_dict_by_rule(self, rules):
+        '''
+        this function will execute each op.in detail,
+            - op: take  --> the start of an new search
+            - op: chooseleaf_firstn/... --> the rule to search
+            - op: emit --> the end of a search
+        '''
+        storage_groups = []
+        for rule in rules:
+            index = -1
+            for step in rule['steps']:
+                op = step['op']
+                if op == 'take':
+                    bucket_id =  step['item']
+                    index = index + 1
+                    values = {'name':rule['rule_name'],
+                              'storage_class':rule['rule_name'],
+                              'friendly_name':rule['rule_name'],
+                              'take_id':bucket_id,
+                              'rule_id':rule['rule_id'],
+                              'take_index':index,
+                              }
+                    storage_groups.append(values)
+
+        return storage_groups
+
 
 if __name__ == '__main__':
     crushmap = CrushMap("./crush.json")

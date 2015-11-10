@@ -140,3 +140,12 @@ class API(object):
 
     def reconfig_diamond(self, context, body=None):
         return self.scheduler_rpcapi.reconfig_diamond(context, body)
+
+    def check_pre_existing_cluster(self,context,body):
+        return self.scheduler_rpcapi.check_pre_existing_cluster(context,body)
+
+    def import_cluster(self,context,body):
+        return self.scheduler_rpcapi.import_cluster(context,body)
+
+    def detect_crushmap(self,context,body):
+        return self.scheduler_rpcapi.detect_crushmap(context,body)

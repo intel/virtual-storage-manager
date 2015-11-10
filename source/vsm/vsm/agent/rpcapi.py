@@ -536,3 +536,31 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         self.make_msg('reconfig_diamond',
                                       body=body),
                         topic)
+
+    def check_pre_existing_cluster(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('check_pre_existing_cluster',
+                                      body=body),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res
+
+    def import_cluster(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('import_cluster',
+                                      body=body),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res
+
+
+    def detect_crushmap(self, context, keyring, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('detect_crushmap',
+                                      keyring=keyring),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res

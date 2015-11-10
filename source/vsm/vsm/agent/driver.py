@@ -70,6 +70,41 @@ class CephDriver(object):
         args = ['ceph', 'osd', 'crush', 'rule', 'dump']
         ruleset_list = self._run_cmd_to_json(args)
         return len(ruleset_list)
+    def _get_cluster_name(self,secondary_public_ip,keyring):
+        cluster_name = ''
+        args = ['ceph', 'mon', 'dump','--keyring',keyring]
+        mon_name = None
+        mon_dump = self._run_cmd_to_json(args)
+        for mon in mon_dump['mons']:
+            if mon['addr'].split(':')[0] == secondary_public_ip.split(',')[0]:
+                mon_name = mon['name']
+                break
+        if mon_name:
+            mon_configs = self._get_mon_config_dict(mon_name,keyring)
+            cluster_name = mon_configs['cluster']
+        return cluster_name
+
+    # def _get_ceph_admin_keyring_from_file(self,secondary_public_ip):
+    #     keyring = ''
+    #     args = ['ceph', 'mon', 'dump']
+    #     mon_name = None
+    #     mon_dump = self._run_cmd_to_json(args)
+    #     for mon in mon_dump['mons']:
+    #         if mon['addr'].split(':')[0] == secondary_public_ip.split(',')[0]:
+    #             mon_name = mon['name']
+    #             break
+    #     if mon_name:
+    #         mon_configs = self._get_mon_config_dict(mon_name)
+    #         keyring_file = mon_configs['keyring']
+    #         keyring,err = utils.execute('cat',keyring_file,run_as_root=True)
+    #     return keyring
+
+    def _get_mon_config_dict(self,mon_id,keyring):
+        args = ['ceph', 'daemon','mon.%s'%mon_id ,'config','show','--keyring',keyring]
+        return self._run_cmd_to_json(args)
+
+
+
 
     def create_storage_pool(self, context, body):
         pool_name = body["name"]

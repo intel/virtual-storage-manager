@@ -43,6 +43,11 @@ from vsm.openstack.common.periodic_task import periodic_task
 from vsm.openstack.common.rpc import common as rpc_exc
 from vsm.agent import rpcapi as agent_rpc
 from vsm import context
+<<<<<<< HEAD
+import operator
+from crushmap_parser import CrushMap
+=======
+>>>>>>> 308e6e1b30f56636211c70add3c002e16f34d6c1
 import glob
 CTXT = context.get_admin_context()
 
@@ -1740,6 +1745,315 @@ class AgentManager(manager.Manager):
         else:
             return
         self.diamond_driver.change_collector_conf(collect_name,confs)
+
+    def get_crushmap_json_format(self,keyring=None):
+        '''
+        :return:
+        '''
+        json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump','--keyring',keyring, run_as_root=True)
+        crushmap = CrushMap(json_context=json_crushmap)
+        return crushmap
+
+    def get_crushmap_json_str(self,keyring=None):
+        '''
+        :return:
+        '''
+        if keyring:
+            json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump','--keyring',keyring, run_as_root=True)
+        else:
+            json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump', run_as_root=True)
+        return json_crushmap
+
+    def _insert_zone_from_crushmap_to_db(self,context,crushmap):
+        '''
+        select buckets which has parent_bucket and type level are higher than host from crushmap and then save as zones in DB
+        :param context:
+        :param crushmap:
+        :return:
+        '''
+
+        types = crushmap._types
+        types.sort(key=operator.itemgetter('type_id'))
+        zone_values = []
+        if not types:
+            return 'unvailed crushmap!'
+        if len(types) <= 3:
+            raise "types in crushmap is less than 3."
+        if len(types) > 3:
+            buckets = crushmap._buckets
+            for bucket in buckets:
+                if bucket['type_id'] > types[2]['type_id']:
+                    for item in bucket['items']:
+                        zone = crushmap.get_bucket_by_id(item['id'])
+                        values = {'id': zone['id'],
+                                  'name': zone['name'],
+                                  'parent_id': bucket['id'],
+                                  'type': zone['type_id'],
+                        }
+                        zone_values.append(values)
+        for value_dict in zone_values:
+            db.zone_update_or_create(context,value_dict)
+
+
+    def _insert_storage_group_from_crushmap_to_db(self,context,crushmap):
+        '''
+        :param context:
+        :param crushmap:
+        :return:
+        '''
+        rules = crushmap._rules
+        storage_groups = crushmap.get_storage_groups_dict_by_rule(rules)
+        LOG.info('get storage groups foorm crushmap====%s'%storage_groups)
+        for storage_group in storage_groups:
+            db.storage_group_update_or_create(context,storage_group)
+
+    def detect_crushmap(self,context,keyring):
+        message = {'error':'','code':'','info':''}
+        try:
+            crushmap = self.get_crushmap_json_str(keyring)
+            message['error'] = ''
+            message['code'] = ''
+            message['info'] = 'Success'
+            message['crushmap'] = crushmap
+        except:
+            message['error'] = 'failed'
+            message['code'] = '-1'
+            message['info'] = 'Fail'
+            raise
+        LOG.info('detect_crushmap----%s'%message)
+        return message
+
+    def import_cluster(self,context,body):
+        message = {'error':'','code':'','info':''}
+        try:
+            keyring = body.get('monitor_keyring')
+            crushmap = self.get_crushmap_json_format(keyring)
+            self._insert_zone_from_crushmap_to_db(context,crushmap)
+            self._insert_storage_group_from_crushmap_to_db(context,crushmap)
+            ceph_conf_path = body.get('cluster_conf',FLAGS.ceph_conf)
+            config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_path))
+            config_dict = config.as_dict()
+            config_content = config._parser.as_str()
+            self._modify_init_nodes_from_config_to_db(context,config_dict)
+            self._insert_devices_from_config_to_db(context,config_dict)
+            self._insert_osd_states_from_config_to_db(context,config_dict,crushmap)
+            self._insert_or_modified_clusters(context,config_content,keyring)
+            message['error'] = ''
+            message['code'] = ''
+            message['info'] = 'Success'
+        except:
+            message['error'] = 'failed'
+            message['code'] = '-1'
+            message['info'] = 'Fail'
+            raise
+        LOG.info('import cluster-----88888888--%s'%message)
+        return message
+
+    def _modify_init_nodes_from_config_to_db(self,context,config_dict):
+        '''TODO:'''
+        servers = db.init_node_get_all(context)
+        osd_list = []
+        for key,value in config_dict.iteritems():
+            if key.find('osd.')!=-1:
+                osd_list.append({key:value})
+                for server in servers:
+                    if value.get('host') == server['host']:
+                        server['data_drives_number'] = int(server['data_drives_number']) + 1
+                        break
+        for server in servers:
+            values = {'data_drives_number':server['data_drives_number']}
+            db.init_node_update(context,server['id'],values)
+
+
+    def _insert_devices_from_config_to_db(self,context,config_dict):
+        '''TODO: device_type interface_type  mount_point path state journal_state'''
+        device_values = []
+        fs_type = db.cluster_get_all(context)[0]['file_system']
+
+        for key,value in config_dict.iteritems():
+            if key.find('osd.')!=-1:
+                values = {
+                        'name':value.get('devs'),
+                        'journal':value.get('osd journal'),
+                        'path':value.get('devs'),
+                        'fs_type':fs_type,
+                        'state':'OK',
+                        'journal_state':'OK',
+                        'mount_point':value.get('mount_point'),
+                        }
+
+                service_id = db.init_node_get_by_host(context,value.get('host'))['service_id']
+                values['service_id'] = service_id
+                device_values.append(values)
+        LOG.info('get device_values==22222222222===%s'%device_values)
+        for device in device_values:
+            device_ref = None
+            device_ref =  db.device_get_by_name_and_journal_and_service_id(context,device.get('name'),device.get('journal'),device.get('service_id'))
+            if device_ref:
+                db.device_update(context,device_ref['id'],device)
+            else:
+                db.device_create(context,device)
+
+
+    def _insert_osd_states_from_config_to_db(self,context,config_dict,crushmap):
+        cluster_id = db.cluster_get_all(context)[0]['id']
+        osd_state_values = []
+        for key,value in config_dict.iteritems():
+            if key.find('osd.')!=-1:
+                osd_name = key
+                service_id = db.init_node_get_by_host(context,value.get('host'))['service_id']
+                device_id = db.device_get_by_name_and_journal_and_service_id(context,value.get('devs'),value.get('osd journal'),service_id)['id']
+                storage_group_id = 1
+                cluster_id = cluster_id
+                state = 'In-Up'
+                operation_status = 'Present'
+                weight = crushmap.get_weight_by_osd_name(osd_name)
+                public_ip = value.get('public addr')
+                cluster_ip = value.get('cluster addr')
+                zone_id = 1
+                values = {'id':device_id,
+                          'osd_name':osd_name,
+                          'device_id':device_id,
+                          'storage_group_id':storage_group_id,
+                          'service_id':service_id,
+                          'cluster_id':cluster_id,
+                          'state':state,
+                          'operation_status':operation_status,
+                          'weight':weight,
+                          'public_ip':public_ip,
+                          'cluster_ip':cluster_ip,
+                          'zone_id':zone_id,
+                          }
+                osd_state_values.append(values)
+        LOG.info('get osd_states==1111111111===%s'%osd_state_values)
+        for osd_state in osd_state_values:
+            db.osd_state_update_or_create(context,osd_state)
+
+    def _insert_or_modified_clusters(self,context,content,keyring):
+        '''
+
+        :param context:
+        :param body:
+        {
+
+        }}
+        :return:
+        '''
+        cluster_name = self.get_cluster_name(context)
+        keyring_admin = keyring
+        info_dict = {'keyring_admin': keyring_admin}
+        ceph_conf = content
+        values = {'name':cluster_name,
+                  'info_dict':info_dict,
+                  'ceph_conf':ceph_conf,
+                  }
+        cluster_all = db.cluster_get_all(context)
+        if len(cluster_all) == 1:
+            cluster_id = cluster_all[0].id
+            db.cluster_update(context,cluster_id,values)
+
+
+    def get_cluster_name(self,context,keyring):
+        init_node_ref = db.init_node_get_by_host(context,
+                                             self.host)
+        cluster_name = self.ceph_driver._get_cluster_name(init_node_ref.secondary_public_ip)
+        return cluster_name
+
+    # def get_ceph_admin_keyring_from_file(self,context):
+    #     init_node_ref = db.init_node_get_by_host(context,
+    #                                  self.host)
+    #     keyring = self.ceph_driver._get_ceph_admin_keyring_from_file(init_node_ref.secondary_public_ip)
+    #     return keyring
+
+    def check_pre_existing_cluster(self, context, body):
+        messages = []
+        messages.append(self.check_network(context, body))
+        messages.append(self.check_pre_existing_ceph_conf(context, body))
+        messages.append(self.check_pre_existing_crushmap(context, body))
+        message_ret = {'code':[],'error':[],'info':[]}
+        for message in messages:
+            message_ret['code'] = message_ret['code']+message['code']
+            message_ret['error'] = message_ret['error']+message['error']
+            message_ret['info'] = message_ret['info']+message['info']
+        for key,value in message_ret.iteritems():
+            message_ret[key] = ','.join(value)
+        return message_ret
+
+    def check_network(self, context, body):
+        message = {'code':[],'error':[],'info':[]}
+        return message
+
+    def check_pre_existing_ceph_conf(self, context, body):
+        message = {'code':[],'error':[],'info':[]}
+        ceph_conf_path = body.get('cluster_conf',FLAGS.ceph_conf)
+        config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_path))
+        config_dict = config.as_dict()
+        osd_list = []
+        osd_header = {}
+        mon_list = []
+        mds_list = []
+        mds_header = {}
+        mon_header = {}
+        global_header = {}
+        for key,value in config_dict.iteritems():
+            if key.find('osd.')!=-1:
+                osd_list.append({key:value})
+            elif key.find('osd')!=-1:
+                osd_header = value
+            elif key.find('mon.')!=-1:
+                mon_list.append({key:value})
+            elif key.find('mon')!=-1:
+                mon_header = value
+            elif key.find('mds.')!=-1:
+                mds_list.append({key:value})
+            elif key.find('mds')!=-1:
+                mds_header = value
+            elif key.find('global')!=-1:
+                global_header = value
+        if not global_header:
+            message['code'].append('-21')
+            message['error'].append('missing global section in ceph configration file.')
+        else:
+            pass
+        if not mon_header:
+            message['code'].append('-22')
+            message['error'].append('missing mon header section in ceph configration file.')
+        else:
+            pass
+        if not osd_header:
+            message['code'].append('-23')
+            message['error'].append('missing osd header section in ceph configration file.')
+        else:
+            pass
+
+        osd_fields = ['devs','host','cluster addr','public addr','osd journal']
+        for osd in osd_list:
+            osd_name = osd.keys()[0]
+            fields_missing = set(osd_fields) - set(osd[osd_name].keys())
+            if len(fields_missing) > 0:
+                message['code'].append('-24')
+                message['error'].append('missing field %s for %s in ceph configration file.'%(fields_missing,osd_name))
+
+        mon_fields = ['host','mon addr']
+        for mon in mon_list:
+            mon_name = mon.keys()[0]
+            fields_missing = set(mon_fields) - set(mon[mon_name].keys())
+            if len(fields_missing) > 0:
+                message['code'].append('-25')
+                message['error'].append('missing field %s for %s in ceph configration file.'%(fields_missing,mon_name))
+        return message
+
+
+    def check_pre_existing_crushmap(self, context, body):
+        message = {'code':[],'error':[],'info':[]}
+        return message
+
+
+
+
+
+
+
 
 
 

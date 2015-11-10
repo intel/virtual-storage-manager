@@ -19,7 +19,10 @@ function InitCtrlCSS(){
 }
 
 $("#btnImportCluster").click(function(){
+<<<<<<< HEAD
+=======
 	//Check the field is should not null
+>>>>>>> 308e6e1b30f56636211c70add3c002e16f34d6c1
 	if(   $("#id_monitor_host").val() == ""
 	   || $("#id_monitor_keyring").val() == ""
 	   || $("#id_cluster_conf").val() == ""){
@@ -47,7 +50,16 @@ $("#btnImportCluster").click(function(){
 		data: postData,
 		dataType:"json",
 		success: function(data){
+<<<<<<< HEAD
+                if (data.status=='Failed') {
+                     showTip("error",data.message)
+                }
+                else{
+                    showTip("success",data.message)
+                }
+=======
 				console.log(data);
+>>>>>>> 308e6e1b30f56636211c70add3c002e16f34d6c1
 				window.location.href="/dashboard/vsm/cluster-import/";
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {

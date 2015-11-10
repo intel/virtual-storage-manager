@@ -133,6 +133,45 @@ class ClusterController(wsgi.Controller):
         else:
             return {"message":"No such cluster which named  %s in DB"%cluster_name}
 
+    def detect_crushmap(self, req, body=None):
+        '''
+
+        :param res:
+        :param body:
+        :return:
+        '''
+        LOG.info("CEPH_LOG detect_crushmap body=%s"%body )
+        context = req.environ['vsm.context']
+        ret = self.scheduler_api.detect_crushmap(context,body)
+        LOG.info('CEPH_LOG detect_crushmap get ret=%s'%ret)
+        return ret
+
+    def check_pre_existing_cluster(self,req,body):
+        '''
+
+        :param res:
+        :param body:
+        :return:
+        '''
+        LOG.info("CEPH_LOG check_pre_existing_cluster body=%s"%body )
+        context = req.environ['vsm.context']
+        ret = self.scheduler_api.check_pre_existing_cluster(context,body)
+        LOG.info('CEPH_LOG check_pre_existing_cluster get ret=%s'%ret)
+        return ret
+
+    def import_cluster(self,req,body):
+        '''
+
+        :param res:
+        :param body:
+        :return:
+        '''
+        LOG.info("CEPH_LOG import_cluster body=%s"%body )
+        context = req.environ['vsm.context']
+        ret = self.scheduler_api.import_cluster(context,body)
+        LOG.info('CEPH_LOG import_cluster get ret=%s'%ret)
+        return ret
+
     def integrate(self, req,body=None):
         """
         integrate an existing ceph cluster
