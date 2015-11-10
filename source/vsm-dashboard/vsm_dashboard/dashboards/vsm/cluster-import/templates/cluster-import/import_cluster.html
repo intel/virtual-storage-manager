@@ -27,11 +27,52 @@
 
 {% block main %}
     {% csrf_token %}
+    <!-- the main form -->
     <div id="divImportClusterForm" >
 	    <div class="left">
 	    <form>
 		    <fieldset>
-		    	{% include "horizon/common/_form_fields.html" %}
+		    	<!-- {% include "horizon/common/_form_fields.html" %} -->
+		    	<!-- Crushmap field -->
+
+		    	<div id="divMonitorHost2" class="control-group form-field clearfix required" style="display:none">
+		    		<label>Monitor Host:</label>
+		    		<span class="help-block"></span>
+		    		<div class="input">
+		      			<select id="selMonitorHost2"  class="form-control">
+							{%for monitor in  monitor_host %}
+								<option value="{{monitor.id}}">{{monitor.host}}</option>
+							{%endfor%}
+						</select>
+		    		</div>
+	  			</div>
+
+		  		<div id="divtxtMonitorKeyring2" class="control-group form-field clearfix required" style="display:none">
+		    		<label>Monitor Keyring:</label>
+		    		<span class="help-block"></span>
+		    		<div class="input">
+		      			<input id="txtMonitorKeyring2" type="text" value="" class="form-control">
+		    		</div>
+		  		</div>
+
+		    	<div class="control-group form-field clearfix required">
+				    <label for="id_crushmap">Crushmap:</label>
+				    <a id="btnAutoDetect" class="btn btn-primary" onclick="openAddDetectDialog()">Auto Detect</a>
+				    <span class="help-block"></span>
+				    <div class="input">
+				      <textarea cols="40" id="txtCrushmap" rows="10"></textarea>
+				    </div>
+				 </div>
+
+				<!-- Ceph.conf field -->
+		    	<div class="control-group form-field clearfix required">
+				    <label for="id_ceph_conf">Ceph.conf:</label>
+				    <span class="help-block"></span>
+				    <div class="input">
+				      <textarea cols="40" id="txtCephConf" rows="10"></textarea>
+				    </div>
+				 </div>
+
 		    </fieldset>
 			</div>
 			<div class="right">
@@ -40,10 +81,37 @@
 			</div>
 		</form>
 		 <div id="divFormOptions" class="vsm-options-bar">
-	    	<button id="btnImportCluster" class="btn btn-primary">Submit</button>
+		 	<button id="btnImportValidate" class="btn btn-primary" onclick="validate()">Validate</button>
+	    	<button id="btnImportCluster" class="btn btn-primary" style="display:none" onclick="importCluster()">Submit</button>
 	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/cluster-import/">Cancel</a>
 	    </div>
 	</div>
+
+	<!-- the dialog form -->
+	<div id="divAutoDetectInfo" style="display:none">
+		<div id="divAutoDetectInfoContext" style="width:300px;">
+			<div class="control-group form-field clearfix required">
+	    		<label>Monitor Host:</label>
+	    		<span class="help-block"></span>
+	    		<div class="input">
+	      			<select id="selMonitorHost"  class="form-control">
+						{%for monitor in  monitor_host %}
+							<option value="{{monitor.id}}">{{monitor.host}}</option>
+						{%endfor%}
+					</select>
+	    		</div>
+	  		</div>
+
+	  		<div class="control-group form-field clearfix required">
+	    		<label>Monitor Keyring:</label>
+	    		<span class="help-block"></span>
+	    		<div class="input">
+	      			<input id="txtMonitorKeyring" type="text" value="" class="form-control">
+	    		</div>
+	  		</div>
+  		</div>
+	</div>
+
 {% endblock %}
 
 
