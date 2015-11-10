@@ -95,8 +95,12 @@ def auto_detect(request):
     print "=========auto detect========"
     print body
     try:
+        ret = vsmapi.detect_crushmap(request,body=body)
+        print '==detect_crushmap===='
+        print ret
+        print '==detect_crushmap over==='
         status = "OK"
-        msg = "atuo detect Successfully!"
+        msg = ret.get('crushmap')
     except:
         status = "Failed"
         msg = "atuo detect Failed!"
