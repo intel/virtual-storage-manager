@@ -116,6 +116,9 @@ class APIRouter(vsm.api.openstack.APIRouter):
                                     'start_cluster': 'post',
                                     'stop_cluster': 'post',
                                     'get_ceph_health_list':'get',
+                                    'check_pre_existing_cluster':'post',
+                                    'import_cluster':'post',
+                                    'detect_crushmap':'post',
                                     },
                         member={'action': 'post'})
 

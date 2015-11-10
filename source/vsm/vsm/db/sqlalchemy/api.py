@@ -3158,6 +3158,39 @@ def device_update_or_create(context, values):
         result.save(session=session)
         return result
 
+def zone_update_or_create(context, values):
+    session = get_session()
+    with session.begin():
+        result = None
+        if values['id']:
+           result = model_query(context, models.Zone, session=session).\
+                        filter_by(id=values['id']).\
+                        first()
+        if result:
+            result.update(values)
+        else:
+            result = models.Zone()
+            result.update(values)
+        result.save(session=session)
+        return result
+
+def storage_group_update_or_create(context, values):
+    session = get_session()
+    with session.begin():
+        result = None
+        if values['name'] and values['take_id'] and values['take_index']:
+           result = model_query(context, models.StorageGroup, session=session).\
+                        filter_by(name=values['name']).\
+                        filter_by(take_id=values['take_id']).\
+                        filter_by(take_index=values['take_index']).\
+                        first()
+        if result:
+            result.update(values)
+        else:
+            result = models.StorageGroup()
+            result.update(values)
+        result.save(session=session)
+        return result
 ##############################################ly>
 
 #region vsmapp operations

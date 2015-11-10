@@ -17,10 +17,18 @@
 from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import ImportClusterView
+<<<<<<< HEAD
+from .views import import_cluster,check_cluster_tobe_import
+=======
 from .views import import_cluster
+>>>>>>> 308e6e1b30f56636211c70add3c002e16f34d6c1
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^importcluster/$', ImportClusterView.as_view(), name='importcluster'),
     url(r'^import_cluster/$', import_cluster, name='import_cluster'),
+<<<<<<< HEAD
+    url(r'^check_cluster_tobe_import/$', check_cluster_tobe_import, name='check_cluster_tobe_import'),
+=======
+>>>>>>> 308e6e1b30f56636211c70add3c002e16f34d6c1
 )

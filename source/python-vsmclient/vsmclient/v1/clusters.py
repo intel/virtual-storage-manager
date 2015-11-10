@@ -232,6 +232,19 @@ class ClusterManager(base.ManagerWithFind):
         url = "/clusters/import_ceph_conf"
         return self.api.client.post(url,body=body)
 
+    def check_pre_existing_cluster(self,body):
+        url = "/clusters/check_pre_existing_cluster"
+        return self.api.client.post(url,body=body)
+
+    def import_cluster(self,body):
+        url = "/clusters/import_cluster"
+        return self.api.client.post(url,body=body)
+
+
+    def detect_crushmap(self,body):
+        url = "/clusters/detect_crushmap"
+        return self.api.client.post(url,body=body)
+
     def integrate(self,servers=[]):
         body = {'cluster': {
                             "servers": servers,

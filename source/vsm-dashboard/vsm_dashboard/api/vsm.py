@@ -278,3 +278,22 @@ def add_new_disks_to_cluster(request, body):
 
 def get_available_disks(request,  search_opts):
     return vsmclient(request).devices.get_available_disks( search_opts=search_opts)
+
+def check_pre_existing_cluster(request, body=None):
+    """check_pre_existing_cluster.
+        body : {u'cluster_conf': u'/etc/ceph/ceph.conf',
+        u'monitor_host_name': u'centos-storage1',
+        u'monitor_host_id': u'1',
+         u'monitor_keyring': u'/etc/keying'}
+    """
+    return vsmclient(request).clusters.check_pre_existing_cluster(body)
+
+
+def import_cluster(request, body=None):
+    """check_pre_existing_cluster.
+        body : {u'cluster_conf': u'/etc/ceph/ceph.conf',
+        u'monitor_host_name': u'centos-storage1',
+        u'monitor_host_id': u'1',
+         u'monitor_keyring': u'/etc/keying'}
+    """
+    return vsmclient(request).clusters.import_cluster(body)

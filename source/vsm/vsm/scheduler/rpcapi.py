@@ -210,3 +210,13 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 
     def reconfig_diamond(self, ctxt, body=None):
         return self.cast(ctxt, self.make_msg('reconfig_diamond', body=body))
+
+    def check_pre_existing_cluster(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('check_pre_existing_cluster', body=body))
+
+    def import_cluster(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('import_cluster', body=body))
+
+    def detect_crushmap(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('detect_crushmap', body=body))
+

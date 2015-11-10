@@ -1065,6 +1065,13 @@ def device_get_by_name_and_journal_and_service_id(context, name, \
     return IMPL.device_get_by_name_and_journal_and_service_id(context, \
                                             name, journal, service_id)
 
+
+def zone_update_or_create(context, values):
+    return IMPL.zone_update_or_create(context, values)
+
+def storage_group_update_or_create(context, values):
+    return IMPL.storage_group_update_or_create(context, values)
+
 #region vsmapp db APIs
 def appnodes_get_by_id(context, id):
     return IMPL.appnodes_get_by_id(context, id)
