@@ -3178,7 +3178,7 @@ def storage_group_update_or_create(context, values):
     session = get_session()
     with session.begin():
         result = None
-        if values['name'] and values['take_id'] and values['take_index']:
+        if values['name']:
            result = model_query(context, models.StorageGroup, session=session).\
                         filter_by(name=values['name']).\
                         filter_by(take_id=values['take_id']).\

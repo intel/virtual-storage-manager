@@ -80,7 +80,7 @@ class CephDriver(object):
                 mon_name = mon['name']
                 break
         if mon_name:
-            mon_configs = self._get_mon_config_dict(mon_name,keyring)
+            mon_configs = self._get_mon_config_dict(mon_name)
             cluster_name = mon_configs['cluster']
         return cluster_name
 
@@ -99,8 +99,8 @@ class CephDriver(object):
     #         keyring,err = utils.execute('cat',keyring_file,run_as_root=True)
     #     return keyring
 
-    def _get_mon_config_dict(self,mon_id,keyring):
-        args = ['ceph', 'daemon','mon.%s'%mon_id ,'config','show','--keyring',keyring]
+    def _get_mon_config_dict(self,mon_id):
+        args = ['ceph', 'daemon','mon.%s'%mon_id ,'config','show']
         return self._run_cmd_to_json(args)
 
 

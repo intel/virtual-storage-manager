@@ -1825,8 +1825,8 @@ class AgentManager(manager.Manager):
         message = {'error':'','code':'','info':''}
         try:
             keyring_file_path = body.get('monitor_keyring')
-            keyring,err = utils.execute('cat',keyring_file_path,run_as_root=True)
-            crushmap = self.get_crushmap_json_format(keyring)
+
+            crushmap = self.get_crushmap_json_format(keyring_file_path)
             self._insert_zone_from_crushmap_to_db(context,crushmap)
             self._insert_storage_group_from_crushmap_to_db(context,crushmap)
             ceph_conf = body.get('ceph_conf')
@@ -1838,7 +1838,7 @@ class AgentManager(manager.Manager):
             self._modify_init_nodes_from_config_to_db(context,config_dict)
             self._insert_devices_from_config_to_db(context,config_dict)
             self._insert_osd_states_from_config_to_db(context,config_dict,crushmap)
-            self._insert_or_modified_clusters(context,config_content,keyring)
+            self._insert_or_modified_clusters(context,config_content,keyring_file_path)
             message['error'] = ''
             message['code'] = ''
             message['info'] = 'Success'
@@ -1854,6 +1854,8 @@ class AgentManager(manager.Manager):
         '''TODO:'''
         servers = db.init_node_get_all(context)
         osd_list = []
+        for server in servers:
+            server['data_drives_number'] = 0
         for key,value in config_dict.iteritems():
             if key.find('osd.')!=-1:
                 osd_list.append({key:value})
@@ -1862,7 +1864,7 @@ class AgentManager(manager.Manager):
                         server['data_drives_number'] = int(server['data_drives_number']) + 1
                         break
         for server in servers:
-            values = {'data_drives_number':server['data_drives_number']}
+            values = {'data_drives_number':server['data_drives_number'],'status':'Active'}
             db.init_node_update(context,server['id'],values)
 
 
@@ -1930,7 +1932,7 @@ class AgentManager(manager.Manager):
         for osd_state in osd_state_values:
             db.osd_state_update_or_create(context,osd_state)
 
-    def _insert_or_modified_clusters(self,context,content,keyring):
+    def _insert_or_modified_clusters(self,context,content,keyring_path):
         '''
 
         :param context:
@@ -1940,7 +1942,8 @@ class AgentManager(manager.Manager):
         }}
         :return:
         '''
-        cluster_name = self.get_cluster_name(context)
+        keyring,err = utils.execute('cat',keyring_path,run_as_root=True)
+        cluster_name = self.get_cluster_name(context,keyring_path)
         keyring_admin = keyring
         info_dict = {'keyring_admin': keyring_admin}
         ceph_conf = content
@@ -1957,7 +1960,7 @@ class AgentManager(manager.Manager):
     def get_cluster_name(self,context,keyring):
         init_node_ref = db.init_node_get_by_host(context,
                                              self.host)
-        cluster_name = self.ceph_driver._get_cluster_name(init_node_ref.secondary_public_ip)
+        cluster_name = self.ceph_driver._get_cluster_name(init_node_ref.secondary_public_ip,keyring)
         return cluster_name
 
     # def get_ceph_admin_keyring_from_file(self,context):
