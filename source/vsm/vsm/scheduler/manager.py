@@ -1234,6 +1234,13 @@ class SchedulerManager(manager.Manager):
 
 
     def check_pre_existing_crushmap(self, context, body):
+        '''
+
+        :param context:
+        :param body:
+        {u'ceph_conf': u'****', u'crush_map': u'****'}
+        :return:
+        '''
         crushmap_str = body.get('crush_map')
         crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
         utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
@@ -1245,7 +1252,7 @@ class SchedulerManager(manager.Manager):
         '''
         :param context:
         :param body:
-        {u'cluster_conf': u'/etc/ceph/ceph.conf', u'monitor_host_name': u'centos-storage1', u'monitor_host_id': u'1', u'monitor_keyring': u'******'}
+        { u'monitor_host_name': u'centos-storage1', u'monitor_id': u'1', u'monitor_keyring': u'******'}
         :return:
         '''
         monitor_pitched_host = body.get('monitor_host_name')
@@ -1266,7 +1273,7 @@ class SchedulerManager(manager.Manager):
         '''
         :param context:
         :param body:
-        {u'cluster_conf': u'/etc/ceph/ceph.conf', u'monitor_host_name': u'centos-storage1', u'monitor_host_id': u'1', u'monitor_keyring': u'/etc/keying'}
+        {u'ceph_conf': u'****', u'monitor_host_name': u'centos-storage1', u'monitor_id': u'1', u'monitor_keyring': u'******'}
         :return:
         '''
         monitor_pitched_host = body.get('monitor_host_name')

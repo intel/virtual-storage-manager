@@ -1828,8 +1828,10 @@ class AgentManager(manager.Manager):
             crushmap = self.get_crushmap_json_format(keyring)
             self._insert_zone_from_crushmap_to_db(context,crushmap)
             self._insert_storage_group_from_crushmap_to_db(context,crushmap)
-            ceph_conf_path = body.get('cluster_conf',FLAGS.ceph_conf)
-            config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_path))
+            ceph_conf = body.get('ceph_conf')
+            ceph_conf_file_new = '%s-import'%FLAGS.ceph_conf
+            utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
+            config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new))
             config_dict = config.as_dict()
             config_content = config._parser.as_str()
             self._modify_init_nodes_from_config_to_db(context,config_dict)

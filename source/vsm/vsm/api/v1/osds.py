@@ -131,7 +131,8 @@ class Controller(wsgi.Controller):
         LOG.info('vsm/api/v1/osds.py detailed service_id:%s' % service_id)
         if service_id:
             osds = db.osd_get_by_service_id(context, service_id)
-            LOG.info('device=%s'%osds[0].device)
+            if len(osds) > 0:
+                LOG.info('device=%s'%osds[0].device)
         else:
             limit = req.GET.get('limit', None)
             marker = req.GET.get('marker', None)
