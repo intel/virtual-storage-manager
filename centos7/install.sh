@@ -382,8 +382,9 @@ EOF
 }
 
 function install_setup_diamond() {
-    kill_diamond $1
+#    kill_diamond $1
     $SSH $USER@$1 "$SUDO yum install -y diamond"
+    $SSH $USER@$1 "$SUDO chmod 755 /etc/init.d/diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     if [[ $IS_CONTROLLER -eq 0 ]]; then
         $SCP $USER@$CONTROLLER_ADDRESS:$DEPLOYRC_FILE /tmp
@@ -427,7 +428,7 @@ function install_setup_diamond() {
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = False\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = False\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO diamond"
+    "$SUDO service diamond restart"
 }
 
 function setup_remote_agent() {
