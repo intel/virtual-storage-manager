@@ -3,7 +3,7 @@ $(function(){
 
 	initCtrlCSS();
 
-	//init the dialog
+
 	atuoDetectDialog("Auto Detect",$("#divAutoDetectInfo")[0].innerHTML);
 	$("#divAutoDetectInfo").remove();
 });
@@ -51,12 +51,12 @@ function atuoDetectDialog(title,body){
 
 function openAddDetectDialog(){
 	$("#modal_wrapper").modal("show");
-	//$("#btnDialogCancel").hide();
+
 	return false;
 }
 
 function addDetect(){
-	//Check the field is should not null
+
 	if($("#txtMonitorKeyring").val() == ""){
 		showTip("error","Monitor Keyring should not be empty");
 		return  false;
@@ -67,15 +67,15 @@ function addDetect(){
 	var monitor_name = ctrlServerList.options[ctrlServerList.selectedIndex].text;
 	var keyring = $("#txtMonitorKeyring").val();
 
-	//set the value for submit
+
 	$("#selMonitorHost2")[0].selectedIndex = ctrlServerList.selectedIndex;
 	$("#txtMonitorKeyring2").val($("#txtMonitorKeyring").val());
 
 
 	var data = {
 		"monitor_id":monitor_id,
-		"monitor_name":monitor_name,
-		"keyring":keyring,
+		"monitor_host_name":monitor_name,
+		"monitor_keyring":keyring,
 	}
 
 	var postData = JSON.stringify(data);
@@ -87,14 +87,13 @@ function addDetect(){
 		dataType:"json",
 		success: function(data){
 				$("#txtCrushmap")[0].innerHTML += data.message;
-				
-				//clear the controls
+
 				ctrlServerList.selectedIndex = 0;
 				$("#txtMonitorKeyring").val("")
 				$("#modal_wrapper").modal("hide");
 				$(".messages").empty();
 
-				//show the error
+
 				if(data.status == "Failed"){
 					showTip("error",data.message);
 					return  false;
@@ -116,7 +115,7 @@ function addDetect(){
 
 
 function validate(){
-	//Check the field is should not null
+
 	if(    $("#txtCrushmap").val() == ""
 	 	|| $("#txtCephConf").val() == ""){
 		showTip("error","Configuration should not be empty");
@@ -124,8 +123,8 @@ function validate(){
 	}
 
 	var data = {
-		"crushmap":$("#txtCrushmap")[0].value,
-		"cephconf":$("#txtCephConf")[0].value,
+		"crush_map":$("#txtCrushmap")[0].value,
+		"ceph_conf":$("#txtCephConf")[0].value,
 	}
 
 	var postData = JSON.stringify(data);
@@ -164,7 +163,7 @@ function validate(){
 }
 
 function importCluster(){
-	//Check the field is should not null
+
 	if(   $("#selMonitorHost2").val() == ""
 	   || $("#txtMonitorKeyring2").val() == ""
 	   || $("#txtCrushmap")[0].value  == ""
@@ -183,8 +182,8 @@ function importCluster(){
 		"monitor_host_id":monitor_host_id,
 		"monitor_host_name":monitor_host_name,
 		"monitor_keyring":monitor_keyring,
-		"crushmap":crushmap,
-		"cephconf":cephconf,
+		"crush_map":crushmap,
+		"ceph_conf":cephconf,
 	}
 
 	var postData = JSON.stringify(data);
@@ -203,7 +202,7 @@ function importCluster(){
 					showTip("error",data.message);
 					break;
 		   	}
-		   	//window.location.href= "/dashboard/vsm/cluster-import/";
+
 		},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500)

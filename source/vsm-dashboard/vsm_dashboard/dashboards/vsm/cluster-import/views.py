@@ -100,7 +100,7 @@ def auto_detect(request):
         print ret
         print '==detect_crushmap over==='
         status = "OK"
-        msg = ret.get('crushmap')
+        msg = ret[1].get('crushmap')
     except:
         status = "Failed"
         msg = "atuo detect Failed!"
@@ -120,9 +120,9 @@ def validate_conf(request):
         print '============='
         print ret
         print '!!!!!!!!!!!'
-        if ret.get('error'):
+        if ret[1].get('error'):
             status = "Failed"
-            msg = ret.get('error')
+            msg = ret[1].get('error')
         else:
             status = "OK"
             msg = "Import Cluster Successfully!"
@@ -142,22 +142,18 @@ def import_cluster(request):
     print "=========import cluster data========"
     print body
     try:
-        code,ret = vsmapi.import_cluster(request,body=body)
+        ret = vsmapi.import_cluster(request,body=body)
         print '============='
         print ret
         print '!!!!!!!!!!!'
 
-        if ret.get('error'):
-            print 'ecept----1111-----'
+        if ret[1].get('error'):
             status = "Failed"
-            msg = ret.get('error')
-            print 'ecept----22222-----'
+            msg = ret[1].get('error')
         else:
             status = "OK"
             msg = "Import Cluster Successfully!"
     except:
-        print 'ecept---------'
-        raise
         status = "Failed"
         msg = "Import Cluster Failed!"
 

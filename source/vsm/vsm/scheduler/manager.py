@@ -1169,11 +1169,14 @@ class SchedulerManager(manager.Manager):
 
     def check_pre_existing_ceph_conf(self, context, body):
         message = {'code':[],'error':[],'info':[]}
-        ceph_conf = body.get('cluster_conf')
+        ceph_conf = body.get('ceph_conf')
         ceph_conf_file_new = '%s-check'%FLAGS.ceph_conf
         utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
         config = cephconfigparser.CephConfigParser(fp=ceph_conf_file_new)
         config_dict = config.as_dict()
+        if config_dict is None:
+            message['code'].append('-26')
+            message['error'].append('the format of ceph_conf error.')
         osd_list = []
         osd_header = {}
         mon_list = []
@@ -1232,7 +1235,9 @@ class SchedulerManager(manager.Manager):
 
     def check_pre_existing_crushmap(self, context, body):
         crushmap_str = body.get('crush_map')
-        crushmap = CrushMap(json_context=crushmap_str)
+        crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
+        utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
+        crushmap = CrushMap(json_file=crush_map_new)
         message = {'code':[],'error':[],'info':[]}
         return message
 
