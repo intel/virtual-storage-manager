@@ -343,7 +343,7 @@ function install_controller() {
                 $SUDO vsm-controller
             fi
         fi
-        if [ -e /var/cache/apt/archives/*.deb ]; then
+        if [[ `ls /var/cache/apt/archives/*.deb | wc -l` -gt 1 ]]; then
             cp /var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
         fi
         cd $REPO_PATH
