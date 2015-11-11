@@ -92,13 +92,9 @@ def auto_detect(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print "=========auto detect========"
     print body
     try:
         ret = vsmapi.detect_crushmap(request,body=body)
-        print '==detect_crushmap===='
-        print ret
-        print '==detect_crushmap over==='
         status = "OK"
         msg = ret[1].get('crushmap')
     except:
@@ -113,13 +109,9 @@ def validate_conf(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print "=========check cluster data========"
     print body
     try:
         ret = vsmapi.check_pre_existing_cluster(request,body=body)
-        print '============='
-        print ret
-        print '!!!!!!!!!!!'
         if ret[1].get('error'):
             status = "Failed"
             msg = ret[1].get('error')
@@ -139,14 +131,8 @@ def import_cluster(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print "=========import cluster data========"
-    print body
     try:
         ret = vsmapi.import_cluster(request,body=body)
-        print '============='
-        print ret
-        print '!!!!!!!!!!!'
-
         if ret[1].get('error'):
             status = "Failed"
             msg = ret[1].get('error')
