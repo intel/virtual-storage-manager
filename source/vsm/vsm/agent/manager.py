@@ -1824,7 +1824,8 @@ class AgentManager(manager.Manager):
     def import_cluster(self,context,body):
         message = {'error':'','code':'','info':''}
         try:
-            keyring = body.get('monitor_keyring')
+            keyring_file_path = body.get('monitor_keyring')
+            keyring,err = utils.execute('cat',keyring_file_path,run_as_root=True)
             crushmap = self.get_crushmap_json_format(keyring)
             self._insert_zone_from_crushmap_to_db(context,crushmap)
             self._insert_storage_group_from_crushmap_to_db(context,crushmap)
