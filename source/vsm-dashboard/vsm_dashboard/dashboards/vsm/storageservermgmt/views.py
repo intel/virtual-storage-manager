@@ -98,7 +98,7 @@ class RemoveServersView(tables.DataTableView):
     template_name = 'vsm/storageservermgmt/serversaction.html'
 
     def get_data(self):
-        return get_server_list(self.request, lambda x: x['status'] in ("Active", "999999999"))
+        return get_server_list(self.request, lambda x: x['status'] in ("Active","unavailable"))
 
 
 

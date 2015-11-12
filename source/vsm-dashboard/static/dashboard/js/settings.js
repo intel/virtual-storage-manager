@@ -45,5 +45,13 @@ $(".enable_or_disable").click(function(){
 });
 
 
+function check_text(obj){
+    if(obj.value=="0"){
+        $("#"+obj.id).next()[0].checked = true;
+    }
+    else{
+        $("#"+obj.id).next()[0].checked = false;
+    }
+}
 
 
