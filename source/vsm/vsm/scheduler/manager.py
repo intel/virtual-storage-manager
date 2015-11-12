@@ -1155,7 +1155,9 @@ class SchedulerManager(manager.Manager):
         messages = []
         #messages.append(self.check_network(context, body))
         messages.append(self.check_pre_existing_ceph_conf(context, body))
-        messages.append(self.check_pre_existing_crushmap(context, body))
+        message_crushmap = self.check_pre_existing_crushmap(context, body)
+        crush_tree_node = message_crushmap['info']
+        messages.append(message_crushmap)
         message_ret = {'code':[],'error':[],'info':[]}
         for message in messages:
             message_ret['code'] = message_ret['code']+message['code']
@@ -1163,6 +1165,7 @@ class SchedulerManager(manager.Manager):
             message_ret['info'] = message_ret['info']+message['info']
         for key,value in message_ret.iteritems():
             message_ret[key] = ','.join(value)
+        message_ret['crush_tree_node'] = crush_tree_node
         return message_ret
 
 
@@ -1245,7 +1248,16 @@ class SchedulerManager(manager.Manager):
         crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
         utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
         crushmap = CrushMap(json_file=crush_map_new)
-        message = {'code':[],'error':[],'info':[]}
+        tree_node = crushmap._show_as_tree_dict()
+        code = []
+        error = []
+        info = []
+        if type(tree_node) == str:
+            error = [tree_node]
+            code = ['-11']
+        else:
+            info = [tree_node]
+        message = {'code':code,'error':error,'info':info}
         return message
 
     def detect_crushmap(self,context,body):

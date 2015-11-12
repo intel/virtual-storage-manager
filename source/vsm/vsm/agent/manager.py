@@ -182,7 +182,7 @@ class AgentManager(manager.Manager):
                     device_dict['device_type'] = device_type
                     device_dict['mount_point'] = disk['osd']
                     device_dict['path'] = disk['osd']
-                    self._drive_num_count += 1 
+                    self._drive_num_count += 1
                     try:
                         device_ref = db.\
                             device_get_by_name_and_journal_and_service_id(\
@@ -1226,7 +1226,7 @@ class AgentManager(manager.Manager):
                         pgp_num = pg_num = max_pg_num_finally
                         self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
                     elif pg_num > max_pg_num:
-                        pgp_num = pg_num = max_pg_num 
+                        pgp_num = pg_num = max_pg_num
                         self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
                     elif pg_num > pool['pg_num']:
                         pgp_num = pg_num
@@ -1238,9 +1238,9 @@ class AgentManager(manager.Manager):
         for pool in ceph_pools:
             values = {
                 'pg_num': pool.get('pg_num'),
-                'pgp_num': pool.get('pg_placement_num') 
+                'pgp_num': pool.get('pg_placement_num')
                 }
-            db.pool_update_by_pool_id(context, pool['pool'], values) 
+            db.pool_update_by_pool_id(context, pool['pool'], values)
 
     #@require_active_host
     @periodic_task(run_immediately=True,
@@ -1299,7 +1299,7 @@ class AgentManager(manager.Manager):
             if pool.get('erasure_code_profile'):
                 values['ec_status'] = pool['erasure_code_profile']
             if values:
-                db.pool_update_by_pool_id(context, pool['pool'], values) 
+                db.pool_update_by_pool_id(context, pool['pool'], values)
 
         # If both in ceph/db. Update info in db.
         upd_pools = []
@@ -1397,7 +1397,7 @@ class AgentManager(manager.Manager):
                     LOG.info('pool %s does not exist in the existing pool list.' % pid)
 
     #@require_active_host
-    @periodic_task(run_immediately=True, service_topic=FLAGS.agent_topic, 
+    @periodic_task(run_immediately=True, service_topic=FLAGS.agent_topic,
                    spacing=_get_interval_time('ceph_status'))
     def update_mon_health(self, context):
         ceph_status = self.ceph_driver.get_ceph_status()
@@ -1963,11 +1963,6 @@ class AgentManager(manager.Manager):
         cluster_name = self.ceph_driver._get_cluster_name(init_node_ref.secondary_public_ip,keyring)
         return cluster_name
 
-    # def get_ceph_admin_keyring_from_file(self,context):
-    #     init_node_ref = db.init_node_get_by_host(context,
-    #                                  self.host)
-    #     keyring = self.ceph_driver._get_ceph_admin_keyring_from_file(init_node_ref.secondary_public_ip)
-    #     return keyring
 
     def check_pre_existing_cluster(self, context, body):
         messages = []
@@ -1989,7 +1984,7 @@ class AgentManager(manager.Manager):
 
     def check_pre_existing_ceph_conf(self, context, body):
         message = {'code':[],'error':[],'info':[]}
-        ceph_conf_path = body.get('cluster_conf',FLAGS.ceph_conf)
+        ceph_conf_path = body.get('ceph_conf',FLAGS.ceph_conf)
         config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_path))
         config_dict = config.as_dict()
         osd_list = []
@@ -2049,8 +2044,20 @@ class AgentManager(manager.Manager):
 
 
     def check_pre_existing_crushmap(self, context, body):
-        message = {'code':[],'error':[],'info':[]}
+        keyring_file_path = body.get('monitor_keyring')
+        crushmap = self.get_crushmap_json_format(keyring_file_path)
+        tree_node = crushmap._show_as_tree_dict()
+        code = []
+        error = []
+        info = []
+        if type(tree_node) == str:
+            error = [tree_node]
+            code = ['-11']
+        else:
+            info = [tree_node]
+        message = {'code':code,'error':error,'info':info}
         return message
+
 
 
 
