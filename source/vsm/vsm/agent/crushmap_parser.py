@@ -193,10 +193,47 @@ class CrushMap():
 
         return storage_groups
 
+    def _show_as_tree_dict(self):
+        buckets = self._buckets
+        tree_data = {}
+        for bucket in buckets:
+            node_id = bucket['id']
+            items = bucket['items']
+            if not tree_data.has_key(str(node_id)):
+                node_name = bucket['name']
+                node_type_id = bucket['type_id']
+                tree_node_data = {'id':node_id,'name':node_name,'type':node_type_id}
+                tree_data[str(node_id)] = tree_node_data
+            for item in items:
+                item_id = item['id']
+                if self.get_osd_by_id(item_id):
+                    item_node = self.get_osd_by_id(item_id)
+                    item_node['type_id'] = 0
+                elif self.get_bucket_by_id(item_id):
+                    item_node = self.get_bucket_by_id(item_id)
+                else:
+                    return 'No defined error in crushmap:id=%s'%item_id
+                item_node_id = item_node['id']
+                item_node_parent_id = [node_id]
+                if tree_data.has_key(str(item_node_id)):
+                    tree_data[str(item_node_id)]['parent_id'] = tree_data[str(item_node_id)].get('parent_id',[])+item_node_parent_id
+                else:
+                    item_node_name = item_node['name']
+                    item_node_type_id = item_node['type_id']
+                    item_tree_node_data = {'id':item_node_id,'name':item_node_name,'type':item_node_type_id,'parent_id':item_node_parent_id}
+                    tree_data[str(item_node_id)] = item_tree_node_data
+        return tree_data
+
+
+
+
+
 
 if __name__ == '__main__':
     crushmap = CrushMap("./crush.json")
-
+    print '-----tree_data------'
+    crushmap._show_as_tree_dict()
+    print '=========tree_data================'
     tunables = crushmap.get_all_tunables()
 
 #    for name in tunables:
