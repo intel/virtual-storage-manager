@@ -2963,7 +2963,7 @@ class DiamondDriver(object):
         for line in content:
             out, err = utils.execute('sed','-i','1i\%s'%line, config_file, run_as_root=True)
         out, err = utils.execute('sed','-i','%s,$d'%(len(content)+1), config_file, run_as_root=True)
-        out, err = utils.execute('service', 'diamond' 'restart', run_as_root=True)
+        out, err = utils.execute('service', 'diamond', 'restart', run_as_root=True)
         return out
 
 class ManagerCrushMapDriver(object):
