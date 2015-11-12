@@ -222,7 +222,8 @@ class CrushMap():
                     item_node_type_id = item_node['type_id']
                     item_tree_node_data = {'id':item_node_id,'name':item_node_name,'type':item_node_type_id,'parent_id':item_node_parent_id}
                     tree_data[str(item_node_id)] = item_tree_node_data
-        return tree_data
+
+        return tree_data.values()
 
 
 
