@@ -115,14 +115,16 @@ def validate_conf(request):
         if ret[1].get('error'):
             status = "Failed"
             msg = ret[1].get('error')
+            crushmap_tree_data = ret[1].get('crushmap_tree_data')
         else:
             status = "OK"
             msg = "Import Cluster Successfully!"
+            crushmap_tree_data = ret[1].get('crushmap_tree_data')
     except:
         status = "Failed"
         msg = "Import Cluster Failed!"
 
-    resp = dict(message=msg, status=status)
+    resp = dict(message=msg, status=status, crushmap_tree_data=crushmap_tree_data )
     resp = json.dumps(resp)
     return HttpResponse(resp)
 

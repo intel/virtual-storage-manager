@@ -1156,7 +1156,7 @@ class SchedulerManager(manager.Manager):
         #messages.append(self.check_network(context, body))
         messages.append(self.check_pre_existing_ceph_conf(context, body))
         message_crushmap = self.check_pre_existing_crushmap(context, body)
-        crush_tree_node = message_crushmap['info']
+        crushmap_tree_data = message_crushmap['info']
         messages.append(message_crushmap)
         message_ret = {'code':[],'error':[],'info':[]}
         for message in messages:
@@ -1165,7 +1165,7 @@ class SchedulerManager(manager.Manager):
             message_ret['info'] = message_ret['info']+message['info']
         for key,value in message_ret.iteritems():
             message_ret[key] = ','.join(value)
-        message_ret['crush_tree_node'] = crush_tree_node
+        message_ret['crushmap_tree_data'] = crushmap_tree_data
         return message_ret
 
 
