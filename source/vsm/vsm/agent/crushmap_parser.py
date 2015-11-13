@@ -145,7 +145,11 @@ class CrushMap():
             if op == 'take':
                 sg_count += 1
                 storage_groups.append([])
-                buckets.append(self.get_bucket_by_id(step['item']))
+                take_bucket = self.get_bucket_by_id(step['item'])
+                if take_bucket:
+                    buckets.append(take_bucket)
+                else:
+                    return "undefined error:item %s"%(str(step['item']))
 
             if op in ['choose_firstn', 'chooseleaf_firstn', 'choose_indep', 'chooseleaf_indep']:
                 type = step['type']
@@ -159,7 +163,7 @@ class CrushMap():
 
             if op == 'emit':
                 if sg_count <= 0 :
-                    raise "invalid crush map format, take and emit is not in pair"
+                    return "invalid crush map format, take and emit is not in pair"
                 for bucket in buckets:
                     devices = []
                     storage_groups[sg_count-1] = self.get_all_osds_by_bucket(bucket['id'],devices)

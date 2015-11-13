@@ -1255,14 +1255,19 @@ class SchedulerManager(manager.Manager):
         crushmap = CrushMap(json_file=crush_map_new)
         tree_node = crushmap._show_as_tree_dict()
         osd_num = len(crushmap._devices)
+        rule_check = crushmap.get_storage_groups_by_rule()
+
         code = []
         error = []
         info = []
         if type(tree_node) == str:
-            error = [tree_node]
-            code = ['-11']
+            error.append(tree_node)
+            code.append('-11')
         else:
-            info = [tree_node]
+            info.append(tree_node)
+        if type(rule_check) == str:
+            error.append(rule_check)
+            code.append('-12')
         message = {'code':code,'error':error,'info':info,'osd_num':osd_num}
         return message
 
