@@ -191,7 +191,7 @@ class CrushMap():
                               'friendly_name':rule['rule_name'],
                               'take_id':bucket_id,
                               'rule_id':rule['rule_id'],
-                              'take_index':index,
+                              'take_order':index,
                               }
                     storage_groups.append(values)
 
