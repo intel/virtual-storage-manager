@@ -182,7 +182,7 @@ class AgentManager(manager.Manager):
                     device_dict['device_type'] = device_type
                     device_dict['mount_point'] = disk['osd']
                     device_dict['path'] = disk['osd']
-                    self._drive_num_count += 1 
+                    self._drive_num_count += 1
                     try:
                         device_ref = db.\
                             device_get_by_name_and_journal_and_service_id(\
@@ -1226,7 +1226,7 @@ class AgentManager(manager.Manager):
                         pgp_num = pg_num = max_pg_num_finally
                         self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
                     elif pg_num > max_pg_num:
-                        pgp_num = pg_num = max_pg_num 
+                        pgp_num = pg_num = max_pg_num
                         self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
                     elif pg_num > pool['pg_num']:
                         pgp_num = pg_num
@@ -1238,9 +1238,9 @@ class AgentManager(manager.Manager):
         for pool in ceph_pools:
             values = {
                 'pg_num': pool.get('pg_num'),
-                'pgp_num': pool.get('pg_placement_num') 
+                'pgp_num': pool.get('pg_placement_num')
                 }
-            db.pool_update_by_pool_id(context, pool['pool'], values) 
+            db.pool_update_by_pool_id(context, pool['pool'], values)
 
     #@require_active_host
     @periodic_task(run_immediately=True,
@@ -1299,7 +1299,7 @@ class AgentManager(manager.Manager):
             if pool.get('erasure_code_profile'):
                 values['ec_status'] = pool['erasure_code_profile']
             if values:
-                db.pool_update_by_pool_id(context, pool['pool'], values) 
+                db.pool_update_by_pool_id(context, pool['pool'], values)
 
         # If both in ceph/db. Update info in db.
         upd_pools = []
@@ -1397,7 +1397,7 @@ class AgentManager(manager.Manager):
                     LOG.info('pool %s does not exist in the existing pool list.' % pid)
 
     #@require_active_host
-    @periodic_task(run_immediately=True, service_topic=FLAGS.agent_topic, 
+    @periodic_task(run_immediately=True, service_topic=FLAGS.agent_topic,
                    spacing=_get_interval_time('ceph_status'))
     def update_mon_health(self, context):
         ceph_status = self.ceph_driver.get_ceph_status()
@@ -1824,18 +1824,21 @@ class AgentManager(manager.Manager):
     def import_cluster(self,context,body):
         message = {'error':'','code':'','info':''}
         try:
-            keyring = body.get('monitor_keyring')
-            crushmap = self.get_crushmap_json_format(keyring)
+            keyring_file_path = body.get('monitor_keyring')
+
+            crushmap = self.get_crushmap_json_format(keyring_file_path)
             self._insert_zone_from_crushmap_to_db(context,crushmap)
             self._insert_storage_group_from_crushmap_to_db(context,crushmap)
-            ceph_conf_path = body.get('cluster_conf',FLAGS.ceph_conf)
-            config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_path))
+            ceph_conf = body.get('ceph_conf')
+            ceph_conf_file_new = '%s-import'%FLAGS.ceph_conf
+            utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
+            config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new))
             config_dict = config.as_dict()
             config_content = config._parser.as_str()
             self._modify_init_nodes_from_config_to_db(context,config_dict)
             self._insert_devices_from_config_to_db(context,config_dict)
             self._insert_osd_states_from_config_to_db(context,config_dict,crushmap)
-            self._insert_or_modified_clusters(context,config_content,keyring)
+            self._insert_or_modified_clusters(context,config_content,keyring_file_path)
             message['error'] = ''
             message['code'] = ''
             message['info'] = 'Success'
@@ -1851,6 +1854,8 @@ class AgentManager(manager.Manager):
         '''TODO:'''
         servers = db.init_node_get_all(context)
         osd_list = []
+        for server in servers:
+            server['data_drives_number'] = 0
         for key,value in config_dict.iteritems():
             if key.find('osd.')!=-1:
                 osd_list.append({key:value})
@@ -1859,7 +1864,7 @@ class AgentManager(manager.Manager):
                         server['data_drives_number'] = int(server['data_drives_number']) + 1
                         break
         for server in servers:
-            values = {'data_drives_number':server['data_drives_number']}
+            values = {'data_drives_number':server['data_drives_number'],'status':'Active'}
             db.init_node_update(context,server['id'],values)
 
 
@@ -1927,7 +1932,7 @@ class AgentManager(manager.Manager):
         for osd_state in osd_state_values:
             db.osd_state_update_or_create(context,osd_state)
 
-    def _insert_or_modified_clusters(self,context,content,keyring):
+    def _insert_or_modified_clusters(self,context,content,keyring_path):
         '''
 
         :param context:
@@ -1937,7 +1942,8 @@ class AgentManager(manager.Manager):
         }}
         :return:
         '''
-        cluster_name = self.get_cluster_name(context)
+        keyring,err = utils.execute('cat',keyring_path,run_as_root=True)
+        cluster_name = self.get_cluster_name(context,keyring_path)
         keyring_admin = keyring
         info_dict = {'keyring_admin': keyring_admin}
         ceph_conf = content
@@ -1954,14 +1960,9 @@ class AgentManager(manager.Manager):
     def get_cluster_name(self,context,keyring):
         init_node_ref = db.init_node_get_by_host(context,
                                              self.host)
-        cluster_name = self.ceph_driver._get_cluster_name(init_node_ref.secondary_public_ip)
+        cluster_name = self.ceph_driver._get_cluster_name(init_node_ref.secondary_public_ip,keyring)
         return cluster_name
 
-    # def get_ceph_admin_keyring_from_file(self,context):
-    #     init_node_ref = db.init_node_get_by_host(context,
-    #                                  self.host)
-    #     keyring = self.ceph_driver._get_ceph_admin_keyring_from_file(init_node_ref.secondary_public_ip)
-    #     return keyring
 
     def check_pre_existing_cluster(self, context, body):
         messages = []
@@ -1983,7 +1984,9 @@ class AgentManager(manager.Manager):
 
     def check_pre_existing_ceph_conf(self, context, body):
         message = {'code':[],'error':[],'info':[]}
-        ceph_conf_path = body.get('cluster_conf',FLAGS.ceph_conf)
+        ceph_conf = body.get('ceph_conf')
+        ceph_conf_path = '%s-check'%FLAGS.ceph_conf
+        utils.write_file_as_root(ceph_conf_path, ceph_conf, 'w')
         config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_path))
         config_dict = config.as_dict()
         osd_list = []
@@ -2043,8 +2046,18 @@ class AgentManager(manager.Manager):
 
 
     def check_pre_existing_crushmap(self, context, body):
-        message = {'code':[],'error':[],'info':[]}
+        keyring_file_path = body.get('monitor_keyring')
+        crushmap = self.get_crushmap_json_format(keyring_file_path)
+        tree_node = crushmap._show_as_tree_dict()
+        code = []
+        error = []
+        info = []
+        if type(tree_node) == str:
+            error = [tree_node]
+            code = ['-11']
+        message = {'code':code,'error':error,'info':info,'tree_data':tree_node}
         return message
+
 
 
 

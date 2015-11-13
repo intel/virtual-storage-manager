@@ -412,7 +412,8 @@ class StorageGroup(BASE, VsmBase):
     rule_id = Column(Integer, nullable=False)
     drive_extended_threshold = Column(Integer, default=0, nullable=False)
     status = Column(String(length=255), default="OUT", nullable=False)
-
+    take_id = Column(Integer, nullable=True)
+    take_order = Column(Integer, nullable=True)
 class Zone(BASE, VsmBase):
     """This table store the zones"""
 

@@ -1153,27 +1153,37 @@ class SchedulerManager(manager.Manager):
 
     def check_pre_existing_cluster(self, context, body):
         messages = []
-        #messages.append(self.check_network(context, body))
-        messages.append(self.check_pre_existing_ceph_conf(context, body))
-        messages.append(self.check_pre_existing_crushmap(context, body))
         message_ret = {'code':[],'error':[],'info':[]}
+        #messages.append(self.check_network(context, body))
+        message_cephconf = self.check_pre_existing_ceph_conf(context, body)
+        messages.append(message_cephconf)
+        message_crushmap = self.check_pre_existing_crushmap(context, body)
+        crushmap_tree_data = message_crushmap['tree_data']
+        messages.append(message_crushmap)
+        if message_cephconf['osd_num'] != message_crushmap['osd_num']:
+            message_ret['code'].append('-1')
+            message_ret['error'].append('osd quantity is not consistent between ceph conf and crush map.')
         for message in messages:
             message_ret['code'] = message_ret['code']+message['code']
             message_ret['error'] = message_ret['error']+message['error']
             message_ret['info'] = message_ret['info']+message['info']
         for key,value in message_ret.iteritems():
             message_ret[key] = ','.join(value)
+        message_ret['crushmap_tree_data'] = crushmap_tree_data
         return message_ret
 
 
 
     def check_pre_existing_ceph_conf(self, context, body):
         message = {'code':[],'error':[],'info':[]}
-        ceph_conf = body.get('cluster_conf')
+        ceph_conf = body.get('ceph_conf')
         ceph_conf_file_new = '%s-check'%FLAGS.ceph_conf
         utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
         config = cephconfigparser.CephConfigParser(fp=ceph_conf_file_new)
         config_dict = config.as_dict()
+        if config_dict is None:
+            message['code'].append('-26')
+            message['error'].append('the format of ceph_conf error.')
         osd_list = []
         osd_header = {}
         mon_list = []
@@ -1227,20 +1237,47 @@ class SchedulerManager(manager.Manager):
             if len(fields_missing) > 0:
                 message['code'].append('-25')
                 message['error'].append('missing field %s for %s in ceph configration file.'%(fields_missing,mon_name))
+        message['osd_num'] = len(osd_list)
         return message
 
 
     def check_pre_existing_crushmap(self, context, body):
+        '''
+
+        :param context:
+        :param body:
+        {u'ceph_conf': u'****', u'crush_map': u'****'}
+        :return:
+        '''
         crushmap_str = body.get('crush_map')
-        crushmap = CrushMap(json_context=crushmap_str)
-        message = {'code':[],'error':[],'info':[]}
+        crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
+        utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
+        crushmap = CrushMap(json_file=crush_map_new)
+        tree_node = crushmap._show_as_tree_dict()
+        osd_num = len(crushmap._devices)
+        rule_check = []
+        for rule in crushmap._rules:
+            rule_check_ret = crushmap.get_storage_groups_by_rule(rule)
+            if type(rule_check) == str:
+              rule_check.append(rule_check_ret)
+
+        code = []
+        error = []
+        info = []
+        if type(tree_node) == str:
+            error.append(tree_node)
+            code.append('-11')
+        if rule_check:
+            error = error + rule_check
+            code.append('-12')
+        message = {'code':code,'error':error,'info':info,'osd_num':osd_num,'tree_data':tree_node}
         return message
 
     def detect_crushmap(self,context,body):
         '''
         :param context:
         :param body:
-        {u'cluster_conf': u'/etc/ceph/ceph.conf', u'monitor_host_name': u'centos-storage1', u'monitor_host_id': u'1', u'monitor_keyring': u'******'}
+        { u'monitor_host_name': u'centos-storage1', u'monitor_id': u'1', u'monitor_keyring': u'******'}
         :return:
         '''
         monitor_pitched_host = body.get('monitor_host_name')
@@ -1261,7 +1298,7 @@ class SchedulerManager(manager.Manager):
         '''
         :param context:
         :param body:
-        {u'cluster_conf': u'/etc/ceph/ceph.conf', u'monitor_host_name': u'centos-storage1', u'monitor_host_id': u'1', u'monitor_keyring': u'/etc/keying'}
+        {u'ceph_conf': u'****', u'monitor_host_name': u'centos-storage1', u'monitor_id': u'1', u'monitor_keyring': u'******'}
         :return:
         '''
         monitor_pitched_host = body.get('monitor_host_name')
