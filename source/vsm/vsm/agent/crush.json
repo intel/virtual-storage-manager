@@ -400,7 +400,7 @@
           "min_size": 0,
           "max_size": 10,
           "steps": [
-                { "op": "take",;
+                { "op": "take",
                   "item": -13,
                   "item_name": "performance"},
                 { "op": "chooseleaf_firstn",

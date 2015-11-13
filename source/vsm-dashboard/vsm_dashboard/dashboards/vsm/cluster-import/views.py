@@ -92,11 +92,11 @@ def auto_detect(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print "=========auto detect========"
     print body
     try:
+        ret = vsmapi.detect_crushmap(request,body=body)
         status = "OK"
-        msg = "atuo detect Successfully!"
+        msg = ret[1].get('crushmap')
     except:
         status = "Failed"
         msg = "atuo detect Failed!"
@@ -109,24 +109,22 @@ def validate_conf(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print "=========check cluster data========"
     print body
     try:
         ret = vsmapi.check_pre_existing_cluster(request,body=body)
-        print '============='
-        print ret
-        print '!!!!!!!!!!!'
-        if ret.get('error'):
+        if ret[1].get('error'):
             status = "Failed"
-            msg = ret.get('error')
+            msg = ret[1].get('error')
+            crushmap_tree_data = ret[1].get('crushmap_tree_data')
         else:
             status = "OK"
             msg = "Import Cluster Successfully!"
+            crushmap_tree_data = ret[1].get('crushmap_tree_data')
     except:
         status = "Failed"
         msg = "Import Cluster Failed!"
 
-    resp = dict(message=msg, status=status)
+    resp = dict(message=msg, status=status, crushmap_tree_data=crushmap_tree_data )
     resp = json.dumps(resp)
     return HttpResponse(resp)
 
@@ -135,25 +133,15 @@ def import_cluster(request):
     status = ""
     msg = ""
     body = json.loads(request.body)
-    print "=========import cluster data========"
-    print body
     try:
-        code,ret = vsmapi.import_cluster(request,body=body)
-        print '============='
-        print ret
-        print '!!!!!!!!!!!'
-
-        if ret.get('error'):
-            print 'ecept----1111-----'
+        ret = vsmapi.import_cluster(request,body=body)
+        if ret[1].get('error'):
             status = "Failed"
-            msg = ret.get('error')
-            print 'ecept----22222-----'
+            msg = ret[1].get('error')
         else:
             status = "OK"
             msg = "Import Cluster Successfully!"
     except:
-        print 'ecept---------'
-        raise
         status = "Failed"
         msg = "Import Cluster Failed!"
 
