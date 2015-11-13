@@ -43,6 +43,7 @@ from vsm.conductor import rpcapi as conductor_rpcapi
 from vsm.agent import rpcapi as agent_rpc
 from vsm.conductor import api as conductor_api
 from vsm.agent import cephconfigparser
+from vsm.agent.crushmap_parser import CrushMap
 from vsm.exception import *
 
 LOG = logging.getLogger(__name__)
@@ -1121,6 +1122,7 @@ class SchedulerManager(manager.Manager):
         :param server_list:
         :return:
         """
+
         LOG.info('integrate cluster by syncing OSDs and refreshing status')
         server_list = db.init_node_get_all(context)
         for srv in server_list:
@@ -1128,6 +1130,157 @@ class SchedulerManager(manager.Manager):
         active_server = self._set_active_server(context)
         #TODO db.update_mount_points()
         return self._agent_rpcapi.integrate_cluster_update_status(context, active_server['host'])
+    #
+    # def check_pre_existing_cluster(self,context,body):
+    #     '''
+    #     :param context:
+    #     :param body:
+    #     {u'cluster_conf': u'/etc/ceph/ceph.conf', u'monitor_host_name': u'centos-storage1', u'monitor_host_id': u'1', u'monitor_keyring': u'/etc/keying'}
+    #     :return:
+    #     '''
+    #     monitor_pitched_host = body.get('monitor_host_name')
+    #     message = {}
+    #     try:
+    #         message = self._agent_rpcapi.check_pre_existing_cluster(context, body, monitor_pitched_host)
+    #     except rpc_exc.Timeout:
+    #         LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
+    #     except rpc_exc.RemoteError:
+    #         LOG.error('ERROR: check_pre_existing_cluster rpc remote')
+    #     except:
+    #         LOG.error('ERROR: check_pre_existing_cluster')
+    #         raise
+    #     return message
+
+    def check_pre_existing_cluster(self, context, body):
+        messages = []
+        #messages.append(self.check_network(context, body))
+        messages.append(self.check_pre_existing_ceph_conf(context, body))
+        messages.append(self.check_pre_existing_crushmap(context, body))
+        message_ret = {'code':[],'error':[],'info':[]}
+        for message in messages:
+            message_ret['code'] = message_ret['code']+message['code']
+            message_ret['error'] = message_ret['error']+message['error']
+            message_ret['info'] = message_ret['info']+message['info']
+        for key,value in message_ret.iteritems():
+            message_ret[key] = ','.join(value)
+        return message_ret
+
+
+
+    def check_pre_existing_ceph_conf(self, context, body):
+        message = {'code':[],'error':[],'info':[]}
+        ceph_conf = body.get('cluster_conf')
+        ceph_conf_file_new = '%s-check'%FLAGS.ceph_conf
+        utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
+        config = cephconfigparser.CephConfigParser(fp=ceph_conf_file_new)
+        config_dict = config.as_dict()
+        osd_list = []
+        osd_header = {}
+        mon_list = []
+        mds_list = []
+        mds_header = {}
+        mon_header = {}
+        global_header = {}
+        for key,value in config_dict.iteritems():
+            if key.find('osd.')!=-1:
+                osd_list.append({key:value})
+            elif key.find('osd')!=-1:
+                osd_header = value
+            elif key.find('mon.')!=-1:
+                mon_list.append({key:value})
+            elif key.find('mon')!=-1:
+                mon_header = value
+            elif key.find('mds.')!=-1:
+                mds_list.append({key:value})
+            elif key.find('mds')!=-1:
+                mds_header = value
+            elif key.find('global')!=-1:
+                global_header = value
+        if not global_header:
+            message['code'].append('-21')
+            message['error'].append('missing global section in ceph configration file.')
+        else:
+            pass
+        if not mon_header:
+            message['code'].append('-22')
+            message['error'].append('missing mon header section in ceph configration file.')
+        else:
+            pass
+        if not osd_header:
+            message['code'].append('-23')
+            message['error'].append('missing osd header section in ceph configration file.')
+        else:
+            pass
+
+        osd_fields = ['devs','host','cluster addr','public addr','osd journal']
+        for osd in osd_list:
+            osd_name = osd.keys()[0]
+            fields_missing = set(osd_fields) - set(osd[osd_name].keys())
+            if len(fields_missing) > 0:
+                message['code'].append('-24')
+                message['error'].append('missing field %s for %s in ceph configration file.'%(fields_missing,osd_name))
+
+        mon_fields = ['host','mon addr']
+        for mon in mon_list:
+            mon_name = mon.keys()[0]
+            fields_missing = set(mon_fields) - set(mon[mon_name].keys())
+            if len(fields_missing) > 0:
+                message['code'].append('-25')
+                message['error'].append('missing field %s for %s in ceph configration file.'%(fields_missing,mon_name))
+        return message
+
+
+    def check_pre_existing_crushmap(self, context, body):
+        crushmap_str = body.get('crush_map')
+        crushmap = CrushMap(json_context=crushmap_str)
+        message = {'code':[],'error':[],'info':[]}
+        return message
+
+    def detect_crushmap(self,context,body):
+        '''
+        :param context:
+        :param body:
+        {u'cluster_conf': u'/etc/ceph/ceph.conf', u'monitor_host_name': u'centos-storage1', u'monitor_host_id': u'1', u'monitor_keyring': u'******'}
+        :return:
+        '''
+        monitor_pitched_host = body.get('monitor_host_name')
+        monitor_keyring = body.get('monitor_keyring')
+        message = {}
+        try:
+            message = self._agent_rpcapi.detect_crushmap(context, monitor_keyring, monitor_pitched_host)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: check_pre_existing_cluster rpc remote')
+        except:
+            LOG.error('ERROR: check_pre_existing_cluster')
+            raise
+        return message
+
+    def import_cluster(self,context,body):
+        '''
+        :param context:
+        :param body:
+        {u'cluster_conf': u'/etc/ceph/ceph.conf', u'monitor_host_name': u'centos-storage1', u'monitor_host_id': u'1', u'monitor_keyring': u'/etc/keying'}
+        :return:
+        '''
+        monitor_pitched_host = body.get('monitor_host_name')
+        message = {}
+        try:
+            message = self._agent_rpcapi.check_pre_existing_cluster(context, body, monitor_pitched_host)
+            LOG.info('check----result----%s'%message)
+            if message.get('error'):
+                return message
+            else:
+                message = self._agent_rpcapi.import_cluster(context, body, monitor_pitched_host)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: check_pre_existing_cluster rpc remote')
+        except:
+            LOG.error('ERROR: check_pre_existing_cluster')
+            raise
+        return message
 
     @utils.single_lock
     def create_cluster(self, context, server_list):
@@ -1601,3 +1754,4 @@ class SchedulerManager(manager.Manager):
         for server in servers:
             if server['status'] == 'Active':
                 self._agent_rpcapi.reconfig_diamond(context, body, server['host'])
+
