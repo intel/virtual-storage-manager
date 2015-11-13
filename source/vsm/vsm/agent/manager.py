@@ -1984,7 +1984,9 @@ class AgentManager(manager.Manager):
 
     def check_pre_existing_ceph_conf(self, context, body):
         message = {'code':[],'error':[],'info':[]}
-        ceph_conf_path = body.get('ceph_conf',FLAGS.ceph_conf)
+        ceph_conf = body.get('ceph_conf')
+        ceph_conf_path = '%s-check'%FLAGS.ceph_conf
+        utils.write_file_as_root(ceph_conf_path, ceph_conf, 'w')
         config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_path))
         config_dict = config.as_dict()
         osd_list = []
@@ -2053,9 +2055,7 @@ class AgentManager(manager.Manager):
         if type(tree_node) == str:
             error = [tree_node]
             code = ['-11']
-        else:
-            info = [tree_node]
-        message = {'code':code,'error':error,'info':info}
+        message = {'code':code,'error':error,'info':info,'tree_data':tree_node}
         return message
 
 

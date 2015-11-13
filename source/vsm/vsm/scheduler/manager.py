@@ -1158,7 +1158,7 @@ class SchedulerManager(manager.Manager):
         message_cephconf = self.check_pre_existing_ceph_conf(context, body)
         messages.append(message_cephconf)
         message_crushmap = self.check_pre_existing_crushmap(context, body)
-        crushmap_tree_data = message_crushmap['info']
+        crushmap_tree_data = message_crushmap['tree_data']
         messages.append(message_crushmap)
         if message_cephconf['osd_num'] != message_crushmap['osd_num']:
             message_ret['code'].append('-1')
@@ -1255,7 +1255,11 @@ class SchedulerManager(manager.Manager):
         crushmap = CrushMap(json_file=crush_map_new)
         tree_node = crushmap._show_as_tree_dict()
         osd_num = len(crushmap._devices)
-        rule_check = crushmap.get_storage_groups_by_rule()
+        rule_check = []
+        for rule in crushmap._rules:
+            rule_check_ret = crushmap.get_storage_groups_by_rule(rule)
+            if type(rule_check) == str:
+              rule_check.append(rule_check_ret)
 
         code = []
         error = []
@@ -1263,12 +1267,10 @@ class SchedulerManager(manager.Manager):
         if type(tree_node) == str:
             error.append(tree_node)
             code.append('-11')
-        else:
-            info.append(tree_node)
-        if type(rule_check) == str:
-            error.append(rule_check)
+        if rule_check:
+            error = error + rule_check
             code.append('-12')
-        message = {'code':code,'error':error,'info':info,'osd_num':osd_num}
+        message = {'code':code,'error':error,'info':info,'osd_num':osd_num,'tree_data':tree_node}
         return message
 
     def detect_crushmap(self,context,body):
