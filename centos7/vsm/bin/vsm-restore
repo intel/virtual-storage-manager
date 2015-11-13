@@ -24,6 +24,7 @@ if [[ ! -e /opt/backup-vsm.tar.gz ]]; then
     exit 0
 fi
 
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:$PATH
 TEMP=`mktemp`; rm -rf $TEMP; mkdir -p /opt/$TEMP
 cd /opt/$TEMP
 mkdir -p /etc/manifest
