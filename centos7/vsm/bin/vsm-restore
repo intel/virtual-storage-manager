@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+set -e
+
+if [[ ! -e /opt/backup-vsm.tar.gz ]]; then
+    echo "Can not find backup-vsm.tar.gz."
+    echo "Make sure you put it on path:"
+    echo "/opt/backup-vsm.tar.gz"
+    exit 0
+fi
+
+TEMP=`mktemp`; rm -rf $TEMP; mkdir -p /opt/$TEMP
+cd /opt/$TEMP
+mkdir -p /etc/manifest
+tar zxf /opt/backup-vsm.tar.gz
+cd backup-vsm
+cp -rf deployrc /etc/vsmdeploy/deployrc
+cp -rf *.manifest /etc/manifest/
+
+cd /root/
+vsm-controller -f /etc/vsmdeploy/deployrc
+
+cd /opt/$TEMP/backup-vsm/
+service vsm-api stop
+service vsm-conductor stop
+service vsm-scheduler stop
+service httpd stop
+mysql -uroot -p`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'` < ./vsm.sql
+
+cd /root/
+service mariadb start
+service rabbitmq-server start
+service vsm-api start
+service vsm-conductor start
+service vsm-scheduler start
+service httpd start
+
+rm -rf /opt/$TEMP
+echo "----------------------------------------"
+echo "Restore over, you may use VSM again."
+echo "----------------------------------------"
