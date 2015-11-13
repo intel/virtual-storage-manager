@@ -1153,12 +1153,16 @@ class SchedulerManager(manager.Manager):
 
     def check_pre_existing_cluster(self, context, body):
         messages = []
+        message_ret = {'code':[],'error':[],'info':[]}
         #messages.append(self.check_network(context, body))
-        messages.append(self.check_pre_existing_ceph_conf(context, body))
+        message_cephconf = self.check_pre_existing_ceph_conf(context, body)
+        messages.append(message_cephconf)
         message_crushmap = self.check_pre_existing_crushmap(context, body)
         crushmap_tree_data = message_crushmap['info']
         messages.append(message_crushmap)
-        message_ret = {'code':[],'error':[],'info':[]}
+        if message_cephconf['osd_num'] != message_crushmap['osd_num']:
+            message_ret['code'].append('-1')
+            message_ret['error'].append('osd quantity is not consistent between ceph conf and crush map.')
         for message in messages:
             message_ret['code'] = message_ret['code']+message['code']
             message_ret['error'] = message_ret['error']+message['error']
@@ -1233,6 +1237,7 @@ class SchedulerManager(manager.Manager):
             if len(fields_missing) > 0:
                 message['code'].append('-25')
                 message['error'].append('missing field %s for %s in ceph configration file.'%(fields_missing,mon_name))
+        message['osd_num'] = len(osd_list)
         return message
 
 
@@ -1249,6 +1254,7 @@ class SchedulerManager(manager.Manager):
         utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
         crushmap = CrushMap(json_file=crush_map_new)
         tree_node = crushmap._show_as_tree_dict()
+        osd_num = len(crushmap._devices)
         code = []
         error = []
         info = []
@@ -1257,7 +1263,7 @@ class SchedulerManager(manager.Manager):
             code = ['-11']
         else:
             info = [tree_node]
-        message = {'code':code,'error':error,'info':info}
+        message = {'code':code,'error':error,'info':info,'osd_num':osd_num}
         return message
 
     def detect_crushmap(self,context,body):
