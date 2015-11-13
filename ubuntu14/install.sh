@@ -343,7 +343,7 @@ function install_controller() {
                 $SUDO vsm-controller
             fi
         fi
-        if [ -e /var/cache/apt/archives/*.deb ]; then
+        if [[ `ls /var/cache/apt/archives/*.deb | wc -l` -gt 1 ]]; then
             cp /var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
         fi
         cd $REPO_PATH
@@ -374,7 +374,7 @@ EOF
 }
 
 function install_setup_diamond() {
-    kill_diamond $1
+#    kill_diamond $1
     $SSH $USER@$1 "$SUDO apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     if [[ $IS_CONTROLLER -eq 0 ]]; then
@@ -419,7 +419,7 @@ function install_setup_diamond() {
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/i\[\[NetworkCollector\]\]\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/ienabled = False\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"/\[\[CPUCollector\]\]/aenabled = False\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO diamond"
+    "$SUDO service diamond restart"
 }
 
 function setup_remote_agent() {

@@ -2865,12 +2865,12 @@ class DiamondDriver(object):
         }
         :return:
         '''
-        try:
-            out, err = utils.execute('kill_diamond',
-                                     'll',
-                                     run_as_root=True)
-        except:
-            LOG.info("kill_diamond error:%s--%s"%(out,err))
+        # try:
+        #     out, err = utils.execute('kill_diamond',
+        #                              'll',
+        #                              run_as_root=True)
+        # except:
+        #     LOG.info("kill_diamond error:%s--%s"%(out,err))
         config_file = '%s%s.conf'%(self._diamond_config_path,collector)
         keys = values.keys()
         content = []
@@ -2882,7 +2882,7 @@ class DiamondDriver(object):
         for line in content:
             out, err = utils.execute('sed','-i','1i\%s'%line, config_file, run_as_root=True)
         out, err = utils.execute('sed','-i','%s,$d'%(len(content)+1), config_file, run_as_root=True)
-        out, err = utils.execute('diamond', 'll', run_as_root=True)
+        out, err = utils.execute('service', 'diamond', 'restart', run_as_root=True)
         return out
 
 
