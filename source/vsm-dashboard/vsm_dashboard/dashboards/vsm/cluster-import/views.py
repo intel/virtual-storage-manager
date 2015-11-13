@@ -2,6 +2,7 @@ import logging
 import os
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse
 
 from horizon import exceptions
 from horizon import tables
@@ -12,6 +13,7 @@ from vsm_dashboard.api import vsm as vsmapi
 from .tables import ListServerTable
 from .form import ImportCluster
 from django.http import HttpResponse
+
 
 
 import json
@@ -61,10 +63,72 @@ class IndexView(tables.DataTableView):
             servers.append(server)
         return servers
 
-class ImportClusterView(forms.ModalFormView):
-    form_class = ImportCluster
+class ImportClusterView(views.APIView):
+    #form_class = ImportCluster
     template_name = 'vsm/cluster-import/import_cluster.html'
-    success_url = reverse_lazy('horizon:vsm:poolsmanagement:index')
+
+    def get_data(self, request, context, *args, **kwargs):
+        context["monitor_host"] = get_monitor_host(request)
+        return  context
+
+def get_monitor_host(request):
+    monitor_list = []
+    try:
+        #get the serverlist
+        _servers = vsmapi.get_server_list(request,)
+        for _server in _servers:
+            if "monitor" in _server.type:
+                server_item = {
+                    "id":_server.id,
+                    "host":_server.host
+                }
+                monitor_list.append(server_item)
+    except:
+        pass
+    return monitor_list
+
+
+def auto_detect(request):
+    status = ""
+    msg = ""
+    body = json.loads(request.body)
+    print "=========auto detect========"
+    print body
+    try:
+        status = "OK"
+        msg = "atuo detect Successfully!"
+    except:
+        status = "Failed"
+        msg = "atuo detect Failed!"
+
+    resp = dict(message=msg, status=status)
+    resp = json.dumps(resp)
+    return HttpResponse(resp)
+
+def validate_conf(request):
+    status = ""
+    msg = ""
+    body = json.loads(request.body)
+    print "=========check cluster data========"
+    print body
+    try:
+        ret = vsmapi.check_pre_existing_cluster(request,body=body)
+        print '============='
+        print ret
+        print '!!!!!!!!!!!'
+        if ret.get('error'):
+            status = "Failed"
+            msg = ret.get('error')
+        else:
+            status = "OK"
+            msg = "Import Cluster Successfully!"
+    except:
+        status = "Failed"
+        msg = "Import Cluster Failed!"
+
+    resp = dict(message=msg, status=status)
+    resp = json.dumps(resp)
+    return HttpResponse(resp)
 
 
 def import_cluster(request):
@@ -74,7 +138,6 @@ def import_cluster(request):
     print "=========import cluster data========"
     print body
     try:
-<<<<<<< HEAD
         code,ret = vsmapi.import_cluster(request,body=body)
         print '============='
         print ret
@@ -96,35 +159,5 @@ def import_cluster(request):
 
     resp = dict(message=msg, status=status)
     print resp
-    resp = json.dumps(resp)
-    return HttpResponse(resp)
-
-def check_cluster_tobe_import(request):
-    status = ""
-    msg = ""
-    body = json.loads(request.body)
-    print "=========check cluster data========"
-    print body
-    try:
-        ret = vsmapi.check_pre_existing_cluster(request,body=body)
-        print '============='
-        print ret
-        print '!!!!!!!!!!!'
-        if ret.get('error'):
-            status = "Failed"
-            msg = ret.get('error')
-        else:
-            status = "OK"
-            msg = "Import Cluster Successfully!"
-=======
-        #ret = vsmapi.add_cache_tier(request,body=body)
-        status = "OK"
-        msg = "Import Cluster Successfully!"
->>>>>>> 308e6e1b30f56636211c70add3c002e16f34d6c1
-    except:
-        status = "Failed"
-        msg = "Import Cluster Failed!"
-
-    resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
     return HttpResponse(resp)
