@@ -903,9 +903,9 @@ class CephDriver(object):
         # step 7 start osd service
         LOG.info('>>> step7 start')
         self.start_osd_daemon(context, osd_id)
-        utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_id, weight,
-          "host=%s" % crush_dict['host'],
-         run_as_root=True)
+        # utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_id, weight,
+        #   "host=%s" % crush_dict['host'],
+        #  run_as_root=True)
 
         self._conductor_api.osd_state_create(context, osd_state)
         LOG.info('>>> step7 finish')
@@ -1412,9 +1412,9 @@ class CephDriver(object):
             osd = db.get_zone_hostname_storagegroup_by_osd_id(context, osd_id)[0]
             osd_name = osd['osd_name'].split('.')[-1]
             self.start_osd_daemon(context, osd_name)
-            utils.execute("ceph", "osd", "crush", "create-or-move", osd['osd_name'], osd['weight'],
-                "host=%s_%s_%s" %(osd['service']['host'],osd['storage_group']['name'],osd['zone']['name']) ,
-                run_as_root=True)
+            # utils.execute("ceph", "osd", "crush", "create-or-move", osd['osd_name'], osd['weight'],
+            #     "host=%s_%s_%s" %(osd['service']['host'],osd['storage_group']['name'],osd['zone']['name']) ,
+            #     run_as_root=True)
             values = {'state': FLAGS.osd_in_up, 'osd_name': osd['osd_name']}
             self._conductor_rpcapi.osd_state_update_or_create(context,
                                                               values)
@@ -1863,9 +1863,9 @@ class CephDriver(object):
         utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
         self.ceph_osd_start(context, osd['osd_name'])
         time.sleep(10)
-        utils.execute("ceph", "osd", "crush", "create-or-move", osd['osd_name'], osd['weight'],
-          "host=%s_%s_%s" %(osd['service']['host'],osd['storage_group']['name'],osd['zone']['name']) ,
-         run_as_root=True)
+        # utils.execute("ceph", "osd", "crush", "create-or-move", osd['osd_name'], osd['weight'],
+        #   "host=%s_%s_%s" %(osd['service']['host'],osd['storage_group']['name'],osd['zone']['name']) ,
+        #  run_as_root=True)
         return True
 
     def osd_restore(self, context, osd_id):
@@ -1961,9 +1961,9 @@ class CephDriver(object):
         #step2
         utils.execute('ceph', 'osd', 'in', osd_name, run_as_root=True)
         time.sleep(10)
-        utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_inner_id, weight,
-          "host=%s" % crush_dict['host'],
-         run_as_root=True)
+        # utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_inner_id, weight,
+        #   "host=%s" % crush_dict['host'],
+        #  run_as_root=True)
         #update db
         value = {}
         value['id'] = osd_id
