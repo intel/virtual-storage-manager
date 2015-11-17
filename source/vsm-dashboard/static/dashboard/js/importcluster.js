@@ -1,3 +1,54 @@
+
+function getFont(treeId, node) {
+	return node.font ? node.font : {};
+}
+
+function onClickEvent(event, treeId, treeNode, clickFlag) {
+	// console.log(event);
+	// console.log(treeId);
+	// console.log(treeNode);
+	// console.log(clickFlag)
+	// crushmapdata(treeNode.type);
+	console.log(treeNode.type);
+
+
+	// var ctrlNote = $("#divNote")[0];
+	// switch(treeNode.type){
+	// 	case 0:
+	// 		ctrlNote.innerHTML = "Controller";
+	// 		break;
+	// 	case 1:
+	// 		ctrlNote.innerHTML = "Server";
+	// 		break;
+	// 	case 2:
+	// 		ctrlNote.innerHTML = "Host";
+	// 		break;
+	// 	case 3:
+	// 		ctrlNote.innerHTML = "OSD";
+	// 		break;
+	// }
+}
+
+var CRUSHMAP = "";
+
+var setting = {
+	view: {
+		showLine: true,
+		fontCss: getFont,
+		nameIsHTML: true
+	},
+	data: {
+		simpleData: {
+			enable: true
+		}
+	},
+	callback: {
+		//beforeClick: beforeClick,
+		onClick: onClickEvent
+	}
+};
+
+
 $(function(){
 	console.log("Import Cluster Ready");
 
@@ -142,6 +193,9 @@ function validate(){
 						$("#divMonitorHost2").show();
 						$("#divtxtMonitorKeyring2").show();
 						showTip("success",data.message);
+
+                        //Create the crushmap
+						loadTree(data.crushmap);
 						break;
 					case "Failed":
 						showTip("error",data.message);
@@ -215,3 +269,11 @@ function importCluster(){
 		}
     });
 }
+
+
+function loadTree(data){
+	CRUSHMAP = $.fn.zTree.init($("#divCrushmapTree"), setting, data);
+	CRUSHMAP.expandAll(true);
+}
+
+

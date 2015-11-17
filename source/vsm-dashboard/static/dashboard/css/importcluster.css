@@ -15,3 +15,17 @@
 .control-group{
 	margin-top: 10px;
 }
+
+
+#divCrushmap{
+	width: auto;
+	height: auto;
+	overflow: hidden;
+}
+
+.crushmap-tree{
+	width: 400px;
+	height: 600px;
+	overflow: auto;
+	float: left;
+}
