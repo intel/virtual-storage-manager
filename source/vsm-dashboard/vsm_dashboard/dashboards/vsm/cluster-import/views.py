@@ -128,7 +128,7 @@ def validate_conf(request):
         status = "Failed"
         msg = "Import Cluster Failed!"
 
-    resp = dict(message=msg, status=status,,crushmap=crushmap, crushmap_tree_data=crushmap_tree_data )
+    resp = dict(message=msg, status=status,crushmap=crushmap, crushmap_tree_data=crushmap_tree_data )
     resp = json.dumps(resp)
     return HttpResponse(resp)
 
