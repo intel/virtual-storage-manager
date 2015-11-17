@@ -213,16 +213,12 @@ class CrushMap():
     def _get_location_by_osd_name(self,osd_name):
         parent_bucket = {}
         osds = self._devices
-        print "osds====%s"%osds
         buckets = self._buckets
         osd_id = [osd['id'] for osd in osds if osd['name'] == osd_name]
         osd_id = osd_id[0]
-        print '111--osd_id-%s-'%osd_id
         for bucket in buckets:
             for item in bucket['items']:
-                print 'check--item---%s'%item
                 if int(item['id']) == int(osd_id):
-                    print 'hit-------------'
                     parent_bucket['name'] = bucket['name']
                     parent_bucket['type_name'] = bucket['type_name']
                     break
