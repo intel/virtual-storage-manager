@@ -197,6 +197,33 @@ class CrushMap():
 
         return storage_groups
 
+    def _get_location_by_osd_name_list(self,osd_name_list):
+        parent_bucket = []
+        osds = self._devices
+        buckets = self._buckets
+        for osd_name in osd_name_list:
+            osd_id = [osd['id'] for osd in osds if osd['name'] == osd_name]
+            for bucket in buckets:
+                for item in bucket['items']:
+                    if item['id'] == osd_id:
+                        parent_bucket.append(bucket['id'])
+        return list(set(parent_bucket))
+
+
+    def _get_location_by_osd_name(self,osd_name):
+        parent_bucket = {}
+        osds = self._devices
+        buckets = self._buckets
+        osd_id = [osd['id'] for osd in osds if osd['name'] == osd_name]
+        for bucket in buckets:
+            for item in bucket['items']:
+                if item['id'] == osd_id:
+                    parent_bucket['name'] = bucket['name']
+                    parent_bucket['type_name'] = bucket['type_name']
+                    break
+        return parent_bucket
+
+
     def _show_as_tree_dict(self):
         buckets = self._buckets
         tree_data = {}

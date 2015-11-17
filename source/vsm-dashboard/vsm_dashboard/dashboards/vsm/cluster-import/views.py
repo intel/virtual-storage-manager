@@ -99,7 +99,7 @@ def auto_detect(request):
         msg = ret[1].get('crushmap')
     except:
         status = "Failed"
-        msg = "atuo detect Failed!"
+        msg = "Auto detect crush map Failed!"
 
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
@@ -115,20 +115,16 @@ def validate_conf(request):
         if ret[1].get('error'):
             status = "Failed"
             msg = ret[1].get('error')
-            #get the crushmap
-            crushmap = get_crushmap_series()
             crushmap_tree_data = ret[1].get('crushmap_tree_data')
         else:
             status = "OK"
-            msg = "Import Cluster Successfully!"
-            #get the crushmap
-            crushmap = get_crushmap_series()
+            msg = "Validate Cluster Successfully!"
             crushmap_tree_data = ret[1].get('crushmap_tree_data')
     except:
         status = "Failed"
-        msg = "Import Cluster Failed!"
+        msg = "Validate Cluster Failed!"
 
-    resp = dict(message=msg, status=status,crushmap=crushmap, crushmap_tree_data=crushmap_tree_data )
+    resp = dict(message=msg, status=status, crushmap_tree_data=crushmap_tree_data )
     resp = json.dumps(resp)
     return HttpResponse(resp)
 
