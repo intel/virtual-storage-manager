@@ -900,7 +900,7 @@ class CephDriver(object):
         #          "storage_group=%s" % crush_dict['storage_group'],
         #          "zone=%s" % crush_dict['zone'], "host=%s" % crush_dict['host'],
         #          run_as_root=True)
-        
+
         all_osd_in_host = db.osd_state_get_by_service_id(context,osd_state['service_id'])
         other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id']]
         crushmap = self.get_crushmap_json_format()
@@ -910,6 +910,7 @@ class CephDriver(object):
         else:
             osd_location = crush_dict['host']
             osd_location_str = "%s=%s"%(crushmap._types[1]['name'],osd_location)
+        LOG.info("osd_location_str=======%s"%osd_location_str)
         utils.execute("ceph", "osd", "crush", "add", "osd.%s" % osd_id, weight,
                  osd_location_str,
                  run_as_root=True)

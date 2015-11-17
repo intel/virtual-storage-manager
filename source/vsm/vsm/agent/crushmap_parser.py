@@ -213,11 +213,16 @@ class CrushMap():
     def _get_location_by_osd_name(self,osd_name):
         parent_bucket = {}
         osds = self._devices
+        print "osds====%s"%osds
         buckets = self._buckets
         osd_id = [osd['id'] for osd in osds if osd['name'] == osd_name]
+        osd_id = osd_id[0]
+        print '111--osd_id-%s-'%osd_id
         for bucket in buckets:
             for item in bucket['items']:
-                if item['id'] == osd_id:
+                print 'check--item---%s'%item
+                if int(item['id']) == int(osd_id):
+                    print 'hit-------------'
                     parent_bucket['name'] = bucket['name']
                     parent_bucket['type_name'] = bucket['type_name']
                     break
@@ -263,10 +268,12 @@ class CrushMap():
 
 if __name__ == '__main__':
     crushmap = CrushMap("./crush.json")
-    print '-----tree_data------'
-    crushmap._show_as_tree_dict()
-    print '=========tree_data================'
-    tunables = crushmap.get_all_tunables()
+    # print '-----tree_data------'
+    # crushmap._show_as_tree_dict()
+    # print '=========tree_data================'
+    # tunables = crushmap.get_all_tunables()
+    ret = crushmap._get_location_by_osd_name('osd.1')
+    print 'location----%s-'%ret
 
 #    for name in tunables:
 #        print name, tunables[name]
@@ -290,5 +297,5 @@ if __name__ == '__main__':
 #    bucket = crushmap.get_bucket_by_id(-15)
 #    print bucket
 #    print crushmap.get_children_by_type(-15, 'zone')
-    rule = crushmap.get_rules_by_name('value')
-    crushmap.get_storage_groups_by_rule(rule)
+#     rule = crushmap.get_rules_by_name('value')
+#     crushmap.get_storage_groups_by_rule(rule)
