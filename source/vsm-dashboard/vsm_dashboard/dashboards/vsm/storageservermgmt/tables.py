@@ -243,10 +243,10 @@ class ListServerTable(ListServerTableBase):
         verbose_name = _("Cluster Server List")
         table_actions = (AddServersAction, RemoveServersAction,
                 AddMonitorsAction, RemoveMonitorsAction, StartServersAction, StopServersAction)
-        status_columns = ['status']
-        row_class = UpdateRow
+        #status_columns = ['status']
+        #row_class = UpdateRow
         multi_select = False
-        row_actions = (ResetStatus,)
+        #row_actions = (ResetStatus,)
 
 def empty_value_maker(type, name, value, attrs=None):
     def _empty_value_caller(datum):
