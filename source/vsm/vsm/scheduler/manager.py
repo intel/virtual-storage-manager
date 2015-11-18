@@ -1249,27 +1249,33 @@ class SchedulerManager(manager.Manager):
         {u'ceph_conf': u'****', u'crush_map': u'****'}
         :return:
         '''
-        crushmap_str = body.get('crush_map')
-        crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
-        utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
-        crushmap = CrushMap(json_file=crush_map_new)
-        tree_node = crushmap._show_as_tree_dict()
-        osd_num = len(crushmap._devices)
-        rule_check = []
-        for rule in crushmap._rules:
-            rule_check_ret = crushmap.get_storage_groups_by_rule(rule)
-            if type(rule_check) == str:
-              rule_check.append(rule_check_ret)
 
         code = []
         error = []
         info = []
-        if type(tree_node) == str:
-            error.append(tree_node)
-            code.append('-11')
-        if rule_check:
-            error = error + rule_check
-            code.append('-12')
+        crushmap_str = body.get('crush_map')
+        crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
+        utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
+        try:
+            crushmap = CrushMap(json_file=crush_map_new)
+            tree_node = crushmap._show_as_tree_dict()
+            osd_num = len(crushmap._devices)
+            rule_check = []
+            for rule in crushmap._rules:
+                rule_check_ret = crushmap.get_storage_groups_by_rule(rule)
+                if type(rule_check) == str:
+                  rule_check.append(rule_check_ret)
+
+            if type(tree_node) == str:
+                error.append(tree_node)
+                code.append('-11')
+            if rule_check:
+                error = error + rule_check
+                code.append('-12')
+        except:
+            error.append('crusmap format error.')
+            code.append('-13')
+
         message = {'code':code,'error':error,'info':info,'osd_num':osd_num,'tree_data':tree_node}
         return message
 

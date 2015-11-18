@@ -1783,7 +1783,7 @@ class AgentManager(manager.Manager):
         if len(types) > 2:
             buckets = crushmap._buckets
             for bucket in buckets:
-                if bucket['type_id'] > types[0]['type_id']:
+                if bucket['type_id'] > types[1]['type_id']:
                     for item in bucket['items']:
                         zone = crushmap.get_bucket_by_id(item['id'])
                         values = {'id': zone['id'],
