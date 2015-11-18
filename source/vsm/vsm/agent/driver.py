@@ -38,6 +38,7 @@ from vsm.agent import rpcapi as agent_rpc
 from vsm.agent import cephconfigparser
 from vsm.openstack.common.rpc import common as rpc_exc
 import glob
+from crushmap_parser import CrushMap
 
 try:
     from novaclient.v1_1 import client as nc
@@ -894,18 +895,31 @@ class CephDriver(object):
 
         # step 6 zone host stg
         LOG.info('>>> step6 start')
-        utils.execute("ceph", "osd", "crush", "add", "osd.%s" % osd_id, weight,
-                 "root=%s" % crush_dict['root'],
-                 "storage_group=%s" % crush_dict['storage_group'],
-                 "zone=%s" % crush_dict['zone'], "host=%s" % crush_dict['host'],
-                 run_as_root=True)
+        # utils.execute("ceph", "osd", "crush", "add", "osd.%s" % osd_id, weight,
+        #          "root=%s" % crush_dict['root'],
+        #          "storage_group=%s" % crush_dict['storage_group'],
+        #          "zone=%s" % crush_dict['zone'], "host=%s" % crush_dict['host'],
+        #          run_as_root=True)
 
+        all_osd_in_host = db.osd_state_get_by_service_id(context,osd_state['service_id'])
+        other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id']]
+        crushmap = self.get_crushmap_json_format()
+        if len(other_osd_in_host) > 0:
+            osd_location = crushmap._get_location_by_osd_name(other_osd_in_host[0])
+            osd_location_str = "%s=%s"%(osd_location['type_name'],osd_location['name'])
+        else:
+            osd_location = crush_dict['host']
+            osd_location_str = "%s=%s"%(crushmap._types[1]['name'],osd_location)
+        LOG.info("osd_location_str=======%s"%osd_location_str)
+        utils.execute("ceph", "osd", "crush", "add", "osd.%s" % osd_id, weight,
+                 osd_location_str,
+                 run_as_root=True)
         # step 7 start osd service
         LOG.info('>>> step7 start')
         self.start_osd_daemon(context, osd_id)
-        # utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_id, weight,
-        #   "host=%s" % crush_dict['host'],
-        #  run_as_root=True)
+        utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_id, weight,
+           osd_location_str,
+          run_as_root=True)
 
         self._conductor_api.osd_state_create(context, osd_state)
         LOG.info('>>> step7 finish')
@@ -923,7 +937,16 @@ class CephDriver(object):
         LOG.info('>>>> _add_ceph_osd_to_config added')
         config.save_conf(FLAGS.ceph_conf)
         return True
-
+    def get_crushmap_json_format(self,keyring=None):
+        '''
+        :return:
+        '''
+        if keyring:
+            json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump','--keyring',keyring, run_as_root=True)
+        else:
+            json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump', run_as_root=True)
+        crushmap = CrushMap(json_context=json_crushmap)
+        return crushmap
     def add_monitor(self, context, host_id, mon_id, port="6789"):
         LOG.info('>> start to add mon %s on %s' % (mon_id, host_id))
         ser = self._conductor_rpcapi.init_node_get_by_id(context, host_id)
