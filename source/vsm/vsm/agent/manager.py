@@ -1748,7 +1748,10 @@ class AgentManager(manager.Manager):
         '''
         :return:
         '''
-        json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump','--keyring',keyring, run_as_root=True)
+        if keyring:
+            json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump','--keyring',keyring, run_as_root=True)
+        else:
+            json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump', run_as_root=True)
         crushmap = CrushMap(json_context=json_crushmap)
         return crushmap
 
@@ -1775,12 +1778,12 @@ class AgentManager(manager.Manager):
         zone_values = []
         if not types:
             return 'unvailed crushmap!'
-        if len(types) <= 3:
-            raise "types in crushmap is less than 3."
-        if len(types) > 3:
+        if len(types) <= 2:
+            raise "types in crushmap is less than 2."
+        if len(types) > 2:
             buckets = crushmap._buckets
             for bucket in buckets:
-                if bucket['type_id'] > types[2]['type_id']:
+                if bucket['type_id'] > types[0]['type_id']:
                     for item in bucket['items']:
                         zone = crushmap.get_bucket_by_id(item['id'])
                         values = {'id': zone['id'],
@@ -1825,7 +1828,6 @@ class AgentManager(manager.Manager):
         message = {'error':'','code':'','info':''}
         try:
             keyring_file_path = body.get('monitor_keyring')
-
             crushmap = self.get_crushmap_json_format(keyring_file_path)
             self._insert_zone_from_crushmap_to_db(context,crushmap)
             self._insert_storage_group_from_crushmap_to_db(context,crushmap)
