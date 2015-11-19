@@ -19,7 +19,9 @@
 
 $(function(){
     //Update the table status
-    UpdateServerStatus();
+    setInterval(function(){
+        UpdateServerStatus();
+    }, 5000);
 
     //Open the TableCheckbox
     OpenTableCheckbox();
@@ -41,14 +43,39 @@ function OpenTableCheckbox(){
 }
 
 function UpdateServerStatus(){
-    var tr_list = $("#server_list>tbody>tr");
-    for(var i=0;i<tr_list.length;i++){
-        tr_list[i].className = "ajax-update status_unknown odd";
-    }
+    $.ajax({
+        data: "",
+        type: "get",
+        dataType: "json",
+        url: "/dashboard/vsm/storageservermgmt/update_server_list/",
+        success: function (servers) {
+            console.log("Updated");
+            var html = "";
+            for(var i=0;i<servers.length;i++){
+                html +="<tr id='server_list__row__"+ i +" data-display='"+servers[i].name+"' data-object-id='"+servers[i].id+"' >";
+                html +="<td class=\"server_id sortable normal_column\">"+servers[i].id+"</td>";
+                html +="<td class=\"sortable name normal_column\">"+servers[i].name+"</td>";
+                html +="<td class=\"normal_column sortable primary_public_ip\">"+servers[i].primary_public_ip+"</td>";
+                html +="<td class=\"secondary_public_ip sortable normal_column\">"+servers[i].secondary_public_ip+"</td>";
+                html +="<td class=\"cluster_ip sortable normal_column\">"+servers[i].cluster_ip+"</td>";
+                html +="<td class=\"ceph_ver sortable normal_column\">"+servers[i].ceph_ver+"</td>";
+                html +="<td class=\"osds sortable normal_column\">"+servers[i].osds+"</td>";
+                html +="<td class=\"monitor_tag sortable normal_column\">"+servers[i].is_monitor+"</td>";
+                html +="<td class=\"zone sortable normal_column\">"+servers[i].zone+"</td>";
+                html +="<td class=\"status sortable normal_column\">"+servers[i].status+"</td>";
+                html +="<td class=\"actions_column\"></td>";
+                html +="</tr>";
+            }
+            $("#server_list>tbody")[0].innerHTML = html;
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
 
-    setTimeout(horizon.datatables.update, 2000);
+        },
+        complete: function(){
+
+        }
+    });
 }
-
 //Add Servers
 $("#btnSubmit").click(function(){
     //the action including action option and action index.
