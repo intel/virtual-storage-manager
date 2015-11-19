@@ -259,10 +259,11 @@ class ManifestParser(object):
             [role]
             storage
             monitor
+            mds
 
         Put this kind into dict as:
             {'name': 'role',
-             'single': ['storage', 'monitor']}
+             'single': ['storage', 'monitor', 'mds']}
 
         Then we change this dict into json as you wanted.
         """
@@ -312,7 +313,7 @@ class ManifestParser(object):
                 if len(columns) == 1:
                     enter_single_column = True
                     # Write this to support:
-                    # storage,monitor
+                    # storage,monitor,mds
                     parts = columns[0].split(',')
                     ret['single'] = ret['single'] +\
                          [segs for segs in parts if len(segs) > 0]
