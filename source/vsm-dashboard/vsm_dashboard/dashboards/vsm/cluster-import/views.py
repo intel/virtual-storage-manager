@@ -123,8 +123,8 @@ def validate_conf(request):
     except:
         status = "Failed"
         msg = "Validate Cluster Failed!"
-
-    resp = dict(message=msg, status=status, crushmap_tree_data=crushmap_tree_data )
+    crushmap_tree_data = get_crushmap_series(crushmap_tree_data)
+    resp = dict(message=msg, status=status, crushmap=crushmap_tree_data )
     resp = json.dumps(resp)
     return HttpResponse(resp)
 
@@ -151,62 +151,62 @@ def import_cluster(request):
     return HttpResponse(resp)
 
 
-def get_crushmap_series():
-    node_list = [
-        {'type': 4, 'id': -16, 'name': 'vsm'},
-
-        {'parent_id': [-16], 'type': 3, 'id': -13, 'name': 'performance'},
-        {'parent_id': [-16], 'type': 3, 'id': -15, 'name': 'capacity'},
-        {'parent_id': [-16], 'type': 3, 'id': -14, 'name': 'high_performance_test'},
-
-        {'parent_id': [-14], 'type': 2, 'id': -11, 'name': 'zone0_high_performance_test'},
-        {'parent_id': [-13], 'type': 2, 'id': -10, 'name': 'zone0_performance'},
-        {'parent_id': [-15], 'type': 2, 'id': -12, 'name': 'zone0_capacity'},
-
-        {'parent_id': [-10], 'type': 1, 'id': -4, 'name': 'ceph02_performance_zone0'},
-        {'parent_id': [-10], 'type': 1, 'id': -7, 'name': 'ceph03_performance_zone0'},
-        {'parent_id': [-10], 'type': 1, 'id': -1, 'name': 'ceph01_performance_zone0'},
-        {'parent_id': [-11], 'type': 1, 'id': -8, 'name': 'ceph03_high_performance_test_zone0'},
-        {'parent_id': [-11], 'type': 1, 'id': -5, 'name': 'ceph02_high_performance_test_zone0'},
-        {'parent_id': [-11], 'type': 1, 'id': -2, 'name': 'ceph01_high_performance_test_zone0'},
-        {'parent_id': [-12], 'type': 1, 'id': -9, 'name': 'ceph03_capacity_zone0'},
-        {'parent_id': [-12], 'type': 1, 'id': -3, 'name': 'ceph01_capacity_zone0'},
-        {'parent_id': [-12], 'type': 1, 'id': -6, 'name': 'ceph02_capacity_zone0'},
-
-        {'parent_id': [-1], 'type': 0, 'id': 8, 'name': 'osd.8'},
-        {'parent_id': [-1], 'type': 0, 'id': 10, 'name': 'osd.10'},
-        {'parent_id': [-1], 'type': 0, 'id': 9, 'name': 'osd.9'},
-        {'parent_id': [-2], 'type': 0, 'id': 0, 'name': 'osd.0'},
-        {'parent_id': [-3], 'type': 0, 'id': 2, 'name': 'osd.2'},
-        {'parent_id': [-3], 'type': 0, 'id': 4, 'name': 'osd.4'},
-        {'parent_id': [-3], 'type': 0, 'id': 6, 'name': 'osd.6'},
-        {'parent_id': [-3], 'type': 0, 'id': 1, 'name': 'osd.1'},
-        {'parent_id': [-3], 'type': 0, 'id': 3, 'name': 'osd.3'},
-        {'parent_id': [-3], 'type': 0, 'id': 5, 'name': 'osd.5'},
-        {'parent_id': [-3], 'type': 0, 'id': 7, 'name': 'osd.7'},
-        {'parent_id': [-4], 'type': 0, 'id': 19, 'name': 'osd.19'},
-        {'parent_id': [-4], 'type': 0, 'id': 20, 'name': 'osd.20'},
-        {'parent_id': [-4], 'type': 0, 'id': 21, 'name': 'osd.21'},
-        {'parent_id': [-5], 'type': 0, 'id': 11, 'name': 'osd.11'},
-        {'parent_id': [-6], 'type': 0, 'id': 13, 'name': 'osd.13'},
-        {'parent_id': [-6], 'type': 0, 'id': 12, 'name': 'osd.12'},
-        {'parent_id': [-6], 'type': 0, 'id': 15, 'name': 'osd.15'},
-        {'parent_id': [-6], 'type': 0, 'id': 14, 'name': 'osd.14'},
-        {'parent_id': [-6], 'type': 0, 'id': 17, 'name': 'osd.17'},
-        {'parent_id': [-6], 'type': 0, 'id': 16, 'name': 'osd.16'},
-        {'parent_id': [-6], 'type': 0, 'id': 18, 'name': 'osd.18'},
-        {'parent_id': [-7], 'type': 0, 'id': 32, 'name': 'osd.32'},
-        {'parent_id': [-7], 'type': 0, 'id': 31, 'name': 'osd.31'},
-        {'parent_id': [-7], 'type': 0, 'id': 30, 'name': 'osd.30'},
-        {'parent_id': [-8], 'type': 0, 'id': 22, 'name': 'osd.22'},
-        {'parent_id': [-9], 'type': 0, 'id': 25, 'name': 'osd.25'},
-        {'parent_id': [-9], 'type': 0, 'id': 26, 'name': 'osd.26'},
-        {'parent_id': [-9], 'type': 0, 'id': 27, 'name': 'osd.27'},
-        {'parent_id': [-9], 'type': 0, 'id': 23, 'name': 'osd.23'},
-        {'parent_id': [-9], 'type': 0, 'id': 28, 'name': 'osd.28'},
-        {'parent_id': [-9], 'type': 0, 'id': 29, 'name': 'osd.29'},
-        {'parent_id': [-9,-8], 'type': 0, 'id': 24, 'name': 'osd.24'},
-    ]
+def get_crushmap_series(node_list):
+    # node_list = [
+    #     {'type': 4, 'id': -16, 'name': 'vsm'},
+    #
+    #     {'parent_id': [-16], 'type': 3, 'id': -13, 'name': 'performance'},
+    #     {'parent_id': [-16], 'type': 3, 'id': -15, 'name': 'capacity'},
+    #     {'parent_id': [-16], 'type': 3, 'id': -14, 'name': 'high_performance_test'},
+    #
+    #     {'parent_id': [-14], 'type': 2, 'id': -11, 'name': 'zone0_high_performance_test'},
+    #     {'parent_id': [-13], 'type': 2, 'id': -10, 'name': 'zone0_performance'},
+    #     {'parent_id': [-15], 'type': 2, 'id': -12, 'name': 'zone0_capacity'},
+    #
+    #     {'parent_id': [-10], 'type': 1, 'id': -4, 'name': 'ceph02_performance_zone0'},
+    #     {'parent_id': [-10], 'type': 1, 'id': -7, 'name': 'ceph03_performance_zone0'},
+    #     {'parent_id': [-10], 'type': 1, 'id': -1, 'name': 'ceph01_performance_zone0'},
+    #     {'parent_id': [-11], 'type': 1, 'id': -8, 'name': 'ceph03_high_performance_test_zone0'},
+    #     {'parent_id': [-11], 'type': 1, 'id': -5, 'name': 'ceph02_high_performance_test_zone0'},
+    #     {'parent_id': [-11], 'type': 1, 'id': -2, 'name': 'ceph01_high_performance_test_zone0'},
+    #     {'parent_id': [-12], 'type': 1, 'id': -9, 'name': 'ceph03_capacity_zone0'},
+    #     {'parent_id': [-12], 'type': 1, 'id': -3, 'name': 'ceph01_capacity_zone0'},
+    #     {'parent_id': [-12], 'type': 1, 'id': -6, 'name': 'ceph02_capacity_zone0'},
+    #
+    #     {'parent_id': [-1], 'type': 0, 'id': 8, 'name': 'osd.8'},
+    #     {'parent_id': [-1], 'type': 0, 'id': 10, 'name': 'osd.10'},
+    #     {'parent_id': [-1], 'type': 0, 'id': 9, 'name': 'osd.9'},
+    #     {'parent_id': [-2], 'type': 0, 'id': 0, 'name': 'osd.0'},
+    #     {'parent_id': [-3], 'type': 0, 'id': 2, 'name': 'osd.2'},
+    #     {'parent_id': [-3], 'type': 0, 'id': 4, 'name': 'osd.4'},
+    #     {'parent_id': [-3], 'type': 0, 'id': 6, 'name': 'osd.6'},
+    #     {'parent_id': [-3], 'type': 0, 'id': 1, 'name': 'osd.1'},
+    #     {'parent_id': [-3], 'type': 0, 'id': 3, 'name': 'osd.3'},
+    #     {'parent_id': [-3], 'type': 0, 'id': 5, 'name': 'osd.5'},
+    #     {'parent_id': [-3], 'type': 0, 'id': 7, 'name': 'osd.7'},
+    #     {'parent_id': [-4], 'type': 0, 'id': 19, 'name': 'osd.19'},
+    #     {'parent_id': [-4], 'type': 0, 'id': 20, 'name': 'osd.20'},
+    #     {'parent_id': [-4], 'type': 0, 'id': 21, 'name': 'osd.21'},
+    #     {'parent_id': [-5], 'type': 0, 'id': 11, 'name': 'osd.11'},
+    #     {'parent_id': [-6], 'type': 0, 'id': 13, 'name': 'osd.13'},
+    #     {'parent_id': [-6], 'type': 0, 'id': 12, 'name': 'osd.12'},
+    #     {'parent_id': [-6], 'type': 0, 'id': 15, 'name': 'osd.15'},
+    #     {'parent_id': [-6], 'type': 0, 'id': 14, 'name': 'osd.14'},
+    #     {'parent_id': [-6], 'type': 0, 'id': 17, 'name': 'osd.17'},
+    #     {'parent_id': [-6], 'type': 0, 'id': 16, 'name': 'osd.16'},
+    #     {'parent_id': [-6], 'type': 0, 'id': 18, 'name': 'osd.18'},
+    #     {'parent_id': [-7], 'type': 0, 'id': 32, 'name': 'osd.32'},
+    #     {'parent_id': [-7], 'type': 0, 'id': 31, 'name': 'osd.31'},
+    #     {'parent_id': [-7], 'type': 0, 'id': 30, 'name': 'osd.30'},
+    #     {'parent_id': [-8], 'type': 0, 'id': 22, 'name': 'osd.22'},
+    #     {'parent_id': [-9], 'type': 0, 'id': 25, 'name': 'osd.25'},
+    #     {'parent_id': [-9], 'type': 0, 'id': 26, 'name': 'osd.26'},
+    #     {'parent_id': [-9], 'type': 0, 'id': 27, 'name': 'osd.27'},
+    #     {'parent_id': [-9], 'type': 0, 'id': 23, 'name': 'osd.23'},
+    #     {'parent_id': [-9], 'type': 0, 'id': 28, 'name': 'osd.28'},
+    #     {'parent_id': [-9], 'type': 0, 'id': 29, 'name': 'osd.29'},
+    #     {'parent_id': [-9,-8], 'type': 0, 'id': 24, 'name': 'osd.24'},
+    # ]
 
     #generate the crushmap nodes
     #type: 4-root, 3-storage group, 2-zone, 1-xxx, 0-OSD

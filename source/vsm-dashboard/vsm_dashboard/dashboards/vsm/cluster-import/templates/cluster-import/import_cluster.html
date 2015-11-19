@@ -22,6 +22,7 @@
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=_("Import Cluster") %}
   <link href="{{ STATIC_URL }}dashboard/css/importcluster.css" rel="stylesheet">
+<link href="{{ STATIC_URL }}dashboard/css/zTreeStyle.css" rel="stylesheet">
 
 {% endblock page_header %}
 
@@ -118,5 +119,6 @@
 {% block js %}
     {{ block.super }}
     <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
-    <script src="{{ STATIC_URL }}dashboard/js/importcluster.js"></script> 
+<script src="{{ STATIC_URL }}dashboard/js/jquery.ztree.all-3.5.min.js"></script>
+<script src="{{ STATIC_URL }}dashboard/js/importcluster.js"></script>
 {% endblock %}
