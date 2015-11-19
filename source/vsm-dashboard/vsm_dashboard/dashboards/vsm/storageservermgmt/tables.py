@@ -185,28 +185,68 @@ class ListServerTable(ListServerTableBase):
         ("Stopped", True),
     )
 
-    server_id = tables.Column("id", verbose_name=_("ID"), classes=("server_id",))
-    name = tables.Column("name", verbose_name=_("Name"))
-    primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"), attrs={"data-type": "ip"})
-    secondary_public_ip = tables.Column("secondary_public_ip", verbose_name=_("Ceph Public Address"), attrs={"data-type": "ip"})
-    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph Cluster Address"), attrs={"data-type": "ip"})
-    osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
-    ceph_ver = tables.Column("ceph_ver", verbose_name=_("Ceph Version"))
-    is_monitor = tables.Column("is_monitor", classes=("monitor_tag",), verbose_name=_("Monitor"))
-    zone = tables.Column("zone", classes=("zone",), verbose_name=_("Zone"))
-    status = tables.Column("status", status=True,
-                            status_choices=STATUS_CHOICES,
-                            display_choices=STATUS_DISPLAY_CHOICES,
-                            verbose_name=_("Status"))
+    server_id = tables.Column(
+                    "id",
+                    verbose_name=_("ID"),
+                    classes=("server_id",)
+                )
+    name = tables.Column(
+                    "name",
+                    verbose_name=_("Name"),
+                    classes=("name",)
+                )
+    primary_public_ip = tables.Column(
+                    "primary_public_ip",
+                    verbose_name=_("Management Address")
+                    ,classes=("primary_public_ip",)
+                )
+    secondary_public_ip = tables.Column(
+                    "secondary_public_ip",
+                    verbose_name=_("Ceph Public Address"),
+                    classes=("secondary_public_ip",)
+                )
+    cluster_ip = tables.Column(
+                    "cluster_ip",
+                    verbose_name=_("Ceph Cluster Address"),
+                    classes=("cluster_ip",)
+                )
+    ceph_ver = tables.Column(
+                    "ceph_ver",
+                    verbose_name=_("Ceph Version"),
+                    classes=("ceph_ver",)
+                )
+    osds = tables.Column(
+                    "osds",
+                    verbose_name=_("OSDs (Data Drives)"),
+                    classes=("osds",)
+                )
+    is_monitor = tables.Column(
+                    "is_monitor",
+                    verbose_name=_("Monitor"),
+                    classes=("monitor_tag",)
+                )
+    zone = tables.Column(
+                    "zone",
+                    verbose_name=_("Zone"),
+                    classes=("zone",)
+                )
+    status = tables.Column(
+                    "status",
+                    status=True,
+                    status_choices=STATUS_CHOICES,
+                    display_choices=STATUS_DISPLAY_CHOICES,
+                    verbose_name=_("Status"),
+                    classes=("status",)
+                )
     class Meta:
         name = "server_list"
         verbose_name = _("Cluster Server List")
         table_actions = (AddServersAction, RemoveServersAction,
                 AddMonitorsAction, RemoveMonitorsAction, StartServersAction, StopServersAction)
-        status_columns = ['status']
-        row_class = UpdateRow
+        #status_columns = ['status']
+        #row_class = UpdateRow
         multi_select = False
-        row_actions = (ResetStatus,)
+        #row_actions = (ResetStatus,)
 
 def empty_value_maker(type, name, value, attrs=None):
     def _empty_value_caller(datum):

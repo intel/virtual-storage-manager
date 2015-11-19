@@ -26,6 +26,7 @@ from .views import RemoveMonitorsView
 from .views import StartServersView
 from .views import StopServersView
 from .views import ResetStatus
+from .views import update_server_list
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
@@ -37,4 +38,6 @@ urlpatterns = patterns('',
     url(r'^stopserversview/$', StopServersView.as_view(), name='stopserversview'),
     url(r'^servers/(?P<action>\w+)$', ServersAction, name='serversaction'),
     url(r'^reset_status/(?P<server_id>\w+)$', ResetStatus, name='reset_status'),
+    url(r'^update_server_list/$', update_server_list, name='update_server_list'),
+
 )

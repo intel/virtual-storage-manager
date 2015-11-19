@@ -240,3 +240,6 @@ def ResetStatus(request, server_id):
     vsmapi.reset_status(request, server_id)
     return HttpResponse(resp)
 
+def update_server_list(request):
+    servers = get_server_list(request)
+    return HttpResponse(json.dumps(servers))
