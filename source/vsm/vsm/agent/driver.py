@@ -39,6 +39,7 @@ from vsm.agent import cephconfigparser
 from vsm.openstack.common.rpc import common as rpc_exc
 import glob
 from crushmap_parser import CrushMap
+import operator
 
 try:
     from novaclient.v1_1 import client as nc
@@ -774,17 +775,20 @@ class CephDriver(object):
             values = {}
             #if not added_to_crushmap:
             #    LOG.info('>> add crushmap ')
+            crushmap = self.get_crushmap_json_format()
+            types = crushmap.get_all_types()
+            types.sort(key=operator.itemgetter('type_id'))
             if self.is_new_storage_group(crush_dict['storage_group']):
                 self._crushmap_mgmt.add_storage_group(crush_dict['storage_group'],\
-                                                  crush_dict['root'])
+                                                  crush_dict['root'],types=types)
                 zones = db.zone_get_all(context)
                 for item in zones: 
                     zone_item = item['name'] + '_' + crush_dict['storage_group'] 
                     self._crushmap_mgmt.add_zone(zone_item, \
-                                                crush_dict['storage_group'])
+                                                crush_dict['storage_group'],types=types)
                 
                 if zone == FLAGS.default_zone:
-                    self._crushmap_mgmt.add_rule(crush_dict['storage_group'], 'host') 
+                    self._crushmap_mgmt.add_rule(crush_dict['storage_group'], 'host')
                 else:
                     self._crushmap_mgmt.add_rule(crush_dict['storage_group'], 'zone')
 
@@ -2522,24 +2526,42 @@ class CreateCrushMapDriver(object):
         utils.execute("ceph", "osd", "crush", "rule", "create-simple", \
                         name, name, type)
         
-    def add_storage_group(self, storage_group, root):
-        utils.execute("ceph", "osd", "crush", "add-bucket", storage_group, \
-                        "storage_group", run_as_root=True)
-        utils.execute("ceph", "osd", "crush", "move", storage_group,\
-                        "root=%s" % root, run_as_root=True)
+    def add_storage_group(self, storage_group, root, types=None):
+        if types is None:
+            utils.execute("ceph", "osd", "crush", "add-bucket", storage_group, \
+                            "storage_group", run_as_root=True)
+            utils.execute("ceph", "osd", "crush", "move", storage_group,\
+                            "root=%s" % root, run_as_root=True)
+        else:
+            utils.execute("ceph", "osd", "crush", "add-bucket", storage_group, \
+                            "%s"%types[3]['name'], run_as_root=True)
+            utils.execute("ceph", "osd", "crush", "move", storage_group,\
+                            "%s=%s" %(types[-1]['name'],root), run_as_root=True)
 
-    def add_zone(self, zone, storage_group):
-        utils.execute("ceph", "osd", "crush", "add-bucket", zone, \
-                        "zone", run_as_root=True)
-        utils.execute("ceph", "osd", "crush", "move", zone, \
-                        "storage_group=%s" % storage_group, run_as_root=True)
- 
-    def add_host(self, host_name, zone):
-        utils.execute("ceph", "osd", "crush", "add-bucket", host_name, "host",
-                        run_as_root=True)
-        utils.execute("ceph", "osd", "crush", "move", host_name,
-                        "zone=%s" % zone,
-                        run_as_root=True)
+    def add_zone(self, zone, storage_group,types=None):
+        if types is None:
+            utils.execute("ceph", "osd", "crush", "add-bucket", zone, \
+                            "zone", run_as_root=True)
+            utils.execute("ceph", "osd", "crush", "move", zone, \
+                            "storage_group=%s" % storage_group, run_as_root=True)
+        else:
+            utils.execute("ceph", "osd", "crush", "add-bucket", zone, \
+                            "%s"%types[2]['name'], run_as_root=True)
+            utils.execute("ceph", "osd", "crush", "move", zone, \
+                            "%s=%s" %(types[3]['name'],storage_group), run_as_root=True)
+    def add_host(self, host_name, zone,types=None):
+        if types is None:
+            utils.execute("ceph", "osd", "crush", "add-bucket", host_name, "host",
+                            run_as_root=True)
+            utils.execute("ceph", "osd", "crush", "move", host_name,
+                            "zone=%s" % zone,
+                            run_as_root=True)
+        else:
+            utils.execute("ceph", "osd", "crush", "add-bucket", host_name, "%s"%types[1]['name'],
+                            run_as_root=True)
+            utils.execute("ceph", "osd", "crush", "move", host_name,
+                            "%s=%s" %(types[2]['name'],zone),
+                            run_as_root=True)
 
     def remove_host(self, host_name):
         utils.execute("ceph", "osd", "crush", "remove", host_name,
