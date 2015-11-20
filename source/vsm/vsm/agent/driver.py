@@ -39,6 +39,7 @@ from vsm.agent import cephconfigparser
 from vsm.openstack.common.rpc import common as rpc_exc
 import glob
 from crushmap_parser import CrushMap
+import operator
 
 try:
     from novaclient.v1_1 import client as nc
@@ -776,6 +777,7 @@ class CephDriver(object):
             #    LOG.info('>> add crushmap ')
             crushmap = self.get_crushmap_json_format()
             types = crushmap.get_all_types()
+            types.sort(key=operator.itemgetter('type_id'))
             if self.is_new_storage_group(crush_dict['storage_group']):
                 self._crushmap_mgmt.add_storage_group(crush_dict['storage_group'],\
                                                   crush_dict['root'],types=types)
