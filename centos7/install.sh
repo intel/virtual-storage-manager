@@ -452,7 +452,7 @@ function setup_remote_agent() {
 }
 
 function install_agent() {
-    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ `ls /etc/yum.repos.d|wc -l` -gt 0 ]]; then $SUDO mkdir -p /tmp/backup; $SUDO mv * /tmp/backup; fi"
+    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ ! -e /etc/yum.repos.d ]]; then $SUDO mkdir -p /tmp/backup; $SUDO mv * /tmp/backup; fi"
     check_manifest $1
     set_remote_repo $1
     set_iptables_and_selinux $1
@@ -461,7 +461,7 @@ function install_agent() {
 
     setup_remote_agent $1
     install_setup_diamond $1
-    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ -d /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; $SUDO rm -rf /tmp/backup; fi"
+    $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ ! -e /tmp/backup ]]; then $SUDO mv /tmp/backup/* .; $SUDO rm -rf /tmp/backup; fi"
 }
 
 function generate_token() {
