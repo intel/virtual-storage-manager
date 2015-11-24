@@ -452,6 +452,7 @@ function setup_remote_agent() {
 }
 
 function install_agent() {
+    generate_token
     $SSH $USER@$1 "cd /etc/yum.repos.d; if [[ ! -e /etc/yum.repos.d ]]; then $SUDO mkdir -p /tmp/backup; $SUDO mv * /tmp/backup; fi"
     check_manifest $1
     set_remote_repo $1
@@ -490,15 +491,7 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
-    generate_token
-#    if [[ $IS_CONTROLLER -eq 0 ]]; then
-#        TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
-# $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
-#	echo -n $TOKEN >./.token
-#    else
-#        TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
-#	echo -n $TOKEN >./.token
-#    fi
+#    generate_token
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
     done
@@ -510,15 +503,7 @@ else
         install_controller
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
-        generate_token
-#        if [[ $IS_CONTROLLER -eq 0 ]]; then
-#            TOKEN=`$SSH $USER@$CONTROLLER_ADDRESS "unset http_proxy; agent-token \
-# $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST"`
-#	    echo -n $TOKEN >./.token
-#        else
-#            TOKEN=`unset http_proxy; agent-token $OS_TENANT_NAME $OS_USERNAME $OS_PASSWORD $OS_KEYSTONE_HOST`
-#	    echo -n $TOKEN >./.token
-#        fi
+#        generate_token
 
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
