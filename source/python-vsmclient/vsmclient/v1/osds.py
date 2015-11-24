@@ -97,7 +97,7 @@ class OsdManager(base.ManagerWithFind):
     def remove(self, osd):
         self._action('remove', osd)
 
-    def add_new_disks_to_cluster(self, body):
+    def add(self, body):
 
         '''body={'server_id':server_id,
                 'osdinfo':[{'storage_group_id':
@@ -105,7 +105,7 @@ class OsdManager(base.ManagerWithFind):
                             "jounal":
                             "data":
         }]}'''
-        url = '/osds/add_new_disks_to_cluster'
+        url = '/osds/add'
         return self.api.client.post(url, body=body)
 
     def delete(self, osd):
