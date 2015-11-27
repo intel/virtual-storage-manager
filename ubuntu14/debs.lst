@@ -42,4 +42,4 @@ python-sqlalchemy-ext_0.9.7-1~cloud0_amd64.deb
 python-stevedore_1.0.0.0-0ubuntu1~cloud0_all.deb
 python-swiftclient_1%253a2.3.0-0ubuntu1%7Ecloud0_all.deb
 python-troveclient_1%253a1.0.5-0ubuntu2%7Ecloud0_all.deb
-diamond_4.0_all.deb
+diamond_4.0.1_all.deb
