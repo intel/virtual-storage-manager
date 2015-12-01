@@ -1817,14 +1817,45 @@ class SchedulerManager(manager.Manager):
             return res
 
     def add_new_disks_to_cluster(self, context, body):
-        server_id = body['server_id']
-        server = db.init_node_get_by_id(context,id=server_id)
+        server_id = body.get('server_id',None)
+        server_name = body.get('server_name',None)
+        if server_id is not None:
+            server = db.init_node_get_by_id(context,id=server_id)
+        elif server_name is not None:
+            server = db.init_node_get_by_host(context,host=server_name)
         self._agent_rpcapi.add_new_disks_to_cluster(context, body, server['host'])
         new_osd_count = int(server["data_drives_number"]) + len(body['osdinfo'])
         values = {"data_drives_number": new_osd_count}
         self._conductor_rpcapi.init_node_update(context,
                                         server["id"],
                                         values)
+
+    def add_batch_new_disks_to_cluster(self, context, body):
+        """
+
+        :param context:
+        :param body: {"disks":[
+                                {'server_id':'1','osdinfo':[{'storage_group_id':
+                                                            "weight":
+                                                            "journal":
+                                                            "data":},{}]},
+                                {'server_id':'2','osdinfo':[{'storage_group_id':
+                                                            "weight":
+                                                            "journal":
+                                                            "data":},{}]},
+                            ]
+                    }
+        :return:
+        """
+        disks = body.get('disks',[])
+        try:
+            for disk_in_same_server in disks:
+                self.add_new_disks_to_cluster( context, disk_in_same_server)
+        except:
+            return {"message":"data error"}
+        return {"message": "success"}
+
+
     def reconfig_diamond(self, context, body):
         servers = db.init_node_get_all(context)
         for server in servers:
