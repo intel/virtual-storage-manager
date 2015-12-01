@@ -149,3 +149,6 @@ class API(object):
 
     def detect_crushmap(self,context,body):
         return self.scheduler_rpcapi.detect_crushmap(context,body)
+
+    def get_crushmap_tree_data(self,context,body):
+        return self.scheduler_rpcapi.get_crushmap_tree_data(context,body)

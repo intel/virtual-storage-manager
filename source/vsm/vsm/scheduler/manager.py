@@ -1300,6 +1300,28 @@ class SchedulerManager(manager.Manager):
             raise
         return message
 
+    def get_crushmap_tree_data(self,context,body):
+        '''
+        :param context:
+        :param body:
+        { u'cluster_id":1}
+        :return:
+        '''
+        monitor_pitched_host = self._get_monitor_by_cluster_id(context, body.get('cluster_id',1))
+        monitor_pitched_host = monitor_pitched_host['host']
+        monitor_keyring = None
+        message = {}
+        try:
+            message = self._agent_rpcapi.detect_crushmap(context, monitor_keyring, monitor_pitched_host)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: check_pre_existing_cluster rpc remote')
+        except:
+            LOG.error('ERROR: check_pre_existing_cluster')
+            raise
+        return message
+
     def import_cluster(self,context,body):
         '''
         :param context:

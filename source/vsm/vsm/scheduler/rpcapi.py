@@ -220,3 +220,7 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def detect_crushmap(self,ctxt,body):
         return self.call(ctxt, self.make_msg('detect_crushmap', body=body))
 
+    def get_crushmap_tree_data(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('get_crushmap_tree_data', body=body))
+
+

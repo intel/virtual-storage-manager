@@ -119,6 +119,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
                                     'check_pre_existing_cluster':'post',
                                     'import_cluster':'post',
                                     'detect_crushmap':'post',
+                                    'get_crushmap_tree_data':'post',
                                     },
                         member={'action': 'post'})
 
