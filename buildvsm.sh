@@ -30,14 +30,19 @@ Build VSM Release Package:
 Options:
   --help | -h
     Print usage information.
+  --package | -p PACKAGE_NAME(s)
+    The packages will be build, if more than one package, please use "," between
+    two packages like vsm,vsm-dashboard,vsm-deploy,python-vsmclient.
 EOF
     exit 0
 }
 
+PACKAGE_NAMES=""
 while [ $# -gt 0 ]; do
   case "$1" in
     -h) usage ;;
     --help) usage ;;
+    --package| -p) shift; PACKAGE_NAMES=$1 ;;
     *) shift ;;
   esac
   shift
@@ -90,7 +95,7 @@ function create_release() {
         cp -rf ubuntu14/vsm-dashboard ./source
         cp -rf ubuntu14/vsm-deploy ./source
         cp ubuntu14/builddeb .
-        bash +x builddeb
+        bash +x builddeb $PACKAGE_NAMES
         cp ubuntu14/install.sh release/$BUILD
         cp ubuntu14/uninstall.sh release/$BUILD
         cp ubuntu14/debs.lst release/$BUILD
@@ -100,7 +105,7 @@ function create_release() {
         cp -rf centos7/vsm-dashboard ./source
         cp -rf centos7/vsm-deploy ./source
         cp centos7/buildrpm .
-        bash +x buildrpm
+        bash +x buildrpm $PACKAGE_NAMES
         cp centos7/install.sh release/$BUILD
         cp uninstall.sh release/$BUILD
         cp centos7/rpms.lst release/$BUILD
@@ -112,7 +117,7 @@ function create_release() {
         cp suse/buildrpm .
         bash +x buildrpm
     elif [[ $OS == "CentOS" && $OS_VERSION =~ "6" ]]; then
-        bash +x buildrpm
+        bash +x buildrpm $PACKAGE_NAMES
         cp install.sh release/$BUILD
         cp uninstall.sh release/$BUILD
     fi

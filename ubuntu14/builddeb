@@ -34,8 +34,6 @@ echo '%debug_package %{nil}' >> ~/.debmacros
 # Load Function
 #---------------------------------------------
 
-#VERSION="2015.03"
-#RELEASE="2.0"
 SOURCE_DIR=source
 VSM_DIR=vsm
 VSMCLIENT_DIR=python-vsmclient
@@ -47,52 +45,47 @@ for n in `ls $TOPDIR/.lib/ | grep -v iptables`; do
     source $TOPDIR/.lib/$n
 done
 
-#for pkg in vsm vsm-dashboard python-vsmclient vsm-deploy; do
-#    for ph in /root /var /tmp /opt /mnt; do
-#        find $ph -name "${pkg}*.deb" | xargs -i rm -rf {}
-#    done
-#done
-
-# rm *.pyc and *.pyo
 find $TOPDIR -name "*.pyc" | xargs -i rm -rf {}
 find $TOPDIR -name "*.pyo" | xargs -i rm -rf {}
 
-#---------------------------------------------
-# Begin to build vsm deb
-#---------------------------------------------
-
-build_vsm_deb
-
-#---------------------------------------------
-# Begin to build python-vsmclient deb
-#---------------------------------------------
-
-build_vsmclient_deb
-
-#---------------------------------------------
-# Begin to build vsm-dashboard deb
-#---------------------------------------------
-
-build_vsm_dashboard_deb
-
-#---------------------------------------------
-# Begin to build vsm-deploy deb
-#---------------------------------------------
-
-build_vsmdeploy_deb
+PACKAGE_NAMES=$1
+if [[ $PACKAGE_NAMES != "" ]]
+then
+    PACKAGE_NAME_LIST=${PACKAGE_NAMES//,/ }
+    for package_name in $PACKAGE_NAME_LIST
+    do
+        if [[ $package_name == "vsm" ]]
+        then
+            build_vsm_deb
+        elif [[ $package_name == "python-vsmclient" ]]
+        then
+            build_vsmclient_deb
+        elif [[ $package_name == "vsm-dashboard" ]]
+        then
+            build_vsm_dashboard_deb
+        elif [[ $package_name == "vsm-deploy" ]]
+        then
+            build_vsmdeploy_deb
+        else
+            echo "vsm project does not include $package_name package"
+        fi
+    done
+else
+    build_vsm_deb
+    build_vsmclient_deb
+    build_vsm_dashboard_deb
+    build_vsmdeploy_deb
+fi
 
 #---------------------------------------------
 # Update vsmrepo
 #---------------------------------------------
-
-# __create_repo_by_rpms
 
 is_dpkg_dev=`dpkg -s dpkg-dev|grep "install ok installed"|wc -l`
 if [[ $is_dpkg_dev -eq 0 ]]; then
     sudo apt-get install dpkg-dev
 fi
 dpkg-scanpackages vsmrepo | gzip > vsmrepo/Packages.gz
-#apt-get update
 
 rm -rf $TEMP
 
