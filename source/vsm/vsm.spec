@@ -193,7 +193,7 @@ install -p -D -m 640 etc/vsm/api-paste.ini %{buildroot}%{_sysconfdir}/vsm/api-pa
 install -p -D -m 640 etc/vsm/policy.json %{buildroot}%{_sysconfdir}/vsm/policy.json
 install -p -D -m 640 etc/vsm/logging_sample.conf %{buildroot}%{_sysconfdir}/vsm/logging.conf
 install -p -D -m 640 etc/vsm/rootwrap.d/vsm.filters %{buildroot}%{_sysconfdir}/vsm/rootwrap.d/vsm.filters
-install -p -D -m 640 etc/sudoers.d/vsm %{buildroot}%{_sysconfdir}/sudoers.d/vsm
+install -p -D -m 440 etc/sudoers.d/vsm %{buildroot}%{_sysconfdir}/sudoers.d/vsm
 
 %if 0%{?suse_version}
 install -p -D -m 640 etc/logrotate.d/vsm %{buildroot}%{_sysconfdir}/logrotate.d/vsm
@@ -205,7 +205,7 @@ install -p -D -m 640 etc/logrotate.d/vsmceph %{buildroot}%{_sysconfdir}/logrotat
 #  SSH Keys
 #---------------------------
 # TODO check this line whether is needed
-#cp -rf etc/vsm/*.sh %%{buildroot}%%{_sysconfdir}/vsm/
+#cp -rf etc/vsm/*.sh %{buildroot}%{_sysconfdir}/vsm/
 
 
 #---------------------------
@@ -296,8 +296,8 @@ install -p -D -m 755 bin/check_xtrust_crudini %{buildroot}%{_usr}/local/bin/chec
 install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/local/bin/getip
 install -p -D -m 755 bin/import_ceph_conf  %{buildroot}%{_usr}/local/bin/import_ceph_conf
 install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
-install -p -D -m 755 bin/vsm-ceph-upgrade %{buildroot}%{_bindir}/vsm-ceph-upgrade
 install -p -D -m 755 bin/kill_diamond %{buildroot}%{_bindir}/kill_diamond
+install -p -D -m 755 bin/vsm-ceph-upgrade %{buildroot}%{_bindir}/vsm-ceph-upgrade
 
 install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/local/bin/get_storage
 install -p -D -m 755 tools/spot_info_list %{buildroot}%{_usr}/local/bin/spot_info_list
@@ -479,6 +479,8 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/get_smart_info
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/intergrate-cluster
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/import_ceph_conf
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/kill_diamond
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-ceph-upgrade
 
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/getip
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/cluster_manifest

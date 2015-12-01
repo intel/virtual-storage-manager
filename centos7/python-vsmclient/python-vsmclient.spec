@@ -4,11 +4,11 @@
 Name:             python-vsmclient
 Version:          %{version}
 Release:          %{release}
-Summary:          Python API and CLI for  vsm
+Summary:          Python API and CLI for VSM
 
 Group:            Development/Languages
-License:          Intel Reserved
-URL:              http://intel.com/itflex
+License:          Apache License 2.0
+URL:              http://github.com/01org/virtual-storage-manager
 Source:           %{name}-%{version}.tar.gz
 
 #
