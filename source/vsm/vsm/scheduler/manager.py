@@ -1596,6 +1596,29 @@ class SchedulerManager(manager.Manager):
         self._conductor_rpcapi.init_node_update(context,
                                         server["id"],
                                         values)
+
+    def add_batch_new_disks_to_cluster(self, context, body):
+        """
+
+        :param context:
+        :param body: {"disks":[
+                                {'server_id':'1','osdinfo':[{'storage_group_id':
+                                                            "weight":
+                                                            "jounal":
+                                                            "data":},{}]},
+                                {'server_id':'2','osdinfo':[{'storage_group_id':
+                                                            "weight":
+                                                            "jounal":
+                                                            "data":},{}]},
+                            ]
+                    }
+        :return:
+        """
+        disks = body.get('disks',[])
+        for disk_in_same_server in disks:
+            self.add_new_disks_to_cluster(self, context, disk_in_same_server)
+
+
     def reconfig_diamond(self, context, body):
         servers = db.init_node_get_all(context)
         for server in servers:

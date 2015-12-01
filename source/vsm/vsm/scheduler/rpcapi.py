@@ -208,5 +208,8 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def add_new_disks_to_cluster(self, ctxt, body=None):
         return self.call(ctxt, self.make_msg('add_new_disks_to_cluster', body=body))
 
+    def add_batch_new_disks_to_cluster(self, ctxt, body=None):
+        return self.call(ctxt, self.make_msg('add_batch_new_disks_to_cluster', body=body))
+
     def reconfig_diamond(self, ctxt, body=None):
         return self.cast(ctxt, self.make_msg('reconfig_diamond', body=body))
