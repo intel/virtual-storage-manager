@@ -1,11 +1,12 @@
 #!/bin/bash
 
 function preinstall_controller() {
-    yum install -y ceph httpd librbd* MariaDB-client MariaDB-devel MariaDB-server memcached ntp openssh-server openssl openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse smartmontools
+    yum install -y ceph httpd librbd1 MariaDB-client MariaDB-devel MariaDB-server memcached ntp openssh-server openssl openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse smartmontools
+    yum install -y ceph httpd librbd1 MariaDB-client MariaDB-devel MariaDB-server memcached ntp openssh-server openssl openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse smartmontools
 }
 
 function preinstall_agent() {
-    yum install -y ceph librbd* rbd-fuse ntp openssh-server python-keystoneclient openstack-utils python-devel smartmontools
+    yum install -y ceph librbd1 rbd-fuse ntp openssh-server python-keystoneclient openstack-utils python-devel smartmontools
 }
 
 if [[ $1 ]]; then

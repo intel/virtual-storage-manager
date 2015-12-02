@@ -1,0 +1,101 @@
+#divFramework{
+	width: 100%;
+	overflow: hidden;
+}
+
+#divCrushmap{
+	float: left;
+	width: 25%;
+	height: 740px;
+	border:1px solid #ccc;
+	overflow: auto;
+}
+
+#divStorageGroup{
+	margin-left: 10px;
+	float: left;
+	width: 70%;
+	height: 740px;
+	border:1px solid #ccc;
+	padding: 5px;
+}
+
+#divStorageGroupTable{
+	height: 300px;
+	overflow-y:auto;
+}
+
+#divStorageGroupForm{
+	margin-top: 20px;
+	overflow: hidden;
+}
+
+#divStorageGroupFormLeft{
+	float: left;
+	width: 350px;
+	/*border:1px solid #ccc;*/
+}
+
+#divStorageGroupFormRight{
+	margin-left: 20px;
+	float: left;
+	width: 350px;
+	height: 300px;
+	/*border:1px solid #ccc;*/
+}
+
+
+#divTakeList{
+	width: 320px;
+	height: 260px;
+	/*border:1px solid #ccc;*/
+	border-radius: 5px;
+	overflow-y:auto;
+}
+
+#divFormOptions{
+	margin-top: 20px;
+	width: 620px;
+}
+
+.control-group {
+    margin-top: 5px;
+    margin-left: 20px;
+}
+
+.marker-icon{
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+}
+
+.take{
+	width: 100%;
+	height: 35px;
+	line-height: 45px;
+	border-bottom: 1px solid #ccc;
+}
+
+.take-left{
+	width:220px;
+	height: inherit;
+	line-height: inherit;
+	float: left;
+}
+
+.take-right{
+	width:80px;
+	height: inherit;
+	line-height: inherit;
+	float: left;
+
+}
+
+.take-right span{
+	width: 20px;
+}
+
+.take-right span:hover{
+	cursor: pointer;
+	color: #337ab7;
+}
