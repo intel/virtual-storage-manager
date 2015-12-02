@@ -1604,19 +1604,23 @@ class SchedulerManager(manager.Manager):
         :param body: {"disks":[
                                 {'server_id':'1','osdinfo':[{'storage_group_id':
                                                             "weight":
-                                                            "jounal":
+                                                            "journal":
                                                             "data":},{}]},
                                 {'server_id':'2','osdinfo':[{'storage_group_id':
                                                             "weight":
-                                                            "jounal":
+                                                            "journal":
                                                             "data":},{}]},
                             ]
                     }
         :return:
         """
         disks = body.get('disks',[])
-        for disk_in_same_server in disks:
-            self.add_new_disks_to_cluster(self, context, disk_in_same_server)
+        try:
+            for disk_in_same_server in disks:
+                self.add_new_disks_to_cluster( context, disk_in_same_server)
+        except:
+            return {"message":"data error"}
+        return {"message": "success"}
 
 
     def reconfig_diamond(self, context, body):
