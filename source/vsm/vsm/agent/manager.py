@@ -1809,9 +1809,11 @@ class AgentManager(manager.Manager):
             db.storage_group_update_or_create(context,storage_group)
 
     def detect_crushmap(self,context,keyring):
+        LOG.info('333333')
         message = {'error':'','code':'','info':''}
         try:
             crushmap = self.get_crushmap_json_str(keyring)
+            LOG.info('4444')
             message['error'] = ''
             message['code'] = ''
             message['info'] = 'Success'

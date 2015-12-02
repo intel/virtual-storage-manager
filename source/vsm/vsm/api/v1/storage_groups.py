@@ -150,7 +150,10 @@ class Controller(wsgi.Controller):
                                                    if osd['storage_group']['id'] == storage_group["id"]])
             storage_group['capacity_avail'] = sum([osd["device"]['avail_capacity_kb'] for osd in osds
                                                    if osd['storage_group']['id'] == storage_group["id"]])
-            storage_group['take_name'] = db.zone_get(context,storage_group['take_id'])['name']
+            if storage_group.get('take_id'):
+                storage_group['take_name'] = db.zone_get(context,storage_group['take_id'])['name']
+            else:
+                storage_group['take_name'] = ''
 
             # largest
             nodes = {}

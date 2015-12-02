@@ -1308,19 +1308,26 @@ class SchedulerManager(manager.Manager):
         :return:
         '''
         monitor_pitched_host = self._get_monitor_by_cluster_id(context, body.get('cluster_id',1))
-        monitor_pitched_host = monitor_pitched_host['host']
+        LOG.info("000000000000000=%s"%monitor_pitched_host)
         monitor_keyring = None
-        message = {}
+        tree_node = []
         try:
+            LOG.info("111111111111111=%s"%monitor_pitched_host)
             message = self._agent_rpcapi.detect_crushmap(context, monitor_keyring, monitor_pitched_host)
+            crushmap_str = message['crushmap']
+            crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
+            utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
+            crushmap = CrushMap(json_file=crush_map_new)
+            tree_node = crushmap._show_as_tree_dict()
+            LOG.info("222222==%s"%tree_node)
         except rpc_exc.Timeout:
-            LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
+            LOG.error('ERROR: get_crushmap_tree_data rpc timeout')
         except rpc_exc.RemoteError:
-            LOG.error('ERROR: check_pre_existing_cluster rpc remote')
+            LOG.error('ERROR: get_crushmap_tree_data rpc remote')
         except:
-            LOG.error('ERROR: check_pre_existing_cluster')
+            LOG.error('ERROR: get_crushmap_tree_data')
             raise
-        return message
+        return {'tree_node':tree_node}
 
     def import_cluster(self,context,body):
         '''
