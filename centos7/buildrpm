@@ -60,29 +60,35 @@ create_dir
 find $TOPDIR -name "*.pyc" | xargs -i rm -rf {}
 find $TOPDIR -name "*.pyo" | xargs -i rm -rf {}
 
-#---------------------------------------------
-# Begin to build VSM rpms.
-#---------------------------------------------
 
-build_vsm_rpm
-
-#---------------------------------------------
-# Begin to build python-vsmclient rpm.
-#---------------------------------------------
-
-build_vsmclient_rpm
-
-#---------------------------------------------
-# Begin to build vsm-dashboard rpm
-#---------------------------------------------
-
-build_vsm_dashboard_rpm
-
-#---------------------------------------------
-# vsm deploy
-#---------------------------------------------
-
-build_vsmdeploy_rpm
+PACKAGE_NAMES=$1
+if [[ $PACKAGE_NAMES != "" ]]
+then
+    PACKAGE_NAME_LIST=${PACKAGE_NAMES//,/ }
+    for package_name in $PACKAGE_NAME_LIST
+    do
+        if [[ $package_name == "vsm" ]]
+        then
+            build_vsm_deb
+        elif [[ $package_name == "python-vsmclient" ]]
+        then
+            build_vsmclient_deb
+        elif [[ $package_name == "vsm-dashboard" ]]
+        then
+            build_vsm_dashboard_deb
+        elif [[ $package_name == "vsm-deploy" ]]
+        then
+            build_vsmdeploy_deb
+        else
+            echo "vsm project does not include $package_name package"
+        fi
+    done
+else
+    build_vsm_deb
+    build_vsmclient_deb
+    build_vsm_dashboard_deb
+    build_vsmdeploy_deb
+fi
 
 #---------------------------------------------
 # Update vsmrepo
