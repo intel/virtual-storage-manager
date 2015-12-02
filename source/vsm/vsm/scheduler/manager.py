@@ -1588,8 +1588,12 @@ class SchedulerManager(manager.Manager):
             return res
 
     def add_new_disks_to_cluster(self, context, body):
-        server_id = body['server_id']
-        server = db.init_node_get_by_id(context,id=server_id)
+        server_id = body.get('server_id',None)
+        server_name = body.get('server_name',None)
+        if server_id is not None:
+            server = db.init_node_get_by_id(context,id=server_id)
+        elif server_name is not None:
+            server = db.init_node_get_by_host(context,host=server_name)
         self._agent_rpcapi.add_new_disks_to_cluster(context, body, server['host'])
         new_osd_count = int(server["data_drives_number"]) + len(body['osdinfo'])
         values = {"data_drives_number": new_osd_count}
