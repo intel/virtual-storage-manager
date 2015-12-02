@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Cluster Status" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Crushmap") %}
+    <link href="{{ STATIC_URL }}dashboard/css/crushmap.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}dashboard/css/zTreeStyle.css" rel="stylesheet">
+{% endblock page_header %}
+
+{% block main %}
+    {% csrf_token %}
+    <div id="divFramework">
+        <div id="divCrushmap">
+            <div id="divCrushmapTree" class="ztree"></div>
+        </div>
+        <div id="divStorageGroup">
+            <div id="divStorageGroupTable">
+                <table id="storage_group_list" class="table table-bordered table-striped datatable tablesorter tablesorter-default">
+                    <thead>
+                        <tr class="table_caption">
+                            <th class="table_header" colspan="7" data-column="0">
+                                <h3 class="table_title">Storage Group List</h3>
+                                <div class="table_actions clearfix">
+                                    <button href="#" title="Add Storage Group" class="btn btn-default  btn-primary" onclick="addAction()">Add Storage Group</button>
+                                </div>
+                            </th>
+                        </tr>
+                        <tr class="tablesorter-headerRow">
+                            <th class="multi_select_column tablesorter-header sorter-false" data-column="0" tabindex="0">
+                                <div class="tablesorter-header-inner">
+                                    <input type="checkbox" class="table-row-multi-select" onclick="SelectAllCheckBox(this)">
+                                </div>
+                            </th>
+                            <th class="sortable normal_column tablesorter-header" data-column="1" tabindex="0">
+                                <div class="tablesorter-header-inner">Name</div>
+                            </th>
+                            <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0">
+                                <div class="tablesorter-header-inner">Class</div>
+                            </th>
+                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
+                                <div class="tablesorter-header-inner">Take</div>
+                            </th>
+                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
+                                <div class="tablesorter-header-inner">Friendly Name</div>
+                            </th>
+                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
+                                <div class="tablesorter-header-inner">Marker</div>
+                            </th>
+                            <th class="sortable normal_column" data-column="3" tabindex="0">
+                                <div class="tablesorter-header-inner">Action</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {%for sg in sg_list %}
+                        <tr class="odd" data-object-id='{{sg.id}}' id="storage_group_list__row__{{sg.id}}">
+                            <td class="multi_select_column">
+                                <input class="table-row-multi-select" name="object_ids" type="checkbox" value="{{sg.id}}" onclick="MarkTree()">
+                            </td>
+                            <td class="sortable normal_column name">{{sg.name}}
+                            </td>
+                            <td class="sortable normal_column class">{{sg.storage_class}}</td>
+                            <td class="sortable normal_column take" style="width:20%">Take2</td>
+                            <td class="sortable normal_column friendly_name">{{sg.friendly_name}}</td>
+                            <td class="sortable normal_column marker">
+                                <span class="glyphicon glyphicon-tag" aria-hidden="true"  style="color:#50f50f"></span>
+                            </td>
+                            <td class="actions_column">
+                                <button href="#" class="btn btn-default btn-primary" onclick="updateAction({{sg.id}})">Edit</button>
+                            </td>
+                        </tr>
+                        {%endfor%}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="7" data-column="0">
+                                <span class="table_count">Displaying {{ sg_list | length }} item</span> 
+                            </td> 
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div id="divStorageGroupForm">
+                <div id="divStorageGroupFormLeft">
+                    <form>
+                        <fieldset>
+                            <div class="control-group form-field clearfix required">
+                                <label>Name:</label>
+                                <span class="help-block"></span>
+                                <div class="input">
+                                    <input id="txtName" maxlength="255"  type="text" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="control-group form-field clearfix required">
+                                <label>Friendly Name:</label>
+                                <span class="help-block"></span>
+                                <div class="input">
+                                  <input id="txtFriendlyName" maxlength="255" type="text" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="control-group form-field clearfix required">
+                                <label>Class:</label>
+                                <span class="help-block"></span>
+                                <div class="input">
+                                  <input id="txtClass" maxlength="255"  type="text" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="control-group form-field clearfix required">
+                                <label>Marker:</label>
+                                <span class="help-block"></span>
+                                <div class="input">
+                                    <input id="txtMarker" maxlength="24" type="color" class="form-control" value="#cccccc" />
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+
+                <div id="divStorageGroupFormRight">
+                    <div class="control-group form-field clearfix required" >
+                        <label>Take:</label>
+                        <span class="help-block"></span>
+                        <div id="divTakeList">
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="divFormOptions" class="vsm-options-bar">
+                    <button id="btnAddStorageGroup" class="btn btn-primary" onclick="PostAction('create')">Add</button>
+                    <button id="btnUpdateStorageGroup" class="btn btn-primary" style="display:none" onclick="PostAction('update')">Update</button>
+                    <a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/storage-group-management/">Cancel</a>
+            </div>
+
+
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    {{ block.super }}
+    <script src="{{ STATIC_URL }}dashboard/js/jquery.ztree.all-3.5.min.js"></script>
+    <script src="{{ STATIC_URL }}dashboard/js/crushmap.js"></script> 
+{% endblock %}
