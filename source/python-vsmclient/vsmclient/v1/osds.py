@@ -99,13 +99,37 @@ class OsdManager(base.ManagerWithFind):
 
     def add_new_disks_to_cluster(self, body):
 
-        '''body={'server_id':server_id,
-                'osdinfo':[{'storage_group_id':
-                            "weight":
-                            "jounal":
-                            "data":
-        }]}'''
+        """
+        :param body:
+         body={'server_id':server_id,
+                        'osdinfo':[{'storage_group_id':
+                                    "weight":
+                                    "jounal":
+                                    "data":
+                }]}
+        :return:
+        """
         url = '/osds/add_new_disks_to_cluster'
+        return self.api.client.post(url, body=body)
+
+    def add_batch_new_disks_to_cluster(self, body):
+        """
+
+        :param context:
+        :param body: {"disks":[
+                                {'server_id':'1','osdinfo':[{'storage_group_id':
+                                                            "weight":
+                                                            "jounal":
+                                                            "data":},{}]},
+                                {'server_id':'2','osdinfo':[{'storage_group_id':
+                                                            "weight":
+                                                            "jounal":
+                                                            "data":},{}]},
+                            ]
+                    }
+        :return:
+        """
+        url = '/osds/add_batch_new_disks_to_cluster'
         return self.api.client.post(url, body=body)
 
     def delete(self, osd):

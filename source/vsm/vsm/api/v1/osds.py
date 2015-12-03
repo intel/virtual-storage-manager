@@ -244,6 +244,12 @@ class Controller(wsgi.Controller):
         self.scheduler_api.add_new_disks_to_cluster(context, body)
         return webob.Response(status_int=202)
 
+    def add_batch_new_disks_to_cluster(self, req, body):
+        context = req.environ['vsm.context']
+        LOG.info("batch_osd_add body= %s" % body)
+        self.scheduler_api.add_batch_new_disks_to_cluster(context, body)
+        return webob.Response(status_int=202)
+
     def summary(self, req, cluster_id = None):
         #LOG.info('osd-summary body %s ' % body)
         context = req.environ['vsm.context']

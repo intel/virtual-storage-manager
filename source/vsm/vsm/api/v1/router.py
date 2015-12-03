@@ -147,6 +147,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         collection={"summary": "get",
                                     "refresh": "post",
                                     "detail": "get",
+                                    "add_batch_new_disks_to_cluster":"post",
                                     "add_new_disks_to_cluster":"post",
                                     "detail_filter_and_sort": "get"},
                         member={'action':'POST'})
