@@ -116,9 +116,6 @@ def get_crushmap_series(request):
                 "font":"",
                 "open":is_open,
                 "isParent":is_parent,
-                "sg":node["sg"],
-                "nocheck":node["nocheck"],
-                "take":node["take"],
             }
             #append the item into crushmap
             crushmap_nodes.append(item)
@@ -146,7 +143,7 @@ def create_storage_group(request):
     print "===========Create Storage Group============"
     print body
     try:
-        rsp = vsmapi.storage_group_create(request, body=body)
+        rsp = vsmapi.storage_group_create_with_takes(request, body=body)
         status = "OK"
         msg = "Add Storage Group Successfully!"
     except ex:

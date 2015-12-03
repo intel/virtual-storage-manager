@@ -179,6 +179,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
         mapper.resource("storage_groups", "storage_groups",
                         controller=self.resources['storage_groups'],
                         collection={"summary": "get",
+                                    "create_with_takes":"post",
                                     "detail": "get"},
                         member={'action':'POST'})
 

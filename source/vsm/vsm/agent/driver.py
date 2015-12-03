@@ -2870,6 +2870,7 @@ class CreateCrushMapDriver(object):
             #    self._write_to_crushmap(string)
         return True
 
+
     def _gen_rule(self):
         string = """\n# rules
 rule capacity {
@@ -2965,9 +2966,75 @@ class DiamondDriver(object):
         out, err = utils.execute('diamond', 'll', run_as_root=True)
         return out
 
+class ManagerCrushMapDriver(object):
+    """Create crushmap file"""
+    def __init__(self, execute=utils.execute, *args, **kwargs):
+        self.conductor_api = conductor.API()
+        self.conductor_rpcapi = conductor_rpcapi.ConductorAPI()
+        self._crushmap_path = "/var/run/vsm/crushmap_decompiled"
 
 
+    def _write_to_crushmap(self, string):
+        fd = open(self._crushmap_path, 'a')
+        fd.write(string)
+        fd.close()
 
+    def get_crushmap(self):
+        LOG.info("DEBUG Begin to get crushmap")
+        utils.execute('ceph', 'osd', 'getcrushmap', '-o',
+                self._crushmap_path+"_before", run_as_root=True)
+        utils.execute('crushtool', '-d', self._crushmap_path+"_before", '-o',
+                        self._crushmap_path, run_as_root=True)
+        return True
+
+    def set_crushmap(self):
+        LOG.info("DEBUG Begin to set crushmap")
+        utils.execute('crushtool', '-c', self._crushmap_path, '-o',
+                        self._crushmap_path+"_compiled", run_as_root=True)
+        utils.execute('ceph', 'osd', 'setcrushmap', '-i',
+                        self._crushmap_path+"_compiled", run_as_root=True)
+        return True
+
+    def _generate_one_rule(self,rule_name,take_name_list,rule_id=NOne,choose_leaf_type=None,type='replicated',min_size=0,max_size=10):
+        crushmap = get_crushmap_json_format()
+        if rule_id is None:
+            rule_ids =[rule['rule_id'] for rule in crushmap._rules]
+            rule_ids.sort()
+            rule_id = rule_ids[-1]+1
+        if choose_leaf_type is None:
+            types = crushmap._types
+            types.sort(key=operator.itemgetter('type_id'))
+            choose_leaf_type = types[-2]['name']
+        sting_common = """    type %s
+    min_size %s
+    max_size %s
+"""%(type,str(min_size),str(max_size))
+        string_choose = """    step chooseleaf firstn 0 type %s
+    step emit
+}
+"""%choose_leaf_type
+        string = ""
+        string = string + "\nrule " + rule_name + " {\n"
+        string = string + "    ruleset " + str(rule_id) + "\n"
+        string = string + sting_common
+        for take in take_name_list:
+            string = string + "    step take " + take + "\n"
+        string = string + string_choose
+        self.get_crushmap()
+        self._write_to_crushmap(string)
+        self.set_crushmap()
+        return {'rule_id':rule_id}
+
+def get_crushmap_json_format(self,keyring=None):
+    '''
+    :return:
+    '''
+    if keyring:
+        json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump','--keyring',keyring, run_as_root=True)
+    else:
+        json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump', run_as_root=True)
+    crushmap = CrushMap(json_context=json_crushmap)
+    return crushmap
 
 
 

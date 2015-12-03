@@ -152,3 +152,6 @@ class API(object):
 
     def get_crushmap_tree_data(self,context,body):
         return self.scheduler_rpcapi.get_crushmap_tree_data(context,body)
+
+    def add_storage_group_to_crushmap_and_db(self,context,body):
+        return self.scheduler_rpcapi.add_storage_group_to_crushmap_and_db(context,body)

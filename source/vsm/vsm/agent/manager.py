@@ -81,6 +81,7 @@ class AgentManager(manager.Manager):
         self._driver = driver.DbDriver()
         self.ceph_driver = driver.CephDriver()
         self.crushmap_driver = driver.CreateCrushMapDriver()
+        self.crushmap_manager_driver = driver.ManagerCrushMapDriver()
         self.diamond_driver= driver.DiamondDriver()
         self._smp = ManifestParser()
         self._node_info = self._smp.format_to_json()
@@ -2062,6 +2063,11 @@ class AgentManager(manager.Manager):
         message = {'code':code,'error':error,'info':info,'tree_data':tree_node}
         return message
 
+    def add_rule_to_crushmap(self,context,body):
+        rule_name = body.get('name')
+        take_name_list = body.get('take_name_list')
+        ret = self.crushmap_manager_driver._generate_one_rule(rule_name=rule_name,take_name_list=take_name_list)
+        return ret
 
 
 

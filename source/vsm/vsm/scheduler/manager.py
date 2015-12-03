@@ -1827,3 +1827,28 @@ class SchedulerManager(manager.Manager):
             if server['status'] == 'Active':
                 self._agent_rpcapi.reconfig_diamond(context, body, server['host'])
 
+    def add_storage_group_to_crushmap_and_db(self, context, body):
+        storage_groups = body.get('storage_groups')
+        cluster_id = body.get('cluster_id',None)
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('sync call to host = %s' % active_monitor['host'])
+        for storage_group in storage_groups:
+            ret = self._agent_rpcapi.add_rule_to_crushmap(context, storage_group, active_monitor['host'])
+            rule_id = ret.get('rule_id')
+            take_order = 0
+            for take in body.get('take_name_list'):
+                take_order += 1
+                storage_group_to_db = {
+                    'name':storage_group['name'],
+                    'storage_class':storage_group['storage_class'],
+                    'friendly_name':storage_group['friendly_name'],
+                    'rule_id':rule_id,
+                    'take_id':take,
+                    'take_order':take_order,
+                }
+                db.create_storage_group(context, storage_group_to_db)
+
+        return {'message':'success'}
+
+
+
