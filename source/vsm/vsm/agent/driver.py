@@ -2982,9 +2982,9 @@ class ManagerCrushMapDriver(object):
     def get_crushmap(self):
         LOG.info("DEBUG Begin to get crushmap")
         utils.execute('ceph', 'osd', 'getcrushmap', '-o',
-                self._crushmap_path+"_before", run_as_root=True)
+                self._crushmap_path+"_before", run_as_root=False)
         utils.execute('crushtool', '-d', self._crushmap_path+"_before", '-o',
-                        self._crushmap_path, run_as_root=True)
+                        self._crushmap_path, run_as_root=False)
         return True
 
     def set_crushmap(self):
@@ -2995,7 +2995,7 @@ class ManagerCrushMapDriver(object):
                         self._crushmap_path+"_compiled", run_as_root=True)
         return True
 
-    def _generate_one_rule(self,rule_name,take_name_list,rule_id=NOne,choose_leaf_type=None,type='replicated',min_size=0,max_size=10):
+    def _generate_one_rule(self,rule_name,take_id_list,rule_id=None,choose_leaf_type=None,type='replicated',min_size=0,max_size=10):
         crushmap = get_crushmap_json_format()
         if rule_id is None:
             rule_ids =[rule['rule_id'] for rule in crushmap._rules]
@@ -3017,15 +3017,16 @@ class ManagerCrushMapDriver(object):
         string = string + "\nrule " + rule_name + " {\n"
         string = string + "    ruleset " + str(rule_id) + "\n"
         string = string + sting_common
-        for take in take_name_list:
-            string = string + "    step take " + take + "\n"
+        for take in take_id_list:
+            take_name = crushmap.get_bucket_by_id(int(take))['name']
+            string = string + "    step take " + take_name + "\n"
         string = string + string_choose
         self.get_crushmap()
         self._write_to_crushmap(string)
         self.set_crushmap()
         return {'rule_id':rule_id}
 
-def get_crushmap_json_format(self,keyring=None):
+def get_crushmap_json_format(keyring=None):
     '''
     :return:
     '''

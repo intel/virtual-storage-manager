@@ -1828,6 +1828,7 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.reconfig_diamond(context, body, server['host'])
 
     def add_storage_group_to_crushmap_and_db(self, context, body):
+        LOG.info('add_storage_group_to_crushmap_and_db3333333333===%s'%body)
         storage_groups = body.get('storage_groups')
         cluster_id = body.get('cluster_id',None)
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
@@ -1836,8 +1837,8 @@ class SchedulerManager(manager.Manager):
             ret = self._agent_rpcapi.add_rule_to_crushmap(context, storage_group, active_monitor['host'])
             rule_id = ret.get('rule_id')
             take_order = 0
-            for take in body.get('take_name_list'):
-                take_order += 1
+            LOG.info('take==333333=====%s'%storage_group.get('take'))
+            for take in storage_group.get('take'):
                 storage_group_to_db = {
                     'name':storage_group['name'],
                     'storage_class':storage_group['storage_class'],
@@ -1846,9 +1847,19 @@ class SchedulerManager(manager.Manager):
                     'take_id':take,
                     'take_order':take_order,
                 }
-                db.create_storage_group(context, storage_group_to_db)
+                LOG.info('take==444444444=====%s'%storage_group_to_db)
+                db.storage_group_update_or_create(context, storage_group_to_db)
+                take_order += 1
 
         return {'message':'success'}
 
-
+    def update_zones_from_crushmap_to_db(self, context, body):
+        if body is not None:
+            cluster_id = body.get('cluster_id',None)
+        else:
+            cluster_id = None
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('update_zones_from_crushmap_to_db sync call to host = %s' % active_monitor['host'])
+        self._agent_rpcapi.update_zones_from_crushmap_to_db(context,body,active_monitor['host'])
+        return {'message':'success'}
 

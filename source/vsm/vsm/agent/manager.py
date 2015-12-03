@@ -1786,6 +1786,7 @@ class AgentManager(manager.Manager):
             for bucket in buckets:
                 if bucket['type_id'] > types[1]['type_id']:
                     for item in bucket['items']:
+                        LOG.info('222222222===%s'%item['id'])
                         zone = crushmap.get_bucket_by_id(item['id'])
                         values = {'id': zone['id'],
                                   'name': zone['name'],
@@ -2065,10 +2066,15 @@ class AgentManager(manager.Manager):
 
     def add_rule_to_crushmap(self,context,body):
         rule_name = body.get('name')
-        take_name_list = body.get('take_name_list')
-        ret = self.crushmap_manager_driver._generate_one_rule(rule_name=rule_name,take_name_list=take_name_list)
+        take_id_list = body.get('take')
+        ret = self.crushmap_manager_driver._generate_one_rule(rule_name=rule_name,take_id_list=take_id_list)
         return ret
 
+    def update_zones_from_crushmap_to_db(self,context,body):
+        crushmap = self.get_crushmap_json_format()
+        LOG.info('update_zones_from_crushmap_to_db-----1111===%s'%crushmap)
+        ret = self._insert_zone_from_crushmap_to_db(context,crushmap)
+        return ret
 
 
 

@@ -164,7 +164,11 @@ class Controller(wsgi.Controller):
             storage_group['capacity_avail'] = sum([osd["device"]['avail_capacity_kb'] for osd in osds
                                                    if osd['storage_group']['id'] == storage_group["id"]])
             if storage_group.get('take_id'):
-                storage_group['take_name'] = db.zone_get(context,storage_group['take_id'])['name']
+                try:
+                    storage_group['take_name'] = db.zone_get(context,storage_group['take_id'])['name']
+                except:
+                    self.scheduler_api.update_zones_from_crushmap_to_db(context)
+                    storage_group['take_name'] = ''
             else:
                 storage_group['take_name'] = ''
 

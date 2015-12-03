@@ -3181,7 +3181,6 @@ def storage_group_update_or_create(context, values):
         if values['name']:
            result = model_query(context, models.StorageGroup, session=session).\
                         filter_by(name=values['name']).\
-                        filter_by(take_id=values['take_id']).\
                         filter_by(take_order=values['take_order']).\
                         first()
         if result:

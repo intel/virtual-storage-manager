@@ -43,6 +43,7 @@ class ViewBuilder(common.ViewBuilder):
                 "take_name": storage_group["take_name"],
                 "take_id": storage_group["take_id"],
                 "take_order": storage_group["take_order"],
+                "marker": storage_group["marker"],
 
             }
         }

@@ -7,11 +7,12 @@ function getFont(treeId, node) {
 
 function onClickEvent(event, treeId, treeNode, clickFlag) {
 	if(treeNode.type != 0){
-		var take = treeNode.name;
+        var take_id = treeNode.id.toString();
+		var take_name = treeNode.name;
 
 		var is_exsit = false;
 		$(".take-left").each(function(){
-			if(trimStr(this.innerHTML) == trimStr(take)){
+			if(trimStr(this.id) == trimStr(take_id)){
 				is_exsit = true;
 			}
 		});
@@ -20,7 +21,7 @@ function onClickEvent(event, treeId, treeNode, clickFlag) {
 			return false;
 		}
 
-    	$("#divTakeList").append(GenerateTakeHTML(take));
+    	$("#divTakeList").append(GenerateTakeHTML(take_id,take_name));
     	RefreshTakeList();
 	}
 }
@@ -65,7 +66,7 @@ $(document).ready(function(){
 function loadTree(){
 	var data = {
 		"crushmap":"",
-		"cephconf":"",
+		"cephconf":""
 	}
 
 	var postData = JSON.stringify(data);
@@ -114,7 +115,9 @@ function updateAction(id){
 
 	var trID = "storage_group_list__row__"+id;
 	var tr = $("#"+trID);
-	var sg_take =  trimStr(tr.find(".take")[0].innerHTML);
+    //TODO:later
+	var sg_take_id =  trimStr(tr.find(".take")[0].innerHTML);
+    var sg_take_name =  trimStr(tr.find(".take")[0].innerHTML);
 
 
 	$("#txtName").val(trimStr(tr.find(".name")[0].innerHTML));
@@ -164,20 +167,19 @@ function PostAction(action){
 
 	var take_list = [];
 	$(".take-left").each(function(){
-		take_list.push(this.innerHTML);
-	})
-
-	var sg_data = {
-        'storage_group': {
-        	'id':_SG_ID,
-            'name': $("#txtName").val(),
-            'friendly_name': $("#txtFriendlyName").val(),
-            'storage_class': $("#txtClass").val(),
-            'marker': $("#txtMarker").val(),
-            'take': take_list,
-            'cluster_id':1  //bad code. the origin is 1
-        }
+		take_list.push(this.id);
+	});
+    var sg_data = {'storage_groups':[]};
+    var sg = {
+        'id':_SG_ID,
+        'name': $("#txtName").val(),
+        'friendly_name': $("#txtFriendlyName").val(),
+        'storage_class': $("#txtClass").val(),
+        'marker': $("#txtMarker").val(),
+        'take': take_list,
+        'cluster_id':1  //bad code. the origin is 1
     }
+    sg_data.storage_groups.push(sg);
 
 	var postData = JSON.stringify(sg_data);
 	token = $("input[name=csrfmiddlewaretoken]").val();
@@ -355,16 +357,17 @@ function RefreshTakeList(){
 	}
 }
 
-function GenerateTakeHTML(take){
+function GenerateTakeHTML(take_id,take_name){
+    var ctrlTakeID = "divTake_"+take_id;
 	var html = "";
-	html += "<div id='"+ take +"' class='take'>";
-	html += "	<div class='take-left'>";
-	html += 		take;
+	html += "<div id='"+ ctrlTakeID +"' class='take'>";
+	html += "	<div id='"+ take_id +"' class='take-left'>";
+	html += 		take_name;
 	html += "	</div>";
 	html += "	<div class='take-right'>";
-	html += "		<span class='glyphicon glyphicon-arrow-up' aria-hidden='true' onclick=\"TakeUp('"+take+"')\"></span>";
-	html += "		<span class='glyphicon glyphicon-arrow-down' aria-hidden='true' onclick=\"TakeDown('"+take+"')\"></span>"
-	html += "		<span class='glyphicon glyphicon-remove' aria-hidden='true' onclick=\"TakeRemove('"+take+"')\"></span>"
+	html += "		<span class='glyphicon glyphicon-arrow-up' aria-hidden='true' onclick=\"TakeUp('"+ctrlTakeID+"')\"></span>";
+	html += "		<span class='glyphicon glyphicon-arrow-down' aria-hidden='true' onclick=\"TakeDown('"+ctrlTakeID+"')\"></span>"
+	html += "		<span class='glyphicon glyphicon-remove' aria-hidden='true' onclick=\"TakeRemove('"+ctrlTakeID+"')\"></span>"
 	html += "	</div>";
 	html += "</div>";
 

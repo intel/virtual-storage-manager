@@ -414,6 +414,8 @@ class StorageGroup(BASE, VsmBase):
     status = Column(String(length=255), default="OUT", nullable=False)
     take_id = Column(Integer, nullable=True)
     take_order = Column(Integer, nullable=True)
+    marker = Column(String(length=255), nullable=True)
+
 class Zone(BASE, VsmBase):
     """This table store the zones"""
 
