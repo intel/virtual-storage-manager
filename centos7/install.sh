@@ -369,7 +369,7 @@ function install_controller() {
 function kill_diamond() {
     cat <<"EOF" >kill_diamond.sh
 #!/bin/bash
-diamond_pid=`ps -ef|grep diamond|grep -v grep|grep -v bash|awk -F " " '{print $2}'`
+diamond_pid=`ps -ef|grep diamond|grep -v grep|grep -v bash|grep -v kill_diamond|awk -F " " '{print $2}'`
 for pid in $diamond_pid; do
     sudo -E kill -9 $pid
 done
