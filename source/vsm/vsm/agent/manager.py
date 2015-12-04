@@ -2076,6 +2076,11 @@ class AgentManager(manager.Manager):
         ret = self._insert_zone_from_crushmap_to_db(context,crushmap)
         return ret
 
+    def update_storage_grpoups_from_crushmap_to_db(self,context,body):
+        crushmap = self.get_crushmap_json_format()
+        LOG.info('update_zones_from_crushmap_to_db-----1111===%s'%crushmap)
+        ret = self._insert_storage_group_from_crushmap_to_db(context,crushmap)
+        return ret
 
 
 

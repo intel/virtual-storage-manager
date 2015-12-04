@@ -1579,6 +1579,10 @@ class SchedulerManager(manager.Manager):
             time.sleep(1)
         self._agent_rpcapi.update_all_status(context,
             host=monitor_node['host'])
+        self._agent_rpcapi.update_zones_from_crushmap_to_db(context,None,
+            monitor_node['host'])
+        self._agent_rpcapi.update_storage_groups_from_crushmap_to_db(context,None,
+            monitor_node['host'])
         self._judge_drive_ext_threshold(context)
         self._update_drive_ext_threshold(context)
         return {'message':'res'}
