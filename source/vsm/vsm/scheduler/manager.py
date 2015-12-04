@@ -1855,8 +1855,47 @@ class SchedulerManager(manager.Manager):
                 LOG.info('take==444444444=====%s'%storage_group_to_db)
                 db.storage_group_update_or_create(context, storage_group_to_db)
                 take_order += 1
+        message = {'info':'Add storage group %s success!'%(','.join([ storage_group['name'] for storage_group in storage_groups])),
+                   'error_code':'','error_msg':''}
+        return message
 
-        return {'message':'success'}
+    def update_storage_group_to_crushmap_and_db(self, context, body):
+        LOG.info('update_storage_group_to_crushmap_and_db===%s'%body)
+        storage_groups = body.get('storage_groups')
+        cluster_id = body.get('cluster_id',None)
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('sync call to host = %s' % active_monitor['host'])
+        message = {'info':'Update success!','error_code':[],'error_msg':[]}
+        for storage_group in storage_groups:
+            storage_group_in_db = db.storage_group_get_by_name(context,storage_group['name'])
+            rule_id = storage_group_in_db['rule_id']
+            pools = db.pool_get_by_ruleset(context,rule_id)
+            if len(pools) > 0:
+                pool_names = [ pool['name'] for pool in pools ]
+                message['error_code'].append('-1')
+                message['error_msg'].append('storage group %s was used by pool %s currently!'%(storage_group['name'],pool_names))
+                continue
+            ret = self._agent_rpcapi.modify_rule_in_crushmap(context, storage_group, active_monitor['host'])
+            rule_id = ret.get('rule_id')
+            take_order = 0
+            LOG.info('take==333333=====%s'%storage_group.get('take'))
+            for take in storage_group.get('take'):
+                storage_group_to_db = {
+                    'name':storage_group['name'],
+                    'storage_class':storage_group['storage_class'],
+                    'friendly_name':storage_group['friendly_name'],
+                    'marker':storage_group['marker'],
+                    'rule_id':rule_id,
+                    'take_id':take,
+                    'take_order':take_order,
+                }
+                LOG.info('take==444444444=====%s'%storage_group_to_db)
+                db.storage_group_update_or_create(context, storage_group_to_db)
+                take_order += 1
+            db.storage_group_delete_by_order(context,take_order=take_order,name=storage_group['name'])
+        message['error_code'] = ','.join(message['error_code'])
+        message['error_msg'] = ','.join(message['error_msg'])
+        return message
 
     def update_zones_from_crushmap_to_db(self, context, body):
         if body is not None:

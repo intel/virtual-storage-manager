@@ -2612,7 +2612,19 @@ def storage_group_update_by_name(context, name, values, session=None):
             values['updated_at'] = timeutils.utcnow()
             convert_datetimes(values, 'created_at', 'deleted_at', 'updated_at')
             group_ref.update(values)
-    
+
+@require_admin_context
+def storage_group_delete_by_order_and_name(context, take_order, name, session=None):
+    if not session:
+        session = get_session()
+    with session.begin(subtransactions=True):
+        group_refs = model_query(context, models.StorageGroup, session=session).\
+            filter_by(name=name).filter(models.StorageGroup.take_order>=take_order).all()
+        values = {'deleted_at':timeutils.utcnow(),'deleted':1}
+        convert_datetimes(values, 'created_at', 'deleted_at', 'updated_at')
+        for group_ref in group_refs:
+            group_ref.update(values)
+
 #bellow is operation on zone
 @require_admin_context
 def zone_get_all(context, session=None):
