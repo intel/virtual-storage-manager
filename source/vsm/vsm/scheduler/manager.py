@@ -1832,25 +1832,55 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.reconfig_diamond(context, body, server['host'])
 
     def add_storage_group_to_crushmap_and_db(self, context, body):
+        '''
+
+        :param context:
+        :param body:{'storage_groups': [{
+                        'id':None,
+                        'name': 'storage_group_name',
+                        'friendly_name': 'storage_group_name',
+                        'storage_class': 'storage_group_name',
+                        'marker': '#FFFFF',
+                        'rule_info':{
+                                    'rule_name':'storage_group_name',
+                                    'rule_id':None,
+                                    'type':'replicated',
+                                    'min_size':0,
+                                    'max_size':10,
+                                    'takes': [{'take_id':-12,
+                                            'choose_leaf_type':'host',
+                                            'choose_num':2,
+                                            },
+                                            ]
+                                }
+                        'cluster_id':1  //bad code. the origin is 1
+                    },
+                    ]
+                }
+        :return:
+        '''
         LOG.info('add_storage_group_to_crushmap_and_db body=%s'%body)
         storage_groups = body.get('storage_groups')
         cluster_id = body.get('cluster_id',None)
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
         LOG.info('sync call to host = %s' % active_monitor['host'])
         for storage_group in storage_groups:
-            ret = self._agent_rpcapi.add_rule_to_crushmap(context, storage_group, active_monitor['host'])
+            rule_info = storage_group.get('rule_info')
+            ret = self._agent_rpcapi.add_rule_to_crushmap(context, rule_info, active_monitor['host'])
             rule_id = ret.get('rule_id')
             take_order = 0
             #LOG.info('take==333333=====%s'%storage_group.get('take'))
-            for take in storage_group.get('take'):
+            for take in storage_group.get('rule_info').get('take'):
                 storage_group_to_db = {
                     'name':storage_group['name'],
                     'storage_class':storage_group['storage_class'],
                     'friendly_name':storage_group['friendly_name'],
                     'marker':storage_group['marker'],
                     'rule_id':rule_id,
-                    'take_id':take,
+                    'take_id':take.get('take_id'),
                     'take_order':take_order,
+                    'choose_type':take.get('choose_leaf_type'),#TODO
+                    'choose_num':take.get('choose_num'),#"TODO"
                 }
                 #LOG.info('take==444444444=====%s'%storage_group_to_db)
                 db.storage_group_update_or_create(context, storage_group_to_db)
@@ -1867,6 +1897,7 @@ class SchedulerManager(manager.Manager):
         LOG.info('sync call to host = %s' % active_monitor['host'])
         message = {'info':'Update success!','error_code':[],'error_msg':[]}
         for storage_group in storage_groups:
+            rule_info = storage_group.get('rule_info')
             storage_group_in_db = db.storage_group_get_by_name(context,storage_group['name'])
             rule_id = storage_group_in_db['rule_id']
             pools = db.pool_get_by_ruleset(context,rule_id)
@@ -1875,19 +1906,21 @@ class SchedulerManager(manager.Manager):
                 message['error_code'].append('-1')
                 message['error_msg'].append('storage group %s was used by pool %s currently!'%(storage_group['name'],pool_names))
                 continue
-            ret = self._agent_rpcapi.modify_rule_in_crushmap(context, storage_group, active_monitor['host'])
+            ret = self._agent_rpcapi.modify_rule_in_crushmap(context, rule_info, active_monitor['host'])
             rule_id = ret.get('rule_id')
             take_order = 0
             LOG.info('update_storage_group_to_crushmap_and_db=====%s'%storage_group.get('take'))
-            for take in storage_group.get('take'):
+            for take in storage_group.get('rule_info').get('take'):
                 storage_group_to_db = {
                     'name':storage_group['name'],
                     'storage_class':storage_group['storage_class'],
                     'friendly_name':storage_group['friendly_name'],
                     'marker':storage_group['marker'],
                     'rule_id':rule_id,
-                    'take_id':take,
+                    'take_id':take.get('take_id'),
                     'take_order':take_order,
+                    'choose_type':take.get('choose_leaf_type'),#TODO
+                    'choose_num':take.get('choose_num'),#"TODO"
                 }
                 LOG.info('update_storage_group_to_crushmap_and_db=====%s'%storage_group_to_db)
                 db.storage_group_update_or_create(context, storage_group_to_db)

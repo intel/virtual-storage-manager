@@ -162,6 +162,8 @@ class Controller(wsgi.Controller):
             if storage_group_db['name'] in storage_group_name_list:
                 storage_groups[storage_group_db['name']]['take_id'].append(storage_group_db['take_id'])
                 storage_groups[storage_group_db['name']]['take_order'].append(storage_group_db['take_order'])
+                storage_groups[storage_group_db['name']]['choose_num'].append(storage_group_db['choose_num'])
+                storage_groups[storage_group_db['name']]['choose_type'].append(storage_group_db['choose_type'])
             else:
                 storage_group_name_list.append(storage_group_db['name'])
                 storage_group_dict = {
@@ -173,6 +175,8 @@ class Controller(wsgi.Controller):
                     'rule_id':storage_group_db['rule_id'],
                     'take_id':[storage_group_db['take_id']],
                     'take_order':[storage_group_db['take_order']],
+                    'choose_num':[storage_group_db['choose_num']],
+                    'choose_type':[storage_group_db['choose_type']],
                     'status': storage_group_db["status"],
                 }
                 storage_groups[storage_group_db['name']] = storage_group_dict

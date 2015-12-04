@@ -43,6 +43,8 @@ class ViewBuilder(common.ViewBuilder):
                 "take_name": ','.join([str(id) for id in storage_group["take_name"]]) ,
                 "take_id": ','.join([str(id) for id in storage_group["take_id"]]) ,
                 "take_order": ','.join([str(id) for id in storage_group["take_order"]]),
+                "choose_num": ','.join([str(id) for id in storage_group["choose_num"]]) ,
+                "choose_type": ','.join([str(id) for id in storage_group["choose_type"]]),
                 "marker": storage_group["marker"],
 
             }
