@@ -29,7 +29,7 @@ def upgrade(migrate_engine):
     storage_group = Table('storage_groups', meta, autoload=True)
     choose_type = Column('choose_type',String(length=255), nullable=True)
     storage_group.create_column(choose_type)
-    choose_num = Column('choose_type',Integer, nullable=True)
+    choose_num = Column('choose_num',Integer, nullable=True)
     storage_group.create_column(choose_num)
 
 
@@ -39,7 +39,7 @@ def downgrade(migrate_engine):
 
     storage_group = Table('storage_groups', meta, autoload=True)
     choose_type = Column('choose_type',String(length=255), nullable=True)
-    choose_num = Column('choose_type',Integer, nullable=True)
+    choose_num = Column('choose_num',Integer, nullable=True)
 
     try:
         storage_group.drop_column(choose_type)
