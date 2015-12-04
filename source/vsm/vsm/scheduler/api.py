@@ -156,5 +156,8 @@ class API(object):
     def add_storage_group_to_crushmap_and_db(self,context,body):
         return self.scheduler_rpcapi.add_storage_group_to_crushmap_and_db(context,body)
 
+    def update_storage_group_to_crushmap_and_db(self,context,body):
+        return self.scheduler_rpcapi.update_storage_group_to_crushmap_and_db(context,body)
+
     def update_zones_from_crushmap_to_db(self,context,body=None):
         return self.scheduler_rpcapi.update_zones_from_crushmap_to_db(context,body)

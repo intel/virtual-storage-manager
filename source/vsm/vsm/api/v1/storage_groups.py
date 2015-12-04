@@ -110,6 +110,19 @@ class Controller(wsgi.Controller):
         LOG.info('CEPH_LOG create_with_takes  ret=%s'%ret)
         return ret
 
+    def update_with_takes(self, req, body=None):
+        '''
+
+        :param res:
+        :param body:
+        :return:
+        '''
+        LOG.info("CEPH_LOG update_with_takes body=%s"%body )
+        context = req.environ['vsm.context']
+        ret = self.scheduler_api.update_storage_group_to_crushmap_and_db(context,body)
+        LOG.info('CEPH_LOG update_with_takes  ret=%s'%ret)
+        return ret
+
     @wsgi.serializers(xml=StorageGroupsTemplate)
     def show(self, req, id):
         """Return data about the given storage_group."""

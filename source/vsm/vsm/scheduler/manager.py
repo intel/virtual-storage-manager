@@ -1832,7 +1832,7 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.reconfig_diamond(context, body, server['host'])
 
     def add_storage_group_to_crushmap_and_db(self, context, body):
-        LOG.info('add_storage_group_to_crushmap_and_db3333333333===%s'%body)
+        LOG.info('add_storage_group_to_crushmap_and_db body=%s'%body)
         storage_groups = body.get('storage_groups')
         cluster_id = body.get('cluster_id',None)
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
@@ -1841,7 +1841,7 @@ class SchedulerManager(manager.Manager):
             ret = self._agent_rpcapi.add_rule_to_crushmap(context, storage_group, active_monitor['host'])
             rule_id = ret.get('rule_id')
             take_order = 0
-            LOG.info('take==333333=====%s'%storage_group.get('take'))
+            #LOG.info('take==333333=====%s'%storage_group.get('take'))
             for take in storage_group.get('take'):
                 storage_group_to_db = {
                     'name':storage_group['name'],
@@ -1852,7 +1852,7 @@ class SchedulerManager(manager.Manager):
                     'take_id':take,
                     'take_order':take_order,
                 }
-                LOG.info('take==444444444=====%s'%storage_group_to_db)
+                #LOG.info('take==444444444=====%s'%storage_group_to_db)
                 db.storage_group_update_or_create(context, storage_group_to_db)
                 take_order += 1
         message = {'info':'Add storage group %s success!'%(','.join([ storage_group['name'] for storage_group in storage_groups])),
@@ -1860,7 +1860,7 @@ class SchedulerManager(manager.Manager):
         return message
 
     def update_storage_group_to_crushmap_and_db(self, context, body):
-        LOG.info('update_storage_group_to_crushmap_and_db===%s'%body)
+        LOG.info('update_storage_group_to_crushmap_and_db body=%s'%body)
         storage_groups = body.get('storage_groups')
         cluster_id = body.get('cluster_id',None)
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
@@ -1878,7 +1878,7 @@ class SchedulerManager(manager.Manager):
             ret = self._agent_rpcapi.modify_rule_in_crushmap(context, storage_group, active_monitor['host'])
             rule_id = ret.get('rule_id')
             take_order = 0
-            LOG.info('take==333333=====%s'%storage_group.get('take'))
+            LOG.info('update_storage_group_to_crushmap_and_db=====%s'%storage_group.get('take'))
             for take in storage_group.get('take'):
                 storage_group_to_db = {
                     'name':storage_group['name'],
@@ -1889,7 +1889,7 @@ class SchedulerManager(manager.Manager):
                     'take_id':take,
                     'take_order':take_order,
                 }
-                LOG.info('take==444444444=====%s'%storage_group_to_db)
+                LOG.info('update_storage_group_to_crushmap_and_db=====%s'%storage_group_to_db)
                 db.storage_group_update_or_create(context, storage_group_to_db)
                 take_order += 1
             db.storage_group_delete_by_order(context,take_order=take_order,name=storage_group['name'])

@@ -203,6 +203,9 @@ def storage_group_create(request, body):
 def storage_group_create_with_takes(request, body):
     return vsmclient(request).storage_groups.create_with_takes(body)
 
+def storage_group_update_with_takes(request, body):
+    return vsmclient(request).storage_groups.update_with_takes(body)
+
 def storage_group_update(request, body):
     return vsmclient(request).storage_groups.update(body)
 

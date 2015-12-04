@@ -164,7 +164,7 @@ def update_storage_group(request):
     print "===========Update Storage Group============"
     print body
     try:
-        rsp = vsmapi.storage_group_create(request, body=body)
+        rsp = vsmapi.storage_group_update_with_takes(request, body=body)
         status = "OK"
         msg = "Update Storage Group Successfully!"
     except ex:
