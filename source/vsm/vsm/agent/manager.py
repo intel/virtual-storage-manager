@@ -2065,13 +2065,11 @@ class AgentManager(manager.Manager):
         return message
 
     def add_rule_to_crushmap(self,context,body):
-        rule_info = body.get('rule_info')
-        ret = self.crushmap_manager_driver._generate_one_rule(rule_info)
+        ret = self.crushmap_manager_driver._generate_one_rule(body)
         return ret
 
     def modify_rule_in_crushmap(self,context,body):
-        rule_info = body.get('rule_info')
-        ret = self.crushmap_manager_driver._modify_takes_of_rule(rule_info)
+        ret = self.crushmap_manager_driver._modify_takes_of_rule(body)
         return ret
 
     def update_zones_from_crushmap_to_db(self,context,body):

@@ -1865,12 +1865,14 @@ class SchedulerManager(manager.Manager):
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
         LOG.info('sync call to host = %s' % active_monitor['host'])
         for storage_group in storage_groups:
-            rule_info = storage_group.get('rule_info')
+
+            rule_info = storage_group['rule_info']
+            LOG.info('add_storage_group_to_crushmap_and_db storage_group=%s'%rule_info)
             ret = self._agent_rpcapi.add_rule_to_crushmap(context, rule_info, active_monitor['host'])
             rule_id = ret.get('rule_id')
             take_order = 0
             #LOG.info('take==333333=====%s'%storage_group.get('take'))
-            for take in storage_group.get('rule_info').get('take'):
+            for take in storage_group.get('rule_info').get('takes'):
                 storage_group_to_db = {
                     'name':storage_group['name'],
                     'storage_class':storage_group['storage_class'],
@@ -1910,7 +1912,7 @@ class SchedulerManager(manager.Manager):
             rule_id = ret.get('rule_id')
             take_order = 0
             LOG.info('update_storage_group_to_crushmap_and_db=====%s'%storage_group.get('take'))
-            for take in storage_group.get('rule_info').get('take'):
+            for take in storage_group.get('rule_info').get('takes'):
                 storage_group_to_db = {
                     'name':storage_group['name'],
                     'storage_class':storage_group['storage_class'],
