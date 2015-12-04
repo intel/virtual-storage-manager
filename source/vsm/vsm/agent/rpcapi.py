@@ -583,10 +583,10 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         version='1.0', timeout=6000)
         return res
 
-    def update_storage_grpoups_from_crushmap_to_db(self, context, body, host):
+    def update_storage_groups_from_crushmap_to_db(self, context, body, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         res = self.call(context,
-                        self.make_msg('update_storage_grpoups_from_crushmap_to_db',
+                        self.make_msg('update_storage_groups_from_crushmap_to_db',
                                       body=body),
                         topic,
                         version='1.0', timeout=6000)
