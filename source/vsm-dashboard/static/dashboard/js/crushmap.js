@@ -204,10 +204,10 @@ function PostAction(action){
 					else{
 						UpdateStorageGroupHTML(sg);
 					}
-
+                    showTip("success",data.message);
 					break;
 				case "Failed":
-					showTip("error",data.msg);
+					showTip("error",data.message);
 					break;
 			}
 	   	},
