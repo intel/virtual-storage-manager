@@ -1325,7 +1325,23 @@ class AgentManager(manager.Manager):
     def update_rbd_status(self, context):
         rbd_list = self.ceph_driver.get_rbd_status()
         if rbd_list:
-            rbd_list = rbd_list[:100]
+            rbd_image_list = []
+            for rbd in rbd_list:
+                rbd_image = rbd['image']
+                rbd_image_list.append(rbd_image)
+            # rbd_list = rbd_list[:100]
+            old_rbd_list = self._conductor_rpcapi.rbd_get_all(context,
+                                                              None,
+                                                              None,
+                                                              None,
+                                                              None)
+            for old_rbd in old_rbd_list:
+                old_rbd_image = old_rbd["image"]
+                if old_rbd_image and old_rbd_image not in rbd_image_list:
+                    deleted_at = timeutils.utcnow()
+                    old_rbd["deleted_at"] = deleted_at
+                    old_rbd["deleted"] = 1
+                    db.rbd_update_or_create(context, old_rbd)
             for rbd in rbd_list:
                 db.rbd_update_or_create(context, rbd)
 
