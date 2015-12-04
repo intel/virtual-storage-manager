@@ -116,7 +116,7 @@ function updateAction(id){
 	var trID = "storage_group_list__row__"+id;
 	var tr = $("#"+trID);
     //TODO:later
-	var sg_take_id =  trimStr(tr.find(".take")[0].innerHTML);
+	var sg_take_id =  trimStr(tr.find(".take_id")[0].innerHTML);
     var sg_take_name =  trimStr(tr.find(".take")[0].innerHTML);
 
 
@@ -125,9 +125,10 @@ function updateAction(id){
 	$("#txtFriendlyName").val(trimStr(tr.find(".friendly_name")[0].innerHTML));
 	$("#txtMarker")[0].value = rgb2hex(tr.find(".glyphicon")[0].style.color);
 
-	var take_list = sg_take.split(',');
-	for(var i=0;i<take_list.length;i++){
-		$("#divTakeList").append(GenerateTakeHTML(trimStr(take_list[i])));
+	var take_id_list = sg_take_id.split(',');
+    var take_name_list = sg_take_name.split(',');
+	for(var i=0;i<take_name_list.length;i++){
+		$("#divTakeList").append(GenerateTakeHTML(trimStr(take_id_list[i]),trimStr(take_name_list[i])));
 	}
 	RefreshTakeList();
 	//mark the tree checkbox
@@ -165,9 +166,12 @@ function PostAction(action){
 	//empty the error message
 	$(".messages").empty();
 
-	var take_list = [];
+	var take_list_id = [];
+    var take_list_name = [];
+    var take_list_order = "";
 	$(".take-left").each(function(){
-		take_list.push(this.id);
+		take_list_id.push(this.id);
+        take_list_name.push(this.innerHTML);
 	});
     var sg_data = {'storage_groups':[]};
     var sg = {
@@ -176,7 +180,9 @@ function PostAction(action){
         'friendly_name': $("#txtFriendlyName").val(),
         'storage_class': $("#txtClass").val(),
         'marker': $("#txtMarker").val(),
-        'take': take_list,
+        'take': take_list_id,
+        'take_name': take_list_name,
+        'take_order':take_list_order,
         'cluster_id':1  //bad code. the origin is 1
     }
     sg_data.storage_groups.push(sg);
@@ -194,10 +200,10 @@ function PostAction(action){
 					// CRUSHMAP = $.fn.zTree.init($("#divCrushmapTree"), setting, data.crushmap);
 					// CRUSHMAP.expandAll(true);
 					if(action == "create"){
-						AddStorageGroupHTML(sg_data.storage_group);
+						AddStorageGroupHTML(sg);
 					}
 					else{
-						UpdateStorageGroupHTML(sg_data.storage_group);
+						UpdateStorageGroupHTML(sg);
 					}
 
 					break;
@@ -231,8 +237,14 @@ function AddStorageGroupHTML(data){
 	html += "	<td class='sortable normal_column class'>";
 	html += 		data.storage_class;
 	html += "	</td>";
+    html += "	<td class='sortable normal_column take_id' style=\"display: none\">";
+	html += 		data.take.toString();
+	html += "	</td>";
 	html += "	<td class='sortable normal_column take'>";
-	html += 		data.take;
+	html += 		data.take_name.toString();
+	html += "	</td>";
+    html += "	<td class='sortable normal_column take_order' style=\"display: none\">";
+	html += 		data.take_order;
 	html += "	</td>";
 	html += "	<td class='sortable normal_column friendly_name'>";
 	html += 		data.friendly_name;

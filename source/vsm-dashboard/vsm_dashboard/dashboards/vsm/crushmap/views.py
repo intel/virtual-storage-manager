@@ -144,6 +144,7 @@ def create_storage_group(request):
     print body
     try:
         rsp = vsmapi.storage_group_create_with_takes(request, body=body)
+        print '---rsp====',rsp
         status = "OK"
         msg = "Add Storage Group Successfully!"
     except ex:

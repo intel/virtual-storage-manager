@@ -40,9 +40,9 @@ class ViewBuilder(common.ViewBuilder):
                 #"capacity_percent_used": "health",
                 "largest_node_capacity_used": storage_group["largest_node_capacity_used"],
                 "status": storage_group["status"],
-                "take_name": storage_group["take_name"],
-                "take_id": storage_group["take_id"],
-                "take_order": storage_group["take_order"],
+                "take_name": ','.join([str(id) for id in storage_group["take_name"]]) ,
+                "take_id": ','.join([str(id) for id in storage_group["take_id"]]) ,
+                "take_order": ','.join([str(id) for id in storage_group["take_order"]]),
                 "marker": storage_group["marker"],
 
             }

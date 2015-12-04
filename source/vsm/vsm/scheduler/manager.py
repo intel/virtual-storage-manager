@@ -1843,6 +1843,7 @@ class SchedulerManager(manager.Manager):
                     'name':storage_group['name'],
                     'storage_class':storage_group['storage_class'],
                     'friendly_name':storage_group['friendly_name'],
+                    'marker':storage_group['marker'],
                     'rule_id':rule_id,
                     'take_id':take,
                     'take_order':take_order,
