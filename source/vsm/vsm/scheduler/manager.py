@@ -1892,9 +1892,10 @@ class SchedulerManager(manager.Manager):
                 LOG.info('update_storage_group_to_crushmap_and_db=====%s'%storage_group_to_db)
                 db.storage_group_update_or_create(context, storage_group_to_db)
                 take_order += 1
-            db.storage_group_delete_by_order(context,take_order=take_order,name=storage_group['name'])
+            db.storage_group_delete_by_order_and_name(context,take_order=take_order,name=storage_group['name'])
         message['error_code'] = ','.join(message['error_code'])
         message['error_msg'] = ','.join(message['error_msg'])
+        LOG.info('---888--%s'%message)
         return message
 
     def update_zones_from_crushmap_to_db(self, context, body):

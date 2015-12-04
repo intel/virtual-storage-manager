@@ -873,8 +873,8 @@ def storage_group_get(context, group_id):
     """Get an storage_group with group_id"""
     return IMPL.storage_group_get(context, group_id)
 
-def storage_group_delete_by_order_and_name(context, take_orde, name):
-    return IMPL.storage_group_delete_by_order_and_name(context, take_orde, name)
+def storage_group_delete_by_order_and_name(context, take_order, name):
+    return IMPL.storage_group_delete_by_order_and_name(context, take_order, name)
 
 def storage_group_get_by_name(context, group_name):
     """Get an storage_group with group_id"""

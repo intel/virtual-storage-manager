@@ -115,7 +115,6 @@ function updateAction(id){
 
 	var trID = "storage_group_list__row__"+id;
 	var tr = $("#"+trID);
-    //TODO:later
 	var sg_take_id =  trimStr(tr.find(".take_id")[0].innerHTML);
     var sg_take_name =  trimStr(tr.find(".take")[0].innerHTML);
 
@@ -268,7 +267,9 @@ function UpdateStorageGroupHTML(data){
 	tr.find(".class")[0].innerHTML = data.storage_class;
 	tr.find(".friendly_name")[0].innerHTML = data.friendly_name;
 	tr.find(".glyphicon")[0].style.color = data.marker;
-	tr.find(".take")[0].innerHTML = data.take;
+	tr.find(".take_id")[0].innerHTML = data.take;
+    tr.find(".take")[0].innerHTML = data.take_name;
+    tr.find(".take_order")[0].innerHTML = data.take_order;
 }
 
 

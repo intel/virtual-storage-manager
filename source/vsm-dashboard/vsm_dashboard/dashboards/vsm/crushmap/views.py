@@ -143,14 +143,18 @@ def create_storage_group(request):
     print "===========Create Storage Group============"
     print body
     try:
-        rsp = vsmapi.storage_group_create_with_takes(request, body=body)
-        print '---rsp====',rsp
-        status = "OK"
-        msg = "Add Storage Group Successfully!"
+        http_response_code,ret = vsmapi.storage_group_create_with_takes(request, body=body)
+        print '---ret====',ret
+        if len(ret.get('error_code')) > 0:
+            status = "Failed"
+            msg = ret.get('error_msg')
+        else:
+            status = "OK"
+            msg = ret.get('info')
     except ex:
         print ex
         status = "Failed"
-        msg = "Add Storage Group Failed!"
+        msg = "Add Storage Group Failed!Unknown exception!"
 
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
@@ -164,13 +168,18 @@ def update_storage_group(request):
     print "===========Update Storage Group============"
     print body
     try:
-        rsp = vsmapi.storage_group_update_with_takes(request, body=body)
-        status = "OK"
-        msg = "Update Storage Group Successfully!"
+        http_response_code,ret = vsmapi.storage_group_update_with_takes(request, body=body)
+        print '---ret====',ret
+        if len(ret.get('error_code')) > 0:
+            status = "Failed"
+            msg = ret.get('error_msg')
+        else:
+            status = "OK"
+            msg = ret.get('info')
     except ex:
         print ex
         status = "Failed"
-        msg = "Update Stroage Group Failed!"
+        msg = "Update Stroage Group Failed!Unknown exception!"
 
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)

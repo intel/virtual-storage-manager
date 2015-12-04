@@ -3004,7 +3004,7 @@ class ManagerCrushMapDriver(object):
         if choose_leaf_type is None:
             types = crushmap._types
             types.sort(key=operator.itemgetter('type_id'))
-            choose_leaf_type = types[-2]['name']
+            choose_leaf_type = types[1]['name']
         sting_common = """    type %s
     min_size %s
     max_size %s
@@ -3025,6 +3025,56 @@ class ManagerCrushMapDriver(object):
         self._write_to_crushmap(string)
         self.set_crushmap()
         return {'rule_id':rule_id}
+
+    def _modify_takes_of_rule(self,rule_name,take_id_list):
+        crushmap = get_crushmap_json_format()
+        self.get_crushmap()
+        fd = open(self._crushmap_path, 'r')
+        rule_start_line = None
+        rule_end_line = None
+        insert_take_line = None
+        line_number = -1
+        lines = fd.readlines()
+        fd.close()
+        new_lines = []
+        LOG.info('rulename=====%s'%rule_name)
+        LOG.info('take_id_list=====%s'%take_id_list)
+        LOG.info('old lines=====%s'%lines)
+        for line in lines:
+            line_number += 1
+            if 'rule %s {'%rule_name in line:
+                rule_start_line = line_number
+            if rule_start_line is not None:
+                if rule_end_line is None and '}' in line:
+                    rule_end_line = line_number
+            if rule_start_line is not None and rule_end_line is None:
+                if 'ruleset ' in line:
+                    rule_id = line[0:-1].split(' ')[-1]
+                if 'step take' in line and insert_take_line is None:
+                    insert_take_line = line_number
+                    LOG.info('pass--11-%s'%line)
+                    continue
+                if 'step take' in line and insert_take_line is not None:
+                    LOG.info('pass--22-%s'%line)
+                    continue
+
+            new_lines.append(line)
+        if insert_take_line is not None:
+            for take in take_id_list:
+                take_name = crushmap.get_bucket_by_id(int(take))['name']
+                string = "    step take " + take_name + "\n"
+                new_lines.insert(insert_take_line,string)
+                insert_take_line +=1
+        fd = open(self._crushmap_path, 'w')
+        LOG.info('new lines=====%s'%new_lines)
+        fd.writelines(new_lines)
+        fd.close()
+        self.set_crushmap()
+        return {'rule_id':rule_id}
+
+
+
+
 
 def get_crushmap_json_format(keyring=None):
     '''
