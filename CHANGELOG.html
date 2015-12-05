@@ -298,7 +298,38 @@ img {
 <li>
 Some spotlights:
 <ul>
-<li>Manage existing cluster through &quot;Cluster Management\Import Cluster&quot;</li>
+<li>
+Manage existing cluster through &quot;Cluster Management\Import Cluster&quot;
+<ol>
+<li>applicable to 2.1 alpha 1.</li>
+<li>deploy a ceph cluster external (maybe there is already one running)</li>
+<li>deploy VSM with agents deployed on each ceph node with appropriate role defined.</li>
+<li>
+in VSM web ui:
+<ol>
+<li>navigate to &quot;Cluster Management\Import Cluster&quot;</li>
+<li>you should see all ceph nodes listed.</li>
+<li>click &quot;import cluster&quot;, then we will see an new page where it asks for crushmap and ceph.conf</li>
+</ol>
+</li>
+<li>
+there are two approaches to get crushmap:
+<ol>
+<li>paste crushmap directly into the text box under &quot;Crushmap&quot;</li>
+<li>click &quot;Auto Detect&quot;, then a dialog will pop up, you'd select one monitor host, and point where is the monitor keyring file on the monitor host.</li>
+</ol>
+</li>
+<li>for ceph.conf, <strong>we see some ceph.conf doesn't include osd information, if this is the case, you'd manually add them into ceph.conf.</strong></li>
+<li>when crushmap and ceph.conf are ready, click &quot;validate&quot; to see if all can pass. If yes, you could click &quot;submit&quot;, if succeed, the message tip will show up to say the import is successful.</li>
+<li>wait for a few minutes before the status gets synced, then you will see the cluster status.</li>
+</ol>
+</li>
+<li>
+Crushmap management
+<ol>
+<li>only draft UI, not ready.</li>
+</ol>
+</li>
 </ul>
 </li>
 <li>16 new features are added, and 39 bugs are fixed till this release.</li>
