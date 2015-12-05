@@ -1,3 +1,83 @@
+2.1.0 (build 281)
+------------------------------------
+
+Special Notes
+---------------
+-	This is 2.1 alpha 1 release, only very limited tests on it. 
+-	Some spotlights:
+	- Manage existing cluster through "Cluster Management\Import Cluster"
+-	16 new features are added, and 39 bugs are fixed till this release.
+
+
+New Features
+---------------
+-	[VSM-355](https://01.org/jira/browse/VSM-355)	there are some used disk paths list in the data path field and journal dik path field on page 'add new osd'
+-	[VSM-90](https://01.org/jira/browse/VSM-90)	Monitor Status page improvements.
+-	[VSM-96](https://01.org/jira/browse/VSM-96)	UI responsiveness
+-	[VSM-98](https://01.org/jira/browse/VSM-98)	Server Configuration Change.
+-	[VSM-352](https://01.org/jira/browse/VSM-352)	servermgmt page autorefrush too frequent
+-	[VSM-372](https://01.org/jira/browse/VSM-372)	narrow the attack surface from VSM to Openstack cluster
+-	[VSM-373](https://01.org/jira/browse/VSM-373)	at adding new OSD page, expect to list device name like /dev/sdd1 instead of pci bus address.
+-	[VSM-140](https://01.org/jira/browse/VSM-140)	Ceph Development (Epic 6): Prototype Calamari/VSM dashboard implementation
+-	[VSM-88](https://01.org/jira/browse/VSM-88)	On monitor status page, report what server each monitor is running on.
+-	[VSM-15](https://01.org/jira/browse/VSM-15)	VSM-backup prompt info not correct
+-	[VSM-242](https://01.org/jira/browse/VSM-242)	Allow user to modify ceph.conf outside VSM
+-	[VSM-124](https://01.org/jira/browse/VSM-124)	[CDEK-1852] VSM | adding possibility to manipulate ceph values in cluster.manifest file
+-	[VSM-4](https://01.org/jira/browse/VSM-4)	Average Response Time" missing in dashboard Overview panel "VSM Status" section.
+-	[VSM-159](https://01.org/jira/browse/VSM-159)	add issue reporting tool
+-	[VSM-184](https://01.org/jira/browse/VSM-184)	add automated script to help deploy VSM on multiple nodes
+-	[VSM-156](https://01.org/jira/browse/VSM-156)	add sanity check tool to help identify potential issues before or after deployment
+
+
+Resolved bugs
+----------------
+-	[Key](https://01.org/jira/browse/Key)	Summary
+-	[VSM-321](https://01.org/jira/browse/VSM-321)	no upstart mechanism used for ubuntu when controlling ceph service
+-	[VSM-336](https://01.org/jira/browse/VSM-336)	On Dashboard, even no cluster is created, the VSM version and uptime should be displayed
+-	[VSM-24](https://01.org/jira/browse/VSM-24)	[CDEK-1661] VSM Dashboard | Manage Servers | Reset server status - works not correctly.
+-	[VSM-365](https://01.org/jira/browse/VSM-365)	Creating Cluster stucks at ceph.conf creation when running VSM on CentOS 7.1
+-	[VSM-19](https://01.org/jira/browse/VSM-19)	CDEK-1613] VSM | Reset Server Status button - return Error:Network error
+-	[VSM-379](https://01.org/jira/browse/VSM-379)	Trace back in browser when using reset server status action buttons
+-	[VSM-381](https://01.org/jira/browse/VSM-381)	run diamond through service instead of current process launching
+-	[VSM-378](https://01.org/jira/browse/VSM-378)	Performance data is retrieved from outside nodes
+-	[VSM-374](https://01.org/jira/browse/VSM-374)	the down server is not reflected in VSM
+-	[VSM-375](https://01.org/jira/browse/VSM-375)	Malformed JSON in 'Integrate Cluster' function
+-	[VSM-366](https://01.org/jira/browse/VSM-366)	the password for openstack access is shown as plain text
+-	[VSM-312](https://01.org/jira/browse/VSM-312)	vsm-node sets node status="Need more IP" if a Monitor only node does not have a cluster IP address..
+-	[VSM-367](https://01.org/jira/browse/VSM-367)	can't create cluster at public cloud environment
+-	[VSM-368](https://01.org/jira/browse/VSM-368)	The default password is not following the same password policy to include uppercase and digitals.
+-	[VSM-369](https://01.org/jira/browse/VSM-369)	Change password: "!" doesnt' support in password even prompt message says OK
+-	[VSM-224](https://01.org/jira/browse/VSM-224)	Controller node error in /var/log/httpd/error_log - constantly ongoing messages [error] <Response [200]>
+-	[VSM-244](https://01.org/jira/browse/VSM-244)	Internal server error when installing v1.1
+-	[VSM-179](https://01.org/jira/browse/VSM-179)	keep ceph.conf up to date when executing "remove server" operations.
+-	[VSM-176](https://01.org/jira/browse/VSM-176)	SSL certificate password is stored in a plain text file
+-	[VSM-193](https://01.org/jira/browse/VSM-193)	hard-coded cluster id
+-	[VSM-177](https://01.org/jira/browse/VSM-177)	wrong /etc/fstab entry for osd device mount point
+-	[VSM-239](https://01.org/jira/browse/VSM-239)	with automatic deployment, the execution is blocked at asking if start mysql service
+-	[VSM-166](https://01.org/jira/browse/VSM-166)	cluster_manifest sanity check program gives incorrect advice for auth_keys
+-	[VSM-121](https://01.org/jira/browse/VSM-121)	Storage node unable to connect to controller although network is OK and all setting correct
+-	[VSM-123](https://01.org/jira/browse/VSM-123)	Storage node will not be able to contact controller node to install if http proxy set
+-	[VSM-171](https://01.org/jira/browse/VSM-171)	[CDEK1672] VSM_CLI | list shows Admin network in Public IP section
+-	[VSM-168](https://01.org/jira/browse/VSM-168)	[CDEK1800] VSM_CLI | remove mds - doesn't update vsm database
+-	[VSM-236](https://01.org/jira/browse/VSM-236)	no way to check manifest correctness after editing them
+-	[VSM-233](https://01.org/jira/browse/VSM-233)	console blocks when running automatic installation procedure
+-	[VSM-260](https://01.org/jira/browse/VSM-260)	the check_network in server_manifest will be wrong when it has a single network card
+-	[VSM-33](https://01.org/jira/browse/VSM-33)	negative update time in RBD list
+-	[VSM-51](https://01.org/jira/browse/VSM-51)	Install Fails for VSM 0.8.0 Engineering Build Release
+-	[VSM-113](https://01.org/jira/browse/VSM-113)	[CDEK-1835] VSM | /var/log/httpd/error_log - constantly ongoing messages [error] <Response [200]>
+-	[VSM-29](https://01.org/jira/browse/VSM-29)	vsm-agent process causes high i/o on os disk
+-	[VSM-216](https://01.org/jira/browse/VSM-216)	Add storage group requires at least 3 nodes
+-	[VSM-26](https://01.org/jira/browse/VSM-26)	[CDEK-1664] VSM | Not possible to replace node if ceph contain only 3 nodes.
+-	[VSM-207](https://01.org/jira/browse/VSM-207)	can't assume eth0 device name
+-	[VSM-230](https://01.org/jira/browse/VSM-230)	when presenting pool to openstack, cache tiering pools should be listed.
+
+
+Known issues
+-----------------
+-	[VSM-393](https://01.org/jira/browse/VSM-393)	When importing cluster, if there is no OSd and MON sections, the import will fail
+
+
+
 2.0.0 (build 216)
 ------------------------------------
 Special Notes
