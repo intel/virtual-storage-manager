@@ -388,8 +388,10 @@ class CephDriver(object):
                     auth_url,
                     region_name=region_name
                 )
-                cinderclient.volume_types.create(volume_type)
+                cinder = cinderclient.volume_types.create(volume_type)
                 LOG.info("creating volume type = %s" % volume_type)
+                cinder.set_keys({"volume_backend_name": pool_name})
+                LOG.info("Set extra specs {volume_backend_name: %s} on a volume type" % pool_name)
 
 
     def _create_osd_state(self, context, strg, osd_id):
