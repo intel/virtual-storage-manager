@@ -260,6 +260,11 @@ class ClusterController(wsgi.Controller):
         vb = summary_view.ViewBuilder()
         return vb.basic(sum, 'cluster')
 
+    def get_service_list(self, req,cluster_id=None):
+        context = req.environ['vsm.context']
+        service = db.service_get_all(context)
+        return {"services":service}
+
     def refresh(self, req):
         """
         :param req:

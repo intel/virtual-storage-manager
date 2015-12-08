@@ -121,6 +121,7 @@ def start_server(request, servers=None):
     """
     return vsmclient(request).servers.start(servers)
 
+
 def stop_server(request, servers=None):
     """Stop servers.
        servers = [{'id': 1}, {'id': 2}]
@@ -151,6 +152,9 @@ def get_cluster_list(request, opts=None):
 
 def create_cluster(request, servers=[]):
     return vsmclient(request).clusters.create(servers=servers)
+
+def get_service_list(request):
+    return vsmclient(request).clusters.get_service_list()
 
 def integrate_cluster(request, servers=[]):
     return vsmclient(request).clusters.integrate(servers=servers)
