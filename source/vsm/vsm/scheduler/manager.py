@@ -916,7 +916,7 @@ class SchedulerManager(manager.Manager):
                                                 'ERROR')
                 raise
 
-        active_count = db.init_node_count_by_status(context,'Active')
+        active_count = db.init_node_count_by_status(context,status='Active')
         if need_change_mds and active_count > 0:
             self.add_mds(context, server_list)
         return True
