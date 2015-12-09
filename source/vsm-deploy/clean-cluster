@@ -140,4 +140,6 @@ function main(){
     fi
 }
 
+main
+
 set +o xtrace
