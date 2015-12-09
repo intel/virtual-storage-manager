@@ -916,9 +916,11 @@ class SchedulerManager(manager.Manager):
                                                 'ERROR')
                 raise
 
-        if need_change_mds:
+        active_count = db.init_node_count_by_status(context,status='Active')
+        if need_change_mds and active_count > 0:
             self.add_mds(context, server_list)
         return True
+
 
     @utils.single_lock
     def ceph_upgrade(self, context, body=None):
