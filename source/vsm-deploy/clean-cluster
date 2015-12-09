@@ -1,0 +1,145 @@
+#!/bin/bash
+
+# Copyright 2014 Intel Corporation, All Rights Reserved.
+
+# Licensed under the Apache License, Version 2.0 (the"License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#  http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+
+set -o xtrace
+
+g_remove_packages=0
+g_install_ceph_version=''
+g_remove_or_install=0
+g_os_name=''
+g_os_version=''
+
+
+function usage() {
+    cat << EOF
+Usage: deploy-ceph-tool.sh
+
+Auto deploy ceph:
+    The tool can help you to deploy or undeploy the ceph envirement automatically.
+    Please run such as :
+        bash +x deploy-ceph-tool.sh remove --rm_packages
+        or
+        bash +x deploy-ceph-tool.sh install --rm_packages
+
+Options:
+    -h | --help
+        Print usage information.
+    remove
+        Remove ceph cluster data or ceph packages
+    install
+        Install ceph packages
+    --rm_packages
+        Remove ceph packages
+    --ceph_version
+        The ceph version to be installed
+EOF
+    exit 0
+}
+
+function get_keys(){
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        -h) usage ;;
+        --help) usage 1;;
+        remove) g_remove_or_install=0 ;;
+        install) g_remove_or_install=1 ;;
+        --rm_packages) g_remove_packages=1 ;;
+        --ceph_version) shift; g_install_ceph_version=$1 ;;
+        *) shift ;;
+      esac
+      shift
+    done
+}
+
+functon func_get_os_version(){
+    is_lsb_release=0
+    lsb_release -a >/dev/null 2>&1 && is_lsb_release=1
+
+    if [[ $is_lsb_release -gt 0 ]]; then
+        g_os_name=`lsb_release -a|grep "Distributor ID:"|awk -F ' ' '{print $3}'`
+        g_os_version=`lsb_release -a|grep "Release"|awk -F ' ' '{print $2}'`
+    else
+        var=`cat /etc/os-release|grep "PRETTY_NAME"|awk -F "=" '{print $2}'`
+        if [[ $var =~ "CentOS Linux 7" ]]; then
+            g_os_name="CentOS"
+            g_os_version="7"
+        fi
+    fi
+}
+
+
+function func_remove_ceph_cluster(){
+
+    #stop services on controller-node
+    service vsm-api stop
+    service vsm-conductor stop
+    service vsm-scheduler stop
+
+    #get agent node hostnames
+    PWD=`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'`
+    nodes=`mysql -uroot -p${PWD} -e "use vsm;select host from init_nodes;"`
+
+    agent_nodes=${nodes[@]:4}
+
+    #clean databse vsm
+    mysql -uroot -p`cat /etc/vsmdeploy/deployrc | grep ROOT | awk -F "=" '{print $2}'` -e "drop database if exists vsm;create database vsm;"
+    vsm-manage db sync
+
+    #start services on controller-node
+    service vsm-api start
+    service vsm-conductor start
+    service vsm-scheduler start
+
+    #clean data in agent-nodes
+    for i in $agent_nodes
+    do
+        ssh $i "__clean-data"
+    done
+
+    #replace-str agent-token and restart
+    token=`agent-token`
+    for i in $agent_nodes
+    do
+        ssh $i "replace-str $token;service vsm-agent restart;service vsm-physical restart;"
+
+    done
+
+    if [[ $g_remove_packages -gt 1  ]];then
+        if [[ $g_os_name -gt 'CentOS' ]] ;then
+            yum remove -y ceph librados2 librbd1 ceph-mds
+        else
+            apt-get remove -y ceph librados2 librbd1 ceph-mds
+    fi
+}
+
+function main(){
+
+    func_get_os_version()
+
+    if [[ $g_remove_or_install -gt 0 ]];then
+        func_remove_ceph_cluster
+    fi
+
+    if [[ $g_remove_or_install -gt 1 ]];then
+        func_install_ceph
+    fi
+}
+
+main
+
+set +o xtrace
