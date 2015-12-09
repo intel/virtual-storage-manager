@@ -1300,6 +1300,35 @@ class SchedulerManager(manager.Manager):
             raise
         return message
 
+    def get_crushmap_tree_data(self,context,body):
+        '''
+        :param context:
+        :param body:
+        { u'cluster_id":1}
+        :return:
+        '''
+        monitor_pitched_host = self._get_monitor_by_cluster_id(context, body.get('cluster_id',1))
+        LOG.info("000000000000000=%s"%monitor_pitched_host)
+        monitor_keyring = None
+        tree_node = []
+        try:
+            LOG.info("111111111111111=%s"%monitor_pitched_host)
+            message = self._agent_rpcapi.detect_crushmap(context, monitor_keyring, monitor_pitched_host)
+            crushmap_str = message['crushmap']
+            crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
+            utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
+            crushmap = CrushMap(json_file=crush_map_new)
+            tree_node = crushmap._show_as_tree_dict()
+            LOG.info("222222==%s"%tree_node)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: get_crushmap_tree_data rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: get_crushmap_tree_data rpc remote')
+        except:
+            LOG.error('ERROR: get_crushmap_tree_data')
+            raise
+        return {'tree_node':tree_node}
+
     def import_cluster(self,context,body):
         '''
         :param context:
@@ -1550,6 +1579,10 @@ class SchedulerManager(manager.Manager):
             time.sleep(1)
         self._agent_rpcapi.update_all_status(context,
             host=monitor_node['host'])
+        self._agent_rpcapi.update_zones_from_crushmap_to_db(context,None,
+            monitor_node['host'])
+        self._agent_rpcapi.update_storage_groups_from_crushmap_to_db(context,None,
+            monitor_node['host'])
         self._judge_drive_ext_threshold(context)
         self._update_drive_ext_threshold(context)
         return {'message':'res'}
@@ -1797,4 +1830,116 @@ class SchedulerManager(manager.Manager):
         for server in servers:
             if server['status'] == 'Active':
                 self._agent_rpcapi.reconfig_diamond(context, body, server['host'])
+
+    def add_storage_group_to_crushmap_and_db(self, context, body):
+        '''
+
+        :param context:
+        :param body:{'storage_groups': [{
+                        'id':None,
+                        'name': 'storage_group_name',
+                        'friendly_name': 'storage_group_name',
+                        'storage_class': 'storage_group_name',
+                        'marker': '#FFFFF',
+                        'rule_info':{
+                                    'rule_name':'storage_group_name',
+                                    'rule_id':None,
+                                    'type':'replicated',
+                                    'min_size':0,
+                                    'max_size':10,
+                                    'takes': [{'take_id':-12,
+                                            'choose_leaf_type':'host',
+                                            'choose_num':2,
+                                            },
+                                            ]
+                                }
+                        'cluster_id':1  //bad code. the origin is 1
+                    },
+                    ]
+                }
+        :return:
+        '''
+        LOG.info('add_storage_group_to_crushmap_and_db body=%s'%body)
+        storage_groups = body.get('storage_groups')
+        cluster_id = body.get('cluster_id',None)
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('sync call to host = %s' % active_monitor['host'])
+        for storage_group in storage_groups:
+
+            rule_info = storage_group['rule_info']
+            LOG.info('add_storage_group_to_crushmap_and_db storage_group=%s'%rule_info)
+            ret = self._agent_rpcapi.add_rule_to_crushmap(context, rule_info, active_monitor['host'])
+            rule_id = ret.get('rule_id')
+            take_order = 0
+            #LOG.info('take==333333=====%s'%storage_group.get('take'))
+            for take in storage_group.get('rule_info').get('takes'):
+                storage_group_to_db = {
+                    'name':storage_group['name'],
+                    'storage_class':storage_group['storage_class'],
+                    'friendly_name':storage_group['friendly_name'],
+                    'marker':storage_group['marker'],
+                    'rule_id':rule_id,
+                    'take_id':take.get('take_id'),
+                    'take_order':take_order,
+                    'choose_type':take.get('choose_leaf_type'),#TODO
+                    'choose_num':take.get('choose_num'),#"TODO"
+                }
+                #LOG.info('take==444444444=====%s'%storage_group_to_db)
+                db.storage_group_update_or_create(context, storage_group_to_db)
+                take_order += 1
+        message = {'info':'Add storage group %s success!'%(','.join([ storage_group['name'] for storage_group in storage_groups])),
+                   'error_code':'','error_msg':''}
+        return message
+
+    def update_storage_group_to_crushmap_and_db(self, context, body):
+        LOG.info('update_storage_group_to_crushmap_and_db body=%s'%body)
+        storage_groups = body.get('storage_groups')
+        cluster_id = body.get('cluster_id',None)
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('sync call to host = %s' % active_monitor['host'])
+        message = {'info':'Update success!','error_code':[],'error_msg':[]}
+        for storage_group in storage_groups:
+            rule_info = storage_group.get('rule_info')
+            storage_group_in_db = db.storage_group_get_by_name(context,storage_group['name'])
+            rule_id = storage_group_in_db['rule_id']
+            pools = db.pool_get_by_ruleset(context,rule_id)
+            if len(pools) > 0:
+                pool_names = [ pool['name'] for pool in pools ]
+                message['error_code'].append('-1')
+                message['error_msg'].append('storage group %s was used by pool %s currently!'%(storage_group['name'],pool_names))
+                continue
+            ret = self._agent_rpcapi.modify_rule_in_crushmap(context, rule_info, active_monitor['host'])
+            rule_id = ret.get('rule_id')
+            take_order = 0
+            LOG.info('update_storage_group_to_crushmap_and_db=====%s'%storage_group.get('take'))
+            for take in storage_group.get('rule_info').get('takes'):
+                storage_group_to_db = {
+                    'name':storage_group['name'],
+                    'storage_class':storage_group['storage_class'],
+                    'friendly_name':storage_group['friendly_name'],
+                    'marker':storage_group['marker'],
+                    'rule_id':rule_id,
+                    'take_id':take.get('take_id'),
+                    'take_order':take_order,
+                    'choose_type':take.get('choose_leaf_type'),#TODO
+                    'choose_num':take.get('choose_num'),#"TODO"
+                }
+                LOG.info('update_storage_group_to_crushmap_and_db=====%s'%storage_group_to_db)
+                db.storage_group_update_or_create(context, storage_group_to_db)
+                take_order += 1
+            db.storage_group_delete_by_order_and_name(context,take_order=take_order,name=storage_group['name'])
+        message['error_code'] = ','.join(message['error_code'])
+        message['error_msg'] = ','.join(message['error_msg'])
+        LOG.info('---888--%s'%message)
+        return message
+
+    def update_zones_from_crushmap_to_db(self, context, body):
+        if body is not None:
+            cluster_id = body.get('cluster_id',None)
+        else:
+            cluster_id = None
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('update_zones_from_crushmap_to_db sync call to host = %s' % active_monitor['host'])
+        self._agent_rpcapi.update_zones_from_crushmap_to_db(context,body,active_monitor['host'])
+        return {'message':'success'}
 

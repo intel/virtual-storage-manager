@@ -119,6 +119,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
                                     'check_pre_existing_cluster':'post',
                                     'import_cluster':'post',
                                     'detect_crushmap':'post',
+                                    'get_crushmap_tree_data':'post',
                                     },
                         member={'action': 'post'})
 
@@ -178,6 +179,8 @@ class APIRouter(vsm.api.openstack.APIRouter):
         mapper.resource("storage_groups", "storage_groups",
                         controller=self.resources['storage_groups'],
                         collection={"summary": "get",
+                                    "create_with_takes":"post",
+                                    "update_with_takes":"post",
                                     "detail": "get"},
                         member={'action':'POST'})
 

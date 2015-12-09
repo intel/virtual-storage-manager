@@ -55,6 +55,28 @@ class StorageGroupsManager(base.ManagerWithFind):
         #                   }}
         return self._create('/storage_groups', body, 'storage_group')
 
+    def create_with_takes(self, body):
+
+        """
+        Create a storage_group with takes and write rule to crushmap.
+        """
+
+        #body = {'zone': {'name': name
+        #                   }}
+        url = "/storage_groups/create_with_takes"
+        return self.api.client.post(url,body=body)
+
+    def update_with_takes(self, body):
+
+        """
+        update a storage_group with takes in db and update rule in crushmap.
+        """
+
+        #body = {'zone': {'name': name
+        #                   }}
+        url = "/storage_groups/update_with_takes"
+        return self.api.client.post(url,body=body)
+
     def get(self, storage_group_id):
         """
         Get a storage_group.

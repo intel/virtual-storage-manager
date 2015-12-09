@@ -2870,6 +2870,7 @@ class CreateCrushMapDriver(object):
             #    self._write_to_crushmap(string)
         return True
 
+
     def _gen_rule(self):
         string = """\n# rules
 rule capacity {
@@ -2965,9 +2966,276 @@ class DiamondDriver(object):
         out, err = utils.execute('diamond', 'll', run_as_root=True)
         return out
 
+class ManagerCrushMapDriver(object):
+    """Create crushmap file"""
+    def __init__(self, execute=utils.execute, *args, **kwargs):
+        self.conductor_api = conductor.API()
+        self.conductor_rpcapi = conductor_rpcapi.ConductorAPI()
+        self._crushmap_path = "/var/run/vsm/crushmap_decompiled"
+
+
+    def _write_to_crushmap(self, string):
+        fd = open(self._crushmap_path, 'a')
+        fd.write(string)
+        fd.close()
+
+    def get_crushmap(self):
+        LOG.info("DEBUG Begin to get crushmap")
+        utils.execute('ceph', 'osd', 'getcrushmap', '-o',
+                self._crushmap_path+"_before", run_as_root=False)
+        utils.execute('crushtool', '-d', self._crushmap_path+"_before", '-o',
+                        self._crushmap_path, run_as_root=False)
+        return True
+
+    def set_crushmap(self):
+        LOG.info("DEBUG Begin to set crushmap")
+        utils.execute('crushtool', '-c', self._crushmap_path, '-o',
+                        self._crushmap_path+"_compiled", run_as_root=True)
+        utils.execute('ceph', 'osd', 'setcrushmap', '-i',
+                        self._crushmap_path+"_compiled", run_as_root=True)
+        return True
+
+
+    def _generate_one_rule(self,rule_info):
+        '''
+        rule_info:{'rule_name':'test-rule',
+        'rule_id':None,
+        'type':'replicated',
+        'min_size':0,
+        'max_size':10,
+        'takes':[{'take_id':-12,
+                'choose_leaf_type':'host',
+                'choose_num':2,
+                },
+                ]
+
+        }
+        :return:{'rule_id':3}
+        '''
+
+        crushmap = get_crushmap_json_format()
+        rule_id = rule_info.get('rule_id')
+        if rule_id is None:
+            rule_ids =[rule['rule_id'] for rule in crushmap._rules]
+            rule_ids.sort()
+            rule_id = rule_ids[-1]+1
+        types = crushmap._types
+        types.sort(key=operator.itemgetter('type_id'))
+        choose_leaf_type_default = types[1]['name']
+        rule_type = rule_info.get('type','replicated')
+        min_size = rule_info.get('min_size',0)
+        max_size = rule_info.get('max_size',10)
+        rule_name = rule_info.get('rule_name')
+        takes = rule_info.get('takes')
+        sting_common = """    type %s
+    min_size %s
+    max_size %s
+"""%(rule_type,str(min_size),str(max_size))
+        string = ""
+        string = string + "\nrule " + rule_name + " {\n"
+        string = string + "    ruleset " + str(rule_id) + "\n"
+        string = string + sting_common
+        for take in takes:
+            take_name = crushmap.get_bucket_by_id(int(take.get('take_id')))['name']
+            take_choose_leaf_type = take.get('choose_leaf_type',choose_leaf_type_default)
+            take_choose_num = take.get('choose_num',1)
+            string_choose = """    step chooseleaf firstn %s type %s
+    step emit
+"""%(str(take_choose_num),take_choose_leaf_type)
+            string = string + "    step take " + take_name + "\n" + string_choose
+        string = string +"    }\n"
+        self.get_crushmap()
+        self._write_to_crushmap(string)
+        self.set_crushmap()
+        return {'rule_id':rule_id}
+
+    def _modify_takes_of_rule(self,rule_info):
+        '''
+        rule_info:{'rule_name':'test-rule',
+        'rule_id':None,
+        'type':'replicated',
+        'min_size':0,
+        'max_size':10,
+        'takes':[{'take_id':-12,
+                'choose_leaf_type':'host',
+                'choose_num':2,
+                },
+                ]
+
+        }
+        :return:{'rule_id':3}
+        '''
+
+        crushmap = get_crushmap_json_format()
+        types = crushmap._types
+        types.sort(key=operator.itemgetter('type_id'))
+        choose_leaf_type_default = types[1]['name']
+        # rule_type = rule_info.get('type','')
+        # min_size = rule_info.get('min_size')
+        # max_size = rule_info.get('max_size')
+        rule_name = rule_info.get('rule_name')
+        takes = rule_info.get('takes')
+
+        self.get_crushmap()
+        fd = open(self._crushmap_path, 'r')
+        rule_start_line = None
+        rule_end_line = None
+        insert_take_line = None
+        line_number = -1
+        lines = fd.readlines()
+        fd.close()
+        new_lines = []
+        # LOG.info('rulename=====%s'%rule_name)
+        # LOG.info('take_id_list=====%s'%take_id_list)
+        # LOG.info('old lines=====%s'%lines)
+        for line in lines:
+            line_number += 1
+            if 'rule %s {'%rule_name in line:
+                rule_start_line = line_number
+            if rule_start_line is not None:
+                if rule_end_line is None and '}' in line:
+                    rule_end_line = line_number
+            if rule_start_line is not None and rule_end_line is None:
+                if 'ruleset ' in line:
+                    rule_id = line[0:-1].split(' ')[-1]
+                if 'step take' in line and insert_take_line is None:
+                    insert_take_line = line_number
+                    #LOG.info('pass--11-%s'%line)
+                    continue
+                if 'step take' in line and insert_take_line is not None:
+                    #LOG.info('pass--22-%s'%line)
+                    continue
+                if 'step chooseleaf' in line and insert_take_line is not None:
+                    #LOG.info('pass--22-%s'%line)
+                    continue
+                if 'step emit' in line and insert_take_line is not None:
+                    #LOG.info('pass--22-%s'%line)
+                    continue
+            new_lines.append(line)
+        if insert_take_line is not None:
+            for take in takes:
+                take_name = crushmap.get_bucket_by_id(int(take.get('take_id')))['name']
+                take_choose_leaf_type = take.get('choose_leaf_type',choose_leaf_type_default)
+                take_choose_num = take.get('choose_num',1)
+                string = "    step take " + take_name + "\n"
+                new_lines.insert(insert_take_line,string)
+                string_choose = """    step chooseleaf firstn %s type %s\n"""%(str(take_choose_num),take_choose_leaf_type)
+                new_lines.insert(insert_take_line+1,string_choose)
+                new_lines.insert(insert_take_line+2,"    step emit\n")
+                insert_take_line +=3
+        fd = open(self._crushmap_path, 'w')
+        LOG.info('new lines=====%s'%new_lines)
+        fd.writelines(new_lines)
+        fd.close()
+        self.set_crushmap()
+        return {'rule_id':rule_id}
+
+#     def _generate_one_rule(self,rule_name,take_id_list,rule_id=None,choose_leaf_type=None,choose_num=None,type='replicated',min_size=0,max_size=10):
+#         crushmap = get_crushmap_json_format()
+#         if rule_id is None:
+#             rule_ids =[rule['rule_id'] for rule in crushmap._rules]
+#             rule_ids.sort()
+#             rule_id = rule_ids[-1]+1
+#         if choose_leaf_type is None:
+#             types = crushmap._types
+#             types.sort(key=operator.itemgetter('type_id'))
+#             choose_leaf_type = types[1]['name']
+#         sting_common = """    type %s
+#     min_size %s
+#     max_size %s
+# """%(type,str(min_size),str(max_size))
+#         string_choose = """    step chooseleaf firstn 1 type %s
+#     step emit
+# """%choose_leaf_type
+#         string = ""
+#         string = string + "\nrule " + rule_name + " {\n"
+#         string = string + "    ruleset " + str(rule_id) + "\n"
+#         string = string + sting_common
+#         for take in take_id_list:
+#             take_name = crushmap.get_bucket_by_id(int(take))['name']
+#             string = string + "    step take " + take_name + "\n" + string_choose
+#         string = string +"    }\n"
+#         self.get_crushmap()
+#         self._write_to_crushmap(string)
+#         self.set_crushmap()
+#         return {'rule_id':rule_id}
+#
+#     def _modify_takes_of_rule(self,rule_name,take_id_list,choose_leaf_type=None,choose_num_list=None):
+#         crushmap = get_crushmap_json_format()
+#         if choose_leaf_type is None:
+#             types = crushmap._types
+#             types.sort(key=operator.itemgetter('type_id'))
+#             choose_leaf_type = types[1]['name']
+#         string_choose = """    step chooseleaf firstn 1 type %s
+#     step emit
+# }
+# """%choose_leaf_type
+#         self.get_crushmap()
+#         fd = open(self._crushmap_path, 'r')
+#         rule_start_line = None
+#         rule_end_line = None
+#         insert_take_line = None
+#         line_number = -1
+#         lines = fd.readlines()
+#         fd.close()
+#         new_lines = []
+#         # LOG.info('rulename=====%s'%rule_name)
+#         # LOG.info('take_id_list=====%s'%take_id_list)
+#         # LOG.info('old lines=====%s'%lines)
+#         for line in lines:
+#             line_number += 1
+#             if 'rule %s {'%rule_name in line:
+#                 rule_start_line = line_number
+#             if rule_start_line is not None:
+#                 if rule_end_line is None and '}' in line:
+#                     rule_end_line = line_number
+#             if rule_start_line is not None and rule_end_line is None:
+#                 if 'ruleset ' in line:
+#                     rule_id = line[0:-1].split(' ')[-1]
+#                 if 'step take' in line and insert_take_line is None:
+#                     insert_take_line = line_number
+#                     #LOG.info('pass--11-%s'%line)
+#                     continue
+#                 if 'step take' in line and insert_take_line is not None:
+#                     #LOG.info('pass--22-%s'%line)
+#                     continue
+#                 if 'step chooseleaf' in line and insert_take_line is not None:
+#                     #LOG.info('pass--22-%s'%line)
+#                     continue
+#                 if 'step emit' in line and insert_take_line is not None:
+#                     #LOG.info('pass--22-%s'%line)
+#                     continue
+#             new_lines.append(line)
+#         if insert_take_line is not None:
+#             for take in take_id_list:
+#                 take_name = crushmap.get_bucket_by_id(int(take))['name']
+#                 string = "    step take " + take_name + "\n"
+#                 new_lines.insert(insert_take_line,string)
+#                 string_choose = """    step chooseleaf firstn 1 type %s\n"""%choose_leaf_type
+#                 new_lines.insert(insert_take_line+1,string_choose)
+#                 new_lines.insert(insert_take_line+2,"    step emit\n")
+#                 insert_take_line +=3
+#         fd = open(self._crushmap_path, 'w')
+#         LOG.info('new lines=====%s'%new_lines)
+#         fd.writelines(new_lines)
+#         fd.close()
+#         self.set_crushmap()
+#         return {'rule_id':rule_id}
+#
+#
 
 
 
+def get_crushmap_json_format(keyring=None):
+    '''
+    :return:
+    '''
+    if keyring:
+        json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump','--keyring',keyring, run_as_root=True)
+    else:
+        json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump', run_as_root=True)
+    crushmap = CrushMap(json_context=json_crushmap)
+    return crushmap
 
 
 

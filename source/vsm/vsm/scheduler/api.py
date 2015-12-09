@@ -149,3 +149,15 @@ class API(object):
 
     def detect_crushmap(self,context,body):
         return self.scheduler_rpcapi.detect_crushmap(context,body)
+
+    def get_crushmap_tree_data(self,context,body):
+        return self.scheduler_rpcapi.get_crushmap_tree_data(context,body)
+
+    def add_storage_group_to_crushmap_and_db(self,context,body):
+        return self.scheduler_rpcapi.add_storage_group_to_crushmap_and_db(context,body)
+
+    def update_storage_group_to_crushmap_and_db(self,context,body):
+        return self.scheduler_rpcapi.update_storage_group_to_crushmap_and_db(context,body)
+
+    def update_zones_from_crushmap_to_db(self,context,body=None):
+        return self.scheduler_rpcapi.update_zones_from_crushmap_to_db(context,body)

@@ -341,7 +341,7 @@ class AgentsController(wsgi.Controller):
 
         At here we have to write info as below:
 
-            name, storage_class, friendly_name, rule_id, deleted.
+            name, storage_class, friendly_name, rule_id, deleted,take_order.
 
         --------------------------------------------------------
         Important
@@ -359,6 +359,7 @@ class AgentsController(wsgi.Controller):
         for rule_id, stg in enumerate(stg_list):
             stg['rule_id'] = rule_id
             stg['status'] = FLAGS.storage_group_in
+            stg['take_order'] = 0
             # TODO change the create_storage_group api.
             # DB create_storage_group will ignore the
             # request if the stg has exists.

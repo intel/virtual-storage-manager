@@ -245,6 +245,10 @@ class ClusterManager(base.ManagerWithFind):
         url = "/clusters/detect_crushmap"
         return self.api.client.post(url,body=body)
 
+    def get_crushmap_tree_data(self,body):
+        url = "/clusters/get_crushmap_tree_data"
+        return self.api.client.post(url,body=body)
+
     def integrate(self,servers=[]):
         body = {'cluster': {
                             "servers": servers,
