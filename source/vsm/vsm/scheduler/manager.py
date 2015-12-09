@@ -1310,18 +1310,18 @@ class SchedulerManager(manager.Manager):
         :return:
         '''
         monitor_pitched_host = self._get_monitor_by_cluster_id(context, body.get('cluster_id',1))
-        LOG.info("000000000000000=%s"%monitor_pitched_host)
+        #LOG.info("000000000000000=%s"%monitor_pitched_host)
         monitor_keyring = None
         tree_node = []
         try:
-            LOG.info("111111111111111=%s"%monitor_pitched_host)
+            #LOG.info("111111111111111=%s"%monitor_pitched_host)
             message = self._agent_rpcapi.detect_crushmap(context, monitor_keyring, monitor_pitched_host)
             crushmap_str = message['crushmap']
             crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
             utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
             crushmap = CrushMap(json_file=crush_map_new)
             tree_node = crushmap._show_as_tree_dict()
-            LOG.info("222222==%s"%tree_node)
+            #LOG.info("222222==%s"%tree_node)
         except rpc_exc.Timeout:
             LOG.error('ERROR: get_crushmap_tree_data rpc timeout')
         except rpc_exc.RemoteError:
