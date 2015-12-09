@@ -1,0 +1,98 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Batch Import OSD" %}{% endblock %}
+
+{% block page_header %}
+{% include "horizon/common/_page_header.html" with title=_("Batch Import OSD") %}
+<link href="{{ STATIC_URL }}dashboard/css/importosd.css" rel="stylesheet">
+{% endblock page_header %}
+
+{% block main %}
+
+{% csrf_token %}
+
+<div id="divFramework">
+  <div id="divFileUpload">
+    <form id="fUpload" method="post" class="form-inline" enctype="multipart/form-data" action="/dashboard/vsm/devices-management/batch_import_view/" >
+      <a id="linkUploadfile" href="#" class="file btn btn-primary">
+        {{form}}
+        <span>Select File</span>
+      </a>
+      <input id="btnPreview" type="submit"  class="btn btn-primary"  value="Preview"/>
+      {%if data.has_data %}
+        <input id="btnImport" type="button"  class="btn btn-primary"  value="Import"/>
+      {%endif%}
+      <input type="hidden" name="csrfmiddlewaretoken" value="{% csrf_token %}"/>
+    </form>
+  </div>
+  <div id="divFileInfo">
+    <span id="lblFileNameMark">file name:</span>
+    <span id="lblFileName"></span>
+  </div>
+
+  <table id="osd_list" class="table table-bordered table-striped datatable tablesorter tablesorter-default">
+    <thead>
+      <tr class="tablesorter-headerRow">
+          <th class="sortable normal_column tablesorter-header">
+              <div class="tablesorter-header-inner">Server Name</div>
+          </th>
+          <th class="sortable normal_column tablesorter-header">
+              <div class="tablesorter-header-inner">Storage Group ID</div>
+          </th>
+          <th class="sortable normal_column tablesorter-header">
+              <div class="tablesorter-header-inner">Weight</div>
+          </th>
+          <th class="sortable normal_column tablesorter-header" >
+              <div class="tablesorter-header-inner">Journal</div>
+          </th>
+          <th class="sortable normal_column tablesorter-header">
+              <div class="tablesorter-header-inner">Data</div>
+          </th>
+      </tr>
+    </thead>
+    <tbody>
+        {%for osd in data.osd_list %}
+        <tr class="odd">
+            <td class="sortable normal_column">{{osd.server_name}}</td>
+            <td class="sortable normal_column">{{osd.storage_group_id}}</td>
+            <td class="sortable normal_column">{{osd.weight}}</td>
+            <td class="sortable normal_column">{{osd.journal}}</td>
+            <td class="sortable normal_column">{{osd.data}}</td>
+        </tr>
+        {%endfor%}
+    </tbody>
+    <tfoot>
+      <tr>
+          <td colspan="5" data-column="0">
+              <span class="table_count">Displaying {{ sg_list | length }} item</span> 
+          </td> 
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+<script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
+<script src='{{ STATIC_URL }}dashboard/js/import_osd.js' type='text/javascript' charset='utf-8'></script>
+{% endblock %}
+
