@@ -200,6 +200,15 @@ def storage_group_status(request):
 def storage_group_create(request, body):
     return vsmclient(request).storage_groups.create(body)
 
+def storage_group_create_with_takes(request, body):
+    return vsmclient(request).storage_groups.create_with_takes(body)
+
+def storage_group_update_with_takes(request, body):
+    return vsmclient(request).storage_groups.update_with_takes(body)
+
+def storage_group_update(request, body):
+    return vsmclient(request).storage_groups.update(body)
+
 def placement_group_summary(request):
     return vsmclient(request).placement_groups.summary()
 
@@ -306,3 +315,9 @@ def detect_crushmap(request, body=None):
          u'monitor_keyring': u'/etc/keying'}
     """
     return vsmclient(request).clusters.detect_crushmap(body)
+
+def get_crushmap_tree_data(request, body=None):
+    """
+        body : {'cluster_id':1}
+    """
+    return vsmclient(request).clusters.get_crushmap_tree_data(body)

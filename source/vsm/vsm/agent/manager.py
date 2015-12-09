@@ -81,6 +81,7 @@ class AgentManager(manager.Manager):
         self._driver = driver.DbDriver()
         self.ceph_driver = driver.CephDriver()
         self.crushmap_driver = driver.CreateCrushMapDriver()
+        self.crushmap_manager_driver = driver.ManagerCrushMapDriver()
         self.diamond_driver= driver.DiamondDriver()
         self._smp = ManifestParser()
         self._node_info = self._smp.format_to_json()
@@ -1785,6 +1786,7 @@ class AgentManager(manager.Manager):
             for bucket in buckets:
                 if bucket['type_id'] > types[1]['type_id']:
                     for item in bucket['items']:
+                        LOG.info('222222222===%s'%item['id'])
                         zone = crushmap.get_bucket_by_id(item['id'])
                         values = {'id': zone['id'],
                                   'name': zone['name'],
@@ -1809,9 +1811,11 @@ class AgentManager(manager.Manager):
             db.storage_group_update_or_create(context,storage_group)
 
     def detect_crushmap(self,context,keyring):
+        LOG.info('333333')
         message = {'error':'','code':'','info':''}
         try:
             crushmap = self.get_crushmap_json_str(keyring)
+            LOG.info('4444')
             message['error'] = ''
             message['code'] = ''
             message['info'] = 'Success'
@@ -2060,8 +2064,25 @@ class AgentManager(manager.Manager):
         message = {'code':code,'error':error,'info':info,'tree_data':tree_node}
         return message
 
+    def add_rule_to_crushmap(self,context,body):
+        ret = self.crushmap_manager_driver._generate_one_rule(body)
+        return ret
 
+    def modify_rule_in_crushmap(self,context,body):
+        ret = self.crushmap_manager_driver._modify_takes_of_rule(body)
+        return ret
 
+    def update_zones_from_crushmap_to_db(self,context,body):
+        crushmap = self.get_crushmap_json_format()
+        LOG.info('update_zones_from_crushmap_to_db-----1111===%s'%crushmap)
+        ret = self._insert_zone_from_crushmap_to_db(context,crushmap)
+        return ret
+
+    def update_storage_groups_from_crushmap_to_db(self,context,body):
+        crushmap = self.get_crushmap_json_format()
+        LOG.info('update_zones_from_crushmap_to_db-----1111===%s'%crushmap)
+        ret = self._insert_storage_group_from_crushmap_to_db(context,crushmap)
+        return ret
 
 
 

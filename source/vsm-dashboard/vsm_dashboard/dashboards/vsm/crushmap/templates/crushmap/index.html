@@ -38,8 +38,14 @@
                             <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0">
                                 <div class="tablesorter-header-inner">Class</div>
                             </th>
+                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0" style="display: none">
+                                <div class="tablesorter-header-inner"></div>
+                            </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
                                 <div class="tablesorter-header-inner">Take</div>
+                            </th>
+                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0" style="display: none">
+                                <div class="tablesorter-header-inner">Take Order</div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
                                 <div class="tablesorter-header-inner">Friendly Name</div>
@@ -61,10 +67,13 @@
                             <td class="sortable normal_column name">{{sg.name}}
                             </td>
                             <td class="sortable normal_column class">{{sg.storage_class}}</td>
-                            <td class="sortable normal_column take" style="width:20%">Take2</td>
+                            <td class="sortable normal_column take_id" style="display: none">{{sg.take_id}}</td>
+                            <td class="sortable normal_column take" style="width:20%">{{sg.take_name}}</td>
+                            <td class="sortable normal_column take_order" style="display: none">{{sg.take_order}}</td>
                             <td class="sortable normal_column friendly_name">{{sg.friendly_name}}</td>
                             <td class="sortable normal_column marker">
-                                <span class="glyphicon glyphicon-tag" aria-hidden="true"  style="color:#50f50f"></span>
+                                <span class="glyphicon glyphicon-tag" aria-hidden="true"  style="color:{{sg.marker}}"></span>
+
                             </td>
                             <td class="actions_column">
                                 <button href="#" class="btn btn-default btn-primary" onclick="updateAction({{sg.id}})">Edit</button>

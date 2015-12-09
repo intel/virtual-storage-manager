@@ -564,3 +564,39 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         topic,
                         version='1.0', timeout=6000)
         return res
+
+    def add_rule_to_crushmap(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('add_rule_to_crushmap',
+                                      body=body),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res
+
+    def modify_rule_in_crushmap(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('modify_rule_in_crushmap',
+                                      body=body),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res
+
+    def update_zones_from_crushmap_to_db(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('update_zones_from_crushmap_to_db',
+                                      body=body),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res
+
+    def update_storage_groups_from_crushmap_to_db(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('update_storage_groups_from_crushmap_to_db',
+                                      body=body),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res

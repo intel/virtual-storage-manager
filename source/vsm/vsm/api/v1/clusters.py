@@ -146,6 +146,19 @@ class ClusterController(wsgi.Controller):
         LOG.info('CEPH_LOG detect_crushmap get ret=%s'%ret)
         return ret
 
+    def get_crushmap_tree_data(self, req, body=None):
+        '''
+
+        :param res:
+        :param body:
+        :return:
+        '''
+        LOG.info("CEPH_LOG get_crushmap_tree_data body=%s"%body )
+        context = req.environ['vsm.context']
+        ret = self.scheduler_api.get_crushmap_tree_data(context,body)
+        LOG.info('CEPH_LOG get_crushmap_tree_data get ret=%s'%ret)
+        return ret
+
     def check_pre_existing_cluster(self,req,body):
         '''
 
