@@ -1698,7 +1698,10 @@ class AgentManager(manager.Manager):
         device_dict['total_capacity_kb'] = 0
         zone_ref = db.zone_get_by_name(self._context, self._node_info['zone'])
         zone_id = zone_ref['id']
-        storage_group_ref = db.storage_group_get(context,device_info["storage_group_id"])
+        if "storage_group_id"  in device_info.keys():
+            storage_group_ref = db.storage_group_get(context,device_info["storage_group_id"])
+        else:
+            storage_group_ref = db.storage_group_get_by_storage_class(context,device_info["storage_group_name"])
         if storage_group_ref:
             device_type = storage_group_ref['storage_class']
             device_dict['journal'] = device_info['journal']
