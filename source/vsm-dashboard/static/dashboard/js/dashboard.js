@@ -317,7 +317,10 @@ function loadCapacity(){
         data: null,
         dataType:"json",
         success: function(data){
-            cClusterGague.setOption(GenerateGaugeOption(data.value));
+            cClusterGague.setOption(GenerateGaugeOption(data.percent));
+            //update the capacity value
+            $("#lblCapacityUsed")[0].innerHTML = ((parseInt(data.used)/1024)/1024).toString() + " MB";
+            $("#lblCapacityTotal")[0].innerHTML = ((parseInt(data.total)/1024)/1024).toString() + " MB";
         }
      });
 }
@@ -584,7 +587,7 @@ function GenerateGaugeOption(value) {
                             [0.8, '#48b'],
                             [1, '#ff4500']
                         ],
-                        width: 10,
+                        width: 10
                     }
                 },
                 axisTick:{
@@ -597,10 +600,10 @@ function GenerateGaugeOption(value) {
                         type: 'solid'
                     }
                 },
-                radius:['30%', '90%'],
-                center:['55%','50%']
+                radius:['30%', '100%'],
+                center:['50%','55%']
             }
-        ],
+        ]
     };
 
     return option;
@@ -612,7 +615,7 @@ function GenerateLineOption(){
             x:40,
             y:20,
             height:'80%',
-            width:'85%',
+            width:'85%'
         },
         tooltip:{
             trigger:'axis'
@@ -626,7 +629,7 @@ function GenerateLineOption(){
                 boundaryGap : false,
                 axisLabel:{
                     show:true,
-                    interval:0,
+                    interval:0
                 },
                 data :InitAxis_X()
             }
@@ -639,7 +642,7 @@ function GenerateLineOption(){
                 //max:15,
                 axisLabel:{
                     show:true,
-                    interval:'auto',
+                    interval:'auto'
                 },
                 name : '',
                 boundaryGap: [0.5, 0.5]
@@ -680,7 +683,7 @@ function GenerateCPUOption(timestampList,legendList,seriesList){
             x:40,
             y:20,
             height:'80%',
-            width:'85%',
+            width:'85%'
         },
         tooltip:{
             trigger:'axis'
@@ -694,7 +697,7 @@ function GenerateCPUOption(timestampList,legendList,seriesList){
                 boundaryGap : false,
                 axisLabel:{
                     show:true,
-                    interval:0,
+                    interval:0
                 },
                 data :timestampList
             }
@@ -707,7 +710,7 @@ function GenerateCPUOption(timestampList,legendList,seriesList){
                 //max:15,
                 axisLabel:{
                     show:true,
-                    interval:'auto',
+                    interval:'auto'
                 },
                 name : '',
                 boundaryGap: [0.5, 0.5]
@@ -724,7 +727,7 @@ function GenerateInitCPUOption(){
             x:40,
             y:20,
             height:'80%',
-            width:'85%',
+            width:'85%'
         },
         tooltip:{
             trigger:'axis'
@@ -738,7 +741,7 @@ function GenerateInitCPUOption(){
                 boundaryGap : false,
                 axisLabel:{
                     show:true,
-                    interval:0,
+                    interval:0
                 },
                 data :InitAxis_X()
             }
@@ -782,7 +785,7 @@ function GetLatencyOption(){
             x:40,
             y:20,
             height:'80%',
-            width:'85%',
+            width:'85%'
         },
         tooltip:{
             trigger:'axis'
@@ -796,7 +799,7 @@ function GetLatencyOption(){
                 boundaryGap : false,
                 axisLabel:{
                     show:true,
-                    interval:0,
+                    interval:0
                 },
                 data : InitAxis_X()
             }
@@ -809,7 +812,7 @@ function GetLatencyOption(){
                 //max:15,
                 axisLabel:{
                     show:true,
-                    interval:'auto',
+                    interval:'auto'
                 },
                 name : '',
                 boundaryGap: [0.5, 0.5]
@@ -854,7 +857,7 @@ function GetBandwidthOption(){
             x:40,
             y:20,
             height:'80%',
-            width:'85%',
+            width:'85%'
         },
         tooltip:{
             trigger:'axis'
@@ -868,7 +871,7 @@ function GetBandwidthOption(){
                 boundaryGap : false,
                 axisLabel:{
                     show:true,
-                    interval:0,
+                    interval:0
                 },
                 data : InitAxis_X()
             }
@@ -881,7 +884,7 @@ function GetBandwidthOption(){
                 //max:15,
                 axisLabel:{
                     show:true,
-                    interval:'auto',
+                    interval:'auto'
                 },
                 name : '',
                 boundaryGap: [0.5, 0.5]

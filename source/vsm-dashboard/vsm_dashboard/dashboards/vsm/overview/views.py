@@ -164,8 +164,10 @@ def get_cluster():
 #get the capactiy data
 def get_capacity():
     pg_summary = vsmapi.placement_group_summary(None)
+    capactiy_used = pg_summary.bytes_used
+    capactiy_total = pg_summary.bytes_total
     used_percent = ('%.2f'%((pg_summary.bytes_used/pg_summary.bytes_total)*100));
-    capacity_dict = {"value":used_percent}
+    capacity_dict = {"used":capactiy_used,"total":capactiy_total,"percent":used_percent}
     capacitydata = json.dumps(capacity_dict)
     return capacitydata
 

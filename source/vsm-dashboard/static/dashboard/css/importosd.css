@@ -1,0 +1,63 @@
+#divFramework{
+	width: 100%;
+	overflow: hidden;
+}
+
+#fUpload{
+	float: none;
+}
+
+#btnPreview{
+	padding: 3px 14px !important;
+	border-radius: 2px;
+}
+
+#btnImport{
+	padding: 3px 14px !important;
+	border-radius: 2px;
+}
+
+.file {
+    position: relative;
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.file input {
+    position: absolute;
+    height: 30px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+}
+
+
+.file label{
+    display: none;
+}
+
+.file ul{
+    display: none;
+}
+
+#divFileUpload{
+	height: 48px;
+	line-height: 48px;
+	width: 100%;
+	border:1px solid #ccc;
+	border-bottom: none;
+	text-align: right;
+ 	padding:10px;
+}
+
+#divFileInfo{
+	padding:10px;
+	width: 100%;
+	border-left:1px solid #ccc;
+	border-right:1px solid #ccc;
+}
+
+#osd_list{
+	border-collapse:inherit;
+}
+
