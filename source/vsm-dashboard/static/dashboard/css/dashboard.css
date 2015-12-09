@@ -49,10 +49,18 @@
     float: left;
 }
 
-#divClusterGauge{
+#divCapacity{
     width: 35%;
     height: 200px;
     float:left;
+}
+
+#divClusterGauge{
+    height: 140px;
+}
+
+#divCapacityInfo{
+    padding-left: 10px;
 }
 
 /**
