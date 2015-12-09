@@ -21,6 +21,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse_lazy
 from django.utils.datastructures import SortedDict
 from django.views.generic import TemplateView
+from django.shortcuts import render
+from django import forms as django_froms
 from horizon import exceptions
 from horizon import tables
 from horizon import forms
@@ -143,6 +145,61 @@ class AddOSDView(TemplateView):
             context["available_disks"] = disks_list
         
         return context
+
+class UploadFileForm(django_froms.Form):
+    file = forms.FileField()
+
+@csrf_exempt
+def batch_import_view(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST,request.FILES)
+        if form.is_valid():
+            data = handle_uploaded_file(request.FILES['file'])
+            return render(request,"vsm/devices-management/batch_import.html",{'form':form,"data":data})
+    else:
+        form = UploadFileForm()
+
+    return render(request,"vsm/devices-management/batch_import.html",{'form':form})
+
+
+def handle_uploaded_file(f):
+    data = {"has_data":True,"file_name":"","osd_list":[]}
+    try:
+        data["file_name"] = f.name
+        file_content = []
+        for chunk in f.chunks():
+           file_content.append(chunk)
+        file_content = file_content[0].replace("\r\n",";").replace("\n",";").split(";");
+        for i,item in enumerate(file_content):
+            if i == 0:
+                continue
+            osd = item.split(",")
+            osd = {
+                "server_name":osd[0],
+                "storage_group_id":osd[1],
+                "weight":osd[2],
+                "journal":osd[3],
+                "data":osd[4],
+            }
+            data["osd_list"].append(osd)
+    except Exception, e:
+        print e
+
+    return data
+
+def batch_import(request):
+    data = json.loads(request.body)
+    print "===========Batch Add OSD==============="
+    print data
+    try:
+        pass
+        #vsmapi.osds.add_batch_new_disks_to_cluster(data)
+    except Exception, e:
+        print e
+
+    res = {"status":"OK"}
+    res = json.dumps(res)
+    return HttpResponse(res)
 
 def DevicesAction(request, action):
     data = json.loads(request.body)
