@@ -102,7 +102,7 @@ class DeviceManager(base.ManagerWithFind):
         message = []
         paths = search_opts.get("path")
         disks = []
-        for disk in disks:
+        for disk in body:
             disk_name = disk.get('disk_name','')
             by_path = disk.get('by_path','')
             by_uuid = disk.get('by_uuid','')

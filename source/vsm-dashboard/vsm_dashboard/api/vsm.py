@@ -287,13 +287,11 @@ def get_ceph_health_list(request):
     return  vsmclient(request).clusters.get_ceph_health_list()
 
 def add_new_disks_to_cluster(request, body):
-    return vsmclient(request).osds.add(body)
+    return vsmclient(request).osds.add_new_disks_to_cluster(body)
 
 def add_batch_new_disks_to_cluster(request, body):
     return vsmclient(request).osds.add_batch_new_disks_to_cluster(body)
 
-def add_batch_new_disks_to_cluster(request, body):
-    return vsmclient(request).osds.add_batch_new_disks_to_cluster(body)
 
 def get_available_disks(request,  search_opts):
     return vsmclient(request).devices.get_available_disks( search_opts=search_opts)

@@ -239,7 +239,7 @@ class Controller(wsgi.Controller):
         self.scheduler_api.osd_add(context, id)
         return webob.Response(status_int=202)
 
-    def add(self, req, body):
+    def add_new_disks_to_cluster(self, req, body):
         context = req.environ['vsm.context']
         LOG.info("osd_add body= %s" % body)
         self.scheduler_api.add_new_disks_to_cluster(context, body)

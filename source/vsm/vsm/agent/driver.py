@@ -797,10 +797,10 @@ class CephDriver(object):
                 #TODO update rule_id and status in DB
                 rule_dict = self.get_crush_rule_dump_by_name(crush_dict['storage_group']) 
                 LOG.info("rule_dict:%s" % rule_dict)
-                values['rule_id'] = rule_dict['rule_id'] 
+                values['rule_id'] = rule_dict['rule_id']
 
             self._crushmap_mgmt.add_host(crush_dict['host'],
-                                         crush_dict['zone'])
+                                         crush_dict['zone'],types=types)
             #    added_to_crushmap = True
 
             #There must be at least 3 hosts in every storage group when the status is "IN"
@@ -1716,20 +1716,40 @@ class CephDriver(object):
         all_disk_info,err = utils.execute('blockdev','--report',run_as_root=True)
         all_disk_info = all_disk_info.split('\n')
         all_disk_name = []
+        disk_check = []
         if len(all_disk_info)>1:
             for line in all_disk_info[1:-1]:
-                all_disk_name.append(line.split(' ')[-1])
-        for disk in all_disk_name:
-            if '%s1'%disk in all_disk_name:
-                all_disk_name.remove(disk)
-        usd_disk_info,err = utils.execute('blkid','-d',run_as_root=True)
-        usd_disk_info = usd_disk_info.split('\n')
-        usd_disk_name = []
-        if len(usd_disk_info)>1:
-            for line in usd_disk_info:
-                usd_disk_name.append(line.split(':')[0])
-        available_disk_name = all_disk_name-usd_disk_name
-        return list(set(available_disk_name))
+                LOG.info('line====%s'%line)
+                line_list = line.split(' ')
+                line_list.remove('')
+                LOG.info('line_list====%s'%line_list)
+                if int(line_list[-4]) <= 1024:
+                    continue
+                if line_list[-1].find('-') != -1:
+                    continue
+                if line_list[-9] and int(line_list[-9]) == 0:
+                    disk_check.append(line_list[-1])
+                all_disk_name.append(line_list[-1])
+        for disk_check_cell in disk_check:
+            for disk in all_disk_name:
+                if disk != disk_check_cell and disk.find(disk_check_cell) == 0:
+                    all_disk_name.remove(disk_check_cell)
+                    break
+        mounted_disk_info,err = utils.execute('mount', '-l', run_as_root=True)
+        mounted_disk_info = mounted_disk_info.split('\n')
+        for mounted_disk in mounted_disk_info:
+            mounted_disk_list = mounted_disk.split(' ')
+            if mounted_disk_list[0].find('/dev/') != -1:
+                if mounted_disk_list[0] in all_disk_name:
+                    all_disk_name.remove(mounted_disk_list[0])
+        pvs_disk_info,err = utils.execute('pvs', '--rows', run_as_root=True)
+        pvs_disk_info = pvs_disk_info.split('\n')
+        for line in pvs_disk_info:
+            line_list = line.split(' ')
+            if line_list[-1].find('/dev/') != -1 and line_list[-1] in all_disk_name:
+                all_disk_name.remove(line_list[-1])
+
+        return all_disk_name
 
 
     def get_disks_name(self, context,disk_bypath_list):
@@ -1741,21 +1761,23 @@ class CephDriver(object):
                 disk_name_dict[bypath] = '/dev/%s'%(out.split('../../')[1][:-1])
         return disk_name_dict
 
-    def get_disks_name_by_path_dict(self, context,disk_name_list):
+    def get_disks_name_by_path_dict(self,disk_name_list):
         disk_name_dict = {}
-        by_path_info,err = utils.execute('ll','/dev/disk/by-path',run_as_root=True)
+        by_path_info,err = utils.execute('ls','-al','/dev/disk/by-path',run_as_root=True)
+        LOG.info('by_path_info===%s,err===%s'%(by_path_info,err))
         for bypath in by_path_info.split('\n'):
             bypath_list = bypath.split(' -> ../../')
-            if bypath_list > 1:
+            if len(bypath_list) > 1:
                 disk_name_dict['/dev/%s'%(bypath_list[1])] = '/dev/disk/by-path/%s'%(bypath_list[0].split(' ')[-1])
         return disk_name_dict
 
-    def get_disks_name_by_uuid_dict(self, context,disk_name_list):
+    def get_disks_name_by_uuid_dict(self,disk_name_list):
         disk_name_dict = {}
-        by_uuid_info,err = utils.execute('ll','/dev/disk/by-uuid',run_as_root=True)
+        by_uuid_info,err = utils.execute('ls','-al','/dev/disk/by-uuid',run_as_root=True)
+        LOG.info('by_uuid_info===%s,err===%s'%(by_uuid_info,err))
         for byuuid in by_uuid_info.split('\n'):
             byuuid_list = byuuid.split(' -> ../../')
-            if byuuid_list > 1:
+            if len(byuuid_list) > 1:
                 disk_name_dict['/dev/%s'%(byuuid_list[1])] = '/dev/disk/by-path/%s'%(byuuid_list[0].split(' ')[-1])
         return disk_name_dict
 
