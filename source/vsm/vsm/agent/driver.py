@@ -847,8 +847,14 @@ class CephDriver(object):
         LOG.info('>>> step2 start')
         #osd_pth = '%sceph-%s' % (FLAGS.osd_data_path, osd_id)
         #osd_keyring_pth = "%s/keyring" % osd_pth
-        osd_pth = '/var/lib/ceph/osd/osd%s' % osd_id
-        osd_keyring_pth = '/etc/ceph/keyring.osd.%s' % osd_id
+        #osd_pth = '/var/lib/ceph/osd/osd%s' % osd_id
+        #osd_keyring_pth = '/etc/ceph/keyring.osd.%s' % osd_id
+        osd_data_path = self.get_ceph_config(context)['osd']['osd data']
+        osd_pth = osd_data_path.replace('$id',osd_id)
+        LOG.info('osd add osd_pth =%s'%osd_pth)
+        osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
+        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_id)
+        LOG.info('osd add keyring path=%s'%osd_keyring_pth)
         utils.ensure_tree(osd_pth)
 
         # step 3
