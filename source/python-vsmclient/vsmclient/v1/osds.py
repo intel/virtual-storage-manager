@@ -97,7 +97,7 @@ class OsdManager(base.ManagerWithFind):
     def remove(self, osd):
         self._action('remove', osd)
 
-    def add(self, body):
+    def add_new_disks_to_cluster(self, body):
 
         """
         :param body:
