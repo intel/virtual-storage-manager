@@ -6,13 +6,14 @@ function getFont(treeId, node) {
 }
 
 function onClickEvent(event, treeId, treeNode, clickFlag) {
-	if(treeNode.type != 0){
-        var take_id = treeNode.id.toString();
+	if(treeNode.type_id != _TYPE_LIST[0].id){
+		var take_id = treeNode.id.toString();
 		var take_name = treeNode.name;
+		var take_type_id = treeNode.type_id;
 
 		var is_exsit = false;
-		$(".take-left").each(function(){
-			if(trimStr(this.id) == trimStr(take_id)){
+		$(".take-id").each(function(){
+			if(this.innerHTML.trim() == take_id.trim()){
 				is_exsit = true;
 			}
 		});
@@ -21,18 +22,14 @@ function onClickEvent(event, treeId, treeNode, clickFlag) {
 			return false;
 		}
 
-    	$("#divTakeList").append(GenerateTakeHTML(take_id,take_name));
-    	RefreshTakeList();
+
+		var type_list = GetTypeListByNode(treeNode);
+    	$("#tTakeList>tbody").append(GenerateTakeHTML(take_id,take_name,"",type_list,""));
 	}
 }
 
-function onCheckEvent(event, treeId, treeNode){
-	console.log(treeNode.take);
-}
-
-
 var CRUSHMAP = "";
-
+var _TYPE_LIST = [];
 var setting = {
 	check: {
 		enable: false,
@@ -50,15 +47,12 @@ var setting = {
 		}
 	},
 	callback: {
-		//beforeClick: beforeClick,
-		onClick: onClickEvent,
-		onCheck: onCheckEvent
+		onClick: onClickEvent
 	}
 };
 
 $(document).ready(function(){
 	loadTree();
-	//RefreshTakeList();
 });
 
 
@@ -66,7 +60,7 @@ $(document).ready(function(){
 function loadTree(){
 	var data = {
 		"crushmap":"",
-		"cephconf":""
+		"cephconf":"",
 	}
 
 	var postData = JSON.stringify(data);
@@ -79,7 +73,7 @@ function loadTree(){
 		success: function(data){
 				switch(data.status){
 					case "OK":
-						console.log(data.crushmap);
+						_TYPE_LIST = data.type_list;
 						CRUSHMAP = $.fn.zTree.init($("#divCrushmapTree"), setting, data.crushmap);
 						CRUSHMAP.expandAll(true);
 						break;
@@ -105,50 +99,62 @@ function loadTree(){
 var _SG_ID = -1;
 function addAction(){
 	_SG_ID = -1;
-	resetForm();
+	ResetForm();
+	$("#btnReset").show();
 	$("#btnAddStorageGroup").show();
 }
 
 function updateAction(id){
 	_SG_ID = id;
-	resetForm();
-
+	ResetForm();
+	$("#btnUpdateStorageGroup").show();
+	$("#btnReset").show();
 	var trID = "storage_group_list__row__"+id;
 	var tr = $("#"+trID);
-	var sg_take_id =  trimStr(tr.find(".take_id")[0].innerHTML);
-    var sg_take_name =  trimStr(tr.find(".take")[0].innerHTML);
 
-
-	$("#txtName").val(trimStr(tr.find(".name")[0].innerHTML));
-	$("#txtClass").val(trimStr(tr.find(".class")[0].innerHTML));
-	$("#txtFriendlyName").val(trimStr(tr.find(".friendly_name")[0].innerHTML));
+	$("#txtName").val(tr.find(".name")[0].innerHTML.trim());
+	$("#txtClass").val(tr.find(".class")[0].innerHTML.trim());
+	$("#txtFriendlyName").val(tr.find(".friendly_name")[0].innerHTML.trim());
 	$("#txtMarker")[0].value = rgb2hex(tr.find(".glyphicon")[0].style.color);
 
-	var take_id_list = sg_take_id.split(',');
-    var take_name_list = sg_take_name.split(',');
-	for(var i=0;i<take_name_list.length;i++){
-		$("#divTakeList").append(GenerateTakeHTML(trimStr(take_id_list[i]),trimStr(take_name_list[i])));
+
+	var take_id_list = [];
+	tr.find("input[type='hidden']").each(function(){
+		var is_exsit_value =false;
+		for(var i=0;i<take_id_list.length;i++){
+			if(this.name==take_id_list[i]){
+				is_exsit_value = true;
+				break;
+			}
+		}
+		if(is_exsit_value==false){
+			take_id_list.push(this.name);
+		}
+	})
+
+	for(var i=0;i<take_id_list.length;i++){
+		var take_id = take_id_list[i];
+		var take_name = $(".take-name[name=\""+take_id+"\"]").val();
+		var type_id = $(".type-id[name=\""+take_id+"\"]").val();
+		var take_num = $(".take-num[name=\""+take_id+"\"]").val();
+
+		var tree_node = CRUSHMAP.getNodeByParam("id",parseInt(take_id),null);
+		var type_list = GetTypeListByNode(tree_node);
+
+		$("#tTakeList>tbody").append(GenerateTakeHTML(take_id,take_name,type_id,type_list,take_num));
 	}
-	RefreshTakeList();
-	//mark the tree checkbox
-
-
-
-	$("#btnUpdateStorageGroup").show();
 }
 
-function resetForm(){
+
+
+function ResetForm(){
 	$("#txtName").val("");
 	$("#txtClass").val("");
 	$("#txtFriendlyName").val("");
 	$("#txtMarker").val("");
-	$("#divTakeList").empty();
+	$("#tTakeList>tbody").empty();
 	$("#btnAddStorageGroup").hide();
 	$("#btnUpdateStorageGroup").hide();
-
-	$(".button.chk").each(function(){
-		this.className = "button chk checkbox_false_full";
-	});
 }
 
 function PostAction(action){
@@ -162,29 +168,64 @@ function PostAction(action){
 		return  false;
 	}
 
+	var is_value_empty = false;
+	$(".text-take-num").each(function(){
+		if(this.value=="" || this.value==null){
+			this.style.border = "1px solid red";
+			is_value_empty = true;
+		}
+		else{
+			this.style.border = "1px solid #ccc";
+		}
+	});
+
+	if(is_value_empty == true){
+		return false;
+	}
+
+
+
 	//empty the error message
 	$(".messages").empty();
 
-	var take_list_id = [];
-    var take_list_name = [];
-    var take_list_order = "";
-	$(".take-left").each(function(){
-		take_list_id.push(this.id);
-        take_list_name.push(this.innerHTML);
-	});
-    var sg_data = {'storage_groups':[]};
-    var sg = {
-        'id':_SG_ID,
-        'name': $("#txtName").val(),
-        'friendly_name': $("#txtFriendlyName").val(),
-        'storage_class': $("#txtClass").val(),
-        'marker': $("#txtMarker").val(),
-        'take': take_list_id,
-        'take_name': take_list_name,
-        'take_order':take_list_order,
-        'cluster_id':1  //bad code. the origin is 1
+	var take_list = [];
+	$(".tr-take").each(function(){
+		var trID = this.id;
+		var selTakeType = $("#"+trID).find(".select-take-type")[0];
+		var choose_leaf_type_id = selTakeType.value;
+		var choose_leaf_type_name = selTakeType.options[selTakeType.selectedIndex].text;
+		
+		var choose_num = $("#"+trID).find(".text-take-num")[0].value;
+		
+
+		var take = {
+			"take_id":$("#"+trID).find(".take-id")[0].innerHTML,
+			"take_name":$("#"+trID).find(".take-name")[0].innerHTML,
+			"choose_leaf_type_id":choose_leaf_type_id,
+			"choose_leaf_type":choose_leaf_type_name,
+			"choose_num":choose_num,
+		}
+		take_list.push(take);
+	})
+
+	var sg_data = {
+        'storage_group': {
+        	'cluster_id':1,  //bad code. the origin is 1
+        	'id':_SG_ID,
+            'name': $("#txtName").val(),
+            'friendly_name': $("#txtFriendlyName").val(),
+            'storage_class': $("#txtClass").val(),
+            'marker': $("#txtMarker").val(),
+            'rule_info':{
+            	"rule_name":$("#txtName").val(),
+            	"rule_id":_SG_ID,
+            	"type":"replicated",
+            	"min_size":0,
+            	"max_size":10,
+            	"takes":take_list
+            },
+        }
     }
-    sg_data.storage_groups.push(sg);
 
 	var postData = JSON.stringify(sg_data);
 	token = $("input[name=csrfmiddlewaretoken]").val();
@@ -196,18 +237,17 @@ function PostAction(action){
 		success: function(data){
 			switch(data.status){
 				case "OK":
-					// CRUSHMAP = $.fn.zTree.init($("#divCrushmapTree"), setting, data.crushmap);
-					// CRUSHMAP.expandAll(true);
 					if(action == "create"){
-						AddStorageGroupHTML(sg);
+						AddStorageGroupHTML(sg_data.storage_group);
+						ResetForm();
+						$("#btnReset").hide();
 					}
 					else{
-						UpdateStorageGroupHTML(sg);
+						UpdateStorageGroupHTML(sg_data.storage_group);
 					}
-                    showTip("success",data.message);
 					break;
 				case "Failed":
-					showTip("error",data.message);
+					showTip("error",data.msg);
 					break;
 			}
 	   	},
@@ -236,17 +276,21 @@ function AddStorageGroupHTML(data){
 	html += "	<td class='sortable normal_column class'>";
 	html += 		data.storage_class;
 	html += "	</td>";
-    html += "	<td class='sortable normal_column take_id' style=\"display: none\">";
-	html += 		data.take.toString();
-	html += "	</td>";
-	html += "	<td class='sortable normal_column take'>";
-	html += 		data.take_name.toString();
-	html += "	</td>";
-    html += "	<td class='sortable normal_column take_order' style=\"display: none\">";
-	html += 		data.take_order;
-	html += "	</td>";
 	html += "	<td class='sortable normal_column friendly_name'>";
 	html += 		data.friendly_name;
+	html += "	</td>";
+	html += "	<td class='sortable normal_column take'>";
+	for(var i=0;i<data.rule_info.takes.length;i++){
+		var displayText = data.rule_info.takes[i].take_name+"("+data.rule_info.takes[i].choose_leaf_type+","+data.rule_info.takes[i].choose_num+")";
+		html += displayText;
+		var take_id = data.rule_info.takes[i].take_id;
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"take-id\" value=\""+take_id+"\"/>";
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"take-name\" value=\""+data.rule_info.takes[i].take_name+"\"/>";
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"type-id\" value=\""+data.rule_info.takes[i].choose_leaf_type_id+"\"/>";
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"type-name\" value=\""+data.rule_info.takes[i].choose_leaf_type+"\"/>";
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"take-num\" value=\""+data.rule_info.takes[i].choose_num+"\"/>";
+		html += "<br>";
+	}
 	html += "	</td>";
 	html += "	<td class='sortable normal_column marker'>";
 	html += "		 <span class='glyphicon glyphicon-tag' aria-hidden='true'  style=\"color:"+data.marker+"\"></span>";
@@ -267,9 +311,22 @@ function UpdateStorageGroupHTML(data){
 	tr.find(".class")[0].innerHTML = data.storage_class;
 	tr.find(".friendly_name")[0].innerHTML = data.friendly_name;
 	tr.find(".glyphicon")[0].style.color = data.marker;
-	tr.find(".take_id")[0].innerHTML = data.take;
-    tr.find(".take")[0].innerHTML = data.take_name;
-    tr.find(".take_order")[0].innerHTML = data.take_order;
+
+	var html = "";
+	for(var i=0;i<data.rule_info.takes.length;i++){
+		var displayText = data.rule_info.takes[i].take_name+"("+data.rule_info.takes[i].choose_leaf_type+","+data.rule_info.takes[i].choose_num+")";
+		html += displayText;
+		var take_id = data.rule_info.takes[i].take_id;
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"take-id\" value=\""+take_id+"\"/>";
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"take-name\" value=\""+data.rule_info.takes[i].take_name+"\"/>";
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"type-id\" value=\""+data.rule_info.takes[i].choose_leaf_type_id+"\"/>";
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"type-name\" value=\""+data.rule_info.takes[i].choose_leaf_type+"\"/>";
+		html += "<input type=\"hidden\" name=\""+take_id+"\" class=\"take-num\" value=\""+data.rule_info.takes[i].choose_num+"\"/>";
+		html += "<br>";
+	}
+
+	tr.find(".take")[0].innerHTML = html;
+
 }
 
 
@@ -285,44 +342,46 @@ function MarkTree(){
 	//clean all the marker
 	$(".tree-marker").remove();
 
-	var sg_marker_list = [];
+	var marker_list = [];
 	$("#storage_group_list>tbody>tr").each(function(){
-		var checked = $("#"+this.id).find(".table-row-multi-select")[0].checked;
+		var trID= "#"+this.id;
+		var checked = $(trID).find(".table-row-multi-select")[0].checked;
 		if(checked == true){
-			sg_marker = {
-				"sg_id":$("#"+this.id).find(".table-row-multi-select")[0].value,
-				"take":$("#"+this.id).find(".take")[0].innerHTML.split(','),
-				"marker":rgb2hex($("#"+this.id).find(".glyphicon")[0].style.color),
-			};
-			sg_marker_list.push(sg_marker);
+			//get the marker color
+			var marker_color = rgb2hex($(trID).find(".glyphicon")[0].style.color)
+			//get the take ID list
+			$(trID).find(".take-id[type=\"hidden\"]").each(function(){
+				marker_list.push({
+					"takeID":this.value,
+					"color":marker_color
+				});
+			});
 		}
 	});
 
-	console.log(sg_marker_list);
+	
+	for(var i=0;i<marker_list.length;i++){
+		var takeID = marker_list[i].takeID;
+		var markerColor = marker_list[i].color;
+		var treeNode = CRUSHMAP.getNodeByParam("id",parseInt(takeID),null);
+		
+		ALL_SUB_NODE = [];
+		ALL_SUB_NODE.push(treeNode);
+		GetAllSubNodes(treeNode.children);
 
-	var nodes = CRUSHMAP.transformToArray(CRUSHMAP.getNodes());
-	for(var i=0; i<nodes.length; i++){
-		for(var j=0;j<sg_marker_list.length;j++){
-			for(var z=0;z<sg_marker_list[j].take.length;z++){
-				var marker = sg_marker_list[j].marker;
-				var take = sg_marker_list[j].take[z];
-
-				if(trimStr(take) == trimStr(nodes[i].name)){
-					var node_id = nodes[i].tId
-					$("#"+node_id+"_span").after(GenerateTreeMarker(marker));
-
-					$("#"+node_id+"_ul>li>a").each(function(){
-						$("#"+this.id).append(GenerateTreeMarker(marker));
-					})
-				}
-			}
+		console.log(ALL_SUB_NODE);
+		//Marker all the nodes
+		for(var j=0;j<ALL_SUB_NODE.length;j++){
+			var node_id = ALL_SUB_NODE[j].tId;
+			$("#"+node_id+"_span").after(GenerateTreeMarker(markerColor));
 		}
+
 	}
 }
 
 function GenerateTreeMarker(color){
 	var html ="";
-	html += "<span class=\"tree-marker glyphicon glyphicon-tag\" aria-hidden=\"true\"  style=\"color:"+color+"\"></span>";
+	html += "<span class=\"tree-marker\" aria-hidden=\"true\"  style=\"background-Color:"+color+"\"></span>";
 	return html;
 
 }
@@ -330,58 +389,72 @@ function GenerateTreeMarker(color){
 
 function TakeUp(takeID){
 	$("#"+takeID).insertBefore($("#"+takeID).prev());
-	RefreshTakeList();
 }
 
 function TakeDown(takeID){
 	$("#"+takeID).insertAfter($("#"+takeID).next());
-	RefreshTakeList();
 }
 
 function TakeRemove(takeID){
 	$("#"+takeID).remove();
-	RefreshTakeList();
 }
 
-function RefreshTakeList(){
-	var take_list = $("#divTakeList").children();
-	if(take_list == null || take_list.length == 0){
-		return false;
-	}
+// function RefreshTakeList(){
+// 	var take_list = $("#divTakeList").children();
+// 	if(take_list == null || take_list.length == 0){
+// 		return false;
+// 	}
 
-	if(take_list.length == 1){
-		var take_id = take_list[0].id;
-		$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "hidden";
-		$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "hidden";
-	}
+// 	if(take_list.length == 1){
+// 		var take_id = take_list[0].id;
+// 		$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "hidden";
+// 		$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "hidden";
+// 	}
 
-	//check the item
-	for(var i=0;i<take_list.length;i++){
-		var take_id = take_list[i].id;
-		$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "visible";
-		$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "visible";
+// 	//check the item
+// 	for(var i=0;i<take_list.length;i++){
+// 		var take_id = take_list[i].id;
+// 		$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "visible";
+// 		$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "visible";
 
-		if(i==0){
-			$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "hidden";
-		}
-		if(i==take_list.length-1){
-			$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "hidden";
-		}
-	}
-}
+// 		if(i==0){
+// 			$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "hidden";
+// 		}
+// 		if(i==take_list.length-1){
+// 			$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "hidden";
+// 		}
+// 	}
+// }
 
-function GenerateTakeHTML(take_id,take_name){
-    var ctrlTakeID = "divTake_"+take_id;
+function GenerateTakeHTML(takeID,takeName,typeID,type_list,takeNum){
+	var trID = "trTake_"+takeID;
+
 	var html = "";
-	html += "<div id='"+ ctrlTakeID +"' class='take'>";
-	html += "	<div id='"+ take_id +"' class='take-left'>";
-	html += 		take_name;
-	html += "	</div>";
-	html += "	<div class='take-right'>";
-	html += "		<span class='glyphicon glyphicon-arrow-up' aria-hidden='true' onclick=\"TakeUp('"+ctrlTakeID+"')\"></span>";
-	html += "		<span class='glyphicon glyphicon-arrow-down' aria-hidden='true' onclick=\"TakeDown('"+ctrlTakeID+"')\"></span>"
-	html += "		<span class='glyphicon glyphicon-remove' aria-hidden='true' onclick=\"TakeRemove('"+ctrlTakeID+"')\"></span>"
-	html += "	</div>";
+	html += "<tr id=\""+trID+"\" class=\"tr-take\">";
+	html += "	<td class=\"take-id\" style=\"display:none\">"+takeID+"</td>";
+	html += "	<td class=\"take-name\">"+takeName+"</td>";
+	html += "	<td class=\"take-type\">";
+	html += "		<select class=\"select-take-type form-control\">";
+	for(var i=0;i<type_list.length;i++){
+		if(typeID.toString() == type_list[i].id.toString()){
+			html += "		<option value=\""+type_list[i].id+"\" selected=\"true\">";
+		}
+		else{
+			html += "		<option value=\""+type_list[i].id+"\">";
+		}
+		html += type_list[i].name;
+		html += "		</option>";
+	}
+	html += "		</select>";
+	html += "	</td>";
+	html += "	<td class=\"take-num\">";
+	html += "		<input maxlength=\"10\" type=\"number\" class=\"text-take-num form-control\" placeholder=\"take number\" value=\""+takeNum+"\" />";
+	html += "	</td>";
+	html += "	<td class=\"take-action\">";
+	html += "		<span class='glyphicon glyphicon-arrow-up' aria-hidden='true' onclick=\"TakeUp('"+trID+"')\"></span>";
+	html += "		<span class='glyphicon glyphicon-arrow-down' aria-hidden='true' onclick=\"TakeDown('"+trID+"')\"></span>"
+	html += "		<span class='glyphicon glyphicon-remove' aria-hidden='true' onclick=\"TakeRemove('"+trID+"')\"></span>"
+	html += "	</td>";
 	html += "</div>";
 
 	return html;
@@ -405,6 +478,50 @@ function rgb2hex(rgb) {
   return "#" + zero_fill_hex(decimal, 6);
 }
 
-function trimStr(str){
-	return str.replace(/(^\s*)|(\s*$)/g,"");
+String.prototype.trim = function(){
+	return this.replace(/(^\s*)|(\s*$)/g,"");
+}
+
+var ALL_SUB_NODE = []
+function GetAllSubNodes(children){
+	for(var i=0;i<children.length;i++){
+		ALL_SUB_NODE.push(children[i]);
+		if(children[i].children!=null){
+			GetAllSubNodes(children[i].children);
+		}
+	}
+}
+
+function GetTypeListByNode(node){
+	//get all the sub nodes	
+	ALL_SUB_NODE = [];
+	GetAllSubNodes(node.children);
+	var type_list = [];
+	//add itself type
+	type_list.push({
+		"id":node.type_id,
+		"name":node.type_name
+	});
+	//add sub node type
+	for(var i=0;i<ALL_SUB_NODE.length;i++){
+		//not a osd
+		if(ALL_SUB_NODE[i].type_id ==_TYPE_LIST[0].id){
+			continue;
+		}
+
+		var is_type_exist = false;
+		for(var j=0;j<type_list.length;j++){
+			if(type_list[j].id == ALL_SUB_NODE[i].type_id){
+				is_type_exist = true;	
+				break;
+			}
+		}
+		if(is_type_exist==false){
+			type_list.push({
+				"id":ALL_SUB_NODE[i].type_id,
+				"name":ALL_SUB_NODE[i].type_name
+			});
+		}
+	}
+	return type_list;
 }
