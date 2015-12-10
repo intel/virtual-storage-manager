@@ -1702,6 +1702,25 @@ class CephDriver(object):
         return smart_info_dict
 
     def get_available_disks(self, context):
+        all_disk_info,err = utils.execute('blockdev','--report',run_as_root=True)
+        all_disk_info = all_disk_info.split('\n')
+        all_disk_name = []
+        if len(all_disk_info)>1:
+            for line in all_disk_info[1:-1]:
+                all_disk_name.append(line.split(' ')[-1])
+        for disk in all_disk_name:
+            if '%s1'%disk in all_disk_name:
+                all_disk_name.remove(disk)
+        usd_disk_info,err = utils.execute('blkid','-d',run_as_root=True)
+        usd_disk_info = usd_disk_info.split('\n')
+        usd_disk_name = []
+        if len(usd_disk_info)>1:
+            for line in usd_disk_info:
+                usd_disk_name.append(line.split(':')[0])
+        available_disk_name = all_disk_name-usd_disk_name
+        return list(set(available_disk_name))
+
+    def get_available_disks_bak(self, context):
         all_disk = glob.glob('/dev/disk/by-path/*')
         all_disk_name_dict = self.get_disks_name(context,all_disk)
         all_disk_name = all_disk_name_dict.values()

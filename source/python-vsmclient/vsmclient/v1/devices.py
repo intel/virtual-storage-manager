@@ -101,8 +101,19 @@ class DeviceManager(base.ManagerWithFind):
         ret = {"ret":1}
         message = []
         paths = search_opts.get("path")
+        disks = []
+        for disk in disks:
+            disk_name = disk.get('disk_name','')
+            by_path = disk.get('by_path','')
+            by_uuid = disk.get('by_uuid','')
+            if disk_name:
+                disks.append(disk_name)
+            if by_path:
+                disks.append(by_path)
+            if by_uuid:
+                disks.append(by_uuid)
         if paths:
-            unaviable_paths = [path for path in paths if path not in body]
+            unaviable_paths = [path for path in paths if path not in disks]
             if unaviable_paths:
                 message.append('There is no %s '%(','.join(unaviable_paths)))
         if message:
