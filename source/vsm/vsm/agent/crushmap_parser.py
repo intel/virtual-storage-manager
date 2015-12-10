@@ -110,10 +110,12 @@ class CrushMap():
     def get_all_osds_by_rule(self, name):
         rule = self.get_rules_by_name(name)
         steps = rule['steps']
+        devices = []
         for step in steps:
             if step['op'] == 'take':
-                bucket = step['item_name']
-                print bucket
+                bucket_id = step['item']
+                self.get_all_osds_by_bucket(bucket_id, devices)
+        return devices
 
     def get_all_osds_by_bucket(self, id, devices):
         print id
