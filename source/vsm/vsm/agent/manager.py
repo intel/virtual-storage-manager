@@ -1671,12 +1671,14 @@ class AgentManager(manager.Manager):
         available_disk_name = self.ceph_driver.get_available_disks(context)
         LOG.info('available_disk_name=====%s'%available_disk_name)
         available_disk_info_list = []
+        name_by_path_dict = self.ceph_driver.get_disks_name_by_path_dict(available_disk_name)
+        name_by_uuid_dict = self.ceph_driver.get_disks_name_by_uuid_dict(available_disk_name)
         for disk in available_disk_name:
-            by_path_name = ''
-            by_uuid_name = ''
+            by_path_name = name_by_path_dict.get(disk,'')
+            by_uuid_name = name_by_uuid_dict.get(disk,'')
             available_disk_info_list.append({'disk_name':disk,
-             'by-path':by_path_name,
-             'by-uuid':by_uuid_name,}
+                                             'by-path':by_path_name,
+                                             'by-uuid':by_uuid_name,})
         return available_disk_info_list
 
     def add_new_disks_to_cluster(self, context, body):

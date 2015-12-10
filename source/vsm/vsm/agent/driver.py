@@ -1731,31 +1731,6 @@ class CephDriver(object):
         available_disk_name = all_disk_name-usd_disk_name
         return list(set(available_disk_name))
 
-    def get_available_disks_bak(self, context):
-        all_disk = glob.glob('/dev/disk/by-path/*')
-        all_disk_name_dict = self.get_disks_name(context,all_disk)
-        all_disk_name = all_disk_name_dict.values()
-        all_disk = all_disk + all_disk_name
-        #LOG.info("all-disks===%s"%all_disk)
-        lines=[]
-        try:
-            f = open('/etc/mtab', "r")
-            lines = f.readlines()
-        except:
-            f.close()
-        finally:
-            f.close()
-        for line in lines:
-            if not line.startswith('/dev'):
-                continue
-            if line.split()[0] in all_disk:
-                all_disk.remove(line.split()[0])
-                #LOG.info("removed=111==%s"%line.split()[0])
-            for key in all_disk_name_dict.keys():
-                if all_disk_name_dict[key] == line.split()[0]:
-                    #LOG.info("removed==222=%s"%key)
-                    all_disk.remove(key)
-        return list(set(all_disk))
 
     def get_disks_name(self, context,disk_bypath_list):
         disk_name_dict = {}
@@ -1765,6 +1740,25 @@ class CephDriver(object):
             if len(out.split('../../'))>1:
                 disk_name_dict[bypath] = '/dev/%s'%(out.split('../../')[1][:-1])
         return disk_name_dict
+
+    def get_disks_name_by_path_dict(self, context,disk_name_list):
+        disk_name_dict = {}
+        by_path_info,err = utils.execute('ll','/dev/disk/by-path',run_as_root=True)
+        for bypath in by_path_info.split('\n'):
+            bypath_list = bypath.split(' -> ../../')
+            if bypath_list > 1:
+                disk_name_dict['/dev/%s'%(bypath_list[1])] = '/dev/disk/by-path/%s'%(bypath_list[0].split(' ')[-1])
+        return disk_name_dict
+
+    def get_disks_name_by_uuid_dict(self, context,disk_name_list):
+        disk_name_dict = {}
+        by_uuid_info,err = utils.execute('ll','/dev/disk/by-uuid',run_as_root=True)
+        for byuuid in by_uuid_info.split('\n'):
+            byuuid_list = byuuid.split(' -> ../../')
+            if byuuid_list > 1:
+                disk_name_dict['/dev/%s'%(byuuid_list[1])] = '/dev/disk/by-path/%s'%(byuuid_list[0].split(' ')[-1])
+        return disk_name_dict
+
     def run_add_disk_hook(self, context):
         out, err = utils.execute('add_disk',
                                  'll',
