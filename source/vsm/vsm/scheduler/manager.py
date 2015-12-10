@@ -1347,6 +1347,10 @@ class SchedulerManager(manager.Manager):
                 return message
             else:
                 message = self._agent_rpcapi.import_cluster(context, body, monitor_pitched_host)
+            server_list = db.init_node_get_all(context)
+            for ser in server_list:
+                LOG.info('fresh ceph conf from db to ceph nodes %s '%ser['host'])
+                self._agent_rpcapi.update_ceph_conf(context, ser['host'])
         except rpc_exc.Timeout:
             LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
         except rpc_exc.RemoteError:
