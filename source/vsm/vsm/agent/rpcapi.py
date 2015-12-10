@@ -398,6 +398,7 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         topic = rpc.queue_get_for(context, self.topic, host)
         self.cast(context, self.make_msg('update_ceph_conf'), topic)
 
+
     def start_monitor(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         return self.call(context, self.make_msg('start_monitor'), topic,

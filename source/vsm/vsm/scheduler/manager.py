@@ -1351,6 +1351,8 @@ class SchedulerManager(manager.Manager):
             for ser in server_list:
                 LOG.info('fresh ceph conf from db to ceph nodes %s '%ser['host'])
                 self._agent_rpcapi.update_ceph_conf(context, ser['host'])
+                self._agent_rpcapi.update_keyring_admin_from_db(context,ser['host'])
+
         except rpc_exc.Timeout:
             LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
         except rpc_exc.RemoteError:
