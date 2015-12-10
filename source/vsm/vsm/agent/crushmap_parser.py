@@ -243,7 +243,7 @@ class CrushMap():
                 if self.get_osd_by_id(item_id):
                     item_node = self.get_osd_by_id(item_id)
                     item_node['type_id'] = types[0]['type_id']
-                    item_node['type_name'] = types[0]['type_name']
+                    item_node['type_name'] = types[0]['name']
                 elif self.get_bucket_by_id(item_id):
                     item_node = self.get_bucket_by_id(item_id)
                 else:
