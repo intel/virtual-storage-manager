@@ -159,11 +159,22 @@ class Controller(wsgi.Controller):
         storage_groups = {}
         storage_group_name_list = []
         for storage_group_db in storage_groups_db:
+            take_dict = {
+                "id":storage_group_db['take_id'],
+                "name":"",
+                "order":storage_group_db['take_order'],
+                "choose_type":storage_group_db['choose_type'],
+                "choose_num":storage_group_db['choose_num']
+            }
+            if storage_group_db['take_id']:
+                try:
+                    take_dict['name'] = db.zone_get(context,storage_group_db['take_id'])['name']
+                except:
+                    self.scheduler_api.update_zones_from_crushmap_to_db(context)
+                    take_dict['name'] = db.zone_get(context,storage_group_db['take_id'])['name']
+
             if storage_group_db['name'] in storage_group_name_list:
-                storage_groups[storage_group_db['name']]['take_id'].append(storage_group_db['take_id'])
-                storage_groups[storage_group_db['name']]['take_order'].append(storage_group_db['take_order'])
-                storage_groups[storage_group_db['name']]['choose_num'].append(storage_group_db['choose_num'])
-                storage_groups[storage_group_db['name']]['choose_type'].append(storage_group_db['choose_type'])
+                storage_groups[storage_group_db['name']]['take_list'].append(take_dict)
             else:
                 storage_group_name_list.append(storage_group_db['name'])
                 storage_group_dict = {
@@ -173,10 +184,7 @@ class Controller(wsgi.Controller):
                     'friendly_name':storage_group_db['friendly_name'],
                     'marker':storage_group_db['marker'],
                     'rule_id':storage_group_db['rule_id'],
-                    'take_id':[storage_group_db['take_id']],
-                    'take_order':[storage_group_db['take_order']],
-                    'choose_num':[storage_group_db['choose_num']],
-                    'choose_type':[storage_group_db['choose_type']],
+                    'take_list':[take_dict],
                     'status': storage_group_db["status"],
                 }
                 storage_groups[storage_group_db['name']] = storage_group_dict
@@ -203,22 +211,7 @@ class Controller(wsgi.Controller):
                                                    if osd['storage_group']['id'] == storage_group["id"]])
             storage_group['capacity_avail'] = sum([osd["device"]['avail_capacity_kb'] for osd in osds
                                                    if osd['storage_group']['id'] == storage_group["id"]])
-            storage_group['take_name'] = []
-            if None in storage_group.get('take_id'):
-                storage_group['take_id'] = []
-                storage_group['take_order'] = []
-            if storage_group.get('take_id'):
-                try:
-                    for take_id in storage_group.get('take_id'):
-                        storage_group['take_name'].append( db.zone_get(context,take_id)['name'])
-                except:
-                    self.scheduler_api.update_zones_from_crushmap_to_db(context)
-                    storage_group['take_name'] = []
-                    for take_id in storage_group.get('take_id'):
-                        LOG.info('---------------take9999999999==%s='%take_id)
-                        storage_group['take_name'].append( db.zone_get(context,take_id)['name'])
 
-            # largest
             nodes = {}
             osd_cnt = 0
             for osd in osds:

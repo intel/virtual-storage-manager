@@ -110,7 +110,7 @@ class CephDriver(object):
 
     def create_storage_pool(self, context, body):
         pool_name = body["name"]
-        primary_storage_group = replica_storage_group = ""
+        primary_storage_group = ''
         if body.get("ec_profile_id"):
             profile_ref = db.ec_profile_get(context, body['ec_profile_id'])
             pgp_num = pg_num = profile_ref['pg_num'] 
@@ -140,58 +140,21 @@ class CephDriver(object):
                                 run_as_root=True)
                 utils.execute('crushtool', '-d', FLAGS.crushmap_bin, '-o', FLAGS.crushmap_src, 
                                 run_as_root=True)
-                ruleset = self._get_new_ruleset()
-                storage_group_list = db.storage_group_get_all(context)
-                storage_group_id = int(body['storage_group_id'])
-                replica_storage_group_id = int(body['replica_storage_group_id'])
+                #ruleset = self._get_new_ruleset()
                 pg_num = str(body['pg_num'])
-                for x in storage_group_list:
-                    if x['id'] == storage_group_id and \
-                        x['id'] == replica_storage_group_id:
-                        primary_storage_group = replica_storage_group = x['name']
-                    elif x['id'] == storage_group_id:
-                        primary_storage_group = x['name']
-                    elif x['id'] == replica_storage_group_id:
-                        replica_storage_group = x['name']
-                    else:
-                        continue
-                if not (primary_storage_group and replica_storage_group):        
-                    LOG.error("Can't find primary_storage_group_id or replica_storage_group_id")
-                    raise 
-                    return False
-
-                type = "host" 
-                #TODO min_size and max_size
-                rule_str = "rule " + pool_name + "_replica {"
-                rule_str += "    ruleset " + str(ruleset)
-                rule_str += "    type replicated" 
-                rule_str += "    min_size 0"
-                rule_str += "    max_size 10"
-                rule_str += "    step take " + primary_storage_group
-                rule_str += "    step chooseleaf firstn 1 type " + type
-                rule_str += "    step emit"
-                rule_str += "    step take " + replica_storage_group
-                rule_str += "    step chooseleaf firstn " + str(body['size'] - 1) + " type " + type
-                rule_str += "    step emit"
-                rule_str += "}"
-
+                primary_storage_group = body['storage_group_name']
+                storage_group = db.storage_group_get_by_name(context,primary_storage_group)
+                ruleset = storage_group['rule_id']
                 utils.execute('chown', '-R', 'vsm:vsm', '/etc/vsm/',
                         run_as_root=True) 
-                if utils.append_to_file(FLAGS.crushmap_src, rule_str):
-                    utils.execute('crushtool', '-c', FLAGS.crushmap_src, '-o', FLAGS.crushmap_bin, \
-                                    run_as_root=True) 
-                    utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
-                                    run_as_root=True)
-                    utils.execute('ceph', 'osd', 'pool', 'create', pool_name, \
-                                pg_num, pg_num, 'replicated', run_as_root=True)
-                    utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
-                                'crush_ruleset', ruleset, run_as_root=True)
-                    utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
-                                'size', str(body['size']), run_as_root=True)
-                    res = True
-                else:
-                    LOG.error("Failed while writing crushmap!")
-                    return False 
+
+                utils.execute('ceph', 'osd', 'pool', 'create', pool_name, \
+                            pg_num, pg_num, 'replicated', run_as_root=True)
+                utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
+                            'crush_ruleset', ruleset, run_as_root=True)
+                utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
+                            'size', str(body['size']), run_as_root=True)
+                res = True
             except:
                 LOG.error("create replica storage pool error!")
                 raise
@@ -853,7 +816,7 @@ class CephDriver(object):
         osd_pth = osd_data_path.replace('$id',osd_id)
         LOG.info('osd add osd_pth =%s'%osd_pth)
         osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
-        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_id)
+        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_id).replace('$name','osd.%s'%osd_id)
         LOG.info('osd add keyring path=%s'%osd_keyring_pth)
         utils.ensure_tree(osd_pth)
 
@@ -2006,7 +1969,7 @@ class CephDriver(object):
         utils.execute("ceph", "auth", "del", "osd.%s" % osd_inner_id,
                         run_as_root=True)
         osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
-        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_inner_id)
+        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_inner_id).replace('$name','osd.%s'%osd_id)
         LOG.info('osd restore keyring path=%s'%osd_keyring_pth)
         #osd_keyring_pth = "/etc/ceph/keyring.osd.%s" % osd_inner_id
         utils.execute("ceph", "auth", "add", "osd.%s" % osd_inner_id,
