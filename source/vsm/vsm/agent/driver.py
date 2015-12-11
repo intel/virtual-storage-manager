@@ -2990,28 +2990,28 @@ class ManagerCrushMapDriver(object):
     def __init__(self, execute=utils.execute, *args, **kwargs):
         self.conductor_api = conductor.API()
         self.conductor_rpcapi = conductor_rpcapi.ConductorAPI()
-        self._crushmap_path = "/var/run/vsm/crushmap_decompiled"
+        self._crushmap_path = "/var/run/vsm/mg_crushmap"
 
 
     def _write_to_crushmap(self, string):
-        fd = open(self._crushmap_path, 'a')
+        fd = open(self._crushmap_path+'_decompiled', 'a')
         fd.write(string)
         fd.close()
 
     def get_crushmap(self):
         LOG.info("DEBUG Begin to get crushmap")
         utils.execute('ceph', 'osd', 'getcrushmap', '-o',
-                self._crushmap_path+"_before", run_as_root=False)
-        utils.execute('crushtool', '-d', self._crushmap_path+"_before", '-o',
-                        self._crushmap_path, run_as_root=False)
+                self._crushmap_path, run_as_root=False)
+        utils.execute('crushtool', '-d', self._crushmap_path, '-o',
+                        self._crushmap_path+'_decompiled', run_as_root=False)
         return True
 
     def set_crushmap(self):
         LOG.info("DEBUG Begin to set crushmap")
-        utils.execute('crushtool', '-c', self._crushmap_path, '-o',
-                        self._crushmap_path+"_compiled", run_as_root=True)
+        utils.execute('crushtool', '-c', self._crushmap_path+'_decompiled', '-o',
+                        self._crushmap_path, run_as_root=False)
         utils.execute('ceph', 'osd', 'setcrushmap', '-i',
-                        self._crushmap_path+"_compiled", run_as_root=True)
+                        self._crushmap_path, run_as_root=True)
         return True
 
 
@@ -3033,7 +3033,7 @@ class ManagerCrushMapDriver(object):
         '''
 
         crushmap = get_crushmap_json_format()
-        rule_id = rule_info.get('rule_id')
+        rule_id = rule_info.get('rule_id',None)
         if rule_id is None:
             rule_ids =[rule['rule_id'] for rule in crushmap._rules]
             rule_ids.sort()
@@ -3063,6 +3063,7 @@ class ManagerCrushMapDriver(object):
 """%(str(take_choose_num),take_choose_leaf_type)
             string = string + "    step take " + take_name + "\n" + string_choose
         string = string +"    }\n"
+        LOG.info('---string-----%s---'%string)
         self.get_crushmap()
         self._write_to_crushmap(string)
         self.set_crushmap()
@@ -3096,7 +3097,7 @@ class ManagerCrushMapDriver(object):
         takes = rule_info.get('takes')
 
         self.get_crushmap()
-        fd = open(self._crushmap_path, 'r')
+        fd = open(self._crushmap_path+'_decompiled', 'r')
         rule_start_line = None
         rule_end_line = None
         insert_take_line = None
@@ -3104,11 +3105,10 @@ class ManagerCrushMapDriver(object):
         lines = fd.readlines()
         fd.close()
         new_lines = []
-        # LOG.info('rulename=====%s'%rule_name)
-        # LOG.info('take_id_list=====%s'%take_id_list)
-        # LOG.info('old lines=====%s'%lines)
+        LOG.info('rulename=====%s'%rule_name)
         for line in lines:
             line_number += 1
+            LOG.info('old lines=====%s----type=%s'%(line,type(line)))
             if 'rule %s {'%rule_name in line:
                 rule_start_line = line_number
             if rule_start_line is not None:

@@ -98,7 +98,7 @@ function loadTree(){
 
 var _SG_ID = -1;
 function addAction(){
-	_SG_ID = -1;
+	_SG_ID = Null;
 	ResetForm();
 	$("#btnReset").show();
 	$("#btnAddStorageGroup").show();
@@ -135,13 +135,13 @@ function updateAction(id){
 	for(var i=0;i<take_id_list.length;i++){
 		var take_id = take_id_list[i];
 		var take_name = $(".take-name[name=\""+take_id+"\"]").val();
-		var type_id = $(".type-id[name=\""+take_id+"\"]").val();
+		var type_name = $(".type-name[name=\""+take_id+"\"]").val();
 		var take_num = $(".take-num[name=\""+take_id+"\"]").val();
 
 		var tree_node = CRUSHMAP.getNodeByParam("id",parseInt(take_id),null);
 		var type_list = GetTypeListByNode(tree_node);
 
-		$("#tTakeList>tbody").append(GenerateTakeHTML(take_id,take_name,type_id,type_list,take_num));
+		$("#tTakeList>tbody").append(GenerateTakeHTML(take_id,take_name,type_name,type_list,take_num));
 	}
 }
 
@@ -209,7 +209,7 @@ function PostAction(action){
 	})
 
 	var sg_data = {
-        'storage_group': {
+        'storage_group': [{
         	'cluster_id':1,  //bad code. the origin is 1
         	'id':_SG_ID,
             'name': $("#txtName").val(),
@@ -218,15 +218,14 @@ function PostAction(action){
             'marker': $("#txtMarker").val(),
             'rule_info':{
             	"rule_name":$("#txtName").val(),
-            	"rule_id":_SG_ID,
             	"type":"replicated",
             	"min_size":0,
             	"max_size":10,
             	"takes":take_list
             },
-        }
+        },]
     }
-
+    console.log(sg_data);
 	var postData = JSON.stringify(sg_data);
 	token = $("input[name=csrfmiddlewaretoken]").val();
 	$.ajax({
@@ -238,12 +237,12 @@ function PostAction(action){
 			switch(data.status){
 				case "OK":
 					if(action == "create"){
-						AddStorageGroupHTML(sg_data.storage_group);
+						AddStorageGroupHTML(sg_data.storage_group[0]);
 						ResetForm();
 						$("#btnReset").hide();
 					}
 					else{
-						UpdateStorageGroupHTML(sg_data.storage_group);
+						UpdateStorageGroupHTML(sg_data.storage_group[0]);
 					}
 					break;
 				case "Failed":
@@ -426,7 +425,7 @@ function TakeRemove(takeID){
 // 	}
 // }
 
-function GenerateTakeHTML(takeID,takeName,typeID,type_list,takeNum){
+function GenerateTakeHTML(takeID,takeName,typeName,type_list,takeNum){
 	var trID = "trTake_"+takeID;
 
 	var html = "";
@@ -436,7 +435,7 @@ function GenerateTakeHTML(takeID,takeName,typeID,type_list,takeNum){
 	html += "	<td class=\"take-type\">";
 	html += "		<select class=\"select-take-type form-control\">";
 	for(var i=0;i<type_list.length;i++){
-		if(typeID.toString() == type_list[i].id.toString()){
+		if(typeName.toString() == type_list[i].name.toString()){
 			html += "		<option value=\""+type_list[i].id+"\" selected=\"true\">";
 		}
 		else{

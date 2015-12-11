@@ -41,6 +41,7 @@ class ViewBuilder(common.ViewBuilder):
                 "largest_node_capacity_used": storage_group["largest_node_capacity_used"],
                 "status": storage_group["status"],
                 "take_list":storage_group["take_list"],
+                "rule_id":storage_group["rule_id"],
                 "marker": storage_group["marker"],
 
             }

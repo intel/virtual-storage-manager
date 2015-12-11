@@ -32,14 +32,14 @@
 
 #divStorageGroupFormLeft{
 	float: left;
-	width: 350px;
+	width: 300px;
 	/*border:1px solid #ccc;*/
 }
 
 #divStorageGroupFormRight{
 	margin-left: 20px;
 	float: left;
-	width: 350px;
+	width: 300px;
 	/*border:1px solid #ccc;*/
 }
 
