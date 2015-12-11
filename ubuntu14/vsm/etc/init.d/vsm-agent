@@ -61,7 +61,7 @@ case $1 in
   		;;
 	stop)
 		log_daemon_msg "Stopping VSM server" "vsm-agent"
-  		start-stop-daemon --stop --pidfile $PIDFILE
+  		start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE
 		log_end_msg $?
 		rm -rf $PIDFILE
   		;;
