@@ -797,10 +797,10 @@ class CephDriver(object):
                 #TODO update rule_id and status in DB
                 rule_dict = self.get_crush_rule_dump_by_name(crush_dict['storage_group']) 
                 LOG.info("rule_dict:%s" % rule_dict)
-                values['rule_id'] = rule_dict['rule_id'] 
+                values['rule_id'] = rule_dict['rule_id']
 
             self._crushmap_mgmt.add_host(crush_dict['host'],
-                                         crush_dict['zone'])
+                                         crush_dict['zone'],types=types)
             #    added_to_crushmap = True
 
             #There must be at least 3 hosts in every storage group when the status is "IN"
@@ -847,8 +847,14 @@ class CephDriver(object):
         LOG.info('>>> step2 start')
         #osd_pth = '%sceph-%s' % (FLAGS.osd_data_path, osd_id)
         #osd_keyring_pth = "%s/keyring" % osd_pth
-        osd_pth = '/var/lib/ceph/osd/osd%s' % osd_id
-        osd_keyring_pth = '/etc/ceph/keyring.osd.%s' % osd_id
+        #osd_pth = '/var/lib/ceph/osd/osd%s' % osd_id
+        #osd_keyring_pth = '/etc/ceph/keyring.osd.%s' % osd_id
+        osd_data_path = self.get_ceph_config(context)['osd']['osd data']
+        osd_pth = osd_data_path.replace('$id',osd_id)
+        LOG.info('osd add osd_pth =%s'%osd_pth)
+        osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
+        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_id)
+        LOG.info('osd add keyring path=%s'%osd_keyring_pth)
         utils.ensure_tree(osd_pth)
 
         # step 3
@@ -961,8 +967,13 @@ class CephDriver(object):
         # TODO
         # step 1
         LOG.info('>> add mon step 1 ')
-        utils.ensure_tree(os.path.join(FLAGS.monitor_data_path,
-            "mon" + mon_id))
+        try:
+            mon_data_path = self.get_ceph_config(context)['mon']['mon data']
+            mon_pth = mon_data_path.replace('$id',mon_id)
+            LOG.info('osd restore mon_pth =%s'%mon_pth)
+        except:
+            mon_path = os.path.join(FLAGS.monitor_data_path,"mon" + mon_id)
+        utils.ensure_tree(mon_path)
         # step 2
         LOG.info('>> add mon step 2 ')
         tmp_pth = "/tmp"
@@ -1702,30 +1713,44 @@ class CephDriver(object):
         return smart_info_dict
 
     def get_available_disks(self, context):
-        all_disk = glob.glob('/dev/disk/by-path/*')
-        all_disk_name_dict = self.get_disks_name(context,all_disk)
-        all_disk_name = all_disk_name_dict.values()
-        all_disk = all_disk + all_disk_name
-        #LOG.info("all-disks===%s"%all_disk)
-        lines=[]
-        try:
-            f = open('/etc/mtab', "r")
-            lines = f.readlines()
-        except:
-            f.close()
-        finally:
-            f.close()
-        for line in lines:
-            if not line.startswith('/dev'):
-                continue
-            if line.split()[0] in all_disk:
-                all_disk.remove(line.split()[0])
-                #LOG.info("removed=111==%s"%line.split()[0])
-            for key in all_disk_name_dict.keys():
-                if all_disk_name_dict[key] == line.split()[0]:
-                    #LOG.info("removed==222=%s"%key)
-                    all_disk.remove(key)
-        return list(set(all_disk))
+        all_disk_info,err = utils.execute('blockdev','--report',run_as_root=True)
+        all_disk_info = all_disk_info.split('\n')
+        all_disk_name = []
+        disk_check = []
+        if len(all_disk_info)>1:
+            for line in all_disk_info[1:-1]:
+                LOG.info('line====%s'%line)
+                line_list = line.split(' ')
+                line_list.remove('')
+                LOG.info('line_list====%s'%line_list)
+                if int(line_list[-4]) <= 1024:
+                    continue
+                if line_list[-1].find('-') != -1:
+                    continue
+                if line_list[-9] and int(line_list[-9]) == 0:
+                    disk_check.append(line_list[-1])
+                all_disk_name.append(line_list[-1])
+        for disk_check_cell in disk_check:
+            for disk in all_disk_name:
+                if disk != disk_check_cell and disk.find(disk_check_cell) == 0:
+                    all_disk_name.remove(disk_check_cell)
+                    break
+        mounted_disk_info,err = utils.execute('mount', '-l', run_as_root=True)
+        mounted_disk_info = mounted_disk_info.split('\n')
+        for mounted_disk in mounted_disk_info:
+            mounted_disk_list = mounted_disk.split(' ')
+            if mounted_disk_list[0].find('/dev/') != -1:
+                if mounted_disk_list[0] in all_disk_name:
+                    all_disk_name.remove(mounted_disk_list[0])
+        pvs_disk_info,err = utils.execute('pvs', '--rows', run_as_root=True)
+        pvs_disk_info = pvs_disk_info.split('\n')
+        for line in pvs_disk_info:
+            line_list = line.split(' ')
+            if line_list[-1].find('/dev/') != -1 and line_list[-1] in all_disk_name:
+                all_disk_name.remove(line_list[-1])
+
+        return all_disk_name
+
 
     def get_disks_name(self, context,disk_bypath_list):
         disk_name_dict = {}
@@ -1735,6 +1760,27 @@ class CephDriver(object):
             if len(out.split('../../'))>1:
                 disk_name_dict[bypath] = '/dev/%s'%(out.split('../../')[1][:-1])
         return disk_name_dict
+
+    def get_disks_name_by_path_dict(self,disk_name_list):
+        disk_name_dict = {}
+        by_path_info,err = utils.execute('ls','-al','/dev/disk/by-path',run_as_root=True)
+        LOG.info('by_path_info===%s,err===%s'%(by_path_info,err))
+        for bypath in by_path_info.split('\n'):
+            bypath_list = bypath.split(' -> ../../')
+            if len(bypath_list) > 1:
+                disk_name_dict['/dev/%s'%(bypath_list[1])] = '/dev/disk/by-path/%s'%(bypath_list[0].split(' ')[-1])
+        return disk_name_dict
+
+    def get_disks_name_by_uuid_dict(self,disk_name_list):
+        disk_name_dict = {}
+        by_uuid_info,err = utils.execute('ls','-al','/dev/disk/by-uuid',run_as_root=True)
+        LOG.info('by_uuid_info===%s,err===%s'%(by_uuid_info,err))
+        for byuuid in by_uuid_info.split('\n'):
+            byuuid_list = byuuid.split(' -> ../../')
+            if len(byuuid_list) > 1:
+                disk_name_dict['/dev/%s'%(byuuid_list[1])] = '/dev/disk/by-path/%s'%(byuuid_list[0].split(' ')[-1])
+        return disk_name_dict
+
     def run_add_disk_hook(self, context):
         out, err = utils.execute('add_disk',
                                  'll',
@@ -1936,7 +1982,9 @@ class CephDriver(object):
                       run_as_root=True)
 
         #osd_pth = '%sceph-%s' % (FLAGS.osd_data_path, osd_inner_id)
-        osd_pth = '/var/lib/ceph/osd/osd%s' % osd_inner_id
+        osd_data_path = self.get_ceph_config(context)['osd']['osd data']
+        osd_pth = osd_data_path.replace('$id',osd_inner_id)
+        LOG.info('osd restore osd_pth =%s'%osd_pth)
         utils.ensure_tree(osd_pth)
         fs_opt = utils.get_fs_options(file_system)[1]
         utils.execute("mount",
@@ -1957,7 +2005,10 @@ class CephDriver(object):
 
         utils.execute("ceph", "auth", "del", "osd.%s" % osd_inner_id,
                         run_as_root=True)
-        osd_keyring_pth = "/etc/ceph/keyring.osd.%s" % osd_inner_id
+        osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
+        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_inner_id)
+        LOG.info('osd restore keyring path=%s'%osd_keyring_pth)
+        #osd_keyring_pth = "/etc/ceph/keyring.osd.%s" % osd_inner_id
         utils.execute("ceph", "auth", "add", "osd.%s" % osd_inner_id,
                       "osd", "allow *", "mon", "allow rwx",
                       "-i", osd_keyring_pth,
@@ -2616,9 +2667,12 @@ class CreateCrushMapDriver(object):
         return True
 
     def _gen_crushmap_optimal(self):
-        optimal = "# begin crush map\ntunable choose_local_tries 0\
-                  \ntunable choose_local_tries 0\ntunable choose_total_tries 50\
-                  \ntunable chooseleaf_descend_once 1\ntunable chooseleaf_vary_r 1\n"
+        optimal = "# begin crush map\n" \
+                  "tunable choose_local_tries 0\n" \
+                  "tunable choose_local_fallback_tries 0\n" \
+                  "tunable choose_total_tries 50\n" \
+                  "tunable chooseleaf_descend_once 1\n" \
+                  "tunable chooseleaf_vary_r 1\n"
         self._write_to_crushmap(optimal)
 
     def _gen_device_osd(self, osd_num):

@@ -38,17 +38,11 @@
                             <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0">
                                 <div class="tablesorter-header-inner">Class</div>
                             </th>
-                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0" style="display: none">
-                                <div class="tablesorter-header-inner"></div>
-                            </th>
-                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
-                                <div class="tablesorter-header-inner">Take</div>
-                            </th>
-                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0" style="display: none">
-                                <div class="tablesorter-header-inner">Take Order</div>
-                            </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
                                 <div class="tablesorter-header-inner">Friendly Name</div>
+                            </th>
+                            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
+                                <div class="tablesorter-header-inner">Take Name(Type Name, Type Number)</div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
                                 <div class="tablesorter-header-inner">Marker</div>
@@ -64,16 +58,28 @@
                             <td class="multi_select_column">
                                 <input class="table-row-multi-select" name="object_ids" type="checkbox" value="{{sg.id}}" onclick="MarkTree()">
                             </td>
-                            <td class="sortable normal_column name">{{sg.name}}
+                            <td class="sortable normal_column name">
+                                {{sg.name}}
                             </td>
-                            <td class="sortable normal_column class">{{sg.storage_class}}</td>
-                            <td class="sortable normal_column take_id" style="display: none">{{sg.take_id}}</td>
-                            <td class="sortable normal_column take" style="width:20%">{{sg.take_name}}</td>
-                            <td class="sortable normal_column take_order" style="display: none">{{sg.take_order}}</td>
-                            <td class="sortable normal_column friendly_name">{{sg.friendly_name}}</td>
+                            <td class="sortable normal_column class">
+                                {{sg.storage_class}}
+                            </td>
+                            <td class="sortable normal_column friendly_name">
+                                {{sg.friendly_name}}
+                            </td>
+                            <td class="sortable normal_column take">
+                                {%for take in sg.take_list%}
+                                    {{take.name}}({{take.type_name}},{{take.choose_num}})
+                                    <input type="hidden" name="{{take.id}}" class="take-id" value="{{take.id}}"/>
+                                    <input type="hidden" name="{{take.id}}" class="take-name" value="{{take.name}}"/>
+                                    <input type="hidden" name="{{take.id}}" class="type-id" value="{{take.type_id}}"/>
+                                    <input type="hidden" name="{{take.id}}" class="type-name" value="{{take.type_name}}"/>
+                                    <input type="hidden" name="{{take.id}}" class="take-num" value="{{take.choose_num}}"/>
+                                    <br/>
+                                {%endfor%}
+                            </td>
                             <td class="sortable normal_column marker">
-                                <span class="glyphicon glyphicon-tag" aria-hidden="true"  style="color:{{sg.marker}}"></span>
-
+                                <span class="glyphicon glyphicon-tag" aria-hidden="true"  style="color:#50f50f"></span>
                             </td>
                             <td class="actions_column">
                                 <button href="#" class="btn btn-default btn-primary" onclick="updateAction({{sg.id}})">Edit</button>
@@ -93,57 +99,61 @@
 
             <div id="divStorageGroupForm">
                 <div id="divStorageGroupFormLeft">
-                    <form>
-                        <fieldset>
-                            <div class="control-group form-field clearfix required">
-                                <label>Name:</label>
-                                <span class="help-block"></span>
-                                <div class="input">
-                                    <input id="txtName" maxlength="255"  type="text" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="control-group form-field clearfix required">
-                                <label>Friendly Name:</label>
-                                <span class="help-block"></span>
-                                <div class="input">
-                                  <input id="txtFriendlyName" maxlength="255" type="text" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="control-group form-field clearfix required">
-                                <label>Class:</label>
-                                <span class="help-block"></span>
-                                <div class="input">
-                                  <input id="txtClass" maxlength="255"  type="text" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="control-group form-field clearfix required">
-                                <label>Marker:</label>
-                                <span class="help-block"></span>
-                                <div class="input">
-                                    <input id="txtMarker" maxlength="24" type="color" class="form-control" value="#cccccc" />
-                                </div>
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
-
-                <div id="divStorageGroupFormRight">
-                    <div class="control-group form-field clearfix required" >
-                        <label>Take:</label>
+                    <div class="control-group form-field clearfix required">
+                        <label>Name:</label>
+                        <span class="required-star">*</span>
                         <span class="help-block"></span>
-                        <div id="divTakeList">
-                           
+                        <div class="input">
+                            <input id="txtName" maxlength="255"  type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix required">
+                        <label>Class:</label>
+                        <span class="required-star">*</span>
+                        <span class="help-block"></span>
+                        <div class="input">
+                          <input id="txtClass" maxlength="255"  type="text" class="form-control">
                         </div>
                     </div>
                 </div>
+
+                <div id="divStorageGroupFormRight">
+                    <div class="control-group form-field clearfix required">
+                        <label>Friendly Name:</label>
+                        <span class="required-star">*</span>
+                        <span class="help-block"></span>
+                        <div class="input">
+                          <input id="txtFriendlyName" maxlength="255" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix required">
+                        <label>Marker:</label>
+                        <span class="required-star">*</span>
+                        <span class="help-block"></span>
+                        <div class="input">
+                            <input id="txtMarker" maxlength="24" type="color" class="form-control" value="#cccccc" />
+                        </div>
+                    </div>
+                   
+                </div>
             </div>
+
+            <div id="dTakeFrom">
+                <div class="control-group form-field clearfix required" >
+                    <label>Take:</label>
+                    <span class="help-block"></span>
+                    <table id="tTakeList">
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
             <div id="divFormOptions" class="vsm-options-bar">
                     <button id="btnAddStorageGroup" class="btn btn-primary" onclick="PostAction('create')">Add</button>
                     <button id="btnUpdateStorageGroup" class="btn btn-primary" style="display:none" onclick="PostAction('update')">Update</button>
-                    <a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/storage-group-management/">Cancel</a>
+                    <button id="btnReset" class="btn btn-default" onclick="ResetForm()">Reset</button>
             </div>
 
 

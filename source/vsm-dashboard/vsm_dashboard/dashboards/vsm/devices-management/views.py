@@ -27,7 +27,7 @@ from horizon import exceptions
 from horizon import tables
 from horizon import forms
 from horizon import views
-
+from django.views.decorators.csrf import csrf_exempt
 from vsm_dashboard.api import vsm as vsmapi
 from .tables import OsdsTable
 from django.http import HttpResponse
@@ -141,8 +141,8 @@ class AddOSDView(TemplateView):
                 "result_mode":"get_disks",
             })
             disks = ret['disks'] or []
-            disks_list = [disk for disk in disks if disk.find('by-path') == -1]
-            context["available_disks"] = disks_list
+            #disks_list = [disk for disk in disks if disk.find('by-path') == -1]
+            context["available_disks"] = disks
         
         return context
 

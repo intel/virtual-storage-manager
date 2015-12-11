@@ -112,12 +112,12 @@ class ConductorManager(manager.Manager):
         group_list = {}
         if storage_group_list:
             for group in storage_group_list:
-                osd_num=0
-                for osd in osds:
-                    if osd['storage_group_id'] == group['id']:
-                        osd_num = osd_num + 1
-                if osd_num > 0:
-                    group_list[group['id']] = group['name']
+                # osd_num=0
+                # for osd in osds:
+                #     if osd['storage_group_id'] == group['id']:
+                #         osd_num = osd_num + 1
+                # if osd_num > 0:
+                group_list[group['id']] = group['name']
         return group_list
 
     def get_server_list(self, context):

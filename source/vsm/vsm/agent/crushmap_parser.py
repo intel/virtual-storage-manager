@@ -23,7 +23,7 @@ Parse crush map in json format, and identify storage groups from ruleset.
 
 """
 import json
-
+import operator
 
 class CrushMap():
 
@@ -110,10 +110,12 @@ class CrushMap():
     def get_all_osds_by_rule(self, name):
         rule = self.get_rules_by_name(name)
         steps = rule['steps']
+        devices = []
         for step in steps:
             if step['op'] == 'take':
-                bucket = step['item_name']
-                print bucket
+                bucket_id = step['item']
+                self.get_all_osds_by_bucket(bucket_id, devices)
+        return devices
 
     def get_all_osds_by_bucket(self, id, devices):
         print id
@@ -228,6 +230,8 @@ class CrushMap():
     def _show_as_tree_dict(self):
         buckets = self._buckets
         tree_data = {}
+        types = self._types
+        types.sort(key=operator.itemgetter('type_id'))
         for bucket in buckets:
             node_id = bucket['id']
             items = bucket['items']
@@ -240,7 +244,8 @@ class CrushMap():
                 item_id = item['id']
                 if self.get_osd_by_id(item_id):
                     item_node = self.get_osd_by_id(item_id)
-                    item_node['type_id'] = 0
+                    item_node['type_id'] = types[0]['type_id']
+                    item_node['type_name'] = types[0]['name']
                 elif self.get_bucket_by_id(item_id):
                     item_node = self.get_bucket_by_id(item_id)
                 else:
@@ -252,7 +257,8 @@ class CrushMap():
                 else:
                     item_node_name = item_node['name']
                     item_node_type_id = item_node['type_id']
-                    item_tree_node_data = {'id':item_node_id,'name':item_node_name,'type':item_node_type_id,'parent_id':item_node_parent_id}
+                    item_node_type_name = item_node['type_name']
+                    item_tree_node_data = {'id':item_node_id,'name':item_node_name,'type':item_node_type_id,'type_name':item_node_type_name,'parent_id':item_node_parent_id}
                     tree_data[str(item_node_id)] = item_tree_node_data
 
         return tree_data.values()
