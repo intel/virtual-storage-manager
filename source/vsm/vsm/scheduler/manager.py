@@ -1310,18 +1310,18 @@ class SchedulerManager(manager.Manager):
         :return:
         '''
         monitor_pitched_host = self._get_monitor_by_cluster_id(context, body.get('cluster_id',1))
-        LOG.info("000000000000000=%s"%monitor_pitched_host)
+        #LOG.info("000000000000000=%s"%monitor_pitched_host)
         monitor_keyring = None
         tree_node = []
         try:
-            LOG.info("111111111111111=%s"%monitor_pitched_host)
+            #LOG.info("111111111111111=%s"%monitor_pitched_host)
             message = self._agent_rpcapi.detect_crushmap(context, monitor_keyring, monitor_pitched_host)
             crushmap_str = message['crushmap']
             crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
             utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
             crushmap = CrushMap(json_file=crush_map_new)
             tree_node = crushmap._show_as_tree_dict()
-            LOG.info("222222==%s"%tree_node)
+            #LOG.info("222222==%s"%tree_node)
         except rpc_exc.Timeout:
             LOG.error('ERROR: get_crushmap_tree_data rpc timeout')
         except rpc_exc.RemoteError:
@@ -1347,6 +1347,12 @@ class SchedulerManager(manager.Manager):
                 return message
             else:
                 message = self._agent_rpcapi.import_cluster(context, body, monitor_pitched_host)
+            server_list = db.init_node_get_all(context)
+            for ser in server_list:
+                LOG.info('fresh ceph conf from db to ceph nodes %s '%ser['host'])
+                self._agent_rpcapi.update_ceph_conf(context, ser['host'])
+                self._agent_rpcapi.update_keyring_admin_from_db(context,ser['host'])
+
         except rpc_exc.Timeout:
             LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
         except rpc_exc.RemoteError:

@@ -1665,19 +1665,21 @@ class AgentManager(manager.Manager):
     def monitor_restart(self, context, monitor_num):
         self.ceph_driver.start_mon_daemon(context, monitor_num)
         return True
+
     def get_available_disks(self, context):
         #LOG.info('333333333')
-        all_disk = self.ceph_driver.get_available_disks(context)
-        used_disk = db.device_get_all_by_service_id(context,
-                                                  self._service_id)
-        used_journal_disk = [disk.journal for disk in used_disk]
-        used_data_disk = [disk.path for disk in used_disk]
-        used_data_disk_name_dict = self.ceph_driver.get_disks_name(context,used_data_disk)
-        used_data_disk_name = used_data_disk_name_dict.values()
-        used_journal_disk_name_dict = self.ceph_driver.get_disks_name(context,used_journal_disk)
-        used_journal_disk_name = used_journal_disk_name_dict.values()
-        available_disk = list(set(all_disk)-set(used_journal_disk)-set(used_data_disk)-set(used_data_disk_name)-set(used_journal_disk_name))
-        return available_disk
+        available_disk_name = self.ceph_driver.get_available_disks(context)
+        LOG.info('available_disk_name=====%s'%available_disk_name)
+        available_disk_info_list = []
+        name_by_path_dict = self.ceph_driver.get_disks_name_by_path_dict(available_disk_name)
+        name_by_uuid_dict = self.ceph_driver.get_disks_name_by_uuid_dict(available_disk_name)
+        for disk in available_disk_name:
+            by_path_name = name_by_path_dict.get(disk,'')
+            by_uuid_name = name_by_uuid_dict.get(disk,'')
+            available_disk_info_list.append({'disk_name':disk,
+                                             'by-path':by_path_name,
+                                             'by-uuid':by_uuid_name,})
+        return available_disk_info_list
 
     def add_new_disks_to_cluster(self, context, body):
         all_disk = glob.glob('/dev/disk/by-path/*')
@@ -1804,6 +1806,13 @@ class AgentManager(manager.Manager):
             buckets = crushmap._buckets
             for bucket in buckets:
                 if bucket['type_id'] > types[1]['type_id']:
+                    if bucket['type_id'] == types[-1]['type_id']:
+                        values = {'id': bucket['id'],
+                                  'name': bucket['name'],
+                                  'parent_id': None,
+                                  'type': bucket['type_id'],
+                        }
+                        zone_values.append(values)
                     for item in bucket['items']:
                         LOG.info('222222222===%s'%item['id'])
                         zone = crushmap.get_bucket_by_id(item['id'])
@@ -1830,11 +1839,9 @@ class AgentManager(manager.Manager):
             db.storage_group_update_or_create(context,storage_group)
 
     def detect_crushmap(self,context,keyring):
-        LOG.info('333333')
         message = {'error':'','code':'','info':''}
         try:
             crushmap = self.get_crushmap_json_str(keyring)
-            LOG.info('4444')
             message['error'] = ''
             message['code'] = ''
             message['info'] = 'Success'
@@ -1844,7 +1851,6 @@ class AgentManager(manager.Manager):
             message['code'] = '-1'
             message['info'] = 'Fail'
             raise
-        LOG.info('detect_crushmap----%s'%message)
         return message
 
     def import_cluster(self,context,body):
