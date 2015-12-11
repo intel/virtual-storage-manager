@@ -298,7 +298,6 @@ class SchedulerManager(manager.Manager):
                 raise MonitorException
             except:
                 LOG.error("There must be 1 monitor in the cluster")
-            return False
 
         # select an active monitor
         idx = random.randint(0, len(active_monitor_list)-1)
