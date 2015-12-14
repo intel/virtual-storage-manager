@@ -1921,6 +1921,7 @@ class SchedulerManager(manager.Manager):
                     'take_order':take_order,
                     'choose_type':take.get('choose_leaf_type'),#TODO
                     'choose_num':take.get('choose_num'),#"TODO"
+                    'status':'IN',
                 }
                 #LOG.info('take==444444444=====%s'%storage_group_to_db)
                 db.storage_group_update_or_create(context, storage_group_to_db)

@@ -301,6 +301,9 @@ class StoragePoolController(wsgi.Controller):
         storage_group_id =  storage_group['id']
         size = db.get_size_by_storage_group_name(context,storage_group_name)
         size = int(size)
+        if size == 0:
+            pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
+            size = int(pool_default_size.value)
         #LOG.info('size=====%s'%size)
         osd_num = 2 #TODO self.scheduler_api.get_osd_num_from_crushmap_by_rule(context, rule_id)
         is_ec_pool = pool_dict.get('ecProfileId')
