@@ -300,13 +300,16 @@ class StoragePoolController(wsgi.Controller):
         rule_id = storage_group['rule_id']
         storage_group_id =  storage_group['id']
         size = db.get_size_by_storage_group_name(context,storage_group_name)
-        osd_num = self.scheduler_api.get_osd_num_from_crushmap_by_rule(context, rule_id)
+        size = int(size)
+        LOG.info('size=====%s'%size)
+        osd_num = 2 #TODO self.scheduler_api.get_osd_num_from_crushmap_by_rule(context, rule_id)
         is_ec_pool = pool_dict.get('ecProfileId')
         if is_ec_pool:
             #erasure code pool 
             body_info = {'name': name,
                         'cluster_id':cluster_id,
                         'storage_group_id':storage_group_id,
+                        'storage_group_name':storage_group_name,
                         'ec_profile_id':pool_dict['ecProfileId'],
                         'ec_ruleset_root':storage_group['name'],
                         'ec_failure_domain':pool_dict['ecFailureDomain'],
@@ -358,7 +361,7 @@ class StoragePoolController(wsgi.Controller):
             "enable_quota": pool_dict.get("enablePoolQuota"),
             "max_pg_num_per_osd": pool_dict.get("max_pg_num_per_osd") or 100,
         })
-
+        LOG.info('body_info=====%s'%body_info)
         return self.scheduler_api.create_storage_pool(context, body_info)
 
     @wsgi.serializers(xml=StoragePoolsTemplate)

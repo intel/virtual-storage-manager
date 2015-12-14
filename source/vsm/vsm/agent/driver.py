@@ -179,18 +179,18 @@ class CephDriver(object):
         for pool in pool_list:
             if pool_name == pool['pool_name']:
                 values = {
-                    'pool_id': pool.get('pool'),
-                    'name': pool.get('pool_name'),
-                    'pg_num': pool.get('pg_num'),
-                    'pgp_num': pool.get('pg_placement_num'),
-                    'size': pool.get('size'),
-                    'min_size': pool.get('min_size'),
-                    'crush_ruleset': pool.get('crush_ruleset'),
-                    'crash_replay_interval': pool.get('crash_replay_interval'),
-                    'ec_status': pool.get('erasure_code_profile'),
-                    'replica_storage_group': body.get('pool_type',None),
-                    'quota': body.get('quota'),
-                    'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
+                        'pool_id': pool.get('pool'),
+                        'name': pool.get('pool_name'),
+                        'pg_num': pool.get('pg_num'),
+                        'pgp_num': pool.get('pg_placement_num'),
+                        'size': pool.get('size'),
+                        'min_size': pool.get('min_size'),
+                        'crush_ruleset': pool.get('crush_ruleset'),
+                        'crash_replay_interval': pool.get('crash_replay_interval'),
+                        'ec_status': pool.get('erasure_code_profile'),
+                        'replica_storage_group': body.get('pool_type'),
+                        'quota': body.get('quota'),
+                        'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
