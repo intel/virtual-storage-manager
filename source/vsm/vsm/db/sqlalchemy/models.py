@@ -798,3 +798,16 @@ class CephPerformanceMetric(BASE, VsmBase):
     value = Column(String(length=255), nullable=False)
     timestamp = Column(Integer, db_index=True, nullable=False)
 
+class Config(BASE, VsmBase):
+    """ configurable items for vsm, ceph, os, etc.
+    """
+    __tablename__ = 'config'
+
+    id = Column(Integer, primary_key=True, nullable=False),
+    name = Column('name', String(length=255), nullable=False),
+    value = Column('value', String(length=255), nullable=True),
+    default_value = Column('default_value', String(length=255), nullable=False),
+    category = Column('category', String(length=255), nullable=True),
+    section = Column('section', String(length=255), nullable=False),
+    description = Column('description', String(length=255), nullable=True),
+    alterable = Column('alterable', Boolean(create_constraint=True, name=None)),
