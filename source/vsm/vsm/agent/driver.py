@@ -134,7 +134,7 @@ class CephDriver(object):
             res = utils.execute('ceph', 'osd', 'pool', 'create', pool_name, pg_num, \
                             pgp_num, 'erasure', profile_ref['name'], rule_name, \
                             run_as_root=True) 
-        elif body.get('replica_storage_group_id'):
+        elif body.get('pool_type') == 'replicated':
             try:
                 utils.execute('ceph', 'osd', 'getcrushmap', '-o', FLAGS.crushmap_bin,
                                 run_as_root=True)
@@ -188,7 +188,7 @@ class CephDriver(object):
                     'crush_ruleset': pool.get('crush_ruleset'),
                     'crash_replay_interval': pool.get('crash_replay_interval'),
                     'ec_status': pool.get('erasure_code_profile'),
-                    'replica_storage_group': replica_storage_group if replica_storage_group else None, 
+                    'replica_storage_group': body.get('pool_type',None),
                     'quota': body.get('quota'),
                     'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
                 }
