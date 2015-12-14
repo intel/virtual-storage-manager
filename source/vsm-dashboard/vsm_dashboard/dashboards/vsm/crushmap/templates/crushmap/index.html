@@ -42,7 +42,7 @@
                                 <div class="tablesorter-header-inner">Friendly Name</div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
-                                <div class="tablesorter-header-inner">Take Name(Type Name, Type Number)</div>
+                                <div class="tablesorter-header-inner">Take Name(Choose Type, Type Number)</div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
                                 <div class="tablesorter-header-inner">Marker</div>
@@ -69,11 +69,10 @@
                             </td>
                             <td class="sortable normal_column take">
                                 {%for take in sg.take_list%}
-                                    {{take.name}}({{take.type_name}},{{take.choose_num}})
+                                    {{take.name}}({{take.choose_type}},{{take.choose_num}})
                                     <input type="hidden" name="{{take.id}}" class="take-id" value="{{take.id}}"/>
                                     <input type="hidden" name="{{take.id}}" class="take-name" value="{{take.name}}"/>
-                                    <input type="hidden" name="{{take.id}}" class="type-id" value="{{take.type_id}}"/>
-                                    <input type="hidden" name="{{take.id}}" class="type-name" value="{{take.type_name}}"/>
+                                    <input type="hidden" name="{{take.id}}" class="type-name" value="{{take.choose_type}}"/>
                                     <input type="hidden" name="{{take.id}}" class="take-num" value="{{take.choose_num}}"/>
                                     <br/>
                                 {%endfor%}

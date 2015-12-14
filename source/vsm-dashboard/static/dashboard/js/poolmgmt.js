@@ -136,6 +136,7 @@ $("#btnAddReplicatedPool").click(function(){
 			"pool":{
 				"name":$("#id_name").val(),
 				"storageGroupId":$("#id_storage_group").val(),
+                'storageGroupName': $("#id_storage_group")[0].options[$("#id_storage_group")[0].selectedIndex].text,
 				"replicatedStorageGroupId":$("#id_replicated_storage_group").val(),
 				'replicationFactor': $("#id_replication_factor").val(),
 				'max_pg_num_per_osd': $("#id_max_pg_num_per_osd").val(),
@@ -186,6 +187,7 @@ $("#btnCreateErasureCodedPool").click(function(){
 		"pool": {
             'name': $("#id_name").val(),
             'storageGroupId': $("#id_storage_group").val(),
+            'storageGroupName': $("#id_storage_group")[0].options[$("#id_storage_group")[0].selectedIndex].text,
             'tag': $("#id_tag").val(),
             'clusterId': '0',
             'createdBy': 'VSM',

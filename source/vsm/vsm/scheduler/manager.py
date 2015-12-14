@@ -1873,7 +1873,7 @@ class SchedulerManager(manager.Manager):
         '''
 
         :param context:
-        :param body:{'storage_groups': [{
+        :param body:{'storage_group': [{
                         'id':None,
                         'name': 'storage_group_name',
                         'friendly_name': 'storage_group_name',
@@ -1898,7 +1898,7 @@ class SchedulerManager(manager.Manager):
         :return:
         '''
         LOG.info('add_storage_group_to_crushmap_and_db body=%s'%body)
-        storage_groups = body.get('storage_groups')
+        storage_groups = body.get('storage_group')
         cluster_id = body.get('cluster_id',None)
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
         LOG.info('sync call to host = %s' % active_monitor['host'])
@@ -1931,7 +1931,7 @@ class SchedulerManager(manager.Manager):
 
     def update_storage_group_to_crushmap_and_db(self, context, body):
         LOG.info('update_storage_group_to_crushmap_and_db body=%s'%body)
-        storage_groups = body.get('storage_groups')
+        storage_groups = body.get('storage_group')
         cluster_id = body.get('cluster_id',None)
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
         LOG.info('sync call to host = %s' % active_monitor['host'])

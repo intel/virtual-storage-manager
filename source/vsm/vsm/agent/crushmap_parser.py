@@ -238,7 +238,7 @@ class CrushMap():
             if not tree_data.has_key(str(node_id)):
                 node_name = bucket['name']
                 node_type_id = bucket['type_id']
-                tree_node_data = {'id':node_id,'name':node_name,'type':node_type_id}
+                tree_node_data = {'id':node_id,'name':node_name,'type':node_type_id,'type_name':bucket['type_name']}
                 tree_data[str(node_id)] = tree_node_data
             for item in items:
                 item_id = item['id']

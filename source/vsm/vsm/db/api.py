@@ -879,6 +879,11 @@ def storage_group_delete_by_order_and_name(context, take_order, name):
 def storage_group_get_by_name(context, group_name):
     """Get an storage_group with group_id"""
     return IMPL.storage_group_get_by_name(context, group_name)
+def get_size_by_storage_group_name(context,group_name):
+    return IMPL.get_sum_choose_num_by_storage_group_name(context, group_name)
+
+
+
 #manange zone
 def zone_get_all(context):
     """get all zones"""

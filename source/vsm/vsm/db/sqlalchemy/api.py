@@ -2551,6 +2551,14 @@ def storage_group_get_by_rule_id(context, rule_id, session=None):
     return result
 
 @require_admin_context
+def get_sum_choose_num_by_storage_group_name(context, name, session=None):
+    if not session:
+        session = get_session()
+    sql_str = '''select sum(choose_num) from  storage_groups where name='%s';'''%name
+    sql_ret = session.execute(sql_str).fetchall()
+    return sql_ret[0][0]
+
+@require_admin_context
 def storage_group_get_by_name(context, name, session=None):
     if not session:
         session = get_session()

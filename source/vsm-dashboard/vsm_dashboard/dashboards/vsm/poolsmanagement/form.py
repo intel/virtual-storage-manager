@@ -44,13 +44,13 @@ class CreatePool(forms.SelfHandlingForm):
                                          " ASCII characters and numbers.")},
                             validators=[validate_pool_name])
     storage_group = forms.ChoiceField(label=_('Primary Storage Group'), validators=[StorageGroupValidator()])
-    replicated_storage_group = forms.ChoiceField(label=_('Replicated Storage Group'), required=False,
-                                                 validators=[StorageGroupValidator(replicated=True)],
-                                                 error_messages={'invalid': "You should choose \"Default: same as Primary\", if you want to use same storage group"})
-    replication_factor = forms.IntegerField(label=_("Replication Factor"),
-                                        min_value=1,
-                                        initial=3,
-                                        required=True)
+    # replicated_storage_group = forms.ChoiceField(label=_('Replicated Storage Group'), required=False,
+    #                                              validators=[StorageGroupValidator(replicated=True)],
+    #                                              error_messages={'invalid': "You should choose \"Default: same as Primary\", if you want to use same storage group"})
+    #replication_factor = forms.IntegerField(label=_("Replication Factor"),
+                                        # min_value=1,
+                                        # initial=3,
+                                        # required=True)
     max_pg_num_per_osd = forms.IntegerField(label=_("PG Count Factor"),
                                     initial=100,
                                     required=True)
@@ -74,19 +74,19 @@ class CreatePool(forms.SelfHandlingForm):
     def __init__(self, request, *args, **kwargs):
         super(CreatePool, self).__init__(request, *args, **kwargs)
         storage_group_list = [('', _("Select a storage group"))]
-        replicated_storage_group_list = [('', _("Default: Same as Primary"))]
+        #replicated_storage_group_list = [('', _("Default: Same as Primary"))]
         try:
             rsp, group_list= vsm_api.get_storage_group_list(self.request)
             for key in group_list:
                 storage_group_list.append((key, group_list[key]))
-                replicated_storage_group_list.append((key, group_list[key]))
+                #replicated_storage_group_list.append((key, group_list[key]))
         except:
             msg = _('Failed to get storage_group_list.')
             redirect = reverse(self.failure_url)
             exceptions.handle(request, msg, redirect=redirect)
             return False
         self.fields['storage_group'].choices = storage_group_list
-        self.fields['replicated_storage_group'].choices = replicated_storage_group_list
+        #self.fields['replicated_storage_group'].choices = replicated_storage_group_list
 
     def handle(self, request, data):
         pass

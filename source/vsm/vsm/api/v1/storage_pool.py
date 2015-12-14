@@ -278,14 +278,15 @@ class StoragePoolController(wsgi.Controller):
         context = req.environ['vsm.context']
         pool_dict = body['pool']
 
-        for key in ('name', 'createdBy', 'storageGroupId'):
+        for key in ('name', 'createdBy', 'storageGroupName'):
             if not key in pool_dict:
                 msg = _("%s is not defined in pool" % key)
                 raise exc.HTTPBadRequest(explanation=msg)
 
         name = pool_dict['name'].strip()
         created_by = pool_dict['createdBy'].strip()
-        storage_group_id = pool_dict['storageGroupId']
+
+        storage_group_name = pool_dict['storageGroupName']
         tag = pool_dict['tag'].strip()
         cluster_id = pool_dict['clusterId']
 
@@ -295,14 +296,20 @@ class StoragePoolController(wsgi.Controller):
             msg = _('cluster_id must be an interger value')
             raise exc.HTTPBadRequest(explanation=msg)
 
-        osd_num = self.conductor_api.get_osd_num(context, storage_group_id)
-        storage_group = db.storage_group_get(context, storage_group_id)
+        storage_group = db.storage_group_get_by_name(context, storage_group_name)
+        rule_id = storage_group['rule_id']
+        storage_group_id =  storage_group['id']
+        size = db.get_size_by_storage_group_name(context,storage_group_name)
+        size = int(size)
+        LOG.info('size=====%s'%size)
+        osd_num = 2 #TODO self.scheduler_api.get_osd_num_from_crushmap_by_rule(context, rule_id)
         is_ec_pool = pool_dict.get('ecProfileId')
         if is_ec_pool:
             #erasure code pool 
             body_info = {'name': name,
                         'cluster_id':cluster_id,
                         'storage_group_id':storage_group_id,
+                        'storage_group_name':storage_group_name,
                         'ec_profile_id':pool_dict['ecProfileId'],
                         'ec_ruleset_root':storage_group['name'],
                         'ec_failure_domain':pool_dict['ecFailureDomain'],
@@ -311,27 +318,27 @@ class StoragePoolController(wsgi.Controller):
              
         else:
             #replicated pool 
-            crush_ruleset = self.conductor_api.get_ruleset_id(context, storage_group_id)
+            crush_ruleset = rule_id#self.conductor_api.get_ruleset_id(context, storage_group_id)
             if crush_ruleset < 0:
                 msg = _('crush_ruleset must be a non-negative integer value')
                 raise exc.HTTPBadRequest(explanation=msg)
 
-            size = pool_dict['replicationFactor']
-            replica_storage_group_id = pool_dict['replicatedStorageGroupId']
-            try:
-                size = int(str(size))
-                if size < 1:
-                    msg = _('size must be > 1')
-                    raise exc.HTTPBadRequest(explanation=msg)
-
-                host_num = self.conductor_api.count_hosts_by_storage_group_id(context, storage_group_id) 
-                LOG.info("storage_group_id:%s,host_num:%s", storage_group_id, host_num)
-                if size > host_num:
-                    msg = "The replication factor must be less than or equal to the number of storage nodes in the specific storage group in cluster!"
-                    return {'message': msg}
-            except ValueError:
-                msg = _('size must be an interger value')
-                raise exc.HTTPBadRequest(explanation=msg)
+            #size = pool_dict['replicationFactor']
+            #replica_storage_group_id = pool_dict['replicatedStorageGroupId']
+            #try:
+            #     size = int(str(size))
+            #     if size < 1:
+            #         msg = _('size must be > 1')
+            #         raise exc.HTTPBadRequest(explanation=msg)
+            #
+            #     host_num = self.conductor_api.count_hosts_by_storage_group_id(context, storage_group_id)
+            #     LOG.info("storage_group_id:%s,host_num:%s", storage_group_id, host_num)
+            #     if size > host_num:
+            #         msg = "The replication factor must be less than or equal to the number of storage nodes in the specific storage group in cluster!"
+            #         return {'message': msg}
+            # except ValueError:
+            #     msg = _('size must be an interger value')
+            #     raise exc.HTTPBadRequest(explanation=msg)
 
             pg_num = self._compute_pg_num(context, osd_num, size)
 
@@ -339,7 +346,8 @@ class StoragePoolController(wsgi.Controller):
             body_info = {'name': name, #+ "-vsm" + vsm_id,
                         'cluster_id':cluster_id,
                         'storage_group_id':storage_group_id,
-                        'replica_storage_group_id':replica_storage_group_id,
+                        'storage_group_name':storage_group_name,
+                        'pool_type':'replicated',
                         'crush_ruleset':crush_ruleset,
                         'pg_num':pg_num,
                         'pgp_num':pg_num,
@@ -353,7 +361,7 @@ class StoragePoolController(wsgi.Controller):
             "enable_quota": pool_dict.get("enablePoolQuota"),
             "max_pg_num_per_osd": pool_dict.get("max_pg_num_per_osd") or 100,
         })
-
+        LOG.info('body_info=====%s'%body_info)
         return self.scheduler_api.create_storage_pool(context, body_info)
 
     @wsgi.serializers(xml=StoragePoolsTemplate)

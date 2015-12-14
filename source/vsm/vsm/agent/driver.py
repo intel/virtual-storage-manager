@@ -110,7 +110,7 @@ class CephDriver(object):
 
     def create_storage_pool(self, context, body):
         pool_name = body["name"]
-        primary_storage_group = replica_storage_group = ""
+        primary_storage_group = ''
         if body.get("ec_profile_id"):
             profile_ref = db.ec_profile_get(context, body['ec_profile_id'])
             pgp_num = pg_num = profile_ref['pg_num'] 
@@ -134,64 +134,27 @@ class CephDriver(object):
             res = utils.execute('ceph', 'osd', 'pool', 'create', pool_name, pg_num, \
                             pgp_num, 'erasure', profile_ref['name'], rule_name, \
                             run_as_root=True) 
-        elif body.get('replica_storage_group_id'):
+        elif body.get('pool_type') == 'replicated':
             try:
                 utils.execute('ceph', 'osd', 'getcrushmap', '-o', FLAGS.crushmap_bin,
                                 run_as_root=True)
                 utils.execute('crushtool', '-d', FLAGS.crushmap_bin, '-o', FLAGS.crushmap_src, 
                                 run_as_root=True)
-                ruleset = self._get_new_ruleset()
-                storage_group_list = db.storage_group_get_all(context)
-                storage_group_id = int(body['storage_group_id'])
-                replica_storage_group_id = int(body['replica_storage_group_id'])
+                #ruleset = self._get_new_ruleset()
                 pg_num = str(body['pg_num'])
-                for x in storage_group_list:
-                    if x['id'] == storage_group_id and \
-                        x['id'] == replica_storage_group_id:
-                        primary_storage_group = replica_storage_group = x['name']
-                    elif x['id'] == storage_group_id:
-                        primary_storage_group = x['name']
-                    elif x['id'] == replica_storage_group_id:
-                        replica_storage_group = x['name']
-                    else:
-                        continue
-                if not (primary_storage_group and replica_storage_group):        
-                    LOG.error("Can't find primary_storage_group_id or replica_storage_group_id")
-                    raise 
-                    return False
-
-                type = "host" 
-                #TODO min_size and max_size
-                rule_str = "rule " + pool_name + "_replica {"
-                rule_str += "    ruleset " + str(ruleset)
-                rule_str += "    type replicated" 
-                rule_str += "    min_size 0"
-                rule_str += "    max_size 10"
-                rule_str += "    step take " + primary_storage_group
-                rule_str += "    step chooseleaf firstn 1 type " + type
-                rule_str += "    step emit"
-                rule_str += "    step take " + replica_storage_group
-                rule_str += "    step chooseleaf firstn " + str(body['size'] - 1) + " type " + type
-                rule_str += "    step emit"
-                rule_str += "}"
-
+                primary_storage_group = body['storage_group_name']
+                storage_group = db.storage_group_get_by_name(context,primary_storage_group)
+                ruleset = storage_group['rule_id']
                 utils.execute('chown', '-R', 'vsm:vsm', '/etc/vsm/',
                         run_as_root=True) 
-                if utils.append_to_file(FLAGS.crushmap_src, rule_str):
-                    utils.execute('crushtool', '-c', FLAGS.crushmap_src, '-o', FLAGS.crushmap_bin, \
-                                    run_as_root=True) 
-                    utils.execute('ceph', 'osd', 'setcrushmap', '-i', FLAGS.crushmap_bin, \
-                                    run_as_root=True)
-                    utils.execute('ceph', 'osd', 'pool', 'create', pool_name, \
-                                pg_num, pg_num, 'replicated', run_as_root=True)
-                    utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
-                                'crush_ruleset', ruleset, run_as_root=True)
-                    utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
-                                'size', str(body['size']), run_as_root=True)
-                    res = True
-                else:
-                    LOG.error("Failed while writing crushmap!")
-                    return False 
+
+                utils.execute('ceph', 'osd', 'pool', 'create', pool_name, \
+                            pg_num, pg_num, 'replicated', run_as_root=True)
+                utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
+                            'crush_ruleset', ruleset, run_as_root=True)
+                utils.execute('ceph', 'osd', 'pool', 'set', pool_name,
+                            'size', str(body['size']), run_as_root=True)
+                res = True
             except:
                 LOG.error("create replica storage pool error!")
                 raise
@@ -216,18 +179,18 @@ class CephDriver(object):
         for pool in pool_list:
             if pool_name == pool['pool_name']:
                 values = {
-                    'pool_id': pool.get('pool'),
-                    'name': pool.get('pool_name'),
-                    'pg_num': pool.get('pg_num'),
-                    'pgp_num': pool.get('pg_placement_num'),
-                    'size': pool.get('size'),
-                    'min_size': pool.get('min_size'),
-                    'crush_ruleset': pool.get('crush_ruleset'),
-                    'crash_replay_interval': pool.get('crash_replay_interval'),
-                    'ec_status': pool.get('erasure_code_profile'),
-                    'replica_storage_group': replica_storage_group if replica_storage_group else None, 
-                    'quota': body.get('quota'),
-                    'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
+                        'pool_id': pool.get('pool'),
+                        'name': pool.get('pool_name'),
+                        'pg_num': pool.get('pg_num'),
+                        'pgp_num': pool.get('pg_placement_num'),
+                        'size': pool.get('size'),
+                        'min_size': pool.get('min_size'),
+                        'crush_ruleset': pool.get('crush_ruleset'),
+                        'crash_replay_interval': pool.get('crash_replay_interval'),
+                        'ec_status': pool.get('erasure_code_profile'),
+                        'replica_storage_group': body.get('pool_type'),
+                        'quota': body.get('quota'),
+                        'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
@@ -853,7 +816,7 @@ class CephDriver(object):
         osd_pth = osd_data_path.replace('$id',osd_id)
         LOG.info('osd add osd_pth =%s'%osd_pth)
         osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
-        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_id)
+        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_id).replace('$name','osd.%s'%osd_id)
         LOG.info('osd add keyring path=%s'%osd_keyring_pth)
         utils.ensure_tree(osd_pth)
 
@@ -2006,7 +1969,7 @@ class CephDriver(object):
         utils.execute("ceph", "auth", "del", "osd.%s" % osd_inner_id,
                         run_as_root=True)
         osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
-        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_inner_id)
+        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_inner_id).replace('$name','osd.%s'%osd_id)
         LOG.info('osd restore keyring path=%s'%osd_keyring_pth)
         #osd_keyring_pth = "/etc/ceph/keyring.osd.%s" % osd_inner_id
         utils.execute("ceph", "auth", "add", "osd.%s" % osd_inner_id,
@@ -3027,28 +2990,28 @@ class ManagerCrushMapDriver(object):
     def __init__(self, execute=utils.execute, *args, **kwargs):
         self.conductor_api = conductor.API()
         self.conductor_rpcapi = conductor_rpcapi.ConductorAPI()
-        self._crushmap_path = "/var/run/vsm/crushmap_decompiled"
+        self._crushmap_path = "/var/run/vsm/mg_crushmap"
 
 
     def _write_to_crushmap(self, string):
-        fd = open(self._crushmap_path, 'a')
+        fd = open(self._crushmap_path+'_decompiled', 'a')
         fd.write(string)
         fd.close()
 
     def get_crushmap(self):
         LOG.info("DEBUG Begin to get crushmap")
         utils.execute('ceph', 'osd', 'getcrushmap', '-o',
-                self._crushmap_path+"_before", run_as_root=False)
-        utils.execute('crushtool', '-d', self._crushmap_path+"_before", '-o',
-                        self._crushmap_path, run_as_root=False)
+                self._crushmap_path, run_as_root=False)
+        utils.execute('crushtool', '-d', self._crushmap_path, '-o',
+                        self._crushmap_path+'_decompiled', run_as_root=False)
         return True
 
     def set_crushmap(self):
         LOG.info("DEBUG Begin to set crushmap")
-        utils.execute('crushtool', '-c', self._crushmap_path, '-o',
-                        self._crushmap_path+"_compiled", run_as_root=True)
+        utils.execute('crushtool', '-c', self._crushmap_path+'_decompiled', '-o',
+                        self._crushmap_path, run_as_root=False)
         utils.execute('ceph', 'osd', 'setcrushmap', '-i',
-                        self._crushmap_path+"_compiled", run_as_root=True)
+                        self._crushmap_path, run_as_root=True)
         return True
 
 
@@ -3070,7 +3033,7 @@ class ManagerCrushMapDriver(object):
         '''
 
         crushmap = get_crushmap_json_format()
-        rule_id = rule_info.get('rule_id')
+        rule_id = rule_info.get('rule_id',None)
         if rule_id is None:
             rule_ids =[rule['rule_id'] for rule in crushmap._rules]
             rule_ids.sort()
@@ -3100,6 +3063,7 @@ class ManagerCrushMapDriver(object):
 """%(str(take_choose_num),take_choose_leaf_type)
             string = string + "    step take " + take_name + "\n" + string_choose
         string = string +"    }\n"
+        LOG.info('---string-----%s---'%string)
         self.get_crushmap()
         self._write_to_crushmap(string)
         self.set_crushmap()
@@ -3133,7 +3097,7 @@ class ManagerCrushMapDriver(object):
         takes = rule_info.get('takes')
 
         self.get_crushmap()
-        fd = open(self._crushmap_path, 'r')
+        fd = open(self._crushmap_path+'_decompiled', 'r')
         rule_start_line = None
         rule_end_line = None
         insert_take_line = None
@@ -3141,11 +3105,10 @@ class ManagerCrushMapDriver(object):
         lines = fd.readlines()
         fd.close()
         new_lines = []
-        # LOG.info('rulename=====%s'%rule_name)
-        # LOG.info('take_id_list=====%s'%take_id_list)
-        # LOG.info('old lines=====%s'%lines)
+        LOG.info('rulename=====%s'%rule_name)
         for line in lines:
             line_number += 1
+            LOG.info('old lines=====%s----type=%s'%(line,type(line)))
             if 'rule %s {'%rule_name in line:
                 rule_start_line = line_number
             if rule_start_line is not None:
