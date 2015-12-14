@@ -63,7 +63,6 @@ function UpdateServerStatus(){
                 html +="<td class=\"monitor_tag sortable normal_column\">"+servers[i].is_monitor+"</td>";
                 html +="<td class=\"zone sortable normal_column\">"+servers[i].zone+"</td>";
                 html +="<td class=\"status sortable normal_column\">"+servers[i].status+"</td>";
-                html +="<td class=\"actions_column\"></td>";
                 html +="</tr>";
             }
             $("#server_list>tbody")[0].innerHTML = html;
