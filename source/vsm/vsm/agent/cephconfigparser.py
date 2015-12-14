@@ -412,6 +412,7 @@ class CephConfigParser(manager.Manager):
         # NOTE Do not add osd data here.
         self._parser.set('osd', 'osd journal size', str(journal_size))
         self._parser.set('osd', 'filestore xattr use omap', 'true')
+        self._parser.set('osd', 'osd crush update on start', 'false' )
         osd_data = "/var/lib/ceph/osd/osd$id"
         self._parser.set('osd', 'osd data', osd_data)
         # NOTE add keyring to support lower version of OSD.
@@ -422,6 +423,7 @@ class CephConfigParser(manager.Manager):
         self._parser.set('osd', 'osd mkfs type', osd_type)
         mount_option = utils.get_fs_options(osd_type)[1]
         self._parser.set('osd', 'osd mount options %s' % osd_type, mount_option)
+
 
         # Below is very important for set file system.
         # Do not change any of them.
