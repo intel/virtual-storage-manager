@@ -462,7 +462,7 @@ class OsdState(BASE, VsmBase):
                                  'OsdState.storage_group_id == StorageGroup.id,'
                                  'OsdState.deleted == False)')
 
-    osd_name = Column(String(length=255), unique=True, nullable=False)
+    osd_name = Column(String(length=255), nullable=False)
     cluster_id = Column(Integer)
     state = Column(String(length=255), default="down")
     public_ip = Column(String(length=255))
