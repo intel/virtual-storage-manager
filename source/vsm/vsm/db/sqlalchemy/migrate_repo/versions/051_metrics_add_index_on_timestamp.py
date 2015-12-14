@@ -28,7 +28,7 @@ def upgrade(migrate_engine):
     metrics = Table('metrics', meta, autoload=True)
     timestamp = Column('timestamp', Integer, nullable=False)
     metrics.drop_column(timestamp)
-    new_timestamp = Column('timestamp', Integer, nullable=False, db_index=True)
+    new_timestamp = Column('timestamp', Integer, nullable=False, index=True)
     metrics.create_column(new_timestamp)
 
 
@@ -37,7 +37,7 @@ def downgrade(migrate_engine):
     meta.bind = migrate_engine
 
     metrics = Table('metrics', meta, autoload=True)
-    timestamp = Column('timestamp', Integer, nullable=False, db_index=True)
+    timestamp = Column('timestamp', Integer, nullable=False, index=True)
     metrics.drop_column(timestamp)
     new_timestamp = Column('timestamp', Integer, nullable=False)
     metrics.create_column(new_timestamp)

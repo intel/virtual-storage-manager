@@ -37,7 +37,6 @@ def upgrade(migrate_engine):
         Column('updated_at', DateTime(timezone=False)),
         Column('deleted_at', DateTime(timezone=False)),
         Column('deleted', Boolean(create_constraint=True, name=None)),
-        Column('timestamp', Integer, nullable=False),
     )
 
     try:
