@@ -95,12 +95,8 @@ class Parser(object):
                 sec_name = line
                 options = {}
             elif line.find('=') != -1:
-                pair = line.split('=')
-                key = pair[0].strip()
-                if len(pair) == 2:
-                    val = pair[1].strip()
-                if len(pair) == 3:
-                    val = pair[1] + "=" + pair[2]
+                key = line[0:line.find('=')].strip()
+                val = line[line.find('=')+1:].strip()
                 options[key] = val
 
         self._sections[sec_name] = options
