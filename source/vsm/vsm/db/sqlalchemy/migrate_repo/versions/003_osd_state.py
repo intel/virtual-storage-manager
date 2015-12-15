@@ -29,7 +29,7 @@ def upgrade(migrate_engine):
     osd_states = Table(
         'osd_states', meta,
         Column('id', Integer, primary_key=True, nullable=False),
-        Column('osd_name', String(length=255), unique=True, nullable=False),
+        Column('osd_name', String(length=255), nullable=False),
         Column('device_id', Integer, ForeignKey(models.Device.id), nullable=False),
         Column('storage_group_id', Integer, nullable=False),
         Column('service_id', Integer, nullable=False),
