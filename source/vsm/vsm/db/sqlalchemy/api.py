@@ -2935,8 +2935,15 @@ def osd_state_create(context, values, session=None,force_create=False):
     if not session:
         session = get_session()
     if not force_create:
-        ref = osd_state_get_by_name(context, values.get('osd_name'))
+        #LOG.warn('1111111111')
+        #ref = osd_state_get_by_name(context, values.get('osd_name'))
+        ref = model_query(context,
+            models.OsdState, read_deleted="yes").\
+            filter_by(osd_name=values['osd_name']).\
+            first()
+        #LOG.warn('ref==%s='%ref)
         if ref:
+            values['deleted'] = 0
             ref = osd_state_update(context, ref['id'], values)
             return ref
 

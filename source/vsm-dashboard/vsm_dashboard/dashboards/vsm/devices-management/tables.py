@@ -108,6 +108,12 @@ class AddOSDAction(tables.LinkAction):
     url = "/dashboard/vsm/devices-management/add_new_osd/"
     classes = ('btn-primary',)
 
+class BatchImportOSDAction(tables.LinkAction):
+    name = "batch_import"
+    verbose_name = _("Batch Import")
+    url = "/dashboard/vsm/devices-management/batch_import_view/"
+    classes = ('btn-primary',)
+
 class OsdsTable(tables.DataTable):
     STATUS_CHOICES = (
         ("Present", True),
@@ -149,7 +155,7 @@ class OsdsTable(tables.DataTable):
         name = "osds"
         verbose_name = _("Device List")
         table_actions = (RestartOsdsAction, RemoveOsdsAction,
-                         RestoreOsdsAction,AddOSDAction)
+                         RestoreOsdsAction,AddOSDAction,BatchImportOSDAction)
         status_columns = ['vsm_status']
         row_class = UpdateRow
 
