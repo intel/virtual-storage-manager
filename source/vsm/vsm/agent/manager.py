@@ -1669,15 +1669,19 @@ class AgentManager(manager.Manager):
         #LOG.info('333333333')
         available_disk_name = self.ceph_driver.get_available_disks(context)
         LOG.info('available_disk_name=====%s'%available_disk_name)
+        devices = db.device_get_all_by_service_id(context,self._service_id)
+        dev_used_by_ceph = [dev.journal for dev in devices]
         available_disk_info_list = []
         name_by_path_dict = self.ceph_driver.get_disks_name_by_path_dict(available_disk_name)
         name_by_uuid_dict = self.ceph_driver.get_disks_name_by_uuid_dict(available_disk_name)
         for disk in available_disk_name:
             by_path_name = name_by_path_dict.get(disk,'')
             by_uuid_name = name_by_uuid_dict.get(disk,'')
-            available_disk_info_list.append({'disk_name':disk,
-                                             'by-path':by_path_name,
-                                             'by-uuid':by_uuid_name,})
+            if not disk in dev_used_by_ceph and not by_path_name in dev_used_by_ceph and not by_uuid_name in dev_used_by_ceph:
+                available_disk_info_list.append({'disk_name':disk,
+                                                 'by-path':by_path_name,
+                                                 'by-uuid':by_uuid_name,})
+        LOG.info('available_disk_info_list=====%s'%available_disk_info_list)
         return available_disk_info_list
 
     def add_new_disks_to_cluster(self, context, body):
