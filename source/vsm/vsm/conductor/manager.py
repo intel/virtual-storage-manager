@@ -107,9 +107,10 @@ class ConductorManager(manager.Manager):
 
         storage_group_list = db.storage_group_get_all(context)
         storage_group_list = [x for x in storage_group_list if x.status == "IN"]
-        osds = db.osd_get_all(context)
+        # osds = db.osd_get_all(context)
 
         group_list = {}
+        group_name_list = []
         if storage_group_list:
             for group in storage_group_list:
                 # osd_num=0
@@ -117,7 +118,9 @@ class ConductorManager(manager.Manager):
                 #     if osd['storage_group_id'] == group['id']:
                 #         osd_num = osd_num + 1
                 # if osd_num > 0:
-                group_list[group['id']] = group['name']
+                if group['name'] not in group_name_list:
+                    group_name_list.append(group['name'])
+                    group_list[group['id']] = group['name']
         return group_list
 
     def get_server_list(self, context):

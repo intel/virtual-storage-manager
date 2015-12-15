@@ -17,7 +17,7 @@
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey
 from sqlalchemy import Integer, MetaData, String, Table
-from sqlalchemy import Table, Text, Float
+from sqlalchemy import Table, Text, Float, Index
 #test
 def upgrade(migrate_engine):
     # Upgrade operations go here. Don't create your own engine;
@@ -26,18 +26,9 @@ def upgrade(migrate_engine):
     meta.bind = migrate_engine
 
     metrics = Table('metrics', meta, autoload=True)
-    timestamp = Column('timestamp', Integer, nullable=False)
-    metrics.drop_column(timestamp)
-    new_timestamp = Column('timestamp', Integer, nullable=False, index=True)
-    metrics.create_column(new_timestamp)
+    metrics_timestamp_index = Index('metrics_timestamp_index',metrics.columns.timestamp)
+    metrics_timestamp_index.create(bind=migrate_engine)
 
 
 def downgrade(migrate_engine):
-    meta = MetaData()
-    meta.bind = migrate_engine
-
-    metrics = Table('metrics', meta, autoload=True)
-    timestamp = Column('timestamp', Integer, nullable=False, index=True)
-    metrics.drop_column(timestamp)
-    new_timestamp = Column('timestamp', Integer, nullable=False)
-    metrics.create_column(new_timestamp)
+    pass

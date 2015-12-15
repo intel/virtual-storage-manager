@@ -246,7 +246,7 @@ function PostAction(action){
 					}
 					break;
 				case "Failed":
-					showTip("error",data.msg);
+					showTip("error",data.message);
 					break;
 			}
 	   	},

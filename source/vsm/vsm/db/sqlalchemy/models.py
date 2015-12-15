@@ -462,7 +462,7 @@ class OsdState(BASE, VsmBase):
                                  'OsdState.storage_group_id == StorageGroup.id,'
                                  'OsdState.deleted == False)')
 
-    osd_name = Column(String(length=255), unique=True, nullable=False)
+    osd_name = Column(String(length=255), nullable=False)
     cluster_id = Column(Integer)
     state = Column(String(length=255), default="down")
     public_ip = Column(String(length=255))
@@ -796,18 +796,18 @@ class CephPerformanceMetric(BASE, VsmBase):
     hostname = Column(String(length=255), nullable=False)
     instance = Column(String(length=255), nullable=False)
     value = Column(String(length=255), nullable=False)
-    timestamp = Column(Integer, db_index=True, nullable=False)
+    timestamp = Column(Integer, nullable=False)
 
 class Config(BASE, VsmBase):
     """ configurable items for vsm, ceph, os, etc.
     """
     __tablename__ = 'config'
 
-    id = Column(Integer, primary_key=True, nullable=False),
-    name = Column('name', String(length=255), nullable=False),
-    value = Column('value', String(length=255), nullable=True),
-    default_value = Column('default_value', String(length=255), nullable=False),
-    category = Column('category', String(length=255), nullable=True),
-    section = Column('section', String(length=255), nullable=False),
-    description = Column('description', String(length=255), nullable=True),
-    alterable = Column('alterable', Boolean(create_constraint=True, name=None)),
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column('name', String(length=255), nullable=False)
+    value = Column('value', String(length=255), nullable=True)
+    default_value = Column('default_value', String(length=255), nullable=False)
+    category = Column('category', String(length=255), nullable=True)
+    section = Column('section', String(length=255), nullable=False)
+    description = Column('description', String(length=255), nullable=True)
+    alterable = Column('alterable', Boolean(create_constraint=True, name=None))

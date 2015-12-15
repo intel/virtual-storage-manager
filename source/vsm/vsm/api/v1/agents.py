@@ -360,6 +360,8 @@ class AgentsController(wsgi.Controller):
             stg['rule_id'] = rule_id
             stg['status'] = FLAGS.storage_group_in
             stg['take_order'] = 0
+            stg['choose_num'] = 0
+            stg['choose_type'] = 'host'
             # TODO change the create_storage_group api.
             # DB create_storage_group will ignore the
             # request if the stg has exists.

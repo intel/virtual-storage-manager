@@ -1969,7 +1969,7 @@ class CephDriver(object):
         utils.execute("ceph", "auth", "del", "osd.%s" % osd_inner_id,
                         run_as_root=True)
         osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
-        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_inner_id).replace('$name','osd.%s'%osd_id)
+        osd_keyring_pth = osd_keyring_pth.replace('$id',osd_inner_id).replace('$name','osd.%s'%osd_inner_id)
         LOG.info('osd restore keyring path=%s'%osd_keyring_pth)
         #osd_keyring_pth = "/etc/ceph/keyring.osd.%s" % osd_inner_id
         utils.execute("ceph", "auth", "add", "osd.%s" % osd_inner_id,
