@@ -3206,6 +3206,10 @@ def storage_group_update_or_create(context, values):
         if result:
             result.update(values)
         else:
+            if not values.get('storage_class',None):
+                values['storage_class'] = values['name']
+            if not values.get('friendly_name',None):
+                values['friendly_name'] = values['name']
             result = models.StorageGroup()
             result.update(values)
         result.save(session=session)

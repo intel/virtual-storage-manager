@@ -189,8 +189,8 @@ class CrushMap():
                     bucket_id =  step['item']
                     index = index + 1
                     values = {'name':rule['rule_name'],
-                              'storage_class':rule['rule_name'],
-                              'friendly_name':rule['rule_name'],
+                              #'storage_class':rule['rule_name'],
+                              #'friendly_name':rule['rule_name'],
                               'take_id':bucket_id,
                               'rule_id':rule['rule_id'],
                               'take_order':index,
