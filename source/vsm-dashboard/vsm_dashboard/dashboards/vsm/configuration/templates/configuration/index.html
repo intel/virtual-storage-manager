@@ -1,0 +1,105 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Settings" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Settings") %}
+  <link href="{{ STATIC_URL }}dashboard/css/settings.css" rel="stylesheet">
+{% endblock page_header %}
+
+{% block main %}
+{% csrf_token %}
+    <ul class="nav nav-tabs">
+        {%for config in config_list%}
+          {%if forloop.counter == 1%}
+            <li role="presentation" class="active" onclick="SwitchTab(this,'{{config.section}}')">
+              <a href="#" >{{config.section}}</a>
+            </li>
+          {%else%}
+            <li role="presentation" onclick="SwitchTab(this,'{{config.section}}')">
+              <a href="#"  >{{config.section}}</a>
+            </li>
+          {%endif%}
+        {%endfor%} 
+    </ul>
+
+    {%for config in config_list%}
+      {%if forloop.counter == 1%}
+        <table id="t{{config.section}}" class="table-config table table-bordered table-striped datatable">
+      {%else%}
+        <table id="t{{config.section}}" class="table-config table table-bordered table-striped datatable" style="display:none">
+      {%endif%}
+        <thead>
+            <tr class="table_caption">
+              <th class="table_header" colspan="5">
+                <h3 class="table_title">{{config.section}}</h3>
+                  <div class="table_actions clearfix">
+                      <a id="btnAddConfig" href="/dashboard/vsm/configuration/create/" class="btn btn-primary" >Add</a>
+                      <a id="btnDeleteConfig" href="#" class="btn btn-primary" onclick="DeleteConfig('{{config.section}}')" >Delete</a>
+                  </div>
+              </th>
+            </tr>
+            <tr>
+              <th class="multi_select_column tablesorter-header">
+                <div class="tablesorter-header-inner">
+                  <input class="table-row-multi-select" type="checkbox" name="{{config.section}}" onClick="SelectAllCheckbox(this,'{{config.section}}')">
+                </div>
+              </th>
+              <th class="sortable normal_column hide">ID</th>
+              <th class="sortable normal_column name">Name</th> 
+              <th class="sortable normal_column default">Default Value</th>
+              <th class="sortable normal_column value">Current Value</th>
+              <th class="actions_column">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+          {%for item in config.items%}
+            <tr class="" >
+              <td class="multi_select_column">
+                <input class="table-row-multi-select" value="{{item.id}}" type="checkbox" name="{{config.section}}">
+              </td>
+              <td class="sortable normal_column hide">{{item.id}}</td>
+              <td class="sortable normal_column name">{{item.name}}</td>
+              <td class="sortable normal_column default">{{item.default_value}}</td>
+                <td class="sortable normal_column value">{{item.value}}</td>
+              <td class="actions_column">
+                <a href="/dashboard/vsm/configuration/update/{{item.id}}/" class="btn btn-primary" >
+                  Update
+                </a>
+              </td>
+            </tr>
+          {%endfor%}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5">
+              <span class="table_count">Displaying {{config_list|length}} item</span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    {%endfor%} 
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/settings.js' type='text/javascript' charset='utf-8'></script>
+{% endblock %}
+
