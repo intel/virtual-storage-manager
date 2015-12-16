@@ -434,6 +434,7 @@ class OsdState(BASE, VsmBase):
     service_id = Column(Integer, ForeignKey('services.id'), nullable=False)
     service = relationship(Service,
                            backref=backref('osd_state'),
+                           lazy='subquery',
                            foreign_keys=service_id,
                            primaryjoin='and_('
                            'OsdState.service_id == Service.id,'
@@ -442,12 +443,14 @@ class OsdState(BASE, VsmBase):
     zone = relationship(Zone,
                             backref=backref('osd_state'),
                             foreign_keys=zone_id,
+                            lazy='subquery',
                             primaryjoin='and_('
                                 'OsdState.zone_id== Zone.id,'
                                 'OsdState.deleted == False)')
     device_id = Column(Integer, ForeignKey('devices.id'), nullable=False)
     device = relationship(Device,
                           backref=backref('osd_state'),
+                          lazy='subquery',
                           foreign_keys=device_id,
                           primaryjoin='and_('
                           'OsdState.device_id == Device.id,'
@@ -457,6 +460,7 @@ class OsdState(BASE, VsmBase):
                               nullable=False)
     storage_group = relationship(StorageGroup,
                                  backref=backref('osd_state'),
+                                 lazy='subquery',
                                  foreign_keys=storage_group_id,
                                  primaryjoin='and_('
                                  'OsdState.storage_group_id == StorageGroup.id,'

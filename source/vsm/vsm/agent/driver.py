@@ -895,7 +895,7 @@ class CephDriver(object):
         utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_id, weight,
            osd_location_str,
           run_as_root=True)
-
+        #LOG.info('osd-to-db==%s'%osd_state)
         self._conductor_api.osd_state_create(context, osd_state)
         LOG.info('>>> step7 finish')
         return True

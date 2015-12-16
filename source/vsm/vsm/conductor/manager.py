@@ -300,7 +300,7 @@ class ConductorManager(manager.Manager):
             return osd_state
 
     def osd_state_update_or_create(self, context, values, create=None):
-        #LOG.info("osd_state_update_or_create")
+        #LOG.info("osd_state_update_or_create---%s"%values)
         osd_ref = db.osd_state_get_by_name(context, values['osd_name'])
         if not osd_ref:
             osd_ref = db.osd_state_get_by_device_id_and_service_id_and_cluster_id(\

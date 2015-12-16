@@ -2937,9 +2937,8 @@ def osd_state_create(context, values, session=None,force_create=False):
     if not force_create:
         ref = osd_state_get_by_name(context, values.get('osd_name'))
         if ref:
-            ref = osd_state_update(context, ref['id'], values)
+            ref.update(values)
             return ref
-
     with session.begin(subtransactions=True):
         osd_state_ref = models.OsdState()
         session.add(osd_state_ref)
@@ -3206,6 +3205,10 @@ def storage_group_update_or_create(context, values):
         if result:
             result.update(values)
         else:
+            if not values.get('storage_class',None):
+                values['storage_class'] = values['name']
+            if not values.get('friendly_name',None):
+                values['friendly_name'] = values['name']
             result = models.StorageGroup()
             result.update(values)
         result.save(session=session)
