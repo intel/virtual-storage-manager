@@ -325,29 +325,29 @@ def restart_osd(request):
     return HttpResponse(rs)
 
 def get_available_disks(request):
-    # search_opts = json.loads(request.body)
-    # server_id = search_opts["server_id"]
-    #
-    # ret = vsmapi.get_available_disks(request, search_opts={
-    #             "server_id": server_id
-    #             ,"result_mode":"get_disks",
-    #         })
-    #
-    # disks = ret['disks']
-    # if disks is None:disks=[]
-    # disks_list = [disk for disk in disks if disk.find('by-path')==-1]
-    # disk_dict = {'disks':disks_list}
-    # disk_data = json.dumps(disk_dict)
+    search_opts = json.loads(request.body)
+    server_id = search_opts["server_id"]
 
-    device_list = []
-    for i in range(0,5):
-        device_list.append({
-                "by_path":"Path_"+str(i),
-                "disk_name":"/dev/vdb_"+str(i),
-                "by_uuid":"/dev/disk/by-path/xxxxxxxxxxxxxxxx_"+str(i)
+    ret = vsmapi.get_available_disks(request, search_opts={
+                "server_id": server_id
+                ,"result_mode":"get_disks",
             })
-    devicedata = json.dumps(device_list)
-    return HttpResponse(devicedata)
+
+    disks = ret['disks']
+    if disks is None:disks=[]
+    disks_list = [disk for disk in disks if disk.find('by-path')==-1]
+    disk_dict = {'disks':disks_list}
+    disk_data = json.dumps(disk_dict)
+
+    # device_list = []
+    # for i in range(0,5):
+    #     device_list.append({
+    #             "by_path":"Path_"+str(i),
+    #             "disk_name":"/dev/vdb_"+str(i),
+    #             "by_uuid":"/dev/disk/by-path/xxxxxxxxxxxxxxxx_"+str(i)
+    #         })
+    # devicedata = json.dumps(disk_data)
+    return HttpResponse(disk_data)
 
 def remove_osd(request):
     data = json.loads(request.body)
