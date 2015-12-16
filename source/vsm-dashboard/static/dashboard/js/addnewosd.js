@@ -1,20 +1,82 @@
- $(function(){
- 	
+//storage the device list
+_DEVICE_LIST = []
+
+$(function(){
  })
 
- function SelectJournalDevice(){
-     $("#txtJournalDevice").val($("#selJournalDevice").val());
- }
+function SelectDevice(type,device_name){
+ 	var device = GetDeviceByName(device_name);
+ 	var title = "";
 
- function SelectDataDevice(){
-     $("#txtDataDevice").val($("#selDataDevice").val());
- }
+ 	$(".pop-"+type).remove();
+    if(type == "journal"){
+    	title = "Journal Device Info";
+    	$("#txtJournalDevice").val(device_name);
+    	$("#lblJournalDeviceHelp").after(GenerateIcon(type,title,GenerateDeviceInfo(device)));
+    }
+    else{
+    	title = "Data Device Info";
+    	$("#txtDataDevice").val(device_name);
+    	$("#lblDataDeviceHelp").after(GenerateIcon(type,title,GenerateDeviceInfo(device)));
+	}
 
+    //register the popover
+    $("a[data-toggle=popover]").popover();
+}
 
- $("#selServer").change(function(){
+function GetDeviceByName(name){
+ 	for(var i=0;i<_DEVICE_LIST.length;i++){
+ 		if(name == _DEVICE_LIST[i].disk_name){
+			return _DEVICE_LIST[i];
+ 		}
+ 	}
+}
+
+function GenerateDeviceInfo(data){
+ 	var htmlDeviceInfo = "";
+    	htmlDeviceInfo += "<span class='vsm-label-90'>Name:</span>";
+    	htmlDeviceInfo += "<span class='vsm-label-90'>"+data.disk_name+"</span>";
+		htmlDeviceInfo += "<br />";
+		htmlDeviceInfo += "<span class='vsm-label-90'>Path:</span>";
+    	htmlDeviceInfo += "<span class='vsm-label-90'>"+data.by_path+"</span>";
+		htmlDeviceInfo += "<br />";
+		htmlDeviceInfo += "<span class='vsm-label-90'>UUID:</span>";
+    	htmlDeviceInfo += "<span class='vsm-label-90'>"+data.by_uuid+"</span>";
+		htmlDeviceInfo += "<br />";
+	return htmlDeviceInfo;
+}
+
+function GenerateIcon(type,popover_title,popover_content){
+	var htmlOSDStatusIcon = "";
+		htmlOSDStatusIcon += "<a class=\"img_popover pop-"+type+"\" tabindex='0' ";
+		htmlOSDStatusIcon += " role='button' ";
+		htmlOSDStatusIcon += " data-toggle='popover' ";
+		htmlOSDStatusIcon += " data-container='body' ";
+		htmlOSDStatusIcon += " data-placement='right' ";
+		htmlOSDStatusIcon += " data-trigger='click' ";
+		htmlOSDStatusIcon += " data-html='true' ";
+		htmlOSDStatusIcon += " onblur='HidePopover()' ";
+		htmlOSDStatusIcon += " title='"+popover_title+"' ";
+		htmlOSDStatusIcon += " data-content=\""+popover_content+"\" >";
+		htmlOSDStatusIcon += " <span class='glyphicon glyphicon-info-sign' aria-hidden='true'  style=\"color:#286090\"></span>"
+		htmlOSDStatusIcon += "</a>";
+	return htmlOSDStatusIcon;
+}
+
+function HidePopover(){
+	$(".popover").popover("hide");
+}
+
+$("#selServer").change(function(){
 	var service_id = this.value;
 	var token = $("input[name=csrfmiddlewaretoken]").val();
 	var postData = JSON.stringify({"service_id":service_id});
+
+	$("#tbOSDList").empty();
+	$("#txtJournalDevice").val("");
+	$("#txtDataDevice").val("");
+	$("#txtWeight").val("");
+	$("#selStorageGroup")[0].selectedIndex = 0;
 
 	$.ajax({
 		type: "post",
@@ -23,13 +85,6 @@
 		dataType:"json",
 		success: function(data){
 				var osdlist = data.osdlist;
-
-				$("#tbOSDList").empty();
-				$("#txtJournalDevice").val("");
-				$("#txtDataDevice").val("");
-				$("#txtWeight").val("");
-				$("#selStorageGroup")[0].selectedIndex = 0;
-
 				for(var i=0;i<osdlist.length;i++){
 					var tbodyHtml = "";
 					tbodyHtml += "<tr id='tr_'"+osdlist[i].id+" name='"+osdlist[i].name+"'>";
@@ -63,42 +118,54 @@
         var server_id = this.options[this.selectedIndex].getAttribute("node-id");
         postData = JSON.stringify({"server_id":server_id});
         $.ajax({
-		type: "post",
-		url:"/dashboard/vsm/devices-management/get_available_disks/",
-		data: postData,
-		dataType:"json",
-		success: function(data){
-			var path_list = data.disks;
-            $("#selJournalDevice")[0].options.length = 0;
-            $("#selDataDevice")[0].options.length = 0;
-            for(var i=0;i<path_list.length;i++){
-                var option1 = new Option();
-                var option2 = new Option();
-                option1.value =path_list[i];
-                option1.text = path_list[i];
-                option2.value =path_list[i];
-                option2.text = path_list[i];
-                $("#selJournalDevice")[0].options.add(option1);
-                $("#selDataDevice")[0].options.add(option2);
-            }
+			type: "post",
+			url:"/dashboard/vsm/devices-management/get_available_disks/",
+			data: postData,
+			dataType:"json",
+			success: function(data){
+				// var path_list = data.disks;
+				_DEVICE_LIST = data;
+				console.log(_DEVICE_LIST);
 
-            $("#txtJournalDevice").val( $("#selJournalDevice").val());
-            $("#txtDataDevice").val( $("#selDataDevice").val());
+	            $("#selJournalDevice")[0].options.length = 0;
+	            $("#selDataDevice")[0].options.length = 0;
+	            for(var i=0;i<_DEVICE_LIST.length;i++){
+	            	if(i==0){
+	            		$("#txtJournalDevice")[0].value = _DEVICE_LIST[i].disk_name;
+	            		$("#txtDataDevice")[0].value = _DEVICE_LIST[i].disk_name;
+	            		//add the device info
+	                	$(".pop-journal").remove();
+	                	$(".pop-data").remove();
+	                	$("#lblJournalDeviceHelp").after(GenerateIcon("journal","Journal Device Info",GenerateDeviceInfo(_DEVICE_LIST[i])));
+	            		$("#lblDataDeviceHelp").after(GenerateIcon("data","Data Device Info",GenerateDeviceInfo(_DEVICE_LIST[i])));
+	            		//register the popover
+    					$("a[data-toggle=popover]").popover();
+	            	}
 
-    	},
-		error: function (XMLHttpRequest, textStatus, errorThrown) {
-				if(XMLHttpRequest.status == 500){
-					console.log("internal error");
-				}
-			},
-		headers: {
-			"X-CSRFToken": token
-			},
-		complete: function(){
+	                var option1 = new Option();
+	                var option2 = new Option();
+	                option1.value =_DEVICE_LIST[i].disk_name;
+	                option1.text = _DEVICE_LIST[i].disk_name;
+	                option2.value =_DEVICE_LIST[i].disk_name;
+	                option2.text = _DEVICE_LIST[i].disk_name;
+	                $("#selJournalDevice")[0].options.add(option1);
+	                $("#selDataDevice")[0].options.add(option2);
 
-		}
+
+	            }
+	    	},
+			error: function (XMLHttpRequest, textStatus, errorThrown) {
+					if(XMLHttpRequest.status == 500){
+						console.log("internal error");
+					}
+				},
+			headers: {
+				"X-CSRFToken": token
+				},
+			complete: function(){
+
+			}
         });
-
 });
 
 

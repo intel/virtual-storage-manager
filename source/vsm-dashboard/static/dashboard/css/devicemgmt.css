@@ -24,6 +24,18 @@
 	cursor: pointer;
 }
 
+.img_popover:hover{
+	cursor: pointer;
+	border: 0px;
+	text-decoration: none;
+}
+
+.img_popover:focus{
+	cursor: pointer;
+	border: 0px;
+	text-decoration: none;
+}
+
 
 #divOSDInfo{
 	width: 400px;
@@ -140,9 +152,6 @@
 	margin-left:10px;
 	cursor:pointer;
 }
-	cursor:pointer;
-}
-
 
 #divServerPanel{
 	width: 500px;
