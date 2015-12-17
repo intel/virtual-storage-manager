@@ -1679,8 +1679,8 @@ class AgentManager(manager.Manager):
             by_uuid_name = name_by_uuid_dict.get(disk,'')
             if not disk in dev_used_by_ceph and not by_path_name in dev_used_by_ceph and not by_uuid_name in dev_used_by_ceph:
                 available_disk_info_list.append({'disk_name':disk,
-                                                 'by-path':by_path_name,
-                                                 'by-uuid':by_uuid_name,})
+                                                 'by_path':by_path_name,
+                                                 'by_uuid':by_uuid_name,})
         LOG.info('available_disk_info_list=====%s'%available_disk_info_list)
         return available_disk_info_list
 
