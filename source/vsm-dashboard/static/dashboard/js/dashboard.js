@@ -319,8 +319,8 @@ function loadCapacity(){
         success: function(data){
             cClusterGague.setOption(GenerateGaugeOption(data.percent));
             //update the capacity value
-            $("#lblCapacityUsed")[0].innerHTML = ((parseInt(data.used)/1024)/1024).toString() + " MB";
-            $("#lblCapacityTotal")[0].innerHTML = ((parseInt(data.total)/1024)/1024).toString() + " MB";
+            $("#lblCapacityUsed")[0].innerHTML = ((parseInt(data.used)/1024)/1024/1024).toFixed(2).toString() + " GB";
+            $("#lblCapacityTotal")[0].innerHTML = ((parseInt(data.total)/1024)/1024/1024).toFixed(2).toString() + " GB";
         }
      });
 }

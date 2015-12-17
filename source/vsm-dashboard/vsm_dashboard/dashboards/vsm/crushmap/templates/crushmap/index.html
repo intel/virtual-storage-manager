@@ -14,9 +14,9 @@
         <div id="divCrushmap">
             <div id="divCrushmapTree" class="ztree"></div>
         </div>
-        <div id="divStorageGroup">
-            <div id="divStorageGroupTable">
-                <table id="storage_group_list" class="table table-bordered table-striped datatable tablesorter tablesorter-default">
+
+        <div id="divStorageGroupTable">
+            <table id="storage_group_list" class="table table-bordered table-striped datatable tablesorter tablesorter-default">
                     <thead>
                         <tr class="table_caption">
                             <th class="table_header" colspan="7" data-column="0">
@@ -94,9 +94,10 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>
+        </div>
 
-            <div id="divStorageGroupForm">
+        <div id="divStorageGroupForm" style="display:none">
+            <div id="divBaseForm">
                 <div id="divStorageGroupFormLeft">
                     <div class="control-group form-field clearfix required">
                         <label>Name:</label>
@@ -115,7 +116,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="divStorageGroupFormRight">
                     <div class="control-group form-field clearfix required">
                         <label>Friendly Name:</label>
@@ -133,11 +133,10 @@
                             <input id="txtMarker" maxlength="24" type="color" class="form-control" value="#cccccc" />
                         </div>
                     </div>
-                   
                 </div>
             </div>
 
-            <div id="dTakeFrom">
+            <div id="divTakeFrom">
                 <div class="control-group form-field clearfix required" >
                     <label>Take:</label>
                     <span class="help-block"></span>
@@ -148,14 +147,11 @@
                 </div>
             </div>
 
-
             <div id="divFormOptions" class="vsm-options-bar">
-                    <button id="btnAddStorageGroup" class="btn btn-primary" onclick="PostAction('create')">Add</button>
-                    <button id="btnUpdateStorageGroup" class="btn btn-primary" style="display:none" onclick="PostAction('update')">Update</button>
-                    <button id="btnReset" class="btn btn-default" onclick="ResetForm()">Reset</button>
+                <button id="btnAddStorageGroup" class="btn btn-primary" onclick="PostAction('create')">Add</button>
+                <button id="btnUpdateStorageGroup" class="btn btn-primary" style="display:none" onclick="PostAction('update')">Update</button>
+                <button id="btnReset" class="btn btn-default" onclick="ResetForm()">Reset</button>
             </div>
-
-
         </div>
     </div>
 {% endblock %}

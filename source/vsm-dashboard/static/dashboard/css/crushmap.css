@@ -11,21 +11,24 @@
 	overflow: auto;
 }
 
-#divStorageGroup{
-	margin-left: 10px;
-	float: left;
-	width: 70%;
-	height: 740px;
-	border:1px solid #ccc;
-	padding: 5px;
-}
 
 #divStorageGroupTable{
-	max-height: 300px;
+	width: 70%;
+	float: left;
+	margin-left: 10px;
+	height: 740px;;
 	overflow-y:auto;
 }
 
 #divStorageGroupForm{
+	width: 70%;
+	float: left;
+	margin-left: 10px;
+	height: 740px;;
+	overflow-y:auto;
+}
+
+#divBaseForm{
 	margin-top: 20px;
 	overflow: hidden;
 }
@@ -43,9 +46,10 @@
 	/*border:1px solid #ccc;*/
 }
 
-#dTakeFrom{
+#divTakeFrom{
+	width: 650px;
 	margin-top: 10px;
-	height: 190px;
+	max-height: 450px;
 	overflow-y:auto;
 	/*border:1px solid #ccc;*/
 }
@@ -57,6 +61,7 @@
 }
 
 #divFormOptions{
+	width: 650px;
 	margin-top: 20px;
 	padding-right: 10px;
 }

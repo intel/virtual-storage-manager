@@ -100,15 +100,18 @@ var _SG_ID = -1;
 function addAction(){
 	_SG_ID = Null;
 	ResetForm();
-	$("#btnReset").show();
 	$("#btnAddStorageGroup").show();
+	$("#divStorageGroupTable").hide();
+	$("#divStorageGroupForm").show();
 }
 
 function updateAction(id){
 	_SG_ID = id;
 	ResetForm();
 	$("#btnUpdateStorageGroup").show();
-	$("#btnReset").show();
+	$("#divStorageGroupTable").hide();
+	$("#divStorageGroupForm").show();
+
 	var trID = "storage_group_list__row__"+id;
 	var tr = $("#"+trID);
 
@@ -155,6 +158,11 @@ function ResetForm(){
 	$("#tTakeList>tbody").empty();
 	$("#btnAddStorageGroup").hide();
 	$("#btnUpdateStorageGroup").hide();
+}
+
+function CancelAction(){
+	$("#divStorageGroupTable").show();
+	$("#divStorageGroupForm").hide();
 }
 
 function PostAction(action){
@@ -238,12 +246,12 @@ function PostAction(action){
 				case "OK":
 					if(action == "create"){
 						AddStorageGroupHTML(sg_data.storage_group[0]);
-						ResetForm();
-						$("#btnReset").hide();
 					}
 					else{
 						UpdateStorageGroupHTML(sg_data.storage_group[0]);
 					}
+                    $("#divStorageGroupTable").show();
+					$("#divStorageGroupForm").hide();
 					break;
 				case "Failed":
 					showTip("error",data.message);
