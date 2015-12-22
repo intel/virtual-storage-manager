@@ -26,7 +26,7 @@
 
 .img_popover:hover{
 	cursor: pointer;
-	border: 0px;
+	border: none;
 	text-decoration: none;
 }
 
@@ -153,9 +153,9 @@
 	cursor:pointer;
 }
 
-#divServerPanel{
-	width: 500px;
-}
+
+
+
 
 .form-label{
 	width: 60px;
@@ -169,21 +169,14 @@
   	color: #428bca;
 }
 
-#selServer{
-	width: 250px;
-	display: inline-block;
-}
-
 #divAddOSDForm{
 	width: 800px;
-	border:1px solid #ccc;
 	margin-top: 10px;
 	overflow: hidden;
 	padding: 5px;
 }
 
 .left{
-	margin-left: 25px;
 	margin-right: 50px;
 }
 
@@ -200,6 +193,7 @@ label{
 	line-height: 50px;
 	margin-top:5px;
 	clear: both;
+	padding-right: 55px;
 }
 
 
@@ -209,4 +203,53 @@ label{
 	margin-top: 10px;
 	overflow: hidden;
 	padding: 5px;
+}
+
+
+
+#divBatchImportForm{
+	width:800px;
+	border:1px solid #ccc;
+	overflow: hidden;
+	padding: 5px;
+}
+
+#divBatchImportFormOptions{
+	width:780px;
+	height: 50px;
+	line-height: 50px;
+	clear: both;
+}
+
+#fUpload{
+	float: none;
+}
+
+.file {
+    position: relative;
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.file input {
+    position: absolute;
+    height: 30px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+}
+
+
+.file label{
+    display: none;
+}
+
+.file ul{
+    display: none;
+}
+
+
+#divSelectServer{
+	margin-bottom: 10px;
+	overflow: hidden;
 }
