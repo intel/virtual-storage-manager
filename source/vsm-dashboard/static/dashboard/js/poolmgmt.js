@@ -140,6 +140,7 @@ $("#btnAddReplicatedPool").click(function(){
 				"replicatedStorageGroupId":$("#id_replicated_storage_group").val(),
 				'replicationFactor': $("#id_replication_factor").val(),
 				'max_pg_num_per_osd': $("#id_max_pg_num_per_osd").val(),
+                'auto_growth_pg': $("#id_auto_growth_pg").val(),
 				'tag': $("#id_tag").val(),
 				'clusterId': "0",
 				'createdBy': "VSM",

@@ -60,7 +60,15 @@ class CreatePool(forms.SelfHandlingForm):
                             error_messages={
                             'required': _('This field is required.'),},
                             )
-
+    disable_pg_auto_growth = forms.BooleanField(label="Disable PG auto growth",required=False,initial=False)
+    auto_growth_pg = forms.IntegerField(label=_("PG number"),
+                           error_messages={
+                               'invalid': _("The string may only contain"
+                                            " numbers.")},
+                           initial=0,
+                           max_value=8589934591,
+                           required=True
+                           )
     enable_pool_quota = forms.BooleanField(label="Enable Pool Quota",required=False,initial=False)
     pool_quota = forms.IntegerField(label=_("Pool Quota (GB)"),
                            error_messages={
