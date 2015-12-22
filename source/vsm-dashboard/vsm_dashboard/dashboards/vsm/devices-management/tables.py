@@ -155,7 +155,7 @@ class OsdsTable(tables.DataTable):
         name = "osds"
         verbose_name = _("Device List")
         table_actions = (RestartOsdsAction, RemoveOsdsAction,
-                         RestoreOsdsAction,AddOSDAction,BatchImportOSDAction)
+                         RestoreOsdsAction,AddOSDAction)
         status_columns = ['vsm_status']
         row_class = UpdateRow
 
