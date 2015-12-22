@@ -305,7 +305,7 @@ class StoragePoolController(wsgi.Controller):
             pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
             size = int(pool_default_size.value)
         #LOG.info('size=====%s'%size)
-        osd_num = 2 #TODO self.scheduler_api.get_osd_num_from_crushmap_by_rule(context, rule_id)
+        #osd_num = 2 #TODO self.scheduler_api.get_osd_num_from_crushmap_by_rule(context, rule_id)
         is_ec_pool = pool_dict.get('ecProfileId')
         if is_ec_pool:
             #erasure code pool 
@@ -343,9 +343,13 @@ class StoragePoolController(wsgi.Controller):
             #     msg = _('size must be an interger value')
             #     raise exc.HTTPBadRequest(explanation=msg)
 
-            pg_num = self._compute_pg_num(context, osd_num, size)
+            #pg_num = self._compute_pg_num(context, osd_num, size)
 
             #vsm_id = str(uuid.uuid1()).split('-')[0]
+            pg_num = 64
+            if  pool_dict.get("auto_growth_pg",0) and int(pool_dict.get("auto_growth_pg")) < pg_num:
+                pg_num = int(pool_dict.get("auto_growth_pg"))
+            #self._compute_pg_num(context, osd_num, size)
             body_info = {'name': name, #+ "-vsm" + vsm_id,
                         'cluster_id':cluster_id,
                         'storage_group_id':storage_group_id,
@@ -363,6 +367,7 @@ class StoragePoolController(wsgi.Controller):
             "quota": pool_dict.get("poolQuota"),
             "enable_quota": pool_dict.get("enablePoolQuota"),
             "max_pg_num_per_osd": pool_dict.get("max_pg_num_per_osd") or 100,
+            "auto_growth_pg": pool_dict.get("auto_growth_pg") or 0,
         })
         #LOG.info('body_info=====%s'%body_info)
         return self.scheduler_api.create_storage_pool(context, body_info)
