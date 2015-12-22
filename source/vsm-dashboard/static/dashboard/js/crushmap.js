@@ -406,33 +406,6 @@ function TakeRemove(takeID){
 	$("#"+takeID).remove();
 }
 
-// function RefreshTakeList(){
-// 	var take_list = $("#divTakeList").children();
-// 	if(take_list == null || take_list.length == 0){
-// 		return false;
-// 	}
-
-// 	if(take_list.length == 1){
-// 		var take_id = take_list[0].id;
-// 		$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "hidden";
-// 		$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "hidden";
-// 	}
-
-// 	//check the item
-// 	for(var i=0;i<take_list.length;i++){
-// 		var take_id = take_list[i].id;
-// 		$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "visible";
-// 		$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "visible";
-
-// 		if(i==0){
-// 			$("#"+take_id).find(".glyphicon-arrow-up")[0].style.visibility = "hidden";
-// 		}
-// 		if(i==take_list.length-1){
-// 			$("#"+take_id).find(".glyphicon-arrow-down")[0].style.visibility = "hidden";
-// 		}
-// 	}
-// }
-
 function GenerateTakeHTML(takeID,takeName,typeName,type_list,takeNum){
 	var trID = "trTake_"+takeID;
 

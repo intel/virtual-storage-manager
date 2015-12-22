@@ -15,22 +15,13 @@
 #    under the License.
 
 import logging
-from django.template.defaultfilters import filesizeformat
 from django.utils.translation import ugettext_lazy as _
-from django.utils.datastructures import SortedDict
 from django import forms
-
-from django.utils.safestring import mark_safe
-#from vsm_dashboard.dashboards.admin.instances.tables import \
-#        AdminUpdateRow
-
+from django.conf import settings
 from horizon import tables
-from horizon.utils import html
 from horizon import exceptions
+
 from vsm_dashboard.api import vsm as vsmapi
-
-from .utils import checkbox_transform
-
 STRING_SEPARATOR = "__"
 LOG = logging.getLogger(__name__)
 
@@ -131,6 +122,13 @@ class CephUpgradeAction(tables.LinkAction):
     verbose_name = _("Ceph Upgrade")
     url = "horizon:vsm:storageservermgmt:cephupgradeview"
     classes = ("ajax-modal", "btn-primary")
+
+class ShellinaboxAction(tables.LinkAction):
+    name = "shellinabox"
+    verbose_name = _("Shell")
+    url = settings.SHELL_IN_A_BOX_URL
+    classes = ("ajax-modal","btn-primary","btn-shellinabox")
+
 
 class ListServerTableBase(tables.DataTable):
     STATUS_CHOICES = (

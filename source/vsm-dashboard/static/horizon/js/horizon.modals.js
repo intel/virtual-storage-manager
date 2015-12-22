@@ -53,7 +53,7 @@ horizon.modals.modal_spinner = function (text) {
   horizon.modals.spinner = $(template.render({text: text}));
   horizon.modals.spinner.appendTo("#modal_wrapper");
   horizon.modals.spinner.modal({backdrop: 'static'});
-  horizon.modals.spinner.find(".modal-body").spin(horizon.conf.spinner_options.modal);
+  //horizon.modals.spinner.find(".modal-body").spin(horizon.conf.spinner_options.modal);
 };
 
 horizon.modals.init_wizard = function () {
@@ -256,7 +256,7 @@ horizon.addInitFunction(function() {
         } else {
           $('.ajax-modal, .dropdown-toggle').removeAttr("disabled");
           $form.closest(".modal").modal("hide");
-          horizon.alert("danger", gettext("There was an error submitting the form. Please try again."));
+          //horizon.alert("danger", gettext("There was an error submitting the form. Please try again."));
         }
       }
     };

@@ -56,7 +56,7 @@ LOGOUT_URL = WEBROOT + '/auth/logout/'
 # HORIZON_CONFIG.user_home, if user_home is not set.
 # Do not set it to '/home/', as this will cause circular redirect loop
 LOGIN_REDIRECT_URL = WEBROOT
-
+SHELL_IN_A_BOX_URL = "https://10.239.44.50/dashboard/vsm_controller/"
 MEDIA_ROOT = os.path.abspath(os.path.join(ROOT_PATH, '..', 'media'))
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.abspath(os.path.join(ROOT_PATH, '..', 'static'))
