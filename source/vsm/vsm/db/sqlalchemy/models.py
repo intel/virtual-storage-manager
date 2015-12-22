@@ -582,6 +582,7 @@ class StoragePool(BASE, VsmBase):
     cache_mode = Column(String(length=255))
     replica_storage_group =Column(String(length=255))
     max_pg_num_per_osd = Column('max_pg_num_per_osd',Integer, nullable=False,default=100)
+    auto_growth_pg = Column('auto_growth_pg',Integer, nullable=False,default=0)
 
 class InitNode(BASE, VsmBase):
     """This table init nodes."""

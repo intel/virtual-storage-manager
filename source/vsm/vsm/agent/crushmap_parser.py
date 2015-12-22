@@ -102,6 +102,11 @@ class CrushMap():
             if name == rule['rule_name']:
                 return rule
 
+    def get_rules_by_id(self, rule_id):
+        for rule in self._rules:
+            if rule_id == rule['rule_id']:
+                return rule
+
     def get_osd_by_id(self, id):
         osd = filter(lambda item: id == item['id'], self._devices)
         if osd:
@@ -116,6 +121,17 @@ class CrushMap():
                 bucket_id = step['item']
                 self.get_all_osds_by_bucket(bucket_id, devices)
         return devices
+
+    def osd_count_by_rule_id(self,rule_id):
+        rule = self.get_rules_by_id(rule_id)
+        steps = rule['steps']
+        devices = []
+        for step in steps:
+            if step['op'] == 'take':
+                bucket_id = step['item']
+                self.get_all_osds_by_bucket(bucket_id, devices)
+        return len(devices)
+
 
     def get_all_osds_by_bucket(self, id, devices):
         print id

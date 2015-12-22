@@ -1203,37 +1203,42 @@ class AgentManager(manager.Manager):
     def update_pg_and_pgp(self, context):
         db_pools = db.pool_get_all(context)
         for pool in db_pools:
-            storage_group = db.storage_group_get_by_rule_id(context, \
-                                                    pool['crush_ruleset'])
-            if storage_group:
-                osd_num_per_group = db.osd_state_count_by_storage_group_id(context, storage_group['id'])
-                #reset pgs
-                max_pg_num_per_osd = pool['max_pg_num_per_osd']
-                if not max_pg_num_per_osd:
-                    settings = db.vsm_settings_get_all(context)
-                    for setting in settings:
-                        if setting['name'] == 'pg_count_factor':
-                             max_pg_num_per_osd = int(setting['value'])
+            # storage_group = db.storage_group_get_by_rule_id(context, \
+            #                                         pool['crush_ruleset'])
+            # if storage_group:
+            crushmap = self.get_crushmap_json_format()
+            osd_num_per_group = crushmap.osd_count_by_rule_id(context,  pool['crush_ruleset'])
+            #reset pgs
+            max_pg_num_per_osd = pool['max_pg_num_per_osd']
+            if not max_pg_num_per_osd:
+                settings = db.vsm_settings_get_all(context)
+                for setting in settings:
+                    if setting['name'] == 'pg_count_factor':
+                         max_pg_num_per_osd = int(setting['value'])
+            auto_growth_pg = pool['max_pg_num_finally']
+            if auto_growth_pg:
+                max_pg_num_finally = auto_growth_pg
+            else:
                 max_pg_num_finally = max_pg_num_per_osd * osd_num_per_group//pool['size']
-                if max_pg_num_finally > pool['pg_num']:
-                    pg_num = max_pg_num_finally#self._compute_pg_num(context, osd_num_per_group, pool['size'])
-                    LOG.info("storage group id %s has %s osds" % (storage_group['id'], osd_num_per_group))
-                    if osd_num_per_group > 64:
-                        osd_num_per_group = 64
-                        LOG.info("osd_num_per_group > 64, use osd_num_per_group=64")
-                    step_max_pg_num = osd_num_per_group * 32
-                    max_pg_num = step_max_pg_num + pool['pg_num']
-                    if pg_num > max_pg_num_finally:
-                        pgp_num = pg_num = max_pg_num_finally
-                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
-                    elif pg_num > max_pg_num:
-                        pgp_num = pg_num = max_pg_num
-                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
-                    elif pg_num > pool['pg_num']:
-                        pgp_num = pg_num
-                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
-                    else:
-                        continue
+            if max_pg_num_finally > pool['pg_num']:
+                pg_num = max_pg_num_finally#self._compute_pg_num(context, osd_num_per_group, pool['size'])
+                LOG.info("pool['crush_ruleset'] id %s has %s osds" % (pool['crush_ruleset'], osd_num_per_group))
+                if osd_num_per_group > 64:
+                    osd_num_per_group = 64
+                    LOG.info("osd_num_per_group > 64, use osd_num_per_group=64")
+                step_max_pg_num = osd_num_per_group * 32
+                max_pg_num = step_max_pg_num + pool['pg_num']
+                if pg_num > max_pg_num_finally:
+                    pgp_num = pg_num = max_pg_num_finally
+                    self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                elif pg_num > max_pg_num:
+                    pgp_num = pg_num = max_pg_num
+                    self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                elif pg_num > pool['pg_num']:
+                    pgp_num = pg_num
+                    self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                else:
+                    continue
 
         ceph_pools = self.ceph_driver.get_pool_status()
         for pool in ceph_pools:
