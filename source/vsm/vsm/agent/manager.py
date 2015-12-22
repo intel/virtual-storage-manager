@@ -1207,7 +1207,7 @@ class AgentManager(manager.Manager):
             #                                         pool['crush_ruleset'])
             # if storage_group:
             crushmap = self.get_crushmap_json_format()
-            osd_num_per_group = crushmap.osd_count_by_rule_id(context,  pool['crush_ruleset'])
+            osd_num_per_group = crushmap.osd_count_by_rule_id( pool['crush_ruleset'])
             #reset pgs
             max_pg_num_per_osd = pool['max_pg_num_per_osd']
             if not max_pg_num_per_osd:
@@ -1215,7 +1215,7 @@ class AgentManager(manager.Manager):
                 for setting in settings:
                     if setting['name'] == 'pg_count_factor':
                          max_pg_num_per_osd = int(setting['value'])
-            auto_growth_pg = pool['max_pg_num_finally']
+            auto_growth_pg = pool['auto_growth_pg']
             if auto_growth_pg:
                 max_pg_num_finally = auto_growth_pg
             else:
