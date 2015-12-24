@@ -149,10 +149,10 @@ function check_vsm_package() {
         exit 1
     fi
     cd vsmrepo
-    IS_PYTHON_VSMCLIENT=`ls|grep python-vsmclient*.deb|wc -l`
+    IS_PYTHON_VSMCLIENT=`ls|grep python-vsmclient.*.deb|wc -l`
     IS_VSM=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
-    IS_VSM_DASHBOARD=`ls|grep vsm-dashboard*.deb|wc -l`
-    IS_VSM_DEPLOY=`ls|grep vsm-deploy*.deb|wc -l`
+    IS_VSM_DASHBOARD=`ls|grep vsm-dashboard.*.deb|wc -l`
+    IS_VSM_DEPLOY=`ls|grep vsm-deploy.*.deb|wc -l`
     if [[ $IS_PYTHON_VSMCLIENT -gt 0 ]] && [[ $IS_VSM -gt 0 ]] &&\
         [[ $IS_VSM_DASHBOARD -gt 0 ]] && [[ $IS_VSM_DEPLOY -gt 0 ]]; then
         echo "The vsm pachages have been already prepared"
