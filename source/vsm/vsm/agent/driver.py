@@ -191,6 +191,7 @@ class CephDriver(object):
                         'replica_storage_group': body.get('pool_type'),
                         'quota': body.get('quota'),
                         'max_pg_num_per_osd':body.get('max_pg_num_per_osd'),
+                        'auto_growth_pg':body.get('auto_growth_pg',0),
                 }
                 values['created_by'] = body.get('created_by')
                 values['cluster_id'] = body.get('cluster_id')
