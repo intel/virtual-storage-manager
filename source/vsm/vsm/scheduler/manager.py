@@ -1416,6 +1416,7 @@ class SchedulerManager(manager.Manager):
                         if rest_mon_num <= 0:
                             break
         # Use mkcephfs to set up ceph system.
+        LOG.info('server_list111 = %s' % server_list)
         monitor_node = self._select_monitor(context, server_list)
         LOG.info('Choose monitor node = %s' % monitor_node)
         # Clean ceph data.
