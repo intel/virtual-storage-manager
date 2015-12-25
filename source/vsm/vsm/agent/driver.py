@@ -933,8 +933,8 @@ class CephDriver(object):
         LOG.info('>> add mon step 1 ')
         try:
             mon_data_path = self.get_ceph_config(context)['mon']['mon data']
-            mon_pth = mon_data_path.replace('$id',mon_id)
-            LOG.info('osd restore mon_pth =%s'%mon_pth)
+            mon_path = mon_data_path.replace('$id',mon_id)
+            LOG.info('osd restore mon_pth =%s'%mon_path)
         except:
             mon_path = os.path.join(FLAGS.monitor_data_path,"mon" + mon_id)
         utils.ensure_tree(mon_path)
