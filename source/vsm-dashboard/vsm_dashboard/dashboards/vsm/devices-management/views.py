@@ -131,8 +131,7 @@ def add_new_osd(request):
         if form.is_valid():
             import_data = handle_uploaded_file(request.FILES['file'])
             try:
-                pass
-                vsmapi.osds.add_batch_new_disks_to_cluster(import_data)
+                vsmapi.add_batch_new_disks_to_cluster(request,import_data)
             except Exception, e:
                 print e
 
