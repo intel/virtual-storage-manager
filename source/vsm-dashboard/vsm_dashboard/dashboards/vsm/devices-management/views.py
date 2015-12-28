@@ -108,17 +108,19 @@ class IndexView(tables.DataTableView):
 
 @csrf_exempt
 def add_new_osd(request):
-    template = 'vsm/devices-management/add_osd2.html'
+    template = "vsm/devices-management/add_osd.html"
     context = {}
     #get the server list
     servers = vsmapi.get_server_list(None, )
+    context["servers"] = servers
     context["init_server_id"] = None
-    context["servers"] = servers;
     context["upload_file"] = UploadFileForm()
     context["storage_group"] = get_storage_group_list()
 
+    #get the current service id
+    #if the current is not none, get the current service entity
+    #else get the first service entity
     service_id = request.GET.get('service_id',None)
-    print service_id
     if service_id != None:
         context["init_service_id"] = int(service_id)
         context["OSDList"] = get_osd_list_data(service_id)
@@ -126,22 +128,34 @@ def add_new_osd(request):
         if len(servers) > 0:
             context["OSDList"] = get_osd_list_data(servers[0].service_id)
 
+    #get the osd list from the file
     if request.method == "POST":
         form = UploadFileForm(request.POST,request.FILES)
         if form.is_valid():
             import_data = handle_uploaded_file(request.FILES['file'])
+            print 10 * "="
+            print "the import osd list"
+            print import_data
             try:
-                vsmapi.add_batch_new_disks_to_cluster(request,import_data)
+                pass
+                #vsmapi.osds.add_batch_new_disks_to_cluster(import_data)
             except Exception, e:
                 print e
 
-            return HttpResponseRedirect("/dashboard/vsm/devices-management/add_new_osd/?service_id="+service_id)
-
+            return HttpResponseRedirect("/dashboard/vsm/devices-management/add_new_osd2/?service_id="+service_id)
     return render(request,template,context)
+
 
 def add_new_osd_action(request):
     data = json.loads(request.body)
     vsmapi.add_new_disks_to_cluster(request,data)
+    status_json = {"status":"OK"}
+    status_data = json.dumps(status_json)
+    return HttpResponse(status_data)
+
+def delete_osd_action(request):
+    data = json.loads(request.body)
+    #TODO:Delete the OSD
     status_json = {"status":"OK"}
     status_data = json.dumps(status_json)
     return HttpResponse(status_data)
