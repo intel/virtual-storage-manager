@@ -11,7 +11,7 @@ function CheckClusterExist(){
         url: "/dashboard/vsm/clustermgmt/check_cluster_exist/",
         success: function (data) {
             console.log(data);
-            if(data.is_exsit==true){
+            if(data.is_exsit==false){
             	$("dl.nav_accordion>dd>div>ul>li>a").each(function(){
             		var nav_name = this.innerHTML;
             		if(	   nav_name!="Create Cluster" 
