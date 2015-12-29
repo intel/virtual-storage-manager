@@ -3639,14 +3639,17 @@ def monitor_update(context, monitor_name, values, session=None):
         session = get_session()
 
     with session.begin(subtransactions=True):
-        mon_ref = _get_monitor(context, session).\
-            filter_by(name=monitor_name).\
-            first()
+        # mon_ref = _get_monitor(context, session).\
+        #     filter_by(name=monitor_name).\
+        #     first()
+        mon_ref = model_query( \
+                context, models.Monitor, read_deleted='yes', session=session).\
+                filter_by(name=monitor_name).first()
         if not mon_ref:
             # create one
             values['name'] = monitor_name
             return monitor_create(context, values, session)
-
+        values['deleted'] = 0
         mon_ref.update(values)
         mon_ref.save(session=session)
 

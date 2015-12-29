@@ -756,7 +756,7 @@ class SchedulerManager(manager.Manager):
         LOG.info("start to add storage")
         self.add_osd(context, server_list)
 
-        self._judge_drive_ext_threshold(context)
+        #self._judge_drive_ext_threshold(context)
         return True
 
     @utils.single_lock
