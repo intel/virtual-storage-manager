@@ -426,20 +426,20 @@ class AgentManager(manager.Manager):
             find_error = False
             if etc_hosts.find(hname) == -1:
                 find_error = True
-                LOG.error('Can not find hostname = %s in /etc/hosts' % hname)
+                LOG.info('Can not find hostname = %s in /etc/hosts' % hname)
 
             for ip in ip_list:
                 if etc_hosts.find(ip) == -1:
                     find_error = True
-                    LOG.error('Can not find ip = %s in /etc/hosts file' % ip)
+                    LOG.info('Can not find ip = %s in /etc/hosts file' % ip)
 
             if find_error:
-                LOG.error('Check /etc/hosts file failed.')
-                utils.execute('service',
-                              'vsm-agent',
-                              'stop',
-                              run_as_root=True)
-                raise
+                LOG.info('Check /etc/hosts file failed.')
+                # utils.execute('service',
+                #               'vsm-agent',
+                #               'stop',
+                #               run_as_root=True)
+                # raise
 
     def init_host(self):
         #TODO Do not call ssh_key_here here.

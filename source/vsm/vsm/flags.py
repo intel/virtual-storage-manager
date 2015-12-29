@@ -302,7 +302,7 @@ global_opts = [
                default='vsm.scheduler.manager.SchedulerManager',
                help='full class name for the Manager for Scheduler'),
     cfg.StrOpt('host',
-               default=socket.gethostname(),
+               default=socket.gethostname().split('.')[0],
                help='Name of this node.  This can be an opaque identifier.  '
                     'It is not necessarily a hostname, FQDN, or IP address.'),
     # NOTE(vish): default to nova for compatibility with nova installs
