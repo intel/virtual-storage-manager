@@ -872,12 +872,15 @@ class AgentManager(manager.Manager):
             value['avail_capacity_kb'] = 0
             db.device_update(context, osd['device']['id'], value)
 
-        osd = db.osd_get(context, osd_id)
+        osd = db.get_zone_hostname_storagegroup_by_osd_id(context, osd_id)
+        osd = osd[0]
         osd_inner_id = osd['osd_name'].split('.')[-1]
         umount_path = osd['device']['name']
+        osd_host = osd['service']['host']
         self.ceph_driver.osd_remove(context,
                                     osd_inner_id,
                                     osd.get('device'),
+                                    osd_host,
                                     umount_path)
         _update_osd_db()
         _update_device_db()
