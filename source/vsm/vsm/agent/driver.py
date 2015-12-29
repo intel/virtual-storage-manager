@@ -68,6 +68,86 @@ class CephDriver(object):
         except:
             pass
 
+    def _operate_ceph_daemon(self, operate, type, id=None, ssh=False, host=None):
+        """
+
+        start/stop ceph osd/mon/mds. If type is None, operate all ceph daemon
+        on the node.
+        ceph script has -a parameter. It can operate remote node. But ceph-osd/ceph-mon
+        only can operate local node. So using ssh to operate remote node.
+
+        :param operate: start or stop
+        :param type: osd, mon or mds or None
+        :param id:
+        :param ssh: if ssh, then remote operate
+        :param host: ssh host
+        :return:
+        """
+
+        if type:
+            # TODO fix the hardcode path
+            path = "/var/lib/ceph/%s" % type
+            dir_list = os.listdir(path)
+            if dir_list:
+                file = path + "/%s" % dir_list[0] + "/upstart"
+                is_file_exist = os.path.exists(file)
+                if is_file_exist:
+                    if id:
+                        type_id = "id=%s" % id
+                        if ssh:
+                            utils.execute('ssh', '-t', 'root@'+host,
+                                          operate, 'ceph-%s' % type,
+                                          type_id, run_as_root=True)
+                        else:
+                            utils.execute(operate, 'ceph-%s' % type, type_id,
+                                          run_as_root=True)
+                    else:
+                        if ssh:
+                            utils.execute('ssh', '-t', 'root@'+host,
+                                          operate, 'ceph-%s-all' % type,
+                                          run_as_root=True)
+                        else:
+                            utils.execute(operate, 'ceph-%s-all' % type,
+                                          run_as_root=True)
+                else:
+                    if id:
+                        type_id = type + "." + id
+                        if ssh:
+                            utils.execute('ssh', '-t', 'root@'+host,
+                                          'service', 'ceph', operate,
+                                          type_id, run_as_root=True)
+                        else:
+                            utils.execute('service', 'ceph', operate, type_id,
+                                          run_as_root=True)
+                    else:
+                        if ssh:
+                            utils.execute('ssh', '-t', 'root@'+host,
+                                          'service', 'ceph', operate, type,
+                                          run_as_root=True)
+                        else:
+                            utils.execute('service', 'ceph', operate, type,
+                                          run_as_root=True)
+        else:
+            # TODO fix the hardcode path
+            path = "/var/lib/ceph/osd"
+            dir_list = os.listdir(path)
+            if dir_list:
+                file = path + "/%s" % dir_list[0] + "/upstart"
+                is_file_exist = os.path.exists(file)
+                if is_file_exist:
+                    if ssh:
+                        utils.execute('ssh', '-t', 'root@'+host,
+                                      operate, 'ceph-all', run_as_root=True)
+                    else:
+                        utils.execute(operate, 'ceph-all', run_as_root=True)
+                else:
+                    if ssh:
+                        utils.execute('ssh', '-t', 'root@'+host,
+                                      'service', 'ceph', operate,
+                                      run_as_root=True)
+                    else:
+                        utils.execute('service', 'ceph', operate, run_as_root=True)
+
     def _get_new_ruleset(self):
         args = ['ceph', 'osd', 'crush', 'rule', 'dump']
         ruleset_list = self._run_cmd_to_json(args)
@@ -1012,12 +1092,13 @@ class CephDriver(object):
             code = e.exit_code
             LOG.info('return code: %s' % code)
             if code == 0:
-                utils.execute("service",
-                              "ceph",
-                              "-a",
-                              "stop",
-                              "mon.%s" % mon_id,
-                              run_as_root=True)
+                # utils.execute("service",
+                #               "ceph",
+                #               "-a",
+                #               "stop",
+                #               "mon.%s" % mon_id,
+                #               run_as_root=True)
+                self._operate_ceph_daemon("stop", "mon", id=mon_id, ssh=True, host=host)
             # If can not ssh to that server,
             # We assume that the server has been shutdown.
             # Go steps below.
@@ -1040,10 +1121,11 @@ class CephDriver(object):
         # TODO  don't remove any code from this line to the end of func
         # remove monitors from unhealthy cluster
         # step 1
-        try:
-            utils.execute("service", "ceph", "stop", "mon", run_as_root=True)
-        except:
-            utils.execute("stop", "ceph-mon-all", run_as_root=True)
+        # try:
+        #     utils.execute("service", "ceph", "stop", "mon", run_as_root=True)
+        # except:
+        #     utils.execute("stop", "ceph-mon-all", run_as_root=True)
+        self._operate_ceph_daemon("stop", "mon")
         # step 2
         LOG.info('>> remove ceph mon step2 start')
         tmp_pth = "/tmp"
@@ -1149,7 +1231,7 @@ class CephDriver(object):
         LOG.info('>> remove ceph osd osd_ids %s' % osd_id_list)
 
         for osd_id in osd_id_list:
-            self._remove_osd(context, osd_id, host_is_running)
+            self._remove_osd(context, osd_id, host, host_is_running)
             # step 5
             LOG.info('>>> remove ceph osd step5 osd_id %s' % osd_id)
             osd_name = 'osd.%s' % osd_id
@@ -1219,7 +1301,8 @@ class CephDriver(object):
     def start_osd_daemon(self, context, num):
         osd = "osd.%s" % num
         LOG.info('begin to start osd = %s' % osd)
-        utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
+        # utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
+        self._operate_ceph_daemon("start", "osd", id=num)
         return True
 
     def stop_mon_daemon(self, context, num):
@@ -1234,7 +1317,8 @@ class CephDriver(object):
         if not self.stop_mon_daemon(context, num):
             return False
         mon_name = 'mon.%s' % num
-        utils.execute('service', 'ceph', 'start', mon_name, run_as_root=True)
+        # utils.execute('service', 'ceph', 'start', mon_name, run_as_root=True)
+        self._operate_ceph_daemon("start", "mon", id=num)
         return True
 
     def stop_mds_daemon(self, context, num):
@@ -1267,7 +1351,8 @@ class CephDriver(object):
 
     def start_mds_daemon(self, context, num):
         mds_name = 'mds.%s' % num
-        utils.execute('service', 'ceph', 'start', mds_name, run_as_root=True)
+        # utils.execute('service', 'ceph', 'start', mds_name, run_as_root=True)
+        self._operate_ceph_daemon("start", "mds", id=num)
 
     def start_monitor(self, context):
         # Get info from db.
@@ -1549,8 +1634,9 @@ class CephDriver(object):
         for item in osd_states:
             osd_name = item['osd_name']
             LOG.info('>> service ceph stop %s' % osd_name)
-            utils.execute('service', 'ceph', 'stop', osd_name,
-                            run_as_root=True)
+            # utils.execute('service', 'ceph', 'stop', osd_name,
+            #                 run_as_root=True)
+            self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
             values = {'state': 'In-Down', 'osd_name': osd_name}
             LOG.info('>> update status into db %s' % osd_name)
             self._conductor_rpcapi.\
@@ -1793,7 +1879,7 @@ class CephDriver(object):
         LOG.info("Refresh OSD number finish")
         return True
 
-    def _remove_osd(self, context, osd_id, host_is_running=True):
+    def _remove_osd(self, context, osd_id, host, host_is_running=True):
         def _get_line(osd_id):
             out = utils.execute('ceph',
                                 'osd',
@@ -1840,8 +1926,10 @@ class CephDriver(object):
         # Step 2: shutdown the process.
         if host_is_running:
             LOG.info('>>> remove ceph osd kill proc osd %s' % osd_id)
-            utils.execute("service", "ceph", "-a", "stop", "osd.%s" % osd_id,
-                      run_as_root=True)
+            # utils.execute("service", "ceph", "-a", "stop", "osd.%s" % osd_id,
+            #           run_as_root=True)
+            self._operate_ceph_daemon("stop", "osd", id=osd_id,
+                                      ssh=True, host=host)
         _wait_osd_status(osd_id, 'up', 0)
 
         # Step 3: Remove it from crushmap.
@@ -1863,22 +1951,24 @@ class CephDriver(object):
         config.remove_osd(osd_id)
         config.save_conf(FLAGS.ceph_conf)
 
-    def osd_remove(self, context, osd_id, device, umount_path):
+    def osd_remove(self, context, osd_id, device, osd_host, umount_path):
         LOG.info('osd_remove osd_id = %s' % osd_id)
-        self._remove_osd(context, osd_id)
+        self._remove_osd(context, osd_id, osd_host)
         utils.execute("umount",
                       umount_path,
                       check_exit_code=False,
                       run_as_root=True)
         return True
 
-    def ceph_osd_stop(self, context, osd_name):
-        utils.execute('service',
-                      'ceph',
-                      '-a',
-                      'stop',
-                      osd_name,
-                      run_as_root=True)
+    def ceph_osd_stop(self, context, osd_name, osd_host):
+        # utils.execute('service',
+        #               'ceph',
+        #               '-a',
+        #               'stop',
+        #               osd_name,
+        #               run_as_root=True)
+        self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1],
+                                  ssh=True, host=osd_host)
         #osd_id = osd_name.split('.')[-1]
         #values = {'state': 'Out-Down', 'osd_name': osd_name}
         #ret = self._conductor_rpcapi.\
@@ -1897,7 +1987,7 @@ class CephDriver(object):
         osd=osd[0]
         #stop
         utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
-        self.ceph_osd_stop(context, osd['osd_name'])
+        self.ceph_osd_stop(context, osd['osd_name'], osd['service']['host'])
         #start
         utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
         self.ceph_osd_start(context, osd['osd_name'])
