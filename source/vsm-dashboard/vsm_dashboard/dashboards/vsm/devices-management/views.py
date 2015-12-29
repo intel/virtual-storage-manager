@@ -108,36 +108,25 @@ class IndexView(tables.DataTableView):
 
 @csrf_exempt
 def add_new_osd(request):
-    template = 'vsm/devices-management/add_osd2.html'
+    template = "vsm/devices-management/add_osd.html"
     context = {}
     #get the server list
     servers = vsmapi.get_server_list(None, )
-    context["init_server_id"] = None
-    context["servers"] = servers;
+    context["servers"] = servers
     context["upload_file"] = UploadFileForm()
     context["storage_group"] = get_storage_group_list()
 
-    service_id = request.GET.get('service_id',None)
-    print service_id
-    if service_id != None:
-        context["init_service_id"] = int(service_id)
-        context["OSDList"] = get_osd_list_data(service_id)
-    else:
-        if len(servers) > 0:
-            context["OSDList"] = get_osd_list_data(servers[0].service_id)
-
+    #get the osd list from the file
     if request.method == "POST":
         form = UploadFileForm(request.POST,request.FILES)
         if form.is_valid():
-            import_data = handle_uploaded_file(request.FILES['file'])
-            try:
-                vsmapi.add_batch_new_disks_to_cluster(request,import_data)
-            except Exception, e:
-                print e
-
-            return HttpResponseRedirect("/dashboard/vsm/devices-management/add_new_osd/?service_id="+service_id)
-
+            context["osd_list"] = handle_uploaded_file(request.FILES['file'])
+            print 10 * "="
+            print "the import osd list"
+            print context["osd_list"]
+            return render(request,template,context)
     return render(request,template,context)
+
 
 def add_new_osd_action(request):
     data = json.loads(request.body)
@@ -147,7 +136,7 @@ def add_new_osd_action(request):
     return HttpResponse(status_data)
 
 def get_storage_group_list():
-    #get the storage group 
+    #get the storage group
     storage_group_list = vsmapi.storage_group_status(None,)
     storage_group = []
     for _sg in storage_group_list:
@@ -168,69 +157,37 @@ class UploadFileForm(django_froms.Form):
     file = forms.FileField()
 
 def handle_uploaded_file(f):
-    import_data = []
+    osd_list = []
     try:
         #get the file content
         file_content = []
         for chunk in f.chunks():
            file_content.append(chunk)
         file_content = file_content[0].replace("\r\n",";").replace("\n",";").split(";");
-        import_data = generate_import_data_format(file_content)
+        osd_list = generate_import_data_format(file_content)
     except Exception, e:
         print e
-
-    return import_data
+    return osd_list
 
 def generate_import_data_format(file_content):
     osd_list = []
-    server_list = []
-    import_data = {"disks":[]}
     for i,item in enumerate(file_content):
         #ignore the first line, there is no data
         if i == 0:
             continue
-        #split the linem 
+        #get the osd list
         osd = item.split(",")
-
-        if len(osd)>1:
-            #get the server_list
-            isExsitServer = False
-            for server in server_list:
-                if osd[0] == server["server_name"]:
-                    isExsitServer = True
-                    break
-
-            if isExsitServer == False:
-                new_server = {
-                    "server_name":osd[0],
-                    "osdinfo":[]
-                }
-                server_list.append(new_server)
-
-            #get the osd list
+        if len(osd) != 1:
             osd = {
                 "server_name":osd[0],
-                "storage_group_id":osd[1],
+                "sg_id":osd[1],
                 "weight":osd[2],
                 "journal":osd[3],
                 "data":osd[4],
             }
             osd_list.append(osd)
+    return osd_list
 
-    #generate the import data format
-    for osd in osd_list:
-        for server in server_list:
-            if osd["server_name"] == server["server_name"]:
-                new_osd = {
-                    "storage_group_id":osd["storage_group_id"],
-                    "weight":osd["weight"],
-                    "journal":osd["journal"],
-                    "data":osd["data"],
-                }
-                server["osdinfo"].append(new_osd)
-
-    import_data["disks"] = server_list
-    return import_data
 
 
 def DevicesAction(request, action):
@@ -363,14 +320,6 @@ def get_available_disks(request):
     if disks is None:disks=[]
     disk_data = json.dumps(disks)
 
-    # device_list = []
-    # for i in range(0,5):
-    #     device_list.append({
-    #             "by_path":"Path_"+str(i),
-    #             "disk_name":"/dev/vdb_"+str(i),
-    #             "by_uuid":"/dev/disk/by-path/xxxxxxxxxxxxxxxx_"+str(i)
-    #         })
-    # devicedata = json.dumps(device_list)
     return HttpResponse(disk_data)
 
 def remove_osd(request):

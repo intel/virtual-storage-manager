@@ -34,7 +34,7 @@
        
         $("#clusteraction>tbody>tr").each(function(){
             var colIsMonitor = this.children[8];
-            var value = colIsMonitor.innerText;
+            var value = colIsMonitor.innerHTML;
             if(value == "yes")
                 colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0' checked='true'>";
             else

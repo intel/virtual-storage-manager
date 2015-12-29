@@ -29,8 +29,8 @@ function addInfoNode(){
 
     for(var i=0;i<trNodes.length;i++){
         var osd_id = trNodes[i].children[0].children[0].value;
-        var tdDeviceStatus = trNodes[i].children[2];
         var tdDataDevice = trNodes[i].children[9];
+        var tdCapacity = trNodes[i].children[17];
         var tdJorunalDevice = trNodes[i].children[14];
         var tdOSDCapcityStatus = trNodes[i].children[16];
         
@@ -51,6 +51,9 @@ function addInfoNode(){
         		break;
         }
 
+        tdDataDevice.innerHTML =   htmlDeviceIcon.replace("{0}",osd_id).replace("{0}",osd_id).replace("{1}",iconDeviceStatus);
+        tdJorunalDevice.innerHTML = htmlJorunalDeviceIcon.replace("{0}",osd_id);
+
         //show capactiy values
         var total_capacity = trNodes[i].children[10].innerHTML;
         var used_capacity = trNodes[i].children[11].innerHTML;
@@ -66,10 +69,8 @@ function addInfoNode(){
         	html_capacity += "<span class=\"vsm-label-90\">"+total_capacity+"(MB)</span>";
 			html_capacity += "<br />";
 
-        tdDataDevice.innerHTML = "";
-        tdDataDevice.innerHTML +=   htmlDeviceIcon.replace("{0}",osd_id).replace("{0}",osd_id).replace("{1}",iconDeviceStatus);
-        tdDataDevice.innerHTML +=   GenerateOSDStatusIcon(iconOSDCapcityStatus,'Capacity values',html_capacity);
-        tdJorunalDevice.innerHTML = htmlJorunalDeviceIcon.replace("{0}",osd_id);
+        tdCapacity.innerHTML =   GenerateOSDStatusIcon(iconOSDCapcityStatus,'Capacity values',html_capacity);
+
     }
 
     //register the popover

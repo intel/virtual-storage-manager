@@ -1,0 +1,54 @@
+#divSelectServer{
+	padding: 5px;
+	margin-bottom: 10px;
+	overflow: hidden;
+}
+
+#divAddOSDForm{
+	width: 800px;
+	margin-top: 10px;
+	overflow: hidden;
+	padding: 5px;
+}
+
+.left{
+	margin-right: 50px;
+}
+
+#divFormOptions{
+	height: 50px;
+	line-height: 50px;
+	margin-top:5px;
+	clear: both;
+	padding-right: 55px;
+}
+
+.file {
+    position: relative;
+    display: inline-block;
+    margin-left: 15px;
+    height: 34px;
+    line-height: 28px;
+}
+
+.file input {
+    position: absolute;
+    height: 30px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+    width: 142px
+}
+
+
+.file label{
+    display: none;
+}
+
+.file ul{
+    display: none;
+}
+
+#divFileUpload{
+	height: 40px;
+}

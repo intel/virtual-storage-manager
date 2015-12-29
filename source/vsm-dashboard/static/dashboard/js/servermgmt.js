@@ -18,6 +18,9 @@
 
 
 $(function(){
+    //check the status
+    CheckTheStatus();
+
     //Update the table status
     setInterval(function(){
         UpdateServerStatus();
@@ -26,6 +29,19 @@ $(function(){
     //Open the TableCheckbox
     OpenTableCheckbox();
 });
+
+function CheckTheStatus(){
+    $("td.status").each(function(){
+        if(this.innerHTML != "unavailable" && this.innerHTML != "Active"){
+            var html = "";
+            html +="<div class='loading_gif'>";
+            html +="    <img src=\"/static/dashboard/img/loading.gif\">";
+            html +="</div>";
+            html +=this.innerHTML;
+            this.innerHTML = html;
+        }
+    });
+}
 
 function OpenTableCheckbox(){
     //Opent the table header
@@ -68,6 +84,18 @@ function UpdateServerStatus(){
                     html +="<td class=\"monitor_tag sortable normal_column\">"+servers[i].is_monitor+"</td>";
                     html +="<td class=\"zone sortable normal_column\">"+servers[i].zone+"</td>";
                     html +="<td class=\"status sortable normal_column\">"+servers[i].status+"</td>";
+                     if(servers[i].status == "unavailable" || servers[i].status == "Active"){
+                        html +="<td class=\"status sortable normal_column\">"+servers[i].status+"</td>";
+                    }
+                    else
+                    {
+                        html +="<td class=\"status sortable normal_column\">";
+                        html +="    <div class='loading_gif'>";
+                        html +="        <img src=\"/static/dashboard/img/loading.gif\">";
+                        html +="    </div>";
+                        html +=servers[i].status;
+                        html +="</td>";
+                    }
                     html +="</tr>";
                 }
             }

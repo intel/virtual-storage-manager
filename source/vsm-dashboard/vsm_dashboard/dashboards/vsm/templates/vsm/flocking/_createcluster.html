@@ -25,12 +25,9 @@
 {% block modal_id %}create_storage_pool_modal{% endblock %}
 
 {% block modal-body %}
- {% csrf_token %}
- {{ table.render }}
+
 {% endblock %}
 
 {% block modal-footer %}
-  <input id="server_list__action_create_cluster" class="btn btn-primary create-cluster-commit" type="submit" value="{% trans "CreateCluster" %}" /> 
-  <input class="btn btn-primary integrate-cluster-commit" type="submit" style="display:none" value="{% trans "integrateCluster" %}" />
-  <a href="{% url 'horizon:vsm:clustermgmt:index' %}" class="btn btn-default">{% trans "Cancel" %}</a>
+
 {% endblock %}

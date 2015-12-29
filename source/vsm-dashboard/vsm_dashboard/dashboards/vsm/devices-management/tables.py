@@ -15,20 +15,10 @@
 #    under the License.
 
 import logging
-import json
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import filesizeformat
-from django.template.defaultfilters import title
 from django.utils.translation import ugettext_lazy as _
-from django.utils.datastructures import SortedDict
-from django import shortcuts
-from django import forms
-
-from django.utils.safestring import mark_safe
 
 from horizon import tables
-from horizon.utils import filters
-from horizon.utils import html
 from horizon import exceptions
 from horizon import messages
 from vsm_dashboard.api import vsm as vsmapi
@@ -108,12 +98,6 @@ class AddOSDAction(tables.LinkAction):
     url = "/dashboard/vsm/devices-management/add_new_osd/"
     classes = ('btn-primary',)
 
-class BatchImportOSDAction(tables.LinkAction):
-    name = "batch_import"
-    verbose_name = _("Batch Import")
-    url = "/dashboard/vsm/devices-management/batch_import_view/"
-    classes = ('btn-primary',)
-
 class OsdsTable(tables.DataTable):
     STATUS_CHOICES = (
         ("Present", True),
@@ -150,6 +134,8 @@ class OsdsTable(tables.DataTable):
                                verbose_name=_("Used(%)"), hidden=True)
     full_warn = tables.Column("full_warn", \
                                verbose_name=_("Used Wran"), hidden=True)
+    capacity_status = tables.Column("capacity_status", \
+                                   verbose_name=_("Capacity Status"))
 
     class Meta:
         name = "osds"
