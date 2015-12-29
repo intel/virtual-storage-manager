@@ -18,15 +18,12 @@ from django.conf.urls import patterns, url
 from .views import IndexView
 from .views import DevicesAction
 from .views import add_new_osd
-from .views import delete_osd_action
-from .views import get_osd_list,add_new_osd_action,check_device_path,get_smart_info,get_available_disks
+from .views import add_new_osd_action,check_device_path,get_smart_info,get_available_disks
 from .views import restart_osd,remove_osd,restore_osd
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^add_new_osd/$', add_new_osd, name='add_new_osd'),
-    url(r'^delete_osd_action/$', delete_osd_action, name='delete_osd_action'),
-    url(r'^get_osd_list/$', get_osd_list, name='get_osd_list'),
     url(r'^add_new_osd_action/$', add_new_osd_action, name='add_new_osd_action'),
     url(r'^check_device_path/$', check_device_path, name='check_device_path'),
     url(r'^get_available_disks/$', get_available_disks, name='get_available_disks'),

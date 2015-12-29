@@ -23,7 +23,6 @@
 	padding-right: 55px;
 }
 
-
 .file {
     position: relative;
     display: inline-block;
@@ -38,6 +37,7 @@
     right: 0;
     top: 0;
     opacity: 0;
+    width: 142px
 }
 
 
@@ -50,6 +50,5 @@
 }
 
 #divFileUpload{
-	display: none;
 	height: 40px;
 }

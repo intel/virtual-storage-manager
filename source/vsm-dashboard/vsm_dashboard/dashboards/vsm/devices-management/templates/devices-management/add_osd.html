@@ -31,7 +31,7 @@
 <div id="divSelectServer">
   <div class="control-group required">
     <label id="lblServer" >Select Server</label>
-    <select id="selServer" class="form-control" style="width: 342px;" onchange="ChangeServer(this,this.value)">
+    <select id="selServer" class="form-control" style="width: 342px;" onchange="ChangeServer()">
       {% for server in servers %}
         {%if init_service_id == server.service_id %}
           <option selected="selected" value = "{{server.service_id}}" node-id = "{{server.id}}" >{{server.host}}</option>
@@ -96,19 +96,19 @@
 
 
 <!--this form for upload the file-->
-<form id="fUpload" method="post" class="form-inline" enctype="multipart/form-data" action="/dashboard/vsm/devices-management/add_new_osd/?service_id={{servers.0.service_id}}" >
+<form id="fUpload" method="post" class="form-inline" enctype="multipart/form-data" action="/dashboard/vsm/devices-management/add_new_osd/" >
     <input type="hidden" name="csrfmiddlewaretoken" value="{% csrf_token %}"/>
     <a id="linkUploadfile" href="#" class="file btn btn-primary">
       {{upload_file}}
-      <span>Select File</span>
+      <span>Batch Import OSD</span>
     </a>    
   </div>
 </div>
 
-<div id="divFileUpload">
+<div id="divFileUpload" style="display:none">
   <span id="lblFileNameMark">file name:</span>
   <span id="lblFileName"></span>
-  <button id="btnImportOSD" class="btn btn-primary">Import</button>
+  <button id="btnPreview" class="btn btn-primary">Preview</button>
 </div>
 
 </form>
@@ -118,38 +118,39 @@
    <table id="tOSDList" class="table table-bordered table-striped datatable">
     <thead>
       <tr>
-          <th  class="normal_column hidden"></th>
-          <th  class="normal_column">Name</th>
-          <th  class="normal_column">Weight</th>
-          <th  class="normal_column">Storage Group</th>
-          <th  class="normal_column">Journal Device</th>
-          <th  class="normal_column">Data Device</th>      
-          <th  class="normal_column">Action</th>
+        <th  class="normal_column hidden"></th>
+        <th  class="normal_column">Server</th>
+        <th  class="normal_column">Weight</th>
+        <th  class="normal_column hidden"></th>
+        <th  class="normal_column">Storage Group</th>
+        <th  class="normal_column">Journal Device</th>
+        <th  class="normal_column">Data Device</th>      
+        <th  class="normal_column">Action</th>
       </tr>
     </thead>
 
     <tbody id="tbOSDList">
-      {%if OSDList and OSDList|length > 0 %}
-        {% for osd in OSDList %}
-          <tr id="tr_{{osd.id}}" name="{{osd.osd_name}}">
-              <td class="sortable normal_column hidden">{{osd.id}}</td>
-              <td class="sortable normal_column">{{ osd.osd_name }}</td>
-              <td class="sortable normal_column">{{ osd.weight }}</td>
-              <td class="sortable normal_column">{{ osd.device.device_type }}</td>
-              <td class="sortable normal_column">{{osd.device.journal}}</td>
-              <td class="sortable normal_column">{{ osd.device.path }}</td>
-              <td class="sortable normal_column">
-                 <button class="btn btn-danger" onclick="DeleteOSD({{osd.id}})">Delete</button>
-              </td>
+      {%if osd_list and osd_list|length > 0 %}
+            {% for osd in osd_list %}
+              <tr class="osd-item">
+                  <td class="sortable normal_column _node_id hidden"></td>
+                  <td class="sortable normal_column server_name">{{osd.server_name }}</td>
+                  <td class="sortable normal_column weight">{{ osd.weight }}</td>
+                  <td class="sortable normal_column sg_id hidden">{{ osd.sg_id }}</td>
+                  <td class="sortable normal_column sg_name"></td>
+                  <td class="sortable normal_column journal">{{osd.journal}}</td>
+                  <td class="sortable normal_column device">{{ osd.data }}</td>
+                  <td class="sortable normal_column">
+                    <button class="btn btn-danger" onclick="RemoveOSD(this)">Remove</button>
+                  </td>
+              </tr>
+            {% endfor %}
+        {%else%}
+          <tr id="trEmptyRow" class="odd empty">
+            <td colspan="8">No items to display.</td>
           </tr>
-        {% endfor %}
-      {%else%}
-          <tr class="odd empty">
-            <td colspan="11">No items to display.</td>
-          </tr>
-      {%endif%}
+        {%endif%}
     </tbody>
-
     <tfoot>
       <tr>
         <td colspan="8">
@@ -158,9 +159,13 @@
       </tr>
     </tfoot>
   </table>
-
-
 <div>
+
+<div id="divFormOptions" class="vsm-options-bar">
+  <button id="btnSubmit" class="btn btn-primary" onclick="AddOSD()">Submit</button>
+  <button id="btnReset" class="btn btn-default" onclick="ResetOSD()">Reset</button>
+
+</div>
 
 {% endblock %}
 
