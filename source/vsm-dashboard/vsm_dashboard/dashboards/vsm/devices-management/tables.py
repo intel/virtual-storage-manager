@@ -15,20 +15,10 @@
 #    under the License.
 
 import logging
-import json
 from django.core.urlresolvers import reverse
-from django.template.defaultfilters import filesizeformat
-from django.template.defaultfilters import title
 from django.utils.translation import ugettext_lazy as _
-from django.utils.datastructures import SortedDict
-from django import shortcuts
-from django import forms
-
-from django.utils.safestring import mark_safe
 
 from horizon import tables
-from horizon.utils import filters
-from horizon.utils import html
 from horizon import exceptions
 from horizon import messages
 from vsm_dashboard.api import vsm as vsmapi
@@ -144,6 +134,8 @@ class OsdsTable(tables.DataTable):
                                verbose_name=_("Used(%)"), hidden=True)
     full_warn = tables.Column("full_warn", \
                                verbose_name=_("Used Wran"), hidden=True)
+    capacity_status = tables.Column("capacity_status", \
+                                   verbose_name=_("Capacity Status"))
 
     class Meta:
         name = "osds"
