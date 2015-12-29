@@ -323,15 +323,28 @@ class SchedulerManager(manager.Manager):
                 ceph_config = self._get_ceph_config(context)
 
                 # gen mon_id
-                monitor_list = []
-                for x in ceph_config:
-                    if x.startswith("mon."):
-                        monitor_list.append(int(x.replace("mon.","")))
-                monitor_list.sort()
+                #LOG.info('add monitor get mon id----')
+                host_ip = db.init_node_get_by_host(context,host = ser['host'])['secondary_public_ip']
+                ip = host_ip.split(',')[0]
+                monitor_address = '%s:%s/0' % (ip, str(6789))
+                mon_ref = db.monitor_get_by_address(context, monitor_address,read_deleted = 'yes')
+                if mon_ref is not None:
+                    mon_id = mon_ref['name']
+                else:
+                    monitor_list = []
+                    for x in ceph_config:
+                        if x.startswith("mon."):
+                            try:
+                                monitor_list.append(int(x.replace("mon.","")))
+                            except:
+                                pass
+                    monitor_list.sort()
+                    deleted_times = db.cluster_get_deleted_times(context,
+                                                                 ser['cluster_id'])
+                    if len(monitor_list) == 0:
+                        monitor_list.append(0)
+                    mon_id = str(monitor_list.pop() + 1 + deleted_times)
 
-                deleted_times = db.cluster_get_deleted_times(context,
-                                                             ser['cluster_id'])
-                mon_id = str(monitor_list.pop() + 1 + deleted_times)
                 LOG.info("new_monitor id %s" % mon_id)
 
                 # Update ceph.conf and keyring.admin from DB.

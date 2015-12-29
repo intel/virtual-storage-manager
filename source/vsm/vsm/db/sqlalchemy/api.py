@@ -3588,6 +3588,15 @@ def _get_monitor(context, session=None):
 def monitor_get_all(context, session=None):
     return _get_monitor(context, session=session).all()
 
+def monitor_get_by_address(context, monitor_address,read_deleted='no', session=None):
+    mon = None
+    if not monitor_address:
+        return mon
+    mon = model_query( \
+        context, models.Monitor, read_deleted=read_deleted, session=session).\
+        filter_by(address=monitor_address).first()
+    return mon
+
 def monitor_get_by_name(context, monitor_name, session=None):
     mon = None
     if not monitor_name:
