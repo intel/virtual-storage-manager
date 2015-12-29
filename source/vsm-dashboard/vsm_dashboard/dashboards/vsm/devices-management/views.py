@@ -320,14 +320,6 @@ def get_available_disks(request):
     if disks is None:disks=[]
     disk_data = json.dumps(disks)
 
-    # device_list = []
-    # for i in range(0,5):
-    #     device_list.append({
-    #             "by_path":"Path_"+str(i),
-    #             "disk_name":"/dev/vdb_"+str(i),
-    #             "by_uuid":"/dev/disk/by-path/xxxxxxxxxxxxxxxx_"+str(i)
-    #         })
-    # devicedata = json.dumps(device_list)
     return HttpResponse(disk_data)
 
 def remove_osd(request):

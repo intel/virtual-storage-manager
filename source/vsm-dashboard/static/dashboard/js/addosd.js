@@ -35,7 +35,7 @@ var StorageGroup = {
 $(function(){
 	//Update the OSD form data
 	server = Server.Create();
-	PostData("get_available_disks",{"service_id":server.node_id});
+	PostData("get_available_disks",{"server_id":server.node_id});
 
 	//show the warning that import the osd
 	$("#id_file").click(function(){
@@ -62,7 +62,7 @@ function ChangeServer(){
 	//Update the upload field post url
 	$formFileUpload.action="/dashboard/vsm/devices-management/add_new_osd2/?service_id="+server.server_id;
 	//Update the OSD form data
-	PostData("get_available_disks",{"service_id":server.node_id});
+	PostData("get_available_disks",{"server_id":server.node_id});
 }
 
 
