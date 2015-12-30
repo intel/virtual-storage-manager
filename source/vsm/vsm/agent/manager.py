@@ -426,20 +426,20 @@ class AgentManager(manager.Manager):
             find_error = False
             if etc_hosts.find(hname) == -1:
                 find_error = True
-                LOG.error('Can not find hostname = %s in /etc/hosts' % hname)
+                LOG.info('Can not find hostname = %s in /etc/hosts' % hname)
 
             for ip in ip_list:
                 if etc_hosts.find(ip) == -1:
                     find_error = True
-                    LOG.error('Can not find ip = %s in /etc/hosts file' % ip)
+                    LOG.info('Can not find ip = %s in /etc/hosts file' % ip)
 
             if find_error:
-                LOG.error('Check /etc/hosts file failed.')
-                utils.execute('service',
-                              'vsm-agent',
-                              'stop',
-                              run_as_root=True)
-                raise
+                LOG.info('Check /etc/hosts file failed.')
+                # utils.execute('service',
+                #               'vsm-agent',
+                #               'stop',
+                #               run_as_root=True)
+                # raise
 
     def init_host(self):
         #TODO Do not call ssh_key_here here.
@@ -872,12 +872,15 @@ class AgentManager(manager.Manager):
             value['avail_capacity_kb'] = 0
             db.device_update(context, osd['device']['id'], value)
 
-        osd = db.osd_get(context, osd_id)
+        osd = db.get_zone_hostname_storagegroup_by_osd_id(context, osd_id)
+        osd = osd[0]
         osd_inner_id = osd['osd_name'].split('.')[-1]
         umount_path = osd['device']['name']
+        osd_host = osd['service']['host']
         self.ceph_driver.osd_remove(context,
                                     osd_inner_id,
                                     osd.get('device'),
+                                    osd_host,
                                     umount_path)
         _update_osd_db()
         _update_device_db()
