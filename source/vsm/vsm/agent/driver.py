@@ -1014,7 +1014,7 @@ class CephDriver(object):
         try:
             mon_data_path = self.get_ceph_config(context)['mon']['mon data']
             mon_path = mon_data_path.replace('$id',mon_id)
-            LOG.info('osd restore mon_pth =%s'%mon_path)
+            #LOG.info('osd restore mon_pth =%s'%mon_path)
         except:
             mon_path = os.path.join(FLAGS.monitor_data_path,"mon" + mon_id)
         utils.ensure_tree(mon_path)
@@ -1054,10 +1054,11 @@ class CephDriver(object):
         self._add_ceph_mon_to_config(context, ser['host'], host_ip, mon_id=mon_id)
         #utils.execute("ceph-mon", "-i", mon_id, "--public-addr", host,
         #                run_as_root=True)
-        self.start_mon_daemon(context, mon_id)
+
         # step 7
         LOG.info('>> add mon step 7 ')
         utils.execute("ceph", "mon", "add", mon_id, host, run_as_root=True)
+        self.start_mon_daemon(context, mon_id)
         LOG.info('>> add mon finish %s' % mon_id)
         return True
 
@@ -1088,6 +1089,7 @@ class CephDriver(object):
         try:
             # test ssh service in case the server is down
             utils.execute('ssh', '-q', 'root@' + host, 'exit', run_as_root=True)
+            self._operate_ceph_daemon("stop", "mon", id=mon_id, ssh=True, host=host)
         except exception.ProcessExecutionError as e:
             code = e.exit_code
             LOG.info('return code: %s' % code)

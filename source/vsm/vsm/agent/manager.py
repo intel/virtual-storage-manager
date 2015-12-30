@@ -1845,7 +1845,7 @@ class AgentManager(manager.Manager):
         '''
         rules = crushmap._rules
         storage_groups = crushmap.get_storage_groups_dict_by_rule(rules)
-        LOG.info('get storage groups foorm crushmap====%s'%storage_groups)
+        LOG.info('get storage groups from crushmap====%s'%storage_groups)
         for storage_group in storage_groups:
             db.storage_group_update_or_create(context,storage_group)
 
@@ -1869,6 +1869,7 @@ class AgentManager(manager.Manager):
         try:
             keyring_file_path = body.get('monitor_keyring')
             crushmap = self.get_crushmap_json_format(keyring_file_path)
+            self._change_rule_id_of_default_storage_group(context,crushmap)
             self._insert_zone_from_crushmap_to_db(context,crushmap)
             self._insert_storage_group_from_crushmap_to_db(context,crushmap)
             ceph_conf = body.get('ceph_conf')
@@ -1889,7 +1890,7 @@ class AgentManager(manager.Manager):
             message['code'] = '-1'
             message['info'] = 'Fail'
             raise
-        LOG.info('import cluster-----88888888--%s'%message)
+        #LOG.info('import cluster-----88888888--%s'%message)
         return message
 
     def _modify_init_nodes_from_config_to_db(self,context,config_dict):
@@ -1930,7 +1931,7 @@ class AgentManager(manager.Manager):
                 service_id = db.init_node_get_by_host(context,value.get('host'))['service_id']
                 values['service_id'] = service_id
                 device_values.append(values)
-        LOG.info('get device_values==22222222222===%s'%device_values)
+        #LOG.info('get device_values==22222222222===%s'%device_values)
         for device in device_values:
             device_ref = None
             device_ref =  db.device_get_by_name_and_journal_and_service_id(context,device.get('name'),device.get('journal'),device.get('service_id'))
@@ -1970,7 +1971,7 @@ class AgentManager(manager.Manager):
                           'zone_id':zone_id,
                           }
                 osd_state_values.append(values)
-        LOG.info('get osd_states==1111111111===%s'%osd_state_values)
+        #LOG.info('get osd_states==1111111111===%s'%osd_state_values)
         for osd_state in osd_state_values:
             db.osd_state_update_or_create(context,osd_state)
 
@@ -1997,6 +1998,17 @@ class AgentManager(manager.Manager):
         if len(cluster_all) == 1:
             cluster_id = cluster_all[0].id
             db.cluster_update(context,cluster_id,values)
+
+    def _change_rule_id_of_default_storage_group(self,context,crushmap):
+        rules = crushmap._rules
+        rules.sort(key=operator.itemgetter('rule_id'))
+        rules_max = rules[-1]['rule_id']
+        storage_groups = db.storage_group_get_all(context)
+        LOG.info('change storage groups default rule_id====%s'%rules_max)
+        for storage_group in storage_groups:
+            storage_group_id = storage_group['id']
+            rule_id = {'rule_id':int(storage_group['rule_id'])+1+rules_max}
+            db.storage_group_update(context,storage_group_id,rule_id)
 
 
     def get_cluster_name(self,context,keyring):
