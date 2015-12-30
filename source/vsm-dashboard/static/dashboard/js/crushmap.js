@@ -98,7 +98,7 @@ function loadTree(){
 
 var _SG_ID = -1;
 function addAction(){
-	_SG_ID = Null;
+	_SG_ID = null;
 	ResetForm();
 	$("#btnAddStorageGroup").show();
 	$("#divStorageGroupTable").hide();

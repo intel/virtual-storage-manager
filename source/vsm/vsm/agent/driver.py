@@ -3087,6 +3087,8 @@ class ManagerCrushMapDriver(object):
 
 
     def _write_to_crushmap(self, string):
+        utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path+'_decompiled',
+            run_as_root=True)
         fd = open(self._crushmap_path+'_decompiled', 'a')
         fd.write(string)
         fd.close()
@@ -3094,15 +3096,15 @@ class ManagerCrushMapDriver(object):
     def get_crushmap(self):
         LOG.info("DEBUG Begin to get crushmap")
         utils.execute('ceph', 'osd', 'getcrushmap', '-o',
-                self._crushmap_path, run_as_root=False)
+                self._crushmap_path,'--keyring',FLAGS.keyring_admin, run_as_root=True)
         utils.execute('crushtool', '-d', self._crushmap_path, '-o',
-                        self._crushmap_path+'_decompiled', run_as_root=False)
+                        self._crushmap_path+'_decompiled', run_as_root=True)
         return True
 
     def set_crushmap(self):
         LOG.info("DEBUG Begin to set crushmap")
         utils.execute('crushtool', '-c', self._crushmap_path+'_decompiled', '-o',
-                        self._crushmap_path, run_as_root=False)
+                        self._crushmap_path, run_as_root=True)
         utils.execute('ceph', 'osd', 'setcrushmap', '-i',
                         self._crushmap_path, run_as_root=True)
         return True
@@ -3180,13 +3182,17 @@ class ManagerCrushMapDriver(object):
         '''
 
         crushmap = get_crushmap_json_format()
+        rule_name = rule_info.get('rule_name')
+        if crushmap.get_rules_by_name(name = rule_name ) is  None:
+            return self._generate_one_rule(rule_info)
+
         types = crushmap._types
         types.sort(key=operator.itemgetter('type_id'))
         choose_leaf_type_default = types[1]['name']
         # rule_type = rule_info.get('type','')
         # min_size = rule_info.get('min_size')
         # max_size = rule_info.get('max_size')
-        rule_name = rule_info.get('rule_name')
+
         takes = rule_info.get('takes')
 
         self.get_crushmap()
@@ -3235,6 +3241,8 @@ class ManagerCrushMapDriver(object):
                 new_lines.insert(insert_take_line+1,string_choose)
                 new_lines.insert(insert_take_line+2,"    step emit\n")
                 insert_take_line +=3
+        utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path,
+            run_as_root=True)
         fd = open(self._crushmap_path, 'w')
         LOG.info('new lines=====%s'%new_lines)
         fd.writelines(new_lines)
