@@ -83,8 +83,7 @@ function UpdateServerStatus(){
                     html +="<td class=\"osds sortable normal_column\">"+servers[i].osds+"</td>";
                     html +="<td class=\"monitor_tag sortable normal_column\">"+servers[i].is_monitor+"</td>";
                     html +="<td class=\"zone sortable normal_column\">"+servers[i].zone+"</td>";
-                    html +="<td class=\"status sortable normal_column\">"+servers[i].status+"</td>";
-                     if(servers[i].status == "unavailable" || servers[i].status == "Active"){
+                    if(servers[i].status == "unavailable" || servers[i].status == "Active"){
                         html +="<td class=\"status sortable normal_column\">"+servers[i].status+"</td>";
                     }
                     else
