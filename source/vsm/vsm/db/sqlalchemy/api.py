@@ -3588,6 +3588,15 @@ def _get_monitor(context, session=None):
 def monitor_get_all(context, session=None):
     return _get_monitor(context, session=session).all()
 
+def monitor_get_by_address(context, monitor_address,read_deleted='no', session=None):
+    mon = None
+    if not monitor_address:
+        return mon
+    mon = model_query( \
+        context, models.Monitor, read_deleted=read_deleted, session=session).\
+        filter_by(address=monitor_address).first()
+    return mon
+
 def monitor_get_by_name(context, monitor_name, session=None):
     mon = None
     if not monitor_name:
@@ -3630,14 +3639,17 @@ def monitor_update(context, monitor_name, values, session=None):
         session = get_session()
 
     with session.begin(subtransactions=True):
-        mon_ref = _get_monitor(context, session).\
-            filter_by(name=monitor_name).\
-            first()
+        # mon_ref = _get_monitor(context, session).\
+        #     filter_by(name=monitor_name).\
+        #     first()
+        mon_ref = model_query( \
+                context, models.Monitor, read_deleted='yes', session=session).\
+                filter_by(name=monitor_name).first()
         if not mon_ref:
             # create one
             values['name'] = monitor_name
             return monitor_create(context, values, session)
-
+        values['deleted'] = 0
         mon_ref.update(values)
         mon_ref.save(session=session)
 
