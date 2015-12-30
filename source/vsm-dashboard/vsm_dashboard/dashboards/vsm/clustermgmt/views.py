@@ -17,25 +17,15 @@
 import logging
 import os
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse_lazy
-
 from horizon import exceptions
 from horizon import tables
-from horizon import forms
-from horizon import views
-
-from vsm_dashboard.api import vsm as vsmapi
 from .tables import ListServerTable
 from .tables import CreateClusterTable
-#from .form import ShouanForm
 from django.http import HttpResponse
-
+from vsm_dashboard.api import vsm as vsmapi
 
 import json
 LOG = logging.getLogger(__name__)
-
-
-
 
 class ModalEditTableMixin(object):
     def get_template_names(self):
@@ -231,4 +221,12 @@ def ClusterAction(request, action):
 
     resp = dict(message=msg, status=status, data="")
     resp = json.dumps(resp)
+    return HttpResponse(resp)
+
+def CheckClusterExist(request):
+    is_exsit = True
+    pool_status = vsmapi.pool_status(request)
+    if len(pool_status) == 0:
+        is_exsit = False
+    resp = json.dumps({"is_exsit":is_exsit})
     return HttpResponse(resp)
