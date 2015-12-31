@@ -145,7 +145,7 @@ class Manager(utils.HookableMixin):
 
     def _get(self, url, response_key=None):
         resp, body = self.api.client.get(url)
-        #print 'get return body %s' % body
+        print 'get return body %s' % body
         if response_key:
             return self.resource_class(self, body[response_key], loaded=True)
         else:

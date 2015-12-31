@@ -1718,7 +1718,7 @@ class AgentManager(manager.Manager):
         if "storage_group_id"  in device_info.keys():
             storage_group_ref = db.storage_group_get(context,device_info["storage_group_id"])
         else:
-            storage_group_ref = db.storage_group_get_by_storage_class(context,device_info["storage_group_name"])
+            storage_group_ref = db.storage_group_get_by_name(context,device_info["storage_group_name"])
         if storage_group_ref:
             device_type = storage_group_ref['storage_class']
             device_dict['journal'] = device_info['journal']
@@ -1740,17 +1740,18 @@ class AgentManager(manager.Manager):
                     dev = db.device_create(self._context, device_dict)
                     #LOG.info("storage_group_ref=%s=="%(dir(storage_group_ref)))
                     osd_states_dict = {
-                        'osd_name':'osd.%s.%s'%(FLAGS.vsm_status_uninitialized, dev.id),
+                        'osd_name': 'osd.%s.%s'%(FLAGS.vsm_status_uninitialized, dev.id),
                         'device_id': dev.id,
                         'storage_group_id': storage_group_ref.id,
-                        'service_id':self._service_id,
-                        'cluster_id':self._cluster_id,
-                        'state':FLAGS.vsm_status_uninitialized,
-                        'operation_status':FLAGS.vsm_status_uninitialized,
-                        'weight':device_info['weight'],
-                        'public_ip':'',
-                        'cluster_ip':'',
-                        'zone_id':zone_id,
+                        'service_id': self._service_id,
+                        'cluster_id': self._cluster_id,
+                        'state': FLAGS.vsm_status_uninitialized,
+                        'operation_status': FLAGS.vsm_status_uninitialized,
+                        'weight': device_info['weight'],
+                        'osd_location': device_info.get('osd_location'),
+                        'public_ip': '',
+                        'cluster_ip': '',
+                        'zone_id': zone_id,
 
                     }
                     osd_ref = db.osd_state_create(self._context, osd_states_dict)

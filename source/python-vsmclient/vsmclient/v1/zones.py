@@ -124,6 +124,13 @@ class ZoneManager(base.ManagerWithFind):
         """
         return self._get("/zones/%s" % vsm_id, "zone")
 
+    def osd_locations_choices(self):
+        """
+        :rtype: :class:`Zone`
+        """
+        resp,body = self.api.client.get("/zones/osd_locations_choices")
+        return body
+
     def list(self, detailed=False, search_opts=None):
         """
         Get a list of all vsms.

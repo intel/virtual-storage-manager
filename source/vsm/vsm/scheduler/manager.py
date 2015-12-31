@@ -1858,7 +1858,7 @@ class SchedulerManager(manager.Manager):
         disks = body.get('disks',[])
         try:
             for disk_in_same_server in disks:
-                self.add_new_disks_to_cluster( context, disk_in_same_server)
+                self.add_new_disks_to_cluster(context, disk_in_same_server)
         except:
             return {"message":"data error"}
         return {"message": "success"}

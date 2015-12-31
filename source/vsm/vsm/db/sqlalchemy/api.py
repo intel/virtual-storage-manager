@@ -2635,6 +2635,11 @@ def storage_group_delete_by_order_and_name(context, take_order, name, session=No
 
 #bellow is operation on zone
 @require_admin_context
+def osd_locations_choices_by_type(context, type, session=None):
+    return model_query(context, models.Zone, session=session).\
+                    filter_by(type=type).all()
+
+@require_admin_context
 def zone_get_all(context, session=None):
     return model_query(context, models.Zone, session=session).all()
 

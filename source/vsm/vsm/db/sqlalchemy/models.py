@@ -425,6 +425,7 @@ class Zone(BASE, VsmBase):
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(length=255), nullable=False)
     parent_id = Column(Integer, ForeignKey('zones.id'), nullable=True)
+    type = Column(Integer)
 
 class OsdState(BASE, VsmBase):
     """This table maintains the information about osd."""
@@ -473,6 +474,7 @@ class OsdState(BASE, VsmBase):
     cluster_ip = Column(String(length=255))
     weight = Column(Float)
     operation_status = Column(String(length=255))
+    osd_location = Column(String(length=255))
 
 class Recipe(BASE, VsmBase):
     """This table store the recipes."""
