@@ -958,7 +958,7 @@ class CephDriver(object):
         #          run_as_root=True)
 
         all_osd_in_host = db.osd_state_get_by_service_id(context,osd_state['service_id'])
-        other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id']]
+        other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id'] and osd['state'] != 'Uninitialized']
         crushmap = self.get_crushmap_json_format()
         osd_location_direct = osd_state.get('osd_location')
         if osd_location_direct:
