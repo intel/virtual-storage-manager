@@ -156,8 +156,17 @@ function ResetForm(){
 	$("#txtFriendlyName").val("");
 	$("#txtMarker").val("");
 	$("#tTakeList>tbody").empty();
-	//$("#btnAddStorageGroup").hide();
-	//$("#btnUpdateStorageGroup").hide();
+
+    if(_SG_ID==null){
+        $("#btnAddStorageGroup").show();
+        $("#btnUpdateStorageGroup").hide();
+    }
+    else {
+        $("#btnAddStorageGroup").hide();
+        $("#btnUpdateStorageGroup").show();
+    }
+
+
 }
 
 function CancelAction(){
