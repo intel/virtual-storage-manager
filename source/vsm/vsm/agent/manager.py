@@ -1223,7 +1223,11 @@ class AgentManager(manager.Manager):
             if auto_growth_pg:
                 max_pg_num_finally = auto_growth_pg
             else:
-                max_pg_num_finally = max_pg_num_per_osd * osd_num_per_group//pool['size']
+                size = pool['size']
+                if pool['size'] == 0:
+                    pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
+                    size = int(pool_default_size.value)
+                max_pg_num_finally = max_pg_num_per_osd * osd_num_per_group//size
             if max_pg_num_finally > pool['pg_num']:
                 pg_num = max_pg_num_finally#self._compute_pg_num(context, osd_num_per_group, pool['size'])
                 LOG.info("pool['crush_ruleset'] id %s has %s osds" % (pool['crush_ruleset'], osd_num_per_group))
