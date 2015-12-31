@@ -156,8 +156,8 @@ function ResetForm(){
 	$("#txtFriendlyName").val("");
 	$("#txtMarker").val("");
 	$("#tTakeList>tbody").empty();
-	$("#btnAddStorageGroup").hide();
-	$("#btnUpdateStorageGroup").hide();
+	//$("#btnAddStorageGroup").hide();
+	//$("#btnUpdateStorageGroup").hide();
 }
 
 function CancelAction(){
