@@ -25,7 +25,7 @@ def upgrade(migrate_engine):
 
     parent_id = Column('parent_id',Integer, nullable=True)
     zones.create_column(parent_id)
-    type = Column("type", Integer, nullable=False)
+    type = Column("type", Integer)
     zones.create_column(type)
 
 def downgrade(migrate_engine):

@@ -962,7 +962,10 @@ class CephDriver(object):
         crushmap = self.get_crushmap_json_format()
         osd_location_direct = osd_state.get('osd_location')
         if osd_location_direct:
-            osd_location_str = "%s=%s"%(crushmap._types[1]['name'],osd_location_direct)
+            if osd_location_direct.find('=') != -1:
+                osd_location_str = osd_location_direct
+            else:
+                osd_location_str = "%s=%s"%(crushmap._types[1]['name'],osd_location_direct)
         elif len(other_osd_in_host) > 0:
             osd_location = crushmap._get_location_by_osd_name(other_osd_in_host[0])
             osd_location_str = "%s=%s"%(osd_location['type_name'],osd_location['name'])
@@ -2084,7 +2087,7 @@ class CephDriver(object):
                       "add",
                       "osd.%s" % osd_inner_id,
                       weight,
-                      "host=%s" % osd['osd_location'],
+                      osd['osd_location'],
                       run_as_root=True)
         else:
             zone = init_node['zone']['name']
@@ -2218,8 +2221,14 @@ class CephDriver(object):
         if node_list:
             for node in node_list:
                 name = node.get('name')
+                id = node.get('id')
                 if name and name.startswith('osd.'):
                     #LOG.debug('node %s ' % node)
+                    for node_2 in node_list:
+                        if node_2.get('children') and id in node_2.get('children'):
+                            osd_location = '%s=%s'%(node_2.get('type'),node_2.get('name'))
+                            node['osd_location'] = osd_location
+                            break
                     return_list.append(node)
         #LOG.debug('osd list: %s' % return_list)
         return return_list

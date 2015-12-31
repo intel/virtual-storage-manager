@@ -131,7 +131,9 @@ def add_new_osd(request):
 
 def add_new_osd_action(request):
     data = json.loads(request.body)
-    vsmapi.add_new_disks_to_cluster(request,data)
+    print 'data----7777==',data
+    #vsmapi.add_new_disks_to_cluster(request,data)
+    vsmapi.add_batch_new_disks_to_cluster(request,data)
     status_json = {"status":"OK"}
     status_data = json.dumps(status_json)
     return HttpResponse(status_data)

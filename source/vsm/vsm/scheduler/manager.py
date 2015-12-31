@@ -1270,6 +1270,7 @@ class SchedulerManager(manager.Manager):
         crushmap_str = body.get('crush_map')
         crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
         utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
+        osd_num = 0
         try:
             crushmap = CrushMap(json_file=crush_map_new)
             tree_node = crushmap._show_as_tree_dict()

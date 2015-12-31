@@ -34,7 +34,7 @@ var StorageGroup = {
 }
 
 
-var location = {
+var Location = {
 	Create:function(){
 		var location = {};
 		location.name = $ctrOSDLocation.options[$ctrOSDLocation.selectedIndex].text;
@@ -71,7 +71,7 @@ function ChangeServer(){
 
 	server = Server.Create();
 	//Update the upload field post url
-	$formFileUpload.action="/dashboard/vsm/devices-management/add_new_osd2/?service_id="+server.server_id;
+	//$formFileUpload.action="/dashboard/vsm/devices-management/add_new_osd2/?service_id="+server.server_id;
 	//Update the OSD form data
 	PostData("get_available_disks",{"server_id":server.node_id});
 }
@@ -125,7 +125,7 @@ function CheckOSDForm(){
 function AddOSDItemInTable(){
 	var server = Server.Create();
 	var sg = StorageGroup.Create();
-    var location = location.Create();
+    var location = Location.Create();
 
 	var osdHtml = "";
 		osdHtml += "<tr class=\"osd-item\">";
@@ -218,7 +218,9 @@ function AddOSD(){
 	}
 
 	//exe add osd
-	PostData("add_new_osd_action",server_list);
+post_data.disks = server_list;
+console.log(post_data);	
+PostData("add_new_osd_action",post_data);
 }
 
 

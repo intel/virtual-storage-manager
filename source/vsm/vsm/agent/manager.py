@@ -1142,6 +1142,7 @@ class AgentManager(manager.Manager):
                     values = dict()
                     values['osd_name'] = name
                     values['weight'] = osd.get('crush_weight')
+                    values['osd_location'] = osd.get('osd_location')
                     #LOG.debug('update crush weight values: %s' % values)
                     self._conductor_rpcapi.\
                         osd_state_update_or_create(context, values, create=False)
