@@ -27,7 +27,7 @@ function GenerateDialog(title,body,showSubmit,submitName){
 
 	var dialogWrapper = $("#modal_wrapper")[0];
 	dialogWrapper.id = "modal_wrapper";
-	dialogWrapper.className = "modal fade";
+	dialogWrapper.className = "modal";
 	dialogWrapper.innerHTML = html;
 
 	return $("#modal_wrapper");
