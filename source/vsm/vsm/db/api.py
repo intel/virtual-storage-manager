@@ -1145,6 +1145,10 @@ def summary_get_by_type_first(context, stype):
 def monitor_get_all(context):
     return IMPL.monitor_get_all(context)
 
+def monitor_get_by_address(context, monitor_address,read_deleted):
+    return IMPL.monitor_get_by_address(context,monitor_address=monitor_address,
+                                       read_deleted=read_deleted)
+
 def monitor_get(context, id):
     return IMPL.monitor_get(context, id)
 
