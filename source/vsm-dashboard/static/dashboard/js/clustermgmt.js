@@ -43,19 +43,13 @@
         })
     }
     $(".create-cluster-commit").click(function(){
-        var rows_num = $(".modal-body .zone").length - 1;
-        console.log(rows_num);
         var data_list = new Array();
-
-
-
-
         var zone_id_has_monitor_list = new Array();
         var zone_id_all = new Array();
 
 
         //get the data list
-        for (var i=1; i <= rows_num; i++)
+        for (var i=1; i <= $("td.zone").length; i++)
         {
             var is_ok = true;
             row_id = $($(".server_id")[i]).html();
@@ -117,6 +111,7 @@
         });
 
     });
+
 
    
     $(".integrate-cluster-commit").click(function(){
