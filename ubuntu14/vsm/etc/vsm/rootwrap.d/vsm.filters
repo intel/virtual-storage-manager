@@ -11,6 +11,8 @@ vsm-rtstool: CommandFilter, vsm-rtstool, root
 
 #changed by YOURONG
 #ceph
+start: CommandFilter, /sbin/start, root
+stop: CommandFilter, /sbin/stop, root
 ceph-osd: CommandFilter, /usr/bin/ceph-osd, root
 mkcephfs: CommandFilter, /sbin/mkcephfs, root
 #problem?TODO
