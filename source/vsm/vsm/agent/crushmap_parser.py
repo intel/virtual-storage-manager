@@ -101,6 +101,7 @@ class CrushMap():
         for rule in self._rules:
             if name == rule['rule_name']:
                 return rule
+        return None
 
     def get_rules_by_id(self, rule_id):
         for rule in self._rules:

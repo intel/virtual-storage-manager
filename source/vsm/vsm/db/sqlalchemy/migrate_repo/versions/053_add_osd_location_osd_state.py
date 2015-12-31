@@ -15,23 +15,38 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from sqlalchemy import and_, String, Column, MetaData, select, Table, Integer
+from sqlalchemy import Boolean, Column, DateTime
+from sqlalchemy import Integer, MetaData, String
+from sqlalchemy import Table, Index
 
 def upgrade(migrate_engine):
+    # Upgrade operations go here. Don't create your own engine;
+    # bind migrate_engine to your metadata
     meta = MetaData()
     meta.bind = migrate_engine
 
-    zones = Table('zones', meta, autoload=True)
+    osd_state = Table(
+        'osd_states', meta,
+        autoload=True
+    )
 
-    parent_id = Column('parent_id',Integer, nullable=True)
-    zones.create_column(parent_id)
-    type = Column("type", Integer)
-    zones.create_column(type)
+    osd_location = Column('osd_location',String(length=255))
+    try:
+        osd_state.create_column(osd_location)
+        #osd_state.update().values(status="OUT").execute()
+    except Exception:
+        raise
 
 def downgrade(migrate_engine):
     meta = MetaData()
     meta.bind = migrate_engine
-    zones = Table('zones', meta, autoload=True)
-    zones.drop_column('parent_id')
-    zones = Table('zones', meta, autoload=True)
-    zones.drop_column('type')
+
+    storage_group = Table('osd_states',
+                    meta,
+                    autoload=True)
+    osd_location = Column('osd_location',String(length=255))
+
+    try:
+        storage_group.drop_column(osd_location)
+    except Exception:
+        raise

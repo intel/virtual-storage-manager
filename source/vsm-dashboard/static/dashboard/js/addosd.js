@@ -5,6 +5,7 @@ var $ctrlJournalDevice = $("#txtJournalDevice")[0];
 var $ctrlDataDevice = $("#txtDataDevice")[0];
 var $ctrlWeight = $("#txtWeight")[0];
 var $ctrlStorageGroup = $("#selStorageGroup")[0];
+var $ctrOSDLocation =  $("#selOSDLocation")[0];
 
 var $ctrlFileUpload = $("#id_file")[0];
 var $ctrlFileName = $("#lblFileName")[0];
@@ -29,6 +30,16 @@ var StorageGroup = {
 		sg.name = $ctrlStorageGroup.options[$ctrlStorageGroup.selectedIndex].text;
 		sg.id = $ctrlStorageGroup.value;
 		return sg;
+	}
+}
+
+
+var Location = {
+	Create:function(){
+		var location = {};
+		location.name = $ctrOSDLocation.options[$ctrOSDLocation.selectedIndex].text;
+		location.id = $ctrOSDLocation.value;
+		return location;
 	}
 }
 
@@ -60,7 +71,7 @@ function ChangeServer(){
 
 	server = Server.Create();
 	//Update the upload field post url
-	$formFileUpload.action="/dashboard/vsm/devices-management/add_new_osd2/?service_id="+server.server_id;
+	//$formFileUpload.action="/dashboard/vsm/devices-management/add_new_osd2/?service_id="+server.server_id;
 	//Update the OSD form data
 	PostData("get_available_disks",{"server_id":server.node_id});
 }
@@ -114,14 +125,15 @@ function CheckOSDForm(){
 function AddOSDItemInTable(){
 	var server = Server.Create();
 	var sg = StorageGroup.Create();
+    var location = Location.Create();
 
 	var osdHtml = "";
 		osdHtml += "<tr class=\"osd-item\">";
 		osdHtml += "	<td class='sortable normal_column _node_id hidden'>"+server.node_id+"</td>";
 		osdHtml += "	<td class='sortable normal_column server_name'>"+server.name+"</td>";
 		osdHtml += "	<td class='sortable normal_column weight'>"+$ctrlWeight.value+"</td>";
-		osdHtml += "	<td class='sortable normal_column sg_id hidden'>"+sg.id+"</td>";
 		osdHtml += "	<td class='sortable normal_column sg_name'>"+sg.name+"</td>";
+        osdHtml += "	<td class='sortable normal_column location'>"+location.name+"</td>";
 		osdHtml += "	<td class='sortable normal_column journal'>"+$ctrlJournalDevice.value+"</td>";
 		osdHtml += "	<td class='sortable normal_column device'>"+$ctrlDataDevice.value+"</td>";
 		osdHtml += "	<td class='sortable normal_column'>";
@@ -156,7 +168,8 @@ function AddOSD(){
 	for(var i=0;i<OSD_Items.length;i++){
 		var osd = {
 			"server_name":OSD_Items[i].children[1].innerHTML,
-			"storage_group_id":OSD_Items[i].children[3].innerHTML,
+			"storage_group_name":OSD_Items[i].children[3].innerHTML,
+            "osd_location":OSD_Items[i].children[4].innerHTML,
 			"weight":OSD_Items[i].children[2].innerHTML,
 			"journal":OSD_Items[i].children[5].innerHTML,
 			"data":OSD_Items[i].children[6].innerHTML
@@ -193,10 +206,11 @@ function AddOSD(){
 		for(var j=0;j<server_list.length;j++){
 			if(osd_list[i].server_name == server_list[j].server_name){
 				var osd = {
-					"storage_group_id":osd_list[i].storage_group_id,
+					"storage_group_name":osd_list[i].storage_group_name,
+                    "osd_location":osd_list[i].osd_location,
             		"weight":osd_list[i].weight,
             		"journal":osd_list[i].journal,
-            		"data":osd_list[i].data,
+            		"data":osd_list[i].data
 				}
 				server_list[j].osdinfo.push(osd);
 			}
@@ -204,7 +218,9 @@ function AddOSD(){
 	}
 
 	//exe add osd
-	PostData("add_new_osd_action",server_list);
+post_data.disks = server_list;
+console.log(post_data);	
+PostData("add_new_osd_action",post_data);
 }
 
 

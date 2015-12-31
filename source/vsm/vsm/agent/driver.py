@@ -958,9 +958,15 @@ class CephDriver(object):
         #          run_as_root=True)
 
         all_osd_in_host = db.osd_state_get_by_service_id(context,osd_state['service_id'])
-        other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id']]
+        other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id'] and osd['state'] != 'Uninitialized']
         crushmap = self.get_crushmap_json_format()
-        if len(other_osd_in_host) > 0:
+        osd_location_direct = osd_state.get('osd_location')
+        if osd_location_direct:
+            if osd_location_direct.find('=') != -1:
+                osd_location_str = osd_location_direct
+            else:
+                osd_location_str = "%s=%s"%(crushmap._types[1]['name'],osd_location_direct)
+        elif len(other_osd_in_host) > 0:
             osd_location = crushmap._get_location_by_osd_name(other_osd_in_host[0])
             osd_location_str = "%s=%s"%(osd_location['type_name'],osd_location['name'])
         else:
@@ -1014,7 +1020,7 @@ class CephDriver(object):
         try:
             mon_data_path = self.get_ceph_config(context)['mon']['mon data']
             mon_path = mon_data_path.replace('$id',mon_id)
-            LOG.info('osd restore mon_pth =%s'%mon_path)
+            #LOG.info('osd restore mon_pth =%s'%mon_path)
         except:
             mon_path = os.path.join(FLAGS.monitor_data_path,"mon" + mon_id)
         utils.ensure_tree(mon_path)
@@ -1054,10 +1060,11 @@ class CephDriver(object):
         self._add_ceph_mon_to_config(context, ser['host'], host_ip, mon_id=mon_id)
         #utils.execute("ceph-mon", "-i", mon_id, "--public-addr", host,
         #                run_as_root=True)
-        self.start_mon_daemon(context, mon_id)
+
         # step 7
         LOG.info('>> add mon step 7 ')
         utils.execute("ceph", "mon", "add", mon_id, host, run_as_root=True)
+        self.start_mon_daemon(context, mon_id)
         LOG.info('>> add mon finish %s' % mon_id)
         return True
 
@@ -1088,6 +1095,7 @@ class CephDriver(object):
         try:
             # test ssh service in case the server is down
             utils.execute('ssh', '-q', 'root@' + host, 'exit', run_as_root=True)
+            self._operate_ceph_daemon("stop", "mon", id=mon_id, ssh=True, host=host)
         except exception.ProcessExecutionError as e:
             code = e.exit_code
             LOG.info('return code: %s' % code)
@@ -2071,24 +2079,35 @@ class CephDriver(object):
         storage_group = osd['storage_group']['name']
 
         #TODO change zone
-        zone = init_node['zone']['name']
-        crush_dict = {"root": 'vsm',
-                    "storage_group":storage_group,
-                    "zone": "_".join([zone, storage_group]),
-                    "host": "_".join([FLAGS.host, storage_group, zone]),
-                    }
-        weight = "1.0"
-        utils.execute("ceph",
+        if osd['osd_location']:
+            weight = "1.0"
+            utils.execute("ceph",
                       "osd",
                       "crush",
                       "add",
                       "osd.%s" % osd_inner_id,
                       weight,
-                      "root=%s" % crush_dict['root'],
-                      "storage_group=%s" % crush_dict['storage_group'],
-                      "zone=%s" % crush_dict['zone'],
-                      "host=%s" % crush_dict['host'],
+                      osd['osd_location'],
                       run_as_root=True)
+        else:
+            zone = init_node['zone']['name']
+            crush_dict = {"root": 'vsm',
+                        "storage_group":storage_group,
+                        "zone": "_".join([zone, storage_group]),
+                        "host": "_".join([FLAGS.host, storage_group, zone]),
+                        }
+            weight = "1.0"
+            utils.execute("ceph",
+                          "osd",
+                          "crush",
+                          "add",
+                          "osd.%s" % osd_inner_id,
+                          weight,
+                          "root=%s" % crush_dict['root'],
+                          "storage_group=%s" % crush_dict['storage_group'],
+                          "zone=%s" % crush_dict['zone'],
+                          "host=%s" % crush_dict['host'],
+                          run_as_root=True)
 
         #step1
         self.start_osd_daemon(context, osd_inner_id)
@@ -2202,8 +2221,14 @@ class CephDriver(object):
         if node_list:
             for node in node_list:
                 name = node.get('name')
+                id = node.get('id')
                 if name and name.startswith('osd.'):
                     #LOG.debug('node %s ' % node)
+                    for node_2 in node_list:
+                        if node_2.get('children') and id in node_2.get('children'):
+                            osd_location = '%s=%s'%(node_2.get('type'),node_2.get('name'))
+                            node['osd_location'] = osd_location
+                            break
                     return_list.append(node)
         #LOG.debug('osd list: %s' % return_list)
         return return_list
@@ -2618,10 +2643,10 @@ class CreateCrushMapDriver(object):
 
         for storage_group in storage_groups:
             zone = zone_name + "_" + storage_group
-            utils.execute("ceph", "osd", "crush", "add-bucket", zone, "zone",
+            utils.execute("ceph", "osd", "crush", "add-bucket", zone, "zone",'--keyring',FLAGS.keyring_admin,
                             run_as_root=True)
             utils.execute("ceph", "osd", "crush", "move", zone,
-                          "storage_group=%s" % storage_group,
+                          "storage_group=%s" % storage_group,'--keyring',FLAGS.keyring_admin,
                           run_as_root=True)
 
         values = {'name': zone_name,
@@ -2631,19 +2656,19 @@ class CreateCrushMapDriver(object):
 
     def add_rule(self, name, type):
         utils.execute("ceph", "osd", "crush", "rule", "create-simple", \
-                        name, name, type)
+                        name, name, type,'--keyring',FLAGS.keyring_admin,)
         
     def add_storage_group(self, storage_group, root, types=None):
         if types is None:
             utils.execute("ceph", "osd", "crush", "add-bucket", storage_group, \
-                            "storage_group", run_as_root=True)
+                            "storage_group", '--keyring',FLAGS.keyring_admin,run_as_root=True)
             utils.execute("ceph", "osd", "crush", "move", storage_group,\
-                            "root=%s" % root, run_as_root=True)
+                            "root=%s" % root,'--keyring',FLAGS.keyring_admin, run_as_root=True)
         else:
             utils.execute("ceph", "osd", "crush", "add-bucket", storage_group, \
-                            "%s"%types[3]['name'], run_as_root=True)
+                            "%s"%types[3]['name'], '--keyring',FLAGS.keyring_admin,run_as_root=True)
             utils.execute("ceph", "osd", "crush", "move", storage_group,\
-                            "%s=%s" %(types[-1]['name'],root), run_as_root=True)
+                            "%s=%s" %(types[-1]['name'],root),'--keyring',FLAGS.keyring_admin, run_as_root=True)
 
     def add_zone(self, zone, storage_group,types=None):
         if types is None:
@@ -2658,20 +2683,20 @@ class CreateCrushMapDriver(object):
                             "%s=%s" %(types[3]['name'],storage_group), run_as_root=True)
     def add_host(self, host_name, zone,types=None):
         if types is None:
-            utils.execute("ceph", "osd", "crush", "add-bucket", host_name, "host",
+            utils.execute("ceph", "osd", "crush", "add-bucket", host_name, "host",'--keyring',FLAGS.keyring_admin,
                             run_as_root=True)
             utils.execute("ceph", "osd", "crush", "move", host_name,
-                            "zone=%s" % zone,
+                            "zone=%s" % zone,'--keyring',FLAGS.keyring_admin,
                             run_as_root=True)
         else:
-            utils.execute("ceph", "osd", "crush", "add-bucket", host_name, "%s"%types[1]['name'],
+            utils.execute("ceph", "osd", "crush", "add-bucket", host_name, "%s"%types[1]['name'],'--keyring',FLAGS.keyring_admin,
                             run_as_root=True)
             utils.execute("ceph", "osd", "crush", "move", host_name,
-                            "%s=%s" %(types[2]['name'],zone),
+                            "%s=%s" %(types[2]['name'],zone),'--keyring',FLAGS.keyring_admin,
                             run_as_root=True)
 
     def remove_host(self, host_name):
-        utils.execute("ceph", "osd", "crush", "remove", host_name,
+        utils.execute("ceph", "osd", "crush", "remove", host_name,'--keyring',FLAGS.keyring_admin,
                         run_as_root=True)
 
     def create_crushmap(self, context, server_list):
@@ -3085,6 +3110,8 @@ class ManagerCrushMapDriver(object):
 
 
     def _write_to_crushmap(self, string):
+        utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path+'_decompiled',
+            run_as_root=True)
         fd = open(self._crushmap_path+'_decompiled', 'a')
         fd.write(string)
         fd.close()
@@ -3092,15 +3119,15 @@ class ManagerCrushMapDriver(object):
     def get_crushmap(self):
         LOG.info("DEBUG Begin to get crushmap")
         utils.execute('ceph', 'osd', 'getcrushmap', '-o',
-                self._crushmap_path, run_as_root=False)
+                self._crushmap_path,'--keyring',FLAGS.keyring_admin, run_as_root=True)
         utils.execute('crushtool', '-d', self._crushmap_path, '-o',
-                        self._crushmap_path+'_decompiled', run_as_root=False)
+                        self._crushmap_path+'_decompiled', run_as_root=True)
         return True
 
     def set_crushmap(self):
         LOG.info("DEBUG Begin to set crushmap")
         utils.execute('crushtool', '-c', self._crushmap_path+'_decompiled', '-o',
-                        self._crushmap_path, run_as_root=False)
+                        self._crushmap_path, run_as_root=True)
         utils.execute('ceph', 'osd', 'setcrushmap', '-i',
                         self._crushmap_path, run_as_root=True)
         return True
@@ -3178,13 +3205,17 @@ class ManagerCrushMapDriver(object):
         '''
 
         crushmap = get_crushmap_json_format()
+        rule_name = rule_info.get('rule_name')
+        if crushmap.get_rules_by_name(name = rule_name ) is  None:
+            return self._generate_one_rule(rule_info)
+
         types = crushmap._types
         types.sort(key=operator.itemgetter('type_id'))
         choose_leaf_type_default = types[1]['name']
         # rule_type = rule_info.get('type','')
         # min_size = rule_info.get('min_size')
         # max_size = rule_info.get('max_size')
-        rule_name = rule_info.get('rule_name')
+
         takes = rule_info.get('takes')
 
         self.get_crushmap()
@@ -3233,6 +3264,8 @@ class ManagerCrushMapDriver(object):
                 new_lines.insert(insert_take_line+1,string_choose)
                 new_lines.insert(insert_take_line+2,"    step emit\n")
                 insert_take_line +=3
+        utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path,
+            run_as_root=True)
         fd = open(self._crushmap_path, 'w')
         LOG.info('new lines=====%s'%new_lines)
         fd.writelines(new_lines)

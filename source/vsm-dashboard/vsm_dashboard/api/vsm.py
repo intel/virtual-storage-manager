@@ -65,6 +65,9 @@ def remove_cache_tier(request, body):
 def get_storage_group_list(request):
     return vsmclient(request).vsms.get_storage_group_list()
 
+def osd_locations_choices_by_type(request):
+    return vsmclient(request).zones.osd_locations_choices()
+
 def get_pool_size_list(request):
     return vsmclient(request).vsms.get_pool_size_list()
 

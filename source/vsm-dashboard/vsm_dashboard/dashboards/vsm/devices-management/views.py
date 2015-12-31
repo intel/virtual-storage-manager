@@ -114,7 +114,8 @@ def add_new_osd(request):
     servers = vsmapi.get_server_list(None, )
     context["servers"] = servers
     context["upload_file"] = UploadFileForm()
-    context["storage_group"] = get_storage_group_list()
+    context["storage_group"] = get_storage_group_list(request)
+    context["osd_location"] = get_osd_location_list(request)
 
     #get the osd list from the file
     if request.method == "POST":
@@ -130,14 +131,16 @@ def add_new_osd(request):
 
 def add_new_osd_action(request):
     data = json.loads(request.body)
-    vsmapi.add_new_disks_to_cluster(request,data)
+    print 'data----7777==',data
+    #vsmapi.add_new_disks_to_cluster(request,data)
+    vsmapi.add_batch_new_disks_to_cluster(request,data)
     status_json = {"status":"OK"}
     status_data = json.dumps(status_json)
     return HttpResponse(status_data)
 
-def get_storage_group_list():
+def get_storage_group_list(request):
     #get the storage group
-    storage_group_list = vsmapi.storage_group_status(None,)
+    storage_group_list = vsmapi.storage_group_status(request)
     storage_group = []
     for _sg in storage_group_list:
         sg = {
@@ -146,6 +149,20 @@ def get_storage_group_list():
         }
         storage_group.append(sg)
     return storage_group
+
+def get_osd_location_list(request):
+    zones = vsmapi.osd_locations_choices_by_type(request)
+    osd_location_list = zones['osd_locations_choices']
+    location_list = []
+    print 'osd_location_list===',osd_location_list
+    for location in osd_location_list:
+        location_dict = {
+            "id":location['id'],
+            "name":location['name'],
+        }
+        location_list.append(location_dict)
+    print 'location_list===',location_list
+    return location_list
 
 def get_osd_list_data(service_id):
     osd_list = vsmapi.osd_status(None, paginate_opts={
@@ -180,10 +197,11 @@ def generate_import_data_format(file_content):
         if len(osd) != 1:
             osd = {
                 "server_name":osd[0],
-                "sg_id":osd[1],
+                "sg_name":osd[1],
                 "weight":osd[2],
                 "journal":osd[3],
                 "data":osd[4],
+                "location":osd[5]
             }
             osd_list.append(osd)
     return osd_list

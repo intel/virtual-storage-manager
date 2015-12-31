@@ -32,6 +32,7 @@ from vsm import utils
 from vsm import conductor
 from vsm.conductor import rpcapi as conductor_rpcapi
 from vsm import scheduler
+from vsm import db
 
 LOG = logging.getLogger(__name__)
 
@@ -117,7 +118,12 @@ class ZonesController(wsgi.Controller):
         """delete zone."""
         LOG.info("CEPH_LOG zone delete id: %s" % id)
         return webob.Response(status_int=202)
-        
+
+    def osd_locations_choices(self,req):
+        context = req.environ['vsm.context']
+        osd_locations = db.osd_locations_choices_by_type(context,type=1)
+        LOG.info("CEPH_LOG zone osd_locations_choices:%s"%osd_locations)
+        return {'osd_locations_choices':osd_locations}
      
 
 def create_resource(ext_mgr):

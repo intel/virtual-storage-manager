@@ -889,6 +889,9 @@ def zone_get_all(context):
     """get all zones"""
     return IMPL.zone_get_all(context)
 
+def osd_locations_choices_by_type(context, type):
+    return IMPL.osd_locations_choices_by_type(context,type)
+
 def create_zone(context, values=None):
     if values is None:
         return False

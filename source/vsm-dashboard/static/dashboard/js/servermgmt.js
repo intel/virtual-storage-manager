@@ -32,7 +32,7 @@ $(function(){
 
 function CheckTheStatus(){
     $("td.status").each(function(){
-        if(this.innerHTML != "unavailable" && this.innerHTML != "available" && this.innerHTML != "Active"){
+        if(this.innerHTML != "unavailable"  && this.innerHTML != "available" && this.innerHTML != "Active" && this.innerHTML != "Stopped"){
             var html = "";
             html +="<div class='loading_gif'>";
             html +="    <img src=\"/static/dashboard/img/loading.gif\">";
@@ -83,7 +83,7 @@ function UpdateServerStatus(){
                     html +="<td class=\"osds sortable normal_column\">"+servers[i].osds+"</td>";
                     html +="<td class=\"monitor_tag sortable normal_column\">"+servers[i].is_monitor+"</td>";
                     html +="<td class=\"zone sortable normal_column\">"+servers[i].zone+"</td>";
-                    if(servers[i].status == "unavailable" || this.innerHTML != "available" || servers[i].status == "Active"){
+                    if(servers[i].status == "unavailable" || servers[i].status == "available" || servers[i].status == "Active" || servers[i].status == "Stopped"){
                         html +="<td class=\"status sortable normal_column\">"+servers[i].status+"</td>";
                     }
                     else
