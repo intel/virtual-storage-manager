@@ -1849,6 +1849,7 @@ class AgentManager(manager.Manager):
         storage_groups = crushmap.get_storage_groups_dict_by_rule(rules)
         LOG.info('get storage groups from crushmap====%s'%storage_groups)
         for storage_group in storage_groups:
+            storage_group['status'] = 'IN'
             db.storage_group_update_or_create(context,storage_group)
 
     def detect_crushmap(self,context,keyring):
