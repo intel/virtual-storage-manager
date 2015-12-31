@@ -103,6 +103,8 @@ function HidePopover(){
 function getStateData(osd_id,device_tag){
 	$("#modal_wrapper").modal("show");
 	$("#btnDialogCancel").hide();
+    $("#divSmartInfoContainer").hide();
+    $("#tSmartInfo>tbody").empty();
 
 
 	//get the device path
@@ -149,14 +151,17 @@ function getStateData(osd_id,device_tag){
 				$("#lblFirmware")[0].innerHTML =  basicInfo.FirmwareVersion;
 
                 //Get smart info
-                $("#tSmartInfo>tbody").empty();
-                for(var i=0;i<smartInfo.length;i++) {
-                    var smart_row = "";
-                    smart_row += "<tr>";
-                    smart_row += "<td>" + smartInfo[i].key + "</td>";
-                    smart_row += "<td><span class='span-label'>" + smartInfo[i].value + "</span></td>";
-                    smart_row += "</tr>";
-                    $("#tSmartInfo>tbody").append(smart_row);
+                if(smartInfo.length > 0) {
+                    $("#divSmartInfoContainer").show();
+	                $("#tSmartInfo>tbody").empty();
+                    for (var i = 0; i < smartInfo.length; i++) {
+                        var smart_row = "";
+                        smart_row += "<tr>";
+                        smart_row += "<td>" + smartInfo[i].key + "</td>";
+                        smart_row += "<td><span class='span-label'>" + smartInfo[i].value + "</span></td>";
+                        smart_row += "</tr>";
+                        $("#tSmartInfo>tbody").append(smart_row);
+                    }
                 }
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
