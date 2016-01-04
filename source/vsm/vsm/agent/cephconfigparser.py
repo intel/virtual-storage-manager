@@ -181,6 +181,13 @@ class Parser(object):
         sec = self._sections[sec_name]
         return sec.get(key, None)
 
+    def get(self, sec_name, key, default_val):
+        val = get(sec_name, key)
+        if val:
+            return val
+        else:
+            return default_val
+
     def set(self, sec_name, key, val):
         sec_name = sec_name.strip()
         key = key.strip()
@@ -228,9 +235,8 @@ class CephConfigParser(manager.Manager):
 
         parser = Parser()
         parser.read(FLAGS.ceph_conf)
-        fs_type = parser.get('osd', 'osd mkfs type')
+        fs_type = parser.get('osd', 'osd mkfs type', 'xfs')
         mount_attr = parser.get('osd', 'osd mount options %s' % fs_type)
-        file_system = parser.get('osd', 'osd mkfs type')
 
         for sec in parser.sections():
             if sec.find('osd.') != -1:
@@ -240,7 +246,7 @@ class CephConfigParser(manager.Manager):
                 mount_host = parser.get(sec, 'host')
                 if FLAGS.host == mount_host:
                     line = mount_disk + ' ' + mount_path
-                    line = line + ' ' + file_system
+                    line = line + ' ' + fs_type
                     line = line + ' ' + mount_attr + ' 0 0'
                     line = line + ' ' + '## forvsmosd'
                     utils.write_file_as_root('/etc/fstab', line)
