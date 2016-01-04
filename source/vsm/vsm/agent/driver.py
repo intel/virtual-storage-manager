@@ -1936,10 +1936,12 @@ class CephDriver(object):
         # Step 2: shutdown the process.
         if host_is_running:
             LOG.info('>>> remove ceph osd kill proc osd %s' % osd_id)
-            # utils.execute("service", "ceph", "-a", "stop", "osd.%s" % osd_id,
-            #           run_as_root=True)
-            self._operate_ceph_daemon("stop", "osd", id=osd_id,
-                                      ssh=True, host=host)
+            try:
+                self._operate_ceph_daemon("stop", "osd", id=osd_id,
+                                          ssh=True, host=host)
+            except:
+                utils.execute("service", "ceph", "-a", "stop", "osd.%s" % osd_id,
+                              run_as_root=True)
         _wait_osd_status(osd_id, 'up', 0)
 
         # Step 3: Remove it from crushmap.
