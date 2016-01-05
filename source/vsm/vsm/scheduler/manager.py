@@ -1408,7 +1408,8 @@ class SchedulerManager(manager.Manager):
                 LOG.info('fresh ceph conf from db to ceph nodes %s '%ser['host'])
                 self._agent_rpcapi.update_ceph_conf(context, ser['host'])
                 self._agent_rpcapi.update_keyring_admin_from_db(context,ser['host'])
-
+            LOG.info('fresh cluster status. monitor name is %s'%monitor_pitched_host)
+            self._agent_rpcapi.cluster_refresh(context,monitor_pitched_host)
         except rpc_exc.Timeout:
             LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
         except rpc_exc.RemoteError:
