@@ -1351,6 +1351,42 @@ class SchedulerManager(manager.Manager):
             raise
         return {'tree_node':tree_node}
 
+    def get_osds_by_rules(self,context,body):
+        '''
+        :param context:
+        :param body:
+        {'rules':[rule_name,rule_name],
+         'cluster_id':1,
+        }
+        :return:
+        '''
+        monitor_pitched_host = self._get_monitor_by_cluster_id(context, body.get('cluster_id',1))
+        #LOG.info("000000000000000=%s"%monitor_pitched_host)
+        monitor_keyring = None
+        rules = body.get('rules')
+        rule_osds = {}
+        try:
+            #LOG.info("111111111111111=%s"%monitor_pitched_host)
+            message = self._agent_rpcapi.detect_crushmap(context, monitor_keyring, monitor_pitched_host)
+            crushmap_str = message['crushmap']
+            crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
+            utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
+            crushmap = CrushMap(json_file=crush_map_new)
+            for rule in rules:
+                osds = crushmap.get_all_osds_by_rule(rule)
+                osds = [osd['name'] for osd in osds]
+                osds = list(set(osds))
+                rule_osds[rule] = osds
+            #LOG.info("222222==%s"%tree_node)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: get_crushmap_tree_data rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: get_crushmap_tree_data rpc remote')
+        except:
+            LOG.error('ERROR: get_crushmap_tree_data')
+            raise
+        return rule_osds
+
     def import_cluster(self,context,body):
         '''
         :param context:

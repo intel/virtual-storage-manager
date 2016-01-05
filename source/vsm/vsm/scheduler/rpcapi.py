@@ -226,6 +226,9 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def get_crushmap_tree_data(self,ctxt,body):
         return self.call(ctxt, self.make_msg('get_crushmap_tree_data', body=body))
 
+    def get_osds_by_rules(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('get_osds_by_rules', body=body))
+
     def add_storage_group_to_crushmap_and_db(self,ctxt,body):
         return self.call(ctxt, self.make_msg('add_storage_group_to_crushmap_and_db', body=body))
 
