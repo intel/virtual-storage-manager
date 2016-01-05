@@ -504,7 +504,7 @@ class SchedulerManager(manager.Manager):
                                                         values)
                 # save ceph conf
                 LOG.info(" save osd_location of osd in  %s " % ser['host'])
-                for osd_location in ser.get('osds_locations'):
+                for osd_location in ser.get('osds_locations',[]):
                     values = {'osd_location':osd_location['osd_location']}
                     osd_id = osd_location['osd_id']
                     db.osd_state_update(context,osd_id,values)
