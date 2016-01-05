@@ -978,7 +978,7 @@ class CephDriver(object):
                  run_as_root=True)
         # step 7 start osd service
         LOG.info('>>> step7 start')
-        self.start_osd_daemon(context, osd_id)
+        self.start_osd_daemon(context, osd_id, is_vsm_add_osd=True)
         utils.execute("ceph", "osd", "crush", "create-or-move", "osd.%s" % osd_id, weight,
            osd_location_str,
           run_as_root=True)
@@ -1306,11 +1306,13 @@ class CephDriver(object):
             LOG.info('Can not find pid file for osd.%s' % num)
         return True
 
-    def start_osd_daemon(self, context, num):
+    def start_osd_daemon(self, context, num, is_vsm_add_osd=False):
         osd = "osd.%s" % num
         LOG.info('begin to start osd = %s' % osd)
-        # utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
-        self._operate_ceph_daemon("start", "osd", id=num)
+        if is_vsm_add_osd:
+            utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
+        else:
+            self._operate_ceph_daemon("start", "osd", id=num)
         return True
 
     def stop_mon_daemon(self, context, num):
@@ -1934,10 +1936,12 @@ class CephDriver(object):
         # Step 2: shutdown the process.
         if host_is_running:
             LOG.info('>>> remove ceph osd kill proc osd %s' % osd_id)
-            # utils.execute("service", "ceph", "-a", "stop", "osd.%s" % osd_id,
-            #           run_as_root=True)
-            self._operate_ceph_daemon("stop", "osd", id=osd_id,
-                                      ssh=True, host=host)
+            try:
+                self._operate_ceph_daemon("stop", "osd", id=osd_id,
+                                          ssh=True, host=host)
+            except:
+                utils.execute("service", "ceph", "-a", "stop", "osd.%s" % osd_id,
+                              run_as_root=True)
         _wait_osd_status(osd_id, 'up', 0)
 
         # Step 3: Remove it from crushmap.
