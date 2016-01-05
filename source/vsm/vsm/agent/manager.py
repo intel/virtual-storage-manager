@@ -1201,10 +1201,12 @@ class AgentManager(manager.Manager):
     def get_ceph_version_to_db(self, context):
         ceph_ver = self.ceph_driver.get_ceph_version()
         db.init_node_update(context,self._init_node_id,{'ceph_ver':ceph_ver})
+
     @periodic_task(run_immediately=True,
                    service_topic=FLAGS.agent_topic,
                    spacing=FLAGS.reset_pg_heart_beat)
     def update_pg_and_pgp(self, context):
+        LOG.info("Updating pg_num and pg_placement_num for pools")
         db_pools = db.pool_get_all(context)
         for pool in db_pools:
             # storage_group = db.storage_group_get_by_rule_id(context, \
@@ -1250,11 +1252,25 @@ class AgentManager(manager.Manager):
 
         ceph_pools = self.ceph_driver.get_pool_status()
         for pool in ceph_pools:
-            values = {
-                'pg_num': pool.get('pg_num'),
-                'pgp_num': pool.get('pg_placement_num')
+            # TODO cluster_id is hardcode here, fix it later
+            # fix issue after import ceph cluster, at this time no pool in db
+
+            cluster_id = 1
+            pool_name = pool.get('pool_name')
+            db_pool = db.pool_get_by_name(context, pool_name, cluster_id)
+            if db_pool:
+                pool_id = pool.get('pool')
+                pg_num = pool.get('pg_num')
+                pg_placement_num = pool.get('pg_placement_num')
+                values = {
+                    'pg_num': pg_num,
+                    'pgp_num': pg_placement_num
                 }
-            db.pool_update_by_pool_id(context, pool['pool'], values)
+                LOG.info("Update pool %s with pg_num %s pg_placement_num %s" %
+                         (pool_name, pg_num, pg_placement_num))
+                db.pool_update_by_pool_id(context, pool_id, values)
+            else:
+                LOG.warn("Not found pool %s in db now, will add and update it later" % pool_name)
 
     #@require_active_host
     @periodic_task(run_immediately=True,
