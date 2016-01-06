@@ -504,9 +504,11 @@ class SchedulerManager(manager.Manager):
                                                         values)
                 # save ceph conf
                 LOG.info(" save osd_location of osd in  %s " % ser['host'])
-                for osd_location in ser.get('osds_locations',[]):
-                    values = {'osd_location':osd_location['osd_location']}
-                    osd_id = osd_location['osd_id']
+                for osd_location in ser.get('osd_locations',[]):
+                    values = {'osd_location':osd_location.get('location',None),
+                              'weight':osd_location.get('weight'),}
+                    osd_id = int(osd_location['osd_id'])
+
                     db.osd_state_update(context,osd_id,values)
                 LOG.info(" start save ceph config to %s " % ser['host'])
                 self._agent_rpcapi.update_ceph_conf(context, ser['host'])
@@ -715,12 +717,12 @@ class SchedulerManager(manager.Manager):
                      u'is_monitor': True,
                      u'id': u'1',
                      u'zone_id': u'1',
-                     u'osds_locations':[{'osd_id':1,'osd_location':zone_id},{'osd_id':2,'osd_location':zone_id2}]},
+                     u'osds_locations':[{'osd_id':1,'location':zone_id},{'osd_id':2,'location':zone_id2}]},
                     {u'is_storage': True,
                      u'is_monitor': False,
                      u'id': u'2',
                      u'zone_id': u'2',
-                     u'osds_locations':[{'osd_id':1,'osd_location':zone_id},{'osd_id':2,'osd_location':zone_id2}]},
+                     u'osds_locations':[{'osd_id':1,'location':zone_id},{'osd_id':2,'location':zone_id2}]},
                 ]
 
            Here we also need to fetch info from DB.

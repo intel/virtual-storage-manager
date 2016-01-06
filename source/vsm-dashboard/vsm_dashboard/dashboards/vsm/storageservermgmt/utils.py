@@ -166,7 +166,10 @@ def get_zone_list(request):
         except:
             exceptions.handle(request,
                               _('Unable to retrieve sever list. '))
-        return get_zone_list_format(_zones)
+        for _zone in _zones:
+            zones.setdefault(_zone['id'], _zone['name'])
+        zone_list = zones.items()
+        return zone_list
 
 def get_zone_not_in_crush_list(request):
         _zones = []
@@ -191,6 +194,8 @@ def get_zone_as_osd_location(request):
 def get_zone_list_format(zones):
         zones_dict = {}
         for _zone in zones:
-            zones_dict.setdefault(_zone.id, _zone.name)
-        zone_list = zones.items()
+            print 'dir-----1111---',dir(_zone)
+            print 'type----1111---',type(_zone)
+            zones_dict.setdefault(_zone['id'], _zone['name'])
+        zone_list = zones_dict.items()
         return zone_list

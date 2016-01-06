@@ -813,8 +813,10 @@ class CephDriver(object):
             osd_state['deleted'] = 0
             osd_state['zone_id'] = strg['zone_id']
             if osd_id_in is not None:
-                db.osd_state_update(context,osd_id_in,osd_state)
-
+                osd_state_ref = db.osd_state_update(context,osd_id_in,osd_state)
+            else:
+                osd_state_ref = self._conductor_api.osd_state_create(context, osd_state)
+            osd_state['osd_location'] = osd_state_ref['osd_location']
             LOG.info('>> crush_dict  %s' % crush_dict)
             LOG.info('>> osd_conf_dict %s' % osd_conf_dict)
             LOG.info('>> osd_state %s' % osd_state)
@@ -960,6 +962,7 @@ class CephDriver(object):
         all_osd_in_host = db.osd_state_get_by_service_id(context,osd_state['service_id'])
         other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id'] and osd['state'] != 'Uninitialized']
         crushmap = self.get_crushmap_json_format()
+        LOG.info("osd_location_direct=======%s"%osd_state.get('osd_location'))
         osd_location_direct = osd_state.get('osd_location')
         if osd_location_direct:
             if osd_location_direct.find('=') != -1:
@@ -983,7 +986,7 @@ class CephDriver(object):
            osd_location_str,
           run_as_root=True)
         #LOG.info('osd-to-db==%s'%osd_state)
-        self._conductor_api.osd_state_create(context, osd_state)
+        #self._conductor_api.osd_state_create(context, osd_state)
         LOG.info('>>> step7 finish')
         return True
 

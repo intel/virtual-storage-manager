@@ -127,8 +127,9 @@ class ZonesController(wsgi.Controller):
 
     def get_zone_not_in_crush_list(self,req):
         context = req.environ['vsm.context']
-        zone_not_in_crush = db.get_zone_not_in_crush_list(context)
+        zone_not_in_crush = db.zone_get_all_not_in_crush(context)
         LOG.info("CEPH_LOG zone get_zone_not_in_crush_list:%s"%zone_not_in_crush)
+        LOG.info("CEPH_LOG zone dir get_zone_not_in_crush_list:%s"%dir(zone_not_in_crush[0]))
         return {'zone_not_in_crush':zone_not_in_crush}
 
 def create_resource(ext_mgr):

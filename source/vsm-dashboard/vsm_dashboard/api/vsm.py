@@ -146,7 +146,7 @@ def get_zone_list(request):
 
 #zone api
 def get_zone_not_in_crush_list(request):
-    return vsmclient(request).zones.get_zone_not_in_crush()
+    return vsmclient(request).zones.get_zone_not_in_crush_list()
 
 
 # TODO return the exact response
