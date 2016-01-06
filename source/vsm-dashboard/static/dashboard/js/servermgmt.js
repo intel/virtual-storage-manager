@@ -116,8 +116,13 @@ $("#btnSubmit").click(function(){
     var data;
     switch(action.index){
         case 1:
-            data = GenerateAddServerData();
-            break;
+            var server_id_list =  GetServerIDListAsString();
+            if(server_id_list==""){
+                showTip("warning","Please select the servers");
+                return false;
+            }
+            window.location.href = "/dashboard/vsm/storageservermgmt/addserverdetailview/?id="+server_id_list;
+            return;
         case 2:
             data = GenerateRemoveServerData();
             break;
@@ -200,6 +205,19 @@ function PostRequest(action,data){
     });
 }
 
+function GetServerIDListAsString(){
+    var server_id_list = "";
+    $("#tServers>tbody>tr").each(function(){
+        var tr_id = this.id;
+        var checkbox = $("#"+tr_id).find(".table-row-multi-select");
+        
+        if(checkbox[0].checked){
+            id = checkbox.val();
+            server_id_list += id+","
+        }
+    })
+    return server_id_list;
+}
 
 function GenerateAddServerData(){
     var data_list = new Array();
