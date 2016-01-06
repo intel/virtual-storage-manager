@@ -1303,7 +1303,12 @@ class CephDriver(object):
         if os.path.exists(file_path):
             self._kill_by_pid_file(file_path)
         else:
-            LOG.info('Can not find pid file for osd.%s' % num)
+            LOG.info("Not found pid file for osd.%s" % num)
+            try:
+                LOG.info("Try to stop osd %s daemon by ceph or ceph-osd command" % num)
+                self._operate_ceph_daemon("stop", "osd", id=num)
+            except:
+                LOG.warn("Osd %s has been stopped" % num)
         return True
 
     def start_osd_daemon(self, context, num, is_vsm_add_osd=False):
@@ -1320,13 +1325,18 @@ class CephDriver(object):
         if os.path.exists(file_path):
             self._kill_by_pid_file(file_path)
         else:
-            LOG.info('Can not find pid file for osd.%s' % num)
+            LOG.info("Not found pid file for mon.%s" % num)
+            try:
+                LOG.info("Try to stop mon %s daemon by ceph or ceph-mon command" % num)
+                self._operate_ceph_daemon("stop", "mon", id=num)
+            except:
+                LOG.warn("Mon %s has been stopped" % num)
         return True
 
     def start_mon_daemon(self, context, num):
         if not self.stop_mon_daemon(context, num):
             return False
-        mon_name = 'mon.%s' % num
+        # mon_name = 'mon.%s' % num
         # utils.execute('service', 'ceph', 'start', mon_name, run_as_root=True)
         self._operate_ceph_daemon("start", "mon", id=num)
         return True
@@ -1336,7 +1346,12 @@ class CephDriver(object):
         if os.path.exists(file_path):
             self._kill_by_pid_file(file_path)
         else:
-            LOG.info('Can not find pid file for mds.%s' % num)
+            LOG.info('Not found pid file for mds.%s' % num)
+            try:
+                LOG.info("Try to stop mds %s daemon by ceph or ceph-mds command" % num)
+                self._operate_ceph_daemon("stop", "mds", id=num)
+            except:
+                LOG.warn("Mds %s has been stopped" % num)
         return True
 
     def get_mds_id(self, host=FLAGS.host):
@@ -1395,9 +1410,9 @@ class CephDriver(object):
                 if config_dict[section]['host'] == FLAGS.host:
                     mon_id = section.replace("mon.", "")
 
-        # Try to start monitor service.
+        # Try to stop monitor service.
         if mon_id:
-            LOG.info('>> start the monitor id: %s' % mon_id)
+            LOG.info('>> stop the monitor id: %s' % mon_id)
             if node_type and node_type.find('monitor') != -1:
                 self.stop_mon_daemon(context, mon_id)
     def start_osd(self, context):
