@@ -174,19 +174,19 @@ class Parser(object):
 
         self._sections.pop(sec_name)
 
-    def get(self, sec_name, key):
+    def get(self, sec_name, key, default_val=None):
         if not self.has_section(sec_name):
             return None
 
         sec = self._sections[sec_name]
-        return sec.get(key, None)
+        return sec.get(key, default_val)
 
-    def get(self, sec_name, key, default_val):
-        val = self.get(sec_name, key)
-        if val:
-            return val
-        else:
-            return default_val
+    # def get(self, sec_name, key, default_val):
+    #     val = self.get(sec_name, key)
+    #     if val:
+    #         return val
+    #     else:
+    #         return default_val
 
     def set(self, sec_name, key, val):
         sec_name = sec_name.strip()
