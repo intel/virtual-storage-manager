@@ -138,6 +138,12 @@ def get_server_list(request, filters=[]):
                 server['is_monitor'] = "yes"
             else:
                 server['is_monitor'] = "no"
+
+            if "storage" in _server.type:
+                server['is_storage'] = "yes"
+            else:
+                server['is_storage'] = "no"
+
             if _server.zone_id in zones:
                 server['zone'] = zones[_server.zone_id]
 

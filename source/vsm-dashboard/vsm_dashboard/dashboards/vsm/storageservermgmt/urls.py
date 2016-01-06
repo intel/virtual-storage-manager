@@ -15,18 +15,20 @@
 # under the License.
 
 from django.conf.urls import patterns, url
+
 from .views import IndexView
 from .views import ServersAction
 from .views import AddServersView
-from .views import AddServersView2
+from .views import AddServerDetailView
 from .views import RemoveServersView
-
 from .views import AddMonitorsView
 from .views import RemoveMonitorsView
 from .views import StartServersView
 from .views import StopServersView
 from .views import ResetStatus
 from .views import update_server_list
+from .views import get_server_by_name
+from .views import add_server
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
@@ -39,5 +41,9 @@ urlpatterns = patterns('',
     url(r'^servers/(?P<action>\w+)$', ServersAction, name='serversaction'),
     url(r'^reset_status/(?P<server_id>\w+)$', ResetStatus, name='reset_status'),
     url(r'^update_server_list/$', update_server_list, name='update_server_list'),
+
+    url(r'^addserverdetailview/$', AddServerDetailView, name='addserverdetailview'),
+    url(r'^get_server_by_name/$', get_server_by_name, name='get_server_by_name'),
+    url(r'^add_server/$', add_server, name='add_server'),
 
 )

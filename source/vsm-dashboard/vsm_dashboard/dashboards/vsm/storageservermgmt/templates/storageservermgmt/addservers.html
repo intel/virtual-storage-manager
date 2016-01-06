@@ -1,0 +1,133 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ --> 
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Manage Servers" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Add Servers") %}
+  <link href="{{ STATIC_URL }}dashboard/css/addserver.css" rel="stylesheet">
+{% endblock page_header %}
+
+{% block main %}
+{% csrf_token %}
+
+<div id="divAddServerForm">
+    <div class="left">
+        <div class="control-group required">
+            <label id="lblServer" >Select Server</label>
+            <select id="selServer" class="form-control" style="width: 342px;" onchange="ChangeServer(this)">
+                {% for server in server_list %}
+                   <option value = "{{server.0}}">{{server.1}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="right">
+        <div class="control-group required">
+            <label >Zone :</label>
+            <span class="form-required">*</span>
+            <div class="input">
+                <select id="selZone" class="form-control" 
+                onchange="ChangeZone(this.selectedIndex)">
+                    {% for zone in zone_list %}
+                       <option value = "{{zone.0}}">{{zone.1}}</option>
+                    {% endfor %}
+                     <option value = "2">zone2</option>
+                </select>
+            </div>
+        </div>
+    </div> 
+    <input id="hfIsMonitor" type="hidden" />
+    <input id="hfIsStorage" type="hidden" />
+    <input id="hfServerIP" type="hidden" />
+    <input id="hfServerID" type="hidden" />
+</div>
+
+
+<div id="divOSDTable">
+    <table id="tOSDList" class="table table-bordered table-striped datatable">
+        <thead>
+            <tr>
+                <th class="normal_column hidden"></th>
+                <th class="normal_column">OSD Name</th>
+                <th class="normal_column">Zone</th>
+                <th class="normal_column">Weight</th>
+                <th class="normal_column">Journal Device</th>
+                <th class="normal_column">Data Device</th>      
+            </tr>
+        </thead>
+
+        <tbody id="tbOSDList">
+
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="6">
+                    <span class="table_count"></span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    <div id="divFormOptions" class="vsm-options-bar">
+        <button id="btnAddOSD" class="btn btn-primary" onclick="AddServer()">Add</button>
+    </div>
+</div>
+
+
+<div id="divServerTable">
+    <table id="tServerList" class="table table-bordered table-striped datatable">
+        <thead>
+            <tr>
+                <th class="normal_column hidden"></th>
+                <th class="normal_column">Server Name</th>
+                <th class="normal_column">Address</th>
+                <th class="normal_column">Monitor</th>
+                <th class="normal_column hidden">Storage</th>
+                <th class="normal_column">OSD Count</th>
+                <th class="normal_column">Zone Info.</th>
+                <th class="normal_column">Action</th>      
+            </tr>
+        </thead>
+
+        <tbody id="tbServerList">
+            <tr id="trServerEmptyRow" class="odd empty">
+                <td colspan="8">No items to display.</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="8">
+                    <span class="table_count"></span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    <div id="divFormOptions" class="vsm-options-bar">
+        <button id="btnAddServer" class="btn btn-primary" onclick="SubmitAddServer()">Submit</button>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/addserver.js' type='text/javascript' charset='utf-8'></script>
+{% endblock %}
+
