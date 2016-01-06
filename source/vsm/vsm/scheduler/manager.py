@@ -493,7 +493,7 @@ class SchedulerManager(manager.Manager):
 
         # select an active monitor
         #active_monitor = self._get_active_monitor(context)
-
+        active_monitor = None
         for ser in new_storage_list:
             try:
                 self._start_add(context, ser['id'])
@@ -503,11 +503,11 @@ class SchedulerManager(manager.Manager):
                                                         ser['id'],
                                                         values)
                 # save ceph conf
-                LOG.info(" save osd_location of osd in  %s " % ser['host'])
+                #LOG.info(" save osd_location of osd in  %s " % ser['osd_locations'])
                 for osd_location in ser.get('osd_locations',[]):
                     values = {'osd_location':osd_location.get('location',None),
                               'weight':osd_location.get('weight'),}
-                    osd_id = int(osd_location['osd_id'])
+                    osd_id = int(osd_location['id'])
 
                     db.osd_state_update(context,osd_id,values)
                 LOG.info(" start save ceph config to %s " % ser['host'])
@@ -544,7 +544,9 @@ class SchedulerManager(manager.Manager):
                                                 new_storage_list,
                                                 'ERROR: add_osd error')
                 raise
-
+        if active_monitor is not None:
+            self._agent_rpcapi.update_zones_from_crushmap_to_db(context,None,
+                active_monitor['host'])
         return True
 
     def remove_osd(self, context, server_list):
