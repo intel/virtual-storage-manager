@@ -1,0 +1,53 @@
+#divAddServerForm{
+	width: 800px;
+	margin-top: 10px;
+	overflow: hidden;
+	padding: 5px;
+}
+
+#divAddServerForm .left{
+	float:left;
+	margin-right:50px;
+	overflow: hidden;
+}
+
+#divAddServerForm .right{
+	float:left;
+	overflow: hidden;
+}
+
+
+#divOSDTable{
+	margin-top:15px;
+	width: 100%;
+	height:auto;
+	overflow:hidden;
+}
+
+#divServerTable{
+	margin-top:15px;
+	width: 100%;
+	height:auto;
+	overflow:hidden;
+}
+
+
+.ctrl-weight{
+	width:200px;
+}
+
+.ctrl-zone{
+	width:200px;
+}
+
+#divFormOptions{
+	height: 50px;
+	line-height: 50px;
+	margin-top:5px;
+	clear: both;
+}
+
+.zone-name{
+	min-width:80px;
+	display:inline-block;
+}
