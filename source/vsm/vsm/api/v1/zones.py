@@ -124,7 +124,12 @@ class ZonesController(wsgi.Controller):
         osd_locations = db.osd_locations_choices_by_type(context,type=1)
         LOG.info("CEPH_LOG zone osd_locations_choices:%s"%osd_locations)
         return {'osd_locations_choices':osd_locations}
-     
+
+    def get_zone_not_in_crush_list(self,req):
+        context = req.environ['vsm.context']
+        zone_not_in_crush = db.get_zone_not_in_crush_list(context)
+        LOG.info("CEPH_LOG zone get_zone_not_in_crush_list:%s"%zone_not_in_crush)
+        return {'zone_not_in_crush':zone_not_in_crush}
 
 def create_resource(ext_mgr):
     return wsgi.Resource(ZonesController(ext_mgr))

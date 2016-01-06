@@ -166,9 +166,31 @@ def get_zone_list(request):
         except:
             exceptions.handle(request,
                               _('Unable to retrieve sever list. '))
+        return get_zone_list_format(_zones)
 
-        zones = {}
-        for _zone in _zones:
-            zones.setdefault(_zone.id, _zone.name)
+def get_zone_not_in_crush_list(request):
+        _zones = []
+        try:
+            _zones = api.vsm.get_zone_not_in_crush_list(request,)
+        except:
+            exceptions.handle(request,
+                              _('Unable to retrieve sever list. '))
+        _zones = _zones['zone_not_in_crush']
+        return get_zone_list_format(_zones)
+
+def get_zone_as_osd_location(request):
+        _zones = []
+        try:
+            _zones = api.vsm.osd_locations_choices_by_type(request,)
+        except:
+            exceptions.handle(request,
+                              _('Unable to retrieve sever list. '))
+        _zones = _zones['osd_locations_choices']
+        return get_zone_list_format(_zones)
+
+def get_zone_list_format(zones):
+        zones_dict = {}
+        for _zone in zones:
+            zones_dict.setdefault(_zone.id, _zone.name)
         zone_list = zones.items()
         return zone_list

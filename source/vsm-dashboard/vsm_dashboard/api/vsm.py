@@ -144,6 +144,11 @@ def ceph_upgrade(request, body=None):
 def get_zone_list(request):
     return vsmclient(request).zones.list()
 
+#zone api
+def get_zone_not_in_crush_list(request):
+    return vsmclient(request).zones.get_zone_not_in_crush()
+
+
 # TODO return the exact response
 def create_zone(request, opts=None):
     res = vsmclient(request).zones.create(opts)

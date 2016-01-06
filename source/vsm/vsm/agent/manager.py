@@ -1407,11 +1407,13 @@ class AgentManager(manager.Manager):
         if mds_list:
             for mds in mds_list:
                 db.mds_update_or_create(context, mds)
-                address = mds['address']
-                LOG.info('mds addresss========%s'%address)
-                node = db.init_node_get_by_cluster_ip(context,address)
-                values = {'mds':'yes'}
-                db.init_node_update(context,node['id'],values)
+                address = mds['address'].split(':')
+                if len(address)>0:
+                    LOG.info('mds addresss========%s'%address[0])
+                    node = db.init_node_get_by_cluster_ip(context,address[0])
+                    if node['mds'] != 'yes':
+                        values = {'mds':'yes'}
+                        db.init_node_update(context,node['id'],values)
 
     #@require_active_host
     #@periodic_task(run_immediately=True,

@@ -827,7 +827,7 @@ class CephDriver(object):
             if self.is_new_storage_group(crush_dict['storage_group']):
                 self._crushmap_mgmt.add_storage_group(crush_dict['storage_group'],\
                                                   crush_dict['root'],types=types)
-                zones = db.zone_get_all(context)
+                zones = db.zone_get_all_not_in_crush(context)
                 for item in zones: 
                     zone_item = item['name'] + '_' + crush_dict['storage_group'] 
                     self._crushmap_mgmt.add_zone(zone_item, \

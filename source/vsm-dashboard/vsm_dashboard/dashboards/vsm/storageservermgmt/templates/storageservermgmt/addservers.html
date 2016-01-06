@@ -45,7 +45,7 @@
             <div class="input">
                 <select id="selZone" class="form-control" 
                 onchange="ChangeZone(this.selectedIndex)">
-                    {% for zone in zone_list %}
+                    {% for zone in zone_list_server %}
                        <option value = "{{zone.0}}">{{zone.1}}</option>
                     {% endfor %}
                      <option value = "2">zone2</option>

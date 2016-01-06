@@ -2644,6 +2644,14 @@ def zone_get_all(context, session=None):
     return model_query(context, models.Zone, session=session).all()
 
 @require_admin_context
+def zone_get_all_in_crush(context, session=None):
+    return model_query(context, models.Zone, session=session).filter(models.Zone.type != None).all()
+
+@require_admin_context
+def zone_get_all_not_in_crush(context, session=None):
+    return model_query(context, models.Zone, session=session).filter(models.Zone.type == None).all()
+
+@require_admin_context
 def zone_get(context, zone_id, session=None):
     result = model_query(context, models.Zone, session=session).\
                      filter_by(id=zone_id).\
