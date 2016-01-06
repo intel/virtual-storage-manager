@@ -182,7 +182,7 @@ class Parser(object):
         return sec.get(key, None)
 
     def get(self, sec_name, key, default_val):
-        val = get(sec_name, key)
+        val = self.get(sec_name, key)
         if val:
             return val
         else:
