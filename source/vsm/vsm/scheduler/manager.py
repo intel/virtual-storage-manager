@@ -504,7 +504,7 @@ class SchedulerManager(manager.Manager):
                                                         values)
                 # save ceph conf
                 LOG.info(" save osd_location of osd in  %s " % ser['host'])
-                for osd_location in ser.get('osds_locations'):
+                for osd_location in ser.get('osds_locations',[]):
                     values = {'osd_location':osd_location['osd_location']}
                     osd_id = osd_location['osd_id']
                     db.osd_state_update(context,osd_id,values)
@@ -1351,6 +1351,42 @@ class SchedulerManager(manager.Manager):
             raise
         return {'tree_node':tree_node}
 
+    def get_osds_by_rules(self,context,body):
+        '''
+        :param context:
+        :param body:
+        {'rules':[rule_name,rule_name],
+         'cluster_id':1,
+        }
+        :return:
+        '''
+        monitor_pitched_host = self._get_monitor_by_cluster_id(context, body.get('cluster_id',1))
+        #LOG.info("000000000000000=%s"%monitor_pitched_host)
+        monitor_keyring = None
+        rules = body.get('rules')
+        rule_osds = {}
+        try:
+            #LOG.info("111111111111111=%s"%monitor_pitched_host)
+            message = self._agent_rpcapi.detect_crushmap(context, monitor_keyring, monitor_pitched_host)
+            crushmap_str = message['crushmap']
+            crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
+            utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
+            crushmap = CrushMap(json_file=crush_map_new)
+            for rule in rules:
+                osds = crushmap.get_all_osds_by_rule(rule)
+                osds = [osd['name'] for osd in osds]
+                osds = list(set(osds))
+                rule_osds[rule] = osds
+            #LOG.info("222222==%s"%tree_node)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: get_crushmap_tree_data rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: get_crushmap_tree_data rpc remote')
+        except:
+            LOG.error('ERROR: get_crushmap_tree_data')
+            raise
+        return rule_osds
+
     def import_cluster(self,context,body):
         '''
         :param context:
@@ -1372,7 +1408,8 @@ class SchedulerManager(manager.Manager):
                 LOG.info('fresh ceph conf from db to ceph nodes %s '%ser['host'])
                 self._agent_rpcapi.update_ceph_conf(context, ser['host'])
                 self._agent_rpcapi.update_keyring_admin_from_db(context,ser['host'])
-
+            LOG.info('fresh cluster status. monitor name is %s'%monitor_pitched_host)
+            self._agent_rpcapi.cluster_refresh(context,monitor_pitched_host)
         except rpc_exc.Timeout:
             LOG.error('ERROR: check_pre_existing_cluster rpc timeout')
         except rpc_exc.RemoteError:

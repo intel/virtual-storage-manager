@@ -243,3 +243,62 @@ def ResetStatus(request, server_id):
 def update_server_list(request):
     servers = get_server_list(request)
     return HttpResponse(json.dumps(servers))
+
+
+def AddServerDetailView(request):
+    template = "vsm/storageservermgmt/addservers.html"
+    context = {}
+    servers = get_server_list(request, )
+    server_id_list = request.GET.get('id', "").split(",")
+    servers_list = [(x["name"],x["name"]+"("+x["primary_public_ip"]+")") for x in servers for y in server_id_list if str(x["id"]) == str(y)]
+    context["server_list"] = servers_list
+    context["zone_list"] = get_zone_list(request)
+    return render(request,template,context)
+
+def get_server_by_name(request):
+    data = json.loads(request.body)
+    server_name = data["name"]
+    server_list = get_server_list(request,lambda x:x['name'] == server_name)
+    server = {}
+
+    paginate_opts = {
+        "limit":10000,
+        "marker":0,
+        "sort_keys":'id',
+        "sort_dir":'asc',
+        "osd_name":"",
+        "server_name":server_name,
+        "zone_name":"",
+        "state":""
+    }
+
+    if(len(server_list)>0):
+        osd_list = vsmapi.osd_status_sort_and_filter(request,paginate_opts)
+        server = {
+            "id":server_list[0]["id"],
+            "IP":server_list[0]["primary_public_ip"],
+            "name":server_list[0]["name"],
+            "zone_id":server_list[0]["zone_id"],
+            "is_monitor":server_list[0]["is_monitor"],
+            "is_storage":server_list[0]["is_storage"],
+            "osd_list":[]
+        }
+        for osd in osd_list:
+            osd_item = {
+                "osd_id":osd.id,
+                "osd_name":osd.osd_name,
+                "zone": osd.zone,
+                "weight": osd.weight,
+                "journal":"/path/journal/",
+                "data": "/path/data/",
+            }
+            server["osd_list"].append(osd_item)
+
+    return HttpResponse(json.dumps(server))
+
+def add_server(request):
+    data = json.loads(request.body)
+    print "=============Add Server======================"
+    print data
+
+    return HttpResponse(json.dumps({"status":"OK"}))

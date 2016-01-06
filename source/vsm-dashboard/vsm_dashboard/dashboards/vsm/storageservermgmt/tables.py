@@ -271,13 +271,13 @@ class AddServerTable(tables.DataTable):
     secondary_public_ip = tables.Column("secondary_public_ip",
         verbose_name=_("Ceph Public Address"))
     cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph Cluster Address"))
-    zone = tables.Column("zone", verbose_name=_("Zone"), 
-        classes=('zone',), empty_value=empty_value_maker("choice","zone_list","",{"style":"width:80px"}))
+    # zone = tables.Column("zone", verbose_name=_("Zone"),
+    #     classes=('zone',), empty_value=empty_value_maker("choice","zone_list","",{"style":"width:80px"}))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
     is_monitor = tables.Column("is_monitor", verbose_name=_("Monitor"),
         classes=('monitor',), empty_value=empty_value_maker("checkbox","is_monitor","")) 
-    is_storage = tables.Column("is_storage", verbose_name=_("Storage"), classes=('storage',),
-        empty_value=empty_value_maker("checkbox","is_storage",1), hidden=True) 
+    # is_storage = tables.Column("is_storage", verbose_name=_("Storage"), classes=('storage',),
+    #     empty_value=empty_value_maker("checkbox","is_storage",1), hidden=True)
     server_status = tables.Column("status", verbose_name=_("Server Status"), classes=('server_status',))
     #createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
     #cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
