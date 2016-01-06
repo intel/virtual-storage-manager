@@ -204,13 +204,17 @@ class Controller(wsgi.Controller):
             if pool_id in pools:
                 pools[pool_id]['attach_status'] = sp_usage['attach_status']
 
+        rules = [storage_group['name'] for storage_group in storage_groups]
+        rules_dict = {'rules':list(set(rules))}
+        rule_osds = self.scheduler_api.get_osds_by_rules(context,rules_dict )
         for storage_group in storage_groups:
+            osds_in_storage_group = rule_osds.get(storage_group['name'])#osd['storage_group']['id'] == storage_group["id"]]
             storage_group['capacity_total'] = sum([osd["device"]['total_capacity_kb'] for osd in osds
-                                               if osd['storage_group']['id'] == storage_group["id"]])
+                                               if osds['name'] in osds_in_storage_group])
             storage_group['capacity_used'] = sum([osd["device"]['used_capacity_kb'] for osd in osds
-                                                   if osd['storage_group']['id'] == storage_group["id"]])
+                                               if osds['name'] in osds_in_storage_group])
             storage_group['capacity_avail'] = sum([osd["device"]['avail_capacity_kb'] for osd in osds
-                                                   if osd['storage_group']['id'] == storage_group["id"]])
+                                               if osds['name'] in osds_in_storage_group])
 
             nodes = {}
             osd_cnt = 0
