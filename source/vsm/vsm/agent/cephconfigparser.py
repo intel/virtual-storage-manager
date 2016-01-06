@@ -179,14 +179,10 @@ class Parser(object):
             return None
 
         sec = self._sections[sec_name]
-        return sec.get(key, default_val)
+        if sec.get(key, None):
+            return sec.get(key, default_val)
 
-    # def get(self, sec_name, key, default_val):
-    #     val = self.get(sec_name, key)
-    #     if val:
-    #         return val
-    #     else:
-    #         return default_val
+        return sec.get(key.replace('_', ' '), default_val)
 
     def set(self, sec_name, key, val):
         sec_name = sec_name.strip()
