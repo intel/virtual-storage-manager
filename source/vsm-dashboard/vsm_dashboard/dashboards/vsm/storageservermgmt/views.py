@@ -37,8 +37,11 @@ from .tables import StartServerTable
 from .tables import StopServerTable
 from django.http import HttpResponse
 from .utils import get_server_list
-from .utils import get_zone_list
+from .utils import get_zone_list,get_zone_not_in_crush_list,get_zone_as_osd_location
 from django.views.generic import TemplateView
+from django.shortcuts import render,render_to_response
+
+
 
 
 import json
@@ -82,7 +85,7 @@ class AddServersView(tables.DataTableView):
 
     def get_data(self):
         servers = get_server_list(self.request, lambda x: x['status'] == "available")
-        zone_list = get_zone_list(self.request)
+        zone_list = get_zone_not_in_crush_list(self.request)
 
         for server in servers:
             server.update({"zone_list": {"choices": zone_list, "value":server['zone_id']}})
@@ -252,7 +255,8 @@ def AddServerDetailView(request):
     server_id_list = request.GET.get('id', "").split(",")
     servers_list = [(x["name"],x["name"]+"("+x["primary_public_ip"]+")") for x in servers for y in server_id_list if str(x["id"]) == str(y)]
     context["server_list"] = servers_list
-    context["zone_list"] = get_zone_list(request)
+    context["zone_list_server"] = get_zone_not_in_crush_list(request)
+    context["zone_list_osd"] = get_zone_as_osd_location(request)
     return render(request,template,context)
 
 def get_server_by_name(request):
@@ -289,8 +293,8 @@ def get_server_by_name(request):
                 "osd_name":osd.osd_name,
                 "zone": osd.zone,
                 "weight": osd.weight,
-                "journal":"/path/journal/",
-                "data": "/path/data/",
+                "journal":osd.device['path'],
+                "data": osd.device['journal'],
             }
             server["osd_list"].append(osd_item)
 
@@ -300,5 +304,7 @@ def add_server(request):
     data = json.loads(request.body)
     print "=============Add Server======================"
     print data
+    code,ret = vsmapi.add_servers(request, data)
+    print ret
 
     return HttpResponse(json.dumps({"status":"OK"}))

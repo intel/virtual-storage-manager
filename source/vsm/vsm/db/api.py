@@ -1056,6 +1056,12 @@ def zone_get_by_id(context, id):
 def zone_get_by_name(context, zone):
     return IMPL.zone_get_by_name(context, zone)
 
+def zone_get_all_in_crush(context):
+    return IMPL.zone_get_all_in_crush(context)
+
+def zone_get_all_not_in_crush(context):
+    return IMPL.zone_get_all_not_in_crush(context)
+
 #device
 
 def device_get_all(context):

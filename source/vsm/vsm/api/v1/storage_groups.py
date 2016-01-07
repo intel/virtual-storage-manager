@@ -210,11 +210,11 @@ class Controller(wsgi.Controller):
         for storage_group in storage_groups:
             osds_in_storage_group = rule_osds.get(storage_group['name'])#osd['storage_group']['id'] == storage_group["id"]]
             storage_group['capacity_total'] = sum([osd["device"]['total_capacity_kb'] for osd in osds
-                                               if osds['name'] in osds_in_storage_group])
+                                               if osd['osd_name'] in osds_in_storage_group])
             storage_group['capacity_used'] = sum([osd["device"]['used_capacity_kb'] for osd in osds
-                                               if osds['name'] in osds_in_storage_group])
+                                               if osd['osd_name'] in osds_in_storage_group])
             storage_group['capacity_avail'] = sum([osd["device"]['avail_capacity_kb'] for osd in osds
-                                               if osds['name'] in osds_in_storage_group])
+                                               if osd['osd_name'] in osds_in_storage_group])
 
             nodes = {}
             osd_cnt = 0

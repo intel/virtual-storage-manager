@@ -144,7 +144,8 @@ class APIRouter(vsm.api.openstack.APIRouter):
         self.resources['zones'] = zones.create_resource(ext_mgr)
         mapper.resource("zones", "zones",
                         controller=self.resources['zones'],
-                        collection={'osd_locations_choices': 'get'},
+                        collection={'osd_locations_choices': 'get',
+                                    'get_zone_not_in_crush_list': 'get',},
                         member={'action':'POST'})
 
         self.resources['osds'] = osds.create_resource(ext_mgr)
