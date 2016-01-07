@@ -1,0 +1,50 @@
+
+#divFramework{
+	width: 100%;
+	overflow: hidden;
+}
+
+#divCrushmap{
+	float: left;
+	width: 25%;
+	height: 740px;
+	border:1px solid #ccc;
+	overflow: auto;
+}
+
+#divZoneForm{
+	width: 70%;
+	float: left;
+	margin-left: 10px;
+	height: 740px;;
+	overflow-y:auto;
+}
+
+#divBaseForm{
+	overflow: hidden;
+}
+
+#divZoneFormLeft{
+	float: left;
+	width: 300px;
+}
+
+#divZoneFormRight{
+	margin-left: 20px;
+	float: left;
+	width: 300px;
+}
+
+#divFormOptions{
+	width: 630px;
+	margin-top: 20px;
+	padding-right: 10px;
+}
+
+.required-star{
+	content: "*";
+	font-weight: bold;
+	line-height: 0;
+	padding-left: 4px;
+	color:#428bca;
+}

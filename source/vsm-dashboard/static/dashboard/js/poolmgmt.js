@@ -12,7 +12,42 @@ function InitCtrlCSS(){
 	for(var i=0;i<ctrlText.length;i++){
 		ctrlText[i].className = "form-control";
 	}
+
+    var ctrlText = $("input[type='number']");
+    for(var i=0;i<ctrlText.length;i++){
+            ctrlText[i].className = "form-control";
+    }
+
+    //disable control
+    DisableControl();
 }
+
+function DisableControl(){
+    if($("#id_auto_growth_pg").length>0){
+            $("#id_auto_growth_pg")[0].readOnly = true;
+    }
+
+    if($("#id_pool_quota").length>0){
+            $("#id_pool_quota")[0].readOnly = true;
+    }
+}
+
+$("#id_disable_pg_auto_growth").click(function(){
+    console.log(this.checked);
+    if(this.checked)
+        $("#id_auto_growth_pg")[0].readOnly = false;
+    else
+        $("#id_auto_growth_pg")[0].readOnly = true;
+});
+
+$("#id_enable_pool_quota").click(function(){
+    console.log(this.checked);
+    if(this.checked)
+        $("#id_pool_quota")[0].readOnly = false;
+    else
+        $("#id_pool_quota")[0].readOnly = true;
+});
+
 
 
 $("#btnAddCacheTier").click(function(){
