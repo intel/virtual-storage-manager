@@ -131,6 +131,13 @@ class ZoneManager(base.ManagerWithFind):
         resp,body = self.api.client.get("/zones/osd_locations_choices")
         return body
 
+    def get_zone_not_in_crush_list(self):
+        """
+        :rtype: :class:`Zone`
+        """
+        resp,body = self.api.client.get("/zones/get_zone_not_in_crush_list")
+        return body
+
     def list(self, detailed=False, search_opts=None):
         """
         Get a list of all vsms.

@@ -164,3 +164,6 @@ class API(object):
 
     def update_zones_from_crushmap_to_db(self,context,body=None):
         return self.scheduler_rpcapi.update_zones_from_crushmap_to_db(context,body)
+
+    def get_osds_by_rules(self,context,body=None):
+        return self.scheduler_rpcapi.get_osds_by_rules(context,body)
