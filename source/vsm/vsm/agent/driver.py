@@ -1762,7 +1762,7 @@ class CephDriver(object):
         if start_line < 10:
             for attr in attributes[start_line:]:
                 attribute = attr.split()
-                if attribute[1] != "Unknown_Attribute":
+                if len(attribute) > 1 and attribute[1] != "Unknown_Attribute":
                     smart_info_dict['smart'][attribute[1]] = attribute[9]
 
 
