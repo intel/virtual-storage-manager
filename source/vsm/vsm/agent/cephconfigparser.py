@@ -290,8 +290,6 @@ class CephConfigParser(manager.Manager):
 
     def add_global(self,
                    pg_num=None,
-                   cnfth=None,
-                   cfth=None,
                    heartbeat_interval=None,
                    osd_heartbeat_interval=None,
                    osd_heartbeat_grace=None, 
@@ -312,12 +310,7 @@ class CephConfigParser(manager.Manager):
         #if pg_num:
             #self._parser.set('global', 'osd pool default pg num', str(pg_num))
             #self._parser.set('global', 'osd pool default pgp num', str(pg_num))
-        if cfth:
-            self._parser.set('global', 'mon osd full ratio', '.' + str(cfth))
-        if cnfth:
-            self._parser.set('global',
-                             'mon osd nearfull ratio',
-                             '.' + str(cnfth))
+
         if heartbeat_interval:
             self._parser.set('global', 'heartbeat interval', str(heartbeat_interval))
         if osd_heartbeat_interval:
@@ -346,7 +339,7 @@ class CephConfigParser(manager.Manager):
         self._parser.set('mds', 'keyring', '/etc/ceph/keyring.$name')
 
 
-    def add_mon_header(self, clock_drift=200):
+    def add_mon_header(self, clock_drift=200, cnfth=None, cfth=None):
         if self._parser.has_section('mon'):
             return
 
@@ -362,6 +355,10 @@ class CephConfigParser(manager.Manager):
         self._parser.set('mon',
                          'mon clock drift allowed',
                          '.' + str(clock_drift))
+        if cfth:
+            self._parser.set('mon', 'mon osd full ratio', '.' + str(cfth))
+        if cnfth:
+            self._parser.set('mon', 'mon osd nearfull ratio', '.' + str(cnfth))
 
     def _update_ceph_conf_into_db(self, content):
         if not self.cluster_id:
