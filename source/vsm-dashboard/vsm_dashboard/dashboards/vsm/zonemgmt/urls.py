@@ -16,9 +16,11 @@
 
 from django.conf.urls import patterns, url
 from .views import IndexView
-from .views import CreateView
+from .views import crushmap_datasource
+from .views import add
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^create/$', CreateView.as_view(), name='create')
+    url(r'^crushmap_datasource/$', crushmap_datasource, name='crushmap_datasource'),
+    url(r'^add/$', add, name='add'),
 )

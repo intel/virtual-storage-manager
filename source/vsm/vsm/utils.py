@@ -1567,7 +1567,7 @@ def pass_lock(uuid_str):
             lock = PassLock(file_name)
             if lock.run():
                 ret = func(*args, **kwargs)
-            return ret
+                return ret
         return __deco
     return _deco
 

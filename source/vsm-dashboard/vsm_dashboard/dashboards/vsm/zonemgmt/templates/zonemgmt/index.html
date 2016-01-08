@@ -20,10 +20,72 @@
 {% block title %}{% trans "Manage Zones" %}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("All Clusters") %}
+  {% include "horizon/common/_page_header.html" with title=_("Manage Zones") %}
+  <link href="{{ STATIC_URL }}dashboard/css/zone.css" rel="stylesheet">
+  <link href="{{ STATIC_URL }}dashboard/css/zTreeStyle.css" rel="stylesheet">
+
 {% endblock page_header %}
 
 {% block main %}
-    {{ table.render }}
+{% csrf_token %}
+
+<div id="divFramework">
+    <div id="divCrushmap">
+        <div id="divCrushmapTree" class="ztree"></div>
+    </div>
+
+	<div id="divZoneForm" >
+		<div id="divBaseForm">
+            <div id="divZoneFormLeft">
+                <div class="control-group form-field clearfix required">
+                    <label>Name:</label>
+                    <span class="required-star">*</span>
+                    <span class="help-block"></span>
+                    <div class="input">
+                        <input id="txtZoneName" maxlength="255"  type="text" class="form-control">
+                    </div>
+                </div>
+
+                <div class="control-group form-field clearfix required">
+                    <label>Parent Name:</label>
+                    <span class="help-block"></span>
+                    <div class="input">
+                        <input id="txtParentName" type="text" class="form-control" readOnly>
+                        <input id="hfParentID"  type="hidden" class="form-control" readOnly>
+                    </div>
+                </div>
+            </div>
+            <div id="divZoneFormRight">
+            	<div class="control-group form-field clearfix required" style="visibility:hidden">
+            		<label>--</label>
+                    <span class="help-block"></span>
+                    <div class="input">
+                        <input maxlength="255"  type="text" class="form-control">
+                    </div>
+            	</div>
+
+                <div class="control-group form-field clearfix required" >
+                    <label>Type:</label>
+                    <span class="help-block"></span>
+                    <div class="input">
+                        <input id="txtTypeName" type="text" class="form-control" readOnly>
+                        <input id="hfTypeID"  type="hidden" class="form-control" readOnly>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="divFormOptions" class="vsm-options-bar">
+        	<button id="btnAddZone" class="btn btn-primary" onclick="addZone()">Add</button>
+        </div>
+	</div>
+</div>
+
 {% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    <script src="{{ STATIC_URL }}dashboard/js/jquery.ztree.all-3.5.min.js"></script>
+    <script src="{{ STATIC_URL }}dashboard/js/zone.js"></script> 
+{% endblock %}
+
 

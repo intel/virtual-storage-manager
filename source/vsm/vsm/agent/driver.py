@@ -499,9 +499,7 @@ class CephDriver(object):
             elif setting['name'] == 'osd_pool_default_size':
                 pool_default_size = setting['value']
 
-        config.add_global(cnfth=cnfth,
-                          cfth=cfth,
-                          heartbeat_interval=heartbeat_interval,
+        config.add_global(heartbeat_interval=heartbeat_interval,
                           osd_heartbeat_interval=osd_heartbeat_interval,
                           osd_heartbeat_grace=osd_heartbeat_grace,
                           pool_default_size=pool_default_size)
@@ -524,7 +522,7 @@ class CephDriver(object):
                     #config.add_mds(hostname, hostip, '0')
                     #values = {'mds': 'yes'}
                     #db.init_node_update(context, host['id'], values)
-                    config.add_mon_header()
+                    config.add_mon_header(cnfth=cnfth,cfth=cfth)
                     is_first_mon = False
                     config.add_mon(hostname, hostip, mon_cnt)
                 else:
@@ -1768,7 +1766,7 @@ class CephDriver(object):
         if start_line < 10:
             for attr in attributes[start_line:]:
                 attribute = attr.split()
-                if attribute[1] != "Unknown_Attribute":
+                if len(attribute) > 1 and attribute[1] != "Unknown_Attribute":
                     smart_info_dict['smart'][attribute[1]] = attribute[9]
 
 

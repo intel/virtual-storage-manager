@@ -105,21 +105,25 @@ def PG(request):
     return HttpResponse(get_PG())
 
 def IOPS(request):
-    return HttpResponse(get_performance_IOPs(request))
+    if request.body:
+        return HttpResponse(get_performance_IOPs(request))
 
 def latency(request):
     # data = json.loads(request.body)
     # timestamp = int(data["timestamp"])
-    return HttpResponse(get_performance_Latency(request))
+    if request.body:
+        return HttpResponse(get_performance_Latency(request))
 
 def bandwidth(request):
     # data = json.loads(request.body)
     # timestamp = int(data["timestamp"])
-    return HttpResponse(get_performance_Bandwith(request))
+    if request.body:
+        return HttpResponse(get_performance_Bandwith(request))
 
 
 def CPU(request):
-    return HttpResponse(get_performance_cpu(request))
+    if request.body:
+        return HttpResponse(get_performance_cpu(request))
 
 def get_vsm_version():
     try:
