@@ -2045,3 +2045,12 @@ class SchedulerManager(manager.Manager):
         self._agent_rpcapi.update_zones_from_crushmap_to_db(context,body,active_monitor['host'])
         return {'message':'success'}
 
+    def add_zone_to_crushmap_and_db(self, context, body):
+        if body is not None:
+            cluster_id = body.get('cluster_id',None)
+        else:
+            cluster_id = None
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('add_zone_to_crushmap_and_db sync call to host = %s' % active_monitor['host'])
+        self._agent_rpcapi.add_zone_to_crushmap_and_db(context,body,active_monitor['host'])
+        return {'message':'success'}

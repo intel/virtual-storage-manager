@@ -129,8 +129,12 @@ class ZonesController(wsgi.Controller):
         context = req.environ['vsm.context']
         zone_not_in_crush = db.zone_get_all_not_in_crush(context)
         LOG.info("CEPH_LOG zone get_zone_not_in_crush_list:%s"%zone_not_in_crush)
-        LOG.info("CEPH_LOG zone dir get_zone_not_in_crush_list:%s"%dir(zone_not_in_crush[0]))
         return {'zone_not_in_crush':zone_not_in_crush}
+
+    def add_zone_to_crushmap_and_db(self,req,body):
+        context = req.environ['vsm.context']
+        self.scheduler_api.add_zone_to_crushmap_and_db(context,body)
+        return body
 
 def create_resource(ext_mgr):
     return wsgi.Resource(ZonesController(ext_mgr))

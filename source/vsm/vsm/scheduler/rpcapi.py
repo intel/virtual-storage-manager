@@ -238,3 +238,5 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def update_zones_from_crushmap_to_db(self,ctxt,body):
         return self.call(ctxt, self.make_msg('update_zones_from_crushmap_to_db', body=body))
 
+    def add_zone_to_crushmap_and_db(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('add_zone_to_crushmap_and_db', body=body))
