@@ -2161,13 +2161,23 @@ class AgentManager(manager.Manager):
         return ret
 
     def add_zone_to_crushmap_and_db(self,context,body):
+        crushmap = self.get_crushmap_json_format()
+        types = crushmap._types
+        types.sort(key=operator.itemgetter('type_id'))
         zone_name = body.get('zone_name')
         parent_zone_type = body.get('zone_parent_type')
         parent_zone_name = body.get('zone_parent_name')
-        self.crushmap_manager_driver.add_bucket_to_crushmap(zone_name,parent_zone_type,parent_zone_name)
+        index_type = 1
+        len_types = len(types)
+        for i in range(len_types):
+            if types[i]['name'] == parent_zone_type:
+                index_type = i-1
+                break
+        zone_type = types[index_type]['name']
+        self.crushmap_manager_driver.add_bucket_to_crushmap(zone_name,zone_type,parent_zone_type,parent_zone_name)
         parent_zone = db.zone_get_by_name(context,parent_zone_name)
-        crushmap = self.get_crushmap_json_format()
-        bucket = crushmap.get_buckets_by_name(zone_name)
+        crushmap_new = self.get_crushmap_json_format()
+        bucket = crushmap_new.get_buckets_by_name(zone_name)
         LOG.info('add bucket--to crushmap success:%s'%bucket)
         values = {'id': bucket['id'],
           'name': zone_name,

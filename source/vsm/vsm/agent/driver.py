@@ -3298,8 +3298,8 @@ class ManagerCrushMapDriver(object):
         self.set_crushmap()
         return {'rule_id':rule_id}
 
-    def add_bucket_to_crushmap(bucket_name,parent_bucket_type,parent_bucket_name):
-        utils.execute("ceph", "osd", "crush", "add-bucket", bucket_name, "zone",'--keyring',FLAGS.keyring_admin,
+    def add_bucket_to_crushmap(self,bucket_name,bucket_type,parent_bucket_type,parent_bucket_name):
+        utils.execute("ceph", "osd", "crush", "add-bucket", bucket_name, bucket_type,'--keyring',FLAGS.keyring_admin,
                 run_as_root=True)
         utils.execute("ceph", "osd", "crush", "move", bucket_name,
               "%s=%s" % (parent_bucket_type,parent_bucket_name),'--keyring',FLAGS.keyring_admin,
