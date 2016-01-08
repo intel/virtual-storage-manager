@@ -3133,6 +3133,19 @@ def osd_state_get_by_service_id(context, service_id):
         all()
     return result
 
+def update_deleted_osd_state_by_service_id(context, service_id, values):
+    session = get_session()
+    with session.begin():
+        result = model_query(
+            context, models.OsdState, read_deleted="only",session=session,).\
+            filter_by(service_id=service_id).\
+            all()
+        #LOG.info('update_deleted_osd_state_by_service_id--%s-'%result)
+        for osd_state in result:
+            osd_state.update(values)
+            osd_state.save(session=session)
+    return True
+
 def osd_state_get_by_osd_name_and_service_id_and_cluster_id(\
         context, osd_name, service_id, cluster_id):
     result = model_query(
