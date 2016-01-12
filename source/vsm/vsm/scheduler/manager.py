@@ -324,26 +324,26 @@ class SchedulerManager(manager.Manager):
 
                 # gen mon_id
                 #LOG.info('add monitor get mon id----')
-                host_ip = db.init_node_get_by_host(context,host = ser['host'])['secondary_public_ip']
-                ip = host_ip.split(',')[0]
-                monitor_address = '%s:%s/0' % (ip, str(6789))
-                mon_ref = db.monitor_get_by_address(context, monitor_address,read_deleted = 'yes')
-                if mon_ref is not None:
-                    mon_id = mon_ref['name']
-                else:
-                    monitor_list = []
-                    for x in ceph_config:
-                        if x.startswith("mon."):
-                            try:
-                                monitor_list.append(int(x.replace("mon.","")))
-                            except:
-                                pass
-                    monitor_list.sort()
-                    deleted_times = db.cluster_get_deleted_times(context,
-                                                                 ser['cluster_id'])
-                    if len(monitor_list) == 0:
-                        monitor_list.append(0)
-                    mon_id = str(monitor_list.pop() + 1 + deleted_times)
+                #host_ip = db.init_node_get_by_host(context,host = ser['host'])['secondary_public_ip']
+                #ip = host_ip.split(',')[0]
+                # monitor_address = '%s:%s/0' % (ip, str(6789))
+                # mon_ref = db.monitor_get_by_address(context, monitor_address,read_deleted = 'yes')
+                # if mon_ref is not None:
+                #     mon_id = mon_ref['name']
+                # else:
+                monitor_list = []
+                for x in ceph_config:
+                    if x.startswith("mon."):
+                        try:
+                            monitor_list.append(int(x.replace("mon.","")))
+                        except:
+                            pass
+                monitor_list.sort()
+                deleted_times = db.cluster_get_deleted_times(context,
+                                                             ser['cluster_id'])
+                if len(monitor_list) == 0:
+                    monitor_list.append(0)
+                mon_id = str(monitor_list.pop() + 1 + deleted_times)
 
                 LOG.info("new_monitor id %s" % mon_id)
 
@@ -798,6 +798,7 @@ class SchedulerManager(manager.Manager):
             ser['remove_monitor'] = ser['type'].find('monitor') != -1
             ser['status'] = ser_ref['status']
             ser['mds'] = ser_ref['mds']
+            ser['service_id'] = ser_ref['service_id']
             if ser['mds'] == 'yes':
                 need_change_mds = True
 
@@ -807,6 +808,16 @@ class SchedulerManager(manager.Manager):
 
             LOG.info("start to remove storage")
             self.remove_osd(context, server_list)
+            values = {'osd_name': "osd.%s"%FLAGS.vsm_status_uninitialized,
+                      'osd_location':'',
+                      'deleted':0,
+                      'state':FLAGS.vsm_status_uninitialized,}
+            LOG.info("update deleted osd to uninited")
+            for server in server_list:
+                service_id = server['service_id']
+                db.update_deleted_osd_state_by_service_id(context,service_id,values)
+            LOG.info("update deleted osd to uninited over")
+
 
             if need_change_mds:
                 LOG.info("start to remove mds")
@@ -2045,3 +2056,12 @@ class SchedulerManager(manager.Manager):
         self._agent_rpcapi.update_zones_from_crushmap_to_db(context,body,active_monitor['host'])
         return {'message':'success'}
 
+    def add_zone_to_crushmap_and_db(self, context, body):
+        if body is not None:
+            cluster_id = body.get('cluster_id',None)
+        else:
+            cluster_id = None
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('add_zone_to_crushmap_and_db sync call to host = %s' % active_monitor['host'])
+        self._agent_rpcapi.add_zone_to_crushmap_and_db(context,body,active_monitor['host'])
+        return {'message':'success'}

@@ -43,8 +43,7 @@
             <label >Zone :</label>
             <span class="form-required">*</span>
             <div class="input">
-                <select id="selZone" class="form-control" 
-                onchange="ChangeZone(this.selectedIndex)">
+                <select id="selZone" class="form-control">
                     {% for zone in zone_list_server %}
                        <option value = "{{zone.0}}">{{zone.1}}</option>
                     {% endfor %}
@@ -56,6 +55,13 @@
     <input id="hfIsStorage" type="hidden" />
     <input id="hfServerIP" type="hidden" />
     <input id="hfServerID" type="hidden" />
+    <select id="selOSDZone" class="form-control" style="display:none ">
+        <option value = "">--</option>
+        {% for zone_osd in zone_list_osd %}
+           <option value = "{{zone_osd.0}}">{{zone_osd.1}}</option>
+        {% endfor %}
+    </select>
+
 </div>
 
 

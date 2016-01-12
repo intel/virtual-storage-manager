@@ -2152,16 +2152,40 @@ class AgentManager(manager.Manager):
 
     def update_zones_from_crushmap_to_db(self,context,body):
         crushmap = self.get_crushmap_json_format()
-        LOG.info('update_zones_from_crushmap_to_db-----1111===%s'%crushmap)
         ret = self._insert_zone_from_crushmap_to_db(context,crushmap)
         return ret
 
     def update_storage_groups_from_crushmap_to_db(self,context,body):
         crushmap = self.get_crushmap_json_format()
-        LOG.info('update_zones_from_crushmap_to_db-----1111===%s'%crushmap)
         ret = self._insert_storage_group_from_crushmap_to_db(context,crushmap)
         return ret
 
+    def add_zone_to_crushmap_and_db(self,context,body):
+        crushmap = self.get_crushmap_json_format()
+        types = crushmap._types
+        types.sort(key=operator.itemgetter('type_id'))
+        zone_name = body.get('zone_name')
+        parent_zone_type = body.get('zone_parent_type')
+        parent_zone_name = body.get('zone_parent_name')
+        index_type = 1
+        len_types = len(types)
+        for i in range(len_types):
+            if types[i]['name'] == parent_zone_type:
+                index_type = i-1
+                break
+        zone_type = types[index_type]['name']
+        self.crushmap_manager_driver.add_bucket_to_crushmap(zone_name,zone_type,parent_zone_type,parent_zone_name)
+        parent_zone = db.zone_get_by_name(context,parent_zone_name)
+        crushmap_new = self.get_crushmap_json_format()
+        bucket = crushmap_new.get_buckets_by_name(zone_name)
+        LOG.info('add bucket--to crushmap success:%s'%bucket)
+        values = {'id': bucket['id'],
+          'name': zone_name,
+          'parent_id': parent_zone['id'],
+          'type': bucket['type_id'],
+        }
+        ret = db.zone_update_or_create(context,values)
+        return ret
 
 
 

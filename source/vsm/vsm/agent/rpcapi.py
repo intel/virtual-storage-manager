@@ -601,3 +601,12 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         topic,
                         version='1.0', timeout=6000)
         return res
+
+    def add_zone_to_crushmap_and_db(self, context, body, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('add_zone_to_crushmap_and_db',
+                                      body=body),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res

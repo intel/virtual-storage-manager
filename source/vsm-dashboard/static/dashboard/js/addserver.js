@@ -15,11 +15,11 @@ function ChangeServer(obj){
 	PostData("get_server_by_name",postdata);
 }
 
-function ChangeZone(selectedIndex){
-	$(".ctrl-zone").each(function(){
-		this.selectedIndex = selectedIndex;
-	})
-}
+//function ChangeZone(selectedIndex){
+//	$(".ctrl-zone").each(function(){
+//		this.selectedIndex = selectedIndex;
+//	})
+//}
 
 function UpdateZoneList(zone_id){
 	for(var i=0;i<$ctrlZoneList.options.length;i++){
@@ -69,7 +69,7 @@ function AddServer(){
 		is_monitor = false;
 
 	var is_storage = true;
-	if($("#hfIsMonitor").val() == "yes")
+	if($("#hfIsStorage").val() == "yes")
 		is_storage = true;
 	else
 		is_storage = false;
@@ -88,13 +88,21 @@ function AddServer(){
 	$(".osd-item").each(function(){
 		var tr = $("#"+this.id);
 		var ctrlLocation = tr.find(".ctrl-zone")[0];
+        var location_name = ctrlLocation.options[ctrlLocation.selectedIndex].text;
+        if(location_name == "--"){
+            location_name = "";
+        }
 		osd = {
 			id:tr.find(".osd_id")[0].innerHTML,
-			location:ctrlLocation.options[ctrlLocation.selectedIndex].text,
+			location:location_name,
 			weight:tr.find(".ctrl-weight")[0].value,
 		}
 		server.osd_locations.push(osd);
 	})
+
+    if(server.osd_locations.length>0){
+        server.is_storage = true;
+    }
 
 	//Update the Server Table Row
 	UpdateServerTable(server);
@@ -197,7 +205,7 @@ function PostData(method,postdata){
 
 
 function CtrlZone(zone_name){
-	var zone_options = $("#selZone")[0].options;
+	var zone_options = $("#selOSDZone")[0].options;
 	var html = "";
 	html += "<select class=\"form-control ctrl-zone\">";
 	for(var i=0; i<zone_options.length;i++){

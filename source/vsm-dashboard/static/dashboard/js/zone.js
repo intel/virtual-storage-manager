@@ -34,8 +34,8 @@ function onClickEvent(event, treeId, treeNode, clickFlag) {
 		$("#txtParentName").val(treeNode.name);
 		$("#hfParentID").val(treeNode.id);
 		if(treeNode.children.length > 0){
-			$("#txtTypeName").val(treeNode.children[0].type_name);
-			$("#hfTypeID").val(treeNode.children[0].type_id);
+			$("#txtTypeName").val(treeNode.type_name);
+			$("#hfTypeID").val(treeNode.type_id);
 		}
 	}
 
@@ -90,16 +90,14 @@ function addZone(){
 	var zone_data = {
 		zone_name:$("#txtZoneName").val(),
 		parent_id:$("#hfParentID").val(),
-		parent_name:$("#txtParentName").val(),
-		zone_type_id:$("#hfTypeID").val(),
-		zone_type_name:$("#txtTypeName").val(),
+		zone_parent_name:$("#txtParentName").val(),
+		zone_parent_type:$("#txtTypeName").val(),
 	}
 
 	if(zone_data.zone_name == ""
 	|| zone_data.parent_id == ""
-	|| zone_data.parent_name == ""
-	|| zone_data.zone_type_id == ""
-	|| zone_data.zone_type_name == ""){
+	|| zone_data.zone_parent_name == ""
+	|| zone_data.zone_parent_type == ""){
 		showTip("error","All the fields should not be empty!");
 		return false;
 	}

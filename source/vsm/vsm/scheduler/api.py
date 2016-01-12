@@ -167,3 +167,6 @@ class API(object):
 
     def get_osds_by_rules(self,context,body=None):
         return self.scheduler_rpcapi.get_osds_by_rules(context,body)
+
+    def add_zone_to_crushmap_and_db(self,context,body):
+        return self.scheduler_rpcapi.add_zone_to_crushmap_and_db(context,body)
