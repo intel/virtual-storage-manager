@@ -27,6 +27,8 @@ require(
     ],
     function(ec){
         cClusterGague = ec.init(document.getElementById('divClusterGauge'));
+        //init the cluster gague when page loaded...
+        cClusterGague.setOption(GenerateGaugeOption(0.0));
         cPGs = ec.init(document.getElementById('divPGRect'));
         cIOPs = ec.init(document.getElementById('divIOPsContent'));
         cLatency = ec.init(document.getElementById('divLatencyContent'));
