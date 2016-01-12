@@ -816,6 +816,7 @@ class CephDriver(object):
             else:
                 osd_state_ref = self._conductor_api.osd_state_create(context, osd_state)
             osd_state['osd_location'] = osd_state_ref['osd_location']
+            osd_state['weight'] = osd_state_ref['osd_location'] and float(osd_state_ref['osd_location']) or 1.0
             LOG.info('>> crush_dict  %s' % crush_dict)
             LOG.info('>> osd_conf_dict %s' % osd_conf_dict)
             LOG.info('>> osd_state %s' % osd_state)

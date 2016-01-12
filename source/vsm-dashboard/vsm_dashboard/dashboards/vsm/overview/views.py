@@ -134,14 +134,18 @@ def get_vsm_version():
 
 #get the vsm_version
 def get_version():
-    vsm_version = get_vsm_version()
+    ceph_version = ''
+    up_time = ''
     try:
         vsm_summary = vsmapi.vsm_summary(None)
-        up_time = get_time_delta3(vsm_summary.uptime)
-        ceph_version = vsm_summary.ceph_version
+        if vsm_summary is not None:
+            up_time = get_time_delta3(vsm_summary.uptime)
+            ceph_version = vsm_summary.ceph_version
     except:
-        up_time = ''
-        ceph_version = ''
+        pass
+    vsm_version = get_vsm_version()
+    if not up_time:
+        up_time = get_time_delta3(open("/proc/uptime", "r").read().strip().split(" ")[0])
     vsm_version = {"version": vsm_version,
                    "update": up_time,
                    "ceph_version":ceph_version,
