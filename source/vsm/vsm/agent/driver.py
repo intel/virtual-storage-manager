@@ -1253,14 +1253,14 @@ class CephDriver(object):
             LOG.info('>>> remove ceph osd step 1-5 osd_id %s' % osd_id)
 
         #step 6
-        LOG.info('>>> Begin to remove crushmap')
-        osd_tree = utils.execute('ceph', 'osd', 'tree', run_as_root=True)[0]
-        LOG.info('>>> Get ceph osd tree = %s' % osd_tree)
-        for line in osd_tree.split('\n'):
-            if line.lower().find(host.lower()) != -1:
-                for x in line.split(' '):
-                    if x.lower().find(host.lower()) != -1:
-                        utils.execute('ceph', 'osd', 'crush', 'rm', x)
+        # LOG.info('>>> Begin to remove crushmap')
+        # osd_tree = utils.execute('ceph', 'osd', 'tree', run_as_root=True)[0]
+        # LOG.info('>>> Get ceph osd tree = %s' % osd_tree)
+        # for line in osd_tree.split('\n'):
+        #     if line.lower().find(host.lower()) != -1:
+        #         for x in line.split(' '):
+        #             if x.lower().find(host.lower()) != -1:
+        #                 utils.execute('ceph', 'osd', 'crush', 'rm', x)
 
         LOG.info('>>> remove ceph osd finish.')
 
