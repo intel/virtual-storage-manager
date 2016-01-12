@@ -32,6 +32,7 @@ os==ubuntu14:
 os==centos7:
     Step 1 get pakages needed by ceph upgrading in controller node: vsm-ceph-upgrade -p http://ceph.com/rpm-hammer/rhel7 -k https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc --proxy ...
     Step 2 upgrade ceph in agent nodes:vsm-ceph-upgrade
+    Step 3 if ceph user exists, chown -R ceph:ceph /var/lib/ceph and chown -R ceph:ceph /etc/ceph and data, journal for osd
 
 Options:
   --help | -h
@@ -102,6 +103,8 @@ function ceph_upgrade_node() {
     exp_ceph-mds_upgrade >>$log_dir ;
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
     sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
+    chown_ceph
+    restart_ceph_daemon
     echo '-----------------over-----------------------------------------' >>$log_dir ;
 
 }
@@ -184,8 +187,45 @@ function ceph_upgrade_node_centos() {
     echo '---------------yum makecache done----' >>$log_dir;
     yum -y install ceph;
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
+    chown_ceph
+    restart_ceph_daemon
     echo '-----------------over-----------------------------------------' >>$log_dir ;
 
+}
+
+function chown_ceph() {
+    ceph_user=`cat /etc/passwd|grep ceph|wc -l`
+    if [[ $ceph_user != 0 ]]; then
+        echo '---------------Modify the directory and file belongs----------' >>$log_dir
+        chown -R ceph:ceph /var/lib/ceph
+        chown -R ceph:ceph /etc/ceph
+        cat /etc/ceph/ceph.conf | while read line; do
+            str1=${line:0:4}
+            str2=${line:0:11}
+            if [[ $str1 == "devs" ]]; then
+                data_partition=${line:7}
+                chown ceph:ceph $data_partition
+            fi
+            if [[ $str2 == "osd journal" ]]; then
+                if [[ ${line:15:-5} == "dev" ]]; then
+                    journal_partition=${line:14}
+                    chown ceph:ceph $journal_partition
+                fi
+            fi
+        done
+        echo '---------------Modify Over--------------------------------' >>$log_dir
+    fi
+}
+
+function restart_ceph_daemon() {
+    echo '---------------Restart ceph daemon------------------------' >>$log_dir
+    upstart_file=`find /var/lib/ceph -name upstart`
+    if [[ -e $upstart_file ]]; then
+        restart ceph-all
+    else
+        service ceph restart
+    fi
+    echo '---------------Restart ceph daemon Over-------------------' >>$log_dir
 }
 
 #---------------------------------------------
