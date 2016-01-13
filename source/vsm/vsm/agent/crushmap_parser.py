@@ -121,7 +121,7 @@ class CrushMap():
             if step['op'] == 'take':
                 bucket_id = step['item']
                 self.get_all_osds_by_bucket(bucket_id, devices)
-        return devices
+        return list(set(devices))
 
     def osd_count_by_rule_id(self,rule_id):
         rule = self.get_rules_by_id(rule_id)
