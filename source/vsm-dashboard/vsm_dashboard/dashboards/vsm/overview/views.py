@@ -204,7 +204,7 @@ def get_OSD():
         _osd_capacity_total = 0 if not _osd.device['total_capacity_kb']\
             else int(_osd.device['total_capacity_kb']/1024)
 
-        if _osd_capacity_total:
+        if _osd_capacity_total and _osd.state in ["In-Up", "In-Down", "Out-Up", "Out-Down", "Out-Down-Autoout"]:
             _osd_capacity_status = round(_osd_capacity_used * 1.0 / _osd_capacity_total * 100, 2)
             if _osd_capacity_status >= disk_full_threshold:
                 full_count = full_count + 1
