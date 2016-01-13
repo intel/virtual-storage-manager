@@ -816,7 +816,7 @@ class CephDriver(object):
             else:
                 osd_state_ref = self._conductor_api.osd_state_create(context, osd_state)
             osd_state['osd_location'] = osd_state_ref['osd_location']
-            osd_state['weight'] = osd_state_ref['osd_location'] and float(osd_state_ref['osd_location']) or 1.0
+            osd_state['weight'] = osd_state_ref['weight'] and float(osd_state_ref['weight']) or 1.0
             LOG.info('>> crush_dict  %s' % crush_dict)
             LOG.info('>> osd_conf_dict %s' % osd_conf_dict)
             LOG.info('>> osd_state %s' % osd_state)
@@ -1126,7 +1126,10 @@ class CephDriver(object):
         # step 3
         LOG.info('>> removing ceph mon step 3')
         LOG.info('>> removing ceph mon step 4:stop  mon service ')
-        self._operate_ceph_daemon("stop", "mon", id=mon_id, ssh=True, host=host)
+        try:
+            self._operate_ceph_daemon("stop", "mon", id=mon_id, ssh=True, host=host)
+        except:
+            pass
         LOG.info('>> removing ceph mon success!')
         config.save_conf(FLAGS.ceph_conf)
         return True
