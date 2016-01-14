@@ -26,14 +26,12 @@ class Dashboard(horizon.PanelGroup):
 class ClusterMgmt(horizon.PanelGroup):
     slug = "clustermgmt"
     name = _("Cluster Management")
-    panels = ('clustermgmt', 'cluster-import', 'cephupgrade', 'poolsmanagement', 'storage-group-management','crushmap','zonemgmt')
-    #panels = ('clustermgmt', 'poolsmanagement')
+    panels = ('clustermgmt', 'cluster-import', 'cephupgrade', 'poolsmanagement','crushmap','zonemgmt')
 
 class ClusterMonitor(horizon.PanelGroup):
     slug = "clustermonitor"
     name = _("Cluster Monitoring")
     panels = ('storage-group-status', 'pool-status', 'osd-status', 'monitor-status', 'mds-status', 'pg-status', 'rbd-status')
-    #panels = ('ceph-server-management',)
 
 class ServerMgmt(horizon.PanelGroup):
     slug = "servermgmt"
@@ -43,26 +41,18 @@ class ServerMgmt(horizon.PanelGroup):
 class OpenstackMgmt(horizon.PanelGroup):
     slug = "openstackmgmt"
     name = _("OpenStack Integration")
-    panels = ('rbdpools', 'openstackconnect',) # 'presentingpools', )
-    #panels = ('rbdpools', 'openstackconnect', 'presentingpools', )
+    panels = ('rbdpools', 'openstackconnect',)
 
 class UserMgmt(horizon.PanelGroup):
     slug = "usermgmt"
     name = _("VSM Management")
     panels = ("usermgmt", 'settings')
 
-#class UpgradeMgmt(horizon.PanelGroup):
-#    slug = "upgrademgmt"
-#    name = _("Manage Upgrade")
-#    panels = ( "cephupgrade",)
-
 class VizDash(horizon.Dashboard):
     name = _("VSM")
     slug = "vsm"
     panels = (Dashboard, ServerMgmt, ClusterMgmt, ClusterMonitor, OpenstackMgmt, UserMgmt)
-    #default_panel = 'flocking'
     default_panel = 'overview'
-    #default_panel = 'poolsmanagement'
     roles = ('admin',)
 
 horizon.register(VizDash)
