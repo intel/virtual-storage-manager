@@ -209,6 +209,7 @@ class Controller(wsgi.Controller):
         rule_osds = self.scheduler_api.get_osds_by_rules(context,rules_dict )
         for storage_group in storage_groups:
             osds_in_storage_group = rule_osds.get(storage_group['name'])#osd['storage_group']['id'] == storage_group["id"]]
+            osd_cnt = len(osds_in_storage_group)
             storage_group['capacity_total'] = sum([osd["device"]['total_capacity_kb'] for osd in osds
                                                if osd['osd_name'] in osds_in_storage_group])
             storage_group['capacity_used'] = sum([osd["device"]['used_capacity_kb'] for osd in osds
@@ -217,11 +218,11 @@ class Controller(wsgi.Controller):
                                                if osd['osd_name'] in osds_in_storage_group])
 
             nodes = {}
-            osd_cnt = 0
+            #osd_cnt = 0
             for osd in osds:
                 if not osd['storage_group']['id'] == storage_group["id"] or osd['state'] == FLAGS.vsm_status_uninitialized:
                     continue
-                osd_cnt = osd_cnt + 1
+                #osd_cnt = osd_cnt + 1
                 k = osd['service']['host']
                 if k not in osd:
                     nodes.setdefault(k, 0)
