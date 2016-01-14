@@ -2733,8 +2733,6 @@ class CreateCrushMapDriver(object):
         LOG.info("DEBUG in create_crushmap body is %s" % server_list)
         service_id = []
         for i in server_list:
-            if i["is_monitor"]:
-                continue
             if i["is_storage"]:
                 service_id.append(i["id"])
         #service id is init node id
