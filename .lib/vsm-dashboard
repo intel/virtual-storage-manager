@@ -5,8 +5,8 @@ function _change_vsm_dashboard_files() {
 }
 
 function _install_vsm_dashboard_dep_package() {
-    yum install -y `cat $1 | grep BuildRequires | awk '{print $2}' | tr "\n" " "`
-    yum install -y rpm-build
+    sudo yum install -y `cat $1 | grep BuildRequires | awk '{print $2}' | tr "\n" " "`
+    sudo yum install -y rpm-build
 }
 
 function _setup_vsm_dashboard_rpm() {

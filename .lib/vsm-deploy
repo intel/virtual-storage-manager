@@ -1,5 +1,5 @@
 function _install_vsmdeploy_dep_package() {
-    yum install -y rpm-build
+    sudo yum install -y rpm-build
 }
 
 function _setup_vsmdeploy_rpm() {
