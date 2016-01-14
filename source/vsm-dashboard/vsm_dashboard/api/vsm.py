@@ -337,3 +337,15 @@ def get_crushmap_tree_data(request, body=None):
         body : {'cluster_id':1}
     """
     return vsmclient(request).clusters.get_crushmap_tree_data(body)
+
+def add_zone_to_crushmap_and_db(request, body):
+    '''
+
+    :param request:
+    :param body:
+    {'zone_name':'kkk',
+    'zone_parent_type':'host',
+    'zone_parent_name':'parent_zone'}
+    :return:
+    '''
+    return vsmclient(request).zones.add_zone_to_crushmap_and_db(body)

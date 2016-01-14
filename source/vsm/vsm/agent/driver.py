@@ -83,7 +83,7 @@ class CephDriver(object):
         :param host: ssh host
         :return:
         """
-
+        LOG.info('zbx-000--type=%s,op=%s'%(type,operate))
         if type:
             # TODO fix the hardcode path
             path = "/var/lib/ceph/%s" % type
@@ -184,6 +184,7 @@ class CephDriver(object):
     def _get_mon_config_dict(self,mon_id):
         args = ['ceph', 'daemon','mon.%s'%mon_id ,'config','show']
         return self._run_cmd_to_json(args)
+
 
 
 
@@ -815,6 +816,7 @@ class CephDriver(object):
             else:
                 osd_state_ref = self._conductor_api.osd_state_create(context, osd_state)
             osd_state['osd_location'] = osd_state_ref['osd_location']
+            osd_state['weight'] = osd_state_ref['weight'] and float(osd_state_ref['weight']) or 1.0
             LOG.info('>> crush_dict  %s' % crush_dict)
             LOG.info('>> osd_conf_dict %s' % osd_conf_dict)
             LOG.info('>> osd_state %s' % osd_state)
@@ -1092,12 +1094,12 @@ class CephDriver(object):
 
         # step 1
         LOG.info('>> removing ceph mon %s' % mon_id)
-        LOG.info('>> removing ceph mon step 1')
         try:
             # test ssh service in case the server is down
+            LOG.info('>>>> removing ceph mon step 1: test server start!')
             utils.execute('ssh', '-q', 'root@' + host, 'exit', run_as_root=True)
-            self._operate_ceph_daemon("stop", "mon", id=mon_id, ssh=True, host=host)
         except exception.ProcessExecutionError as e:
+            LOG.info('>> removing ceph mon test server error!')
             code = e.exit_code
             LOG.info('return code: %s' % code)
             if code == 0:
@@ -1123,7 +1125,12 @@ class CephDriver(object):
             config.remove_mon(mon_id)
         # step 3
         LOG.info('>> removing ceph mon step 3')
-
+        LOG.info('>> removing ceph mon step 4:stop  mon service ')
+        try:
+            self._operate_ceph_daemon("stop", "mon", id=mon_id, ssh=True, host=host)
+        except:
+            pass
+        LOG.info('>> removing ceph mon success!')
         config.save_conf(FLAGS.ceph_conf)
         return True
 
@@ -1134,7 +1141,7 @@ class CephDriver(object):
         #     utils.execute("service", "ceph", "stop", "mon", run_as_root=True)
         # except:
         #     utils.execute("stop", "ceph-mon-all", run_as_root=True)
-        self._operate_ceph_daemon("stop", "mon")
+        #self._operate_ceph_daemon("stop", "mon", id=mon_id, ssh=True, host=host)
         # step 2
         LOG.info('>> remove ceph mon step2 start')
         tmp_pth = "/tmp"
@@ -1181,6 +1188,7 @@ class CephDriver(object):
         self._conductor_rpcapi.init_node_update(context, host_id, values)
         host = node['host']
         host_is_running = __is_host_running(host)
+        LOG.info('host_is_running===mds==%s'%host_is_running)
         if host_is_running:
             try:
                 self._agent_rpcapi.stop_mds(context, host)
@@ -1193,13 +1201,13 @@ class CephDriver(object):
 
         __config_remove_mds(mds_id)
         utils.execute('ceph', 'mds',
-                      'rm', mds_id, 'mds.%s' % mds_id,
+                      'rm', mds_id, 'mds.%s' % mds_id,'--keyring',FLAGS.keyring_admin,
                       run_as_root=True)
         utils.execute('ceph', 'auth', 'del',
-                      'mds.%s' % mds_id,
+                      'mds.%s' % mds_id,'--keyring',FLAGS.keyring_admin,
                       run_as_root=True)
         utils.execute('ceph', 'mds', 'newfs', '0', '1',
-                      '--yes-i-really-mean-it',
+                      '--yes-i-really-mean-it','--keyring',FLAGS.keyring_admin,
                       run_as_root=True)
         LOG.info('remove mds success!')
 
@@ -1227,7 +1235,7 @@ class CephDriver(object):
         node = self._conductor_rpcapi.init_node_get_by_id(context, host_id)
         host = node['host']
         host_is_running = __is_host_running(host)
-
+        LOG.info('host_is_running===osd==%s'%host_is_running)
         # get config
         config_dict = __config_dict()
 
@@ -1249,14 +1257,14 @@ class CephDriver(object):
             LOG.info('>>> remove ceph osd step 1-5 osd_id %s' % osd_id)
 
         #step 6
-        LOG.info('>>> Begin to remove crushmap')
-        osd_tree = utils.execute('ceph', 'osd', 'tree', run_as_root=True)[0]
-        LOG.info('>>> Get ceph osd tree = %s' % osd_tree)
-        for line in osd_tree.split('\n'):
-            if line.lower().find(host.lower()) != -1:
-                for x in line.split(' '):
-                    if x.lower().find(host.lower()) != -1:
-                        utils.execute('ceph', 'osd', 'crush', 'rm', x)
+        # LOG.info('>>> Begin to remove crushmap')
+        # osd_tree = utils.execute('ceph', 'osd', 'tree', run_as_root=True)[0]
+        # LOG.info('>>> Get ceph osd tree = %s' % osd_tree)
+        # for line in osd_tree.split('\n'):
+        #     if line.lower().find(host.lower()) != -1:
+        #         for x in line.split(' '):
+        #             if x.lower().find(host.lower()) != -1:
+        #                 utils.execute('ceph', 'osd', 'crush', 'rm', x)
 
         LOG.info('>>> remove ceph osd finish.')
 
@@ -1947,6 +1955,7 @@ class CephDriver(object):
         LOG.info('>>> remove ceph osd osd_id %s' % osd_id)
         LOG.info('>>> remove ceph osd step0 out osd %s' % osd_id)
         utils.execute("ceph", "osd", "out", osd_id, run_as_root=True)
+        LOG.info('>>> remove ceph osd step0 out osd cmd over')
         _wait_osd_status(osd_id, 'in', 0)
 
         # Step 2: shutdown the process.
@@ -3292,6 +3301,13 @@ class ManagerCrushMapDriver(object):
         fd.close()
         self.set_crushmap()
         return {'rule_id':rule_id}
+
+    def add_bucket_to_crushmap(self,bucket_name,bucket_type,parent_bucket_type,parent_bucket_name):
+        utils.execute("ceph", "osd", "crush", "add-bucket", bucket_name, bucket_type,'--keyring',FLAGS.keyring_admin,
+                run_as_root=True)
+        utils.execute("ceph", "osd", "crush", "move", bucket_name,
+              "%s=%s" % (parent_bucket_type,parent_bucket_name),'--keyring',FLAGS.keyring_admin,
+              run_as_root=True)
 
 #     def _generate_one_rule(self,rule_name,take_id_list,rule_id=None,choose_leaf_type=None,choose_num=None,type='replicated',min_size=0,max_size=10):
 #         crushmap = get_crushmap_json_format()

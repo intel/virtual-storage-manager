@@ -37,7 +37,7 @@ STATUS_DISPLAY_CHOICES = (
 )
 
 class ImportClusterAction(tables.LinkAction):
-    name = "import cluster"
+    name = "import_cluster"
     verbose_name = _("Import Cluster")
     url = "horizon:vsm:cluster-import:importcluster"
     classes = ("ajax-modal", "btn-primary")

@@ -120,7 +120,7 @@ def crushmap_datasource(request):
 
         #if parent id is none,it's "root"
         pID_list = node.get("parent_id",["root"])
-        print '111===',node
+        #print '111===',node
         for pID in pID_list:
             if pID == "root":
                 is_parent = True
@@ -137,10 +137,10 @@ def crushmap_datasource(request):
                 "isParent":is_parent,
             }
             #append the item into crushmap
-            print '33333333333'
+            #print '33333333333'
             crushmap_nodes.append(item)
     #sort the type_list
-    print '222===',type_list
+    #print '222===',type_list
     type_list.sort(key=lambda x:x["id"])
     resp = dict(message="", status="OK",crushmap=crushmap_nodes,type_list=type_list)
     resp = json.dumps(resp)
@@ -153,6 +153,10 @@ def add(request):
     print body
     try:
         #TODO: add zone....
+        code,ret = vsmapi.add_zone_to_crushmap_and_db(request,body)
+        print 'code=====',code
+        print 'ret====',ret
+
         status = "OK"
         msg = "Successfully!"
     except ex:

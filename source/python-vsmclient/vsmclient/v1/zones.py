@@ -194,6 +194,10 @@ class ZoneManager(base.ManagerWithFind):
         url = '/zones/%s/action' % base.getid(vsm)
         return self.api.client.post(url, body=body)
 
+    def add_zone_to_crushmap_and_db(self,body):
+        url = '/zones/add_zone_to_crushmap_and_db'
+        return self.api.client.post(url, body=body)
+
     def initialize_connection(self, vsm, connector):
         """
         Initialize a vsm connection.
