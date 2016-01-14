@@ -75,7 +75,7 @@ HOSTNAME=`hostname`
 #HOSTIP=`hostname -I|sed s/[[:space:]]//g`
 HOSTIP=`hostname -I`
 
-source $TOPDIR/hostrc
+source $TOPDIR/installrc
 
 is_controller=0
 for ip in $HOSTIP; do
