@@ -1,5 +1,5 @@
 function __create_repo_by_rpms() {
-    yum install -y createrepo
+    sudo yum install -y createrepo
     local old_dir=`pwd`
     cd $TOPDIR/
     mkdir -p /tmp/debs/
@@ -101,8 +101,8 @@ __EOF__
     echo $REPO_HOST
     cat /etc/yum.repos.d/vsmrepo.repo
 
-    yum clean all
-    yum makecache
+    sudo yum clean all
+    sudo yum makecache
 }
 
 function setup_repo() {
