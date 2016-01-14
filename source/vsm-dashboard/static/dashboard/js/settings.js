@@ -2,8 +2,8 @@
 var _CURRENT_TAB = "";
 
 $(function(){
-    InitCtrlCSS();
-    _CURRENT_TAB = $(".nav-tabs>li>a")[0].innerHTML;
+    //InitCtrlCSS();
+    //_CURRENT_TAB = $(".nav-tabs>li>a")[0].innerHTML;
 });
 
 function InitCtrlCSS(){

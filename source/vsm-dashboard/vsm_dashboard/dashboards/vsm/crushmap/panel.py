@@ -20,7 +20,7 @@ import horizon
 from vsm_dashboard.dashboards.vsm import dashboard
 
 class Crushmap(horizon.Panel):
-    name = _("Crushmap")
+    name = _("Manage Storage Group")
     slug = 'crushmap'
 
 dashboard.VizDash.register(Crushmap)
