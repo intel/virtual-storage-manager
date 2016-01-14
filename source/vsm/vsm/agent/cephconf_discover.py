@@ -102,27 +102,7 @@ if __name__ == '__main__':
     print 'osds=%s' %discover.get_osds()
     print 'osd.0=%s' %discover.get_osd(1)
 
-    # enumerate osds
-    # for osd in discover.get_osds():
-    #     print ''
-    #     print '[osd.%s]' %osd['id']
-    #     print 'host = %s' %osd['hostname']
-    #     print 'osd data = %s' %osd['osd_data']
-    #     print 'osd journal = %s' %osd['osd_journal']
-    #     print 'cluster addr = %s' %osd['back_addr']
-    #     print 'public addr = %s' %osd['front_addr']
-
     osd_settings = discover.fixup_osd_settings()
     print osd_settings
     mon_settings = discover.fixup_mon_settings()
     print mon_settings
-
-    # print '-----tree_data------'
-    # crushmap._show_as_tree_dict()
-    # print '=========tree_data================'
-    # tunables = crushmap.get_all_tunables()
-
-
-#    for name in tunables:
-#        print name, tunables[name]
-#    print crushmap.get_tunable_value('profile')
