@@ -104,7 +104,7 @@ function ceph_upgrade_node() {
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
     sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
     chown_ceph
-    restart_ceph_daemon
+#    restart_ceph_daemon
     echo '-----------------over-----------------------------------------' >>$log_dir ;
 
 }
@@ -188,7 +188,7 @@ function ceph_upgrade_node_centos() {
     yum -y install ceph;
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
     chown_ceph
-    restart_ceph_daemon
+#    restart_ceph_daemon
     echo '-----------------over-----------------------------------------' >>$log_dir ;
 
 }

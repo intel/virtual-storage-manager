@@ -19,4 +19,16 @@ ceph-osd -i $1 --mkfs --mkkey
 cp -rf /var/lib/ceph/osd/osd$1/keyring /etc/ceph/keyring.osd.$1
 ceph auth add osd.$1 osd 'allow *' mon 'allow profile osd' -i /etc/ceph/keyring.osd.$1
 ceph osd crush add osd.$1 1.0 `hostname`
-service ceph start osd.$1
+
+systemctl --version >/dev/null 2>&1 && systemctl=1
+if test "$systemctl"; then
+    if [[ -f /usr/lib/systemd/system/ceph.target ]]; then
+        chown -R ceph:ceph /var/lib/ceph
+        chown -R ceph:ceph /etc/ceph
+        systemctl start ceph-osd@$1
+    else
+        service ceph start osd.$1
+    fi
+else
+    service ceph start osd.$1
+fi

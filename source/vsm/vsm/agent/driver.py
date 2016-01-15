@@ -26,6 +26,7 @@ Drivers for testdbs.
 import os
 import time
 import json
+import platform
 from vsm import db
 from vsm import exception
 from vsm import flags
@@ -68,12 +69,27 @@ class CephDriver(object):
         except:
             pass
 
+    def _is_systemctl(self):
+        """
+
+        if the ceph version is greater than or equals infernalis and the operating
+        system is not ubuntu, use command "systemctl" to operate ceph daemons.
+        """
+
+        ceph_version = self.get_ceph_version()
+        if int(ceph_version.split(".")[0]) > 0:
+            (distro, release, codename) = platform.dist()
+            if distro != "Ubuntu":
+                return True
+        return False
+
     def _operate_ceph_daemon(self, operate, type, id=None, ssh=False, host=None):
         """
 
-        start/stop ceph osd/mon/mds. If type is None, operate all ceph daemon
-        on the node.
-        ceph script has -a parameter. It can operate remote node. But ceph-osd/ceph-mon
+        start/stop ceph-$type id=$id.
+        service ceph start/stop $type.$id
+        systemctl start/stop ceph-$type@$id
+        ceph script has -a parameter. It can operate remote node. But ceph-$type
         only can operate local node. So using ssh to operate remote node.
 
         :param operate: start or stop
@@ -83,70 +99,57 @@ class CephDriver(object):
         :param host: ssh host
         :return:
         """
-        LOG.info('zbx-000--type=%s,op=%s'%(type,operate))
-        if type:
-            # TODO fix the hardcode path
-            path = "/var/lib/ceph/%s" % type
-            dir_list = os.listdir(path)
-            if dir_list:
-                file = path + "/%s" % dir_list[0] + "/upstart"
-                is_file_exist = os.path.exists(file)
-                if is_file_exist:
-                    if id:
-                        type_id = "id=%s" % id
-                        if ssh:
-                            utils.execute('ssh', '-t', 'root@'+host,
-                                          operate, 'ceph-%s' % type,
-                                          type_id, run_as_root=True)
-                        else:
-                            utils.execute(operate, 'ceph-%s' % type, type_id,
-                                          run_as_root=True)
-                    else:
-                        if ssh:
-                            utils.execute('ssh', '-t', 'root@'+host,
-                                          operate, 'ceph-%s-all' % type,
-                                          run_as_root=True)
-                        else:
-                            utils.execute(operate, 'ceph-%s-all' % type,
-                                          run_as_root=True)
-                else:
-                    if id:
-                        type_id = type + "." + id
-                        if ssh:
-                            utils.execute('ssh', '-t', 'root@'+host,
-                                          'service', 'ceph', operate,
-                                          type_id, run_as_root=True)
-                        else:
-                            utils.execute('service', 'ceph', operate, type_id,
-                                          run_as_root=True)
-                    else:
-                        if ssh:
-                            utils.execute('ssh', '-t', 'root@'+host,
-                                          'service', 'ceph', operate, type,
-                                          run_as_root=True)
-                        else:
-                            utils.execute('service', 'ceph', operate, type,
-                                          run_as_root=True)
+
+        # type and id is required here.
+        # not support operate all ceph daemons
+        if not type or not id:
+            LOG.error("Required parameter type or id is blank")
+            return False
+
+        LOG.info("Operate %s type %s, id %s" % (operate, type, id))
+        is_systemctl = self._is_systemctl()
+
+        ceph_config_parser = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        data_dir = ceph_config_parser._parser.get(type, type + " data")
+        # path = os.path.dirname(data_dir)
+
+        file = data_dir.replace("$id", id) + "/upstart"
+        # no using os.path.exists(), because if the file is owned by ceph
+        # user, the result will return false
+        try:
+            out, err = utils.execute('ls', file, run_as_root=True)
+        except:
+            out = ""
+        # is_file_exist = os.path.exists(file)
+        if out:
+            type_id = "id=%s" % id
+            if ssh:
+                utils.execute('ssh', '-t', 'root@'+host,
+                              operate, 'ceph-%s' % type,
+                              type_id, run_as_root=True)
+            else:
+                utils.execute(operate, 'ceph-%s' % type, type_id,
+                              run_as_root=True)
         else:
-            # TODO fix the hardcode path
-            path = "/var/lib/ceph/osd"
-            dir_list = os.listdir(path)
-            if dir_list:
-                file = path + "/%s" % dir_list[0] + "/upstart"
-                is_file_exist = os.path.exists(file)
-                if is_file_exist:
-                    if ssh:
-                        utils.execute('ssh', '-t', 'root@'+host,
-                                      operate, 'ceph-all', run_as_root=True)
-                    else:
-                        utils.execute(operate, 'ceph-all', run_as_root=True)
+            if is_systemctl:
+                if ssh:
+                    utils.execute('ssh', '-t', 'root@'+host,
+                                  'systemctl', operate,
+                                  'ceph-'+type+'@'+id,
+                                  run_as_root=True)
                 else:
-                    if ssh:
-                        utils.execute('ssh', '-t', 'root@'+host,
-                                      'service', 'ceph', operate,
-                                      run_as_root=True)
-                    else:
-                        utils.execute('service', 'ceph', operate, run_as_root=True)
+                    utils.execute('systemctl', operate,
+                                  'ceph-'+type+'@'+id,
+                                  run_as_root=True)
+            else:
+                type_id = type + "." + id
+                if ssh:
+                    utils.execute('ssh', '-t', 'root@'+host,
+                                  'service', 'ceph', operate,
+                                  type_id, run_as_root=True)
+                else:
+                    utils.execute('service', 'ceph', operate, type_id,
+                                  run_as_root=True)
 
     def _get_new_ruleset(self):
         args = ['ceph', 'osd', 'crush', 'rule', 'dump']
@@ -664,6 +667,11 @@ class CephDriver(object):
             for d in dirs_list:
                 utils.execute('mkdir', '-p', '/var/lib/ceph/' + d,
                               run_as_root=True)
+            if self._is_systemctl():
+                utils.execute('chown', '-R',
+                              'ceph:ceph',
+                              '/var/lib/ceph',
+                              run_as_root=True)
         except:
             LOG.info('build dirs in /var/lib/ceph failed!')
 
@@ -723,6 +731,19 @@ class CephDriver(object):
                           '-p',
                           disk['mount_point'],
                           run_as_root=True)
+            if self._is_systemctl():
+                utils.execute('chown', '-R',
+                              'ceph:ceph',
+                              disk['mount_point'],
+                              run_as_root=True)
+                utils.execute('chown',
+                              'ceph:ceph',
+                              disk['name'],
+                              run_as_root=True)
+                utils.execute('chown',
+                              'ceph:ceph',
+                              disk['journal'],
+                              run_as_root=True)
             mount_options = utils.get_fs_options(fs_type)[1]
             utils.execute('mount',
                           '-t', fs_type,
@@ -1200,15 +1221,24 @@ class CephDriver(object):
             return
 
         __config_remove_mds(mds_id)
-        utils.execute('ceph', 'mds',
-                      'rm', mds_id, 'mds.%s' % mds_id,'--keyring',FLAGS.keyring_admin,
-                      run_as_root=True)
-        utils.execute('ceph', 'auth', 'del',
-                      'mds.%s' % mds_id,'--keyring',FLAGS.keyring_admin,
-                      run_as_root=True)
-        utils.execute('ceph', 'mds', 'newfs', '0', '1',
-                      '--yes-i-really-mean-it','--keyring',FLAGS.keyring_admin,
-                      run_as_root=True)
+        try:
+            utils.execute('ceph', 'mds',
+                          'rm', mds_id, 'mds.%s' % mds_id,'--keyring',FLAGS.keyring_admin,
+                          run_as_root=True)
+        except:
+            pass
+        try:
+            utils.execute('ceph', 'auth', 'del',
+                          'mds.%s' % mds_id,'--keyring',FLAGS.keyring_admin,
+                          run_as_root=True)
+        except:
+            pass
+        try:
+            utils.execute('ceph', 'mds', 'newfs', '0', '1',
+                          '--yes-i-really-mean-it','--keyring',FLAGS.keyring_admin,
+                          run_as_root=True)
+        except:
+            pass
         LOG.info('remove mds success!')
 
     def remove_osd(self, context, host_id):
@@ -1283,8 +1313,19 @@ class CephDriver(object):
         # Kill process by pid file.
         # mainly for ceph.
         file_path = pid_file
-        if os.path.exists(file_path):
-            pid = open(file_path).read().strip()
+        # no using os.path.exists(), because if the file is owned by ceph
+        # user, the result will return false
+        try:
+            out, err = utils.execute('ls', file_path, run_as_root=True)
+        except:
+            out = ""
+        # if os.path.exists(file_path):
+        if out:
+            # no permission to read if the file is owned by ceph user
+            # pid = open(file_path).read().strip()
+
+            out, err = utils.execute('cat', file_path, run_as_root=True)
+            pid = out.strip()
             pid_live = os.path.exists('/proc/%s' % pid)
             utils.execute('rm', '-rf', file_path, run_as_root=True)
             try_times = 1
@@ -1309,7 +1350,14 @@ class CephDriver(object):
         # Param: the osd id
         # return Bool
         file_path = '/var/run/ceph/osd.%s.pid' % num
-        if os.path.exists(file_path):
+        # no using os.path.exists(), because if the file is owned by ceph
+        # user, the result will return false
+        try:
+            out, err = utils.execute('ls', file_path, run_as_root=True)
+        except:
+            out = ""
+        # if os.path.exists(file_path):
+        if out:
             self._kill_by_pid_file(file_path)
         else:
             LOG.info("Not found pid file for osd.%s" % num)
@@ -1331,7 +1379,14 @@ class CephDriver(object):
 
     def stop_mon_daemon(self, context, num):
         file_path = '/var/run/ceph/mon.%s.pid' % num
-        if os.path.exists(file_path):
+        # no using os.path.exists(), because if the file is owned by ceph
+        # user, the result will return false
+        try:
+            out, err = utils.execute('ls', file_path, run_as_root=True)
+        except:
+            out = ""
+        # if os.path.exists(file_path):
+        if out:
             self._kill_by_pid_file(file_path)
         else:
             LOG.info("Not found pid file for mon.%s" % num)
@@ -1481,6 +1536,11 @@ class CephDriver(object):
                       'mon', "allow rwx",
                       run_as_root=True)[0]
         utils.write_file_as_root(mds_key, out, 'w')
+        if self._is_systemctl():
+            utils.execute('chown', '-R',
+                          'ceph:ceph',
+                          '/var/lib/ceph',
+                          run_as_root=True)
 
         # Start mds service.
         self.start_mds(context)
@@ -1499,7 +1559,8 @@ class CephDriver(object):
         if mds_id:
             LOG.info('>> start the mds id: %s' % mds_id)
             try:
-                utils.execute('ceph-mds', '-i', mds_id, run_as_root=True)
+                self._operate_ceph_daemon("start", "mds", id=mds_id)
+                # utils.execute('ceph-mds', '-i', mds_id, run_as_root=True)
             except:
                 LOG.info('Meets some error on start mds service.')
 
@@ -1627,6 +1688,11 @@ class CephDriver(object):
                       '-o',
                       '/var/lib/ceph/bootstrap-mds/ceph.keyring',
                       run_as_root=True)
+        if self._is_systemctl():
+            utils.execute('chown', '-R',
+                          'ceph:ceph',
+                          '/var/lib/ceph',
+                          run_as_root=True)
 
     def stop_cluster(self,context):
         "stop cluster"
@@ -1667,10 +1733,11 @@ class CephDriver(object):
         utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
         for item in osd_states:
             osd_name = item['osd_name']
-            LOG.info('>> service ceph stop %s' % osd_name)
+            LOG.info('>> Stop ceph %s' % osd_name)
             # utils.execute('service', 'ceph', 'stop', osd_name,
             #                 run_as_root=True)
-            self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
+            self.stop_osd_daemon(context, osd_name.split(".")[1])
+            # self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
             values = {'state': 'In-Down', 'osd_name': osd_name}
             LOG.info('>> update status into db %s' % osd_name)
             self._conductor_rpcapi.\

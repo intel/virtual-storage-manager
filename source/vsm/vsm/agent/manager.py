@@ -25,6 +25,7 @@ import re
 import os
 import json
 import time
+import platform
 from vsm import db
 from vsm import context
 from vsm import flags
@@ -773,11 +774,40 @@ class AgentManager(manager.Manager):
                       '/var/lib/ceph/mon/mon%s/sysvinit' % mon_id,
                       run_as_root=True)
 
-        utils.execute('service',
-                      'ceph',
-                      '-c', '/etc/ceph/ceph.conf',
-                      'start', 'mon.%s' % mon_id,
-                      run_as_root=True)
+        def __is_systemctl():
+            """
+
+            if the ceph version is greater than or equals infernalis and the operating
+            system is not ubuntu, use command "systemctl" to operate ceph daemons.
+            """
+            try:
+                out, err = utils.execute('ceph',
+                                         '--version',
+                                         run_as_root=True)
+                out = out.split(' ')[2]
+            except:
+                out = ''
+            ceph_version = out
+            if int(ceph_version.split(".")[0]) > 0:
+                (distro, release, codename) = platform.dist()
+                if distro != "Ubuntu":
+                    return True
+            return False
+        if __is_systemctl():
+            utils.execute('chown', '-R',
+                          'ceph:ceph',
+                          '/var/lib/ceph',
+                          run_as_root=True)
+            utils.execute('systemctl',
+                          'start',
+                          'ceph-mon@%s' % mon_id,
+                          run_as_root=True)
+        else:
+            utils.execute('service',
+                          'ceph',
+                          '-c', '/etc/ceph/ceph.conf',
+                          'start', 'mon.%s' % mon_id,
+                          run_as_root=True)
         return {'status': 'start_monitor_over'}
 
     def track_monitors(self, context):
