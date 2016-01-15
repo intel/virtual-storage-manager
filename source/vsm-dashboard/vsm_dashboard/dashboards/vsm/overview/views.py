@@ -135,9 +135,10 @@ def get_vsm_version():
 #get the vsm_version
 def get_version():
     ceph_version = ''
-    up_time = vsmapi.get_cluster_list(None)[1]['clusters'][0]['created_at']
-    up_time = get_time_delta(up_time)
+    up_time = ''
     try:
+        up_time = vsmapi.get_cluster_list(None)[1]['clusters'][0]['created_at']
+        up_time = get_time_delta(up_time)
         vsm_summary = vsmapi.vsm_summary(None)
         if vsm_summary is not None:
             ceph_version = vsm_summary.ceph_version
