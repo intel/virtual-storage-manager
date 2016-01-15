@@ -141,8 +141,8 @@ class ListServerTableBase(tables.DataTable):
     server_id = tables.Column("id", verbose_name=_("ID"), classes=("server_id",))
     name = tables.Column("name", verbose_name=_("Name"))
     primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"))
-    secondary_public_ip = tables.Column("secondary_public_ip", verbose_name=_("Ceph Public Address"))
-    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph Cluster Address"))
+    secondary_public_ip = tables.Column("secondary_public_ip", verbose_name=_("Public Address"))
+    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Cluster Address"))
     ceph_ver = tables.Column("ceph_ver", verbose_name=_("Ceph Version"))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
     is_monitor = tables.Column("is_monitor", classes=("monitor_tag",), verbose_name=_("Monitor"))
@@ -200,12 +200,12 @@ class ListServerTable(ListServerTableBase):
                 )
     secondary_public_ip = tables.Column(
                     "secondary_public_ip",
-                    verbose_name=_("Ceph Public Address"),
+                    verbose_name=_("Public Address"),
                     classes=("secondary_public_ip",)
                 )
     cluster_ip = tables.Column(
                     "cluster_ip",
-                    verbose_name=_("Ceph Cluster Address"),
+                    verbose_name=_("Cluster Address"),
                     classes=("cluster_ip",)
                 )
     ceph_ver = tables.Column(
@@ -269,8 +269,8 @@ class AddServerTable(tables.DataTable):
     name = tables.Column("name", verbose_name=_("Name"))
     primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"))
     secondary_public_ip = tables.Column("secondary_public_ip",
-        verbose_name=_("Ceph Public Address"))
-    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph Cluster Address"))
+        verbose_name=_("Public Address"))
+    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Cluster Address"))
     # zone = tables.Column("zone", verbose_name=_("Zone"),
     #     classes=('zone',), empty_value=empty_value_maker("choice","zone_list","",{"style":"width:80px"}))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
@@ -306,8 +306,8 @@ class RemoveServerTable(tables.DataTable):
     name = tables.Column("name", classes=("server_name",), verbose_name=_("Name"))
     primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"))
     secondary_public_ip = tables.Column("secondary_public_ip",
-        verbose_name=_("Ceph Public Address"))
-    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph Cluster Address"))
+        verbose_name=_("Public Address"))
+    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Cluster Address"))
     zone = tables.Column("zone", verbose_name=_("Zone"),
         classes=('zone',), empty_value=empty_value_maker("choice","zone_list","",{"style":"width:80px"}))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
