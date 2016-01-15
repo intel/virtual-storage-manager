@@ -116,10 +116,10 @@ class Controller(wsgi.Controller):
 
         if sum:
             try:
+                sum['created_at'] = vsm_sum['created_at'].strftime("%Y-%m-%d %H:%M:%S")
                 sum_data = {
                     'summary_data': json.dumps(sum)
                 }
-                sum['created_at'] = vsm_sum['created_at'].strftime("%Y-%m-%d %H:%M:%S")
             except:
                 pass
         else:

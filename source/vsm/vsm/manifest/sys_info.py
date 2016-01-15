@@ -63,5 +63,5 @@ def wait_disk_ready(file_path, run_times=3):
         time.sleep(1)
         try_times = try_times + 1
         if try_times > run_times:
-            LOG.error('Can not find the FLAGS.ssh_key_gen_ssh')
+            LOG.error('Can not find the %s'%file_path)
             raise
