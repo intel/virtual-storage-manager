@@ -25,19 +25,41 @@ Parse crush map in json format, and identify storage groups from ruleset.
 import json
 import operator
 from vsm import utils
+from vsm import exception
+from vsm.openstack.common import log as logging
+from vsm import flags
+
+LOG = logging.getLogger(__name__)
+FLAGS = flags.FLAGS
 
 class cephconf_discover():
 
-    def __init__(self, json_file=None, json_context=None):
+    def __init__(self, json_file=None):
         if json_file:
             with open(json_file, 'r') as fh:
                 ceph_report = json.load(fh)
             pass
-        elif json_context:
-            ceph_report = json.loads(json_context)
+        else:
+            ceph_report = self._get_report()
 
-        self._osds = ceph_report['osd_metadata']
-        self._mons = ceph_report['monmap']['mons']
+        self._osds = {}
+        self._mons = {}
+        if ceph_report:
+            self._osds = ceph_report['osd_metadata']
+            self._mons = ceph_report['monmap']['mons']
+
+
+    def _get_report(self):
+        report = ""
+        stderr = ""
+
+        try:
+            (report, stderr) = utils.execute('ceph', 'report', run_as_root=True)
+
+            return report
+        except exception.ProcessExecutionError:
+            LOG.warn('Fail to get report from ceph: %s' % stderr)
+
 
     def get_osds(self):
         return self._osds
@@ -79,22 +101,6 @@ class cephconf_discover():
             mon_settings += 'mon addr = %s\n\n' %mon['addr']
 
         return mon_settings
-
-
-    def discover_osd_info(self):
-        try:
-            out = utils.execute('lsblk',
-                                '-P -o NAME,MOUNTPOINT',
-                                run_as_root=True)
-            parser = Parser(out)
-
-            if out.find('1') != -1:
-                return True
-            else:
-                return None
-        except exception.ProcessExecutionError:
-            raise exception.FileNotFound(file_path=file_path)
-
 
 
 if __name__ == '__main__':
