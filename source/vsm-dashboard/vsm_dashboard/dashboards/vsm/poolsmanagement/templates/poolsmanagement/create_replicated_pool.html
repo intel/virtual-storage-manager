@@ -27,11 +27,58 @@
 
 {% block main %}
     {% csrf_token %}
+
+    {{sg_list}}
+
     <div id="divPoolForm" >
 	    <form>
 		    <div class="left">
 			    <fieldset>
-			    {% include "horizon/common/_form_fields.html" %}
+			    	<div class="control-group form-field clearfix required">
+                        <label>Pool Name:</label>
+                        <span class="help-block"></span>
+                        <div class="input">
+                            <input id="txtPoolName" maxlength="255"  type="text" onchange="ChangePoolName(this.value)" class="form-control">
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix">
+                        <label>Tag:</label>
+                        <!-- <span class="required-star">*</span> -->
+                        <span class="help-block"></span>
+                        <div class="input">
+                            <input id="txtTag" maxlength="255"  type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix required">
+                        <label>Storage Group:</label>
+                        <!-- <span class="required-star">*</span> -->
+                        <span class="help-block"></span>
+                        <div class="input">
+                          	<select id="selStorageGroup" class="form-control" onchange="ChangeStorageGroup(this)">
+                          		<option value="" selected="selected">Select a storage group</option>
+                          		{%for sg in sg_list%}
+                          			<option value="{{sg.0}}" pgNumber="{{sg.2}}">{{sg.1}}</option>
+                          		{%endfor%}
+                          	</select>
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix ">
+                        <label>Enable PG Auto-tune:</label>
+                        <input id="chkPGNumber" type="checkbox" checked="checked" onchange="ChangeEableAutoQuto(this.checked)" />
+                        <span class="help-block"></span>
+                        <div class="input">
+                          	<input id="txtPGNumber" maxlength="255"  type="number" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="control-group form-field clearfix ">
+                        <label>Pool Quota:</label>
+                        <input id="chkPoolQuota" type="checkbox" onchange="ChangePoolQuota(this.checked)"/>
+                        <span class="help-block"></span>
+                        <div class="input">
+                          	<input id="txtPoolQuota" maxlength="255"  type="number" class="form-control" readOnly>
+                        </div>
+                    </div>
 			    </fieldset>
 			</div>
 			<div class="right">
@@ -40,7 +87,7 @@
 			</div>
 		</form>
 		 <div id="divFormOptions" class="vsm-options-bar">
-	    	<button id="btnAddReplicatedPool" class="btn btn-primary">Submit</button>
+	    	<button id="btnAddReplicatedPool" class="btn btn-primary" onclick="AddPool()">Submit</button>
 	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/poolsmanagement/">Cancel</a>
 	    </div>
 	</div>
@@ -50,6 +97,7 @@
 {% block js %}
     {{ block.super }}
     <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
-    <script src="{{ STATIC_URL }}dashboard/js/poolmgmt.js"></script> 
+    <script src="{{ STATIC_URL }}dashboard/js/addpool.js"></script> 
+    <!--<script src="{{ STATIC_URL }}dashboard/js/poolmgmt.js"></script>--> 
 {% endblock %}
 
