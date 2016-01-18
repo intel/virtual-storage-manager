@@ -43,7 +43,7 @@ class CreatePool(forms.SelfHandlingForm):
                             'invalid': _("The string may only contain"
                                          " ASCII characters and numbers.")},
                             validators=[validate_pool_name])
-    storage_group = forms.ChoiceField(label=_('Primary Storage Group'), validators=[StorageGroupValidator()])
+    storage_group = forms.ChoiceField(label=_('Storage Group'), validators=[StorageGroupValidator()])
     # replicated_storage_group = forms.ChoiceField(label=_('Replicated Storage Group'), required=False,
     #                                              validators=[StorageGroupValidator(replicated=True)],
     #                                              error_messages={'invalid': "You should choose \"Default: same as Primary\", if you want to use same storage group"})
@@ -86,7 +86,7 @@ class CreatePool(forms.SelfHandlingForm):
         try:
             rsp, group_list= vsm_api.get_storage_group_list(self.request)
             for key in group_list:
-                storage_group_list.append((key, group_list[key]))
+                storage_group_list.append((key, group_list[key],2))
                 #replicated_storage_group_list.append((key, group_list[key]))
         except:
             msg = _('Failed to get storage_group_list.')
