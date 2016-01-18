@@ -2065,3 +2065,13 @@ class SchedulerManager(manager.Manager):
         LOG.info('add_zone_to_crushmap_and_db sync call to host = %s' % active_monitor['host'])
         self._agent_rpcapi.add_zone_to_crushmap_and_db(context,body,active_monitor['host'])
         return {'message':'success'}
+
+    def get_default_pg_num_by_storage_group(self, context, body):
+        if body is not None:
+            cluster_id = body.get('cluster_id',None)
+        else:
+            cluster_id = None
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        LOG.info('get_default_pg_num_by_storage_group sync call to host = %s' % active_monitor['host'])
+        pg_num_default = self._agent_rpcapi.get_default_pg_num_by_storage_group(context,body,active_monitor['host'])
+        return {'pg_num_default':pg_num_default}
