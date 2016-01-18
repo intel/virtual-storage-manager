@@ -78,6 +78,10 @@ class CephDriver(object):
 
         ceph_version = self.get_ceph_version()
         if int(ceph_version.split(".")[0]) > 0:
+            utils.execute('chown', '-R', 'ceph:ceph',
+                          '/var/lib/ceph', run_as_root=True)
+            utils.execute('chown', '-R', 'ceph:ceph',
+                          '/etc/ceph', run_as_root=True)
             (distro, release, codename) = platform.dist()
             if distro != "Ubuntu":
                 return True
@@ -116,10 +120,17 @@ class CephDriver(object):
         file = data_dir.replace("$id", id) + "/upstart"
         # no using os.path.exists(), because if the file is owned by ceph
         # user, the result will return false
-        try:
-            out, err = utils.execute('ls', file, run_as_root=True)
-        except:
-            out = ""
+        if ssh:
+            try:
+                out, err = utils.execute('ssh', '-t', 'root@'+host,
+                                         'ls', file, run_as_root=True)
+            except:
+                out = ""
+        else:
+            try:
+                out, err = utils.execute('ls', file, run_as_root=True)
+            except:
+                out = ""
         # is_file_exist = os.path.exists(file)
         if out:
             type_id = "id=%s" % id
@@ -619,6 +630,13 @@ class CephDriver(object):
                     LOG.info('KILL BY PGREP')
         except:
             LOG.info('Stop meet error')
+            ceph_version = self.get_ceph_version()
+            if int(ceph_version.split(".")[0]) > 0:
+                LOG.info("ceph version is greater than hammer, ceph user exists")
+                LOG.info("Create /var/lib/ceph directory, and chown ceph:ceph")
+                utils.execute('mkdir', '-p', run_path, run_as_root=True)
+                utils.execute('chown', '-R', 'ceph:ceph',
+                              run_path, run_as_root=True)
 
     def _clean_dirs(self, dir_path):
         try:
@@ -667,7 +685,8 @@ class CephDriver(object):
             for d in dirs_list:
                 utils.execute('mkdir', '-p', '/var/lib/ceph/' + d,
                               run_as_root=True)
-            if self._is_systemctl():
+            ceph_version = self.get_ceph_version()
+            if int(ceph_version.split(".")[0]) > 0:
                 utils.execute('chown', '-R',
                               'ceph:ceph',
                               '/var/lib/ceph',
@@ -731,7 +750,8 @@ class CephDriver(object):
                           '-p',
                           disk['mount_point'],
                           run_as_root=True)
-            if self._is_systemctl():
+            ceph_version = self.get_ceph_version()
+            if int(ceph_version.split(".")[0]) > 0:
                 utils.execute('chown', '-R',
                               'ceph:ceph',
                               disk['mount_point'],
@@ -1372,6 +1392,10 @@ class CephDriver(object):
         osd = "osd.%s" % num
         LOG.info('begin to start osd = %s' % osd)
         if is_vsm_add_osd:
+            utils.execute('chown', '-R', 'ceph:ceph',
+                          '/var/lib/ceph', run_as_root=True)
+            utils.execute('chown', '-R', 'ceph:ceph',
+                          '/etc/ceph', run_as_root=True)
             utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
         else:
             self._operate_ceph_daemon("start", "osd", id=num)
@@ -1536,7 +1560,8 @@ class CephDriver(object):
                       'mon', "allow rwx",
                       run_as_root=True)[0]
         utils.write_file_as_root(mds_key, out, 'w')
-        if self._is_systemctl():
+        ceph_version = self.get_ceph_version()
+        if int(ceph_version.split(".")[0]) > 0:
             utils.execute('chown', '-R',
                           'ceph:ceph',
                           '/var/lib/ceph',
