@@ -86,7 +86,7 @@ class CreatePool(forms.SelfHandlingForm):
         try:
             rsp, group_list= vsm_api.get_storage_group_list(self.request)
             for key in group_list:
-                storage_group_list.append((key, group_list[key],2))
+                storage_group_list.append((key, group_list[key]))
                 #replicated_storage_group_list.append((key, group_list[key]))
         except:
             msg = _('Failed to get storage_group_list.')
