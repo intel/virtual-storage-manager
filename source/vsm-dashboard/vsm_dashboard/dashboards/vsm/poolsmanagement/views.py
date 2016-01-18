@@ -17,6 +17,7 @@
 import logging
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse_lazy
+from django.views.generic import TemplateView
 
 from horizon import exceptions
 from horizon import tables
@@ -55,10 +56,14 @@ class IndexView(tables.DataTableView):
         #pools = [pool for pool in pools if pool['tag'] != "SYSTEM"]
         return pools
 
-class CreateView(forms.ModalFormView):
-    form_class = CreatePool
+class CreateView(TemplateView):
     template_name = 'vsm/poolsmanagement/create_replicated_pool.html'
     success_url = reverse_lazy('horizon:vsm:poolsmanagement:index')
+    def get_context_data(self, **kwargs):
+        context = super(CreateView, self).get_context_data(**kwargs)
+        sg_list = [(1,"SG 1",101),(2,"SG 1",102),(3,"SG 3",103)]
+        context["sg_list"] = sg_list
+        return context
 
 class CreateErasureCodedPoolView(forms.ModalFormView):
     form_class = CreateErasureCodedPool
