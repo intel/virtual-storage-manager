@@ -135,10 +135,8 @@ def get_crushmap_series(request):
                 "isParent":is_parent,
             }
             #append the item into crushmap
-            print '33333333333'
             crushmap_nodes.append(item)
     #sort the type_list
-    print '222===',type_list
     type_list.sort(key=lambda x:x["id"])
     resp = dict(message="", status="OK",crushmap=crushmap_nodes,type_list=type_list)
     resp = json.dumps(resp)

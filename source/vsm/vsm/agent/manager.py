@@ -2192,7 +2192,11 @@ class AgentManager(manager.Manager):
         size = db.get_size_by_storage_group_name(context,storage_group_name)
         storage_group = db.storage_group_get_by_name(context,storage_group_name)
         crushmap = self.get_crushmap_json_format()
-        osd_num_per_group = crushmap.osd_count_by_rule_id( storage_group['rule_id'])
+        try:
+            osd_num_per_group = crushmap.osd_count_by_rule_id( storage_group['rule_id'])
+        except:
+            #LOG.info('get_default_pg_num_by_storage_group: no such rule %s in crushmap'%storage_group['rule_id'])
+            return -1
         size = int(size)
         if size == 0:
             pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')

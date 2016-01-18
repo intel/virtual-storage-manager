@@ -55,7 +55,7 @@
                         <span class="help-block"></span>
                         <div class="input">
                           	<select id="selStorageGroup" class="form-control" onchange="ChangeStorageGroup(this)">
-                          		<option value="" selected="selected">Select a storage group</option>
+
                           		{%for sg in sg_list%}
                           			<option value="{{sg.0}}" pgNumber="{{sg.2}}">{{sg.1}}</option>
                           		{%endfor%}
@@ -67,7 +67,7 @@
                         <input id="chkPGNumber" type="checkbox" checked="checked" onchange="ChangeEableAutoQuto(this.checked)" />
                         <span class="help-block"></span>
                         <div class="input">
-                          	<input id="txtPGNumber" maxlength="255"  type="number" class="form-control">
+                          	<input id="txtPGNumber" maxlength="255"  type="number" class="form-control" value="{{sg_list.0.2}}" readOnly>
                         </div>
                     </div>
 

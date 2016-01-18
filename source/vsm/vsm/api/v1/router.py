@@ -186,7 +186,8 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         collection={"summary": "get",
                                     "create_with_takes":"post",
                                     "update_with_takes":"post",
-                                    "detail": "get"},
+                                    "detail": "get",
+                                    "get_default_pg_num":"get"},
                         member={'action':'POST'})
 
         self.resources['placement_groups'] = placement_groups.create_resource(ext_mgr)

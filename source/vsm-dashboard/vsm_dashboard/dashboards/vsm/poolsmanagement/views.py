@@ -61,8 +61,15 @@ class CreateView(TemplateView):
     success_url = reverse_lazy('horizon:vsm:poolsmanagement:index')
     def get_context_data(self, **kwargs):
         context = super(CreateView, self).get_context_data(**kwargs)
-        sg_list = [(1,"SG 1",101),(2,"SG 1",102),(3,"SG 3",103)]
-        context["sg_list"] = sg_list
+        storage_group_list = []
+        rsp, group_list= vsmapi.get_storage_group_list(self.request)
+        for key in group_list:
+            rsp, default_pg_num = vsmapi.get_default_pg_num_by_storage_group(self.request, \
+                                                       {'storage_group_name':group_list[key]})
+            if default_pg_num['pg_num_default'] > 0:
+                storage_group_list.append((key, group_list[key], default_pg_num['pg_num_default']))
+        #sg_list = #[(1,"SG 1",101),(2,"SG 1",102),(3,"SG 3",103)]
+        context["sg_list"] = storage_group_list
         return context
 
 class CreateErasureCodedPoolView(forms.ModalFormView):
@@ -130,7 +137,7 @@ def create_replicated_pool(request):
             msg = "Created storage pool successfully!"
     except:
         status = "Failed"
-        msg = "Remove Cache Tier Failed!"
+        msg = "Create Replication Pool Failed!"
     resp = dict(message=msg, status=status)
     resp = json.dumps(resp)
     return HttpResponse(resp)

@@ -127,3 +127,12 @@ class StorageGroupsManager(base.ManagerWithFind):
         url = '/storage_groups/%s/action' % base.getid(storage_group)
         return self.api.client.post(url, body=body)
 
+    def get_default_pg_num(self,search_opts):
+        """
+        summary
+        """
+        if search_opts is None:
+            search_opts = {}
+        storge_group_name = search_opts.get('storage_group_name')
+        url = "/storage_groups/get_default_pg_num?storage_group_name=%s"%storge_group_name
+        return self.api.client.get(url)

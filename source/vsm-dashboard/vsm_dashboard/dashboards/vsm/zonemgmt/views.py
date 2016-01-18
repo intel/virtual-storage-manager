@@ -149,13 +149,9 @@ def crushmap_datasource(request):
 
 def add(request):
     body = json.loads(request.body)
-    print "=========zone==========="
-    print body
     try:
         #TODO: add zone....
         code,ret = vsmapi.add_zone_to_crushmap_and_db(request,body)
-        print 'code=====',code
-        print 'ret====',ret
 
         status = "OK"
         msg = "Successfully!"
