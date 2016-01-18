@@ -27,9 +27,6 @@
 
 {% block main %}
     {% csrf_token %}
-
-    {{sg_list}}
-
     <div id="divPoolForm" >
 	    <form>
 		    <div class="left">
@@ -72,7 +69,7 @@
                     </div>
 
                     <div class="control-group form-field clearfix ">
-                        <label>Pool Quota:</label>
+                        <label>Pool Quota(GB):</label>
                         <input id="chkPoolQuota" type="checkbox" onchange="ChangePoolQuota(this.checked)"/>
                         <span class="help-block"></span>
                         <div class="input">
