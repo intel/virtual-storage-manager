@@ -2440,7 +2440,7 @@ class CephDriver(object):
             quorum_leader_rank = 0
             for mon in monitors:
                 ranks.append(mon.get('rank'))
-                if mon.get('name') = quorum_leader_name :
+                if mon.get('name') == quorum_leader_name :
                     quorum_leader_rank = mon.get('rank')
 
             mon_data = {
