@@ -170,3 +170,6 @@ class API(object):
 
     def add_zone_to_crushmap_and_db(self,context,body):
         return self.scheduler_rpcapi.add_zone_to_crushmap_and_db(context,body)
+
+    def get_default_pg_num_by_storage_group(self,context,body):
+        return self.scheduler_rpcapi.get_default_pg_num_by_storage_group(context,body)

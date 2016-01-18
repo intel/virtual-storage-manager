@@ -240,3 +240,6 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 
     def add_zone_to_crushmap_and_db(self,ctxt,body):
         return self.call(ctxt, self.make_msg('add_zone_to_crushmap_and_db', body=body))
+
+    def get_default_pg_num_by_storage_group(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('get_default_pg_num_by_storage_group', body=body))
