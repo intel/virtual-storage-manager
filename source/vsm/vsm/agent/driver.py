@@ -1392,10 +1392,12 @@ class CephDriver(object):
         osd = "osd.%s" % num
         LOG.info('begin to start osd = %s' % osd)
         if is_vsm_add_osd:
-            utils.execute('chown', '-R', 'ceph:ceph',
-                          '/var/lib/ceph', run_as_root=True)
-            utils.execute('chown', '-R', 'ceph:ceph',
-                          '/etc/ceph', run_as_root=True)
+            ceph_version = self.get_ceph_version()
+            if int(ceph_version.split(".")[0]) > 0:
+                utils.execute('chown', '-R', 'ceph:ceph',
+                              '/var/lib/ceph', run_as_root=True)
+                utils.execute('chown', '-R', 'ceph:ceph',
+                              '/etc/ceph', run_as_root=True)
             utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
         else:
             self._operate_ceph_daemon("start", "osd", id=num)
