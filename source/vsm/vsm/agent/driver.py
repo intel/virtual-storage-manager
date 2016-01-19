@@ -2435,31 +2435,31 @@ class CephDriver(object):
     def _mon_summary(self, sum_dict):
         if sum_dict:
             quorum_leader_name = self.get_quorum_status().get('quorum_leader_name')
-            monitors = sum_dict.get('monmap').get('mons')
-            ranks = []
-            quorum_leader_rank = 0
-            for mon in monitors:
-                ranks.append(mon.get('rank'))
-                if mon.get('name') == quorum_leader_name :
-                    quorum_leader_rank = mon.get('rank')
+            # monitors = sum_dict.get('monmap').get('mons')
+            # ranks = []
+            # quorum_leader_rank = 0
+            # for mon in monitors:
+            #     ranks.append(mon.get('rank'))
+            #     if mon.get('name') == quorum_leader_name :
+            #         quorum_leader_rank = mon.get('rank')
 
             mon_data = {
                 'monmap_epoch': sum_dict.get('monmap').get('epoch'),
                 # 'monitors': len(sum_dict.get('monmap').get('mons')),
-                'monitors': len(monitors),
+                'monitors': len(sum_dict.get('quorum_names')),
                 'election_epoch': sum_dict.get('election_epoch'),
-                # 'quorum': json.dumps(' '.join(sum_dict.get('quorum_names'))).strip('"'),
-                'quorum': json.dumps(' '.join(ranks)).strip('"'),
+                'quorum': json.dumps(' '.join(sum_dict.get('quorum_names'))).strip('"'),
+                # 'quorum': json.dumps(' '.join(ranks)).strip('"'),
                 'overall_status': json.dumps(sum_dict.get('health').get('overall_status')).strip('"'),
-                'quorum_leader_name':quorum_leader_rank,
+                'quorum_leader_name':quorum_leader_name,
             }
             return json.dumps(mon_data)
+
     def get_quorum_status(self):
         args = ['ceph', 'quorum_status']
         out = self._run_cmd_to_json(args)
         return out
 
-        return out
     def _cluster_summary(self, sum_dict):
         if sum_dict:
             cluster_data = {
