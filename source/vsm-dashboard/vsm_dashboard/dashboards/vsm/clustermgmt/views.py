@@ -230,3 +230,41 @@ def CheckClusterExist(request):
         is_exsit = False
     resp = json.dumps({"is_exsit":is_exsit})
     return HttpResponse(resp)
+
+
+def update_table(request):
+    try:
+        _zones = vsmapi.get_zone_list(request,)
+    except Exception, e:
+        exceptions.handle(request,_('Unable to retrieve sever list. '))
+
+    #generate the zone list
+    zones = {}
+    for _zone in _zones:
+        zones.setdefault(_zone.id, _zone.name)
+
+    _server_list = vsmapi.get_server_list(request)
+    _new_server_list = []
+    for _server in _server_list:
+        _zone_name = ""
+        _is_monitor = "no"
+        if _server.zone_id in zones:
+            _zone_name = zones[_server.zone_id]
+        if "monitor" in _server.type:
+            _is_monitor = "yes"
+        _new_server = {
+            "id": _server.id,
+            "name": _server.host,
+            "primary_public_ip": _server.primary_public_ip,
+            "secondary_public_ip": _server.secondary_public_ip,
+            "cluster_ip": _server.cluster_ip,
+            "zone_id": _server.zone_id,
+            "zone": _zone_name,
+            "osds": _server.osds,
+            "type": _server.type,
+            "status": _server.status,
+            "is_monitor": _is_monitor
+        }
+        _new_server_list.append(_new_server)
+
+    return HttpResponse(json.dumps(_new_server_list))
