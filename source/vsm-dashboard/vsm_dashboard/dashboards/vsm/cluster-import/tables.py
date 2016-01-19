@@ -54,9 +54,9 @@ class ListServerTable(tables.DataTable):
     server_id = tables.Column("id", verbose_name=_("ID"))
     name = tables.Column("name", verbose_name=_("Name"))
     primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"), attrs={"data-type": "ip"})
-    secondary_public_ip = tables.Column("secondary_public_ip", verbose_name=_("Ceph Public Address"), attrs={"data-type": "ip"})
-    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph Cluster Address"), attrs={"data-type": "ip"})
-    osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
+    secondary_public_ip = tables.Column("secondary_public_ip", verbose_name=_("Public Address"), attrs={"data-type": "ip"})
+    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Cluster Address"), attrs={"data-type": "ip"})
+    osds = tables.Column("osds", verbose_name=_("OSDs"))
     is_monitor = tables.Column("is_monitor", verbose_name=_("Monitor"))
     zone = tables.Column("zone", classes=("zone",), verbose_name=_("Zone"))
     status = tables.Column("status", status=True,
