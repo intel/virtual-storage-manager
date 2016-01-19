@@ -104,7 +104,7 @@ function ceph_upgrade_node() {
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
     sed -i "s/root=default/root=vsm/g" /usr/bin/ceph-crush-location;
     chown_ceph
-    restart_ceph_daemon
+#    restart_ceph_daemon
     echo '-----------------over-----------------------------------------' >>$log_dir ;
 
 }
@@ -188,7 +188,7 @@ function ceph_upgrade_node_centos() {
     yum -y install ceph;
     echo '----------------upgrade ceph over-----------------------------' >>$log_dir;
     chown_ceph
-    restart_ceph_daemon
+#    restart_ceph_daemon
     echo '-----------------over-----------------------------------------' >>$log_dir ;
 
 }
@@ -199,6 +199,9 @@ function chown_ceph() {
         echo '---------------Modify the directory and file belongs----------' >>$log_dir
         chown -R ceph:ceph /var/lib/ceph
         chown -R ceph:ceph /etc/ceph
+        if [[ -d /var/run/ceph ]]; then
+            chown -R ceph:ceph /var/run/ceph
+        fi
         cat /etc/ceph/ceph.conf | while read line; do
             str1=${line:0:4}
             str2=${line:0:11}

@@ -69,7 +69,6 @@ Requires:    python-novaclient
 Requires:    python-cinderclient
 Requires:    python-oslo-config
 Requires:    numpy
-Requires:    ceph
 Requires:    btrfs-progs
 Requires:    xfsprogs
 Requires:    python-psutil
