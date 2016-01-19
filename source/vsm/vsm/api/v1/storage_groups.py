@@ -255,6 +255,14 @@ class Controller(wsgi.Controller):
                                'full': False,
                                }}
 
+    def get_default_pg_num(self, req):
+        context = req.environ['vsm.context']
+        storage_group_name= req.GET.get('storage_group_name',None)
+        LOG.info('CEPH_LOG get_default_pg_num %s ' % storage_group_name)
+        body = {'storage_group_name':storage_group_name}
+        default_pg_num = self.scheduler_api.get_default_pg_num_by_storage_group(context,body)
+        return default_pg_num
+
 def create_resource(ext_mgr):
     return wsgi.Resource(Controller(ext_mgr))
 

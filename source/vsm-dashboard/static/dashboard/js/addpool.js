@@ -9,7 +9,7 @@ function ChangeStorageGroup(obj){
 }
 
 function ChangeEableAutoQuto(checked){
-	$("#txtPGNumber")[0].readOnly = !checked
+	$("#txtPGNumber")[0].readOnly = checked
 }
 
 function ChangePoolQuota(checked){
@@ -48,8 +48,13 @@ function AddPool(){
 		data: postData,
 		dataType:"json",
 		success: function(data){
-				console.log(data);
-				//window.location.href="/dashboard/vsm/poolsmanagement/";
+				//console.log(data);
+                if(data.status == "OK"){
+                    window.location.href="/dashboard/vsm/poolsmanagement/";
+                }
+                else{
+                    showTip("error",data.message);
+                }
 		   	},
 		error: function (XMLHttpRequest, textStatus, errorThrown) {
 				if(XMLHttpRequest.status == 500)

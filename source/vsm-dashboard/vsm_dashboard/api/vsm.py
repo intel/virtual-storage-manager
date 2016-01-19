@@ -221,6 +221,9 @@ def storage_group_update_with_takes(request, body):
 def storage_group_update(request, body):
     return vsmclient(request).storage_groups.update(body)
 
+def get_default_pg_num_by_storage_group(request, body):
+    return vsmclient(request).storage_groups.get_default_pg_num(search_opts=body)
+
 def placement_group_summary(request):
     return vsmclient(request).placement_groups.summary()
 
@@ -255,7 +258,6 @@ def device_list(request):
 
 def device_get_smartinfo(request,search_opts=None):
     ret = vsmclient(request).devices.get_smart_info(search_opts=search_opts)
-    print "vsm-dashboard get device =%s",ret
     return ret
 
 #license api
