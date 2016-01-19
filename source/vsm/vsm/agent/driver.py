@@ -2444,12 +2444,12 @@ class CephDriver(object):
                 'quorum_leader_name':quorum_leader_name,
             }
             return json.dumps(mon_data)
+
     def get_quorum_status(self):
         args = ['ceph', 'quorum_status']
         out = self._run_cmd_to_json(args)
         return out
 
-        return out
     def _cluster_summary(self, sum_dict):
         if sum_dict:
             cluster_data = {
