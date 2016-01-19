@@ -60,9 +60,13 @@ function CloseSpin(){
 	$("#spin_wrapper").modal("hide");
 }
 
+var AJAXCount = 0;
 $(document).ajaxStart(function(){
-	//load the spin
-	ShowSpin();
+    AJAXCount ++;
+	if(AJAXCount!=1){
+        //load the spin
+	    ShowSpin();
+    }
 });
 
 $(document).ajaxStop(function(){
