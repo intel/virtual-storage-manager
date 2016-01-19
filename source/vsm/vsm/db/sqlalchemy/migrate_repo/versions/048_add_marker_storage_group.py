@@ -36,7 +36,7 @@ def downgrade(migrate_engine):
     meta.bind = migrate_engine
 
     storage_group = Table('storage_groups', meta, autoload=True)
-    marker = Column('take_id',String(length=255), nullable=True)
+    marker = Column('marker',String(length=255), nullable=True)
 
     try:
         storage_group.drop_column(marker)
