@@ -788,7 +788,7 @@ class AgentManager(manager.Manager):
                           '/var/lib/ceph',
                           run_as_root=True)
         (distro, release, codename) = platform.dist()
-        if distro != "Ubuntu" and int(ceph_version.split(".")[0]) <= 0:
+        if distro != "Ubuntu" and int(ceph_version.split(".")[0]) > 0:
             utils.execute('systemctl',
                           'start',
                           'ceph-mon@%s' % mon_id,
