@@ -89,7 +89,7 @@
             data: data_list_json,
             type: "post",
             dataType: "json",
-            url: "/dashboard/vsm/clustermgmt/cluster/create",
+            url: "/dashboard/vsm/cluster/create",
             success: function (data) {
 
                 for( x in data_list){
@@ -97,7 +97,7 @@
                     $("#server_list__row__"+data_list[x]['id']).find(".status_up").addClass("status_unknown").removeClass("status_up");
                 }
 
-                window.location.href="/dashboard/vsm/clustermgmt/";
+                window.location.href="/dashboard/vsm/";
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
 

@@ -78,7 +78,9 @@
                                 {%endfor%}
                             </td>
                             <td class="sortable normal_column marker">
-                                <span class="glyphicon glyphicon-tag" aria-hidden="true"  style="color:{{sg.marker}}"></span>
+                                <svg width="16" height="16">
+                                    <circle class="marker-circle" cx="8" cy="8" r="8" fill="{{sg.marker}}" />
+                                </svg>
                             </td>
                             <td class="actions_column">
                                 <button href="#" class="btn btn-default btn-primary" onclick="updateAction({{sg.id}})">Edit</button>

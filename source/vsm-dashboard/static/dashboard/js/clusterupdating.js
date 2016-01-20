@@ -14,7 +14,7 @@ function UpdateClusterTable(){
         data: null,
         type: "get",
         dataType: "json",
-        url: "/dashboard/vsm/clustermgmt/update_table/",
+        url: "/dashboard/vsm/update_table/",
         success: function (data) {
         	var ActiveCount = 0;
         	for(var i=0;i<data.length;i++){
