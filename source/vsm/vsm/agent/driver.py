@@ -2528,7 +2528,13 @@ class CephDriver(object):
 
     def _mon_summary(self, sum_dict):
         if sum_dict:
-            quorum_leader_name = self.get_quorum_status().get('quorum_leader_name')
+            quorum_status = self.get_quorum_status()
+            quorum_leader_name = quorum_status.get('quorum_leader_name')
+            quorum_leader_rank = None
+            for mon in quorum_status.get('monmap').get('mons'):
+                if mon.get('name') == quorum_leader_name:
+                    quorum_leader_rank = str(mon.get('rank'))
+                    break
             mon_data = {
                 'monmap_epoch': sum_dict.get('monmap').get('epoch'),
                 'monitors': len(sum_dict.get('monmap').get('mons')),
@@ -2536,6 +2542,7 @@ class CephDriver(object):
                 'quorum': json.dumps(' '.join([str(i) for i in sum_dict.get('quorum')])).strip('"'),
                 'overall_status': json.dumps(sum_dict.get('health').get('overall_status')).strip('"'),
                 'quorum_leader_name':quorum_leader_name,
+                'quorum_leader_rank':quorum_leader_rank,
             }
             return json.dumps(mon_data)
 

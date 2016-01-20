@@ -239,8 +239,8 @@ def get_monitor():
     epoch = monitor_summary.monmap_epoch
     update = get_time_delta(monitor_summary.updated_at)
     quorumlist = monitor_summary.quorum.split(" ")
-    quorum_leader_name = monitor_summary.quorum_leader_name
-    leader_list_index = quorumlist.index(quorum_leader_name)
+    quorum_leader_rank = monitor_summary.quorum_leader_rank
+    leader_list_index = quorumlist.index(quorum_leader_rank)
     #monitors = monitor_summary.monitors
     Monitor_dict = {"epoch":epoch
               ,"update":update

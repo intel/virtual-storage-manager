@@ -69,7 +69,8 @@ class ViewBuilder(common.ViewBuilder):
                     'quorum': sum_data.get('quorum'),
                     'overall_status': sum_data.get('overall_status'),
                     'updated_at': updated_at,
-                    'quorum_leader_name': sum_data.get('quorum_leader_name')
+                    'quorum_leader_name': sum_data.get('quorum_leader_name'),
+                    'quorum_leader_rank': sum_data.get('quorum_leader_rank')
                 }
             }
             LOG.debug('return view %s' % ret)
