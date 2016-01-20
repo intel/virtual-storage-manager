@@ -118,7 +118,7 @@ function updateAction(id){
 	$("#txtName").val(tr.find(".name")[0].innerHTML.trim());
 	$("#txtClass").val(tr.find(".class")[0].innerHTML.trim());
 	$("#txtFriendlyName").val(tr.find(".friendly_name")[0].innerHTML.trim());
-	$("#txtMarker")[0].value = rgb2hex(tr.find(".glyphicon")[0].style.color);
+	$("#txtMarker")[0].value = rgb2hex(tr.find(".marker-circle")[0].getAttribute("fill"))
 
 
 	var take_id_list = [];
@@ -309,7 +309,10 @@ function AddStorageGroupHTML(data){
 	}
 	html += "	</td>";
 	html += "	<td class='sortable normal_column marker'>";
-	html += "		 <span class='glyphicon glyphicon-tag' aria-hidden='true'  style=\"color:"+data.marker+"\"></span>";
+	html += "		<svg width=\"16\" height=\"16\">"
+	html += "			<circle class=\"marker-circle\" cx=\"8\" cy=\"8\" r=\"8\" fill=\""+data.marker+"\" />"
+	html += "		</svg>"
+
 	html += "	</td>";
 	html += "	<td class='actions_column'>";
 	html += "		<button href='' class='btn btn-default btn-primary' onclick='updateAction("+ data.id +")'>Edit</button>";
@@ -326,8 +329,7 @@ function UpdateStorageGroupHTML(data){
 	tr.find(".name")[0].innerHTML = data.name;
 	tr.find(".class")[0].innerHTML = data.storage_class;
 	tr.find(".friendly_name")[0].innerHTML = data.friendly_name;
-	tr.find(".glyphicon")[0].style.color = data.marker;
-
+	tr.find(".marker-circle")[0].getAttribute("fill") = data.marker;
 	var html = "";
 	for(var i=0;i<data.rule_info.takes.length;i++){
 		var displayText = data.rule_info.takes[i].take_name+"("+data.rule_info.takes[i].choose_leaf_type+","+data.rule_info.takes[i].choose_num+")";
@@ -364,7 +366,7 @@ function MarkTree(){
 		var checked = $(trID).find(".table-row-multi-select")[0].checked;
 		if(checked == true){
 			//get the marker color
-			var marker_color = rgb2hex($(trID).find(".glyphicon")[0].style.color)
+			var marker_color = rgb2hex($(trID).find(".marker-circle")[0].getAttribute("fill"))
 			//get the take ID list
 			$(trID).find(".take-id[type=\"hidden\"]").each(function(){
 				marker_list.push({
@@ -397,9 +399,10 @@ function MarkTree(){
 
 function GenerateTreeMarker(color){
 	var html ="";
-	html += "<span class=\"tree-marker\" aria-hidden=\"true\"  style=\"background-Color:"+color+"\"></span>";
+	html += "<svg class=\"tree-marker\" width=\"16\" height=\"16\">";
+	html += "	<circle class=\"marker-circle\" cx=\"8\" cy=\"8\" r=\"8\" fill=\""+color+"\" />";
+	html += "</svg>";
 	return html;
-
 }
 
 
