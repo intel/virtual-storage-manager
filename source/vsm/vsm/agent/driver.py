@@ -966,6 +966,18 @@ class CephDriver(object):
         # TODO: does not support ext4 for now.
         # Need to use -o user_xattr for ext4
         fs_opt = utils.get_fs_options(file_system)[1]
+
+        ceph_version = self.get_ceph_version()
+        if int(ceph_version.split(".")[0]) > 0:
+            utils.execute('chown',
+                          'ceph:ceph',
+                          osd_conf_dict['dev_name'],
+                          run_as_root=True)
+            utils.execute('chown',
+                          'ceph:ceph',
+                          osd_conf_dict['dev_journal'],
+                          run_as_root=True)
+
         utils.execute("mount",
                       "-t", file_system,
                       "-o", fs_opt,
