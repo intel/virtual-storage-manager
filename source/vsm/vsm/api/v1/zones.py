@@ -90,7 +90,7 @@ class ZonesController(wsgi.Controller):
         #zone_list = zones.values()
         #sorted_zones = sorted(zone_list,
         #                      key=lambda item: item['id'])
-        LOG.info('vsm/api/v1/zones.py severs')
+        #LOG.info('vsm/api/v1/zones.py severs')
 
         return self._view_builder.index(zones)
 

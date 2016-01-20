@@ -24,7 +24,7 @@ class ViewBuilder(common.ViewBuilder):
     _collection_name = "zones"
 
     def basic(self, zone):
-        LOG.info("CEPH_LOG zone api view %s " % zone)
+        #LOG.info("CEPH_LOG zone api view %s " % zone)
         return {
             "zone": {
                 "id":zone['id'], 

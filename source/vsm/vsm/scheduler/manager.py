@@ -980,21 +980,22 @@ class SchedulerManager(manager.Manager):
         ssh_user = body.get('ssh_user','')
         #check network and get pakages from network
         LOG.info('scheduler/manager.py ceph_upgrade==%s'%body)
-        err = 'success'
-        try:
-            out, err = utils.execute('vsm-ceph-upgrade','-k',
-                             key_url,'-p', pkg_url,'-s',hosts,'--proxy',proxy,'--ssh_user',ssh_user,
-                             run_as_root=True)
-            LOG.info("exec vsm-ceph-upgrade in controller node:%s--%s"%(out,err))
-            err = 'success'
-        except:
-            LOG.info("vsm-ceph-upgrade in controller node:%s"%err)
-            return {"message":"ceph upgrade unsuccessful.Please make sure that the URLs are reachable."}
         LOG.info("ceph upgrade of scheduer manager %s" % server_list)
         status_all = [node['status'] for node in server_list ]
         status_all = list(set(status_all))
         message = "send commonds success"
         if len(status_all)==1 and status_all[0] in ['available','Active']:
+            err = 'success'
+            try:
+                out, err = utils.execute('vsm-ceph-upgrade','-k',
+                                 key_url,'-p', pkg_url,'-s',hosts,'--proxy',proxy,'--ssh_user',ssh_user,
+                                 run_as_root=True)
+                LOG.info("exec vsm-ceph-upgrade in controller node:%s--%s"%(out,err))
+                err = 'success'
+            except:
+                LOG.info("vsm-ceph-upgrade in controller node:%s"%err)
+                return {"message":"ceph upgrade unsuccessful.Please make sure that the URLs are reachable."}
+
             if status_all[0] == 'available':
                 restart = False
             else:
@@ -1010,6 +1011,8 @@ class SchedulerManager(manager.Manager):
                 thd = utils.MultiThread(__ceph_upgrade,context=context, node_id=item['id'], host=item['host'], key_url=key_url,pkg_url=pkg_url,restart=restart)
                 thd_list.append(thd)
             utils.start_threads(thd_list)
+        else:
+            return {"message":"ceph upgrade unsuccessful.Please add all available servers to ceph cluster firstly."}
         server_list_new = db.init_node_get_all(context)
         new_ceph_ver = server_list_new[0]['ceph_ver']
         if new_ceph_ver != pre_ceph_ver:
