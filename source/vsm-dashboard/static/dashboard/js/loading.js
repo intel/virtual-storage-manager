@@ -1,5 +1,5 @@
 $(function(){
-        CheckClusterExist();
+        //CheckClusterExist();
 })
 
 function CheckClusterExist(){

@@ -17,6 +17,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 import horizon
+from vsm_dashboard.api import vsm as vsmapi
 
 class Dashboard(horizon.PanelGroup):
     slug = 'dashboard'
@@ -48,11 +49,26 @@ class UserMgmt(horizon.PanelGroup):
     name = _("VSM Management")
     panels = ("usermgmt", 'settings')
 
+class ClusterMgmt2(horizon.PanelGroup):
+    slug = "clustermgmt"
+    name = _("Cluster Management")
+    panels = ('clustermgmt', 'cluster-import')
+
+class UserMgmt2(horizon.PanelGroup):
+    slug = "usermgmt"
+    name = _("VSM Management")
+    panels = ("usermgmt",)
+
 class VizDash(horizon.Dashboard):
     name = _("VSM")
     slug = "vsm"
-    panels = (Dashboard, ServerMgmt, ClusterMgmt, ClusterMonitor, OpenstackMgmt, UserMgmt)
-    default_panel = 'overview'
+    pool_status = vsmapi.pool_status(None)
+    if len(pool_status) == 0:
+        panels = (ClusterMgmt2,UserMgmt2)
+        default_panel = 'clustermgmt'
+    else:
+        panels = (Dashboard, ServerMgmt, ClusterMgmt, ClusterMonitor, OpenstackMgmt, UserMgmt)
+        default_panel = 'overview'
     roles = ('admin',)
 
 horizon.register(VizDash)
