@@ -2531,9 +2531,9 @@ class CephDriver(object):
             quorum_leader_name = self.get_quorum_status().get('quorum_leader_name')
             mon_data = {
                 'monmap_epoch': sum_dict.get('monmap').get('epoch'),
-                'monitors': len(len(sum_dict.get('monmap').get('mons'))),
+                'monitors': len(sum_dict.get('monmap').get('mons')),
                 'election_epoch': sum_dict.get('election_epoch'),
-                'quorum': json.dumps(' '.join(sum_dict.get('quorum'))).strip('"'),
+                'quorum': json.dumps(' '.join([str(i) for i in sum_dict.get('quorum')])).strip('"'),
                 'overall_status': json.dumps(sum_dict.get('health').get('overall_status')).strip('"'),
                 'quorum_leader_name':quorum_leader_name,
             }
@@ -3389,7 +3389,7 @@ class ManagerCrushMapDriver(object):
                 insert_take_line +=3
         utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path,
             run_as_root=True)
-        fd = open(self._crushmap_path, 'w')
+        fd = open(self._crushmap_path+'_decompiled', 'w')
         LOG.info('new lines=====%s'%new_lines)
         fd.writelines(new_lines)
         fd.close()
