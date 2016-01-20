@@ -15,3 +15,7 @@
 .control-group{
 	margin-top: 10px;
 }
+
+#id_force_nonempty{
+	margin-left: 5px;	
+}

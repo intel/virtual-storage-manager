@@ -20,6 +20,7 @@ from .views import CreateClusterView
 from .views import IntegrateClusterView
 from .views import ClusterAction
 from .views import CheckClusterExist
+from .views import update_table
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
@@ -27,4 +28,5 @@ urlpatterns = patterns('',
     url(r'^integrateclusterview/$', IntegrateClusterView.as_view(), name='integrateclusterview'),
     url(r'^cluster/(?P<action>\w+)$', ClusterAction, name='clusteraction'),
     url(r'^check_cluster_exist/$', CheckClusterExist, name='check_cluster_exist'),
+    url(r'^update_table/$', update_table, name='update_table'),
 )

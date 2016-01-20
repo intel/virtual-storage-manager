@@ -24,10 +24,7 @@ from horizon import tables
 from horizon import forms
 
 from vsm_dashboard.api import vsm as vsmapi
-from vsm_dashboard.dashboards.vsm.poolsmanagement import utils
-from .form import CreatePool
 from .form import CreateErasureCodedPool
-from .form import AddCacheTier
 from .form import RemoveCacheTier
 from .tables import ListPoolTable
 
@@ -77,11 +74,21 @@ class CreateErasureCodedPoolView(forms.ModalFormView):
     template_name = 'vsm/poolsmanagement/create_erasure_coded_pool.html'
     success_url = reverse_lazy('horizon:vsm:poolsmanagement:index')
 
-#add the cache tier view
-class AddCacheTierView(forms.ModalFormView):
-    form_class = AddCacheTier
+class AddCacheTierView(TemplateView):
     template_name = 'vsm/poolsmanagement/add_cache_tier.html'
     success_url = reverse_lazy('horizon:vsm:poolsmanagement:index')
+    def get_context_data(self, **kwargs):
+        context = super(AddCacheTierView, self).get_context_data(**kwargs)
+        #get pool list
+        pools = vsmapi.pool_status(None)
+        context["pool_list"] = [(pool.pool_id, pool.name) for pool in pools if not pool.cache_tier_status]
+        context["cache_mode_list"] = [('writeback', "Writeback"), ('readonly', "Read-only")]
+        context["hit_set_type_list"] = [('bloom', "bloom")]
+        #get the settings
+        setting_list = vsmapi.get_settings(None)
+        context["settings"] = dict([(setting.name, setting.value) for setting in setting_list])
+        return context
+
 
 class RemoveCacheTierView(forms.ModalFormView):
     form_class = RemoveCacheTier

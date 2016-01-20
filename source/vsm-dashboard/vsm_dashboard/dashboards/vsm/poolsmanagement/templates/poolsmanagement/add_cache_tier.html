@@ -31,7 +31,129 @@
 	    <div class="left">
 	    <form>
 		    <fieldset>
-		    	{% include "horizon/common/_form_fields.html" %}
+		    	<div class="control-group form-field clearfix required">
+	                <label>Cache Tier Pool:</label>
+	                <span class="help-block"></span>
+	                <div class="input">
+	                  	<select id="selCacheTierPool" class="form-control" >
+	                  		{%for pool in pool_list%}
+	                  			<option value="{{pool.0}}">{{pool.1}}</option>
+	                  		{%endfor%}
+	                  	</select>
+	                </div>
+            	</div>
+            	<div class="control-group form-field clearfix required">
+	                <label>Storage Tier Pool:</label>
+	                <span class="help-block"></span>
+	                <div class="input">
+	                  	<select id="selStorageTierPool" class="form-control" >
+	                  		{%for pool in pool_list%}
+	                  			<option value="{{pool.0}}">{{pool.1}}</option>
+	                  		{%endfor%}
+	                  	</select>
+	                </div>
+            	</div>
+            	<div class="control-group form-field clearfix required">
+	                <label>Cache Mode:</label>
+	                <span class="help-block"></span>
+	                <div class="input">
+	                  	<select id="selCacheMode" class="form-control" >
+	                  		{%for cache_mode in cache_mode_list%}
+	                  			<option value="{{cache_mode.0}}">{{cache_mode.1}}</option>
+	                  		{%endfor%}
+	                  	</select>
+	                </div>
+            	</div>
+            	<div class="control-group form-field">
+	                <label>FORCE NONEMPTY:</label>
+	                <input id="chkForceNonempty" type="checkbox" onchange="SwithForceNoneEmpty(this.checked)" />
+            	</div>
+
+            	<div id="divForceNonEmpty" style="display:none">
+            		<div class="control-group form-field clearfix required">
+		                <label>Hit Set Type:</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<select id="selHitSetType" class="form-control" >
+		                  		{%for hit_set_type in hit_set_type_list%}
+		                  			<option value="{{hit_set_type.0}}" >{{hit_set_type.1}}</option>
+		                  		{%endfor%}
+		                  	</select>
+		                </div>
+            		</div>
+
+            		<div class="control-group form-field clearfix required">
+		                <label>Hit set count:</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<input id="txtHitSetCount" maxlength="255"  type="text" class="form-control" value="{{settings.ct_hit_set_count}}" >
+		                </div>
+		            </div>
+
+		            <div class="control-group form-field clearfix required">
+		                <label>Hit set period(s):</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<input id="txtHitSetPeriod" maxlength="255"  type="text" class="form-control" value="{{settings.ct_hit_set_period_s}}">
+		                </div>
+		            </div>
+
+
+		            <div class="control-group form-field clearfix required">
+		                <label>Target maximum memory(MB):</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<input id="txtTargetMaximumMemory" maxlength="255"  type="text" class="form-control"  value="{{settings.ct_target_max_mem_mb}}">
+		                </div>
+		            </div>
+
+
+
+		            <div class="control-group form-field clearfix required">
+		                <label>Target dirty ratio:</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<input id="txtTargetDirtyRatio" maxlength="255"  type="text" class="form-control" value="{{settings.ct_target_dirty_ratio}}">
+		                </div>
+		            </div>
+
+
+
+		            <div class="control-group form-field clearfix required">
+		                <label>Target full ratio:</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<input id="txtTargetFullRatio" maxlength="255"  type="text" class="form-control" value="{{settings.ct_target_full_ratio}}">
+		                </div>
+		            </div>
+
+
+		            <div class="control-group form-field clearfix required">
+		                <label>Target maximum objects:</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<input id="txtTargetMaximumObjects" maxlength="255"  type="text" class="form-control" value="{{settings.ct_target_max_objects}}">
+		                </div>
+		            </div>
+
+
+		            <div class="control-group form-field clearfix required">
+		                <label>Target minimum flush age(m):</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<input id="txtTargetMinimumFlushAge" maxlength="255"  type="text" class="form-control" value="{{settings.ct_target_min_flush_age_m}}">
+		                </div>
+		            </div>
+
+		             <div class="control-group form-field clearfix required">
+		                <label>Target minimum evict age(m):</label>
+		                <span class="help-block"></span>
+		                <div class="input">
+		                  	<input id="txtTargetMinimumEvictAge" maxlength="255"  type="text" class="form-control" value="{{settings.ct_target_min_evict_age_m}}">
+		                </div>
+		            </div>
+
+            	</div>
 		    </fieldset>
 			</div>
 			<div class="right">
@@ -50,6 +172,6 @@
 {% block js %}
     {{ block.super }}
     <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
-    <script src="{{ STATIC_URL }}dashboard/js/poolmgmt.js"></script> 
+    <script src="{{ STATIC_URL }}dashboard/js/addcachetier.js"></script> 
 {% endblock %}
 
