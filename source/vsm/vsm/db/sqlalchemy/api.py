@@ -2571,7 +2571,7 @@ def storage_group_get_by_name(context, name, session=None):
     if not session:
         session = get_session()
     result = model_query(context, models.StorageGroup, session=session).\
-            filter_by(name=name).all()
+            filter_by(name=name).first()
     return result
 
 @require_admin_context
