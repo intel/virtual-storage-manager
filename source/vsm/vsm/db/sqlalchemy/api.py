@@ -4189,6 +4189,8 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
         '''%{'metrics_name':metrics_name,'time_1':timestamp_cur-(diamond_collect_interval-1),'time_2':timestamp_cur+1,'interval':diamond_collect_interval}
         sql_ret_set = session.execute(sql_str).fetchall()
         for cell in sql_ret_set:
+            if cell is None or cell[0] is None:
+                continue
             if correct_cnt:
                 metrics_value = cell[0]/cell[1]*correct_cnt
             else:
@@ -4245,6 +4247,8 @@ def latency_performance_metrics(context, search_opts, session=None):#for latency
         sql_ret = session.execute(sql_str).fetchall()
         #LOG.info('latency--sql-str===%s'%sql_str)
         for cell in sql_ret:
+            if cell is None or cell[0] is None:
+                continue
             metrics_value = cell[0] or 0
             ret_list.append({'instance':'', 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
         timestamp_cur = timestamp_cur + diamond_collect_interval
