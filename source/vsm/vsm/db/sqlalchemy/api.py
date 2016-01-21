@@ -4166,7 +4166,7 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
     if setting_ref:
         diamond_collect_interval = int(setting_ref['value'])
     else:
-        diamond_collect_interval = 0
+        diamond_collect_interval = 15
         vsm_settings_update_or_create(context, {'name':'ceph_diamond_collect_interval','value':diamond_collect_interval}, session=session)
     if timestamp_start is None and timestamp_end:
         timestamp_start = timestamp_end - diamond_collect_interval
@@ -4212,7 +4212,7 @@ def latency_performance_metrics(context, search_opts, session=None):#for latency
     if setting_ref:
         diamond_collect_interval = int(setting_ref['value'])
     else:
-        diamond_collect_interval = 0
+        diamond_collect_interval = 15
         vsm_settings_update_or_create(context, {'name':'ceph_diamond_collect_interval','value':diamond_collect_interval}, session=session)
     if timestamp_start is None and timestamp_end:
         timestamp_start = timestamp_end - diamond_collect_interval
