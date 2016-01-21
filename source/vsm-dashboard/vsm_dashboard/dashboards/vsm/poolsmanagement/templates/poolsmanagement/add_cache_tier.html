@@ -66,10 +66,15 @@
             	</div>
             	<div class="control-group form-field">
 	                <label>FORCE NONEMPTY:</label>
-	                <input id="chkForceNonempty" type="checkbox" onchange="SwithForceNoneEmpty(this.checked)" />
+	                <input id="chkForceNonempty" type="checkbox" />
             	</div>
 
-            	<div id="divForceNonEmpty" style="display:none">
+                <div class="control-group form-field">
+	                <label>Advanced Settings:</label>
+	                <input id="chkAdvancedSettings" type="checkbox" onchange="SwithAdvancedSettings(this.checked)" />
+            	</div>
+
+            	<div id="divAdvancedSettings" style="display:none">
             		<div class="control-group form-field clearfix required">
 		                <label>Hit Set Type:</label>
 		                <span class="help-block"></span>

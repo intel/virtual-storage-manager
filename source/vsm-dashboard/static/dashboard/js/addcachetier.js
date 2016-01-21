@@ -24,11 +24,11 @@ function ModifyLayout(){
 	$("input[id=id_force_nonempty]").appendTo($("label[for=id_force_nonempty]"));
 }
 
-function SwithForceNoneEmpty(checked){
+function SwithAdvancedSettings(checked){
 	if(checked)
-		$("#divForceNonEmpty")[0].style.display = "";
+		$("#divAdvancedSettings")[0].style.display = "";
 	else
-		$("#divForceNonEmpty")[0].style.display = "none";
+		$("#divAdvancedSettings")[0].style.display = "none";
 }
 
 
