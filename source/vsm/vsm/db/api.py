@@ -845,6 +845,9 @@ def storage_group_get_by_storage_class(context, storage_class):
 def storage_group_update_by_name(context, name, values):
     return IMPL.storage_group_update_by_name(context, name, values)
 
+def update_storage_group_marker(context,name,marker):
+    return IMPL.update_storage_group_marker(context,name,marker)
+
 def create_storage_group(context, values):
     if values is None:
         return False

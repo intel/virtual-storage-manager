@@ -2020,6 +2020,7 @@ class SchedulerManager(manager.Manager):
             rule_id = storage_group_in_db['rule_id']
             pools = db.pool_get_by_ruleset(context,rule_id)
             if len(pools) > 0:
+                db.update_storage_group_marker(context,storage_group['name'],storage_group['marker'])
                 pool_names = [ pool['name'] for pool in pools ]
                 message['error_code'].append('-1')
                 message['error_msg'].append('storage group %s was used by pool %s currently!'%(storage_group['name'],pool_names))
