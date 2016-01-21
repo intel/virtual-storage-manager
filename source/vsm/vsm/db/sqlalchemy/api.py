@@ -4223,7 +4223,7 @@ def latency_performance_metrics(context, search_opts, session=None):#for latency
     session = get_session()
     while timestamp_cur < timestamp_end:
         sql_str = '''
-                 select case when avgcount_a<>0 then sum_a*1.0/avgcount_a else 0 end as latency_value from \
+                 select case when avgcount_a<>0 then sum_a*1000/avgcount_a else 0 end as latency_value from \
                  (select sum(la_sum_cur-la_sum_pre) as sum_a from
                     (
                      (select instance,hostname,value as la_sum_cur from metrics where metric ='%(metric_name)s_sum' and timestamp>=%(start_time)d and timestamp<%(end_time)d )  as d
