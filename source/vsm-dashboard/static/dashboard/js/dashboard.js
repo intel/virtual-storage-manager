@@ -130,8 +130,6 @@ function loadVersion(){
             $("#lblCephVersion")[0].innerHTML= data.ceph_version;
 	   },
     error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
             if(XMLHttpRequest.status == 401)
                 window.location.href = "/dashboard/auth/logout/";
         }
@@ -182,8 +180,6 @@ function loadClusterStatus(){
             $("#divClusterContent")[0].className = noteClass;
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
             if(XMLHttpRequest.status == 401)
                 window.location.href = "/dashboard/auth/logout/";
         }
@@ -224,8 +220,6 @@ function loadOSD(){
             }
 	    },
     error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
             if(XMLHttpRequest.status == 401)
                 window.location.href = "/dashboard/auth/logout/";
         }
@@ -254,8 +248,6 @@ function loadMonitor(){
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
             if(XMLHttpRequest.status == 401)
                 window.location.href = "/dashboard/auth/logout/";
         }
@@ -305,8 +297,6 @@ function loadMDS(){
             }         
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
             if(XMLHttpRequest.status == 401)
                 window.location.href = "/dashboard/auth/logout/";
         }
@@ -338,8 +328,6 @@ function loadStorage(){
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
             if(XMLHttpRequest.status == 401)
                 window.location.href = "/dashboard/auth/logout/";
         }
@@ -359,8 +347,6 @@ function loadCapacity(){
             $("#lblCapacityTotal")[0].innerHTML = ((parseInt(data.total)/1024)/1024/1024).toFixed(2).toString() + " GB";
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
             if(XMLHttpRequest.status == 401)
                 window.location.href = "/dashboard/auth/logout/";
         }
@@ -378,8 +364,6 @@ function loadPG(){
                 cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            if(XMLHttpRequest.status == 500)
-                showTip("error","INTERNAL SERVER ERROR")
             if(XMLHttpRequest.status == 401)
                 window.location.href = "/dashboard/auth/logout/";
         }
