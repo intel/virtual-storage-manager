@@ -56,16 +56,6 @@ class CreateErasureCodedPool(forms.SelfHandlingForm):
                           #             " ASCII characters and numbers.")},
                           #validators=[validators.validate_slug]
     )
-    enable_pool_quota = forms.BooleanField(label="Enable Pool Quota",required=False,initial=False)
-
-    pool_quota = forms.IntegerField(label=_("Pool Quota (GB)"),
-                           error_messages={
-                               'invalid': _("The string may only contain"
-                                            " numbers.")},
-                           max_value=8589934591,
-                           initial=0,
-                           required=True
-                           )
 
     def __init__(self, request, *args, **kwargs):
         super(CreateErasureCodedPool, self).__init__(request, *args, **kwargs)

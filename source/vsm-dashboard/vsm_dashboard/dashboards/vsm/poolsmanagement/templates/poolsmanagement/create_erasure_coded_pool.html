@@ -33,6 +33,16 @@
 			    <fieldset>
 			    {% include "horizon/common/_form_fields.html" %}
 			    </fieldset>
+
+                <div class="control-group form-field ">
+	                <label>Enable Pool Quota:</label>
+	                <input id="chkEnablePoolQuota" type="checkbox" onchange="ChangePoolQuota(this.checked)" />
+	                <span class="help-block"></span>
+	                <div class="input">
+	                  	<input id="txtPoolQuota" maxlength="255"  type="number" value="0" class="form-control" readOnly>
+	                </div>
+	            </div>
+
 			</div>
 			<div class="right">
 			    <h3>{% trans "Description" %}:</h3>
