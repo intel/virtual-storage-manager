@@ -98,6 +98,10 @@ class ConductorManager(manager.Manager):
 
         return pool_list_dict
 
+    def get_storage_pool(self, context, id):
+        LOG.info('get_storage_pool in conductor manager')
+        return db.pool_get_by_db_id(context, id)
+
     def destroy_storage_pool(self, context, pool_name):
         if pool_name:
             db.pool_destroy(context, pool_name)
@@ -623,3 +627,12 @@ class ConductorManager(manager.Manager):
 
     def get_cpu_usage(self, context, search_opts):
         return db.get_cpu_usage(context, search_opts=search_opts)
+
+    def get_poolusage(self, context, poolusage_id):
+        return db.get_poolusage(context, poolusage_id=poolusage_id)
+
+    def get_appnode(self, context, appnode_id):
+        return db.appnodes_get_by_id(context, appnode_id)
+
+    def delete_pool_usage(self, context, poolusage_id):
+        return db.destroy_storage_pool_usage(context, poolusage_id)

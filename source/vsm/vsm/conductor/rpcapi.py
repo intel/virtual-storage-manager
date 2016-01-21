@@ -47,6 +47,11 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         ret = self.call(ctxt, self.make_msg('list_storage_pool'))
         return ret
 
+    def get_storage_pool(self, ctxt, id):
+        ret = self.call(ctxt, self.make_msg('get_storage_pool',
+                                            id=id))
+        return ret
+
     def destroy_storage_pool(self, ctxt, pool_name):
         self.cast(ctxt, self.make_msg('destroy_storage_pool', pool_name=pool_name))
 
@@ -404,3 +409,15 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def get_cpu_usage(self, context, search_opts):
         return self.call(context,self.make_msg('get_cpu_usage', \
                                search_opts=search_opts))
+
+    def get_poolusage(self, context, poolusage_id):
+        return self.call(context, self.make_msg('get_poolusage',
+                                                poolusage_id=poolusage_id))
+
+    def get_appnode(self, context, appnode_id):
+        return self.call(context, self.make_msg('get_appnode',
+                                                appnode_id=appnode_id))
+
+    def delete_pool_usage(self, context, poolusage_id):
+        return self.call(context, self.make_msg('delete_pool_usage',
+                                                poolusage_id=poolusage_id))

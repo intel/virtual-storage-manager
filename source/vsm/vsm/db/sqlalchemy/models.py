@@ -559,6 +559,7 @@ class StoragePool(BASE, VsmBase):
     primary_storage_group_id = Column(Integer, ForeignKey('storage_groups.id'), nullable=False)
     storage_group = relationship(StorageGroup,
                            backref=backref('storage_pool'),
+                           lazy='subquery',
                            foreign_keys=primary_storage_group_id,
                            primaryjoin='and_('
                            'StoragePool.primary_storage_group_id == StorageGroup.id,'

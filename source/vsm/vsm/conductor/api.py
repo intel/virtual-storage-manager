@@ -49,6 +49,9 @@ class API(object):
     def list_storage_pool(self, context):
         return self.conductor_rpcapi.list_storage_pool(context)
 
+    def get_storage_pool(self, context, id):
+        return self.conductor_rpcapi.get_storage_pool(context, id)
+
     def get_storage_group_list(self, context):
         return self.conductor_rpcapi.get_storage_group_list(context)
 
@@ -307,3 +310,6 @@ class API(object):
 
     def get_cpu_usage(self, context, search_opts):
         return self.conductor_rpcapi.get_cpu_usage(context, search_opts)
+
+    def get_poolusage(self, context, poolusage_id):
+        return self.conductor_rpcapi.get_poolusage(context, poolusage_id)

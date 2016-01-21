@@ -42,6 +42,7 @@ from vsm.api.v1 import vsm_settings
 from vsm.api.v1 import vsms
 from vsm.api.v1 import licenses
 from vsm.api.v1 import performance_metrics
+from vsm.api.contrib import poolusages
 
 from vsm.openstack.common import log as logging
 
@@ -234,4 +235,10 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         collection={"get_list": "get",
                                     "get_metrics": "get",
                                     },
+                        member={'action':'post'})
+
+        self.resources['poolusages'] = poolusages.create_resource(ext_mgr)
+        mapper.resource("poolusages", "poolusages",
+                        controller=self.resources['poolusages'],
+                        collection={'revoke_pool': "post"},
                         member={'action':'post'})

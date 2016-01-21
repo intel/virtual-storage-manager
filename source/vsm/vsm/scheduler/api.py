@@ -45,6 +45,9 @@ class API(object):
     def present_storage_pools(self, context, body=None):
         return self.scheduler_rpcapi.present_storage_pools(context, body)
 
+    def revoke_storage_pool(self, context, id):
+        return self.scheduler_rpcapi.revoke_storage_pool(context, id)
+
     def get_storage_group_list(self, context):
         return self.scheduler_rpcapi.get_storage_group_list(context)
 

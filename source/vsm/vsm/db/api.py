@@ -774,6 +774,9 @@ def pool_get_all(context):
 def pool_get(context, pool_id):
     return IMPL.pool_get(context, pool_id)
 
+def pool_get_by_db_id(context, id):
+    return IMPL.pool_get_by_db_id(context, id)
+
 def pool_get_by_name(context, pool_name, cluster_id):
     return IMPL.pool_get_by_name(context, pool_name, cluster_id)
 
@@ -1284,4 +1287,7 @@ def get_cpu_usage(context, search_opts):
 
 def clean_performance_history_data(context,days):
     return IMPL.clean_performance_history_data(context,days)
+
+def get_poolusage(context, poolusage_id):
+    return IMPL.get_poolusage(context, poolusage_id=poolusage_id)
 #endregion
