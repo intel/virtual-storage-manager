@@ -77,7 +77,7 @@
             data: data_list_json,
             type: "post",
             dataType: "json",
-            url: "/dashboard/vsm/clustermgmt/create",
+            url: "/dashboard/vsm/clustermgmt/cluster/create",
             success: function (data) {
                 for( x in data_list){
                     $("#server_list__row__"+data_list[x]['id']).addClass("status_unknown").removeClass("status_up");
