@@ -14,18 +14,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.template.defaultfilters import filesizeformat
+
 from django.utils.translation import ugettext_lazy as _
-from django.utils.datastructures import SortedDict
 from django import forms
 
-from django.utils.safestring import mark_safe
-
 from horizon import tables
-from horizon.utils import html
 from horizon import exceptions
 from vsm_dashboard.api import vsm as vsmapi
-from .utils import checkbox_transform
 
 STRING_SEPARATOR = "__"
 
@@ -114,7 +109,7 @@ class ListServerTable(tables.DataTable):
         verbose_name = _("Cluster Server List")
         table_actions = (CreateClusterAction,)
         status_columns = ['status']
-        #row_class = UpdateRow
+        row_class = UpdateRow
         multi_select = False
 
     def get_object_id(self, datum):
