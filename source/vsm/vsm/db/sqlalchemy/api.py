@@ -4192,7 +4192,7 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
             if correct_cnt:
                 metrics_value = cell[0]/cell[1]*correct_cnt
             else:
-                metrics_value = cell[0]
+                metrics_value = cell[0]/diamond_collect_interval
             if metrics_name in ['osd_op_in_bytes','osd_op_out_bytes']:
                 metrics_value = metrics_value and metrics_value*1.0/1024/1024/diamond_collect_interval or 0
             sql_ret_dict = {'instance': cell[2], 'timestamp': str(timestamp_cur), 'metrics_value': metrics_value, 'metrics': metrics_name,}
