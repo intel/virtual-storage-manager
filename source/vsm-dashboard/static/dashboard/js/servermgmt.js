@@ -101,7 +101,8 @@ function UpdateServerStatus(){
             $("#server_list>tbody")[0].innerHTML = html;
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
         },
         complete: function(){
 

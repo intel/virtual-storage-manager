@@ -128,7 +128,13 @@ function loadVersion(){
             $("#lblCephVersion")[0].innerHTML= "--";
         else
             $("#lblCephVersion")[0].innerHTML= data.ceph_version;
-	   }
+	   },
+    error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
+        }
     });
 }
 
@@ -174,6 +180,12 @@ function loadClusterStatus(){
             $("#lblClusterTip")[0].className = statusClass;
             $("#divClusterContent")[0].innerHTML = note;
             $("#divClusterContent")[0].className = noteClass;
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
         }
     });
 }
@@ -185,58 +197,69 @@ function loadOSD(){
 	data: null,
 	dataType:"json",
 	success: function(data){
-	    // console.log(data);
-	    $("#lblOSDEpoch")[0].innerHTML = data.epoch;
-	    $("#lblOSDUpdate")[0].innerHTML = data.update;
-	    $("#divOSD_INUP")[0].innerHTML = data.in_up;
-	    $("#divOSD_INDOWN")[0].innerHTML = data.in_down;
-	    $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
-	    $("#divOSD_OUTDOWN")[0].innerHTML = data.out_down;
-        $("#lblOSDCapacityAvailable")[0].innerHTML = data.capacity_available_count;
-        $("#lblOSDCapacityNearFull")[0].innerHTML = data.capacity_near_full_count;
-        $("#lblOSDCapacityFull")[0].innerHTML = data.capacity_full_count;
+            // console.log(data);
+            $("#lblOSDEpoch")[0].innerHTML = data.epoch;
+            $("#lblOSDUpdate")[0].innerHTML = data.update;
+            $("#divOSD_INUP")[0].innerHTML = data.in_up;
+            $("#divOSD_INDOWN")[0].innerHTML = data.in_down;
+            $("#divOSD_OUTUP")[0].innerHTML = data.out_up;
+            $("#divOSD_OUTDOWN")[0].innerHTML = data.out_down;
+            $("#lblOSDCapacityAvailable")[0].innerHTML = data.capacity_available_count;
+            $("#lblOSDCapacityNearFull")[0].innerHTML = data.capacity_near_full_count;
+            $("#lblOSDCapacityFull")[0].innerHTML = data.capacity_full_count;
 
-        //data.capacity_near_full_count = 1;
+            //data.capacity_near_full_count = 1;
 
-        //init
-        $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_health.png";
-        //when error
-        if(data.in_down>0 || data.capacity_full_count){
-            $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_error.png";
-            return;
+            //init
+            $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_health.png";
+            //when error
+            if(data.in_down>0 || data.capacity_full_count){
+                $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_error.png";
+                return;
+            }
+            //when warnning
+            if(data.out_up>0 || data.out_down>0 || data.capacity_near_full_count){
+                $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_warning.png";
+                return;
+            }
+	    },
+    error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
         }
-        //when warnning
-        if(data.out_up>0 || data.out_down>0 || data.capacity_near_full_count){
-            $("#imgOSDInfo")[0].src = "/static/dashboard/img/info_warning.png";
-            return;
-        }
-	}
     });
 }
 
 function loadMonitor(){
-        $.ajax({
-            type: "get",
-            url: "/dashboard/vsm/monitor/",
-            data: null,
-            dataType:"json",
-            success: function(data){
-        		//console.log(data)
-        		$("#lblMonitorEpoch")[0].innerHTML = data.epoch;
-                $("#lblMonitorUpdate")[0].innerHTML = data.update;
+    $.ajax({
+        type: "get",
+        url: "/dashboard/vsm/monitor/",
+        data: null,
+        dataType:"json",
+        success: function(data){
+            //console.log(data)
+            $("#lblMonitorEpoch")[0].innerHTML = data.epoch;
+            $("#lblMonitorUpdate")[0].innerHTML = data.update;
 
-                var rect =null;
-                $("#divMonitorRect").empty();
-                for(var i=0;i<data.quorum.length;i++) {
-                    if (i == data.selMonitor)
-                       rect = "<div class='vsm-rect vsm-rect-monitor vsm-rect-green'>"+data.quorum[i]+"</div>";
-                    else
-                        rect = "<div class='vsm-rect vsm-rect-monitor'>"+data.quorum[i]+"</div>";
-                    $("#divMonitorRect").append(rect);
-                }
-
+            var rect =null;
+            $("#divMonitorRect").empty();
+            for(var i=0;i<data.quorum.length;i++) {
+                if (i == data.selMonitor)
+                   rect = "<div class='vsm-rect vsm-rect-monitor vsm-rect-green'>"+data.quorum[i]+"</div>";
+                else
+                    rect = "<div class='vsm-rect vsm-rect-monitor'>"+data.quorum[i]+"</div>";
+                $("#divMonitorRect").append(rect);
             }
-     });
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
+        }
+ });
 }
 
 function loadMDS(){
@@ -280,36 +303,47 @@ function loadMDS(){
                 $("#imgMDSInfo")[0].src = "/static/dashboard/img/info_warning.png";
                 return;
             }         
-         }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
+        }
 	});
 }
 
 function loadStorage(){
-        $.ajax({
-            type: "get",
-            url: "/dashboard/vsm/storage/",
-            data: null,
-            dataType:"json",
-            success: function(data){
-                //console.log(data)
-                $("#lblStorageUpdate")[0].innerHTML = data.update;
-                $("#divStorageNormal")[0].innerHTML = data.normal;
-                $("#divStorageNearFull")[0].innerHTML = data.nearfull;
-                $("#divStorageFull")[0].innerHTML = data.full;
+    $.ajax({
+        type: "get",
+        url: "/dashboard/vsm/storage/",
+        data: null,
+        dataType:"json",
+        success: function(data){
+            //console.log(data)
+            $("#lblStorageUpdate")[0].innerHTML = data.update;
+            $("#divStorageNormal")[0].innerHTML = data.normal;
+            $("#divStorageNearFull")[0].innerHTML = data.nearfull;
+            $("#divStorageFull")[0].innerHTML = data.full;
 
-                 //when error
-                if(data.full>0){
-                    $("#imgStorageInfo")[0].src = "/static/dashboard/img/info_error.png";
-                    return;
-                }
-                //when warnning
-                if(data.nearfull>0){
-                    $("#imgStorageInfo")[0].src = "/static/dashboard/img/info_warning.png";
-                    return;
-                }
-
+             //when error
+            if(data.full>0){
+                $("#imgStorageInfo")[0].src = "/static/dashboard/img/info_error.png";
+                return;
             }
-     });
+            //when warnning
+            if(data.nearfull>0){
+                $("#imgStorageInfo")[0].src = "/static/dashboard/img/info_warning.png";
+                return;
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
+        }
+    });
 }
 
 function loadCapacity(){
@@ -323,6 +357,12 @@ function loadCapacity(){
             //update the capacity value
             $("#lblCapacityUsed")[0].innerHTML = ((parseInt(data.used)/1024)/1024/1024).toFixed(2).toString() + " GB";
             $("#lblCapacityTotal")[0].innerHTML = ((parseInt(data.total)/1024)/1024/1024).toFixed(2).toString() + " GB";
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
         }
      });
 }
@@ -336,7 +376,13 @@ function loadPG(){
         success: function(data){
                 $("#lblPGUpdate")[0].innerHTML = data.update;
                 cPGs.setOption(GetPieOption(data.active_clean,data.not_active_clean))
-            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
+        }
      });
 }
 
@@ -382,7 +428,8 @@ function loadIOP(){
                 loadIOP();
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-
+                if(XMLHttpRequest.status == 401)
+                    window.location.href = "/dashboard/auth/logout/";
             },
             headers: {
                 "X-CSRFToken": token
@@ -437,7 +484,8 @@ function loadLatency(){
                 loadLatency();
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-
+                if(XMLHttpRequest.status == 401)
+                    window.location.href = "/dashboard/auth/logout/";
             },
             headers: {
                 "X-CSRFToken": token
@@ -485,7 +533,8 @@ function loadBandwidth(){
                 loadBandwidth();
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-
+                if(XMLHttpRequest.status == 401)
+                    window.location.href = "/dashboard/auth/logout/";
             },
             headers: {
                 "X-CSRFToken": token
@@ -544,7 +593,8 @@ function loadCPU(){
 
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-
+                if(XMLHttpRequest.status == 401)
+                    window.location.href = "/dashboard/auth/logout/";
             },
             headers: {
                 "X-CSRFToken": token
