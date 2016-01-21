@@ -17,36 +17,8 @@ function InitCtrlCSS(){
     for(var i=0;i<ctrlText.length;i++){
             ctrlText[i].className = "form-control";
     }
-
-    //disable control
-    DisableControl();
 }
 
-function DisableControl(){
-    if($("#id_auto_growth_pg").length>0){
-            $("#id_auto_growth_pg")[0].readOnly = true;
-    }
-
-    if($("#id_pool_quota").length>0){
-            $("#id_pool_quota")[0].readOnly = true;
-    }
-}
-
-$("#id_disable_pg_auto_growth").click(function(){
-    console.log(this.checked);
-    if(this.checked)
-        $("#id_auto_growth_pg")[0].readOnly = false;
-    else
-        $("#id_auto_growth_pg")[0].readOnly = true;
-});
-
-$("#id_enable_pool_quota").click(function(){
-    console.log(this.checked);
-    if(this.checked)
-        $("#id_pool_quota")[0].readOnly = false;
-    else
-        $("#id_pool_quota")[0].readOnly = true;
-});
 
 $("#btnRemoveCacheTier").click(function(){
 	var CachePoolID = $("#id_cache_tier_pool").val();
@@ -82,13 +54,18 @@ $("#btnRemoveCacheTier").click(function(){
     return false;
 })
 
+function ChangePoolQuota(checked){
+	$("#txtPoolQuota")[0].readOnly = !checked
+	if(checked==false){
+		$("#txtPoolQuota").val("");
+	}
+}
 
 
 $("#btnCreateErasureCodedPool").click(function(){
 	//Check the field is should not null
 	if(   $("#id_name").val() == ""
-	   || $("#id_tag").val() == ""
-	   || $("#id_pool_quota").val() == "" ){
+	   || $("#id_tag").val() == ""){
 
 		showTip("error","The field is marked as '*' should not be empty");
 		return  false;
@@ -105,8 +82,8 @@ $("#btnCreateErasureCodedPool").click(function(){
             'createdBy': 'VSM',
             'ecProfileId': $("#id_ec_profile").val(),
             'ecFailureDomain': $("#id_ec_failure_domain").val(),
-            'enablePoolQuota': $("#id_enable_pool_quota")[0].checked,
-            'poolQuota': $("#id_pool_quota").val(),
+            'enablePoolQuota':  $("#chkEnablePoolQuota")[0].checked,
+            'poolQuota': $("#txtPoolQuota").val()
         }
 	}
 

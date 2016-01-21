@@ -100,17 +100,19 @@ var _SG_ID = -1;
 function addAction(){
 	_SG_ID = null;
 	ResetForm();
-	$("#btnAddStorageGroup").show();
 	$("#divStorageGroupTable").hide();
 	$("#divStorageGroupForm").show();
+    $("#btnAddStorageGroup").show();
+    $("#btnUpdateStorageGroup").hide();
 }
 
 function updateAction(id){
 	_SG_ID = id;
 	ResetForm();
-	$("#btnUpdateStorageGroup").show();
 	$("#divStorageGroupTable").hide();
 	$("#divStorageGroupForm").show();
+    $("#btnAddStorageGroup").hide();
+    $("#btnUpdateStorageGroup").show();
 
 	var trID = "storage_group_list__row__"+id;
 	var tr = $("#"+trID);
@@ -156,17 +158,6 @@ function ResetForm(){
 	$("#txtFriendlyName").val("");
 	$("#txtMarker").val("");
 	$("#tTakeList>tbody").empty();
-
-    if(_SG_ID==null){
-        $("#btnAddStorageGroup").show();
-        $("#btnUpdateStorageGroup").hide();
-    }
-    else {
-        $("#btnAddStorageGroup").hide();
-        $("#btnUpdateStorageGroup").show();
-    }
-
-
 }
 
 function CancelAction(){
