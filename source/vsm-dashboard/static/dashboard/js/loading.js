@@ -13,14 +13,10 @@ function CheckClusterExist(){
                 $("dl.nav_accordion>dd>div>ul>li>a").each(function(){
                     var nav_name = this.innerHTML;
                     if(nav_name!="Create Cluster" && nav_name!="Import Cluster" && nav_name!="Add/Remove User"){
-                        //this.style.display = "none";
                         this.href = "#";
+                        this.style.color = "#ccc";
                     }
                 });
-                //$("dl.nav_accordion>dd>div")[0].style.display = "none";
-                //$("dl.nav_accordion>dd>div")[1].style.display = "none";
-                //$("dl.nav_accordion>dd>div")[3].style.display = "none";
-                //$("dl.nav_accordion>dd>div")[4].style.display = "none";
             }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
