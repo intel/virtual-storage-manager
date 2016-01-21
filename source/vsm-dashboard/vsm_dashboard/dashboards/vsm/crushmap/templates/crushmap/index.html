@@ -159,6 +159,7 @@
 {% endblock %}
 {% block js %}
     {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
     <script src="{{ STATIC_URL }}dashboard/js/jquery.ztree.all-3.5.min.js"></script>
     <script src="{{ STATIC_URL }}dashboard/js/crushmap.js"></script> 
 {% endblock %}

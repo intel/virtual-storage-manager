@@ -21,15 +21,6 @@
         checkboxCell[i].className = "multi_select_column";
     }
 
-    //Disable all the navigation
-    //if($("#server_list__action_create_cluster").length > 0){
-    //    //Disable all the navigation
-    //    $(".nav_accordion>dd>div>ul>li>a").each(function(){
-    //        $(this).attr('href', '#');
-    //    });
-    //}
-
-
     if($("#clusteraction").length>0){
        
         $("#clusteraction>tbody>tr").each(function(){
@@ -78,10 +69,7 @@
             return false;
         }
 
-
-
         data_list_json = JSON.stringify(data_list);
-        console.log(data_list);
         token = $("input[name=csrfmiddlewaretoken]").val();
         modal_stack = $("#modal_wrapper .modal");
 
@@ -89,15 +77,14 @@
             data: data_list_json,
             type: "post",
             dataType: "json",
-            url: "/dashboard/vsm/cluster/create",
+            url: "/dashboard/vsm/clustermgmt/cluster/create",
             success: function (data) {
-
                 for( x in data_list){
                     $("#server_list__row__"+data_list[x]['id']).addClass("status_unknown").removeClass("status_up");
                     $("#server_list__row__"+data_list[x]['id']).find(".status_up").addClass("status_unknown").removeClass("status_up");
                 }
 
-                window.location.href="/dashboard/vsm/";
+                window.location.href="/dashboard/vsm/clustermgmt/";
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
 
