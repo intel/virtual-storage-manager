@@ -238,7 +238,7 @@ class ListServerTable(ListServerTableBase):
                 )
     class Meta:
         name = "server_list"
-        verbose_name = _("Cluster Server List")
+        verbose_name = _("Server List")
         table_actions = (AddServersAction, RemoveServersAction,
                 AddMonitorsAction, RemoveMonitorsAction, StartServersAction, StopServersAction)
         #status_columns = ['status']
@@ -271,16 +271,10 @@ class AddServerTable(tables.DataTable):
     secondary_public_ip = tables.Column("secondary_public_ip",
         verbose_name=_("Public Address"))
     cluster_ip = tables.Column("cluster_ip", verbose_name=_("Cluster Address"))
-    # zone = tables.Column("zone", verbose_name=_("Zone"),
-    #     classes=('zone',), empty_value=empty_value_maker("choice","zone_list","",{"style":"width:80px"}))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
     is_monitor = tables.Column("is_monitor", verbose_name=_("Monitor"),
-        classes=('monitor',), empty_value=empty_value_maker("checkbox","is_monitor","")) 
-    # is_storage = tables.Column("is_storage", verbose_name=_("Storage"), classes=('storage',),
-    #     empty_value=empty_value_maker("checkbox","is_storage",1), hidden=True)
+        classes=('monitor',), empty_value=empty_value_maker("checkbox","is_monitor",""))
     server_status = tables.Column("status", verbose_name=_("Server Status"), classes=('server_status',))
-    #createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
-    #cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
         multi_select = True
@@ -305,21 +299,14 @@ class RemoveServerTable(tables.DataTable):
     server_id = tables.Column("id", verbose_name=_("ID"), classes=("server_id",))
     name = tables.Column("name", classes=("server_name",), verbose_name=_("Name"))
     primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"))
-    secondary_public_ip = tables.Column("secondary_public_ip",
-        verbose_name=_("Public Address"))
+    secondary_public_ip = tables.Column("secondary_public_ip",verbose_name=_("Public Address"))
     cluster_ip = tables.Column("cluster_ip", verbose_name=_("Cluster Address"))
-    zone = tables.Column("zone", verbose_name=_("Zone"),
-        classes=('zone',), empty_value=empty_value_maker("choice","zone_list","",{"style":"width:80px"}))
+    zone = tables.Column("zone", verbose_name=_("Zone"),classes=('zone',), empty_value=empty_value_maker("choice","zone_list","",{"style":"width:80px"}))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
     is_monitor = tables.Column("is_monitor", classes=("monitor_tag",), verbose_name=_("Monitor"))
-    remove_monitor = tables.Column("remove_monitor", verbose_name=_("Monitor"),
-        classes=('remove_monitor',), empty_value=empty_value_maker("checkbox","remove_monitor", True),
-        hidden=True)
-    remove_storage = tables.Column("remove_storage", verbose_name=_("Storage"), classes=('remove_storage',),
-        empty_value=empty_value_maker("checkbox","remove_storage",True), hidden=True)
+    remove_monitor = tables.Column("remove_monitor", verbose_name=_("Monitor"),classes=('remove_monitor',), empty_value=empty_value_maker("checkbox","remove_monitor", True),hidden=True)
+    remove_storage = tables.Column("remove_storage", verbose_name=_("Storage"), classes=('remove_storage',),empty_value=empty_value_maker("checkbox","remove_storage",True), hidden=True)
     server_status = tables.Column("status", verbose_name=_("Server Status"), classes=('server_status',))
-    #createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
-    #cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
         multi_select = True
