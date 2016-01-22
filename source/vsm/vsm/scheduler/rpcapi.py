@@ -110,7 +110,7 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return ret
 
     def import_cluster(self, context, server_list):
-        ret = self.cast(context,
+        ret = self.call(context,
                         self.make_msg('import_cluster',
                                       server_list=server_list))
         return ret
