@@ -2670,6 +2670,163 @@ class CephDriver(object):
         db.pool_update_by_name(context, storage_pool_name, cluster_id, {"cache_tier_status": None})
         return True
 
+    def auth_caps(self, context, entity, **kwargs):
+        """
+        update caps for <name> from caps specified in the command
+        :param context:
+        :param entity:
+        :param kwargs:
+        :return:
+        """
+
+        caps_keys = kwargs.keys()
+        if "mon" in caps_keys:
+            caps_mon = kwargs['mon']
+        else:
+            caps_mon = ""
+        if "osd" in caps_keys:
+            caps_osd = kwargs['osd']
+        else:
+            caps_osd = ""
+        if "mds" in caps_keys:
+            caps_mds = kwargs['mds']
+        else:
+            caps_mds = ""
+
+        try:
+            if caps_mon and caps_osd and caps_mds:
+                utils.execute('ceph', 'auth', 'caps', entity, 'mds', caps_mds,
+                              'mon', caps_mon, 'osd', caps_osd, run_as_root=True)
+            elif caps_mon and caps_osd:
+                utils.execute('ceph', 'auth', 'caps', entity, 'mon', caps_mon,
+                              'osd', caps_osd, run_as_root=True)
+            elif caps_mon:
+                utils.execute('ceph', 'auth', 'caps', entity, 'mon', caps_mon,
+                              run_as_root=True)
+        except:
+            LOG.error("Failed to update auth caps")
+            raise
+
+    def auth_get(self, context, entity):
+        """
+        get auth info
+        :param entity: client.ce1032ba-9ae9-4a7f-b456-f80fd821dd7f
+        :return:
+        {
+            "entity":"client.ce1032ba-9ae9-4a7f-b456-f80fd821dd7f",
+            "key":"AQB7Gp9WAP+tJRAAgvZTJJqJ\/GxHEL28a4DwLQ==",
+            "caps":{
+                "mon":"allow r",
+                "osd":"allow class-read object_prefix rbd_children,allow rwx pool=testpool01,allow rwx pool=testpool02"
+            }
+        }
+        """
+
+        out = utils.execute('ceph', 'auth', 'get', entity, '-f', 'plain',
+                               run_as_root=True)[0].strip("\n").split("\n")
+        result = {}
+        result["caps"] = {}
+        for line in out:
+            line = line.strip(" ")
+            if len(line.split("=")) < 2:
+                result["entity"] = line.replace("[","").replace("]","")
+            else:
+                if "key" in line.split("=")[0]:
+                    result["key"] = line.split("=")[1].strip()
+                elif "mon" in line.split("=")[0]:
+                    result["caps"]["mon"] = "=".join(line.split("=")[1:]).strip()[1:-1]
+                elif "osd" in line.split("=")[0]:
+                    result["caps"]["osd"] = "=".join(line.split("=")[1:]).strip()[1:-1]
+                elif "mds" in line.split("=")[0]:
+                    result["caps"]["mds"] = "=".join(line.split("=")[1:]).strip()[1:-1]
+
+        return result
+
+    def delete_cinder_type(self, context, name, **kwargs):
+        """
+
+        :param name: cinder type name
+        :param kwargs:
+        :return:
+        """
+
+        username = kwargs.pop('username')
+        password = kwargs.pop('password')
+        tenant_name = kwargs.pop('tenant_name')
+        auth_url = kwargs.pop('auth_url')
+        region_name = kwargs.pop('region_name')
+        cinderclient = cc.Client(username,
+                                 password,
+                                 tenant_name,
+                                 auth_url,
+                                 region_name=region_name)
+        cinder_type_list = cinderclient.volume_types.list()
+        delete_type = None
+        for type in cinder_type_list:
+            if type.name == name:
+                delete_type = type
+                break
+        if delete_type:
+            cinderclient.volume_types.delete(delete_type)
+        else:
+            LOG.warn("Not found the cinder type %s" % name)
+
+    def revoke_storage_pool_from_cinder_conf(self, context, auth_host,
+                                             cinder_host, ssh_user,
+                                             pool_name):
+        """
+
+        :param auth_host:
+        :param cinder_host:
+        :param ssh_user: ssh user
+        :param pool_name: pool name
+        :return:
+        """
+
+        line, err = utils.execute("su", "-s", "/bin/bash", "-c",
+                                  "exec ssh %s ssh %s sudo sed -n '/^enabled_backends/=' /etc/cinder/cinder.conf" %
+                                  (auth_host, cinder_host),
+                                  ssh_user, run_as_root=True)
+        line = line.strip(" ").strip("\n")
+        search_str = str(line) + "p"
+        enabled_backends, err = utils.execute("su", "-s", "/bin/bash", "-c",
+                                              "exec ssh %s ssh %s sudo sed -n %s /etc/cinder/cinder.conf" %
+                                              (auth_host, cinder_host, search_str),
+                                              ssh_user, run_as_root=True)
+        enabled_backends = enabled_backends.strip(" ").strip("\n")
+        backends_list = enabled_backends.split("=")[1].strip(" ").split(",")
+        new_backends_list = []
+        for backend in backends_list:
+            if backend != pool_name:
+                new_backends_list.append(backend)
+        new_enabled_backends = "enabled_backends\\\\\\ =\\\\\\ " + str(",".join(new_backends_list))
+        utils.execute("su", "-s", "/bin/bash", "-c",
+                      "exec ssh %s ssh %s sudo sed -i 's/^enabled_backends*.*/%s/g' /etc/cinder/cinder.conf" %
+                      (auth_host, cinder_host, new_enabled_backends),
+                      ssh_user, run_as_root=True)
+
+        search_str = '/rbd_pool\\\\\\ =\\\\\\ ' + pool_name + '/='
+        line, err = utils.execute("su", "-s", "/bin/bash", "-c",
+                                  "exec ssh %s ssh %s sudo sed -n \"%s\" /etc/cinder/cinder.conf" %
+                                  (auth_host, cinder_host, search_str),
+                                  ssh_user, run_as_root=True)
+        line = line.strip(" ").strip("\n")
+        # remove 10 lines total
+        start_line = int(line) - 2
+        line_after = 9
+        end_line = int(start_line) + line_after
+        utils.execute("su", "-s", "/bin/bash", "-c",
+                      "exec ssh %s ssh %s sudo sed -i %s','%s'd' /etc/cinder/cinder.conf" %
+                      (auth_host, cinder_host, start_line, end_line), ssh_user,
+                      run_as_root=True)
+        try:
+            utils.execute("service", "cinder-api", "restart", run_as_root=True)
+            utils.execute("service", "cinder-volume", "restart", run_as_root=True)
+            LOG.info("Restart cinder-api and cinder-volume successfully")
+        except:
+            utils.execute("service", "openstack-cinder-api", "restart", run_as_root=True)
+            utils.execute("service", "openstack-cinder-volume", "restart", run_as_root=True)
+            LOG.info("Restart openstack-cinder-api and openstack-cinder-volume successfully")
 
 class DbDriver(object):
     """Executes commands relating to TestDBs."""

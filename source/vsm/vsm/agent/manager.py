@@ -507,6 +507,48 @@ class AgentManager(manager.Manager):
                 db.storage_pool_usage_update(context, sp_usage_ref['id'], values)
             return values
 
+    def revoke_storage_pool(self, context, id):
+        LOG.info("Start to revoke storage pool from openstack cinder")
+
+        poolusage = self._conductor_rpcapi.get_poolusage(context, id)
+        cinder_volume_host = poolusage.get('cinder_volume_host')
+        appnode_id = poolusage.get('appnode_id')
+        appnode = self._conductor_rpcapi.get_appnode(context, appnode_id)
+        uuid = appnode.get('uuid')
+        pool_id = poolusage.get('pool_id')
+        storagepool = self._conductor_rpcapi.get_storage_pool(context, pool_id)
+        pool_name = storagepool.get('name')
+        pool_storage_class = storagepool.get('storage_group').get('storage_class')
+
+        type_name = pool_storage_class + "-" + pool_name
+        self.ceph_driver.delete_cinder_type(context, type_name,
+                                            username=appnode.get('os_username'),
+                                            password=appnode.get('os_password'),
+                                            tenant_name = appnode.get('os_tenant_name'),
+                                            auth_url=appnode.get('os_auth_url'),
+                                            region_name=appnode.get('os_region_name'))
+
+        auth_host = appnode.get('os_auth_url').split(":")[1][2:]
+        ssh_user = appnode.get('ssh_user')
+        self.ceph_driver.revoke_storage_pool_from_cinder_conf(context, auth_host,
+                                                              cinder_volume_host,
+                                                              ssh_user, pool_name)
+
+        entity = "client." + uuid
+        auth_caps = self.ceph_driver.auth_get(context, entity)
+
+        osd_caps = auth_caps["caps"]["osd"]
+        osd_caps_list = osd_caps.split(",")
+        for caps in osd_caps_list:
+            if pool_name in caps:
+                osd_caps_list.remove(caps)
+        new_osd_caps = ",".join(osd_caps_list)
+        self.ceph_driver.auth_caps(context, entity, mon=auth_caps["caps"]["mon"],
+                                   osd=new_osd_caps)
+
+        self._conductor_rpcapi.delete_pool_usage(context, id)
+        LOG.info("Succeed to revoke storage pool from openstack cinder")
+
     def _get_info_dict(self, context):
         """Get info dict from DB."""
         LOG.info('Get info_dict from DB.clusters')

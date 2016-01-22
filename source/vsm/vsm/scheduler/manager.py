@@ -84,6 +84,10 @@ class SchedulerManager(manager.Manager):
         LOG.info('scheduler/manager.py present_storage_pools')
         return self._agent_rpcapi.present_storage_pools(context, body)
 
+    def revoke_storage_pool(self, context, id):
+        LOG.info('scheduler/manager.py revoke_storage_pool')
+        self._agent_rpcapi.revoke_storage_pool(context, id)
+
     def create_storage_pool(self, context, body=None,cluster_id = None):
         LOG.info('scheduler/manager.py create_storage_pool')
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)

@@ -4285,3 +4285,10 @@ def clean_performance_history_data(context,days):
     timestamp = time.time() - int(days) * 24 * 3600
     sql_str = 'delete from metrics where timestamp<%s'%timestamp
     session.execute(sql_str)
+
+def get_poolusage(context, poolusage_id):
+    result = model_query(
+        context, models.StoragePoolUsage).\
+        filter_by(id=poolusage_id).\
+        first()
+    return result

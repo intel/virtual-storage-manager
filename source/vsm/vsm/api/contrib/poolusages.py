@@ -66,7 +66,8 @@ class PoolUsagesController(wsgi.Controller):
     """The storage pool usage API controller."""
     _view_builder_class = poolusages_views.ViewBuilder
 
-    def __init__(self):
+    def __init__(self, ext_mgr):
+        self.ext_mgr = ext_mgr
         self.scheduler_api = scheduler_api()
         super(PoolUsagesController, self).__init__()
 
@@ -162,16 +163,44 @@ class PoolUsagesController(wsgi.Controller):
         storagepoolusage.destroy(context, id)
         return webob.Response(status_int=201)
 
-class Poolusages(extensions.ExtensionDescriptor):
-    """storage pool usage extension."""
+    def revoke_pool(self, req, body):
+        """
+        revoke pool from openstack cinder.conf.
+        config the cinder.conf.
+        delete cinder type.
+        delete ceph auth caps.
+        delete pool usage as deleted.
+        :param body:
+        {
+            "poolusage": {
+                "id": "1"
+            }
+        }
+        """
 
-    name = 'Poolusages'
-    alias = 'poolusages'
-    namespace = 'http://docs.openstack.org/storage/ext/poolusages/api/v1'
-    updated = '2014-03-19T00:00:00+00:00'
+        LOG.info("Revoke pool from openstack cinder")
+        context = req.environ['vsm.context']
+        body = body.get('poolusage')
 
-    def get_resources(self):
-        resources = []
-        res = extensions.ResourceExtension(Poolusages.alias, PoolUsagesController())
-        resources.append(res)
-        return resources
+        id = body.get("id", "")
+        try:
+            self.scheduler_api.revoke_storage_pool(context, id)
+        except:
+            raise webob.Response(status=400)
+
+# class Poolusages(extensions.ExtensionDescriptor):
+#     """storage pool usage extension."""
+#
+#     name = 'Poolusages'
+#     alias = 'poolusages'
+#     namespace = 'http://docs.openstack.org/storage/ext/poolusages/api/v1'
+#     updated = '2014-03-19T00:00:00+00:00'
+#
+#     def get_resources(self):
+#         resources = []
+#         res = extensions.ResourceExtension(Poolusages.alias, PoolUsagesController(""))
+#         resources.append(res)
+#         return resources
+
+def create_resource(ext_mgr):
+    return wsgi.Resource(PoolUsagesController(ext_mgr))

@@ -56,6 +56,9 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def present_storage_pools(self, context, body=None):
         return self.cast(context, self.make_msg('present_storage_pools', body=body))
 
+    def revoke_storage_pool(self, context, id):
+        return self.call(context, self.make_msg('revoke_storage_pool', id=id))
+
     def update_keyring_admin_from_db(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         return self.call(context,
