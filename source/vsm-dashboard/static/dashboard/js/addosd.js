@@ -165,6 +165,11 @@ function AddOSD(){
 	var osd_list = [];
 
 	var OSD_Items = $(".osd-item");
+    if(OSD_Items.length == 0){
+        showTip("error","Please add the OSD");
+        return false;
+    }
+
 	for(var i=0;i<OSD_Items.length;i++){
 		var osd = {
 			"server_name":OSD_Items[i].children[1].innerHTML,
@@ -218,9 +223,9 @@ function AddOSD(){
 	}
 
 	//exe add osd
-post_data.disks = server_list;
-console.log(post_data);	
-PostData("add_new_osd_action",post_data);
+    post_data.disks = server_list;
+    console.log(post_data);
+    PostData("add_new_osd_action",post_data);
 }
 
 
