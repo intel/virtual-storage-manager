@@ -2215,6 +2215,12 @@ class CephDriver(object):
 
         #TODO change zone
         if osd['osd_location']:
+            osd_location_str = ''
+            if osd['osd_location'].find('=') != -1:
+                osd_location_str = osd['osd_location']
+            else:
+                crushmap = self.get_crushmap_json_format()
+                osd_location_str = "%s=%s"%(crushmap._types[1]['name'],osd['osd_location'])
             weight = "1.0"
             utils.execute("ceph",
                       "osd",
@@ -2222,7 +2228,7 @@ class CephDriver(object):
                       "add",
                       "osd.%s" % osd_inner_id,
                       weight,
-                      osd['osd_location'],
+                      osd_location_str,
                       run_as_root=True)
         else:
             zone = init_node['zone']['name']
@@ -3563,7 +3569,7 @@ class ManagerCrushMapDriver(object):
                 new_lines.insert(insert_take_line+1,string_choose)
                 new_lines.insert(insert_take_line+2,"    step emit\n")
                 insert_take_line +=3
-        utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path,
+        utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path+'_decompiled',
             run_as_root=True)
         fd = open(self._crushmap_path+'_decompiled', 'w')
         LOG.info('new lines=====%s'%new_lines)
