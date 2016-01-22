@@ -826,6 +826,10 @@ class CephDriver(object):
 
             #TODO strg['storage_group']
             # stands for the storage_group_name fetch from DB.
+            if strg.get('storage_group',None) is None:
+                default_storage_group = db.storage_group_get_all(context)[0]
+                strg['storage_group'] = default_storage_group['name']
+                strg['storage_group_id'] = default_storage_group['id']
             storage_group = strg['storage_group']
             crush_dict = {"root": "vsm",
                           "storage_group": storage_group,
