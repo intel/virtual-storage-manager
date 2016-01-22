@@ -268,5 +268,12 @@
     cursor: pointer;
 }
 
+#tCapacityInfo{
+    margin-left: 10px;
+}
+
+#tCapacityInfo tr td{
+    width: 70px;
+}
 
 
