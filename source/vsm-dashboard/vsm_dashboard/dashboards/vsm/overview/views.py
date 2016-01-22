@@ -15,32 +15,20 @@
 #    under the License.
 
 from __future__ import division
-import logging
-
-from django.views.generic import TemplateView
-from django.http import HttpResponse
+import logging,summarys,json,commands,time
+from django.http import HttpResponse,HttpResponseRedirect
+from django.shortcuts import render
 from vsm_dashboard.api import vsm as vsmapi
-from django.utils.datastructures import SortedDict
-from django.utils.safestring import mark_safe
 from vsm_dashboard.utils import get_time_delta
-from vsm_dashboard.utils import get_time_delta3
-import summarys
-import json
-import random
-import datetime
-import commands
-import time
+
 LOG = logging.getLogger(__name__)
 
-
-class ModalSummaryMixin(object):
-
-    def get_context_data(self, **kwargs):
-        context = super(ModalSummaryMixin, self).get_context_data(**kwargs)
-        return context
-
-class IndexView(ModalSummaryMixin, TemplateView):
-    template_name = 'vsm/overview/index.html'
+def index(request):
+    pool_status = vsmapi.pool_status(None)
+    if len(pool_status) != 0:
+        return render(request,'vsm/overview/index.html',{})
+    else:
+        return HttpResponseRedirect("/dashboard/vsm/clustermgmt/")
 
 #show osd summary
 def osd_summary(request):
