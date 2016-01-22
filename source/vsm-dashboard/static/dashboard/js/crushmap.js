@@ -320,7 +320,7 @@ function UpdateStorageGroupHTML(data){
 	tr.find(".name")[0].innerHTML = data.name;
 	tr.find(".class")[0].innerHTML = data.storage_class;
 	tr.find(".friendly_name")[0].innerHTML = data.friendly_name;
-	tr.find(".marker-circle")[0].getAttribute("fill") = data.marker;
+	tr.find(".marker-circle")[0].setAttribute("fill",data.marker);
 	var html = "";
 	for(var i=0;i<data.rule_info.takes.length;i++){
 		var displayText = data.rule_info.takes[i].take_name+"("+data.rule_info.takes[i].choose_leaf_type+","+data.rule_info.takes[i].choose_num+")";
