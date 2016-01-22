@@ -3412,7 +3412,7 @@ class ManagerCrushMapDriver(object):
                 new_lines.insert(insert_take_line+1,string_choose)
                 new_lines.insert(insert_take_line+2,"    step emit\n")
                 insert_take_line +=3
-        utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path,
+        utils.execute('chown', '-R', 'vsm:vsm', self._crushmap_path+'_decompiled',
             run_as_root=True)
         fd = open(self._crushmap_path+'_decompiled', 'w')
         LOG.info('new lines=====%s'%new_lines)
