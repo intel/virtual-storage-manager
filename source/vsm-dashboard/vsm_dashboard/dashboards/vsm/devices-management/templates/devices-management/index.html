@@ -20,7 +20,7 @@
 {% block title %}{% trans "Manage Devices" %}{% endblock %}
 
 {% block page_header %}
-    {% include "horizon/common/_page_header.html" with title=_("All Devices") %}
+    {% include "horizon/common/_page_header.html" with title=_("Manage Devices") %}
     <link href="{{ STATIC_URL }}dashboard/css/devicemgmt.css" rel="stylesheet">
 {% endblock page_header %}
 
@@ -76,6 +76,9 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div style="width:100%;height:50px;display:block">
             </div>
     </div>
 

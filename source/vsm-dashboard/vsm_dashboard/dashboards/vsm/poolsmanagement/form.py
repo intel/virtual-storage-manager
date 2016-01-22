@@ -59,8 +59,8 @@ class CreateErasureCodedPool(forms.SelfHandlingForm):
 
     def __init__(self, request, *args, **kwargs):
         super(CreateErasureCodedPool, self).__init__(request, *args, **kwargs)
-        storage_group_list = [('', _("Select a storage group"))]
-        ec_profile_list = [('', _("Select an erasure coded profile"))]
+        storage_group_list = []
+        ec_profile_list = []
         ec_failure_domain_list = [('osd', "OSD (default)"), ("zone", "Zone"), ('host', "Host")]
         ec_profiles = vsm_api.ec_profiles(self.request)
         for k, v in enumerate(ec_profiles):

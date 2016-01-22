@@ -1,24 +1,16 @@
 import logging
-import os
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse_lazy
-from django.core.urlresolvers import reverse
 
 from horizon import exceptions
 from horizon import tables
-from horizon import forms
 from horizon import views
 
 from vsm_dashboard.api import vsm as vsmapi
 from .tables import ListServerTable
-from .form import ImportCluster
 from django.http import HttpResponse
-
-
 
 import json
 LOG = logging.getLogger(__name__)
-
 
 class IndexView(tables.DataTableView):
     table_class = ListServerTable

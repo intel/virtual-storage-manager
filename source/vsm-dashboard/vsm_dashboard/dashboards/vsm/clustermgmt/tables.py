@@ -101,12 +101,10 @@ class ListServerTable(tables.DataTable):
                             status_choices=STATUS_CHOICES,
                             display_choices=STATUS_DISPLAY_CHOICES,
                             verbose_name=_("Status"))
-#    createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
-#    cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
         name = "server_list"
-        verbose_name = _("Cluster Server List")
+        verbose_name = _("Server List")
         table_actions = (CreateClusterAction,)
         status_columns = ['status']
         #row_class = UpdateRow
@@ -147,8 +145,8 @@ class CreateClusterTable(tables.DataTable):
     name = tables.Column("name", verbose_name=_("Name"))
     primary_public_ip = tables.Column("primary_public_ip", verbose_name=_("Management Address"))
     secondary_public_ip = tables.Column("secondary_public_ip",
-        verbose_name=_("Ceph Public Address"))
-    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Ceph cluster Address"))
+        verbose_name=_("Public Address"))
+    cluster_ip = tables.Column("cluster_ip", verbose_name=_("Cluster Address"))
     zone = tables.Column("zone", classes=("zone",), verbose_name=_("Zone"))
     osds = tables.Column("osds", verbose_name=_("OSDs (Data Drives)"))
     monitor = tables.Column("monitor", verbose_name=_("Monitor"),
@@ -163,7 +161,7 @@ class CreateClusterTable(tables.DataTable):
 
     class Meta:
         name = "clusteraction"
-        verbose_name = _("Create Cluster")
+        verbose_name = _("Server List")
         multi_select = True
 
     def get_object_id(self, datum):

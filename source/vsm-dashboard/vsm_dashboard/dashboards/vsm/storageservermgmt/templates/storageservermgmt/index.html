@@ -20,7 +20,7 @@
 {% block title %}{% trans "Manage Servers" %}{% endblock %}
 
 {% block page_header %}
-  {% include "horizon/common/_page_header.html" with title=_("All Servers") %}
+  {% include "horizon/common/_page_header.html" with title=_("Manage Servers") %}
 {% endblock page_header %}
 
 {% block main %}
@@ -30,6 +30,6 @@
 
 {% block js %}
     {{ block.super }}
-    <script src='{{ STATIC_URL }}dashboard/js/servermgmt.js' type='text/javascript' charset='utf-8'></script>
+    <script src='{{ STATIC_URL }}dashboard/js/serverupdating.js' type='text/javascript' charset='utf-8'></script>
 {% endblock %}
 

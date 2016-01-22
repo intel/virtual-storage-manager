@@ -4,29 +4,6 @@ function getFont(treeId, node) {
 }
 
 function onClickEvent(event, treeId, treeNode, clickFlag) {
-	// console.log(event);
-	// console.log(treeId);
-	// console.log(treeNode);
-	// console.log(clickFlag)
-	// crushmapdata(treeNode.type);
-	console.log(treeNode.type);
-
-
-	// var ctrlNote = $("#divNote")[0];
-	// switch(treeNode.type){
-	// 	case 0:
-	// 		ctrlNote.innerHTML = "Controller";
-	// 		break;
-	// 	case 1:
-	// 		ctrlNote.innerHTML = "Server";
-	// 		break;
-	// 	case 2:
-	// 		ctrlNote.innerHTML = "Host";
-	// 		break;
-	// 	case 3:
-	// 		ctrlNote.innerHTML = "OSD";
-	// 		break;
-	// }
 }
 
 var CRUSHMAP = "";
@@ -51,10 +28,7 @@ var setting = {
 
 $(function(){
 	console.log("Import Cluster Ready");
-
 	initCtrlCSS();
-
-
 	atuoDetectDialog("Auto Detect",$("#divAutoDetectInfo")[0].innerHTML);
 	$("#divAutoDetectInfo").remove();
 });
@@ -249,7 +223,7 @@ function importCluster(){
 		success: function(data){
 			switch(data.status){
 				case "OK":
-					showTip("success",data.message);
+                    window.location.href = "/dashboard/vsm/";
 					break;
 				case "Failed":
 					showTip("error",data.message);

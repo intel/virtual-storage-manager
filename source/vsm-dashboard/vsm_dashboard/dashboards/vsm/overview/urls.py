@@ -15,12 +15,12 @@
 # under the License.
 
 from django.conf.urls import patterns, url
-from .views import IndexView
+from .views import index
 from .views import version,cluster,capacity,OSD,monitor,MDS,storage,IOPS,PG,latency,bandwidth,CPU
 from .views import osd_summary,monitor_summary,mds_summary,objects_summary,performance_summary,pg_summary,capacity_summary
 
 urlpatterns = patterns('',
-    url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^$', index, name='index'),
     url(r'^version/$', version, name='version'),
     url(r'^cluster/$', cluster, name='cluster'),
     url(r'^capcity/$', capacity, name='capcity'),

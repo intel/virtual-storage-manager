@@ -24,7 +24,7 @@ function onClickEvent(event, treeId, treeNode, clickFlag) {
 
 
 		var type_list = GetTypeListByNode(treeNode);
-    	$("#tTakeList>tbody").append(GenerateTakeHTML(take_id,take_name,"",type_list,""));
+    	$("#tTakeList>tbody").append(GenerateTakeHTML(take_id,take_name,"",type_list,0));
 	}
 }
 
