@@ -14,20 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.template.defaultfilters import filesizeformat
 from django.utils.translation import ugettext_lazy as _
-from django.utils.datastructures import SortedDict
-from django import forms
-
-from django.utils.safestring import mark_safe
-
 from horizon import tables
-from horizon.utils import html
-from horizon import exceptions
-from vsm_dashboard.api import vsm as vsmapi
-
-from .utils import checkbox_transform
-
 STRING_SEPARATOR = "__"
 
 STATUS_DISPLAY_CHOICES = (
@@ -66,7 +54,7 @@ class ListServerTable(tables.DataTable):
 
     class Meta:
         name = "server_list"
-        verbose_name = _("Cluster Server List")
+        verbose_name = _("Server List")
         table_actions = (ImportClusterAction,)
         status_columns = ['status']
         multi_select = False
