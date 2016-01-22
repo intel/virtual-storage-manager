@@ -109,7 +109,7 @@ class ListServerTable(tables.DataTable):
         verbose_name = _("Cluster Server List")
         table_actions = (CreateClusterAction,)
         status_columns = ['status']
-        row_class = UpdateRow
+        #row_class = UpdateRow
         multi_select = False
 
     def get_object_id(self, datum):

@@ -1,12 +1,12 @@
 $(function(){
-	var search = window.location.search;
-	if(search.split("=")[1]=="updating"){
+	//var search = window.location.search;
+	//if(search.split("=")[1]=="updating"){
 		//Update the table status
 	    UpdateClusterTable();
 	    setInterval(function(){
 	        UpdateClusterTable();
 	    }, 5000);
-	}
+	//}
 })
 
 function UpdateClusterTable(){
@@ -39,7 +39,7 @@ function UpdateClusterTable(){
 
         	console.log(ActiveCount);
 
-        	if(ActiveCount == data.length){
+        	if(ActiveCount > 0){
         		window.location.href = "/dashboard/vsm/";
         	}
 
