@@ -112,11 +112,6 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                       server_list=server_list))
         return ret
 
-    def import_cluster(self, context, server_list):
-        ret = self.call(context,
-                        self.make_msg('import_cluster',
-                                      server_list=server_list))
-        return ret
 
     def get_zone_list(self, ctxt):
         ret = self.call(ctxt, self.make_msg('get_zone_list'))
@@ -221,7 +216,7 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return self.call(ctxt, self.make_msg('check_pre_existing_cluster', body=body))
 
     def import_cluster(self,ctxt,body):
-        return self.call(ctxt, self.make_msg('import_cluster', body=body))
+        return self.call(ctxt, self.make_msg('import_cluster', body=body),timeout=6000)
 
     def detect_crushmap(self,ctxt,body):
         return self.call(ctxt, self.make_msg('detect_crushmap', body=body))
