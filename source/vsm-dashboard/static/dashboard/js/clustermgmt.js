@@ -84,7 +84,7 @@
                     $("#server_list__row__"+data_list[x]['id']).find(".status_up").addClass("status_unknown").removeClass("status_up");
                 }
 
-                window.location.href="/dashboard/vsm/clustermgmt/";
+                window.location.href="/dashboard/vsm/clustermgmt/?status=created";
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
 

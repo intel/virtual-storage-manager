@@ -1,12 +1,10 @@
+
+var timer1;
 $(function(){
-	//var search = window.location.search;
-	//if(search.split("=")[1]=="updating"){
-		//Update the table status
-	    UpdateClusterTable();
-	    setInterval(function(){
-	        UpdateClusterTable();
-	    }, 5000);
-	//}
+    UpdateClusterTable();
+    timer1 =  setInterval(function(){
+        UpdateClusterTable();
+    }, 5000);
 })
 
 function UpdateClusterTable(){
@@ -14,7 +12,7 @@ function UpdateClusterTable(){
         data: null,
         type: "get",
         dataType: "json",
-        url: "/dashboard/vsm/update_table/",
+        url: "/dashboard/vsm/clustermgmt/update_table/",
         success: function (data) {
         	var ActiveCount = 0;
         	for(var i=0;i<data.length;i++){
@@ -34,16 +32,14 @@ function UpdateClusterTable(){
                     html +="</td>";
                 }
                 var tr_id = "#server_list__row__"+data[i].id;
-        		$(tr_id).find(".status_up")[0].innerHTML = html;
+        		$(tr_id).find(".status")[0].innerHTML = html;
         	}
 
-        	console.log(ActiveCount);
-
-        	if(ActiveCount > 0){
-        		window.location.href = "/dashboard/vsm/";
-        	}
-
-
+            var search = window.location.search;
+        	if(ActiveCount > 0 && search.split("=")[1]=="created") {
+                window.location.href = "/dashboard/vsm/";
+                clearInterval(timer1);
+            }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
 

@@ -100,7 +100,8 @@ class ListServerTable(tables.DataTable):
     status = tables.Column("status", status=True,
                             status_choices=STATUS_CHOICES,
                             display_choices=STATUS_DISPLAY_CHOICES,
-                            verbose_name=_("Status"))
+                            verbose_name=_("Status"),
+                            classes=("status",))
 
     class Meta:
         name = "server_list"
@@ -156,8 +157,6 @@ class CreateClusterTable(tables.DataTable):
     is_storage = tables.Column("isstorage", verbose_name=_("Storage"), classes=('is_storage',),
         empty_value=empty_value_maker("checkbox","is_storage",1),hidden=True)
     server_status = tables.Column("status", verbose_name=_("Server Status"), classes=('server_status',))
-    #createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
-    #cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
         name = "clusteraction"
