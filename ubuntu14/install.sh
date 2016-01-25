@@ -232,16 +232,20 @@ function prepare() {
 }
 
 function set_remote_repo() {
-    $SSH $USER@$1 "$SUDO rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list; \
-        $SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo"
+    $SSH $USER@$1 "bash -x -s" <<EOF
+$SUDO rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list
+$SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo
+EOF
     $SCP -r $REPO_PATH/vsm-dep-repo $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/vsm-dep-repo /opt"
     $SCP -r vsmrepo $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/vsmrepo /opt"
-    $SSH $USER@$1 "if [[ -f /etc/apt/apt.conf ]]; then $SUDO mv /etc/apt/apt.conf /tmp; $SUDO chown $USER /tmp/apt.conf; \
-        $SUDO echo \"APT::Get::AllowUnauthenticated 1 ;\" >> /tmp/apt.conf; $SUDO chown root /tmp/apt.conf; $SUDO mv /tmp/apt.conf /etc/apt; \
-        else touch /tmp/apt.conf; echo \"APT::Get::AllowUnauthenticated 1 ;\" >> /tmp/apt.conf; \
-        $SUDO mv /tmp/apt.conf /etc/apt; fi"
+    $SSH $USER@$1 "bash -x -s" <<EOF
+$SUDO rm /tmp/apt.conf
+test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp
+echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
+$SUDO mv /tmp/apt.conf /etc/apt
+EOF
 #    $SCP apt.conf $USER@$1:/etc/apt
     $SCP vsm.list $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/vsm.list /etc/apt/sources.list.d"
@@ -255,17 +259,10 @@ function set_local_repo() {
     $SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo
     $SUDO cp -r $REPO_PATH/vsm-dep-repo /opt
     $SUDO cp -r vsmrepo /opt
-    if [[ -f /etc/apt/apt.conf ]]; then
-        $SUDO mv /etc/apt/apt.conf /tmp
-        $SUDO chown $USER /tmp/apt.conf
-        $SUDO echo "APT::Get::AllowUnauthenticated 1 ;" >> /tmp/apt.conf
-        $SUDO chown root /tmp/apt.conf
-        $SUDO mv /tmp/apt.conf /etc/apt
-    else
-        touch /tmp/apt.conf
-        echo "APT::Get::AllowUnauthenticated 1 ;" >> /tmp/apt.conf
-        $SUDO mv /tmp/apt.conf /etc/apt
-    fi
+    $SUDO rm /tmp/apt.conf
+    test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp
+    echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
+    $SUDO mv /tmp/apt.conf /etc/apt
     $SUDO cp vsm.list /etc/apt/sources.list.d
     $SUDO cp vsm-dep.list /etc/apt/sources.list.d
     $SUDO apt-get update
@@ -318,7 +315,7 @@ function install_controller() {
         $SSH $USER@$CONTROLLER_ADDRESS "$SUDO preinstall controller"
         setup_remote_controller
         #$SSH $USER@$CONTROLLER_ADDRESS "ls /var/cache/apt/archives/*.deb"
-        if [ `$SSH $USER@$CONTROLLER_ADDRESS "ls /var/cache/apt/archives/*.deb | wc -l"` -lt 1 ]; then
+        if [ `$SSH $USER@$CONTROLLER_ADDRESS "ls /var/cache/apt/archives/*.deb | wc -l"` -gt 1 ]; then
             $SCP $USER@$CONTROLLER_ADDRESS:/var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
         fi
         cd $REPO_PATH
