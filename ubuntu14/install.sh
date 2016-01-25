@@ -241,7 +241,7 @@ EOF
     $SCP -r vsmrepo $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/vsmrepo /opt"
     $SSH $USER@$1 "bash -x -s" <<EOF
-$SUDO rm /tmp/apt.conf
+$SUDO rm -f /tmp/apt.conf
 test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp
 echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
 $SUDO mv /tmp/apt.conf /etc/apt
@@ -259,7 +259,7 @@ function set_local_repo() {
     $SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo
     $SUDO cp -r $REPO_PATH/vsm-dep-repo /opt
     $SUDO cp -r vsmrepo /opt
-    $SUDO rm /tmp/apt.conf
+    $SUDO rm -f /tmp/apt.conf
     test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp
     echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
     $SUDO mv /tmp/apt.conf /etc/apt
