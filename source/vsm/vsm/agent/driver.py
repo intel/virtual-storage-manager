@@ -104,6 +104,12 @@ class CephDriver(object):
         :return:
         """
 
+        # the cluster should be passed in, but most of the code in this module
+        # assumes the cluster is named 'ceph' - just creating a variable here
+        # makes it simpler to fix this issue later - at least in this function
+        DEFAULT_CLUSTER_NAME = "ceph"
+        DEFAULT_DATA_DIR = "/var/lib/ceph/osd/$cluster-$id"
+
         # type and id is required here.
         # not support operate all ceph daemons
         if not type or not id:
@@ -115,9 +121,11 @@ class CephDriver(object):
 
         ceph_config_parser = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
         data_dir = ceph_config_parser._parser.get(type, type + " data")
+        if not data_dir:
+            data_dir = DEFAULT_DATA_DIR
         # path = os.path.dirname(data_dir)
 
-        file = data_dir.replace("$id", id) + "/upstart"
+        file = data_dir.replace("$cluster", DEFAULT_CLUSTER_NAME).replace("$id", id) + "/upstart"
         # no using os.path.exists(), because if the file is owned by ceph
         # user, the result will return false
         if ssh:
