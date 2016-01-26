@@ -39,7 +39,7 @@ var setting = {
 		showLine: true,
 		fontCss: getFont,
 		nameIsHTML: true,
-		showIcon: false,
+		showIcon: false
 	},
 	data: {
 		simpleData: {
@@ -60,7 +60,7 @@ $(document).ready(function(){
 function loadTree(){
 	var data = {
 		"crushmap":"",
-		"cephconf":"",
+		"cephconf":""
 	}
 
 	var postData = JSON.stringify(data);
@@ -507,4 +507,8 @@ function GetTypeListByNode(node){
 		}
 	}
 	return type_list;
+}
+
+function ChangeName(value){
+    $("#txtFriendlyName").val(value);
 }

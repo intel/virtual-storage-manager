@@ -27,11 +27,8 @@ import logging
 
 from vsm_dashboard.api import vsm as vsm_api
 from vsm_dashboard.utils.validators import validate_pool_name
-from vsm_dashboard.utils.validators import StorageGroupValidator
 
 LOG = logging.getLogger(__name__)
-
-
 
 class CreateErasureCodedPool(forms.SelfHandlingForm):
 
@@ -44,18 +41,14 @@ class CreateErasureCodedPool(forms.SelfHandlingForm):
                                'invalid': _("The string may only contain"
                                             " ASCII characters and numbers.")},
                            validators=[validate_pool_name])
-    storage_group = forms.ChoiceField(label=_('Storage Group'))
-    ec_profile = forms.ChoiceField(label=_('Erasure Coded Profile'))
-    ec_failure_domain = forms.ChoiceField(label=_('Erasure Coded Failure Domain'))
     tag = forms.CharField(label=_("Tag"),
                           max_length=16,
                           min_length=1,
                           error_messages={
-                              'required': _('This field is required.'),},
-                          #'invalid': _("The string may only contain"
-                          #             " ASCII characters and numbers.")},
-                          #validators=[validators.validate_slug]
-    )
+                              'required': _('This field is required.'),})
+    storage_group = forms.ChoiceField(label=_('Storage Group'))
+    ec_profile = forms.ChoiceField(label=_('Erasure Coded Profile'))
+    ec_failure_domain = forms.ChoiceField(label=_('Erasure Coded Failure Domain'))
 
     def __init__(self, request, *args, **kwargs):
         super(CreateErasureCodedPool, self).__init__(request, *args, **kwargs)
