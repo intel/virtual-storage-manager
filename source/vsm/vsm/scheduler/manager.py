@@ -2026,8 +2026,8 @@ class SchedulerManager(manager.Manager):
             if len(pools) > 0:
                 db.update_storage_group_marker(context,storage_group['name'],storage_group['marker'])
                 pool_names = [ pool['name'] for pool in pools ]
-                message['error_code'].append('-1')
-                message['error_msg'].append('storage group %s was used by pool %s currently!'%(storage_group['name'],pool_names))
+                #message['error_code'].append('-1')
+                message['info'] = 'Storage group %s was used by pool %s currently and Only marker update success!'%(storage_group['name'],pool_names)
                 continue
             ret = self._agent_rpcapi.modify_rule_in_crushmap(context, rule_info, active_monitor['host'])
             rule_id = ret.get('rule_id')
