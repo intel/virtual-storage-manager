@@ -259,8 +259,10 @@ function PostAction(action){
 					else{
 						UpdateStorageGroupHTML(sg_data.storage_group[0]);
 					}
+
                     $("#divStorageGroupTable").show();
 					$("#divStorageGroupForm").hide();
+                    showTip("info",data.message);
 					break;
 				case "Failed":
 					showTip("error",data.message);
