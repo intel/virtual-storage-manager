@@ -221,7 +221,27 @@ class CephConfigParser(manager.Manager):
         if not ceph_conf:
             return
 
-        utils.write_file_as_root(FLAGS.ceph_conf, ceph_conf, 'w')
+        ceph_conf += "\n"
+        conf_len = len(ceph_conf)
+        current_pos = 0
+
+        chunk_length = 100000
+
+        while current_pos < conf_len:
+            access_type = "w" if current_pos == 0 else "a+"
+
+            chunk = ceph_conf[current_pos:current_pos + chunk_length]
+
+            for letter in ceph_conf[current_pos + chunk_length:]:
+                if letter == "\n":
+                    current_pos += 1
+                    break
+                chunk += letter
+                current_pos += 1
+
+            current_pos += chunk_length
+            utils.write_file_as_root(FLAGS.ceph_conf, chunk, access_type)
+
 
         # We try to update fstab here.
         utils.execute('sed',
