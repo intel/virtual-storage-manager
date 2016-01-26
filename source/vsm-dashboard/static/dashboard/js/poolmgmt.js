@@ -61,6 +61,10 @@ function ChangePoolQuota(checked){
 	}
 }
 
+$("#id_name").change(function(){
+    $("#id_tag").val(this.value);
+});
+
 
 $("#btnCreateErasureCodedPool").click(function(){
 	//Check the field is should not null
