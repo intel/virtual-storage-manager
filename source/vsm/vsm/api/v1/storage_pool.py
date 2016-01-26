@@ -218,6 +218,19 @@ class StoragePoolController(wsgi.Controller):
 
         super(StoragePoolController, self).__init__()
 
+    @wsgi.serializers(xml=StoragePoolTemplate)
+    def show(self, req, id):
+        """ Return data about the given storage pool """
+
+        context = req.environ['vsm.context']
+
+        try:
+            storage_pool = self.conductor_api.get_storage_pool(context, id)
+        except exception.NotFound:
+            raise exc.HTTPNotFound()
+
+        return {"pool": storage_pool}
+
     def delete(self, req, id):
         """Delete a storage_pool."""
         context = req.environ['vsm.context']
