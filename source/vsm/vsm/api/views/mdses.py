@@ -28,11 +28,11 @@ class ViewBuilder(common.ViewBuilder):
         LOG.info("mdses api view %s " % mds)
         _mds = {
             "mds": {
-                "id":1234,
-                "name": 'mds_name',
-                "gid":1234,
-                "state": 'state',
-                "address": 'address',
+                "id": mds['id'],
+                "name": mds['name'],
+                "gid": mds['gid'],
+                "state": mds['state'],
+                "address": mds['address']
             }
         }
         _mds['mds']['updated_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.strptime(mds['updated_at'], "%Y-%m-%dT%H:%M:%S.000000"))
@@ -46,7 +46,7 @@ class ViewBuilder(common.ViewBuilder):
                 "name": mds['name'],
                 "gid": mds['gid'],
                 "state": mds['state'],
-                "address": mds['address'],
+                "address": mds['address']
             }
         }
         try:

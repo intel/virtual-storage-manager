@@ -37,7 +37,9 @@
     <div class="right">
         <h3>{% trans "Description" %}:</h3>
         <p>{% trans "From here you can upgrade ceph.Before submit,please make sure the Controller can access the package and key url." %}</p>
-        <p>{% trans "Notes: <br>- The formart of proxy is 'proxy=http://username:password@proxy_ip:port/'.<br>- Make sure the ssh user has made mutual trust with all ceph nodes." %}</p>
+        <h3>{% trans "Notes" %}:</h3>
+        <p>{% trans "- Proxy URL looks like 'proxy=http://username:password@proxy_ip:port/'" %}</p>
+        <p>{% trans "- Make sure the ssh user has made mutual trust with all ceph nodes." %}</p>
     </div>
 
     <div class="table_title" hidden="hidden">Ceph Upgrade</div>

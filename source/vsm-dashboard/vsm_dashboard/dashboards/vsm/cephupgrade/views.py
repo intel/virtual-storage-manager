@@ -40,6 +40,16 @@ def ceph_upgrade(request):
     status = "info"
     msg = msg.get('message')
 
+    poolusages = vsmapi.pool_usages(request)
+    host_list = []
+    if poolusages:
+        for pool_usage in poolusages:
+            volume_host = pool_usage.get("cinder_volume_host")
+            if volume_host not in host_list:
+                host_list.append(volume_host)
+        hosts = ", ".join(host_list)
+        msg = msg + "\nPlease upgrade ceph on volume hosts: %s" % hosts
+
     resp = dict(message=msg, status=status, data="")
     resp = json.dumps(resp)
     return HttpResponse(resp)

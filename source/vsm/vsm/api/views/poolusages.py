@@ -32,6 +32,7 @@ class ViewBuilder(common.ViewBuilder):
                 "id": poolusage.get("id", 0),
                 "pool_id": poolusage.get("pool_id", ""),
                 "vsmapp_id": poolusage.get("vsmapp_id", ""),
+                "cinder_volume_host": poolusage.get("cinder_volume_host", ""),
                 "attach_status": poolusage.get("attach_status", ""),
                 "attach_at": poolusage.get("attach_at", "")
             }

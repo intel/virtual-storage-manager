@@ -77,7 +77,7 @@ class Controller(wsgi.Controller):
         try:
             mds = self.conductor_api.mds_get(context, id)
         except exception.NotFound:
-            msg = _("OSD could not be found")
+            msg = _("MDS could not be found")
             raise exc.HTTPNotFound(explanation=msg)
         return mds
 
