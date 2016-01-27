@@ -226,7 +226,9 @@ def ClusterAction(request, action):
 def CheckClusterExist(request):
     is_exsit = True
     pool_status = vsmapi.pool_status(request)
-    if len(pool_status) == 0:
+    server_list = vsmapi.get_server_list(None)
+    status = [server.status for server in server_list]
+    if len(pool_status) == 0 and 'Active' not in status:
         is_exsit = False
     resp = json.dumps({"is_exsit":is_exsit})
     return HttpResponse(resp)
