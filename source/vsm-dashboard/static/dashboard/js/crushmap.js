@@ -514,3 +514,7 @@ function GetTypeListByNode(node){
 function ChangeName(value){
     $("#txtFriendlyName").val(value);
 }
+
+function ChangeStorageClass(value){
+    $("#txtClass").val(value);
+}
