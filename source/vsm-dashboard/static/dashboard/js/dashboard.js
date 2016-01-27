@@ -372,221 +372,233 @@ function loadPG(){
 
 function loadIOP(){
     setTimeout(function (){
-        $.ajax({
-            type: "post",
-            url: "/dashboard/vsm/IOPS/",
-            data: JSON.stringify({"timestamp":IOPs_EndTime }),
-            dataType: "json",
-            success: function (data) {
-                metrics = data.metrics;
-                var axisData = "00:00:00";
-                for(var i=0;i<metrics.length;i++){
-                    IOPs_EndTime = metrics[i].timestamp;
-                    axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+        if($("#divPerformanceCantainer")[0].style.display != "none") {
+            $.ajax({
+                type: "post",
+                url: "/dashboard/vsm/IOPS/",
+                data: JSON.stringify({"timestamp": IOPs_EndTime}),
+                dataType: "json",
+                success: function (data) {
+                    metrics = data.metrics;
+                    var axisData = "00:00:00";
+                    for (var i = 0; i < metrics.length; i++) {
+                        IOPs_EndTime = metrics[i].timestamp;
+                        axisData = new Date(parseInt(metrics[i].timestamp) * 1000).format("hh:mm:ss")
 
-                    //add new node     
-                    cIOPs.addData([
-                        [
-                            0,        //read line
-                            metrics[i].r_value, 
-                            false,    
-                            false,
-                        ],
-                        [
-                            1,        //write line
-                            metrics[i].w_value,
-                            false,    
-                            false,
-                        ],
-                        [
-                            2,        //read write line
-                            metrics[i].rw_value,
-                            false,
-                            false,
-                            axisData
-                        ]
-                    ]);
+                        //add new node
+                        cIOPs.addData([
+                            [
+                                0,        //read line
+                                metrics[i].r_value,
+                                false,
+                                false,
+                            ],
+                            [
+                                1,        //write line
+                                metrics[i].w_value,
+                                false,
+                                false,
+                            ],
+                            [
+                                2,        //read write line
+                                metrics[i].rw_value,
+                                false,
+                                false,
+                                axisData
+                            ]
+                        ]);
+                    }
+
+                    //load the IOP again
+                    //loadIOP();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    if (XMLHttpRequest.status == 401)
+                        window.location.href = "/dashboard/auth/logout/";
+                },
+                headers: {
+                    "X-CSRFToken": token
+                },
+                complete: function () {
+
                 }
-
-                //load the IOP again
-                loadIOP();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                if(XMLHttpRequest.status == 401)
-                    window.location.href = "/dashboard/auth/logout/";
-            },
-            headers: {
-                "X-CSRFToken": token
-            },
-            complete: function(){
-
-            }
-        });
+            });
+        }
+        loadIOP();
     }, 15000);
 }
 
 
 function loadLatency(){
     setTimeout(function (){
-        $.ajax({
-            type: "post",
-            url: "/dashboard/vsm/latency/",
-            data: JSON.stringify({"timestamp":Latency_EndTime }),
-            dataType: "json",
-            success: function (data) {
-                metrics = data.metrics;
-                var axisData = "00:00:00";
-                for(var i=0;i<metrics.length;i++){
-                    Latency_EndTime = metrics[i].timestamp
-                    var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+        if($("#divPerformanceCantainer")[0].style.display != "none") {
+            $.ajax({
+                type: "post",
+                url: "/dashboard/vsm/latency/",
+                data: JSON.stringify({"timestamp": Latency_EndTime}),
+                dataType: "json",
+                success: function (data) {
+                    metrics = data.metrics;
+                    var axisData = "00:00:00";
+                    for (var i = 0; i < metrics.length; i++) {
+                        Latency_EndTime = metrics[i].timestamp
+                        var axisData = new Date(parseInt(metrics[i].timestamp) * 1000).format("hh:mm:ss")
 
-                    //add new node     
-                    cLatency.addData([
-                        [
-                            0,        //read line
-                            metrics[i].r_value, 
-                            false,    
-                            false,
-                        ],
-                        [
-                            1,        //write line
-                            metrics[i].w_value,
-                            false,    
-                            false,    
-                        ],
-                        [
-                            2,        //read_write line
-                            metrics[i].rw_value,
-                            false,    
-                            false,    
-                            axisData 
-                        ]
-                    ]);
+                        //add new node
+                        cLatency.addData([
+                            [
+                                0,        //read line
+                                metrics[i].r_value,
+                                false,
+                                false,
+                            ],
+                            [
+                                1,        //write line
+                                metrics[i].w_value,
+                                false,
+                                false,
+                            ],
+                            [
+                                2,        //read_write line
+                                metrics[i].rw_value,
+                                false,
+                                false,
+                                axisData
+                            ]
+                        ]);
+                    }
+
+                    //reload latency
+                    //loadLatency();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    if (XMLHttpRequest.status == 401)
+                        window.location.href = "/dashboard/auth/logout/";
+                },
+                headers: {
+                    "X-CSRFToken": token
+                },
+                complete: function () {
+
                 }
-
-                //reload latency
-                loadLatency();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                if(XMLHttpRequest.status == 401)
-                    window.location.href = "/dashboard/auth/logout/";
-            },
-            headers: {
-                "X-CSRFToken": token
-            },
-            complete: function(){
-
-            }
-        });
+            });
+        }
+        loadLatency();
     }, 15000);
 }
 
 function loadBandwidth(){
     setTimeout(function (){
-        $.ajax({
-            type: "post",
-            url: "/dashboard/vsm/bandwidth/",
-            data: JSON.stringify({"timestamp":BandWidth_EndTime }),
-            dataType: "json",
-            success: function (data) {
-                metrics = data.metrics;
-                var axisData = "00:00:00";
-                for(var i=0;i<metrics.length;i++){
-                    BandWidth_EndTime  = metrics[i].timestamp
-                    var axisData = new Date(parseInt(metrics[i].timestamp)*1000).format("hh:mm:ss")
+        if($("#divPerformanceCantainer")[0].style.display != "none") {
+            $.ajax({
+                type: "post",
+                url: "/dashboard/vsm/bandwidth/",
+                data: JSON.stringify({"timestamp": BandWidth_EndTime}),
+                dataType: "json",
+                success: function (data) {
+                    metrics = data.metrics;
+                    var axisData = "00:00:00";
+                    for (var i = 0; i < metrics.length; i++) {
+                        BandWidth_EndTime = metrics[i].timestamp
+                        var axisData = new Date(parseInt(metrics[i].timestamp) * 1000).format("hh:mm:ss")
 
-                    //add new node     
-                    cBandwidth.addData([
-                        [
-                            0,        //in
-                            metrics[i].in_value, 
-                            false,    
-                            false,
-                        ],
-                        [
-                            1,        //out
-                            metrics[i].out_value,
-                            false,    
-                            false, 
-                            axisData  
-                        ]
-                    ]);
+                        //add new node
+                        cBandwidth.addData([
+                            [
+                                0,        //in
+                                metrics[i].in_value,
+                                false,
+                                false,
+                            ],
+                            [
+                                1,        //out
+                                metrics[i].out_value,
+                                false,
+                                false,
+                                axisData
+                            ]
+                        ]);
+                    }
+
+                    //reload the bandwidth
+                    //loadBandwidth();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    if (XMLHttpRequest.status == 401)
+                        window.location.href = "/dashboard/auth/logout/";
+                },
+                headers: {
+                    "X-CSRFToken": token
+                },
+                complete: function () {
+
                 }
-
-                //reload the bandwidth
-                loadBandwidth();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                if(XMLHttpRequest.status == 401)
-                    window.location.href = "/dashboard/auth/logout/";
-            },
-            headers: {
-                "X-CSRFToken": token
-            },
-            complete: function(){
-
-            }
-        });
+            });
+        }
+        loadBandwidth();
     }, 15000);
 }
 
 function loadCPU(){
     setTimeout(function (){
-        $.ajax({
-            type: "post",
-            url: "/dashboard/vsm/CPU/",
-            data: JSON.stringify({"timestamp":CPU_EndTime }),
-            dataType: "json",
-            success: function (data) {
-                if(data.time.length>0){
-                    cCPU.clear();
-                    var timestampList = new Array();
-                    var legendList = new Array();
-                    var seriesList = new Array();
-                    //get the timestamp list
-                    for (var i = 0; i < data.time.length; i++) {
-                        if(i == data.time.length - 1){
-                            CPU_EndTime = data.time[i]
+        if($("#divPerformanceCantainer")[0].style.display != "none") {
+            $.ajax({
+                type: "post",
+                url: "/dashboard/vsm/CPU/",
+                data: JSON.stringify({"timestamp": CPU_EndTime}),
+                dataType: "json",
+                success: function (data) {
+                    if (data.time.length > 0) {
+                        cCPU.clear();
+                        var timestampList = new Array();
+                        var legendList = new Array();
+                        var seriesList = new Array();
+                        //get the timestamp list
+                        for (var i = 0; i < data.time.length; i++) {
+                            if (i == data.time.length - 1) {
+                                CPU_EndTime = data.time[i]
+                            }
+                            var axisData = new Date(parseInt(data.time[i]) * 1000).format("hh:mm:ss")
+                            timestampList.push(axisData);
                         }
-                        var axisData = new Date(parseInt(data.time[i]) * 1000).format("hh:mm:ss")
-                        timestampList.push(axisData);
+
+                        for (var i = 0; i < data.cpus.length; i++) {
+                            var cpu = data.cpus[i];
+                            //get the legend list
+                            legendList.push(cpu.name);
+                            var series = {
+                                name: cpu.name,
+                                type: 'line',
+                                smooth: true,
+                                data: []
+                            };
+
+
+                            for (var j = 0; j < cpu.data.length; j++) {
+                                series.data.push(cpu.data[j])
+                            }
+                            seriesList.push(series);
+                        }
+                        cCPU.setOption(GenerateCPUOption(timestampList, legendList, seriesList));
                     }
 
-                    for(var i=0; i<data.cpus.length;i++){
-                        var cpu = data.cpus[i];
-                        //get the legend list
-                        legendList.push(cpu.name);
-                        var series = {
-                                name:cpu.name,
-                                type:'line',
-                                smooth:true,
-                                data:[]
-                        };
+                    //Reload the data
+                    //loadCPU();
 
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    if (XMLHttpRequest.status == 401)
+                        window.location.href = "/dashboard/auth/logout/";
+                },
+                headers: {
+                    "X-CSRFToken": token
+                },
+                complete: function () {
 
-                        for(var j=0;j<cpu.data.length;j++){
-                            series.data.push(cpu.data[j])
-                        }
-                        seriesList.push(series);
-                    }
-                    cCPU.setOption(GenerateCPUOption(timestampList,legendList,seriesList));
                 }
-
-                //Reload the data
-                loadCPU();
-
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                if(XMLHttpRequest.status == 401)
-                    window.location.href = "/dashboard/auth/logout/";
-            },
-            headers: {
-                "X-CSRFToken": token
-            },
-            complete: function(){
-
-            }
-        });
+            });
+        }
+        loadCPU();
     },15000);
 }
 
