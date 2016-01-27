@@ -25,7 +25,7 @@ while getopts "h?kc" opt; do
     h|\?)
         echo "Uninstall VSM and other components and clean up any remaining file system items and processes."
         echo "By default: Uninstall VSM, RabbitMQ, Diamond, and Ceph components."
-	echo "By default: Do NOT uninstall Keystone components.
+        echo "By default: Do NOT uninstall Keystone components.
         echo ""
         echo "Usage: uninstall.sh [options]"
         echo "options:"
