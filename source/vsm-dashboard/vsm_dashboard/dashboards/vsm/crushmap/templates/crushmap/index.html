@@ -113,8 +113,13 @@
                         <label>Class:</label>
                         <span class="required-star">*</span>
                         <span class="help-block"></span>
-                        <div class="input">
-                          <input id="txtClass" maxlength="255"  type="text" class="form-control">
+                        <div class="input" style="position: relative;width: 280px;height: 40px;">
+                            <select id="selClass"  class="form-control" style="z-index:88;" onchange="ChangeStorageClass(this.value)">
+                                {% for sg in sg_list %}
+                                    <option value="{{sg.storage_class}}">{{sg.storage_class}}</option>
+                                {%endfor %}
+                            </select>
+                            <input id="txtClass" class="form-control" style="z-index:99;position: absolute;width: 250px;height: 30px;top: 1px;left: 2px;border: none;" type="text" value="" >
                         </div>
                     </div>
                 </div>
