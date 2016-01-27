@@ -54,15 +54,6 @@
                         <input id="hfParentID"  type="hidden" class="form-control" readOnly>
                     </div>
                 </div>
-            </div>
-            <div id="divZoneFormRight">
-            	<div class="control-group form-field clearfix required" style="visibility:hidden">
-            		<label>--</label>
-                    <span class="help-block"></span>
-                    <div class="input">
-                        <input maxlength="255"  type="text" class="form-control">
-                    </div>
-            	</div>
 
                 <div class="control-group form-field clearfix required" >
                     <label>Parent Zone Type:</label>
@@ -71,6 +62,12 @@
                         <input id="txtTypeName" type="text" class="form-control" readOnly>
                         <input id="hfTypeID"  type="hidden" class="form-control" readOnly>
                     </div>
+                </div>
+            </div>
+            <div id="divZoneFormRight">
+                <div class="control-group form-field clearfix required">
+                    <h3>{% trans "Notes" %}:</h3>
+                    <p>Click on left tree to select parent Zone.</p>
                 </div>
             </div>
         </div>
