@@ -200,17 +200,20 @@ class CrushMap():
         storage_groups = []
         for rule in rules:
             index = -1
-            for step in rule['steps']:
+            steps_len = len(rule['steps'])
+            for i in range(steps_len):
+                step = rule['steps'][i]
                 op = step['op']
                 if op == 'take':
                     bucket_id =  step['item']
                     index = index + 1
-                    values = {'name':rule['rule_name'],
-                              #'storage_class':rule['rule_name'],
-                              #'friendly_name':rule['rule_name'],
-                              'take_id':bucket_id,
-                              'rule_id':rule['rule_id'],
-                              'take_order':index,
+                    next_step = rule['steps'][i+1]
+                    values = {'name': rule['rule_name'],
+                              'choose_num': next_step.get('num',None) or 0,
+                              'choose_type': next_step.get('type',None) or '',
+                              'take_id': bucket_id,
+                              'rule_id': rule['rule_id'],
+                              'take_order': index,
                               }
                     storage_groups.append(values)
 
