@@ -60,7 +60,7 @@ sudo service rabbitmq-server restart
 sleep 3
 sudo apt-get purge --yes vsm vsm-dashboard python-vsmclient vsm-deploy
 sudo apt-get purge --yes rabbitmq-server librabbitmq1
-sudo killall rabbitmq-server beam.smp
+sudo killall rabbitmq-server beam beam.smp
 sudo apt-get purge --yes diamond
 if [ -n "${REMOVE_KEYSTONE_PKGS}" ]; then
     sudo apt-get purge --yes keystone python-keystone python-keystoneclient python-keystonemiddleware

@@ -42,7 +42,7 @@ for ip in $CONTROLLER_ADDRESS; do
     ssh -t $ip "sudo apt-get purge --yes -m rabbitmq-server librabbitmq1 diamond"
     ssh -t $ip "sudo apt-get purge --yes -m keystone python-keystone python-keystoneclient python-keystonemiddleware"
     ssh -t $ip "sudo apt-get autoremove --yes"
-    ssh -t $ip "sudo killall rabbitmq-server beam.smp"
+    ssh -t $ip "sudo killall rabbitmq-server beam beam.smp"
     ssh -t $ip "sudo rm -rf /var/lib/keystone /etc/keystone /etc/vsm /etc/vsm-dashboard /etc/vsmdeploy /var/lib/vsm /var/log/vsm"
 done
 
