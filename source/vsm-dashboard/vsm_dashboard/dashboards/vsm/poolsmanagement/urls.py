@@ -20,7 +20,7 @@ from .views import CreateErasureCodedPoolView
 from .views import AddCacheTierView
 from .views import RemoveCacheTierView
 from .views import add_cache_tier,remove_cache_tier,create_replicated_pool,create_ec_pool
-
+from .views import get_default_pg_number_storage_group
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
@@ -32,5 +32,6 @@ urlpatterns = patterns('',
     url(r'^remove_cache_tier_action/$', remove_cache_tier, name='remove_cache_tier_action'),
     url(r'^create_replicated_pool_action/$', create_replicated_pool, name='create_replicated_pool_action'),
     url(r'^create_ec_pool_action/$', create_ec_pool, name='create_ec_pool_action'),
+    url(r'^get_default_pg_number_storage_group/$', get_default_pg_number_storage_group, name='get_default_pg_number_storage_group'),
 )
 
