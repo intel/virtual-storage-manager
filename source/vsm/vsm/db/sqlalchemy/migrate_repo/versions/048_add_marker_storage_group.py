@@ -27,7 +27,7 @@ def upgrade(migrate_engine):
     meta.bind = migrate_engine
 
     storage_group = Table('storage_groups', meta, autoload=True)
-    marker = Column('marker',String(length=255), nullable=True)
+    marker = Column('marker',String(length=255), nullable=True, default="#ffff00")
     storage_group.create_column(marker)
 
 
@@ -36,7 +36,7 @@ def downgrade(migrate_engine):
     meta.bind = migrate_engine
 
     storage_group = Table('storage_groups', meta, autoload=True)
-    marker = Column('marker',String(length=255), nullable=True)
+    marker = Column('marker',String(length=255), nullable=True, default="#ffff00")
 
     try:
         storage_group.drop_column(marker)
