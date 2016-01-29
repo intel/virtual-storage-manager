@@ -108,7 +108,7 @@ class CephDriver(object):
         # makes it simpler to fix this issue later - at least in this function
         DEFAULT_CLUSTER_NAME = "ceph"
         DEFAULT_OSD_DATA_DIR = "/var/lib/ceph/osd/$cluster-$id"
-        DEFAULT_MON_DATA_DIR = "/var/lib/ceph/osd/$cluster-$host"
+        DEFAULT_MON_DATA_DIR = "/var/lib/ceph/mon/$cluster-$host"
 
         # type and id is required here.
         # not support operate all ceph daemons
