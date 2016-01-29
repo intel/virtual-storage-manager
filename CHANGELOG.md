@@ -1,3 +1,67 @@
+2.1.0 Final
+------------------------------------
+
+Special Notes
+---------------
+-	This is 2.1 final release, we made a lot of tests, especially on importing cluster and infernalis supporting. 
+-	8 new features are added, and 27 bugs are fixed in this release.
+-	Spotlights:
+	 -	Import existing cluster (see "Cluster Management\Import Cluster"), user could import existing cluster, and monitor its status, or manipulate it by adding/removing servers or devices.
+	 -	Manage storage group (see "Cluster Management\Manage Storage group"), user could see the crushmap hierarchy, and understand storage group coverage on the topology.
+	 -	Manage zone (see "Cluster Management\Manage zone"), user could add new zones then associates servers to those new zones.
+
+
+New Features
+---------------
+-	[Key](https://01.org/jira/browse/Key)	Summary
+-	[VSM-53](https://01.org/jira/browse/VSM-53)	Allow VSM to attach to and manage an existing Ceph cluster
+-	[VSM-185](https://01.org/jira/browse/VSM-185)	show SMART information for storage devices
+-	[VSM-409](https://01.org/jira/browse/VSM-409)	add "storage group" column on OSD list page
+-	[VSM-418](https://01.org/jira/browse/VSM-418)	Add support to Ceph infernalis
+-	[VSM-385](https://01.org/jira/browse/VSM-385)	Change PG count even after ceph cluster deployed
+-	[VSM-337](https://01.org/jira/browse/VSM-337)	Upgrade: expect to upgrade from 1.0 to 2.0
+-	[VSM-407](https://01.org/jira/browse/VSM-407)	suggest to split disk status and capacity utilization in different column in device list page
+-	[VSM-396](https://01.org/jira/browse/VSM-396)	Support DNS lookup beside current /etc/hosts lookup
+
+
+Resolved bugs
+----------------
+-	[Key](https://01.org/jira/browse/Key)	Summary
+-	[VSM-427](https://01.org/jira/browse/VSM-427)	when updating storage group, it's required to add a hour glass.
+-	[VSM-428](https://01.org/jira/browse/VSM-428)	if storage group is referenced by some pools, it still allows to update its marker.
+-	[VSM-423](https://01.org/jira/browse/VSM-423)	when creating new pool, after spinner is disappeared, the pool is not showing up
+-	[VSM-419](https://01.org/jira/browse/VSM-419)	Stop Server error in 2.1 beta
+-	[VSM-172](https://01.org/jira/browse/VSM-172)	cluster.manifest - request for improvement from Marcin
+-	[VSM-261](https://01.org/jira/browse/VSM-261)	when executing vsm-controller, a TypeError raises
+-	[VSM-330](https://01.org/jira/browse/VSM-330)	When upgrading from Firefly to Giant, the upgrade complains missing python-rados package
+-	[VSM-344](https://01.org/jira/browse/VSM-344)	after a few times install, clean-up, reinstall, we have seem some "eaddrinuse" errors on starting rabbitmq
+-	[VSM-354](https://01.org/jira/browse/VSM-354)	when 'create cluster' page opened,other pages still can be opened
+-	[VSM-371](https://01.org/jira/browse/VSM-371)	When installing with dependent packages pre-prepared, the installer will stop with complains
+-	[VSM-395](https://01.org/jira/browse/VSM-395)	Remove then restore an OSD, the OSD can't hit to in-up state again.
+-	[VSM-422](https://01.org/jira/browse/VSM-422)	stop/start servers should display an "hour glass" during operation
+-	[VSM-425](https://01.org/jira/browse/VSM-425)	Dashboard Monitor widget: boxes too small for hostname font
+-	[VSM-426](https://01.org/jira/browse/VSM-426)	blocked on process indicator
+-	[VSM-388](https://01.org/jira/browse/VSM-388)	VSM fails to create a Monitor daemon (after clicking OK in a popup warning window)
+-	[VSM-429](https://01.org/jira/browse/VSM-429)	VSM agent fail to save ceph.conf when size is above 127 KB.
+-	[VSM-225](https://01.org/jira/browse/VSM-225)	VSM Creates Very Small pg_num and pg._num Size for EC Pool
+-	[VSM-420](https://01.org/jira/browse/VSM-420)	VSM 2.0 is_server_manifest_error
+-	[VSM-421](https://01.org/jira/browse/VSM-421)	During cluster import, vsm agents don't have sufficient rights to /var/lib/ceph
+-	[VSM-380](https://01.org/jira/browse/VSM-380)	it would be nice if install.sh script should take care of agent-tokens, even at the case restart install.sh with prior errors.
+-	[VSM-406](https://01.org/jira/browse/VSM-406)	servers can't be stopped after cluster imported
+-	[VSM-410](https://01.org/jira/browse/VSM-410)	The scrollbar of manage server is missing now.
+-	[VSM-413](https://01.org/jira/browse/VSM-413)	Manage device, click new, popup “internal ERROR” on the top right corner.
+-	[VSM-416](https://01.org/jira/browse/VSM-416)	at import cluster page, the scroll bar for crushmap and ceph.conf can scroll
+-	[VSM-417](https://01.org/jira/browse/VSM-417)	when creating cluster, the monitor status is incorrect
+-	[VSM-387](https://01.org/jira/browse/VSM-387)	ceph version conflicts when reinstall vsm at the case the previous one made ceph upgrade
+-	[VSM-377](https://01.org/jira/browse/VSM-377)	VSM installation failure
+
+
+Known issues
+-----------------
+
+
+
+
 2.1.0 (build 309)
 ------------------------------------
 
