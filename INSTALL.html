@@ -292,20 +292,22 @@ img {
 </head>
 <body>
 <h1>  Virtual Storage Manager for Ceph</h1>
-<p><strong>Version:</strong> 2.0.0.216</p>
-<p><strong>Source:</strong> 2015-09-30</p>
+<p><strong>Version:</strong> 2.1.0-330</p>
+<p><strong>Source:</strong> 2016-01-27</p>
 <p><strong>Keywords:</strong> Ceph, Openstack, Virtual Storage Management</p>
 <p><strong>Supported Combo:</strong></p>
 <pre><code>OS:         Ubuntu Server 14.04.2/CentOS 7 Server Basic
-Ceph:       Firefly/Giant*/Hammer
-OpenStack:  Havana/Icehouse/Juno
+Ceph:       Firefly/Giant/Hammer/Infernalis
+OpenStack:  Havana/Icehouse/Juno/Kilo/Liberty
 
 (Other combos might also be working, but we didn't try yet.)
 </code></pre>
 
 <h1>Preparation</h1>
-<p>Before you get ready to install VSM, you should prepare your environment. <strong><em>VSM CANNOT manage Ceph Cluster not created by it</em></strong>. The sections here are helpful for understanding the deployment concepts.</p>
-<p><strong>Note</strong>: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster.</p>
+<p>Before you get ready to install VSM, you should prepare your environment. The sections here are helpful for understanding the deployment concepts.</p>
+<p><strong>Note</strong>: 
+ - For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster.
+ - For a Ceph cluster imported from external, as the arbitrary of crushmap, if VSM doesn't correctly recognize it, please report your case on mailing list.</p>
 <h2>Roles</h2>
 <p>There are two roles for the nodes (servers) on your VSM created Ceph cluster.</p>
 <h3>Controller Node</h3>
@@ -1127,7 +1129,7 @@ The workaround is to execute below command to temporary disable gnome-keyring se
 
 <p><strong>Q: Why I can't upgrade from Firefly to Giant?</strong></p>
 <pre><code>A: There are a few missing packages in Giant repository like python-rados, librados2-devel, python-cephfs, python-rbd, librbd1-devel. you'd find out them 
-and install in advance before upgrade. There is a ceph issue is for it at http://tracker.ceph.com/issues/10476#change-46231.
+and install in advance before upgrade. There is a ceph issue for it at http://tracker.ceph.com/issues/10476#change-46231.
 </code></pre>
 
 <p><strong>Q: How can I present pool to Openstack?</strong></p>
@@ -1137,7 +1139,11 @@ outside VSM. in VSM, user needs set the SSH user name when creating Openstack Ac
 
 <p><strong>Q: Can I add an node without VSM software installed into Ceph Cluster?</strong></p>
 <pre><code>A: It's possible. One pre-condition is to make sure the new node has finished all pre-flight configurations. VSM provides a tool named *prov_node.sh*, 
-which will automatically provision VSM software on it, then user can discover the new server on Web UI, and add it into cluster. 
+which will automatically provision VSM software on it, then user can discover the new server on Web UI, and add it into cluster.
+</code></pre>
+
+<p><strong>Q: Can VSM Manage existing cluster?</strong></p>
+<pre><code>A: It's possible. Starting from v2.1, VSM offers the capability to import existing cluster, then manage it.
 </code></pre>
 
 

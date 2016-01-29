@@ -3,26 +3,28 @@
 ==================================
 
 
-**Version:** 2.0.0.216
+**Version:** 2.1.0-330
 
-**Source:** 2015-09-30
+**Source:** 2016-01-27
 
 **Keywords:** Ceph, Openstack, Virtual Storage Management
 
 **Supported Combo:**
 
 	OS:			Ubuntu Server 14.04.2/CentOS 7 Server Basic
-	Ceph: 		Firefly/Giant*/Hammer
-	OpenStack:	Havana/Icehouse/Juno
+	Ceph: 		Firefly/Giant/Hammer/Infernalis
+	OpenStack:	Havana/Icehouse/Juno/Kilo/Liberty
 
 	(Other combos might also be working, but we didn't try yet.)
 
 
 #Preparation
 
-Before you get ready to install VSM, you should prepare your environment. **_VSM CANNOT manage Ceph Cluster not created by it_**. The sections here are helpful for understanding the deployment concepts.
+Before you get ready to install VSM, you should prepare your environment. The sections here are helpful for understanding the deployment concepts.
 
-**Note**: For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster.
+**Note**: 
+ - For a Ceph cluster created and managed by VSM you need to prepare at least three storage nodes plus a VSM controller node. VSM requires a minimum of three Ceph storage nodes (physical or virtual) before it will create a Ceph cluster.
+ - For a Ceph cluster imported from external, as the arbitrary of crushmap, if VSM doesn't correctly recognize it, please report your case on mailing list.
 
 
 ##Roles
@@ -724,7 +726,7 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 **Q: Why I can't upgrade from Firefly to Giant?**
 
 	A: There are a few missing packages in Giant repository like python-rados, librados2-devel, python-cephfs, python-rbd, librbd1-devel. you'd find out them 
-	and install in advance before upgrade. There is a ceph issue is for it at http://tracker.ceph.com/issues/10476#change-46231.
+	and install in advance before upgrade. There is a ceph issue for it at http://tracker.ceph.com/issues/10476#change-46231.
 
 **Q: How can I present pool to Openstack?**
 
@@ -734,4 +736,8 @@ Likewise, you should see no errors in the three log files in /var/log/vsm on the
 **Q: Can I add an node without VSM software installed into Ceph Cluster?**
 	
 	A: It's possible. One pre-condition is to make sure the new node has finished all pre-flight configurations. VSM provides a tool named *prov_node.sh*, 
-	which will automatically provision VSM software on it, then user can discover the new server on Web UI, and add it into cluster. 
+	which will automatically provision VSM software on it, then user can discover the new server on Web UI, and add it into cluster.
+
+**Q: Can VSM Manage existing cluster?**
+	
+	A: It's possible. Starting from v2.1, VSM offers the capability to import existing cluster, then manage it.
