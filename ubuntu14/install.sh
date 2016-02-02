@@ -441,6 +441,7 @@ function setup_remote_agent() {
 }
 
 function install_agent() {
+    echo "=== Install agent [$1] start."
     generate_token
     $SSH $USER@$1 "if [[ -f /etc/apt/sources.list ]]; then $SUDO mv /etc/apt/sources.list /etc/apt/sources.list.bak; fi"
     check_manifest $1
@@ -452,6 +453,7 @@ function install_agent() {
     setup_remote_agent $1
     install_setup_diamond $1
     $SSH $USER@$1 "if [[ -f /etc/apt/sources.list.bak ]]; then $SUDO mv /etc/apt/sources.list.bak /etc/apt/sources.list; fi"
+    echo "=== Install agent [$1] complete."
 }
 
 function generate_token() {
@@ -481,9 +483,15 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     prepare
     install_controller
 #    generate_token
+    unset tf_list
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
-        install_agent $ip_or_hostname
+        tf=$(mktemp)
+        tf_list="${tf_list} ${tf}"
+        echo "=== Starting asynchronous agent install [$ip_or_hostname] ..."
+        install_agent $ip_or_hostname >${tf} 2>&1 &
     done
+    wait
+    for tf in ${tf_list}; do cat ${tf}; rm -f ${tf}; done
 else
     if [[ $IS_PREPARE == True ]]; then
         prepare
@@ -494,10 +502,16 @@ else
     if [[ $IS_AGENT_INSTALL == True ]]; then
 #        generate_token
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
+        unset tf_list
         for ip_or_hostname in $AGENT_IP_LIST; do
-            install_agent $ip_or_hostname
+            tf=$(mktemp)
+            tf_list="${tf_list} ${tf}"
+            echo "=== Starting asynchronous agent install [$ip_or_hostname] ..."
+            install_agent $ip_or_hostname >${tf} 2>&1 &
         done
-	
+        wait
+        for tf in ${tf_list}; do cat ${tf}; rm -f ${tf}; done
+
 	# sync up /etc/hosts
 	if [[ $IS_CONTROLLER_INSTALL == False ]]; then
        	    echo "sync /etc/hosts to controller"
