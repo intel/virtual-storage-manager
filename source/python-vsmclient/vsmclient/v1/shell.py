@@ -801,13 +801,13 @@ def do_device_list(cs, args):
 def do_device_list_available_disks(cs, args):
     """Lists available disks."""
     _is_developing("device-list-available-disks",
-                   "List available disks.")
+                   "Lists available disks.")
 
 @utils.service_type('vsm')
 def do_device_show_smart_info(cs, args):
     """Shows smart info of a device."""
     _is_developing("device-show-smart-info",
-                   "Show smart info of a device.")
+                   "Shows smart info of a device.")
 
 
 #####################mds########################
@@ -815,13 +815,13 @@ def do_device_show_smart_info(cs, args):
 def do_mds_show(cs, args):
     """Shows details info of a mds."""
     _is_developing("mds-show",
-                   "Show details info of a mds.")
+                   "Shows details info of a mds.")
 
 @utils.service_type('vsm')
 def do_mds_list(cs, args):
     """Lists all mdses."""
     _is_developing("mds-list",
-                   "List all mdses.")
+                   "Lists all mdses.")
 
 @utils.service_type('vsm')
 def do_mds_restart(cs, args):
@@ -853,13 +853,13 @@ def do_mds_summary(cs, args):
 def do_mon_show(cs, args):
     """Shows details info of a mon."""
     _is_developing("mon-show",
-                   "Show details info of a mon.")
+                   "Shows details info of a mon.")
 
 @utils.service_type('vsm')
 def do_mon_list(cs, args):
     """Lists all mons."""
     _is_developing("mon-list",
-                   "List all mons.")
+                   "Lists all mons.")
 
 @utils.service_type('vsm')
 def do_mon_summary(cs, args):
@@ -925,9 +925,9 @@ def do_osd_refresh(cs, args):
 
 @utils.service_type('vsm')
 def do_osd_summary(cs, args):
-    """Get summary info of osd."""
+    """Gets summary info of osd."""
     _is_developing("osd-summary",
-                   "Get summary info of osd.")
+                   "Gets summary info of osd.")
 
 
 ###################performance metric##########################
@@ -938,6 +938,7 @@ def do_perf_metric_list(cs, args):
                    "Lists performance metrics.")
 
 
+###################placement group##########################
 @utils.service_type('vsm')
 def do_pg_show(cs, args):
     """Shows details info of a placement group."""
@@ -957,10 +958,64 @@ def do_pg_summary(cs, args):
                    "Gets summary info of placement group.")
 
 
+###################pool usage##########################
 @utils.service_type('vsm')
 def do_pool_usage_create(cs, args):
-    """Creates"""
+    """Creates pool usage."""
+    _is_developing("pool-usage-create",
+                   "Creates pool usage.")
 
+@utils.service_type('vsm')
+def do_pool_usage_list(cs, args):
+    """Lists all pool usages."""
+    _is_developing("pool-usage-list",
+                   "Lists all pool usages.")
+
+@utils.service_type('vsm')
+def do_pool_usage_delete(cs, args):
+    """Deletes pool usage."""
+    _is_developing("pool-usage-delete",
+                   "Deletes pool usage.")
+
+@utils.service_type('vsm')
+def do_pool_usage_update(cs, args):
+    """Updates pool usage."""
+    _is_developing("pool-usage-update",
+                   "Updates pool usage.")
+
+
+###################rbd pool##########################
+@utils.service_type('vsm')
+def do_rbd_pool_show(cs, args):
+    """Shows details info of rbd pool."""
+    _is_developing("rbd-pool-show",
+                   "Shows details info of rbd pool.")
+
+@utils.service_type('vsm')
+def do_rbd_pool_list(cs, args):
+    """Lists all rbd pools."""
+    _is_developing("rbd-pool-list",
+                   "Lists all rbd pools.")
+
+@utils.service_type('vsm')
+def do_rbd_pool_summary(cs, args):
+    """Gets summary info of rbd pool."""
+    _is_developing("rbd-pool-summary",
+                   "Gets summary info of rbd pool.")
+
+
+###################server##########################
+@utils.service_type('vsm')
+def do_server_create(cs, args):
+    """Creates a new server."""
+    _is_developing("server-create",
+                   "Creates a new server.")
+
+@utils.service_type('vsm')
+def do_server_show(cs, args):
+    """Shows details info of server."""
+    _is_developing("server-show",
+                   "Shows details info of server.")
 
 @utils.service_type('vsm')
 def do_server_list(cs, args):
@@ -971,8 +1026,149 @@ def do_server_list(cs, args):
                "Raw IP", "Ceph Ver", "OSDs", "Status"]
     utils.print_list(result, columns)
 
+@utils.service_type('vsm')
+def do_server_update(cs, args):
+    """Updates a server by id."""
+    _is_developing("server-update",
+                   "Updates a server by id.")
+
+@utils.service_type('vsm')
+def do_server_add(cs, args):
+    """Adds a new server."""
+    _is_developing("server-add",
+                   "Adds a new server.")
+
+@utils.service_type('vsm')
+def do_server_remove(cs, args):
+    """Removes a server."""
+    _is_developing("server-remove",
+                   "Removes a server.")
+
+@utils.service_type('vsm')
+def do_server_reset_status(cs, args):
+    """Resets server status."""
+    _is_developing("server-reset-status",
+                   "Resets server status.")
+
+@utils.service_type('vsm')
+def do_server_start(cs, args):
+    """Starts a server."""
+    _is_developing("server-start",
+                   "Starts a server.")
+
+@utils.service_type('vsm')
+def do_server_stop(cs, args):
+    """Stops a server."""
+    _is_developing("server-stop",
+                   "Stops a server.")
+
+@utils.service_type('vsm')
+def do_server_ceph_upgrade(cs, args):
+    """Upgrades ceph version."""
+    _is_developing("server-ceph-upgrade",
+                   "Upgrades ceph version.")
+
+
+###################storage group##########################
+@utils.service_type('vsm')
+def do_storage_group_create(cs, args):
+    """Creates storage group."""
+    _is_developing("storage-group-create",
+                   "Creates storage group.")
+
+@utils.service_type('vsm')
+def do_storage_group_show(cs, args):
+    """Shows detail info of storage group."""
+    _is_developing("storage-group-show",
+                   "Shows detail info of storage group.")
+
+@utils.service_type('vsm')
+def do_storage_group_list(cs, args):
+    """Lists all storage groups."""
+    _is_developing("storage-group-list",
+                   "Lists all storage groups.")
+
+@utils.service_type('vsm')
+def do_storage_group_summary(cs, args):
+    """Gets summary info of storage group."""
+    _is_developing("storage-group-summary",
+                   "Gets summary info of storage group.")
+
+
+###################storage pool##########################
+@utils.service_type('vsm')
+def do_storage_pool_show(cs, args):
+    """Shows details info of storage pool."""
+    _is_developing("storage-pool-show",
+                   "Shows details info of storage pool.")
+
+@utils.service_type('vsm')
+def do_storage_pool_list(cs, args):
+    """Lists all storage pools."""
+    _is_developing("storage-pool-list",
+                   "Lists all storage pools.")
+
+@utils.service_type('vsm')
+def do_storage_pool_add_cache_tier(cs, args):
+    """Adds cache tier pool."""
+    _is_developing("storage-pool-add-cache-tier",
+                   "Adds cache tier pool.")
+
+@utils.service_type('vsm')
+def do_storage_pool_remove_cache_tier(cs, args):
+    """Removes cache tier pool."""
+    _is_developing("storage-pool-remove-cache-tier",
+                   "Removes cache tier pool.")
+
+@utils.service_type('vsm')
+def do_storage_pool_restart(cs, args):
+    """Restarts storage pool."""
+    _is_developing("storage-pool-restart",
+                   "Restarts storage pool.")
+
+@utils.service_type('vsm')
+def do_storage_pool_delete(cs, args):
+    """Deletes storage pool."""
+    _is_developing("storage-pool-delete",
+                   "Deletes storage pool.")
+
+@utils.service_type('vsm')
+def do_storage_pool_list_ec_profiles(cs, args):
+    """Lists ec profiles."""
+    _is_developing("storage-pool-list-ec-profiles",
+                   "Lists ec profiles.")
+
+
+###################setting##########################
+@utils.service_type('vsm')
+def do_setting_show(cs, args):
+    """Shows details info of setting."""
+    _is_developing("setting-show",
+                   "Shows details info of setting.")
+
+@utils.service_type('vsm')
+def do_setting_list(cs, args):
+    """Lists all settings."""
+    _is_developing("setting-list",
+                   "Lists all settings.")
+
+@utils.service_type('vsm')
+def do_setting_create(cs, args):
+    """Creates a setting."""
+    _is_developing("setting-create",
+                   "Creates a setting.")
+
+
+###################zone##########################
+@utils.service_type('vsm')
+def do_zone_list(cs, args):
+    """Lists all zones."""
+    _is_developing("zone-list",
+                   "Lists all zones.")
+
 
 # TODO tag for those not completed commands
+# It will be removed later
 def _is_developing(method, message):
     print('\033[1;31;40m')
     print('*' * 50)
