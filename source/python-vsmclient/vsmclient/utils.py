@@ -129,7 +129,46 @@ def get_service_type(f):
 def pretty_choice_list(l):
     return ', '.join("'%s'" % i for i in l)
 
-def print_list(objs, fields, formatters={}):
+# def print_list(objs, fields, formatters={}):
+#     mixed_case_fields = ['serverId']
+#     pt = prettytable.PrettyTable([f for f in fields], caching=False)
+#     pt.aligns = ['l' for f in fields]
+#
+#     for o in objs:
+#         row = []
+#         for field in fields:
+#             if field in formatters:
+#                 row.append(formatters[field](o))
+#             else:
+#                 if field in mixed_case_fields:
+#                     field_name = field.replace(' ', '_')
+#                 else:
+#                     field_name = field.lower().replace(' ', '_')
+#                 data = getattr(o, field_name, '')
+#                 row.append(data)
+#         pt.add_row(row)
+#
+#     if len(objs) > 0:
+#         print strutils.safe_encode(pt.get_string(sortby=fields[0]))
+
+def _print(pt, order):
+    if sys.version_info >= (3, 0):
+        print(pt.get_string(sortby=order))
+    else:
+        print(strutils.safe_encode(pt.get_string(sortby=order)))
+
+
+def print_list(objs, fields, formatters=None, sortby_index=0):
+    '''Prints a list of objects.
+
+    @param objs: Objects to print
+    @param fields: Fields on each object to be printed
+    @param formatters: Custom field formatters
+    @param sortby_index: Results sorted against the key in the fields list at
+                         this index; if None then the object order is not
+                         altered
+    '''
+    formatters = formatters or {}
     mixed_case_fields = ['serverId']
     pt = prettytable.PrettyTable([f for f in fields], caching=False)
     pt.aligns = ['l' for f in fields]
@@ -144,12 +183,25 @@ def print_list(objs, fields, formatters={}):
                     field_name = field.replace(' ', '_')
                 else:
                     field_name = field.lower().replace(' ', '_')
-                data = getattr(o, field_name, '')
+                if type(o) == dict and field in o:
+                    data = o[field]
+                else:
+                    data = getattr(o, field_name, '')
+                if data is None or data == "":
+                    try:
+                        data = o.get(field_name)
+                    except:
+                        data = '-'
+                if data is None:
+                    data = '-'
                 row.append(data)
         pt.add_row(row)
 
-    if len(objs) > 0:
-        print strutils.safe_encode(pt.get_string(sortby=fields[0]))
+    if sortby_index is None:
+        order_by = None
+    else:
+        order_by = fields[sortby_index]
+    _print(pt, order_by)
 
 def print_dict(d, property="Property"):
     pt = prettytable.PrettyTable([property, 'Value'], caching=False)
@@ -198,6 +250,14 @@ def find_resource(manager, name_or_id):
                " specific." % (manager.resource_class.__name__.lower(),
                                name_or_id))
         raise exceptions.CommandError(msg)
+
+def find_cluster(cs, cluster):
+    """Get a cluster by name or ID."""
+    return find_resource(cs.clusters, cluster)
+
+def find_mds(cs, mds):
+    """Get a mds by name or ID."""
+    return find_resource(cs.mdses, mds)
 
 def _format_servers_list_networks(server):
     output = []

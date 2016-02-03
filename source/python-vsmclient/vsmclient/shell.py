@@ -79,19 +79,20 @@ class OpenStackVsmShell(object):
 
         parser.add_argument('--version',
                             action='version',
-                            version=vsmclient.__version__)
+                            version=vsmclient.__version__,
+                            help="\033[1;32;40mshow program's version number and exit.\033[0m")
 
         parser.add_argument('--debug',
                             action='store_true',
                             default=utils.env('VSMCLIENT_DEBUG',
                                               default=False),
-                            help="Print debugging output")
+                            help="\033[1;32;40mPrint debugging output.\033[0m")
 
         parser.add_argument('--os-username',
                             metavar='<auth-user-name>',
                             default=utils.env('OS_USERNAME',
                                               'VSM_USERNAME'),
-                            help='Defaults to env[OS_USERNAME].')
+                            help='\033[1;32;40mDefaults to env[OS_USERNAME].\033[0m')
         parser.add_argument('--os_username',
                             help=argparse.SUPPRESS)
 
@@ -99,7 +100,7 @@ class OpenStackVsmShell(object):
                             metavar='<auth-password>',
                             default=utils.env('OS_PASSWORD',
                                               'VSM_PASSWORD'),
-                            help='Defaults to env[OS_PASSWORD].')
+                            help='\033[1;32;40mDefaults to env[OS_PASSWORD].\033[0m')
         parser.add_argument('--os_password',
                             help=argparse.SUPPRESS)
 
@@ -107,7 +108,7 @@ class OpenStackVsmShell(object):
                             metavar='<auth-tenant-name>',
                             default=utils.env('OS_TENANT_NAME',
                                               'VSM_PROJECT_ID'),
-                            help='Defaults to env[OS_TENANT_NAME].')
+                            help='\033[1;32;40mDefaults to env[OS_TENANT_NAME].\033[0m')
         parser.add_argument('--os_tenant_name',
                             help=argparse.SUPPRESS)
 
@@ -123,7 +124,7 @@ class OpenStackVsmShell(object):
                             metavar='<auth-url>',
                             default=utils.env('OS_AUTH_URL',
                                               'VSM_URL'),
-                            help='Defaults to env[OS_AUTH_URL].')
+                            help='\033[1;32;40mDefaults to env[OS_AUTH_URL].\033[0m')
         parser.add_argument('--os_auth_url',
                             help=argparse.SUPPRESS)
 
@@ -131,7 +132,7 @@ class OpenStackVsmShell(object):
                             metavar='<region-name>',
                             default=utils.env('OS_REGION_NAME',
                                               'VSM_REGION_NAME'),
-                            help='Defaults to env[OS_REGION_NAME].')
+                            help='\033[1;32;40mDefaults to env[OS_REGION_NAME].\033[0m')
         parser.add_argument('--os_region_name',
                             help=argparse.SUPPRESS)
 

@@ -225,7 +225,7 @@ class ClusterManager(base.ManagerWithFind):
         get_service_list
         """
         url = "/clusters/get_service_list"
-        return self.api.client.get(url)
+        return self._list(url, 'services')
 
     def refresh(self):
         url = "/clusters/refresh"
