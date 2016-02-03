@@ -291,6 +291,9 @@ class API(object):
         return self.conductor_rpcapi.\
                mds_get_all(context)
 
+    def mds_get(self, context, id):
+        return self.conductor_rpcapi.mds_get(context, id)
+
     def ceph_error(self, context):
         return self.conductor_rpcapi.\
                ceph_error(context)

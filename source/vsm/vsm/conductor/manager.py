@@ -603,6 +603,8 @@ class ConductorManager(manager.Manager):
     def mds_get_all(self, context):
         return db.mds_get_all(context)
 
+    def mds_get(self, context, id):
+        return db.mds_get_by_id(context, id)
     
     def zones_hosts_get_by_storage_group(self, context, storage_group):
         osds = db.osd_state_get_all(context)

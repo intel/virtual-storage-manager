@@ -1229,6 +1229,9 @@ def mds_create(context, values):
 def mds_get_all(context):
     return IMPL.mds_get_all(context)
 
+def mds_get_by_id(context, id):
+    return IMPL.mds_get(context, id)
+
 def mds_get_by_gid(context, gid):
     return IMPL.mds_get_by_gid(context, gid)
 

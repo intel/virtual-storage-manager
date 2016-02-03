@@ -384,6 +384,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return self.call(context, \
                          self.make_msg('mds_get_all'))
 
+    def mds_get(self, context, id):
+        return self.call(context,
+                         self.make_msg('mds_get', id=id))
+
     def ceph_error(self, context):
         return self.call(context, \
                          self.make_msg('ceph_error'))
