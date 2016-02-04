@@ -593,6 +593,9 @@ class ConductorManager(manager.Manager):
     def rbd_get_all(self, context, limit, marker, sort_keys, sort_dir):
         return db.rbd_get_all(context, limit, marker, sort_keys, sort_dir)
 
+    def rbd_get(self, context, id):
+        return db.rbd_get(context, id)
+
     def license_status_create(self, context, values):
         return db.license_status_create(context, values)
 

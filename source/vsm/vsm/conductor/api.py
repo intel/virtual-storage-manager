@@ -277,6 +277,9 @@ class API(object):
         return self.conductor_rpcapi.\
                rbd_get_all(context, limit, marker, sort_keys, sort_dir)
 
+    def rbd_get(self, context, id):
+        return self.conductor_rpcapi.rbd_get(context, id)
+
     #license_status
     def license_status_create(self, context, values):
         return self.conductor_rpcapi.\

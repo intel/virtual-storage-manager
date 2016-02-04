@@ -1204,6 +1204,9 @@ def rbd_get_all(context, limit=None, marker=None, sort_keys=None, sort_dir=None)
     return IMPL.rbd_get_all(context, limit=limit, marker=marker, sort_keys=sort_keys,
 							sort_dir=sort_dir)
 
+def rbd_get(context, id):
+    return IMPL.rbd_get(context, id)
+
 def rbd_get_by_pool_and_image(context, pool, image):
     return IMPL.rbd_get_by_pool_and_image(context, pool, image)
 

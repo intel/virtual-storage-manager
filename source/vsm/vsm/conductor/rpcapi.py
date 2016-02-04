@@ -368,6 +368,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 				       limit=limit, marker=marker,
 					sort_keys=sort_keys, sort_dir=sort_dir))
 
+    def rbd_get(self, context, id):
+        return self.call(context, self.make_msg('rbd_get',
+                                                id=id))
+
     #license_status
     def license_status_create(self, context, values):
         return self.call(context,
