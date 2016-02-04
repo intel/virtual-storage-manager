@@ -578,6 +578,9 @@ class ConductorManager(manager.Manager):
     def pg_get_all(self, context, limit, marker, sort_keys, sort_dir):
         return db.pg_get_all(context, limit, marker, sort_keys, sort_dir)
 
+    def pg_get(self, context, id):
+        return db.pg_get(context, id)
+
     def pg_update_or_create(self, context, values):
         pg_ref = db.pg_get_by_pgid(context, values['pgid'])
         if pg_ref:

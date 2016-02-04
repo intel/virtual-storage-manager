@@ -80,7 +80,7 @@ class Controller(wsgi.Controller):
     def _get_placement_group(self, context, req, id):
         """Utility function for looking up an instance by id."""
         try:
-            placement_group = self.conductor_api.placement_group_get(context, id)
+            placement_group = self.conductor_api.pg_get(context, id)
         except exception.NotFound:
             msg = _("placement_group could not be found")
             raise exc.HTTPNotFound(explanation=msg)
@@ -108,7 +108,14 @@ class Controller(wsgi.Controller):
         #                        search_opts,
         #                        self._get_zone_search_options)
         #zones = self.conductor_api.get_zone_list(context)
-        placement_groups = [{}, {}]
+        limit = req.GET.get('limit', None)
+        marker = req.GET.get('marker', None)
+        sort_keys = req.GET.get('sort_keys', None)
+        sort_dir = req.GET.get('sort_dir', None)
+
+        placement_groups = self.conductor_api.pg_get_all(context, limit,
+                                                         marker, sort_keys,
+                                                         sort_dir)
         LOG.info('vsm/api/v1/placement_group.py placement_groups:%s' % placement_groups)
 
         return self._view_builder.index(req, placement_groups)

@@ -269,6 +269,9 @@ class API(object):
         return self.conductor_rpcapi.\
                pg_get_all(context, limit, marker, sort_keys, sort_dir)
 
+    def pg_get(self, context, id):
+        return self.conductor_rpcapi.pg_get(context, id)
+
     #rbd
     def rbd_get_all(self, context, limit, marker, sort_keys, sort_dir):
         return self.conductor_rpcapi.\

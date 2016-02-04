@@ -350,6 +350,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                        sort_keys=sort_keys,
                                        sort_dir=sort_dir))
 
+    def pg_get(self, context, id):
+        return self.call(context, self.make_msg('pg_get',
+                                                id=id))
+
     #suggestion:you'd better not use this api! 
     #If the count of pgs is too large, it may blocks up the net.
     def pg_update_or_create(self, context, values):

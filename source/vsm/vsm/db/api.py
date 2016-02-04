@@ -1184,6 +1184,9 @@ def pg_get_all(context, limit=None, marker=None, sort_keys=None,
     return IMPL.pg_get_all(context, limit=limit, marker=marker,
                            sort_keys=sort_keys, sort_dir=sort_dir)
 
+def pg_get(context, id):
+    return IMPL.pg_get(context, id)
+
 def pg_get_by_pgid(context, pgid):
     return IMPL.pg_get_by_pgid(context, pgid)
 

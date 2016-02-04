@@ -27,11 +27,11 @@ class ViewBuilder(common.ViewBuilder):
         LOG.info("placement_groups api view %s " % placement_group)
         return {
             "placement_group": {
-                "id":1234,
-                "pg_id": 12345,
-                "state": 'st',
-                "up": "true",
-                "acting": 'abc',
+                "id": placement_group['id'],
+                "pg_id": placement_group['pgid'],
+                "state": placement_group['state'],
+                "up": placement_group['up'],
+                "acting": placement_group['acting'],
             }
         }
 
