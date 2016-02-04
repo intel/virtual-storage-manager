@@ -290,6 +290,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def storage_group_get_all(self, context):
         return self.call(context, self.make_msg('storage_group_get_all'))
 
+    def storage_group_get(self, context, id):
+        return self.call(context, self.make_msg('storage_group_get',
+                                                id=id))
+
     def create_storage_group(self, context, values):
         return self.call(context, self.make_msg('create_storage_group', \
                          values=values))

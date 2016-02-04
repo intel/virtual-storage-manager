@@ -407,6 +407,9 @@ class ConductorManager(manager.Manager):
     def storage_group_get_all(self, context):
         return db.storage_group_get_all(context)
 
+    def storage_group_get(self, context, id):
+        return db.storage_group_get(context, id)
+
     def create_storage_group(self, context, values):
         if values is None:
             LOG.warn("Error: Empty values")

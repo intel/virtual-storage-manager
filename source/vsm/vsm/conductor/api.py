@@ -239,6 +239,9 @@ class API(object):
     def storage_group_get_all(self, context):
         return self.conductor_rpcapi.storage_group_get_all(context)
 
+    def storage_group_get(self, context, id):
+        return self.conductor_rpcapi.storage_group_get(context, id)
+
     def create_storage_group(self, context, attrs):
         return self.conductor_rpcapi.create_storage_group(context, attrs)
 
