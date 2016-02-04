@@ -267,6 +267,22 @@ def find_osd(cs, osd):
     """Get an osd by name or ID."""
     return find_resource(cs.osds, osd)
 
+def find_pg(cs, pg):
+    """Get a pg by name or ID."""
+    return find_resource(cs.placement_groups, pg)
+
+def find_rbd(cs, rbd):
+    """Get a rbd by name or ID."""
+    return find_resource(cs.rbd_pools, rbd)
+
+def find_server(cs, server):
+    """Get a server by name or ID."""
+    return find_resource(cs.servers, server)
+
+def find_appnode(cs, appnode):
+    """Get an appnode by name or ID."""
+    return find_resource(cs.appnodes, appnode)
+
 def _format_servers_list_networks(server):
     output = []
     for (network, addresses) in server.networks.items():

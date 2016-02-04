@@ -109,26 +109,63 @@ def _check_cluster_exist(cs):
 
 
 ####################appnode#########################
+@utils.arg('--vsm-os-username',
+           metavar='<vsm-os-username>',
+           help='The username of openstack keystone connected.')
+@utils.arg('--vsm-os-password',
+           metavar='<vsm-os-password>',
+           help='The password of openstack keystone connected.')
+@utils.arg('--vsm-os-tenant-name',
+           metavar='<vsm-os-tenant-name>',
+           help='The tenant name of openstack keystone connected.')
+@utils.arg('--vsm-os-auth-url',
+           metavar='<vsm-os-auth-url>',
+           help='The auth url of openstack keystone connected.')
+@utils.arg('--vsm-os-region-name',
+           metavar='<vsm-os-region-name>',
+           default='RegionOne',
+           help='The region name of openstack keystone connected.')
+@utils.arg('--ssh-user',
+           metavar='<ssh-user>',
+           help='The ssh user to connect openstack keystone node.')
 @utils.service_type('vsm')
 def do_appnode_create(cs, args):
-    """Creates an appnode."""
-    _is_developing("appnode-create",
-                   "Creates an appnode.")
+    """\033[1;32;40mCreates an appnode.\033[0m"""
+    appnode = {
+        'os_username': args.vsm_os_username,
+        'os_password': args.vsm_os_password,
+        'os_tenant_name': args.vsm_os_tenant_name,
+        'os_auth_url': args.vsm_os_auth_url,
+        'os_region_name': args.vsm_os_region_name,
+        'ssh_user': args.ssh_user
+    }
+    try:
+        cs.appnodes.create(appnode)
+        print("Succeed to create appnode.")
+    except:
+        raise exceptions.CommandError("Failed to create appnode.")
 
 @utils.service_type('vsm')
 def do_appnode_list(cs, args):
     """\033[1;32;40mLists all appnodes.\033[0m"""
     appnodes = cs.appnodes.list(detailed=False, search_opts=None)
-    columns = ["ID", "VSMApp ID", "Status", "Connected User", "OS User Name",
+    columns = ["ID", "VSMApp ID", "SSH Status", "SSH User", "OS UserName",
                "OS Password", "OS Tenant Name", "OS Auth Url", "OS Region Name",
                "UUID"]
     utils.print_list(appnodes, columns)
 
+@utils.arg('appnode',
+           metavar='<appnode>',
+           help='Name or ID of appnode.')
 @utils.service_type('vsm')
 def do_appnode_delete(cs, args):
-    """Deletes an appnode by id."""
-    _is_developing("appnode-delete",
-                   "Deletes an appnode by id.")
+    """\033[1;32;40mDeletes an appnode by id.\033[0m"""
+    appnode = utils.find_appnode(cs, args.appnode)
+    try:
+        cs.appnodes.delete(appnode)
+        print("Succeed to delete appnode.")
+    except:
+        raise exceptions.CommandError("Failed to delete appnode.")
 
 @utils.service_type('vsm')
 def do_appnode_update(cs, args):
@@ -140,8 +177,8 @@ def do_appnode_update(cs, args):
 #####################cluster########################
 @utils.arg('--name',
            metavar='<name>',
-           default='ceph',
-           help='Cluster name[Not used]. Default=ceph.')
+           default='default',
+           help='Cluster name[Not used]. Default=default.')
 @utils.arg('--file-system',
            metavar='<file-system>',
            default='xfs',
@@ -206,6 +243,10 @@ def do_cluster_create(cs, args):
             else:
                 if value != "False" and value != "True":
                     raise exceptions.CommandError("is-monitor or is-storage is not True or False")
+                elif value == "False":
+                    value = False
+                elif value == "True":
+                    value = True
             ser[key] = value
         servers_list.append(ser)
     if len(servers_list) < 3:
@@ -231,17 +272,17 @@ def do_cluster_list(cs, args):
     columns = ["ID", "Name", "Size", "File System"]
     utils.print_list(clusters, columns)
 
-@utils.service_type('vsm')
-def do_cluster_delete(cs, args):
-    """Deletes a cluster."""
-    _is_developing("cluster-delete",
-                   "Deletes a cluster.")
+# @utils.service_type('vsm')
+# def do_cluster_delete(cs, args):
+#     """Deletes a cluster."""
+#     _is_developing("cluster-delete",
+#                    "Deletes a cluster.")
 
-@utils.service_type('vsm')
-def do_cluster_update(cs, args):
-    """Updates a cluster."""
-    _is_developing("cluster-update",
-                   "Updates a cluster.")
+# @utils.service_type('vsm')
+# def do_cluster_update(cs, args):
+#     """Updates a cluster."""
+#     _is_developing("cluster-update",
+#                    "Updates a cluster.")
 
 @utils.service_type('vsm')
 def do_cluster_summary(cs, args):
@@ -267,17 +308,17 @@ def do_cluster_refresh(cs, args):
     except:
         raise exceptions.CommandError("Failed to refresh cluster status.")
 
-@utils.service_type('vsm')
-def do_cluster_import_ceph_conf(cs, args):
-    """Imports ceph conf."""
-    _is_developing("cluster-import-ceph-conf",
-                   "Imports ceph conf.")
-
-@utils.service_type('vsm')
-def do_cluster_import(cs, args):
-    """Imports an existing ceph cluster."""
-    _is_developing("cluster-import",
-                   "Imports an existing ceph cluster.")
+# @utils.service_type('vsm')
+# def do_cluster_import_ceph_conf(cs, args):
+#     """Imports ceph conf."""
+#     _is_developing("cluster-import-ceph-conf",
+#                    "Imports ceph conf.")
+#
+# @utils.service_type('vsm')
+# def do_cluster_import(cs, args):
+#     """Imports an existing ceph cluster."""
+#     _is_developing("cluster-import",
+#                    "Imports an existing ceph cluster.")
 
 @utils.arg('id',
            metavar='<id>',
@@ -565,23 +606,30 @@ def do_perf_metric_list(cs, args):
 
 
 ###################placement group##########################
+@utils.arg('pg',
+           metavar='<pg>',
+           help='Name or ID of pg.')
 @utils.service_type('vsm')
 def do_pg_show(cs, args):
-    """Shows details info of a placement group."""
-    _is_developing("pg-show",
-                   "Shows details info of a placement group.")
+    """\033[1;32;40mShows details info of a placement group.\033[0m"""
+    info = dict()
+    pg = utils.find_pg(cs, args.pg)
+    info.update(pg._info)
+    utils.print_dict(info)
 
 @utils.service_type('vsm')
 def do_pg_list(cs, args):
-    """Lists all placement groups."""
-    _is_developing("pg-list",
-                   "Lists all placement groups.")
+    """\033[1;32;40mLists all placement groups.\033[0m"""
+    pgs = cs.placement_groups.list(detailed=False, search_opts=None, paginate_opts=None)
+    columns = ["ID", "PG ID", "State", "UP", "Acting"]
+    utils.print_list(pgs, columns)
 
 @utils.service_type('vsm')
 def do_pg_summary(cs, args):
-    """Gets summary info of placement group."""
-    _is_developing("pg-summary",
-                   "Gets summary info of placement group.")
+    """\033[1;32;40mGets summary info of placement group.\033[0m"""
+    info = cs.placement_groups.summary()
+    info = info._info
+    utils.print_dict(info)
 
 
 ###################pool usage##########################
@@ -593,55 +641,51 @@ def do_pool_usage_create(cs, args):
 
 @utils.service_type('vsm')
 def do_pool_usage_list(cs, args):
-    """Lists all pool usages."""
-    _is_developing("pool-usage-list",
-                   "Lists all pool usages.")
-
-@utils.service_type('vsm')
-def do_pool_usage_delete(cs, args):
-    """Deletes pool usage."""
-    _is_developing("pool-usage-delete",
-                   "Deletes pool usage.")
-
-@utils.service_type('vsm')
-def do_pool_usage_update(cs, args):
-    """Updates pool usage."""
-    _is_developing("pool-usage-update",
-                   "Updates pool usage.")
+    """\033[1;32;40mLists all pool usages.\033[0m"""
+    pool_usages = cs.pool_usages.list(detailed=False, search_opts=None)
+    columns = ["ID", "Pool ID", "VSMApp ID", "Cinder Volume Host", "Attach Status",
+               "Attach_at"]
+    utils.print_list(pool_usages, columns)
 
 
 ###################rbd pool##########################
+@utils.arg('rbd',
+           metavar='<rbd>',
+           help='Name or ID of rbd.')
 @utils.service_type('vsm')
 def do_rbd_pool_show(cs, args):
-    """Shows details info of rbd pool."""
-    _is_developing("rbd-pool-show",
-                   "Shows details info of rbd pool.")
+    """\033[1;32;40mShows details info of rbd pool.\033[0m"""
+    info = dict()
+    rbd = utils.find_rbd(cs, args.rbd)
+    info.update(rbd._info)
+    utils.print_dict(info)
 
 @utils.service_type('vsm')
 def do_rbd_pool_list(cs, args):
-    """Lists all rbd pools."""
-    _is_developing("rbd-pool-list",
-                   "Lists all rbd pools.")
+    """\033[1;32;40mLists all rbd pools.\033[0m"""
+    rbds = cs.rbd_pools.list(detailed=False, search_opts=None, paginate_opts=None)
+    columns = ["ID"]
+    utils.print_list(rbds, columns)
 
 @utils.service_type('vsm')
 def do_rbd_pool_summary(cs, args):
-    """Gets summary info of rbd pool."""
-    _is_developing("rbd-pool-summary",
-                   "Gets summary info of rbd pool.")
+    """\033[1;32;40mGets summary info of rbd pool.\033[0m"""
+    info = cs.rbd_pools.summary()
+    info = info._info
+    utils.print_dict(info)
 
 
 ###################server##########################
-@utils.service_type('vsm')
-def do_server_create(cs, args):
-    """Creates a new server."""
-    _is_developing("server-create",
-                   "Creates a new server.")
-
+@utils.arg('server',
+           metavar='<server>',
+           help='Name or ID of server.')
 @utils.service_type('vsm')
 def do_server_show(cs, args):
-    """Shows details info of server."""
-    _is_developing("server-show",
-                   "Shows details info of server.")
+    """\033[1;32;40mShows details info of server.\033[0m"""
+    info = dict()
+    server = utils.find_server(cs, args.server)
+    info.update(server._info)
+    utils.print_dict(info)
 
 @utils.service_type('vsm')
 def do_server_list(cs, args):
@@ -653,46 +697,83 @@ def do_server_list(cs, args):
     utils.print_list(result, columns)
 
 @utils.service_type('vsm')
-def do_server_update(cs, args):
-    """Updates a server by id."""
-    _is_developing("server-update",
-                   "Updates a server by id.")
-
-@utils.service_type('vsm')
 def do_server_add(cs, args):
     """Adds a new server."""
     _is_developing("server-add",
                    "Adds a new server.")
 
+@utils.arg('--id',
+           metavar='<id>',
+           action='append',
+           default=[],
+           help='ID of server.')
 @utils.service_type('vsm')
 def do_server_remove(cs, args):
-    """Removes a server."""
-    _is_developing("server-remove",
-                   "Removes a server.")
+    """\033[1;32;40mRemoves a server.\033[0m"""
+    remove_storage = True
+    remove_monitor = True
+    cluster_id = 1
+    servers = []
+    for id in args.id:
+        servers.append({
+            'id': id,
+            'cluster_id': cluster_id,
+            'remove_monitor': remove_monitor,
+            'remove_storage': remove_storage
+        })
+    try:
+        cs.servers.remove(servers)
+        print("Succeed to remove servers.")
+    except:
+        raise exceptions.CommandError("Failed to remove servers.")
 
-@utils.service_type('vsm')
-def do_server_reset_status(cs, args):
-    """Resets server status."""
-    _is_developing("server-reset-status",
-                   "Resets server status.")
-
+@utils.arg('--id',
+           metavar='<id>',
+           action='append',
+           default=[],
+           help='ID of server.')
 @utils.service_type('vsm')
 def do_server_start(cs, args):
-    """Starts a server."""
-    _is_developing("server-start",
-                   "Starts a server.")
+    """\033[1;32;40mStarts a server.\033[0m"""
+    cluster_id = 1
+    servers = []
+    for id in args.id:
+        servers.append({
+            'id': id,
+            'cluster_id': cluster_id
+        })
+    try:
+        cs.servers.start(servers)
+        print("Succeed to start servers.")
+    except:
+        raise exceptions.CommandError("Failed to start servers.")
 
+@utils.arg('--id',
+           metavar='<id>',
+           action='append',
+           default=[],
+           help='ID of server.')
 @utils.service_type('vsm')
 def do_server_stop(cs, args):
-    """Stops a server."""
-    _is_developing("server-stop",
-                   "Stops a server.")
+    """\033[1;32;40mStops a server.\033[0m"""
+    cluster_id = 1
+    servers = []
+    for id in args.id:
+        servers.append({
+            'id': id,
+            'cluster_id': cluster_id
+        })
+    try:
+        cs.servers.stop(servers)
+        print("Succeed to stop servers.")
+    except:
+        raise exceptions.CommandError("Failed to stop servers.")
 
-@utils.service_type('vsm')
-def do_server_ceph_upgrade(cs, args):
-    """Upgrades ceph version."""
-    _is_developing("server-ceph-upgrade",
-                   "Upgrades ceph version.")
+# @utils.service_type('vsm')
+# def do_server_ceph_upgrade(cs, args):
+#     """Upgrades ceph version."""
+#     _is_developing("server-ceph-upgrade",
+#                    "Upgrades ceph version.")
 
 
 ###################storage group##########################

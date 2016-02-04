@@ -37,6 +37,7 @@ from vsmclient.v1 import mons
 from vsmclient.v1 import licenses
 from vsmclient.v1 import vsm_settings
 from vsmclient.v1 import performance_metrics
+from vsmclient.v1 import pool_usages
 
 class Client(object):
     """
@@ -88,6 +89,7 @@ class Client(object):
         self.licenses = licenses.LicenseManager(self)
         self.vsm_settings = vsm_settings.VsmSettingsManager(self)
         self.performance_metrics = performance_metrics.PerformanceMetricsManager(self)
+        self.pool_usages = pool_usages.PoolUsageManager(self)
 
         # Add in any extensions...
         if extensions:
