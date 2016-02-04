@@ -259,6 +259,14 @@ def find_mds(cs, mds):
     """Get a mds by name or ID."""
     return find_resource(cs.mdses, mds)
 
+def find_mon(cs, mon):
+    """Get a mon by name or ID."""
+    return find_resource(cs.monitors, mon)
+
+def find_osd(cs, osd):
+    """Get an osd by name or ID."""
+    return find_resource(cs.osds, osd)
+
 def _format_servers_list_networks(server):
     output = []
     for (network, addresses) in server.networks.items():

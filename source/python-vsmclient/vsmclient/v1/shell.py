@@ -261,10 +261,11 @@ def do_cluster_service_list(cs, args):
 @utils.service_type('vsm')
 def do_cluster_refresh(cs, args):
     """\033[1;32;40mRefreshes cluster status.\033[0m"""
-    resp, body = cs.clusters.refresh()
-    code = resp.status_code
-    if code != 200:
-        raise exceptions.CommandError("Failed to refresh the cluster status.")
+    try:
+        cs.clusters.refresh()
+        print("Succeed to refresh cluster status.")
+    except:
+        raise exceptions.CommandError("Failed to refresh cluster status.")
 
 @utils.service_type('vsm')
 def do_cluster_import_ceph_conf(cs, args):
@@ -284,11 +285,12 @@ def do_cluster_import(cs, args):
 @utils.service_type('vsm')
 def do_cluster_stop(cs, args):
     """\033[1;32;40mStops ceph cluster.\033[0m"""
-    resp, body = cs.clusters.stop_cluster(args.id)
-    code = resp.status_code
-    if code != 200:
+    try:
+        cs.clusters.stop_cluster(args.id)
+        print("Succeed to stop cluster.")
+    except:
         raise exceptions.BadRequest("Failed to stop cluster.")
-    print("Succeed to stop cluster.")
+
 
 @utils.arg('id',
            metavar='<id>',
@@ -296,11 +298,11 @@ def do_cluster_stop(cs, args):
 @utils.service_type('vsm')
 def do_cluster_start(cs, args):
     """\033[1;32;40mStarts ceph cluster.\033[0m"""
-    resp, body = cs.clusters.start_cluster(args.id)
-    code = resp.status_code
-    if code != 200:
+    try:
+        cs.clusters.start_cluster(args.id)
+        print("Succeed to start cluster.")
+    except:
         raise exceptions.BadRequest("Failed to start cluster.")
-    print("Succeed to start cluster.")
 
 
 ####################device#########################
@@ -369,111 +371,189 @@ def do_mds_list(cs, args):
     columns = ["ID", "GID", "Name", "State", "Address", "Updated_at"]
     utils.print_list(mdses, columns)
 
-@utils.service_type('vsm')
-def do_mds_restart(cs, args):
-    """Restarts mds."""
-    _is_developing("mds-restart",
-                   "Restarts mds.")
+# @utils.arg('mds',
+#            metavar='<mds>',
+#            help='Name or ID of mds.')
+# @utils.service_type('vsm')
+# def do_mds_restart(cs, args):
+#     """\033[1;32;40mRestarts mds.\033[0m"""
+#     mds = utils.find_mds(cs, args.mds)
+#     resp, body = cs.mdses.restart(mds)
+#     code = resp.status_code
+#     if code != 202:
+#         raise exceptions.CommandError("Failed to restart mds.")
 
-@utils.service_type('vsm')
-def do_mds_delete(cs, args):
-    """Deletes mds by id."""
-    _is_developing("mds-delete",
-                   "Deletes mds by id.")
+# @utils.service_type('vsm')
+# def do_mds_delete(cs, args):
+#     """Deletes mds by id."""
+#     _is_developing("mds-delete",
+#                    "Deletes mds by id.")
 
-@utils.service_type('vsm')
-def do_mds_restore(cs, args):
-    """Restores mds."""
-    _is_developing("mds-restore",
-                   "Restores mds.")
+# @utils.service_type('vsm')
+# def do_mds_restore(cs, args):
+#     """Restores mds."""
+#     _is_developing("mds-restore",
+#                    "Restores mds.")
 
 @utils.service_type('vsm')
 def do_mds_summary(cs, args):
-    """Gets summary info of mds."""
-    _is_developing("mds-summary",
-                   "Gets summary info of mds.")
+    """\033[1;32;40mGets summary info of mds.\033[0m"""
+    info = cs.mdses.summary()
+    info = info._info
+    utils.print_dict(info)
 
 
 #####################mon########################
+@utils.arg('mon',
+           metavar='<mon>',
+           help='Name or ID of mon.')
 @utils.service_type('vsm')
 def do_mon_show(cs, args):
-    """Shows details info of a mon."""
-    _is_developing("mon-show",
-                   "Shows details info of a mon.")
+    """\033[1;32;40mShows details info of a mon.\033[0m"""
+    info = dict()
+    mon = utils.find_mon(cs, args.mon)
+    info.update(mon._info)
+    utils.print_dict(info)
 
 @utils.service_type('vsm')
 def do_mon_list(cs, args):
-    """Lists all mons."""
-    _is_developing("mon-list",
-                   "Lists all mons.")
+    """\033[1;32;40mLists all mons.\033[0m"""
+    mons = cs.monitors.list(detailed=False, search_opts=None)
+    columns = ["ID", "Name", "Address", "Health", "Details"]
+    utils.print_list(mons, columns)
 
 @utils.service_type('vsm')
 def do_mon_summary(cs, args):
-    """Gets summary info of mon."""
-    _is_developing("mon-summary",
-                   "Gets summary info of mon.")
+    """\033[1;32;40mGets summary info of mon.\033[0m"""
+    info = cs.monitors.summary()
+    info = info._info
+    utils.print_dict(info)
 
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of mon.')
 @utils.service_type('vsm')
 def do_mon_restart(cs, args):
-    """Restarts a mon by id."""
-    _is_developing("mon-restart",
-                   "Restarts a mon by id.")
+    """\033[1;32;40mRestarts a mon by id.\033[0m"""
+    mon = utils.find_mon(cs, args.id)
+    try:
+        cs.monitors.restart(mon)
+        print("Succeed to restart mon named %s." % mon.name)
+    except:
+        raise exceptions.CommandError("Failed to restart mon.")
 
 
 #####################osd########################
+@utils.arg('osd',
+           metavar='<osd>',
+           help='Name or ID of osd.')
 @utils.service_type('vsm')
 def do_osd_show(cs, args):
-    """Shows details info of an osd."""
-    _is_developing("osd-show",
-                   "Shows details info of an osd.")
+    """\033[1;32;40mShows details info of an osd.\033[0m"""
+    info = dict()
+    osd = utils.find_osd(cs, args.osd)
+    info.update(osd._info)
+    utils.print_dict(info)
 
 @utils.service_type('vsm')
 def do_osd_list(cs, args):
-    """Lists all osds."""
-    _is_developing("osd-list",
-                   "Lists all osds.")
+    """\033[1;32;40mLists all osds.\033[0m"""
+    osds = cs.osds.list(detailed=False, search_opts=None, paginate_opts=None)
+    columns = ["ID", "OSD Name", "Weight", "State", "Operation Statue",
+               "Device ID", "Service ID", "Updated_at"]
+    utils.print_list(osds, columns)
 
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of osd.')
 @utils.service_type('vsm')
 def do_osd_restart(cs, args):
-    """Restarts an osd by id."""
-    _is_developing("osd-restart",
-                   "Restarts an osd by id.")
+    """\033[1;32;40mRestarts an osd by id.\033[0m"""
+    osd = utils.find_osd(cs, args.id)
+    try:
+        cs.osds.restart(osd)
+        print("Succeed to restart osd named %s." % osd.osd_name)
+    except:
+        raise exceptions.CommandError("Failed to restart osd.")
 
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of osd.')
 @utils.service_type('vsm')
 def do_osd_remove(cs, args):
-    """Removes an osd by id."""
-    _is_developing("osd-remove",
-                   "Removes an osd by id.")
+    """\033[1;32;40mRemoves an osd by id.\033[0m"""
+    osd = utils.find_osd(cs, args.id)
+    try:
+        cs.osds.remove(osd)
+        print("Succeed to remove osd named %s." % osd.osd_name)
+    except:
+        raise exceptions.CommandError("Failed to remove osd.")
 
+@utils.arg('--server-id',
+           metavar='<server-id>',
+           help='The id of server which to add new osd.')
+@utils.arg('--storage-group-id',
+           metavar='<storage-group-id>',
+           help='The id of storage group.')
+@utils.arg('--weight',
+           metavar='<weight>',
+           default='1.0',
+           help='Weight of osd.')
+@utils.arg('--journal',
+           metavar='<journal>',
+           help='Journal path.')
+@utils.arg('--data',
+           metavar='<data>',
+           help='Data path.')
 @utils.service_type('vsm')
 def do_osd_add_new(cs, args):
-    """Adds new osd to ceph cluster."""
-    _is_developing("osd-add-new",
-                   "Adds new osd to ceph cluster.")
+    """\033[1;32;40mAdds new osd to ceph cluster.\033[0m"""
+    body = {
+        'server_id': args.server_id,
+        'osd_info': [
+            {
+                'storage_group_id': args.storage_group_id,
+                'weight': args.weight,
+                'journal': args.journal,
+                'data': args.data
+            }
+        ]
+    }
+    try:
+        cs.osds.add_new_disks_to_cluster(body=body)
+        print("Succeed to add new osd to cluster.")
+    except:
+        raise exceptions.CommandError("Failed to add new osd to cluster.")
 
-@utils.service_type('vsm')
-def do_osd_delete(cs, args):
-    """Deletes an osd by id."""
-    _is_developing("osd-delete",
-                   "Deletes an osd by id.")
-
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of osd.')
 @utils.service_type('vsm')
 def do_osd_restore(cs, args):
-    """Restores an osd."""
-    _is_developing("osd-restore",
-                   "Restores an osd.")
+    """\033[1;32;40mRestores an osd.\033[0m"""
+    osd = utils.find_osd(cs, args.id)
+    try:
+        cs.osds.restore(osd)
+        osd = utils.find_osd(cs, args.id)
+        print("Succeed to restore osd named %s." % osd.osd_name)
+    except:
+        raise exceptions.CommandError("Failed to restore osd.")
 
 @utils.service_type('vsm')
 def do_osd_refresh(cs, args):
-    """Refreshes osd."""
-    _is_developing("osd-refresh",
-                   "Refreshes osd.")
+    """\033[1;32;40mRefreshes osd.\033[0m"""
+    try:
+        cs.osds.refresh()
+        print("Succeed to refresh osd status.")
+    except:
+        raise exceptions.CommandError("Failed to refresh osd status.")
 
 @utils.service_type('vsm')
 def do_osd_summary(cs, args):
-    """Gets summary info of osd."""
-    _is_developing("osd-summary",
-                   "Gets summary info of osd.")
+    """\033[1;32;40mGets summary info of osd.\033[0m"""
+    info = cs.osds.summary()
+    info = info._info
+    utils.print_dict(info)
 
 
 ###################performance metric##########################
