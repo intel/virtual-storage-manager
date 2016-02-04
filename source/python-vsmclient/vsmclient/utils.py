@@ -283,6 +283,14 @@ def find_appnode(cs, appnode):
     """Get an appnode by name or ID."""
     return find_resource(cs.appnodes, appnode)
 
+def find_storage_group(cs, storage_group):
+    """Get a storage group by name or ID."""
+    return find_resource(cs.storage_groups, storage_group)
+
+def find_setting(cs, setting):
+    """Get a setting by name or ID."""
+    return find_resource(cs.vsm_settings, setting)
+
 def _format_servers_list_networks(server):
     output = []
     for (network, addresses) in server.networks.items():

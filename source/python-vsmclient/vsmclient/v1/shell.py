@@ -828,23 +828,31 @@ def do_storage_group_create(cs, args):
     _is_developing("storage-group-create",
                    "Creates storage group.")
 
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of storage group.')
 @utils.service_type('vsm')
 def do_storage_group_show(cs, args):
-    """Shows detail info of storage group."""
-    _is_developing("storage-group-show",
-                   "Shows detail info of storage group.")
+    """\033[1;32;40mShows detail info of storage group.\033[0m"""
+    info = dict()
+    storage_group = utils.find_storage_group(cs, args.id)
+    info.update(storage_group._info)
+    utils.print_dict(info)
 
 @utils.service_type('vsm')
 def do_storage_group_list(cs, args):
-    """Lists all storage groups."""
-    _is_developing("storage-group-list",
-                   "Lists all storage groups.")
+    """\033[1;32;40mLists all storage groups.\033[0m"""
+    storage_groups = cs.storage_groups.list(detailed=True, search_opts=None)
+    columns = ["ID", "Name", "Storage Class", "Attached OSDs", "Rule ID",
+               "Status", "Capacity Used", "Capacity Total"]
+    utils.print_list(storage_groups, columns)
 
 @utils.service_type('vsm')
 def do_storage_group_summary(cs, args):
-    """Gets summary info of storage group."""
-    _is_developing("storage-group-summary",
-                   "Gets summary info of storage group.")
+    """\033[1;32;40mGets summary info of storage group.\033[0m"""
+    info = cs.storage_groups.summary()
+    info = info._info
+    utils.print_dict(info)
 
 
 ###################storage pool##########################
@@ -892,21 +900,27 @@ def do_storage_pool_list_ec_profiles(cs, args):
 
 
 ###################setting##########################
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of setting.')
 @utils.service_type('vsm')
 def do_setting_show(cs, args):
-    """Shows details info of setting."""
-    _is_developing("setting-show",
-                   "Shows details info of setting.")
+    """\033[1;32;40mShows details info of setting.\033[0m"""
+    info = dict()
+    setting = utils.find_setting(cs, args.id)
+    info.update(setting._info)
+    utils.print_dict(info)
 
 @utils.service_type('vsm')
 def do_setting_list(cs, args):
-    """Lists all settings."""
-    _is_developing("setting-list",
-                   "Lists all settings.")
+    """\033[1;32;40mLists all settings.\033[0m"""
+    settings = cs.vsm_settings.list(detailed=False, search_opts=None)
+    columns = ["ID", "Name", "Value"]
+    utils.print_list(settings, columns)
 
 @utils.service_type('vsm')
 def do_setting_create(cs, args):
-    """Creates a setting."""
+    """Creates a setting[Changing]."""
     _is_developing("setting-create",
                    "Creates a setting.")
 
@@ -914,9 +928,10 @@ def do_setting_create(cs, args):
 ###################zone##########################
 @utils.service_type('vsm')
 def do_zone_list(cs, args):
-    """Lists all zones."""
-    _is_developing("zone-list",
-                   "Lists all zones.")
+    """\033[1;32;40mLists all zones.\033[0m"""
+    zones = cs.zones.list(detailed=False, search_opts=None)
+    columns = ["ID", "Name"]
+    utils.print_list(zones, columns)
 
 
 # TODO tag for those not completed commands
