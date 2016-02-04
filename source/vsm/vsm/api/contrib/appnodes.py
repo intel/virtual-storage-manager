@@ -23,6 +23,8 @@ from vsm.api.openstack import wsgi
 from vsm.agent import appnodes
 from vsm.api import xmlutil
 from vsm import flags
+from vsm import conductor
+from vsm import exception
 from vsm.openstack.common import log as logging
 from vsm.api.views import appnodes as appnodes_views
 from vsm.openstack.common.gettextutils import _
@@ -63,7 +65,18 @@ class AppnodesController(wsgi.Controller):
     _view_builder_class = appnodes_views.ViewBuilder
 
     def __init__(self):
+        self.conductor_api = conductor.API()
         super(AppnodesController, self).__init__()
+
+    @wsgi.serializers(xml=AppnodeTemplate)
+    def show(self, req, id):
+        """Get details info of an appnode."""
+        context = req.environ['vsm.context']
+        try:
+            appnode = self.conductor_api.get_appnode(context, id)
+        except exception.NotFound:
+            raise exc.HTTPNotFound()
+        return {"appnode": appnode}
 
     @wsgi.serializers(xml=AppnodesTemplate)
     def index(self, req):

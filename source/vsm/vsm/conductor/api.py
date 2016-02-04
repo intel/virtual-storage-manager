@@ -322,3 +322,6 @@ class API(object):
 
     def get_poolusage(self, context, poolusage_id):
         return self.conductor_rpcapi.get_poolusage(context, poolusage_id)
+
+    def get_appnode(self, context, id):
+        return self.conductor_rpcapi.get_appnode(context, id)
