@@ -51,6 +51,12 @@ class AppNodeManager(base.ManagerWithFind):
         body = {'appnodes':  auth_openstack}
         return self._create('/appnodes', body, 'appnodes')
 
+    def get(self, appnode_id):
+        """
+        Get details of an appnode.
+        """
+        return self._get("/appnodes/%s" % appnode_id, "appnode")
+
     def list(self, detailed=False, search_opts=None):
         """
         Get a list of all appnodes.
@@ -81,13 +87,13 @@ class AppNodeManager(base.ManagerWithFind):
         """
         self._delete("/appnodes/%s" % base.getid(appnode))
 
-    def update(self, appnode, **kargs):
+    def update(self, appnode, appnode_info):
         """
         Update the ssh_status or log_info for an appnode.
 
         """
-        if not kargs:
+        if not appnode_info:
             return
 
-        body = {"appnode": kargs}
+        body = {"appnode": appnode_info}
         self._update("/appnodes/%s" % base.getid(appnode), body)

@@ -167,11 +167,56 @@ def do_appnode_delete(cs, args):
     except:
         raise exceptions.CommandError("Failed to delete appnode.")
 
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of appnode.')
+@utils.arg('--vsm-os-username',
+           metavar='<vsm-os-username>',
+           help='The username of openstack keystone connected.')
+@utils.arg('--vsm-os-password',
+           metavar='<vsm-os-password>',
+           help='The password of openstack keystone connected.')
+@utils.arg('--vsm-os-tenant-name',
+           metavar='<vsm-os-tenant-name>',
+           help='The tenant name of openstack keystone connected.')
+@utils.arg('--vsm-os-auth-url',
+           metavar='<vsm-os-auth-url>',
+           help='The auth url of openstack keystone connected.')
+@utils.arg('--vsm-os-region-name',
+           metavar='<vsm-os-region-name>',
+           default='RegionOne',
+           help='The region name of openstack keystone connected.')
+@utils.arg('--ssh-user',
+           metavar='<ssh-user>',
+           help='The ssh user to connect openstack keystone node.')
 @utils.service_type('vsm')
 def do_appnode_update(cs, args):
-    """Updates an appnode by id."""
-    _is_developing("appnode-update",
-                   "Updates an appnode by id.")
+    """\033[1;32;40mUpdates an appnode by id.\033[0m"""
+    appnode = utils.find_appnode(cs, args.id)
+    vsm_os_username = args.vsm_os_username or appnode.os_username
+    vsm_os_password = args.vsm_os_password or appnode.os_password
+    vsm_os_tenant_name = args.vsm_os_tenant_name or appnode.os_tenant_name
+    vsm_os_auth_url = args.vsm_os_auth_url or appnode.os_auth_url
+    vsm_os_region_name = args.vsm_os_region_name or appnode.os_region_name
+    ssh_user = args.ssh_user or appnode.ssh_user
+    ssh_status = ""
+    log_info = ""
+    new_appnode = {
+        'os_username': vsm_os_username,
+        'os_password': vsm_os_password,
+        'os_tenant_name': vsm_os_tenant_name,
+        'os_auth_url': vsm_os_auth_url,
+        'os_region_name': vsm_os_region_name,
+        'ssh_user': ssh_user,
+        'ssh_status': ssh_status,
+        'log_info': log_info
+    }
+    try:
+        print new_appnode
+        cs.appnodes.update(appnode, new_appnode)
+        print("Succeed to update appnode.")
+    except:
+        raise exceptions.CommandError("Failed to update appnode.")
 
 
 #####################cluster########################
