@@ -43,7 +43,7 @@ EOF
 }
 
 MANIFEST_PATH=""
-DEPENDENCE_BRANCH="master"
+DEPENDENCE_BRANCH="2.1"
 USER=`whoami`
 SSH='ssh'
 SCP='scp'
@@ -107,10 +107,10 @@ if [ ! -d vsmrepo ]; then
 fi
 
 cd vsmrepo
-is_python_vsmclient=`ls|grep python-vsmclient*.rpm|wc -l`
+is_python_vsmclient=`ls|grep -E "python-vsmclient*.+((deb)$|(rpm)$)"|wc -l`
 is_vsm=`ls|grep -v python-vsmclient|grep -v vsm-dashboard|grep -v vsm-deploy|grep vsm|wc -l`
-is_vsm_dashboard=`ls|grep vsm-dashboard*.rpm|wc -l`
-is_vsm_deploy=`ls|grep vsm-deploy*.rpm|wc -l`
+is_vsm_dashboard=`ls|grep -E "vsm-dashboard*.+((deb)$|(rpm)$)"|wc -l`
+is_vsm_deploy=`ls|grep -E "vsm-deploy*.+((deb)$|(rpm)$)"|wc -l`
 if [ $is_python_vsmclient -gt 0 ] && [ $is_vsm -gt 0 ] && [ $is_vsm_dashboard -gt 0 ] && [ $is_vsm_deploy -gt 0 ]; then
     echo "The vsm pachages have been already prepared"
 else
@@ -121,6 +121,15 @@ fi
 cd $TOPDIR
 echo "+++++++++++++++finish checking packages+++++++++++++++"
 
+function check_distro() {
+	distro_check=`cat /proc/version | grep -i $1 | wc -l`
+}
+check_distro ubuntu
+
+# install the requirement packages for ubuntu
+if [ $distro_check -eq 1 ]; then
+sudo apt-get install unzip
+fi
 
 #-------------------------------------------------------------------------------
 #            setting the iptables and selinux
@@ -135,45 +144,81 @@ function set_iptables_selinux() {
 #    $SSH $USER@$1 "setenforce 0"
 }
 
-if [ $is_controller -eq 0 ]; then
-    set_iptables_selinux $CONTROLLER_ADDRESS
-else
-    service iptables stop
-    chkconfig iptables off
-    sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
-#    setenforce 0
+# these things are only valid when we are ina selinux environment
+if [ $distro_check -eq 0 ]; then
+
+	if [ $is_controller -eq 0 ]; then
+	    set_iptables_selinux $CONTROLLER_ADDRESS
+	else
+	    service iptables stop
+	    chkconfig iptables off
+	    sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
+	#    setenforce 0
+	fi
+
+
+	for ip in $AGENT_ADDRESS_LIST; do
+	    set_iptables_selinux $ip
+	done
+
+	echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
 fi
-
-for ip in $AGENT_ADDRESS_LIST; do
-    set_iptables_selinux $ip
-done
-
-echo "+++++++++++++++finish setting the iptables and selinux+++++++++++++++"
 
 
 #-------------------------------------------------------------------------------
 #            downloading the dependences
 #-------------------------------------------------------------------------------
 
-if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
-    wget https://github.com/01org/vsm-dependencies/archive/"$DEPENDENCE_BRANCH".zip
-    unzip $DEPENDENCE_BRANCH
-    mv vsm-dependencies-$DEPENDENCE_BRANCH/repo vsm-dep-repo
-    is_createrepo=`rpm -qa|grep createrepo|wc -l`
-    if [[ $is_createrepo -gt 0 ]]; then
-        createrepo vsm-dep-repo
-    fi
-    rm -rf vsm-dependencies-$DEPENDENCE_BRANCH
-    rm -rf $DEPENDENCE_BRANCH
+if [ $distro_check -eq 0 ]; then
+
+	if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
+	    if [ ! -f "$DEPENDENCE_BRANCH".zip ]; then
+	    	wget https://github.com/01org/vsm-dependencies/archive/"$DEPENDENCE_BRANCH".zip
+	    fi
+	    unzip $DEPENDENCE_BRANCH
+	    mv vsm-dependencies-$DEPENDENCE_BRANCH/repo vsm-dep-repo
+	    is_createrepo=`rpm -qa|grep createrepo|wc -l`
+	    if [[ $is_createrepo -gt 0 ]]; then
+		createrepo vsm-dep-repo
+	    fi
+	    rm -rf vsm-dependencies-$DEPENDENCE_BRANCH
+	    rm -rf $DEPENDENCE_BRANCH
+	fi
+else
+	if [ ! -d /opt/vsm-dep-repo ] && [ ! -d vsm-dep-repo ]; then
+	    if [ ! -f "$DEPENDENCE_BRANCH".zip ]; then
+		# this downloads both deb and rpm files
+	    	wget https://github.com/01org/vsm-dependencies/archive/"$DEPENDENCE_BRANCH".zip
+	    fi
+	    unzip "$DEPENDENCE_BRANCH".zip
+	    mv vsm-dependencies-$DEPENDENCE_BRANCH/ubuntu14 vsm-dep-repo
+	    #lets copy the vsm file to this repo also so that we can install them via apt-get
+	    #dpkg does not have localinstall
+            sudo cp vsmrepo/*.deb vsm-dep-repo
+            #ends
+	    is_createrepo=`which dpkg-scanpackages|wc -l`
+	    if [[ $is_createrepo -gt 0 ]]; then
+		cd vsm-dep-repo
+ 	        dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+		cd -
+	    fi
+	    rm -rf vsm-dependencies-$DEPENDENCE_BRANCH
+	    rm -rf $DEPENDENCE_BRANCH
+	fi
+	
 fi
 
 if [ $is_controller -eq 0 ]; then
-    $SSH $USER@$CONTROLLER_ADDRESS "rm -rf /opt/vsm-dep-repo"
-    $SCP -r vsm-dep-repo $USER@$CONTROLLER_ADDRESS:/opt
+    $SSH $USER@$CONTROLLER_ADDRESS "sudo rm -rf /opt/vsm-dep-repo"
+    $SCP -r vsm-dep-repo $USER@$CONTROLLER_ADDRESS:~
+    $SSH $USER@$CONTROLLER_ADDRESS "sudo mv ~/vsm-dep-repo /opt"
+
 else
     if [ -d vsm-dep-repo ]; then
-        rm -rf /opt/vsm-dep-repo
-        cp -rf vsm-dep-repo /opt
+        sudo rm -rf /opt/vsm-dep-repo
+        sudo cp -rf vsm-dep-repo /opt
+    else
+        sudo cp -rf vsm-dep-repo /opt
     fi
 fi
 
@@ -184,41 +229,94 @@ fi
 
 echo "+++++++++++++++start setting the repo+++++++++++++++"
 
-is_httpd=`rpm -qa|grep httpd|grep -v httpd-tools|wc -l`
-if [[ $is_httpd -gt 0 ]]; then
-    sed -i "s,#*Listen 80,Listen 80,g" /etc/httpd/conf/httpd.conf
-    service httpd restart
+
+if [ $distro_check -eq 0 ]; then
+
+	is_httpd=`rpm -qa|grep httpd|grep -v httpd-tools|wc -l`
+	if [[ $is_httpd -gt 0 ]]; then
+	    sudo sed -i "s,#*Listen 80,Listen 80,g" /etc/httpd/conf/httpd.conf
+	    sudo service httpd restart
+	fi
+else
+	is_httpd=`dpkg -l|grep apache2|wc -l`
+	if [[ $is_httpd -gt 0 ]]; then
+	    sudo sed -i "s,#*Listen 80,Listen 80,g" /etc/apache2/ports.conf
+	    sudo service apache2 restart
+	fi
+
 fi
+
+
+if [ $distro_check -eq 0 ]; then
 
 rm -rf vsm.repo
-cat <<"EOF" >vsm.repo
-[vsm-dep-repo]
-name=vsm-dep-repo
-baseurl=file:///opt/vsm-dep-repo
-gpgcheck=0
-enabled=1
-proxy=_none_
+        cat << 'EOF' > vsm.repo
+	[vsm-dep-repo]
+	name=vsm-dep-repo
+	baseurl=file:///opt/vsm-dep-repo
+	gpgcheck=0
+	enabled=1
+	proxy=_none_
 EOF
 
-oldurl="file:///opt/vsm-dep-repo"
-newurl="http://$CONTROLLER_ADDRESS/vsm-dep-repo"
-if [ $is_controller -eq 0 ]; then
-    $SCP vsm.repo $USER@$CONTROLLER_ADDRESS:/etc/yum.repos.d
-    $SSH $USER@$CONTROLLER_ADDRESS "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html"
-    $SSH $USER@$CONTROLLER_ADDRESS "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
+
 else
-    cp vsm.repo /etc/yum.repos.d
-    yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html
-    sed -i "s,$oldurl,$newurl,g" /etc/yum.repos.d/vsm.repo
-    yum makecache
+	rm -rf vsm.list
+	cat <<EOF > vsm.list
+	deb file:/opt/vsm-dep-repo ./
+EOF
 fi
 
-sed -i "s,$oldurl,$newurl,g" vsm.repo
+if [ $distro_check -eq 0 ]; then
+
+	oldurl="file:///opt/vsm-dep-repo"
+	newurl="http://$CONTROLLER_ADDRESS/vsm-dep-repo"
+	if [ $is_controller -eq 0 ]; then
+	    $SCP vsm.repo $USER@$CONTROLLER_ADDRESS:/etc/yum.repos.d
+	    $SSH $USER@$CONTROLLER_ADDRESS "yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html"
+	    $SSH $USER@$CONTROLLER_ADDRESS "sed -i \"s,$oldurl,$newurl,g\" /etc/yum.repos.d/vsm.repo; yum makecache"
+	else
+	    cp vsm.repo /etc/yum.repos.d
+	    yum makecache; yum -y install httpd; service httpd restart; rm -rf /var/www/html/vsm-dep-repo; cp -rf /opt/vsm-dep-repo /var/www/html
+	    sed -i "s,$oldurl,$newurl,g" /etc/yum.repos.d/vsm.repo
+	    yum makecache
+	fi
+else
+	oldurl="file:/opt/vsm-dep-repo"
+	newurl="http://$CONTROLLER_ADDRESS/vsm-dep-repo"
+	if [ $is_controller -eq 0 ]; then
+            $SCP vsm.list $USER@$CONTROLLER_ADDRESS:~
+	    $SSH $USER@$CONTROLLER_ADDRESS "sudo mv ~/vsm.list /etc/apt/sources.list.d"
+            $SSH $USER@$CONTROLLER_ADDRESS "sudo apt-get update; sudo apt-get -y install apache2 libapache2-mod-wsgi; sudo service apache2 restart; sudo rm -rf /var/www/html/vsm-dep-repo; sudo cp -rf /opt/vsm-dep-repo /var/www/html"
+            $SSH $USER@$CONTROLLER_ADDRESS "sudo sed -i \"s,$oldurl,$newurl,g\" /etc/apt/sources.list.d/vsm.list; sudo apt-get update"
+	else
+	    sudo cp vsm.list /etc/apt/sources.list.d
+            sudo apt-get update; sudo apt-get -y install apache2 libapache2-mod-wsgi; sudo service apache2 restart; sudo rm -rf /var/www/html/vsm-dep-repo; sudo cp -rf /opt/vsm-dep-repo /var/www/html
+            sudo sed -i "s,$oldurl,$newurl,g" /etc/apt/sources.list.d/vsm.list
+            sudo apt-get update
+	fi
+
+fi
+
+sed -i "s,$oldurl,$newurl,g" vsm.list
 
 function set_repo() {
-    $SSH $USER@$1 "rm -rf /etc/yum.repos.d/vsm.repo"
-    $SCP vsm.repo $USER@$1:/etc/yum.repos.d
-    $SSH $USER@$1 "yum makecache"
+    if [ $distro_check -eq 0 ]; then
+	    $SSH $USER@$1 "rm -rf /etc/yum.repos.d/vsm.repo"
+	    $SCP vsm.repo $USER@$1:/etc/yum.repos.d
+	    $SSH $USER@$1 "yum makecache"
+    else
+
+	   # se the ceph repo so that the dependencies like python-rb and others will be installed from the repo
+	    $SSH $USER@$1 "sudo apt-get purge -y ceph ceph-mds librbd1 rbd-fuse; sudo apt-get autoremove -y"
+	    $SSH $USER@$1 "wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -"
+	    $SSH $USER@$1 "sudo apt-add-repository 'deb http://download.ceph.com/debian-hammer/ trusty main'"
+	
+	    $SSH $USER@$1 "sudo rm -rf /etc/apt/sources.list.d/vsm.list"
+            $SCP vsm.list $USER@$1:~
+	    $SSH  $USER@$1 "sudo mv ~/vsm.list /etc/apt/sources.list.d"
+            $SSH $USER@$1 "sudo apt-get update"
+    fi
 }
 
 for ip in $AGENT_ADDRESS_LIST; do
@@ -235,26 +333,72 @@ echo "+++++++++++++++finish setting the repo+++++++++++++++"
 echo "+++++++++++++++install vsm rpm and dependences+++++++++++++++"
 
 function install_vsm_controller() {
-    $SSH $USER@$1 "mkdir -p /opt/vsm_install"
-    $SCP vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm $USER@$1:/opt/vsm_install
-    $SSH $USER@$1 "cd /opt/vsm_install; yum -y localinstall python-vsmclient*.rpm vsm*.rpm"
-    $SSH $USER@$1 "preinstall"
-    $SSH $USER@$1 "cd /opt; rm -rf /opt/vsm_install"
+    if [ $distro_check -eq 0 ]; then
+	    $SSH $USER@$1 "mkdir -p /opt/vsm_install"
+	    $SCP vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm $USER@$1:/opt/vsm_install
+	    $SSH $USER@$1 "cd /opt/vsm_install; yum -y localinstall python-vsmclient*.rpm vsm*.rpm"
+	    $SSH $USER@$1 "sudo preinstall"
+	    $SSH $USER@$1 "cd /opt; rm -rf /opt/vsm_install"
+    else
+	    $SSH $USER@$1 "sudo sudo mkdir -p /opt/vsm_install"
+	    $SCP vsmrepo/python-vsmclient*.deb vsmrepo/vsm*.deb $USER@$1:~
+            $SSH $USER@$1 "sudo mv ~/vsmrepo/python-vsmclient*.deb ~/vsmrepo/vsm*.deb /opt/vsm_install"
+	    #$SSH $USER@$1 "cd /opt/vsm_install; sudo dpkg -i python-vsmclient*.deb vsm*.deb"
+	    $SSH $USER@$1 "cd /opt/vsm_install; sudo apt-get install -y --force-yes python-vsmclient vsm vsm-dashboard vsm-deploy"
+	    #patch required to fix the unsigned package installation
+	    $SSH $USER@$1 "wget https://github.com/oguzy/virtual-storage-manager/raw/master/preinstall.patch -O /tmp/preinstall.patch"
+	    $SSH $USER@$1 "sudo patch /usr/local/bin/preinstall < /tmp/preinstall.patch"
+	    $SSH $USER@$1 "rm /tmp/preinstall.patch"
+	    $SSH $USER@$1 "sudo preinstall"
+	    $SSH $USER@$1 "cd /opt; sudo rm -rf /opt/vsm_install"
+	    
+    fi
 }
 
 function install_vsm_storage() {
-    $SSH $USER@$1 "mkdir -p /opt/vsm_install"
-    $SCP vsmrepo/vsm*.rpm $USER@$1:/opt/vsm_install
-    $SSH $USER@$1 "cd /opt/vsm_install; rm -rf vsm-dashboard*; yum -y localinstall vsm*.rpm"
-    $SSH $USER@$1 "preinstall"
-    $SSH $USER@$1 "cd /opt; rm -rf /opt/vsm_install"
+    if [ $distro_check -eq 0 ]; then
+	    $SSH $USER@$1 "mkdir -p /opt/vsm_install"
+	    $SCP vsmrepo/vsm*.rpm $USER@$1:/opt/vsm_install
+	    $SSH $USER@$1 "cd /opt/vsm_install; rm -rf vsm-dashboard*; yum -y localinstall vsm*.rpm"
+	    $SSH $USER@$1 "sudo preinstall"
+	    $SSH $USER@$1 "cd /opt; rm -rf /opt/vsm_install"
+    else
+	    $SSH $USER@$1 "sudo mkdir -p /opt/vsm_install"
+	    #$SCP vsmrepo/vsm*.deb $USER@$1:/opt/vsm_install
+	    $SCP vsmrepo/vsm*.deb $USER@$1:~
+	    $SSH $USER@$1 "sudo mv ~/vsm*.deb /opt/vsm_install"
+	    #$SSH $USER@$1 "cd /opt/vsm_install; sudo rm -rf vsm-dashboard*; sudo dpkg -i vsm*.deb"
+	    $SSH $USER@$1 "cd /opt/vsm_install; sudo rm -rf vsm-dashboard; sudo apt-get -y --force-yes install vsm vsm-deploy"
+	    #patch required to fix the unsigned package installation
+	    $SSH $USER@$1 "wget https://github.com/oguzy/virtual-storage-manager/raw/master/preinstall.patch -O /tmp/preinstall.patch"
+	    $SSH $USER@$1 "sudo patch /usr/local/bin/preinstall < /tmp/preinstall.patch"
+	    $SSH $USER@$1 "rm /tmp/preinstall.patch"
+	    $SSH $USER@$1 "sudo preinstall agent"
+	    $SSH $USER@$1 "cd /opt; sudo rm -rf /opt/vsm_install"
+    fi
 }
 
-if [ $is_controller -eq 0 ]; then
-    install_vsm_controller $CONTROLLER_ADDRESS
+if [ $distro_check -eq 0 ]; then
+
+	if [ $is_controller -eq 0 ]; then
+	    install_vsm_controller $CONTROLLER_ADDRESS
+	else
+	    yum -y localinstall vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm
+	    preinstall
+	fi
+
 else
-    yum -y localinstall vsmrepo/python-vsmclient*.rpm vsmrepo/vsm*.rpm
-    preinstall
+	if [ $is_controller -eq 0 ]; then
+	    install_vsm_controller $CONTROLLER_ADDRESS
+	else
+	    #sudo dpkg -i  vsmrepo/python-vsmclient*.deb vsmrepo/vsm*.deb
+	    sudo apt-get -y --force-yes install python-vsmclient vsm vsm-dashboard vsm-deploy
+	    #patch required to fix the unsigned package installation
+	    wget https://github.com/oguzy/virtual-storage-manager/raw/master/preinstall.patch -O /tmp/preinstall.patch
+	    sudo patch /usr/local/bin/preinstall < /tmp/preinstall.patch
+	    rm /tmp/preinstall.patch
+	    sudo preinstall
+	fi
 fi
 
 for ip in $AGENT_ADDRESS_LIST; do
@@ -273,30 +417,32 @@ if [ -z $MANIFEST_PATH ]; then
 fi
 
 function setup_controller() {
-    $SSH $USER@$CONTROLLER_ADDRESS "rm -rf /etc/manifest/cluster_manifest"
-    $SCP $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest $USER@$CONTROLLER_ADDRESS:/etc/manifest
-    $SSH $USER@$CONTROLLER_ADDRESS "chown root:vsm /etc/manifest/cluster.manifest; chmod 755 /etc/manifest/cluster.manifest"
-    is_cluster_manifest_error=`$SSH $USER@$CONTROLLER_ADDRESS "cluster_manifest|grep error|wc -l"`
+    $SSH $USER@$CONTROLLER_ADDRESS "sudo rm -rf /etc/manifest/cluster_manifest"
+    #$SCP $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest $USER@$CONTROLLER_ADDRESS:/etc/manifest
+    $SCP $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest $USER@$CONTROLLER_ADDRESS:~
+    $SSH $USER@$CONTROLLER_ADDRESS "sudo mv ~/cluser.manifest /etc/manifest"
+    $SSH $USER@$CONTROLLER_ADDRESS "sudo chown root:vsm /etc/manifest/cluster.manifest; sudo chmod 755 /etc/manifest/cluster.manifest"
+    is_cluster_manifest_error=`$SSH $USER@$CONTROLLER_ADDRESS "sudo cluster_manifest|grep error|wc -l"`
     if [ $is_cluster_manifest_error -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        $SSH $USER@$CONTROLLER_ADDRESS "vsm-controller"
+        $SSH $USER@$CONTROLLER_ADDRESS "sudo vsm-controller"
     fi
 }
 
 if [ $is_controller -eq 0 ]; then
     setup_controller
 else
-    rm -rf /etc/manifest/cluster.manifest
-    cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
-    chown root:vsm /etc/manifest/cluster.manifest
-    chmod 755 /etc/manifest/cluster.manifest
-    if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
+    sudo rm -rf /etc/manifest/cluster.manifest
+    sudo cp $MANIFEST_PATH/$CONTROLLER_ADDRESS/cluster.manifest /etc/manifest
+    sudo chown root:vsm /etc/manifest/cluster.manifest
+    sudo chmod 755 /etc/manifest/cluster.manifest
+    if [ `sudo cluster_manifest|grep error|wc -l` -gt 0 ]; then
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
-        vsm-controller
+        sudo vsm-controller
     fi
 fi
 
@@ -354,5 +500,3 @@ echo "Successful storage node ip: $success"
 echo "Failure storage node ip: $failure"
 
 set +o xtrace
-
-

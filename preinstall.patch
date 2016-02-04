@@ -1,0 +1,23 @@
+--- /usr/local/bin/preinstall	2016-05-09 13:38:29.523150210 +0300
++++ preinstall	2016-05-09 13:39:21.026657856 +0300
+@@ -3,11 +3,11 @@
+ function preinstall_controller() {
+     debconf-set-selections <<< 'maria-db-server mysql-server/root_password password root'
+     debconf-set-selections <<< 'maria-db-server mysql-server/root_password_again password root'
+-    apt-get install -y ceph ceph-mds apache2 libapache2-mod-wsgi librbd1 mariadb-server memcached ntp openssh-server openssl keystone rabbitmq-server rbd-fuse expect  smartmontools
++    apt-get install -y --force-yes ceph ceph-mds apache2 libapache2-mod-wsgi librbd1 mariadb-server memcached ntp openssh-server openssl keystone rabbitmq-server rbd-fuse expect  smartmontools
+ }
+ 
+ function preinstall_agent() {
+-    apt-get install -y ceph ceph-mds librbd1 rbd-fuse ntp openssh-server python-keystoneclient smartmontools expect
++    apt-get install -y --force-yes ceph ceph-mds librbd1 rbd-fuse ntp openssh-server python-keystoneclient smartmontools expect
+ }
+ 
+ if [[ $1 ]]; then
+@@ -18,4 +18,4 @@
+     fi
+ else
+     preinstall_controller
+-fi
+\ No newline at end of file
++fi
