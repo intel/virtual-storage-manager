@@ -233,7 +233,7 @@ def _check_cluster_exist(cs):
            help='The ssh user to connect openstack keystone node.')
 @utils.service_type('vsm')
 def do_appnode_create(cs, args):
-    """\033[1;32;40mCreates an appnode.\033[0m"""
+    """Creates an appnode."""
     appnode = {
         'os_username': args.vsm_os_username,
         'os_password': args.vsm_os_password,
@@ -250,7 +250,7 @@ def do_appnode_create(cs, args):
 
 @utils.service_type('vsm')
 def do_appnode_list(cs, args):
-    """\033[1;32;40mLists all appnodes.\033[0m"""
+    """Lists all appnodes."""
     appnodes = cs.appnodes.list(detailed=False, search_opts=None)
     columns = ["ID", "VSMApp ID", "SSH Status", "SSH User", "OS UserName",
                "OS Password", "OS Tenant Name", "OS Auth Url", "OS Region Name",
@@ -262,7 +262,7 @@ def do_appnode_list(cs, args):
            help='ID of appnode.')
 @utils.service_type('vsm')
 def do_appnode_delete(cs, args):
-    """\033[1;32;40mDeletes an appnode by id.\033[0m"""
+    """Deletes an appnode by id."""
     appnode = _find_appnode(cs, args.id)
     try:
         cs.appnodes.delete(appnode)
@@ -294,7 +294,7 @@ def do_appnode_delete(cs, args):
            help='The ssh user to connect openstack keystone node.')
 @utils.service_type('vsm')
 def do_appnode_update(cs, args):
-    """\033[1;32;40mUpdates an appnode by id.\033[0m"""
+    """Updates an appnode by id."""
     appnode = _find_appnode(cs, args.id)
     vsm_os_username = args.vsm_os_username or appnode.os_username
     vsm_os_password = args.vsm_os_password or appnode.os_password
@@ -370,7 +370,7 @@ def do_appnode_update(cs, args):
                 'Boolean value is True or False[Default=True].')
 @utils.service_type('vsm')
 def do_cluster_create(cs, args):
-    """\033[1;32;40mCreates a cluster.\033[0m"""
+    """Creates a cluster."""
     servers_list = []
     servers = args.servers
     id_list = []
@@ -401,13 +401,13 @@ def do_cluster_create(cs, args):
            help='Name or ID of cluster.')
 @utils.service_type('vsm')
 def do_cluster_show(cs, args):
-    """\033[1;32;40mShows details info of a cluster.\033[0m"""
+    """Shows details info of a cluster."""
     cluster = _find_cluster(cs, args.cluster)
     _print_cluster(cluster)
 
 @utils.service_type('vsm')
 def do_cluster_list(cs, args):
-    """\033[1;32;40mLists all clusters.\033[0m"""
+    """Lists all clusters."""
     clusters = cs.clusters.list(detailed=False, search_opts=None)
     columns = ["ID", "Name", "Size", "File System"]
     utils.print_list(clusters, columns)
@@ -426,26 +426,32 @@ def do_cluster_list(cs, args):
 
 @utils.service_type('vsm')
 def do_cluster_summary(cs, args):
-    """\033[1;32;40mGets summary info of a cluster.\033[0m"""
+    """Gets summary info of a cluster."""
     cluster_summary = cs.clusters.summary()
     _print_cluster(cluster_summary)
 
 # TODO not very good, should use service api to get service info
 @utils.service_type('vsm')
 def do_cluster_service_list(cs, args):
-    """\033[1;32;40mLists all cluster services.\033[0m"""
+    """Lists all cluster services."""
     services = cs.clusters.get_service_list()
     columns = ["ID", "Binary", "Host", "Disabled", "Updated at"]
     utils.print_list(services, columns)
 
+@utils.arg('--really-refresh',
+           action='store_true',
+           help='Really refresh the cluster status. Default=False.')
 @utils.service_type('vsm')
 def do_cluster_refresh(cs, args):
-    """\033[1;32;40mRefreshes cluster status.\033[0m"""
-    try:
-        cs.clusters.refresh()
-        print("Succeed to refresh cluster status.")
-    except:
-        raise exceptions.CommandError("Failed to refresh cluster status.")
+    """Refreshes cluster status."""
+    if args.really_refresh:
+        try:
+            cs.clusters.refresh()
+            print("Succeed to refresh cluster status.")
+        except:
+            raise exceptions.CommandError("Failed to refresh cluster status.")
+    else:
+        print("Follow with --really-refresh, if you really want to refresh the cluster status.")
 
 # @utils.service_type('vsm')
 # def do_cluster_import_ceph_conf(cs, args):
@@ -464,7 +470,7 @@ def do_cluster_refresh(cs, args):
            help='ID of cluster.')
 @utils.service_type('vsm')
 def do_cluster_stop(cs, args):
-    """\033[1;32;40mStops ceph cluster.\033[0m"""
+    """Stops ceph cluster."""
     try:
         cs.clusters.stop_cluster(args.id)
         print("Succeed to stop cluster.")
@@ -477,7 +483,7 @@ def do_cluster_stop(cs, args):
            help='ID of cluster.')
 @utils.service_type('vsm')
 def do_cluster_start(cs, args):
-    """\033[1;32;40mStarts ceph cluster.\033[0m"""
+    """Starts ceph cluster."""
     try:
         cs.clusters.start_cluster(args.id)
         print("Succeed to start cluster.")
@@ -488,13 +494,13 @@ def do_cluster_start(cs, args):
 ####################device#########################
 # @utils.service_type('vsm')
 # def do_device_show(cs, args):
-#     """\033[1;32;40mShows details info of a device.\033[0m"""
+#     """Shows details info of a device."""
 #     _is_developing("device-show",
 #                    "Shows details info of a device.")
 
 @utils.service_type('vsm')
 def do_device_list(cs, args):
-    """\033[1;32;40mLists all devices.\033[0m"""
+    """Lists all devices."""
     devices = cs.devices.list(detailed=False, search_opts=None)
     columns = ["ID", "Name", "Path", "Journal", "Device Type", "Used_Capacity_KB",
                "Avail_Capacity_KB", "Total_Capacity_KB", "State", "Journal State"]
@@ -505,7 +511,7 @@ def do_device_list(cs, args):
            help='ID of server.')
 @utils.service_type('vsm')
 def do_device_list_available_disks(cs, args):
-    """\033[1;32;40mLists available disks.\033[0m"""
+    """Lists available disks."""
     search_opts = {
         'server_id': args.server_id,
         'result_mode': 'get_disks'
@@ -523,7 +529,7 @@ def do_device_list_available_disks(cs, args):
            help='Path of device.')
 @utils.service_type('vsm')
 def do_device_show_smart_info(cs, args):
-    """\033[1;32;40mShows smart info of a device.\033[0m"""
+    """Shows smart info of a device."""
     search_opts = {
         'device_id': args.device_id,
         'device_path': args.device_path
@@ -538,13 +544,13 @@ def do_device_show_smart_info(cs, args):
            help='Name or ID of mds.')
 @utils.service_type('vsm')
 def do_mds_show(cs, args):
-    """\033[1;32;40mShows details info of a mds.\033[0m"""
+    """Shows details info of a mds."""
     mds = _find_mds(cs, args.mds)
     _print_mds(mds)
 
 @utils.service_type('vsm')
 def do_mds_list(cs, args):
-    """\033[1;32;40mLists all mdses.\033[0m"""
+    """Lists all mdses."""
     mdses = cs.mdses.list(detailed=False, search_opts=None)
     columns = ["ID", "GID", "Name", "State", "Address", "Updated_at"]
     utils.print_list(mdses, columns)
@@ -554,7 +560,7 @@ def do_mds_list(cs, args):
 #            help='Name or ID of mds.')
 # @utils.service_type('vsm')
 # def do_mds_restart(cs, args):
-#     """\033[1;32;40mRestarts mds.\033[0m"""
+#     """Restarts mds."""
 #     mds = utils.find_mds(cs, args.mds)
 #     resp, body = cs.mdses.restart(mds)
 #     code = resp.status_code
@@ -575,7 +581,7 @@ def do_mds_list(cs, args):
 
 @utils.service_type('vsm')
 def do_mds_summary(cs, args):
-    """\033[1;32;40mGets summary info of mds.\033[0m"""
+    """Gets summary info of mds."""
     mds_summary = cs.mdses.summary()
     _print_mds(mds_summary)
 
@@ -586,20 +592,20 @@ def do_mds_summary(cs, args):
            help='Name or ID of mon.')
 @utils.service_type('vsm')
 def do_mon_show(cs, args):
-    """\033[1;32;40mShows details info of a mon.\033[0m"""
+    """Shows details info of a mon."""
     mon = _find_mon(cs, args.mon)
     _print_mon(mon)
 
 @utils.service_type('vsm')
 def do_mon_list(cs, args):
-    """\033[1;32;40mLists all mons.\033[0m"""
+    """Lists all mons."""
     mons = cs.monitors.list(detailed=False, search_opts=None)
     columns = ["ID", "Name", "Address", "Health", "Details"]
     utils.print_list(mons, columns)
 
 @utils.service_type('vsm')
 def do_mon_summary(cs, args):
-    """\033[1;32;40mGets summary info of mon.\033[0m"""
+    """Gets summary info of mon."""
     mon_summary = cs.monitors.summary()
     _print_mon(mon_summary)
 
@@ -608,7 +614,7 @@ def do_mon_summary(cs, args):
            help='Name or ID of mon.')
 @utils.service_type('vsm')
 def do_mon_restart(cs, args):
-    """\033[1;32;40mRestarts a mon by id.\033[0m"""
+    """Restarts a mon by id."""
     mon = _find_mon(cs, args.mon)
     try:
         cs.monitors.restart(mon)
@@ -623,15 +629,15 @@ def do_mon_restart(cs, args):
            help='Name or ID of osd.')
 @utils.service_type('vsm')
 def do_osd_show(cs, args):
-    """\033[1;32;40mShows details info of an osd.\033[0m"""
+    """Shows details info of an osd."""
     osd = _find_osd(cs, args.osd)
     _print_osd(osd)
 
 @utils.service_type('vsm')
 def do_osd_list(cs, args):
-    """\033[1;32;40mLists all osds.\033[0m"""
+    """Lists all osds."""
     osds = cs.osds.list(detailed=False, search_opts=None, paginate_opts=None)
-    columns = ["ID", "OSD Name", "Weight", "State", "Operation Statue",
+    columns = ["ID", "OSD Name", "Weight", "State", "Operation Status",
                "Device ID", "Service ID", "Updated_at"]
     utils.print_list(osds, columns)
 
@@ -640,7 +646,7 @@ def do_osd_list(cs, args):
            help='Name or ID of osd.')
 @utils.service_type('vsm')
 def do_osd_restart(cs, args):
-    """\033[1;32;40mRestarts an osd by id.\033[0m"""
+    """Restarts an osd by id."""
     osd = _find_osd(cs, args.osd)
     try:
         cs.osds.restart(osd)
@@ -653,7 +659,7 @@ def do_osd_restart(cs, args):
            help='Name or ID of osd.')
 @utils.service_type('vsm')
 def do_osd_remove(cs, args):
-    """\033[1;32;40mRemoves an osd by id.\033[0m"""
+    """Removes an osd by id."""
     osd = _find_osd(cs, args.osd)
     try:
         cs.osds.remove(osd)
@@ -679,7 +685,7 @@ def do_osd_remove(cs, args):
            help='Data path.')
 @utils.service_type('vsm')
 def do_osd_add_new(cs, args):
-    """\033[1;32;40mAdds new osd to ceph cluster.\033[0m"""
+    """Adds new osd to ceph cluster."""
     body = {
         'server_id': args.server_id,
         'osd_info': [
@@ -702,7 +708,7 @@ def do_osd_add_new(cs, args):
            help='Name or ID of osd.')
 @utils.service_type('vsm')
 def do_osd_restore(cs, args):
-    """\033[1;32;40mRestores an osd.\033[0m"""
+    """Restores an osd."""
     osd = _find_osd(cs, args.osd)
     try:
         cs.osds.restore(osd)
@@ -713,7 +719,7 @@ def do_osd_restore(cs, args):
 
 @utils.service_type('vsm')
 def do_osd_refresh(cs, args):
-    """\033[1;32;40mRefreshes osd.\033[0m"""
+    """Refreshes osd."""
     try:
         cs.osds.refresh()
         print("Succeed to refresh osd status.")
@@ -722,7 +728,7 @@ def do_osd_refresh(cs, args):
 
 @utils.service_type('vsm')
 def do_osd_summary(cs, args):
-    """\033[1;32;40mGets summary info of osd.\033[0m"""
+    """Gets summary info of osd."""
     osd_summary = cs.osds.summary()
     _print_osd(osd_summary)
 
@@ -741,20 +747,20 @@ def do_osd_summary(cs, args):
            help='Name or ID of pg.')
 @utils.service_type('vsm')
 def do_pg_show(cs, args):
-    """\033[1;32;40mShows details info of a placement group.\033[0m"""
+    """Shows details info of a placement group."""
     pg = _find_pg(cs, args.pg)
     _print_pg(pg)
 
 @utils.service_type('vsm')
 def do_pg_list(cs, args):
-    """\033[1;32;40mLists all placement groups.\033[0m"""
+    """Lists all placement groups."""
     pgs = cs.placement_groups.list(detailed=False, search_opts=None, paginate_opts=None)
     columns = ["ID", "PG ID", "State", "UP", "Acting"]
     utils.print_list(pgs, columns)
 
 @utils.service_type('vsm')
 def do_pg_summary(cs, args):
-    """\033[1;32;40mGets summary info of placement group.\033[0m"""
+    """Gets summary info of placement group."""
     pg_summary = cs.placement_groups.summary()
     _print_pg(pg_summary)
 
@@ -762,13 +768,13 @@ def do_pg_summary(cs, args):
 ###################pool usage##########################
 @utils.service_type('vsm')
 def do_pool_usage_create(cs, args):
-    """Creates pool usage."""
+    """\033[1;31;40mCreates pool usage.\033[0m"""
     _is_developing("pool-usage-create",
                    "Creates pool usage.")
 
 @utils.service_type('vsm')
 def do_pool_usage_list(cs, args):
-    """\033[1;32;40mLists all pool usages.\033[0m"""
+    """Lists all pool usages."""
     pool_usages = cs.pool_usages.list(detailed=False, search_opts=None)
     columns = ["ID", "Pool ID", "VSMApp ID", "Cinder Volume Host", "Attach Status",
                "Attach_at"]
@@ -781,20 +787,20 @@ def do_pool_usage_list(cs, args):
            help='Name or ID of rbd.')
 @utils.service_type('vsm')
 def do_rbd_pool_show(cs, args):
-    """\033[1;32;40mShows details info of rbd pool.\033[0m"""
+    """Shows details info of rbd pool."""
     rbd = _find_rbd(cs, args.rbd)
     _print_rbd(rbd)
 
 @utils.service_type('vsm')
 def do_rbd_pool_list(cs, args):
-    """\033[1;32;40mLists all rbd pools.\033[0m"""
+    """Lists all rbd pools."""
     rbds = cs.rbd_pools.list(detailed=False, search_opts=None, paginate_opts=None)
     columns = ["ID"]
     utils.print_list(rbds, columns)
 
 @utils.service_type('vsm')
 def do_rbd_pool_summary(cs, args):
-    """\033[1;32;40mGets summary info of rbd pool.\033[0m"""
+    """Gets summary info of rbd pool."""
     rbd_summary = cs.rbd_pools.summary()
     _print_rbd(rbd_summary)
 
@@ -805,13 +811,13 @@ def do_rbd_pool_summary(cs, args):
            help='Name or ID of server.')
 @utils.service_type('vsm')
 def do_server_show(cs, args):
-    """\033[1;32;40mShows details info of server.\033[0m"""
+    """Shows details info of server."""
     server = _find_server(cs, args.server)
     _print_server(server)
 
 @utils.service_type('vsm')
 def do_server_list(cs, args):
-    """\033[1;32;40mLists all servers.\033[0m"""
+    """Lists all servers."""
     result = cs.servers.list()
     columns = ["ID", "HOST", "Type", "Zone ID", "Service ID",
                "Cluster IP", "Secondary Public IP", "Primary Public IP",
@@ -820,7 +826,7 @@ def do_server_list(cs, args):
 
 @utils.service_type('vsm')
 def do_server_add(cs, args):
-    """Adds a new server."""
+    """\033[1;31;40mAdds a new server.\033[0m"""
     _is_developing("server-add",
                    "Adds a new server.")
 
@@ -831,7 +837,7 @@ def do_server_add(cs, args):
            help='ID of server.')
 @utils.service_type('vsm')
 def do_server_remove(cs, args):
-    """\033[1;32;40mRemoves a server.\033[0m"""
+    """Removes a server."""
     remove_storage = True
     remove_monitor = True
     cluster_id = 1
@@ -856,7 +862,7 @@ def do_server_remove(cs, args):
            help='ID of server.')
 @utils.service_type('vsm')
 def do_server_start(cs, args):
-    """\033[1;32;40mStarts a server.\033[0m"""
+    """Starts a server."""
     cluster_id = 1
     servers = []
     for id in args.id:
@@ -877,7 +883,7 @@ def do_server_start(cs, args):
            help='ID of server.')
 @utils.service_type('vsm')
 def do_server_stop(cs, args):
-    """\033[1;32;40mStops a server.\033[0m"""
+    """Stops a server."""
     cluster_id = 1
     servers = []
     for id in args.id:
@@ -905,18 +911,18 @@ def do_server_stop(cs, args):
 #     _is_developing("storage-group-create",
 #                    "Creates storage group.")
 
-@utils.arg('storage-group',
-           metavar='<storage-group>',
-           help='Name or ID of storage group.')
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of storage group.')
 @utils.service_type('vsm')
 def do_storage_group_show(cs, args):
-    """\033[1;32;40mShows detail info of storage group.\033[0m"""
-    storage_group = _find_storage_group(cs, args.storage_group)
+    """Shows detail info of storage group."""
+    storage_group = _find_storage_group(cs, args.id)
     _print_storage_group(storage_group)
 
 @utils.service_type('vsm')
 def do_storage_group_list(cs, args):
-    """\033[1;32;40mLists all storage groups.\033[0m"""
+    """Lists all storage groups."""
     storage_groups = cs.storage_groups.list(detailed=True, search_opts=None)
     columns = ["ID", "Name", "Storage Class", "Attached OSDs", "Rule ID",
                "Status", "Capacity Used", "Capacity Total"]
@@ -924,7 +930,7 @@ def do_storage_group_list(cs, args):
 
 @utils.service_type('vsm')
 def do_storage_group_summary(cs, args):
-    """\033[1;32;40mGets summary info of storage group.\033[0m"""
+    """Gets summary info of storage group."""
     storage_group_summary = cs.storage_groups.summary()
     _print_storage_group(storage_group_summary)
 
@@ -935,13 +941,129 @@ def do_storage_group_summary(cs, args):
            help='Name or ID of storage pool.')
 @utils.service_type('vsm')
 def do_storage_pool_show(cs, args):
-    """\033[1;32;40mShows details info of storage pool.\033[0m"""
+    """Shows details info of storage pool."""
     storage_pool = _find_storage_pool(cs, args.storage_pool)
     _print_storage_pool(storage_pool)
 
+@utils.arg('name',
+           metavar='<name>',
+           help='Name of storage pool.')
+@utils.arg('--storage-group-id',
+           metavar='<storage-group-id>',
+           help='ID of storage group.')
+@utils.arg('--pg-num',
+           metavar='<pg-num>',
+           help='Placement group number.')
+@utils.arg('--pool-quota',
+           metavar='<pool-quota>',
+           default=0,
+           help='Pool quota. Default=0')
+@utils.arg('--cluster-id',
+           metavar='<cluster-id>',
+           default=0,
+           help='Pool quota. Default=0')
+@utils.arg('--tag',
+           metavar='<tag>',
+           default="",
+           help='Tag. Default=Name of pool.')
+@utils.service_type('vsm')
+def do_storage_pool_replicated_create(cs, args):
+    """Creates replicated pool."""
+    storage_group = _find_storage_group(cs, args.storage_group_id)
+    tag = args.tag
+    pool_name = args.name
+    if not tag:
+        tag = pool_name
+    pool_quota = args.pool_quota
+    if pool_quota:
+        enable_pool_quota = True
+    else:
+        enable_pool_quota = False
+    pool = {
+        "pool": {
+            "name": pool_name,
+            "storageGroupId": args.storage_group_id,
+            "storageGroupName": storage_group.name,
+            "auto_growth_pg": args.pg_num,
+            "enablePoolQuota": enable_pool_quota,
+            "poolQuota": pool_quota,
+            "clusterId": args.cluster_id,
+            "replicatedStorageGroupId": "replica",
+            "tag": tag,
+            "createdBy": "VSM"
+        }
+    }
+    try:
+        cs.vsms.create_storage_pool(pool)
+        print("Succeed to create replicated storage pool.")
+    except:
+        raise exceptions.CommandError("Failed to create replicated storage pool.")
+
+@utils.arg('name',
+           metavar='<name>',
+           help='Name of storage pool.')
+@utils.arg('--storage-group-id',
+           metavar='<storage-group-id>',
+           help='ID of storage group.')
+@utils.arg('--ec-failure-domain',
+           metavar='<ec-failure-domain>',
+           help='EC failure domain[osd, host or zone].')
+@utils.arg('--pool-quota',
+           metavar='<pool-quota>',
+           default=0,
+           help='Pool quota. Default=0')
+@utils.arg('--cluster-id',
+           metavar='<cluster-id>',
+           default=0,
+           help='Pool quota. Default=0')
+@utils.arg('--tag',
+           metavar='<tag>',
+           default="",
+           help='Tag. Default=Name of pool.')
+@utils.arg('--ec-profile-id',
+           metavar='<ec-profile-id>',
+           default=1,
+           help='Tag. Default=1.')
+@utils.service_type('vsm')
+def do_storage_pool_ec_create(cs, args):
+    """Creates ec pool."""
+    storage_group = _find_storage_group(cs, args.storage_group_id)
+    tag = args.tag
+    pool_name = args.name
+    if not tag:
+        tag = pool_name
+    pool_quota = args.pool_quota
+    if pool_quota:
+        enable_pool_quota = True
+    else:
+        enable_pool_quota = False
+    EC_FAILURE_DOMAIN = ['osd', 'host', 'zone']
+    ec_failure_domain = args.ec_failure_domain
+    if ec_failure_domain not in EC_FAILURE_DOMAIN:
+        raise exceptions.CommandError("--ec-failure-domain should be on of osd, host or zone")
+    pool = {
+        "pool": {
+            "name": pool_name,
+            "storageGroupId": args.storage_group_id,
+            "storageGroupName": storage_group.name,
+            "tag": tag,
+            "clusterId": args.cluster_id,
+            "createdBy": "VSM",
+            "ecProfileId": args.ec_profile_id,
+            "ecFailureDomain": ec_failure_domain,
+            "enablePoolQuota": enable_pool_quota,
+            "poolQuota": pool_quota
+        }
+    }
+    try:
+        cs.vsms.create_storage_pool(pool)
+        print("Succeed to create ec storage pool.")
+    except:
+        raise exceptions.CommandError("Failed to create ec storage pool.")
+
 @utils.service_type('vsm')
 def do_storage_pool_list(cs, args):
-    """\033[1;32;40mLists all storage pools.\033[0m"""
+    """Lists all storage pools."""
     storage_pools = cs.storage_pools.list(detailed=True, search_opts=None)
     _translate_storage_pool_keys(storage_pools)
     columns = ["ID", "Name", "Pool ID", "PG Num", "PGP Num", "Cluster ID", "Status",
@@ -950,10 +1072,10 @@ def do_storage_pool_list(cs, args):
 
 @utils.arg('--storage-pool-id',
            metavar='<storage-pool-id>',
-           help='ID of storage pool as the storage pool of cache tier pool.')
+           help='Pool id of storage pool as the storage pool of cache tier pool.')
 @utils.arg('--cache-pool-id',
            metavar='<cache-pool-id>',
-           help='ID of storage pool as the cache pool of cache tier pool.')
+           help='Pool id of storage pool as the cache pool of cache tier pool.')
 @utils.arg('--cache-mode',
            metavar='<cache-mode>',
            default='readonly',
@@ -999,7 +1121,7 @@ def do_storage_pool_list(cs, args):
            help='Target min evict age(m). Default=20.')
 @utils.service_type('vsm')
 def do_storage_pool_add_cache_tier(cs, args):
-    """\033[1;32;40mAdds cache tier pool.\033[0m"""
+    """Adds cache tier pool."""
     storage_pool_id = args.storage_pool_id
     cache_pool_id = args.cache_pool_id
     if storage_pool_id == cache_pool_id:
@@ -1032,23 +1154,29 @@ def do_storage_pool_add_cache_tier(cs, args):
     except:
         raise exceptions.CommandError("Failed to add cache tier.")
 
+@utils.arg('id',
+           metavar='<id>',
+           help='Pool id of storage pool as cache.')
 @utils.service_type('vsm')
 def do_storage_pool_remove_cache_tier(cs, args):
     """Removes cache tier pool."""
-    _is_developing("storage-pool-remove-cache-tier",
-                   "Removes cache tier pool.")
-
-@utils.service_type('vsm')
-def do_storage_pool_delete(cs, args):
-    """Deletes storage pool."""
-    _is_developing("storage-pool-delete",
-                   "Deletes storage pool.")
+    try:
+        body = {
+            "cache_tier": {
+                "cache_pool_id": args.id
+            }
+        }
+        cs.storage_pools.remove_cache_tier(body)
+        print("Succeed to remove cache tier pool.")
+    except:
+        raise exceptions.CommandError("Failed to remove cache tier pool.")
 
 @utils.service_type('vsm')
 def do_storage_pool_list_ec_profiles(cs, args):
     """Lists ec profiles."""
-    _is_developing("storage-pool-list-ec-profiles",
-                   "Lists ec profiles.")
+    ec_profiles = cs.storage_pools.ec_profiles()
+    columns = ["ID", "Name"]
+    utils.print_list(ec_profiles, columns)
 
 
 ###################setting##########################
@@ -1057,20 +1185,20 @@ def do_storage_pool_list_ec_profiles(cs, args):
            help='Name of setting.')
 @utils.service_type('vsm')
 def do_setting_show(cs, args):
-    """\033[1;32;40mShows details info of setting.\033[0m"""
+    """Shows details info of setting."""
     setting = cs.vsm_settings.get(args.setting_name)
     _print_setting(setting)
 
 @utils.service_type('vsm')
 def do_setting_list(cs, args):
-    """\033[1;32;40mLists all settings.\033[0m"""
+    """Lists all settings."""
     settings = cs.vsm_settings.list(detailed=False, search_opts=None)
     columns = ["ID", "Name", "Value"]
     utils.print_list(settings, columns)
 
 @utils.service_type('vsm')
 def do_setting_create(cs, args):
-    """Creates a setting[Changing]."""
+    """\033[1;31;40mCreates a setting[Changing].\033[0m"""
     _is_developing("setting-create",
                    "Creates a setting.")
 
@@ -1078,7 +1206,7 @@ def do_setting_create(cs, args):
 ###################zone##########################
 @utils.service_type('vsm')
 def do_zone_list(cs, args):
-    """\033[1;32;40mLists all zones.\033[0m"""
+    """Lists all zones."""
     zones = cs.zones.list(detailed=False, search_opts=None)
     columns = ["ID", "Name"]
     utils.print_list(zones, columns)
