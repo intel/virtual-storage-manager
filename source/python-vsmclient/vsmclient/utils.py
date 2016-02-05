@@ -18,6 +18,7 @@ import os
 import re
 import sys
 import uuid
+import six
 
 import prettytable
 
@@ -129,27 +130,6 @@ def get_service_type(f):
 def pretty_choice_list(l):
     return ', '.join("'%s'" % i for i in l)
 
-# def print_list(objs, fields, formatters={}):
-#     mixed_case_fields = ['serverId']
-#     pt = prettytable.PrettyTable([f for f in fields], caching=False)
-#     pt.aligns = ['l' for f in fields]
-#
-#     for o in objs:
-#         row = []
-#         for field in fields:
-#             if field in formatters:
-#                 row.append(formatters[field](o))
-#             else:
-#                 if field in mixed_case_fields:
-#                     field_name = field.replace(' ', '_')
-#                 else:
-#                     field_name = field.lower().replace(' ', '_')
-#                 data = getattr(o, field_name, '')
-#                 row.append(data)
-#         pt.add_row(row)
-#
-#     if len(objs) > 0:
-#         print strutils.safe_encode(pt.get_string(sortby=fields[0]))
 
 def _print(pt, order):
     if sys.version_info >= (3, 0):
@@ -206,8 +186,8 @@ def print_list(objs, fields, formatters=None, sortby_index=0):
 def print_dict(d, property="Property"):
     pt = prettytable.PrettyTable([property, 'Value'], caching=False)
     pt.aligns = ['l', 'l']
-    [pt.add_row(list(r)) for r in d.iteritems()]
-    print strutils.safe_encode(pt.get_string(sortby=property))
+    [pt.add_row(list(r)) for r in six.iteritems(d)]
+    _print(pt, property)
 
 def find_resource(manager, name_or_id):
     """Helper for the _find_* methods."""
@@ -286,6 +266,10 @@ def find_appnode(cs, appnode):
 def find_storage_group(cs, storage_group):
     """Get a storage group by name or ID."""
     return find_resource(cs.storage_groups, storage_group)
+
+def find_storage_pool(cs, storage_pool):
+    """Get a storage pool by name or ID."""
+    return find_resource(cs.storage_pools, storage_pool)
 
 def find_setting(cs, setting):
     """Get a setting by name or ID."""

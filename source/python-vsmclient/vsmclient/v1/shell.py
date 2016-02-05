@@ -15,19 +15,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import argparse
-import os
+from __future__ import print_function
+
 import sys
 import time
 
 from vsmclient import exceptions
+from vsmclient.openstack.common import strutils
 from vsmclient import utils
+
 
 def _poll_for_status(poll_fn, obj_id, action, final_ok_states,
                      poll_period=5, show_progress=True):
-    """Block while an action is being performed, periodically printing
-    progress.
-    """
+    """Blocks while an action occurs. Periodically shows progress."""
     def print_progress(progress):
         if show_progress:
             msg = ('\rInstance %(action)s... %(progress)s%% complete'
@@ -38,53 +38,156 @@ def _poll_for_status(poll_fn, obj_id, action, final_ok_states,
         sys.stdout.write(msg)
         sys.stdout.flush()
 
-    print
+    print()
     while True:
         obj = poll_fn(obj_id)
         status = obj.status.lower()
         progress = getattr(obj, 'progress', None) or 0
         if status in final_ok_states:
             print_progress(100)
-            print "\nFinished"
+            print("\nFinished")
             break
         elif status == "error":
-            print "\nError %(action)s instance" % locals()
+            print("\nError %(action)s instance" % {'action': action})
             break
         else:
             print_progress(progress)
             time.sleep(poll_period)
 
-def _find_vsm(cs, vsm):
-    """Get a vsm by ID."""
-    return utils.find_resource(cs.vsms, vsm)
 
-def _find_vsm_snapshot(cs, snapshot):
-    """Get a vsm snapshot by ID."""
-    return utils.find_resource(cs.vsm_snapshots, snapshot)
+def _find_cluster(cs, cluster):
+    """Get a cluster by name or ID."""
+    return utils.find_cluster(cs, cluster)
 
-def _find_backup(cs, backup):
-    """Get a backup by ID."""
-    return utils.find_resource(cs.backups, backup)
+def _find_mds(cs, mds):
+    """Get a mds by name or ID."""
+    return utils.find_mds(cs, mds)
 
-def _print_vsm(vsm):
-    utils.print_dict(vsm._info)
+def _find_mon(cs, mon):
+    """Get a mon by name or ID."""
+    return utils.find_mon(cs, mon)
 
-def _print_vsm_snapshot(snapshot):
-    utils.print_dict(snapshot._info)
+def _find_osd(cs, osd):
+    """Get an osd by name or ID."""
+    return utils.find_osd(cs, osd)
+
+def _find_pg(cs, pg):
+    """Get a pg by name or ID."""
+    return utils.find_pg(cs, pg)
+
+def _find_rbd(cs, rbd):
+    """Get a rbd by name or ID."""
+    return utils.find_rbd(cs, rbd)
+
+def _find_server(cs, server):
+    """Get a server by name or ID."""
+    return utils.find_server(cs, server)
+
+def _find_appnode(cs, appnode):
+    """Get an appnode by name or ID."""
+    return utils.find_appnode(cs, appnode)
+
+def _find_storage_group(cs, storage_group):
+    """Get a storage group by name or ID."""
+    return utils.find_storage_group(cs, storage_group)
+
+def _find_storage_pool(cs, storage_pool):
+    """Get a storage pool by name or ID."""
+    return utils.find_storage_pool(cs, storage_pool)
+
+def _find_setting(cs, setting):
+    """Get a setting by name or ID."""
+    return utils.find_setting(cs, setting)
+
+
+def _print_cluster(cluster):
+    if isinstance(cluster, dict):
+        utils.print_dict(cluster)
+    else:
+        utils.print_dict(cluster._info)
+
+def _print_device(device):
+    if isinstance(device, dict):
+        utils.print_dict(device)
+    else:
+        utils.print_dict(device._info)
+
+def _print_mds(mds):
+    if isinstance(mds, dict):
+        utils.print_dict(mds)
+    else:
+        utils.print_dict(mds._info)
+
+def _print_mon(mon):
+    if isinstance(mon, dict):
+        utils.print_dict(mon)
+    else:
+        utils.print_dict(mon._info)
+
+def _print_osd(osd):
+    if isinstance(osd, dict):
+        utils.print_dict(osd)
+    else:
+        utils.print_dict(osd._info)
+
+def _print_pg(pg):
+    if isinstance(pg, dict):
+        utils.print_dict(pg)
+    else:
+        utils.print_dict(pg._info)
+
+def _print_rbd(rbd):
+    if isinstance(rbd, dict):
+        utils.print_dict(rbd)
+    else:
+        utils.print_dict(rbd._info)
+
+def _print_server(server):
+    if isinstance(server, dict):
+        utils.print_dict(server)
+    else:
+        utils.print_dict(server._info)
+
+def _print_storage_group(storage_group):
+    if isinstance(storage_group, dict):
+        utils.print_dict(storage_group)
+    else:
+        utils.print_dict(storage_group._info)
+
+def _print_storage_pool(storage_pool):
+    if isinstance(storage_pool, dict):
+        utils.print_dict(storage_pool)
+    else:
+        utils.print_dict(storage_pool._info)
+
+def _print_setting(setting):
+    if isinstance(setting, dict):
+        utils.print_dict(setting)
+    else:
+        utils.print_dict(setting._info)
+
 
 def _translate_keys(collection, convert):
     for item in collection:
-        keys = item.__dict__.keys()
+        keys = item.__dict__
         for from_key, to_key in convert:
             if from_key in keys and to_key not in keys:
                 setattr(item, to_key, item._info[from_key])
 
-def _translate_vsm_keys(collection):
-    convert = [('displayName', 'display_name'), ('vsmType', 'vsm_type')]
-    _translate_keys(collection, convert)
-
-def _translate_vsm_snapshot_keys(collection):
-    convert = [('displayName', 'display_name'), ('vsmId', 'vsm_id')]
+def _translate_storage_pool_keys(collection):
+    convert = [
+        ('createdDate', 'created_at'),
+        ('clusterId', 'cluster_id'),
+        ('createdBy', 'created_by'),
+        ('crashRelayInterval', 'crash_relay_interval'),
+        ('pgpNum', 'pgp_num'),
+        ('crushRuleset', 'crush_ruleset'),
+        ('recipeId', 'recipe_id'),
+        ('minSize', 'min_size'),
+        ('storageGroup', 'storage_group'),
+        ('poolId', 'pool_id_duplicated'),
+        ('pgNum', 'pg_num')
+    ]
     _translate_keys(collection, convert)
 
 def _extract_metadata(args):
@@ -154,13 +257,13 @@ def do_appnode_list(cs, args):
                "UUID"]
     utils.print_list(appnodes, columns)
 
-@utils.arg('appnode',
-           metavar='<appnode>',
-           help='Name or ID of appnode.')
+@utils.arg('id',
+           metavar='<id>',
+           help='ID of appnode.')
 @utils.service_type('vsm')
 def do_appnode_delete(cs, args):
     """\033[1;32;40mDeletes an appnode by id.\033[0m"""
-    appnode = utils.find_appnode(cs, args.appnode)
+    appnode = _find_appnode(cs, args.id)
     try:
         cs.appnodes.delete(appnode)
         print("Succeed to delete appnode.")
@@ -192,7 +295,7 @@ def do_appnode_delete(cs, args):
 @utils.service_type('vsm')
 def do_appnode_update(cs, args):
     """\033[1;32;40mUpdates an appnode by id.\033[0m"""
-    appnode = utils.find_appnode(cs, args.id)
+    appnode = _find_appnode(cs, args.id)
     vsm_os_username = args.vsm_os_username or appnode.os_username
     vsm_os_password = args.vsm_os_password or appnode.os_password
     vsm_os_tenant_name = args.vsm_os_tenant_name or appnode.os_tenant_name
@@ -212,7 +315,6 @@ def do_appnode_update(cs, args):
         'log_info': log_info
     }
     try:
-        print new_appnode
         cs.appnodes.update(appnode, new_appnode)
         print("Succeed to update appnode.")
     except:
@@ -265,7 +367,7 @@ def do_appnode_update(cs, args):
            action='append',
            default=[],
            help='Servers to create ceph cluster, need 3 servers at least.'
-                'Boolean value is True or False.')
+                'Boolean value is True or False[Default=True].')
 @utils.service_type('vsm')
 def do_cluster_create(cs, args):
     """\033[1;32;40mCreates a cluster.\033[0m"""
@@ -286,12 +388,7 @@ def do_cluster_create(cs, args):
                 else:
                     raise exceptions.CommandError("ID is duplicated")
             else:
-                if value != "False" and value != "True":
-                    raise exceptions.CommandError("is-monitor or is-storage is not True or False")
-                elif value == "False":
-                    value = False
-                elif value == "True":
-                    value = True
+                strutils.bool_from_string(value, default=True)
             ser[key] = value
         servers_list.append(ser)
     if len(servers_list) < 3:
@@ -305,10 +402,8 @@ def do_cluster_create(cs, args):
 @utils.service_type('vsm')
 def do_cluster_show(cs, args):
     """\033[1;32;40mShows details info of a cluster.\033[0m"""
-    info = dict()
-    cluster = utils.find_cluster(cs, args.cluster)
-    info.update(cluster._info)
-    utils.print_dict(info)
+    cluster = _find_cluster(cs, args.cluster)
+    _print_cluster(cluster)
 
 @utils.service_type('vsm')
 def do_cluster_list(cs, args):
@@ -332,9 +427,8 @@ def do_cluster_list(cs, args):
 @utils.service_type('vsm')
 def do_cluster_summary(cs, args):
     """\033[1;32;40mGets summary info of a cluster.\033[0m"""
-    info = cs.clusters.summary()
-    info = info._info
-    utils.print_dict(info)
+    cluster_summary = cs.clusters.summary()
+    _print_cluster(cluster_summary)
 
 # TODO not very good, should use service api to get service info
 @utils.service_type('vsm')
@@ -435,7 +529,7 @@ def do_device_show_smart_info(cs, args):
         'device_path': args.device_path
     }
     smart_info = cs.devices.get_smart_info(search_opts=search_opts)
-    utils.print_dict(smart_info)
+    _print_device(smart_info)
 
 
 #####################mds########################
@@ -445,10 +539,8 @@ def do_device_show_smart_info(cs, args):
 @utils.service_type('vsm')
 def do_mds_show(cs, args):
     """\033[1;32;40mShows details info of a mds.\033[0m"""
-    info = dict()
-    mds = utils.find_mds(cs, args.mds)
-    info.update(mds._info)
-    utils.print_dict(info)
+    mds = _find_mds(cs, args.mds)
+    _print_mds(mds)
 
 @utils.service_type('vsm')
 def do_mds_list(cs, args):
@@ -484,9 +576,8 @@ def do_mds_list(cs, args):
 @utils.service_type('vsm')
 def do_mds_summary(cs, args):
     """\033[1;32;40mGets summary info of mds.\033[0m"""
-    info = cs.mdses.summary()
-    info = info._info
-    utils.print_dict(info)
+    mds_summary = cs.mdses.summary()
+    _print_mds(mds_summary)
 
 
 #####################mon########################
@@ -496,10 +587,8 @@ def do_mds_summary(cs, args):
 @utils.service_type('vsm')
 def do_mon_show(cs, args):
     """\033[1;32;40mShows details info of a mon.\033[0m"""
-    info = dict()
-    mon = utils.find_mon(cs, args.mon)
-    info.update(mon._info)
-    utils.print_dict(info)
+    mon = _find_mon(cs, args.mon)
+    _print_mon(mon)
 
 @utils.service_type('vsm')
 def do_mon_list(cs, args):
@@ -511,17 +600,16 @@ def do_mon_list(cs, args):
 @utils.service_type('vsm')
 def do_mon_summary(cs, args):
     """\033[1;32;40mGets summary info of mon.\033[0m"""
-    info = cs.monitors.summary()
-    info = info._info
-    utils.print_dict(info)
+    mon_summary = cs.monitors.summary()
+    _print_mon(mon_summary)
 
-@utils.arg('id',
-           metavar='<id>',
-           help='ID of mon.')
+@utils.arg('mon',
+           metavar='<mon>',
+           help='Name or ID of mon.')
 @utils.service_type('vsm')
 def do_mon_restart(cs, args):
     """\033[1;32;40mRestarts a mon by id.\033[0m"""
-    mon = utils.find_mon(cs, args.id)
+    mon = _find_mon(cs, args.mon)
     try:
         cs.monitors.restart(mon)
         print("Succeed to restart mon named %s." % mon.name)
@@ -536,10 +624,8 @@ def do_mon_restart(cs, args):
 @utils.service_type('vsm')
 def do_osd_show(cs, args):
     """\033[1;32;40mShows details info of an osd.\033[0m"""
-    info = dict()
-    osd = utils.find_osd(cs, args.osd)
-    info.update(osd._info)
-    utils.print_dict(info)
+    osd = _find_osd(cs, args.osd)
+    _print_osd(osd)
 
 @utils.service_type('vsm')
 def do_osd_list(cs, args):
@@ -549,26 +635,26 @@ def do_osd_list(cs, args):
                "Device ID", "Service ID", "Updated_at"]
     utils.print_list(osds, columns)
 
-@utils.arg('id',
-           metavar='<id>',
-           help='ID of osd.')
+@utils.arg('osd',
+           metavar='<osd>',
+           help='Name or ID of osd.')
 @utils.service_type('vsm')
 def do_osd_restart(cs, args):
     """\033[1;32;40mRestarts an osd by id.\033[0m"""
-    osd = utils.find_osd(cs, args.id)
+    osd = _find_osd(cs, args.osd)
     try:
         cs.osds.restart(osd)
         print("Succeed to restart osd named %s." % osd.osd_name)
     except:
         raise exceptions.CommandError("Failed to restart osd.")
 
-@utils.arg('id',
-           metavar='<id>',
-           help='ID of osd.')
+@utils.arg('osd',
+           metavar='<osd>',
+           help='Name or ID of osd.')
 @utils.service_type('vsm')
 def do_osd_remove(cs, args):
     """\033[1;32;40mRemoves an osd by id.\033[0m"""
-    osd = utils.find_osd(cs, args.id)
+    osd = _find_osd(cs, args.osd)
     try:
         cs.osds.remove(osd)
         print("Succeed to remove osd named %s." % osd.osd_name)
@@ -611,16 +697,16 @@ def do_osd_add_new(cs, args):
     except:
         raise exceptions.CommandError("Failed to add new osd to cluster.")
 
-@utils.arg('id',
-           metavar='<id>',
-           help='ID of osd.')
+@utils.arg('osd',
+           metavar='<osd>',
+           help='Name or ID of osd.')
 @utils.service_type('vsm')
 def do_osd_restore(cs, args):
     """\033[1;32;40mRestores an osd.\033[0m"""
-    osd = utils.find_osd(cs, args.id)
+    osd = _find_osd(cs, args.osd)
     try:
         cs.osds.restore(osd)
-        osd = utils.find_osd(cs, args.id)
+        osd = _find_osd(cs, args.osd)
         print("Succeed to restore osd named %s." % osd.osd_name)
     except:
         raise exceptions.CommandError("Failed to restore osd.")
@@ -637,17 +723,16 @@ def do_osd_refresh(cs, args):
 @utils.service_type('vsm')
 def do_osd_summary(cs, args):
     """\033[1;32;40mGets summary info of osd.\033[0m"""
-    info = cs.osds.summary()
-    info = info._info
-    utils.print_dict(info)
+    osd_summary = cs.osds.summary()
+    _print_osd(osd_summary)
 
 
 ###################performance metric##########################
-@utils.service_type('vsm')
-def do_perf_metric_list(cs, args):
-    """Lists performance metrics."""
-    _is_developing("perf-metric-list",
-                   "Lists performance metrics.")
+# @utils.service_type('vsm')
+# def do_perf_metric_list(cs, args):
+#     """Lists performance metrics."""
+#     _is_developing("perf-metric-list",
+#                    "Lists performance metrics.")
 
 
 ###################placement group##########################
@@ -657,10 +742,8 @@ def do_perf_metric_list(cs, args):
 @utils.service_type('vsm')
 def do_pg_show(cs, args):
     """\033[1;32;40mShows details info of a placement group.\033[0m"""
-    info = dict()
-    pg = utils.find_pg(cs, args.pg)
-    info.update(pg._info)
-    utils.print_dict(info)
+    pg = _find_pg(cs, args.pg)
+    _print_pg(pg)
 
 @utils.service_type('vsm')
 def do_pg_list(cs, args):
@@ -672,9 +755,8 @@ def do_pg_list(cs, args):
 @utils.service_type('vsm')
 def do_pg_summary(cs, args):
     """\033[1;32;40mGets summary info of placement group.\033[0m"""
-    info = cs.placement_groups.summary()
-    info = info._info
-    utils.print_dict(info)
+    pg_summary = cs.placement_groups.summary()
+    _print_pg(pg_summary)
 
 
 ###################pool usage##########################
@@ -700,10 +782,8 @@ def do_pool_usage_list(cs, args):
 @utils.service_type('vsm')
 def do_rbd_pool_show(cs, args):
     """\033[1;32;40mShows details info of rbd pool.\033[0m"""
-    info = dict()
-    rbd = utils.find_rbd(cs, args.rbd)
-    info.update(rbd._info)
-    utils.print_dict(info)
+    rbd = _find_rbd(cs, args.rbd)
+    _print_rbd(rbd)
 
 @utils.service_type('vsm')
 def do_rbd_pool_list(cs, args):
@@ -715,9 +795,8 @@ def do_rbd_pool_list(cs, args):
 @utils.service_type('vsm')
 def do_rbd_pool_summary(cs, args):
     """\033[1;32;40mGets summary info of rbd pool.\033[0m"""
-    info = cs.rbd_pools.summary()
-    info = info._info
-    utils.print_dict(info)
+    rbd_summary = cs.rbd_pools.summary()
+    _print_rbd(rbd_summary)
 
 
 ###################server##########################
@@ -727,10 +806,8 @@ def do_rbd_pool_summary(cs, args):
 @utils.service_type('vsm')
 def do_server_show(cs, args):
     """\033[1;32;40mShows details info of server.\033[0m"""
-    info = dict()
-    server = utils.find_server(cs, args.server)
-    info.update(server._info)
-    utils.print_dict(info)
+    server = _find_server(cs, args.server)
+    _print_server(server)
 
 @utils.service_type('vsm')
 def do_server_list(cs, args):
@@ -822,22 +899,20 @@ def do_server_stop(cs, args):
 
 
 ###################storage group##########################
-@utils.service_type('vsm')
-def do_storage_group_create(cs, args):
-    """Creates storage group."""
-    _is_developing("storage-group-create",
-                   "Creates storage group.")
+# @utils.service_type('vsm')
+# def do_storage_group_create(cs, args):
+#     """Creates storage group."""
+#     _is_developing("storage-group-create",
+#                    "Creates storage group.")
 
-@utils.arg('id',
-           metavar='<id>',
-           help='ID of storage group.')
+@utils.arg('storage-group',
+           metavar='<storage-group>',
+           help='Name or ID of storage group.')
 @utils.service_type('vsm')
 def do_storage_group_show(cs, args):
     """\033[1;32;40mShows detail info of storage group.\033[0m"""
-    info = dict()
-    storage_group = utils.find_storage_group(cs, args.id)
-    info.update(storage_group._info)
-    utils.print_dict(info)
+    storage_group = _find_storage_group(cs, args.storage_group)
+    _print_storage_group(storage_group)
 
 @utils.service_type('vsm')
 def do_storage_group_list(cs, args):
@@ -850,41 +925,118 @@ def do_storage_group_list(cs, args):
 @utils.service_type('vsm')
 def do_storage_group_summary(cs, args):
     """\033[1;32;40mGets summary info of storage group.\033[0m"""
-    info = cs.storage_groups.summary()
-    info = info._info
-    utils.print_dict(info)
+    storage_group_summary = cs.storage_groups.summary()
+    _print_storage_group(storage_group_summary)
 
 
 ###################storage pool##########################
+@utils.arg('storage-pool',
+           metavar='<storage-pool>',
+           help='Name or ID of storage pool.')
 @utils.service_type('vsm')
 def do_storage_pool_show(cs, args):
-    """Shows details info of storage pool."""
-    _is_developing("storage-pool-show",
-                   "Shows details info of storage pool.")
+    """\033[1;32;40mShows details info of storage pool.\033[0m"""
+    storage_pool = _find_storage_pool(cs, args.storage_pool)
+    _print_storage_pool(storage_pool)
 
 @utils.service_type('vsm')
 def do_storage_pool_list(cs, args):
-    """Lists all storage pools."""
-    _is_developing("storage-pool-list",
-                   "Lists all storage pools.")
+    """\033[1;32;40mLists all storage pools.\033[0m"""
+    storage_pools = cs.storage_pools.list(detailed=True, search_opts=None)
+    _translate_storage_pool_keys(storage_pools)
+    columns = ["ID", "Name", "Pool ID", "PG Num", "PGP Num", "Cluster ID", "Status",
+               "Storage Group", "Tag", "Quota", "Size", "Updated_at"]
+    utils.print_list(storage_pools, columns)
 
+@utils.arg('--storage-pool-id',
+           metavar='<storage-pool-id>',
+           help='ID of storage pool as the storage pool of cache tier pool.')
+@utils.arg('--cache-pool-id',
+           metavar='<cache-pool-id>',
+           help='ID of storage pool as the cache pool of cache tier pool.')
+@utils.arg('--cache-mode',
+           metavar='<cache-mode>',
+           default='readonly',
+           help='Mode of cache tier pool[readonly or writeback]. Default=readonly.')
+@utils.arg('--force-nonempty',
+           action='store_true',
+           help='Force nonempty. Default=False.')
+@utils.arg('--hit-set-type',
+           metavar='<hit-set-type>',
+           default='bloom',
+           help='Hit set type. Default=bloom.')
+@utils.arg('--hit-set-count',
+           metavar='<hit-set-count>',
+           default=1,
+           help='Hit set count. Default=1.')
+@utils.arg('--hit-set-period-s',
+           metavar='<hit-set-period-s>',
+           default=3600,
+           help='Hit set period(s). Default=3600.')
+@utils.arg('--target-max-mem-mb',
+           metavar='<target-max-mem-mb>',
+           default=1000000,
+           help='Target max mem(mb). Default=1000000.')
+@utils.arg('--target-dirty-ratio',
+           metavar='<target-dirty-ratio>',
+           default=0.4,
+           help='Target dirty ratio. Default=0.4.')
+@utils.arg('--target-full-ratio',
+           metavar='<target-full-ratio>',
+           default=0.8,
+           help='Target full ratio. Default=0.8.')
+@utils.arg('--target-max-objects',
+           metavar='<target-max-objects>',
+           default=1000000,
+           help='Target max objects. Default=1000000.')
+@utils.arg('--target-min-flush-age-m',
+           metavar='<target-min-flush-age-m>',
+           default=10,
+           help='Target min flush age(m). Default=10.')
+@utils.arg('--target-min-evict-age-m',
+           metavar='<target-min-evict-age-m>',
+           default=20,
+           help='Target min evict age(m). Default=20.')
 @utils.service_type('vsm')
 def do_storage_pool_add_cache_tier(cs, args):
-    """Adds cache tier pool."""
-    _is_developing("storage-pool-add-cache-tier",
-                   "Adds cache tier pool.")
+    """\033[1;32;40mAdds cache tier pool.\033[0m"""
+    storage_pool_id = args.storage_pool_id
+    cache_pool_id = args.cache_pool_id
+    if storage_pool_id == cache_pool_id:
+        raise exceptions.CommandError("Storage pool id can not be same as cache pool id.")
+    storage_pool = _find_storage_pool(cs, storage_pool_id)
+    cache_pool = _find_storage_pool(cs, cache_pool_id)
+
+    cache_tier = {
+        "cache_tier": {
+            "storage_pool_id": storage_pool.id,
+            "cache_pool_id": cache_pool.id,
+            "cache_mode": args.cache_mode,
+            "force_nonempty": args.force_nonempty,
+            "options": {
+                "hit_set_type": args.hit_set_type,
+                "hit_set_count": args.hit_set_count,
+                "hit_set_period_s": args.hit_set_period_s,
+                "target_max_mem_mb": args.target_max_mem_mb,
+                "target_dirty_ratio": args.target_dirty_ratio,
+                "target_full_ratio": args.target_full_ratio,
+                "target_max_objects": args.target_max_objects,
+                "target_min_flush_age_m": args.target_min_flush_age_m,
+                "target_min_evict_age_m": args.target_min_evict_age_m
+            }
+        }
+    }
+    try:
+        cs.storage_pools.add_cache_tier(cache_tier)
+        print("Succeed to add cache tier.")
+    except:
+        raise exceptions.CommandError("Failed to add cache tier.")
 
 @utils.service_type('vsm')
 def do_storage_pool_remove_cache_tier(cs, args):
     """Removes cache tier pool."""
     _is_developing("storage-pool-remove-cache-tier",
                    "Removes cache tier pool.")
-
-@utils.service_type('vsm')
-def do_storage_pool_restart(cs, args):
-    """Restarts storage pool."""
-    _is_developing("storage-pool-restart",
-                   "Restarts storage pool.")
 
 @utils.service_type('vsm')
 def do_storage_pool_delete(cs, args):
@@ -900,16 +1052,14 @@ def do_storage_pool_list_ec_profiles(cs, args):
 
 
 ###################setting##########################
-@utils.arg('id',
-           metavar='<id>',
-           help='ID of setting.')
+@utils.arg('setting-name',
+           metavar='<setting-name>',
+           help='Name of setting.')
 @utils.service_type('vsm')
 def do_setting_show(cs, args):
     """\033[1;32;40mShows details info of setting.\033[0m"""
-    info = dict()
-    setting = utils.find_setting(cs, args.id)
-    info.update(setting._info)
-    utils.print_dict(info)
+    setting = cs.vsm_settings.get(args.setting_name)
+    _print_setting(setting)
 
 @utils.service_type('vsm')
 def do_setting_list(cs, args):
