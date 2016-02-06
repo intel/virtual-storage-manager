@@ -227,7 +227,7 @@ def _check_cluster_exist(cs):
 @utils.arg('--vsm-os-region-name',
            metavar='<vsm-os-region-name>',
            default='RegionOne',
-           help='The region name of openstack keystone connected.')
+           help='The region name of openstack keystone connected. Default=RegionOne.')
 @utils.arg('--ssh-user',
            metavar='<ssh-user>',
            help='The ssh user to connect openstack keystone node.')
@@ -766,11 +766,34 @@ def do_pg_summary(cs, args):
 
 
 ###################pool usage##########################
+@utils.arg('--pools',
+           metavar='<pool-id=pool-id,cinder-volume-host=hostname,appnode-id=appnode-id>',
+           action='append',
+           default=[],
+           help='Each should have pool id, cinder volume host and appnode id.')
 @utils.service_type('vsm')
 def do_pool_usage_create(cs, args):
-    """\033[1;31;40mCreates pool usage.\033[0m"""
-    _is_developing("pool-usage-create",
-                   "Creates pool usage.")
+    """Creates pool usage."""
+    pools_list = []
+    pools = args.pools
+    id_list = []
+    for pool in pools:
+        key_value_list = pool.split(",")
+        po = {}
+        for key_value in key_value_list:
+            key, _sep, value = key_value.partition("=")
+            # pool-id -> pool_id
+            # cinder-volume-host -> cinder_volume_host
+            # appnode-id -> appnode_id
+            key = key.replace("-", "_")
+            if key == "pool_id":
+                if value not in id_list:
+                    id_list.append(value)
+                else:
+                    raise exceptions.CommandError("Pool id is duplicated")
+            po[key] = value
+        pools_list.append(po)
+    cs.pool_usages.create(pools=pools_list)
 
 @utils.service_type('vsm')
 def do_pool_usage_list(cs, args):
@@ -1196,11 +1219,24 @@ def do_setting_list(cs, args):
     columns = ["ID", "Name", "Value"]
     utils.print_list(settings, columns)
 
+@utils.arg('name',
+           metavar='<name>',
+           help='Name of setting.')
+@utils.arg('--value',
+           metavar='<value>',
+           help='Value of setting.')
 @utils.service_type('vsm')
 def do_setting_create(cs, args):
-    """\033[1;31;40mCreates a setting[Changing].\033[0m"""
-    _is_developing("setting-create",
-                   "Creates a setting.")
+    """Creates a setting[if exist, for updating]."""
+    setting = {
+        "name": args.name,
+        "value": args.value
+    }
+    try:
+        cs.vsm_settings.create(setting)
+        print("Succeed to create or update setting.")
+    except:
+        raise exceptions.CommandError("Failed to create or update setting.")
 
 
 ###################zone##########################
