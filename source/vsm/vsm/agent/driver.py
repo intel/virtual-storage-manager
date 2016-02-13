@@ -89,7 +89,6 @@ class CephDriver(object):
 
     def _operate_ceph_daemon(self, operate, type, id=None, ssh=False, host=None):
         """
-
         start/stop ceph-$type id=$id.
         service ceph start/stop $type.$id
         systemctl start/stop ceph-$type@$id
@@ -108,7 +107,8 @@ class CephDriver(object):
         # assumes the cluster is named 'ceph' - just creating a variable here
         # makes it simpler to fix this issue later - at least in this function
         DEFAULT_CLUSTER_NAME = "ceph"
-        DEFAULT_DATA_DIR = "/var/lib/ceph/osd/$cluster-$id"
+        DEFAULT_OSD_DATA_DIR = "/var/lib/ceph/osd/$cluster-$id"
+        DEFAULT_MON_DATA_DIR = "/var/lib/ceph/mon/$cluster-$host"
 
         # type and id is required here.
         # not support operate all ceph daemons
@@ -116,16 +116,24 @@ class CephDriver(object):
             LOG.error("Required parameter type or id is blank")
             return False
 
+        # host is localhost if not specified
+        if not host:
+            host = platform.node()
+
+        # get cluster from config - use default if not found
+        cluster = DEFAULT_CLUSTER_NAME
+
         LOG.info("Operate %s type %s, id %s" % (operate, type, id))
         is_systemctl = self._is_systemctl()
 
         ceph_config_parser = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
         data_dir = ceph_config_parser._parser.get(type, type + " data")
         if not data_dir:
-            data_dir = DEFAULT_DATA_DIR
+            data_dir = DEFAULT_OSD_DATA_DIR if type == "osd" else DEFAULT_MON_DATA_DIR
         # path = os.path.dirname(data_dir)
 
-        file = data_dir.replace("$cluster", DEFAULT_CLUSTER_NAME).replace("$id", id) + "/upstart"
+        file = data_dir.replace("$cluster", cluster).\
+                    replace("$id", id).replace("$host", host) + "/upstart"
         # no using os.path.exists(), because if the file is owned by ceph
         # user, the result will return false
         if ssh:
@@ -139,16 +147,19 @@ class CephDriver(object):
                 out, err = utils.execute('ls', file, run_as_root=True)
             except:
                 out = ""
+
         # is_file_exist = os.path.exists(file)
         if out:
-            type_id = "id=%s" % id
+            id_assignment = "id=%s" % (host if "-$host" in data_dir else id)
+            cluster_assignment = "cluster=%s" % cluster
+            service = "ceph-%s" % type
             if ssh:
                 utils.execute('ssh', '-t', 'root@'+host,
-                              operate, 'ceph-%s' % type,
-                              type_id, run_as_root=True)
+                                  operate, service, cluster_assignment,
+                                  id_assignment, run_as_root=True)
             else:
-                utils.execute(operate, 'ceph-%s' % type, type_id,
-                              run_as_root=True)
+                utils.execute(operate, service, cluster_assignment,
+                                  id_assignment, run_as_root=True)
         else:
             if is_systemctl:
                 if ssh:
@@ -1409,7 +1420,7 @@ class CephDriver(object):
                 LOG.info("Try to stop osd %s daemon by ceph or ceph-osd command" % num)
                 self._operate_ceph_daemon("stop", "osd", id=num)
             except:
-                LOG.warn("Osd %s has been stopped" % num)
+                LOG.warn("Osd %s has NOT been stopped" % num)
         return True
 
     def start_osd_daemon(self, context, num, is_vsm_add_osd=False):
@@ -1444,15 +1455,20 @@ class CephDriver(object):
                 LOG.info("Try to stop mon %s daemon by ceph or ceph-mon command" % num)
                 self._operate_ceph_daemon("stop", "mon", id=num)
             except:
-                LOG.warn("Mon %s has been stopped" % num)
+                LOG.warn("Mon %s has NOT been stopped" % num)
         return True
 
     def start_mon_daemon(self, context, num):
-        if not self.stop_mon_daemon(context, num):
-            return False
+        try:
+            self.stop_mon_daemon(context, num)
+        except:
+            pass
         # mon_name = 'mon.%s' % num
         # utils.execute('service', 'ceph', 'start', mon_name, run_as_root=True)
-        self._operate_ceph_daemon("start", "mon", id=num)
+        try:
+            self._operate_ceph_daemon("start", "mon", id=num)
+        except:
+            LOG.warn("Monitor has NOT been started!")
         return True
 
     def stop_mds_daemon(self, context, num):
@@ -1465,7 +1481,7 @@ class CephDriver(object):
                 LOG.info("Try to stop mds %s daemon by ceph or ceph-mds command" % num)
                 self._operate_ceph_daemon("stop", "mds", id=num)
             except:
-                LOG.warn("Mds %s has been stopped" % num)
+                LOG.warn("Mds %s has NOT been stopped" % num)
         return True
 
     def get_mds_id(self, host=FLAGS.host):
@@ -1511,6 +1527,7 @@ class CephDriver(object):
             LOG.info('>> start the monitor id: %s' % mon_id)
             if node_type and node_type.find('monitor') != -1:
                 self.start_mon_daemon(context, mon_id)
+
     def stop_monitor(self, context):
         # Get info from db.
         res = self._conductor_rpcapi.init_node_get_by_host(context, FLAGS.host)
@@ -1529,6 +1546,7 @@ class CephDriver(object):
             LOG.info('>> stop the monitor id: %s' % mon_id)
             if node_type and node_type.find('monitor') != -1:
                 self.stop_mon_daemon(context, mon_id)
+
     def start_osd(self, context):
         # Start all the osds on this node.
         osd_list = []
@@ -1618,8 +1636,10 @@ class CephDriver(object):
     def start_server(self, context, node_id):
         """ Start server.
             0. start monitor
-            1. start all osd.
-            2. unset osd noout.
+            1. start mds.
+            2. start all osd.
+            3. unset osd noout.
+            4. reset db server status.
         """
         res = self._conductor_rpcapi.init_node_get_by_id(context, node_id)
         service_id = res.get('service_id', None)
@@ -1628,21 +1648,21 @@ class CephDriver(object):
         host = res.get('host', None)
         LOG.debug('The server info: %s %s %s %s' %
                   (service_id, node_type, host_ip, host))
-        # get mon_id
+
+        # start monitor
         self.start_monitor(context)
+
+        # start mds
         self.start_mds(context)
 
-        # Update status
-        osd_states = self._conductor_rpcapi.\
-                osd_state_get_by_service_id(context, service_id)
+        # get osd list; if there aren't any, update status and return
+        osd_states = self._conductor_rpcapi.osd_state_get_by_service_id(context, service_id)
         if not len(osd_states) > 0:
             LOG.info("There is no osd on node %s" % node_id)
-            self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Active')
+            self._conductor_rpcapi.init_node_update_status_by_id(context, node_id, 'Active')
             return True
 
-        # Begin to start all the OSDs.
+        # async method to start an osd
         def __start_osd(osd_id):
             osd = db.get_zone_hostname_storagegroup_by_osd_id(context, osd_id)[0]
             osd_name = osd['osd_name'].split('.')[-1]
@@ -1651,19 +1671,19 @@ class CephDriver(object):
             #     "host=%s_%s_%s" %(osd['service']['host'],osd['storage_group']['name'],osd['zone']['name']) ,
             #     run_as_root=True)
             values = {'state': FLAGS.osd_in_up, 'osd_name': osd['osd_name']}
-            self._conductor_rpcapi.osd_state_update_or_create(context,
-                                                              values)
+            self._conductor_rpcapi.osd_state_update_or_create(context, values)
 
+        # start osds asynchronously
         thd_list = []
         for item in osd_states:
             osd_id = item['id']
             thd = utils.MultiThread(__start_osd, osd_id=osd_id)
             thd_list.append(thd)
         utils.start_threads(thd_list)
+
         # update init node status
-        ret = self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Active')
+        ret = self._conductor_rpcapi.init_node_update_status_by_id(context, node_id, 'Active')
+
         count = db.init_node_count_by_status(context, 'Stopped')
         if count == 0:
             utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
@@ -1794,15 +1814,16 @@ class CephDriver(object):
             self._conductor_rpcapi.\
                     osd_state_update_or_create(context, values)
 
+        # Stop monitor service.
+        self.stop_monitor(context)
+
         # Stop mds service.
-        self.remove_mds(context, node_id)
-        self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Stopped')
-        values = {'mds': 'no'}
-        self._conductor_rpcapi.init_node_update(context,
-                                                node_id,
-                                                values)
+        self.stop_mds(context)
+        #We really dont' want to remove mds, right? Just stop it.
+        #values = {'mds': 'no'}
+        #self._conductor_rpcapi.init_node_update(context, node_id, values)
+
+        self._conductor_rpcapi.init_node_update_status_by_id(context, node_id, 'Stopped')
         return True
 
     def ceph_upgrade(self, context, node_id, key_url, pkg_url,restart=True):
