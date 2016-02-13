@@ -2710,15 +2710,15 @@ def init_node_create(context, values, session=None):
         session = get_session()
 
     with session.begin(subtransactions=True):
-        if values['primary_public_ip']:
+        if values.has_key('primary_public_ip'):
             init_node_ref = init_node_get_by_primary_public_ip(context,
                         values['primary_public_ip'],
                         session=session)
-        elif values['secondary_public_ip']:
+        elif values.has_key('secondary_public_ip'):
             init_node_ref = init_node_get_by_secondary_public_ip(context,
                         values['secondary_public_ip'],
                         session=session)
-        elif values['cluster_ip']:
+        elif values.has_key('cluster_ip'):
             init_node_ref = init_node_get_by_cluster_ip(context,
                         values['cluster_ip'],
                         session=session)
