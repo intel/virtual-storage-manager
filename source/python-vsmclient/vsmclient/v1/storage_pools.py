@@ -13,31 +13,21 @@
 #    under the License.
 
 """
-StoragePools interface (1.1 extension).
+StoragePools interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class StoragePool(base.Resource):
-    """A osd is an extra block level storage to the OpenStack instances."""
+    """"""
     def __repr__(self):
         return "<StoragePool: %s>" % self.id
 
     def delete(self):
-        """Delete this osd."""
+        """Delete this storage pool."""
         self.manager.delete(self)
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this osd."""
-        self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified osd ignoring its current state.
-
-        :param osd: The UUID of the osd to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class StoragePoolManager(base.ManagerWithFind):
     """

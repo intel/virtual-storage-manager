@@ -13,90 +13,26 @@
 #    under the License.
 
 """
-Zone interface (1.1 extension).
+Zone interface.
 """
 
 import urllib
 from vsmclient import base
 import logging
 
-LOG = logging.getLogger(__name__)
 
 class Zone(base.Resource):
-    """A vsm is an extra block level storage to the OpenStack instances."""
+    """"""
     def __repr__(self):
         return "<Zone: %s>" % self.id
 
     def delete(self):
-        """Delete this vsm."""
+        """Delete this zone."""
         self.manager.delete(self)
 
     def update(self, **kwargs):
-        """Update the display_name or display_description for this vsm."""
+        """"""
         self.manager.update(self, **kwargs)
-
-    def attach(self, instance_uuid, mountpoint):
-        """Set attachment metadata.
-
-        :param instance_uuid: uuid of the attaching instance.
-        :param mountpoint: mountpoint on the attaching instance.
-        """
-        return self.manager.attach(self, instance_uuid, mountpoint)
-
-    def detach(self):
-        """Clear attachment metadata."""
-        return self.manager.detach(self)
-
-    def reserve(self, vsm):
-        """Reserve this vsm."""
-        return self.manager.reserve(self)
-
-    def unreserve(self, vsm):
-        """Unreserve this vsm."""
-        return self.manager.unreserve(self)
-
-    def begin_detaching(self, vsm):
-        """Begin detaching vsm."""
-        return self.manager.begin_detaching(self)
-
-    def roll_detaching(self, vsm):
-        """Roll detaching vsm."""
-        return self.manager.roll_detaching(self)
-
-    def initialize_connection(self, vsm, connector):
-        """Initialize a vsm connection.
-
-        :param connector: connector dict from nova.
-        """
-        return self.manager.initialize_connection(self, connector)
-
-    def terminate_connection(self, vsm, connector):
-        """Terminate a vsm connection.
-
-        :param connector: connector dict from nova.
-        """
-        return self.manager.terminate_connection(self, connector)
-
-    def set_metadata(self, vsm, metadata):
-        """Set or Append metadata to a vsm.
-
-        :param type : The :class: `Zone` to set metadata on
-        :param metadata: A dict of key/value pairs to set
-        """
-        return self.manager.set_metadata(self, metadata)
-
-    def upload_to_image(self, force, image_name, container_format,
-                        disk_format):
-        """Upload a vsm to image service as an image."""
-        self.manager.upload_to_image(self, force, image_name, container_format,
-                                     disk_format)
-
-    def force_delete(self):
-        """Delete the specified vsm ignoring its current state.
-
-        :param vsm: The UUID of the vsm to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class ZoneManager(base.ManagerWithFind):
     """
@@ -112,17 +48,16 @@ class ZoneManager(base.ManagerWithFind):
 
         #body = {'zone': {'name': name
         #                   }}
-        LOG.debug("DEBUG in vsmclient create zones %s" % str(body))
         return self._create('/zones', body, 'zone')
 
-    def get(self, vsm_id):
+    def get(self, zone_id):
         """
-        Get a vsm.
+        Get a zone.
 
-        :param vsm_id: The ID of the vsm to delete.
+        :param zone_id: The ID of the zone to delete.
         :rtype: :class:`Zone`
         """
-        return self._get("/zones/%s" % vsm_id, "zone")
+        return self._get("/zones/%s" % zone_id, "zone")
 
     def osd_locations_choices(self):
         """
@@ -140,7 +75,7 @@ class ZoneManager(base.ManagerWithFind):
 
     def list(self, detailed=False, search_opts=None):
         """
-        Get a list of all vsms.
+        Get a list of all zones.
 
         :rtype: list of :class:`Zone`
         """
@@ -164,17 +99,16 @@ class ZoneManager(base.ManagerWithFind):
                           "zones")
         return ret
 
-    def delete(self, vsm):
+    def delete(self, zone):
         """
-        Delete a vsm.
+        Delete a zone.
 
-        :param vsm: The :class:`Zone` to delete.
+        :param zone: The :class:`Zone` to delete.
         """
-        self._delete("/zones/%s" % base.getid(vsm))
+        self._delete("/zones/%s" % base.getid(zone))
 
-    def update(self, vsm, **kwargs):
+    def update(self, zone, **kwargs):
         """
-        Update the display_name or display_description for a vsm.
 
         :param vsm: The :class:`Zone` to delete.
         """
@@ -183,37 +117,17 @@ class ZoneManager(base.ManagerWithFind):
 
         body = {"zone": kwargs}
 
-        self._update("/zones/%s" % base.getid(vsm), body)
+        self._update("/zones/%s" % base.getid(zone), body)
 
-    def _action(self, action, vsm, info=None, **kwargs):
+    def _action(self, action, zone, info=None, **kwargs):
         """
-        Perform a vsm "action."
+        Perform a zone "action."
         """
         body = {action: info}
         self.run_hooks('modify_body_for_action', body, **kwargs)
-        url = '/zones/%s/action' % base.getid(vsm)
+        url = '/zones/%s/action' % base.getid(zone)
         return self.api.client.post(url, body=body)
 
     def add_zone_to_crushmap_and_db(self,body):
         url = '/zones/add_zone_to_crushmap_and_db'
         return self.api.client.post(url, body=body)
-
-    def initialize_connection(self, vsm, connector):
-        """
-        Initialize a vsm connection.
-
-        :param vsm: The :class:`Zone` (or its ID).
-        :param connector: connector dict from nova.
-        """
-        return self._action('os-initialize_connection', vsm,
-                            {'connector': connector})[1]['connection_info']
-
-    def terminate_connection(self, vsm, connector):
-        """
-        Terminate a vsm connection.
-
-        :param vsm: The :class:`Zone` (or its ID).
-        :param connector: connector dict from nova.
-        """
-        self._action('os-terminate_connection', vsm,
-                     {'connector': connector})

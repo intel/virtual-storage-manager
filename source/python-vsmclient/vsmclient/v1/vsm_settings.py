@@ -13,20 +13,18 @@
 #    under the License.
 
 """
-Monitors interface (1.1 extension).
+VSM Settings interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class VsmSetting(base.Resource):
+    """"""
     def __repr__(self):
 
         return "<VsmSetting: %s>" % self.id
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this setting."""
-        self.manager.update(self, **kwargs)
 
 class VsmSettingsManager(base.ManagerWithFind):
     """

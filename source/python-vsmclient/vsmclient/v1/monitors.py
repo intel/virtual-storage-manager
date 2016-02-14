@@ -13,31 +13,20 @@
 #    under the License.
 
 """
-Monitors interface (1.1 extension).
+Monitors interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class Monitor(base.Resource):
-    """A monitor is an extra block level storage to the OpenStack instances."""
+    """
+    A monitor maintain maps of the cluster state, including the
+    monitor map, the OSD map, the PG map, and the CRUSH map.
+    """
     def __repr__(self):
         return "<Monitor: %s>" % self.id
-
-    def delete(self):
-        """Delete this monitor."""
-        self.manager.delete(self)
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this monitor."""
-        self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified monitor ignoring its current state.
-
-        :param monitor: The UUID of the monitor to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class MonitorsManager(base.ManagerWithFind):
     """
