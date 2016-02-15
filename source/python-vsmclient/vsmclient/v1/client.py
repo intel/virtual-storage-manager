@@ -31,7 +31,7 @@ from vsmclient.v1 import rbd_pools
 from vsmclient.v1 import devices
 from vsmclient.v1 import storage_pools
 from vsmclient.v1 import appnodes
-from vsmclient.v1 import mons
+# from vsmclient.v1 import mons
 from vsmclient.v1 import licenses
 from vsmclient.v1 import vsm_settings
 from vsmclient.v1 import performance_metrics
