@@ -17,13 +17,9 @@
 from vsmclient.openstack.common import version
 
 version_info = version.VersionInfo('python-vsmclient')
-if not version_info.version:
-    # TODO for running unittests
-    # TODO fix later
-    version_info.version = "1.0"
 # We have a circular import problem when we first run python setup.py sdist
 # It's harmless, so deflect it.
 try:
     __version__ = version_info.version_string()
-except AttributeError:
+except (AttributeError, ValueError):
     __version__ = None
