@@ -234,6 +234,17 @@ def _check_cluster_exist(cs):
 @utils.service_type('vsm')
 def do_appnode_create(cs, args):
     """Creates an appnode."""
+    if not args.vsm_os_username:
+        raise exceptions.CommandError("you need specify a OpenStack username")
+    if not args.vsm_os_password:
+        raise exceptions.CommandError("you need specify a OpenStack password")
+    if not args.vsm_os_tenant_name:
+        raise exceptions.CommandError("you need specify a OpenStack tenant name")
+    if not args.vsm_os_auth_url:
+        raise exceptions.CommandError("you need specify a OpenStack auth url")
+    if not args.ssh_user:
+        raise exceptions.CommandError("you need specify a password-less user to "
+                                      "connect the openstack")
     appnode = {
         'os_username': args.vsm_os_username,
         'os_password': args.vsm_os_password,
@@ -392,7 +403,7 @@ def do_cluster_create(cs, args):
             ser[key] = value
         servers_list.append(ser)
     if len(servers_list) < 3:
-        raise exceptions.CommandError("servers is less than 3.")
+        raise exceptions.CommandError("you need to specify 3 servers.")
     cs.clusters.create(servers=servers_list)
     print(servers_list)
 
@@ -506,7 +517,7 @@ def do_device_list(cs, args):
                "Avail_Capacity_KB", "Total_Capacity_KB", "State", "Journal State"]
     utils.print_list(devices, columns)
 
-@utils.arg('--server-id',
+@utils.arg('server-id',
            metavar='<server-id>',
            help='ID of server.')
 @utils.service_type('vsm')
@@ -530,6 +541,10 @@ def do_device_list_available_disks(cs, args):
 @utils.service_type('vsm')
 def do_device_show_smart_info(cs, args):
     """Shows smart info of a device."""
+    if not args.device_id:
+        raise exceptions.CommandError("you need to specify a Device ID")
+    if not args.device_path:
+        raise exceptions.CommandError("you need to specify a Device path")
     search_opts = {
         'device_id': args.device_id,
         'device_path': args.device_path
@@ -686,6 +701,14 @@ def do_osd_remove(cs, args):
 @utils.service_type('vsm')
 def do_osd_add_new(cs, args):
     """Adds new osd to ceph cluster."""
+    if not args.server_id:
+        raise exceptions.CommandError("you need to specify a Server ID")
+    if not args.storage_group_id:
+        raise exceptions.CommandError("you need to specify a Storage Group ID")
+    if not args.journal:
+        raise exceptions.CommandError("you need to specify a journal")
+    if not args.data:
+        raise exceptions.CommandError("you need to specify a data")
     body = {
         'server_id': args.server_id,
         'osd_info': [
@@ -861,6 +884,8 @@ def do_server_add(cs, args):
 @utils.service_type('vsm')
 def do_server_remove(cs, args):
     """Removes a server."""
+    if not args.id:
+        raise exceptions.CommandError("you need to specify Server ID")
     remove_storage = True
     remove_monitor = True
     cluster_id = 1
@@ -886,6 +911,8 @@ def do_server_remove(cs, args):
 @utils.service_type('vsm')
 def do_server_start(cs, args):
     """Starts a server."""
+    if not args.id:
+        raise exceptions.CommandError("you need to specify Server ID")
     cluster_id = 1
     servers = []
     for id in args.id:
@@ -907,6 +934,8 @@ def do_server_start(cs, args):
 @utils.service_type('vsm')
 def do_server_stop(cs, args):
     """Stops a server."""
+    if not args.id:
+        raise exceptions.CommandError("you need to specify Server ID")
     cluster_id = 1
     servers = []
     for id in args.id:
@@ -980,11 +1009,11 @@ def do_storage_pool_show(cs, args):
 @utils.arg('--pool-quota',
            metavar='<pool-quota>',
            default=0,
-           help='Pool quota. Default=0')
+           help='Pool quota. Default=0.')
 @utils.arg('--cluster-id',
            metavar='<cluster-id>',
            default=0,
-           help='Pool quota. Default=0')
+           help='Pool quota. Default=0.')
 @utils.arg('--tag',
            metavar='<tag>',
            default="",
@@ -992,6 +1021,10 @@ def do_storage_pool_show(cs, args):
 @utils.service_type('vsm')
 def do_storage_pool_replicated_create(cs, args):
     """Creates replicated pool."""
+    if not args.storage_group_id:
+        raise exceptions.CommandError("you need to specify a Storage Group ID")
+    if not args.pg_num:
+        raise exceptions.CommandError("you need to specify a pg number")
     storage_group = _find_storage_group(cs, args.storage_group_id)
     tag = args.tag
     pool_name = args.name
@@ -1050,6 +1083,10 @@ def do_storage_pool_replicated_create(cs, args):
 @utils.service_type('vsm')
 def do_storage_pool_ec_create(cs, args):
     """Creates ec pool."""
+    if not args.storage_group_id:
+        raise exceptions.CommandError("you need to specify a Storage Group ID")
+    if not args.ec_failure_domain:
+        raise exceptions.CommandError("you need to specify a EC Failure Domain")
     storage_group = _find_storage_group(cs, args.storage_group_id)
     tag = args.tag
     pool_name = args.name
@@ -1145,6 +1182,10 @@ def do_storage_pool_list(cs, args):
 @utils.service_type('vsm')
 def do_storage_pool_add_cache_tier(cs, args):
     """Adds cache tier pool."""
+    if not args.storage_pool_id:
+        raise exceptions.CommandError("you need to specify a Storage Pool ID")
+    if not args.cache_pool_id:
+        raise exceptions.CommandError("you need to specify a Cache Pool ID")
     storage_pool_id = args.storage_pool_id
     cache_pool_id = args.cache_pool_id
     if storage_pool_id == cache_pool_id:
