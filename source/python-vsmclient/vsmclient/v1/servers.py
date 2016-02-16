@@ -13,31 +13,25 @@
 #    under the License.
 
 """
-Server interface (1.1 extension).
+Server interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class Server(base.Resource):
-    """A vsm is an extra block level storage to the OpenStack instances."""
+    """"""
     def __repr__(self):
         return "<Server: %s>" % self.id
 
     def delete(self):
-        """Delete this vsm."""
+        """Delete this server."""
         self.manager.delete(self)
 
     def update(self, **kwargs):
-        """Update the display_name or display_description for this vsm."""
+        """"""
         self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified vsm ignoring its current state.
-
-        :param vsm: The UUID of the vsm to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class ServerManager(base.ManagerWithFind):
     """
@@ -55,18 +49,18 @@ class ServerManager(base.ManagerWithFind):
                            }}
         return self._create('/servers', body, 'server')
 
-    def get(self, vsm_id):
+    def get(self, server_id):
         """
-        Get a vsm.
+        Get a server.
 
-        :param vsm_id: The ID of the vsm to delete.
+        :param server_id: The ID of the server to delete.
         :rtype: :class:`Server`
         """
-        return self._get("/servers/%s" % vsm_id, "server")
+        return self._get("/servers/%s" % server_id, "server")
 
     def list(self, detailed=False, search_opts=None):
         """
-        Get a list of all vsms.
+        Get a list of all servers.
 
         :rtype: list of :class:`Server`
         """
@@ -90,17 +84,16 @@ class ServerManager(base.ManagerWithFind):
                           "servers")
         return ret
 
-    def delete(self, vsm):
+    def delete(self, server):
         """
-        Delete a vsm.
+        Delete a server.
 
-        :param vsm: The :class:`Server` to delete.
+        :param server: The :class:`Server` to delete.
         """
-        self._delete("/servers/%s" % base.getid(vsm))
+        self._delete("/servers/%s" % base.getid(server))
 
-    def update(self, vsm, **kwargs):
+    def update(self, server, **kwargs):
         """
-        Update the display_name or display_description for a vsm.
 
         :param vsm: The :class:`Server` to delete.
         """
@@ -109,15 +102,15 @@ class ServerManager(base.ManagerWithFind):
 
         body = {"server": kwargs}
 
-        self._update("/servers/%s" % base.getid(vsm), body)
+        self._update("/servers/%s" % base.getid(server), body)
 
-    def _action(self, action, vsm, info=None, **kwargs):
+    def _action(self, action, server, info=None, **kwargs):
         """
-        Perform a vsm "action."
+        Perform a server "action."
         """
         body = {action: info}
         self.run_hooks('modify_body_for_action', body, **kwargs)
-        url = '/servers/%s/action' % base.getid(vsm)
+        url = '/servers/%s/action' % base.getid(server)
         return self.api.client.post(url, body=body)
 
     def add(self, servers=[]):
@@ -164,23 +157,3 @@ class ServerManager(base.ManagerWithFind):
         ret = self.api.client.post(url, body=body)
         print 'vsmclient ---ceph upgrade==',ret
         return ret
-
-    def initialize_connection(self, vsm, connector):
-        """
-        Initialize a vsm connection.
-
-        :param vsm: The :class:`Server` (or its ID).
-        :param connector: connector dict from nova.
-        """
-        return self._action('os-initialize_connection', vsm,
-                            {'connector': connector})[1]['connection_info']
-
-    def terminate_connection(self, vsm, connector):
-        """
-        Terminate a vsm connection.
-
-        :param vsm: The :class:`Server` (or its ID).
-        :param connector: connector dict from nova.
-        """
-        self._action('os-terminate_connection', vsm,
-                     {'connector': connector})

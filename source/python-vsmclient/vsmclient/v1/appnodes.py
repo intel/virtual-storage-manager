@@ -11,14 +11,17 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-""" App node Interface
+
+"""
+Appnodes interface.
 """
 
 from vsmclient import base
 import urllib
 
-class AppNode(base.Resource):
 
+class AppNode(base.Resource):
+    """An appnode connects to openstack cinder."""
     def __repr__(self):
         return "<App Node: %s>" % self.id
 

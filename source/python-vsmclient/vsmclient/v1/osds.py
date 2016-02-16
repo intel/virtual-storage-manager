@@ -13,14 +13,19 @@
 #    under the License.
 
 """
-OSDs interface (1.1 extension).
+OSDs interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class Osd(base.Resource):
-    """A osd is an extra block level storage to the OpenStack instances."""
+    """
+    A osd stores data, handles data replication, recovery,
+    backfilling, rebalancing and provides some monitor information
+    to Ceph monitors by checking other Ceph OSD Daemons for a heartbeat.
+    """
     def __repr__(self):
         try:
             return "<OSD: %s>" % self.id
@@ -30,17 +35,6 @@ class Osd(base.Resource):
     def delete(self):
         """Delete this osd."""
         self.manager.delete(self)
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this osd."""
-        self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified osd ignoring its current state.
-
-        :param osd: The UUID of the osd to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class OsdManager(base.ManagerWithFind):
     """

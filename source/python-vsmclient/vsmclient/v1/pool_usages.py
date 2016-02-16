@@ -11,14 +11,17 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-""" Storage Pool Usage Interface
+
+"""
+Storage Pool Usage Interface.
 """
 
 from vsmclient import base
 import urllib
 
-class PoolUsage(base.Resource):
 
+class PoolUsage(base.Resource):
+    """"""
     def __repr__(self):
         return "<Pool Usage: %s>" % self.id
 

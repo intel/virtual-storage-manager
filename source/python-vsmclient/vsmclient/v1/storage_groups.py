@@ -13,31 +13,17 @@
 #    under the License.
 
 """
-StorageGroups interface (1.1 extension).
+StorageGroups interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class StorageGroup(base.Resource):
-    """A storage_group is an extra block level storage to the OpenStack instances."""
+    """"""
     def __repr__(self):
         return "<StorageGroup: %s>" % self.id
-
-    def delete(self):
-        """Delete this storage_group."""
-        self.manager.delete(self)
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this storage_group."""
-        self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified storage_group ignoring its current state.
-
-        :param storage_group: The UUID of the storage_group to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class StorageGroupsManager(base.ManagerWithFind):
     """

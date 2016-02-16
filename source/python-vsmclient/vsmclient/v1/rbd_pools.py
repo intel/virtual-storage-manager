@@ -13,31 +13,17 @@
 #    under the License.
 
 """
-RBDPools interface (1.1 extension).
+RBDPools interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class RBDPool(base.Resource):
     """A rbd_pool is an extra block level storage to the OpenStack instances."""
     def __repr__(self):
         return "<RBDPool: %s>" % self.id
-
-    def delete(self):
-        """Delete this rbd_pool."""
-        self.manager.delete(self)
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this rbd_pool."""
-        self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified rbd_pool ignoring its current state.
-
-        :param rbd_pool: The UUID of the rbd_pool to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class RBDPoolsManager(base.ManagerWithFind):
     """
@@ -63,7 +49,7 @@ class RBDPoolsManager(base.ManagerWithFind):
         if search_opts is None:
             search_opts = {}
 
-	if paginate_opts is None:
+        if paginate_opts is None:
             paginate_opts = {}
 
         qparams = {}
@@ -72,7 +58,7 @@ class RBDPoolsManager(base.ManagerWithFind):
             if val:
                 qparams[opt] = val
 
-	for opt, val in paginate_opts.iteritems():
+        for opt, val in paginate_opts.iteritems():
             if val:
                 qparams[opt] = val
 

@@ -13,34 +13,20 @@
 #    under the License.
 
 """
-PlacementGroups interface (1.1 extension).
+Placement Groups interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class PlacementGroup(base.Resource):
-    """A placement_group is an extra block level storage to the OpenStack instances."""
+    """A placement group aggregates objects within a pool."""
     def __repr__(self):
         try:
             return "<PlacementGroup: %s>" % self.id
         except AttributeError:
             return "<PG: summary>"
-
-    def delete(self):
-        """Delete this placement_group."""
-        self.manager.delete(self)
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this placement_group."""
-        self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified placement_group ignoring its current state.
-
-        :param placement_group: The UUID of the placement_group to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class PlacementGroupsManager(base.ManagerWithFind):
     """

@@ -1,18 +1,16 @@
-
-# Copyright 2014 Intel Corporation, All Rights Reserved.
-
-# Licensed under the Apache License, Version 2.0 (the"License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#  http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations
-# under the License.
+#  Copyright 2014 Intel Corporation, All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
 
 from vsmclient import client
 from vsmclient.v1 import limits
@@ -33,7 +31,7 @@ from vsmclient.v1 import rbd_pools
 from vsmclient.v1 import devices
 from vsmclient.v1 import storage_pools
 from vsmclient.v1 import appnodes
-from vsmclient.v1 import mons
+# from vsmclient.v1 import mons
 from vsmclient.v1 import licenses
 from vsmclient.v1 import vsm_settings
 from vsmclient.v1 import performance_metrics
@@ -83,7 +81,7 @@ class Client(object):
         self.rbd_pools = rbd_pools.RBDPoolsManager(self)
         self.devices = devices.DeviceManager(self)
         self.storage_pools = storage_pools.StoragePoolManager(self)
-        self.mons = mons.MonitorsManager(self)
+        # self.mons = mons.MonitorsManager(self)
         self.appnodes = appnodes.AppNodeManager(self)
         self.licenses = licenses.LicenseManager(self)
         self.vsm_settings = vsm_settings.VsmSettingsManager(self)
