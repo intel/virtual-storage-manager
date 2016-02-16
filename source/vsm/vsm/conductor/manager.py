@@ -154,7 +154,7 @@ class ConductorManager(manager.Manager):
         return self._set_error(context)
 
     def get_cluster_list(self, context):
-        LOG.info('get_server_list in conductor manager')
+        LOG.info('get_cluster_list in conductor manager')
         cluster_list = db.init_node_get_all(context)
         ret = self._set_error(context)
         for ser in cluster_list:
@@ -163,7 +163,7 @@ class ConductorManager(manager.Manager):
         return cluster_list
 
     def get_server(self, context, id):
-        LOG.info('get_server_list in conductor manager')
+        LOG.info('get_server in conductor manager')
         server = db.init_node_get(context, id)
         ret = self._set_error(context)
         if ret:
