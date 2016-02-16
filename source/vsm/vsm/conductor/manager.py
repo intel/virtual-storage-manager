@@ -407,6 +407,9 @@ class ConductorManager(manager.Manager):
     def storage_group_get_all(self, context):
         return db.storage_group_get_all(context)
 
+    def storage_group_get(self, context, id):
+        return db.storage_group_get(context, id)
+
     def create_storage_group(self, context, values):
         if values is None:
             LOG.warn("Error: Empty values")
@@ -578,6 +581,9 @@ class ConductorManager(manager.Manager):
     def pg_get_all(self, context, limit, marker, sort_keys, sort_dir):
         return db.pg_get_all(context, limit, marker, sort_keys, sort_dir)
 
+    def pg_get(self, context, id):
+        return db.pg_get(context, id)
+
     def pg_update_or_create(self, context, values):
         pg_ref = db.pg_get_by_pgid(context, values['pgid'])
         if pg_ref:
@@ -589,6 +595,9 @@ class ConductorManager(manager.Manager):
     #rbd
     def rbd_get_all(self, context, limit, marker, sort_keys, sort_dir):
         return db.rbd_get_all(context, limit, marker, sort_keys, sort_dir)
+
+    def rbd_get(self, context, id):
+        return db.rbd_get(context, id)
 
     def license_status_create(self, context, values):
         return db.license_status_create(context, values)
@@ -603,6 +612,8 @@ class ConductorManager(manager.Manager):
     def mds_get_all(self, context):
         return db.mds_get_all(context)
 
+    def mds_get(self, context, id):
+        return db.mds_get_by_id(context, id)
     
     def zones_hosts_get_by_storage_group(self, context, storage_group):
         osds = db.osd_state_get_all(context)

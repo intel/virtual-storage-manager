@@ -1184,6 +1184,9 @@ def pg_get_all(context, limit=None, marker=None, sort_keys=None,
     return IMPL.pg_get_all(context, limit=limit, marker=marker,
                            sort_keys=sort_keys, sort_dir=sort_dir)
 
+def pg_get(context, id):
+    return IMPL.pg_get(context, id)
+
 def pg_get_by_pgid(context, pgid):
     return IMPL.pg_get_by_pgid(context, pgid)
 
@@ -1200,6 +1203,9 @@ def rbd_create(context, values):
 def rbd_get_all(context, limit=None, marker=None, sort_keys=None, sort_dir=None):
     return IMPL.rbd_get_all(context, limit=limit, marker=marker, sort_keys=sort_keys,
 							sort_dir=sort_dir)
+
+def rbd_get(context, id):
+    return IMPL.rbd_get(context, id)
 
 def rbd_get_by_pool_and_image(context, pool, image):
     return IMPL.rbd_get_by_pool_and_image(context, pool, image)
@@ -1228,6 +1234,9 @@ def mds_create(context, values):
 
 def mds_get_all(context):
     return IMPL.mds_get_all(context)
+
+def mds_get_by_id(context, id):
+    return IMPL.mds_get(context, id)
 
 def mds_get_by_gid(context, gid):
     return IMPL.mds_get_by_gid(context, gid)

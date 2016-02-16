@@ -290,6 +290,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def storage_group_get_all(self, context):
         return self.call(context, self.make_msg('storage_group_get_all'))
 
+    def storage_group_get(self, context, id):
+        return self.call(context, self.make_msg('storage_group_get',
+                                                id=id))
+
     def create_storage_group(self, context, values):
         return self.call(context, self.make_msg('create_storage_group', \
                          values=values))
@@ -350,6 +354,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                        sort_keys=sort_keys,
                                        sort_dir=sort_dir))
 
+    def pg_get(self, context, id):
+        return self.call(context, self.make_msg('pg_get',
+                                                id=id))
+
     #suggestion:you'd better not use this api! 
     #If the count of pgs is too large, it may blocks up the net.
     def pg_update_or_create(self, context, values):
@@ -363,6 +371,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                          self.make_msg('rbd_get_all',
 				       limit=limit, marker=marker,
 					sort_keys=sort_keys, sort_dir=sort_dir))
+
+    def rbd_get(self, context, id):
+        return self.call(context, self.make_msg('rbd_get',
+                                                id=id))
 
     #license_status
     def license_status_create(self, context, values):
@@ -383,6 +395,10 @@ class ConductorAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def mds_get_all(self, context):
         return self.call(context, \
                          self.make_msg('mds_get_all'))
+
+    def mds_get(self, context, id):
+        return self.call(context,
+                         self.make_msg('mds_get', id=id))
 
     def ceph_error(self, context):
         return self.call(context, \
