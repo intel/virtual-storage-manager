@@ -257,7 +257,7 @@ class VolumeManager(base.ManagerWithFind):
         Perform a vsm "action."
         """
         body = {'request': req}
-        url = '/conductor/asm_settings'
+        url = '/conductor/vsm_settings'
         return self.api.client.post(url, body=body)
 
     def summary(self):
