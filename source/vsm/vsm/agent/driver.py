@@ -229,7 +229,9 @@ class CephDriver(object):
             profile_ref = db.ec_profile_get(context, body['ec_profile_id'])
             pgp_num = pg_num = profile_ref['pg_num'] 
             plugin = "plugin=" + profile_ref['plugin']
-            ruleset_root = "ruleset-root=" + body['ec_ruleset_root']
+
+            crushmap = self.get_crushmap_json_format()
+            ruleset_root = "ruleset-root=" +  crushmap.get_bucket_root_by_rule_name(body['ec_ruleset_root'])
             failure_domain = "ruleset-failure-domain=" + body['ec_failure_domain']
             rule_name = pool_name
 

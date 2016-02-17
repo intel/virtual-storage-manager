@@ -148,6 +148,21 @@ class CrushMap():
 
         return devices
 
+    def get_bucket_root_by_rule_name(self, rule_name):
+        '''
+        this function will try to get bucket root for ec pool from storage group
+        :param rule:
+        :return:
+        '''
+        rule = self.get_rules_by_name(rule_name)
+        bucket_root = "default"
+
+        if len(rule['steps']) > 0:
+            step = rule['steps'][0]
+            bucket_root = step['item_name']
+
+        return bucket_root
+
     def get_storage_groups_by_rule(self, rule):
         '''
         this function will execute each op.in detail,
@@ -296,6 +311,9 @@ if __name__ == '__main__':
     # tunables = crushmap.get_all_tunables()
     ret = crushmap._get_location_by_osd_name('osd.1')
     print 'location----%s-'%ret
+
+    bucket_root = crushmap.get_bucket_root_by_rule_id('performance')
+    print 'bucket root = %s' %bucket_root
 
 #    for name in tunables:
 #        print name, tunables[name]
