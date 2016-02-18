@@ -828,20 +828,21 @@ def do_pool_usage_list(cs, args):
 
 
 ###################rbd pool##########################
-@utils.arg('rbd',
-           metavar='<rbd>',
-           help='Name or ID of rbd.')
-@utils.service_type('vsm')
-def do_rbd_pool_show(cs, args):
-    """Shows details info of rbd pool."""
-    rbd = _find_rbd(cs, args.rbd)
-    _print_rbd(rbd)
+# @utils.arg('rbd',
+#            metavar='<rbd>',
+#            help='Name or ID of rbd.')
+# @utils.service_type('vsm')
+# def do_rbd_pool_show(cs, args):
+#     """Shows details info of rbd pool."""
+#     rbd = _find_rbd(cs, args.rbd)
+#     _print_rbd(rbd)
 
 @utils.service_type('vsm')
 def do_rbd_pool_list(cs, args):
     """Lists all rbd pools."""
-    rbds = cs.rbd_pools.list(detailed=False, search_opts=None, paginate_opts=None)
-    columns = ["ID"]
+    rbds = cs.rbd_pools.list(detailed=True, search_opts=None, paginate_opts=None)
+    columns = ["ID", "Pool", "Image Name", "Size", "Objects", "Order",
+               "Format", "Updated_at"]
     utils.print_list(rbds, columns)
 
 @utils.service_type('vsm')
