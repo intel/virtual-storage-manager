@@ -205,6 +205,11 @@ class CrushMap():
         print storage_groups
         return storage_groups
 
+    def get_storage_group_value_by_rule_name(self,rule_name):
+        rule = self.get_rules_by_name(rule_name)
+        values = self.get_storage_groups_dict_by_rule([rule])
+        return values
+
     def get_storage_groups_dict_by_rule(self, rules):
         '''
         this function will execute each op.in detail,
@@ -314,6 +319,9 @@ if __name__ == '__main__':
 
     bucket_root = crushmap.get_bucket_root_by_rule_id('performance')
     print 'bucket root = %s' %bucket_root
+
+    ret = crushmap.get_storage_group_value_by_rule_name('ecpooltest3')
+    print 'ecpooltest3---storage_group===',ret
 
 #    for name in tunables:
 #        print name, tunables[name]
