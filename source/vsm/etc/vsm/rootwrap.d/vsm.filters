@@ -47,6 +47,7 @@ mount: CommandFilter, /bin/mount, root
 umount: CommandFilter, /bin/umount, root
 
 #common
+su: CommandFilter, /usr/bin/su, root
 ssh: CommandFilter, /usr/bin/ssh, root
 sed: CommandFilter, /bin/sed, root
 touch: CommandFilter, /bin/touch, root
