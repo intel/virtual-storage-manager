@@ -249,7 +249,14 @@ class CephDriver(object):
 
             res = utils.execute('ceph', 'osd', 'pool', 'create', pool_name, pg_num, \
                             pgp_num, 'erasure', profile_ref['name'], rule_name, \
-                            run_as_root=True) 
+                            run_as_root=True)
+            new_crushmap = self.get_crushmap_json_format()
+            storage_group_values = new_crushmap.get_storage_group_value_by_rule_name(rule_name)
+            if len(storage_group_values) == 1:
+                storage_group_values = storage_group_values[0]
+                storage_group_values['status'] = 'IN'
+                ref_storge_group = db.storage_group_update_or_create(context,storage_group_values)
+                body['storage_group_id'] = ref_storge_group.id
         elif body.get('pool_type') == 'replicated':
             try:
                 utils.execute('ceph', 'osd', 'getcrushmap', '-o', FLAGS.crushmap_bin,
