@@ -1144,7 +1144,7 @@ class CephDriver(object):
 
         # step 7
         LOG.info('>> add mon step 7 ')
-        utils.execute("ceph", "mon", "add", mon_id, host, run_as_root=True)
+        # utils.execute("ceph", "mon", "add", mon_id, host, run_as_root=True)
         self.start_mon_daemon(context, mon_id)
         LOG.info('>> add mon finish %s' % mon_id)
         return True
