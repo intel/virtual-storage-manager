@@ -1066,6 +1066,13 @@ class SchedulerManager(manager.Manager):
         LOG.info('scheduler/manager.py get cluster_list values %s' % res)
         return res
 
+    def get_ceph_health_list(self, context, body=None):
+        cluster_id = body and body.get('cluster_id',1) or 1
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        res = self._agent_rpcapi.get_ceph_health_list(context,active_monitor['host'])
+        LOG.info('scheduler/manager.py get_ceph_health_list values %s' % res)
+        return res
+
     def _get_monitor_by_cluster_id(self, context, cluster_id):
         node_ref = self._conductor_rpcapi.init_node_get_by_cluster_id(context,
                                                             cluster_id)
