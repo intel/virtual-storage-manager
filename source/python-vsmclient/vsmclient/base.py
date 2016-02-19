@@ -156,7 +156,7 @@ class Manager(utils.HookableMixin):
         resp, body = self.api.client.post(url, body=body)
         if return_raw:
             return body[response_key]
-        else
+        else:
             return body
 
         with self.completion_cache('human_id', self.resource_class, mode="a"):
