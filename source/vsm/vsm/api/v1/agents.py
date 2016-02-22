@@ -434,7 +434,8 @@ class AgentsController(wsgi.Controller):
                 value['rule_id'] = item['rule_id']
                 value['storage_class'] = item['storage_class']
                 storage_group_list.append(value)
-                storage_class_list.append(item['storage_class'])
+                if not item['storage_class'] in storage_class_list:
+                    storage_class_list.append(item['storage_class'])
         return storage_group_list, storage_class_list
 
     @wsgi.serializers(xml=AgentsTemplate)
