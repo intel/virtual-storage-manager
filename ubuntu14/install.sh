@@ -139,6 +139,23 @@ else
     echo "[Info]: You run the tool in the controller server."
 fi
 
+declare -a on_exit_items
+function on_exit()
+{
+    for i in "${on_exit_items[@]}"; do
+        eval $i
+    done
+}
+
+function add_on_exit()
+{
+    local n=${#on_exit_items[*]}
+    on_exit_items[$n]="$*"
+    if [[ $n -eq 0 ]]; then
+        trap on_exit EXIT
+    fi
+}
+
 #-------------------------------------------------------------------------------
 #            prepare
 #-------------------------------------------------------------------------------
@@ -440,6 +457,11 @@ function setup_remote_agent() {
     fi
 }
 
+function cleanup_remote_sources_list()
+{
+    $SSH $USER@$1 "if [[ -f /etc/apt/sources.list.bak ]]; then $SUDO mv /etc/apt/sources.list.bak /etc/apt/sources.list; fi"
+}
+
 function install_agent() {
     echo "=== Install agent [$1] start."
     generate_token
@@ -452,7 +474,7 @@ function install_agent() {
 
     setup_remote_agent $1
     install_setup_diamond $1
-    $SSH $USER@$1 "if [[ -f /etc/apt/sources.list.bak ]]; then $SUDO mv /etc/apt/sources.list.bak /etc/apt/sources.list; fi"
+    cleanup_remote_sources_list $1
     echo "=== Install agent [$1] complete."
 }
 
@@ -488,6 +510,7 @@ if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
         tf=$(mktemp)
         tf_list="${tf_list} ${tf}"
         echo "=== Starting asynchronous agent install [$ip_or_hostname] ..."
+        add_on_exit cleanup_remote_sources_list $ip_or_hostname
         install_agent $ip_or_hostname >${tf} 2>&1 &
     done
     wait
@@ -507,6 +530,7 @@ else
             tf=$(mktemp)
             tf_list="${tf_list} ${tf}"
             echo "=== Starting asynchronous agent install [$ip_or_hostname] ..."
+            add_on_exit cleanup_remote_sources_list $ip_or_hostname
             install_agent $ip_or_hostname >${tf} 2>&1 &
         done
         wait
