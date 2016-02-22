@@ -254,7 +254,7 @@ class CephConfigParser(manager.Manager):
 
         try:
             if not fp is None:
-                if isinstance(fp, str):
+                if isinstance(fp, str) or isinstance(fp, unicode):
                     if os.path.exists(fp) and os.path.isfile(fp):
                         self._parser.read(fp)
                 elif isinstance(fp, dict):
