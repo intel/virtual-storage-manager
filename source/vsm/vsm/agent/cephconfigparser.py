@@ -232,7 +232,7 @@ class CephConfigParser(manager.Manager):
         parser = Parser()
         parser.read(FLAGS.ceph_conf)
         fs_type = parser.get('osd', 'osd mkfs type', 'xfs')
-        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type)
+        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type, utils.get_fs_options(fs_type))
 
         for sec in parser.sections():
             if sec.find('osd.') != -1:
