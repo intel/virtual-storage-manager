@@ -65,7 +65,6 @@ class IndexView(ModalChartMixin, tables.DataTableView):
                         "capacity_used": 0 if not _sg.capacity_used else round(_sg.capacity_used * 1.0 / 1024 / 1024, 1),
                         "capacity_avail": 0 if not _sg.capacity_avail else round(_sg.capacity_avail * 1.0 / 1024 / 1024, 1),
                         "capacity_percent_used": 0 if not _sg.capacity_total else _sg.capacity_used * 10000 / _sg.capacity_total / 100.0,
-                        "largest_node_capacity_used": _sg.largest_node_capacity_used,
                         "largest_node_capacity_used": 0 if not _sg.largest_node_capacity_used else round(_sg.largest_node_capacity_used * 1.0 / 1024 / 1024, 1),
                         "status": _sg.status,
                         "updated_at": get_time_delta(_sg.updated_at),
