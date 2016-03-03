@@ -560,7 +560,7 @@ class CephDriver(object):
                 hostname = monitor['host']
                 hostip = monitor['secondary_public_ip']
                 if is_first_mon:
-                    config.add_mds_header()
+                    # config.add_mds_header()
                     #config.add_mds(hostname, hostip, '0')
                     #values = {'mds': 'yes'}
                     #db.init_node_update(context, host['id'], values)
