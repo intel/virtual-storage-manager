@@ -170,18 +170,13 @@ class SchedulerManager(manager.Manager):
                 raise MonitorAddFailed
             except Exception, e:
                 LOG.error("%s: %s" %(e.code, e.message))
-        pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
-        pool_default_size = int(pool_default_size.value)
-        if len(monitor_list) < pool_default_size:
-            LOG.error('There must be at least %s monitors.'%pool_default_size)
+
+        monitor_default_size = 3
+        if len(monitor_list) < monitor_default_size:
+            LOG.error('For reliability, it is suggested to have at least %s monitors.'%monitor_default_size)
             self._update_server_list_status(context,
                                             server_list,
-                                            "Error: monitors < %s"%pool_default_size)
-            try:
-                raise MonitorAddFailed
-            except Exception, e:
-                LOG.error("%s: %s" %(e.code, e.message))
-            raise
+                                            "Warn: monitors < %s"%monitor_default_size)
 
         LOG.info(' monitor_list = %s' % monitor_list)
         if len(monitor_list) == 1:
