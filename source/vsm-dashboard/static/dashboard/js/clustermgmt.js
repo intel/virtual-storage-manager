@@ -30,8 +30,9 @@
                 colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0' checked='true'>";
             else
                 colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0'>";
-            
-        })
+            var colIsMDS = this.children[9];
+            colIsMDS.innerHTML = "<input type='checkbox' class='chkIsMDS' value='0'>";
+        })
     }
     $(".create-cluster-commit").click(function(){
         var data_list = new Array();
@@ -51,12 +52,13 @@
                 id = row.find(".server_id").html();
                 is_monitor = row.find(".chkIsMonitor")[0].checked; 
                 is_storage = true;
+                is_mds = row.find(".chkIsMDS")[0].checked;
                 if(row.find(".is_storage ")[0].innerText == "no")
                     is_storage = false;
 
                 zone_id = row.find(".zone").find("select").val();
                 zone_name = row.find(".zone").html();
-                data = {id:id, is_monitor:is_monitor, is_storage:is_storage, zone_id:zone_id};
+                data = {id:id, is_monitor:is_monitor, is_storage:is_storage, is_mds:is_mds, zone_id:zone_id};
                 data_list.push(data);
                 if ($.inArray(zone_name,zone_id_all)==-1){zone_id_all.push(zone_name)}
                 if(is_monitor == true){

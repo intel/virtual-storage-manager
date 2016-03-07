@@ -109,6 +109,15 @@ class ClusterController(wsgi.Controller):
         context = req.environ['vsm.context']
         server_list = body['cluster']['servers']
         LOG.info('Begin to call scheduler.createcluster')
+
+        # only and should only one mds
+        mds_count = 0
+        for server in server_list:
+            if server['is_mds'] == True:
+                mds_count = mds_count + 1
+        if mds_count > 1:
+            raise exc.HTTPBadRequest("More than one mds.")
+
         self.scheduler_api.create_cluster(context, server_list)
         return webob.Response(status_int=202)
 
