@@ -826,7 +826,7 @@ class SchedulerManager(manager.Manager):
             if need_change_mds:
                 LOG.info("start to remove mds")
                 self.remove_mds(context, server_list)
-                self.add_mds(context, server_list)
+                # self.add_mds(context, server_list)
             return True
         except rpc_exc.Timeout:
             self._update_server_list_status(context,
@@ -955,9 +955,9 @@ class SchedulerManager(manager.Manager):
                                                 'ERROR')
                 raise
 
-        active_count = db.init_node_count_by_status(context,status='Active')
-        if need_change_mds and active_count > 0:
-            self.add_mds(context, server_list)
+        # active_count = db.init_node_count_by_status(context,status='Active')
+        # if need_change_mds and active_count > 0:
+        #     self.add_mds(context, server_list)
         return True
 
 
@@ -1458,10 +1458,12 @@ class SchedulerManager(manager.Manager):
            [
                {u'is_storage': True,
                 u'is_monitor': True,
+                u'is_mds': True,
                 u'id': u'1',
                 u'zone_id': u'1'},
                {u'is_storage': True,
                 u'is_monitor': False,
+                u'is_mds': False,
                 u'id': u'2',
                 u'zone_id': u'2'}
            ]
@@ -1472,7 +1474,6 @@ class SchedulerManager(manager.Manager):
         for ser in server_list:
             ser_ref = db.init_node_get(context, ser['id'])
             ser['host'] = ser_ref['host']
-
 
 
         def _update(status):
@@ -1487,12 +1488,15 @@ class SchedulerManager(manager.Manager):
         pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
         pool_default_size = int(pool_default_size.value)
         nums = len(server_list)
+        mds_node = None
         if nums >= pool_default_size:
             count = 0
             rest_mon_num = 0
             for ser in server_list:
                 if ser['is_monitor'] == True:
                     count += 1
+                if ser['is_mds'] == True:
+                    mds_node = ser
             if count < pool_default_size:
                 rest_mon_num = pool_default_size - count
             if rest_mon_num > 0:
@@ -1630,12 +1634,13 @@ class SchedulerManager(manager.Manager):
             _update("ERROR: start osd")
 
         # add mds service
-        try:
-            _update("Start mds")
-            LOG.info('start mds services, host = %s' % monitor_node['host'])
-            self._agent_rpcapi.add_mds(context, host=monitor_node['host'])
-        except:
-            _update("ERROR: mds")
+        if mds_node:
+            try:
+                _update("Start mds")
+                LOG.info('start mds services, host = %s' % mds_node['host'])
+                self._agent_rpcapi.add_mds(context, host=mds_node['host'])
+            except:
+                _update("ERROR: mds")
         # Created begin to get ceph status
 
         try:
