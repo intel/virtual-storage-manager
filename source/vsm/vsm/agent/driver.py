@@ -813,6 +813,13 @@ class CephDriver(object):
                 return False
         return True
 
+    def is_new_zone(self, zone):
+        nodes = self.get_crushmap_nodes()
+        for node in nodes:
+            if zone == node['name']:
+                return False
+        return True
+
     def add_osd(self, context, host_id, osd_id_in=None):
 
         if osd_id_in is not None:
@@ -902,12 +909,12 @@ class CephDriver(object):
             if self.is_new_storage_group(crush_dict['storage_group']):
                 self._crushmap_mgmt.add_storage_group(crush_dict['storage_group'],\
                                                   crush_dict['root'],types=types)
-                zones = db.zone_get_all_not_in_crush(context)
-                for item in zones: 
-                    zone_item = item['name'] + '_' + crush_dict['storage_group'] 
-                    self._crushmap_mgmt.add_zone(zone_item, \
-                                                crush_dict['storage_group'],types=types)
-                
+                # zones = db.zone_get_all_not_in_crush(context)
+                # for item in zones:
+                #     zone_item = item['name'] + '_' + crush_dict['storage_group']
+                #     self._crushmap_mgmt.add_zone(zone_item, \
+                #                                 crush_dict['storage_group'],types=types)
+                #
                 if zone == FLAGS.default_zone:
                     self._crushmap_mgmt.add_rule(crush_dict['storage_group'], 'host')
                 else:
@@ -918,8 +925,11 @@ class CephDriver(object):
                 LOG.info("rule_dict:%s" % rule_dict)
                 values['rule_id'] = rule_dict['rule_id']
 
+            if self.is_new_zone(crush_dict['zone']):
+                self._crushmap_mgmt.add_zone(crush_dict['zone'], \
+                                             crush_dict['storage_group'], types=types)
             self._crushmap_mgmt.add_host(crush_dict['host'],
-                                         crush_dict['zone'],types=types)
+                                         crush_dict['zone'], types=types)
             #    added_to_crushmap = True
 
             #There must be at least 3 hosts in every storage group when the status is "IN"
@@ -3176,7 +3186,8 @@ class CreateCrushMapDriver(object):
                         weight = weight + 1
                 dic["weight"] = (weight != 0 and weight or FLAGS.default_weight)
                 dic["item"] = items
-                host.append(dic)
+                if len(items) > 0:
+                    host.append(dic)
         return host, num
 
     def _get_zone_dic(self, node_info, hosts, zones, storage_groups, num):
@@ -3199,7 +3210,9 @@ class CreateCrushMapDriver(object):
                 dic["item"] = items
                 num = num - 1
                 dic["id"] = num
-                zone_bucket.append(dic)
+                if len(items) > 0:
+                    zone_bucket.append(dic)
+        #LOG.info('zone_bucket----%s'%zone_bucket)
         return zone_bucket, num
 
     def _get_storage_group_bucket(self, storage_groups, zones, num):
@@ -3220,7 +3233,8 @@ class CreateCrushMapDriver(object):
             dic["item"] = items
             num = num - 1
             dic["id"] = num
-            storage_group_bucket.append(dic)
+            if len(items) > 0:
+                storage_group_bucket.append(dic)
         return storage_group_bucket, num
 
     def _get_root_bucket(self, storage_groups, num):
