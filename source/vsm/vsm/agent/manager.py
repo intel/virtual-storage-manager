@@ -25,6 +25,7 @@ import re
 import os
 import json
 import time
+import socket
 import platform
 from vsm import db
 from vsm import context
@@ -676,6 +677,9 @@ class AgentManager(manager.Manager):
         db.cluster_increase_deleted_times(context, self._cluster_id)
         self._sync_mon_list(context)
         return ret
+
+    def get_ceph_disk_list(self, context):
+        return self.ceph_driver.get_ceph_disk_list()
 
     def get_ceph_config(self, context):
         return self.ceph_driver.get_ceph_config(context)
@@ -1958,6 +1962,12 @@ class AgentManager(manager.Manager):
         return message
 
     def import_cluster(self,context,body):
+        '''
+        Main entry point for importing an externally created cluster into VSM's databases.
+        :param context:
+        :param body: request body - {monitor_keyring: <keyring-path>, ceph_conf: <content>}
+        :return: result message - {'error':<error if failed>,'code':<code if failed>,'info':<Success or Fail>}
+        '''
         message = {'error':'','code':'','info':''}
         try:
             keyring_file_path = body.get('monitor_keyring')
@@ -1968,12 +1978,11 @@ class AgentManager(manager.Manager):
             ceph_conf = body.get('ceph_conf')
             ceph_conf_file_new = '%s-import'%FLAGS.ceph_conf
             utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
-            config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new))
-            config_dict = config.as_dict()
-            config_content = config._parser.as_str()
-            self._modify_init_nodes_from_config_to_db(context,config_dict)
-            self._insert_devices_from_config_to_db(context,config_dict)
-            self._insert_osd_states_from_config_to_db(context,config_dict,crushmap)
+            config_content = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new))._parser.as_str()
+            osd_info = self.ceph_driver.get_ceph_osd_info()
+            self._modify_init_nodes_from_config_to_db(context,osd_info)
+            self._insert_devices_from_config_to_db(context,osd_info)
+            self._insert_osd_states_from_config_to_db(context,osd_info,crushmap)
             self._insert_or_modified_clusters(context,config_content,keyring_file_path)
             message['error'] = ''
             message['code'] = ''
@@ -1986,69 +1995,108 @@ class AgentManager(manager.Manager):
         #LOG.info('import cluster-----88888888--%s'%message)
         return message
 
-    def _modify_init_nodes_from_config_to_db(self,context,config_dict):
-        '''TODO:'''
+    def _modify_init_nodes_from_config_to_db(self,context,osd_info):
+        '''
+        Update 'data_drives_number' field in 'init_nodes' table with correct number of OSD devices.
+        :param context:
+        :param osd_info: output from 'ceph osd dump -f json' loaded into a python object with json.load()
+        :return: None
+        '''
         servers = db.init_node_get_all(context)
-        osd_list = []
         for server in servers:
             server['data_drives_number'] = 0
-        for key,value in config_dict.iteritems():
-            if key.find('osd.')!=-1:
-                osd_list.append({key:value})
-                for server in servers:
-                    if value.get('host') == server['host']:
-                        server['data_drives_number'] = int(server['data_drives_number']) + 1
-                        break
+        for osd in osd_info['osds']:
+            cluster_ip = osd['cluster_addr'].split(':')[0]
+            for server in servers:
+                if cluster_ip == server['cluster_ip']:
+                    server['data_drives_number'] = int(server['data_drives_number']) + 1
+                    break
         for server in servers:
             values = {'data_drives_number':server['data_drives_number'],'status':'Active'}
             db.init_node_update(context,server['id'],values)
 
-
-    def _insert_devices_from_config_to_db(self,context,config_dict):
-        '''TODO: device_type interface_type  mount_point path state journal_state'''
+    def _insert_devices_from_config_to_db(self,context,osd_info):
+        '''
+        Add/Update all devices from all OSD cluster nodes. Search for device in device table by host and data/journal
+        paths, update information based on results from 'ceph osd dump' or insert new entry if not found.
+        TODO: device_type interface_type  mount_point path state journal_state
+        :param context:
+        :param osd_info: the osd info returned from 'ceph osd dump -f json'
+        :return: None, but osd_info is updated with additional device info - host name and data/journal paths
+        '''
         device_values = []
         fs_type = db.cluster_get_all(context)[0]['file_system']
 
-        for key,value in config_dict.iteritems():
-            if key.find('osd.')!=-1:
+        self._add_osd_path_info(context,osd_info)
+        for osd in osd_info['osds']:
+            cd = osd.get('cd')
+            if cd:
                 values = {
-                        'name':value.get('devs'),
-                        'journal':value.get('osd journal'),
-                        'path':value.get('devs'),
-                        'fs_type':fs_type,
-                        'state':'OK',
-                        'journal_state':'OK',
-                        'mount_point':value.get('mount_point'),
-                        }
-
-                service_id = db.init_node_get_by_host(context,value.get('host'))['service_id']
+                    'name':cd.get('dev'),
+                    'journal':cd.get('journal'),
+                    'path':cd.get('dev'),
+                    'fs_type':fs_type,
+                    'state':'OK',
+                    'journal_state':'OK',
+                    'mount_point':cd.get('dev'),
+                    }
+                service_id = db.init_node_get_by_host(context,osd.get('host'))['service_id']
                 values['service_id'] = service_id
                 device_values.append(values)
+
         #LOG.info('get device_values==22222222222===%s'%device_values)
         for device in device_values:
-            device_ref = None
             device_ref =  db.device_get_by_name_and_journal_and_service_id(context,device.get('name'),device.get('journal'),device.get('service_id'))
             if device_ref:
                 db.device_update(context,device_ref['id'],device)
             else:
                 db.device_create(context,device)
 
+    def _add_osd_path_info(self,context,osd_info):
+        '''
+        Add osd data/journal block device path info for specified hosts. Also add host name.
+        This is done by remotely executing ceph-disk on each osd node found, and adding the
+        resulting information in the osd_info structure.
+        :param osd_info: the python osd_info structure returned by 'ceph osd dump -f json'
+        :param context: the rpcapi context to use to talk to remote agents.
+        :return: None, but osd_info is updated on exit.
+        '''
+        addr_cache = {}
+        for osd in osd_info['osds']:
+            # build an addr_cache entry for this node if not done already
+            cluster_ip = osd['cluster_addr'].split(':')[0]
+            if not cluster_ip in addr_cache:
+                addr_cache[cluster_ip] = {}
+                node = socket.gethostbyaddr(cluster_ip)[0]
+                addr_cache[cluster_ip]['host'] = unicode(node)
+                cdlist = self._agent_rpcapi.get_ceph_disk_list(context, node)
+                addr_cache[cluster_ip]['cdlist'] = cdlist
 
-    def _insert_osd_states_from_config_to_db(self,context,config_dict,crushmap):
+            # add the host (name) to the osd
+            osd[u'host'] = addr_cache[cluster_ip]['host']
+
+            # find the cdlist entry corresponding to this osd and store it with the osd
+            for osd_dev in addr_cache[cluster_ip]['cdlist']:
+                if osd_dev[u'id'] == osd[u'osd']:
+                    osd[u'cd'] = osd_dev
+
+    def _insert_osd_states_from_config_to_db(self,context,osd_info,crushmap):
         cluster_id = db.cluster_get_all(context)[0]['id']
         osd_state_values = []
-        for key,value in config_dict.iteritems():
-            if key.find('osd.')!=-1:
-                osd_name = key
-                service_id = db.init_node_get_by_host(context,value.get('host'))['service_id']
-                device_id = db.device_get_by_name_and_journal_and_service_id(context,value.get('devs'),value.get('osd journal'),service_id)['id']
+
+        for osd in osd_info['osds']:
+            osd_name = osd.get('osd')
+            cd = osd.get('cd')
+            if cd:
+                service_id = db.init_node_get_by_host(context,osd['host'])['service_id']
+                device_id = db.device_get_by_name_and_journal_and_service_id(context,cd.get('dev'),cd.get('journal'),service_id)['id']
                 storage_group_id = 1
                 cluster_id = cluster_id
                 state = 'In-Up'
                 operation_status = 'Present'
                 weight = crushmap.get_weight_by_osd_name(osd_name)
-                public_ip = value.get('public addr')
-                cluster_ip = value.get('cluster addr')
+                public_ip = osd['public_addr'].split(':')[0]
+                cluster_ip = osd['cluster_addr'].split(':')[0]
                 zone_id = 1
                 values = {'id':device_id,
                           'osd_name':osd_name,

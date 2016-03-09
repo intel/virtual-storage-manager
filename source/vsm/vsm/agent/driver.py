@@ -820,6 +820,96 @@ class CephDriver(object):
                 return False
         return True
 
+    def get_ceph_osd_info(self):
+        '''
+        Locally execute 'ceph osd dump -f json' and return the json block as a python data structure.
+        :return: a python data structure containing the json content returned by 'ceph osd dump -f json'
+        '''
+        output = utils.execute("ceph", "osd", "dump", "-f", "json", run_as_root=True)[0]
+        return json.loads(output)
+
+    def get_ceph_disk_list(self):
+        '''
+        Execute 'sudo ceph-disk list' and gather ceph partition info.
+        :return: a python data structure containing the content of 'sudo ceph-disk list'
+        '''
+        output = utils.execute('ceph-disk', 'list', run_as_root=True)[0]
+        return self.v09_ceph_disk_list_parser(output) if 'ceph data' in output\
+          else self.v08_ceph_disk_list_parser(output)
+
+    def v09_ceph_disk_list_parser(self, output):
+        '''
+        Parse the output of 'ceph-disk list' as if we're running against a v0.9 ceph (infernalis) or higher.
+        :param output: the output to be parsed.
+        :return: a list of disk-info dictionaries.
+        '''
+        disk_list = []
+        for line in output.split('\n'):
+            if 'ceph data' in line:
+                # /dev/sdb1 ceph data, active, cluster ceph, osd.0, journal /dev/sdb2
+                disk_dict = {}
+                parts = line.strip().split(', ')
+                disk_dict[u'dev'] = parts[0].split()[0]
+                disk_dict[u'state'] = parts[1]
+                disk_dict[u'cluster'] = parts[2].split()[-1]
+                disk_dict[u'id'] = int(parts[3].split('.')[-1])
+                disk_dict[u'journal'] = parts[4].split()[-1]
+                disk_list.append(disk_dict)
+        return disk_list
+
+    def v08_ceph_disk_list_parser(self, output):
+        '''
+        Parse the output of 'ceph-disk list' as if we're running against a v0.8 ceph (firefly) or lower.
+        :param output: the output to be parsed.
+        :return: a list of disk-info dictionaries.
+        '''
+        disk_list = []
+        for line in output.split('\n'):
+            if '/osd/' in line:
+                # /dev/sdb4 other, xfs, mounted on /var/lib/ceph/osd/osd0
+                disk_dict = {}
+                parts = line.strip().split(', ')
+                osd_path = parts[-1].split()[-1]
+                osd_id = self.get_osd_whoami(osd_path)
+                osd_daemon_cfg = self.get_osd_daemon_map(osd_id, 'config')
+                osd_daemon_status = self.get_osd_daemon_map(osd_id, 'status')
+                disk_dict[u'dev'] = parts[0].split()[0]
+                disk_dict[u'state'] = osd_daemon_status['state']
+                disk_dict[u'cluster'] = osd_daemon_cfg['cluster']
+                disk_dict[u'id'] = osd_id
+                disk_dict[u'journal'] = osd_daemon_cfg['osd_journal']
+                disk_list.append(disk_dict)
+        return disk_list
+
+    def get_osd_whoami(self, osd_path):
+        '''
+        Return the osd id number for the osd on the specified path.
+        :param osd_path: the device path of the osd - e.g., /var/lib/ceph/osd...
+        :return: an integer value representing the osd id number for the target osd.
+        '''
+        output = utils.execute('cat', osd_path+'/whoami', run_as_root=True)[0]
+        return int(output)
+
+    def get_osd_daemon_map(self, oid, reqtype):
+        '''
+        command: ceph daemon osd.{oid} config show
+        output: { "cluster": "ceph",
+                  ...
+                  "osd_journal": "\/dev\/sdc1"}
+        :param oid: the id number of the osd for which to obtain a journal device path.
+        :param reqtype: the type of request - 'config' or 'status' (could be expanded to other types later).
+        :return: a dictionary containing configuration parameters and values for the specified osd.
+        '''
+        values = {}
+        arglist = ['ceph', 'daemon', 'osd.'+str(oid)]
+        arglist.extend(['config', 'show'] if reqtype == 'config' else ['status'])
+        output = utils.execute(*arglist, run_as_root=True)[0]
+        for line in output.split('\n'):
+            if len(line.strip()) > 0:
+                attr, val = tuple(line.translate(None, ' {"\},').split(':', 1))
+                values[attr] = val
+        return values
+
     def add_osd(self, context, host_id, osd_id_in=None):
 
         if osd_id_in is not None:
