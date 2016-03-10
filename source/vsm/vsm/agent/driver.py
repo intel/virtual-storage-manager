@@ -595,8 +595,7 @@ class CephDriver(object):
                             (json.dumps(strg, sort_keys=True, indent=4)))
 
                     config.add_osd(strg['host'],
-                                   (strg['secondary_public_ip'],
-                                    strg['primary_public_ip']),
+                                   strg['secondary_public_ip'],
                                    strg['cluster_ip'],
                                    strg['dev_name'],
                                    strg['dev_journal'],
@@ -1178,7 +1177,7 @@ class CephDriver(object):
     def _add_ceph_osd_to_config(self, context, strg, osd_id):
         LOG.info('>>>> _add_ceph_osd_to_config start')
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        ip = (strg['secondary_public_ip'], strg['primary_public_ip'])
+        ip = strg['secondary_public_ip']
 
         config.add_osd(strg['host'], ip, strg['cluster_ip'],
                 strg['dev_name'], strg['dev_journal'], osd_id)
