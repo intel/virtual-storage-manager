@@ -44,6 +44,8 @@ from vsm.api.v1 import licenses
 from vsm.api.v1 import performance_metrics
 from vsm.api.contrib import poolusages
 from vsm.api.v1 import ec_profiles
+from vsm.api.v1 import rgw
+
 from vsm.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -253,3 +255,9 @@ class APIRouter(vsm.api.openstack.APIRouter):
                             'ec_profiles_remove': "post",
                             },
                         member={'action': 'post'})
+
+        self.resources['rgws'] = rgw.create_resource(ext_mgr)
+        mapper.resource("rgws", "rgws",
+                        controller=self.resources['rgws'],
+                        collection={},
+                        member={'action':'post'})
