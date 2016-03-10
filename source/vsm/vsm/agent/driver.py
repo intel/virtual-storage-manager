@@ -3386,8 +3386,10 @@ class CreateCrushMapDriver(object):
         return dic['rule_id']
 
     def _generate_rule(self, context, zone_tag):
-        storage_groups = self.conductor_api.storage_group_get_all(context)
-        if storage_groups is None:
+        osds = self.conductor_api.osd_state_get_all(context)
+        storage_groups = [ osd['storage_group']['id'] for osd in osds if osd['storage_group']]
+        storage_groups = list(set(storage_groups))
+        if not storage_groups :#is None:
             LOG.info("Error in getting storage_groups")
             try:
                 raise exception.GetNoneError
@@ -3396,8 +3398,8 @@ class CreateCrushMapDriver(object):
             return False
         LOG.info("DEBUG in generate rule begin")
         LOG.info("DEBUG storage_groups from conductor %s " % storage_groups)
-        sorted_storage_groups = sorted(storage_groups, key=self._key_for_sort)
-        LOG.info("DEBUG storage_groups after sorted %s" % sorted_storage_groups)
+        #sorted_storage_groups = sorted(storage_groups, key=self._key_for_sort)
+        #LOG.info("DEBUG storage_groups after sorted %s" % sorted_storage_groups)
         sting_common = """    type replicated
     min_size 0
     max_size 10
@@ -3412,7 +3414,8 @@ class CreateCrushMapDriver(object):
     step emit
 }
 """
-        for storage_group in sorted_storage_groups:
+        for storage_group_id in storage_groups:
+            storage_group = db.storage_group_get(context,storage_group_id)
             storage_group_name = storage_group["name"]
             rule_id = storage_group["rule_id"]
             string = ""
