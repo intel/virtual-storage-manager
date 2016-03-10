@@ -2318,10 +2318,18 @@ class AgentManager(manager.Manager):
         LOG.info('get_default_pg_num_by_storage_group:%s'%pg_num_default)
         return pg_num_default
 
-
-
-
-
-
-
-
+    def rgw_create(self, context, server_name, rgw_instance_name, is_ssl,
+                   uid, display_name, email, sub_user, access, key_type):
+        self.ceph_driver.create_keyring_and_key_for_rgw(context, rgw_instance_name)
+        self.ceph_driver.add_rgw_conf_into_ceph_conf(context, server_name,
+                                                     rgw_instance_name)
+        utils.execute("mkdir", "-p", "/var/lib/ceph/radosgw/ceph-radosgw." + rgw_instance_name)
+        self.ceph_driver.create_default_pools_for_rgw(context)
+        utils.execute("sed", "-i", "s/gateway/%s/g" % rgw_instance_name, "/var/www/s3gw.fcgi",
+                      run_as_root=True)
+        utils.execute("service", "ceph", "restart", run_as_root=True)
+        try:
+            utils.execute("service", "apache2", "restart", run_as_root=True)
+        except:
+            utils.execute("service", "httpd", "restart", run_as_root=True)
+        utils.execute("/etc/init.d/radosgw", "start", run_as_root=True)

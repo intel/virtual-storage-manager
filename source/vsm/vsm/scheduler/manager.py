@@ -2090,3 +2090,10 @@ class SchedulerManager(manager.Manager):
         LOG.info('get_default_pg_num_by_storage_group sync call to host = %s' % active_monitor['host'])
         pg_num_default = self._agent_rpcapi.get_default_pg_num_by_storage_group(context,body,active_monitor['host'])
         return {'pg_num_default':pg_num_default}
+
+    def rgw_create(self, context, server_name, rgw_instance_name, is_ssl,
+                   uid, display_name, email, sub_user, access, key_type):
+        host = server_name
+        self._agent_rpcapi.rgw_create(context, host, server_name, rgw_instance_name,
+                                      is_ssl, uid, display_name, email, sub_user,
+                                      access, key_type)
