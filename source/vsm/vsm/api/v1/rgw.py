@@ -26,6 +26,7 @@ from vsm import exception
 from vsm import flags
 from vsm.openstack.common import log as logging
 from vsm import scheduler
+from vsm import utils
 
 LOG = logging.getLogger(__name__)
 
@@ -67,6 +68,21 @@ class RgwController(wsgi.Controller):
         :return:
         """
         context = req.environ['vsm.context']
+
+        # check if the server has been installed radosgw
+        try:
+            utils.execute("ls", "/etc/init.d/radosgw", run_as_root=True)
+        except:
+            LOG.error("Not installed radosgw")
+            raise exception.VsmException()
+        try:
+            utils.execute("ls", "/etc/init.d/apache2", run_as_root=True)
+        except:
+            try:
+                utils.execute("ls", "/etc/init.d/httpd", run_as_root=True)
+            except:
+                LOG.error("Not installed apache2 or httpd")
+                raise exception.VsmException()
 
         rgw = body['rgw']
         rgw_info = rgw['rgw_info']
