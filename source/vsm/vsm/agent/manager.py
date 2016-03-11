@@ -2333,7 +2333,12 @@ class AgentManager(manager.Manager):
         self.ceph_driver.create_keyring_and_key_for_rgw(context, rgw_instance_name)
         self.ceph_driver.add_rgw_conf_into_ceph_conf(context, server_name,
                                                      rgw_instance_name)
-        utils.execute("mkdir", "-p", "/var/lib/ceph/radosgw/ceph-radosgw." + rgw_instance_name)
+        try:
+            utils.execute("ls", "/var/lib/ceph/radosgw/ceph-radosgw." + rgw_instance_name,
+                          run_as_root=True)
+        except:
+            utils.execute("mkdir", "-p", "/var/lib/ceph/radosgw/ceph-radosgw." + rgw_instance_name,
+                          run_as_root=True)
         self.ceph_driver.create_default_pools_for_rgw(context)
         utils.execute("sed", "-i", "s/gateway/%s/g" % rgw_instance_name, "/var/www/s3gw.fcgi",
                       run_as_root=True)
