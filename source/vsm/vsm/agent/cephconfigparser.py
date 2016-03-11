@@ -106,8 +106,8 @@ class Parser(object):
             content = f.readlines()
             self.init(content)
 
-    def write(self, file_path):
-        content = self.as_str()
+    def write(self, file_path, rgw=False):
+        content = self.as_str(rgw)
         with open(FLAGS.ceph_conf, 'w') as f:
             f.write(content)
             f.write('\n')
@@ -115,15 +115,17 @@ class Parser(object):
     def as_dict(self):
         return self._sections
 
-    def as_str(self):
+    def as_str(self, rgw=False):
         lines = ""
         d = self._sections.copy()
         def _sec_as_str(sec_name):
             return Section(sec_name, d[sec_name]).as_str() + '\n'
 
         def _secs_as_str(sec_type):
-            strs = _sec_as_str(sec_type)
-            d.pop(sec_type)
+            strs = ''
+            if sec_type != "client.radosgw":
+                strs = _sec_as_str(sec_type)
+                d.pop(sec_type)
             drop_list = []
             for sec in d:
                 if sec.find(sec_type+'.') != -1:
@@ -149,6 +151,9 @@ class Parser(object):
 
         if self.has_section('osd'):
             lines = lines + _secs_as_str('osd')
+
+        if rgw:
+            lines = lines + _secs_as_str("client.radosgw")
 
         lines = lines.strip()
 
@@ -370,15 +375,15 @@ class CephConfigParser(manager.Manager):
         for ser in server_list:
             self._agent_rpcapi.update_ceph_conf(self.context, ser['host'])
 
-    def save_conf(self, file_path=FLAGS.ceph_conf):
+    def save_conf(self, file_path=FLAGS.ceph_conf, rgw=False):
         utils.execute('chown',
                       '-R',
                       'vsm:vsm',
                       '/etc/ceph/',
                       run_as_root=True)
 
-        self._parser.write(file_path)
-        self._update_ceph_conf_into_db(self._parser.as_str())
+        self._parser.write(file_path, rgw)
+        self._update_ceph_conf_into_db(self._parser.as_str(rgw))
 
     def add_mon(self, hostname, ip, mon_id):
         sec = 'mon.%s' % mon_id
