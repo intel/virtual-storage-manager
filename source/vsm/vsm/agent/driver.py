@@ -2978,7 +2978,10 @@ class CephDriver(object):
     def create_keyring_and_key_for_rgw(self, context, rgw_instance_name,
                                        rgw_keyring_path="/etc/ceph"):
         rgw_keyring = rgw_keyring_path + "/keyring.radosgw." + rgw_instance_name
-        utils.execute("rm", rgw_keyring, run_as_root=True)
+        try:
+            utils.execute("rm", rgw_keyring, run_as_root=True)
+        except:
+            pass
         utils.execute("ceph-authtool", "--create-keyring", rgw_keyring,
                       run_as_root=True)
         utils.execute("chmod", "+r", rgw_keyring, run_as_root=True)
@@ -2998,13 +3001,13 @@ class CephDriver(object):
 
     def add_rgw_conf_into_ceph_conf(self, context, server_name, rgw_instance_name):
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        rgw_section = "client.radosgw." + rgw_instance_name
+        rgw_section = "client.radosgw." + str(rgw_instance_name)
         host = server_name
-        keyring = "/etc/ceph/" + rgw_instance_name
+        keyring = "/etc/ceph/keyring.radosgw." + str(rgw_instance_name)
         rsp = "/var/run/ceph/radosgw.sock"
         log_file = "/var/log/ceph/radosgw.log"
         config.add_rgw(rgw_section, host, keyring, rsp, log_file)
-        config.save_conf()
+        config.save_conf(rgw=True)
         LOG.info("+++++++++++++++end add_rgw_conf_into_ceph_conf")
 
     def create_default_pools_for_rgw(self, context):
