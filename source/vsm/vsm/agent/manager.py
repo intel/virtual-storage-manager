@@ -2320,6 +2320,16 @@ class AgentManager(manager.Manager):
 
     def rgw_create(self, context, server_name, rgw_instance_name, is_ssl,
                    uid, display_name, email, sub_user, access, key_type):
+        LOG.info("++++++++++++++++++++++++++rgw_create")
+        LOG.info("==========server_name: %s" % str(server_name))
+        LOG.info("==========rgw_instance_name: %s" % str(rgw_instance_name))
+        LOG.info("==========is_ssl: %s" % str(is_ssl))
+        LOG.info("==========uid: %s" % str(uid))
+        LOG.info("==========display_name: %s" % str(display_name))
+        LOG.info("==========email: %s" % str(email))
+        LOG.info("==========sub_user: %s" % str(sub_user))
+        LOG.info("==========access: %s" % str(access))
+        LOG.info("==========key_type: %s" % str(key_type))
         self.ceph_driver.create_keyring_and_key_for_rgw(context, rgw_instance_name)
         self.ceph_driver.add_rgw_conf_into_ceph_conf(context, server_name,
                                                      rgw_instance_name)
@@ -2330,6 +2340,8 @@ class AgentManager(manager.Manager):
         utils.execute("service", "ceph", "restart", run_as_root=True)
         try:
             utils.execute("service", "apache2", "restart", run_as_root=True)
+            LOG.info("==========service apache2 restart")
         except:
             utils.execute("service", "httpd", "restart", run_as_root=True)
         utils.execute("/etc/init.d/radosgw", "start", run_as_root=True)
+        LOG.info("=======/etc/init.d/radosgr start")
