@@ -3077,13 +3077,19 @@ class CephDriver(object):
     def create_keyring_and_key_for_rgw(self, context, rgw_instance_name,
                                        rgw_keyring_path="/etc/ceph"):
         rgw_keyring = rgw_keyring_path + "/keyring.radosgw." + rgw_instance_name
+        utils.execute("rm", rgw_keyring, run_as_root=True)
         utils.execute("ceph-authtool", "--create-keyring", rgw_keyring,
                       run_as_root=True)
         utils.execute("chmod", "+r", rgw_keyring, run_as_root=True)
+        try:
+            utils.execute("ceph", "auth", "del", "client.radosgw." + rgw_instance_name,
+                          run_as_root=True)
+        except:
+            pass
         utils.execute("ceph-authtool", rgw_keyring, "-n", "client.radosgw." + rgw_instance_name,
                       "--gen-key", run_as_root=True)
         utils.execute("ceph-authtool", "-n", "client.radosgw." + rgw_instance_name,
-                      "--cap", "osd", "'allow rwx'", "--cap", "mon", "'allow rw'",
+                      "--cap", "osd", "allow rwx", "--cap", "mon", "allow rw",
                       rgw_keyring, run_as_root=True)
         utils.execute("ceph", "-k", FLAGS.keyring_admin, "auth", "add",
                       "client.radosgw." + rgw_instance_name, "-i", rgw_keyring,
@@ -3092,12 +3098,13 @@ class CephDriver(object):
     def add_rgw_conf_into_ceph_conf(self, context, server_name, rgw_instance_name):
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
         rgw_section = "client.radosgw." + rgw_instance_name
-        if not config._parser.has_section(rgw_section):
-            config._parser.set(rgw_section, "host", server_name)
-            config._parser.set(rgw_section, "keyring", "/etc/ceph/" + rgw_instance_name)
-            config._parser.set(rgw_section, "rgw socket path", "/var/run/ceph/radosgw.sock")
-            config._parser.set(rgw_section, "log file", "/var/log/ceph/radosgw.log")
-        config.save_conf(file_path=FLAGS.ceph_conf)
+        host = server_name
+        keyring = "/etc/ceph/" + rgw_instance_name
+        rsp = "/var/run/ceph/radosgw.sock"
+        log_file = "/var/log/ceph/radosgw.log"
+        config.add_rgw(rgw_section, host, keyring, rsp, log_file)
+        config.save_conf()
+        LOG.info("+++++++++++++++end add_rgw_conf_into_ceph_conf")
 
     def create_default_pools_for_rgw(self, context):
         utils.execute("ceph", "osd", "pool", "create", ".rgw", 100, 100, run_as_root=True)
