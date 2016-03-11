@@ -19,3 +19,12 @@
 
 # If you want to use OpenStack Message Queue, you should set as followed[not supported].
 #MQ_HOST=10.0.0.10
+
+# FOR RGW INSTALL
+RGW_CONF_PATH=/etc/apache2/sites-available
+RGW_CONF_FILE=rgw.conf
+S3GW_FCGI_PATH=/var/www
+S3GW_FCGI_FILE=s3gw.fcgi
+RADOSGW_SOCK_PATH=/var/run/ceph
+RADOSGW_SOCK_FILE=radosgw.sock
+EMAIL_ADDRESS=test@example.com
