@@ -486,11 +486,11 @@ function setup_remote_agent() { # setup_remote_agent <node>
     $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/server.manifest /etc/manifest"
     $SSH $USER@$1 "$SUDO chown root:vsm /etc/manifest/server.manifest; $SUDO chmod 755 /etc/manifest/server.manifest"
-    is_server_manifest_error=`$SSH $USER@$1 "server_manifest" |grep ERROR|wc -l`
+    is_server_manifest_error=`$SSH $USER@$1 "unset http_proxy;server_manifest" |grep ERROR|wc -l`
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
     else
-        $SSH $USER@$1 "$SUDO vsm-node"
+        $SSH $USER@$1 "unset http_proxy;$SUDO vsm-node"
     fi
 }
 
