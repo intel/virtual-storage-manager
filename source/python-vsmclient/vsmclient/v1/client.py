@@ -31,11 +31,11 @@ from vsmclient.v1 import rbd_pools
 from vsmclient.v1 import devices
 from vsmclient.v1 import storage_pools
 from vsmclient.v1 import appnodes
-# from vsmclient.v1 import mons
 from vsmclient.v1 import licenses
 from vsmclient.v1 import vsm_settings
 from vsmclient.v1 import performance_metrics
 from vsmclient.v1 import pool_usages
+from vsmclient.v1 import rgws
 
 class Client(object):
     """
@@ -88,6 +88,7 @@ class Client(object):
         self.vsm_settings = vsm_settings.VsmSettingsManager(self)
         self.performance_metrics = performance_metrics.PerformanceMetricsManager(self)
         self.pool_usages = pool_usages.PoolUsageManager(self)
+        self.rgws = rgws.RgwManager(self)
 
         # Add in any extensions...
         if extensions:

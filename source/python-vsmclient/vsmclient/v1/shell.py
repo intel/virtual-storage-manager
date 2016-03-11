@@ -1290,6 +1290,63 @@ def do_zone_list(cs, args):
     utils.print_list(zones, columns)
 
 
+###################rgw##########################
+@utils.arg('--host',
+           metavar='<host>',
+           help='The host of rgw.')
+@utils.arg('--name',
+           metavar='<name>',
+           default="gateway",
+           help='The name of rgw instance. Default=gateway.')
+@utils.arg('--is-ssl',
+           action='store_true',
+           help='SSL of not. Default=False.')
+@utils.arg('--uid',
+           metavar='<uid>',
+           default="johndoe",
+           help='The user name. Default=johndoe.')
+@utils.arg('--display-name',
+           metavar='<display-name>',
+           default="John Doe",
+           help='The user display name. Default=John Doe.')
+@utils.arg('--email',
+           metavar='<email>',
+           default="john@example.comjohn@example.com",
+           help='The Email. Default=john@example.comjohn@example.com.')
+@utils.arg('--sub-user',
+           metavar='<sub-user>',
+           default="johndoe:swift",
+           help='The sub user name. Default=johndoe:swift.')
+@utils.arg('--access',
+           metavar='<access>',
+           default="full",
+           help='The access type. Default=full.')
+@utils.arg('--key-type',
+           metavar='<key-type>',
+           default="swift",
+           help='The key type. Default=swift.')
+@utils.service_type('vsm')
+def do_rgw_create(cs, args):
+    """Creates a rgw."""
+    host = args.host
+    if not host:
+        raise exceptions.CommandError("you need specify a host")
+    rgw_instance_name = args.name
+    is_ssl = args.is_ssl
+    uid = args.uid
+    display_name = args.display_name
+    email = args.email
+    sub_user = args.sub_user
+    access = args.access
+    key_type = args.key_type
+    try:
+        cs.rgws.create(host, rgw_instance_name, is_ssl, uid, display_name, email,
+                       sub_user, access, key_type)
+        print("Succeed to create rgw.")
+    except:
+        raise exceptions.CommandError("Failed to create rgw.")
+
+
 # TODO tag for those not completed commands
 # It will be removed later
 def _is_developing(method, message):
