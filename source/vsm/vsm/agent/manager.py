@@ -2349,4 +2349,33 @@ class AgentManager(manager.Manager):
         except:
             utils.execute("service", "httpd", "restart", run_as_root=True)
         utils.execute("radosgw", "restart", run_as_root=True)
-        LOG.info("=======sudo /etc/init.d/radosgr restart")
+        LOG.info("=======sudo /etc/init.d/radosgw restart")
+
+        utils.execute("radosgw-admin", "user", "create", "--uid=%s" % str(uid),
+                      "--display-name=%s" % str(display_name), "--email=%s" % str(email),
+                      run_as_root=True)
+        out, err = utils.execute("radosgw-admin", "user", "info", "--uid=%s" % str(uid),
+                                 "-f", "json")
+        out = json.loads(out)
+        keys = out['keys']
+        for key in keys:
+            if key['user'] == uid:
+                user_secret_key = key['secret_key']
+                user_access_key = key['access_key']
+                LOG.info("=======================user_secret_key: %s" % str(user_secret_key))
+                LOG.info("=======================user_access_key: %s" % str(user_access_key))
+
+        utils.execute("radosgw-admin", "subuser", "create", "--uid=%s" % str(uid),
+                      "--subuser=%s" % str(sub_user), "--access=%s" % access,
+                      run_as_root=True)
+        utils.execute("radosgw-admin", "key", "create", "--subuser=%s" % str(sub_user),
+                      "--key-type=%s" % str(key_type), "--gen-secret", run_as_root=True)
+        out, err = utils.execute("radosgw-admin", "user", "info", "--uid=%s" % str(uid),
+                                 "-f", "json")
+        out = json.loads(out)
+        swift_keys = out['swift_keys']
+        for swift_key in swift_keys:
+            if swift_key['user'] == sub_user:
+                swift_secret_key = swift_key['secret_key']
+                LOG.info("=======================swift_secret_key: %s" % str(swift_secret_key))
+        LOG.info("Succeed to create a rgw named %s" % rgw_instance_name)
