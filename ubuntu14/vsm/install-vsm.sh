@@ -95,6 +95,7 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/import_ceph
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/get_smart_info
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/kill_diamond
 #install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/vsm-ceph-upgrade
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/sbin bin/nvme
 
 mv $VSM_ROOT_PATH/usr/local/bin/vsm-reporter.py $VSM_ROOT_PATH/usr/local/bin/vsm-reporter
 rm -rf $VSM_ROOT_PATH/usr/local/bin/vsm-agent
