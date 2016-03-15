@@ -2009,7 +2009,76 @@ class CephDriver(object):
 
         return max_line + 1
 
+    def parse_nvme_output(self, attributes):
+        import string
+
+        att_list = attributes.split('\n')
+        dev_info={}
+        for att in att_list:
+            att_kv = att.split(':')
+            if not att_kv[0]: continue
+            if len(att_kv) > 1:
+                dev_info[string.strip(att_kv[0])] = string.strip(att_kv[1])
+            else:
+                dev_info[string.strip(att_kv[0])] = ''
+
+        return dev_info
+
+    def get_nvme_smart_info(self, device):
+        smart_info_dict = {'basic':{},'smart':{}}
+
+        if "/dev/nvme" in device:
+            LOG.info("This is a nvme device : " + device)
+            dev_info = {}
+            dev_smart_log = {}
+            dev_smart_add_log = {}
+
+            import commands
+
+            # get nvme device meta data
+            attributes, err =  utils.execute('nvme', 'id-ctrl', device, run_as_root=True)
+            if not err:
+                basic_info_dict = self.parse_nvme_output(attributes)
+                LOG.info("basic_info_dict=" + str(basic_info_dict))
+                smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('mn') or ''
+                smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('sn') or ''
+                smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('fr') or ''
+                smart_info_dict['basic']['Drive Status'] = 'PASSED'
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device identification with error: " + str(err))
+
+            # get nvme devic smart data
+            attributes, err = utils.execute('nvme', 'smart-log', device, run_as_root=True)
+            if not err:
+                dev_smart_log_dict = self.parse_nvme_output(attributes)
+                LOG.info("device smart log=" + str(dev_smart_log_dict))
+                for key in dev_smart_log_dict:
+                    smart_info_dict['smart'][key] = dev_smart_log_dict[key]
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device smart log with error: " + str(err))
+
+            # get nvme device smart additional data
+            attributes, err = utils.execute('nvme', 'smart-log-add', device, run_as_root=True)
+            if not err:
+                dev_smart_log_add_dict = self.parse_nvme_output(attributes)
+                LOG.info("device additional smart log=" + str(dev_smart_log_add_dict))
+                smart_info_dict['smart']['<<< additional smart log'] = ' >>>'
+                for key in dev_smart_log_add_dict:
+                    smart_info_dict['smart'][key] = dev_smart_log_add_dict[key]
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device additional (vendor specific) smart log with error: "  + str(err))
+
+        LOG.info(smart_info_dict)
+        return smart_info_dict
+
     def get_smart_info(self, context, device):
+        LOG.info('retrieve device info for ' + str(device))
+        if "/dev/nvme" in device:
+            return self.get_nvme_smart_info(device)
+
         attributes, err = utils.execute('smartctl', '-A', device, run_as_root=True)
         attributes = attributes.split('\n')
         start_line = self.find_attr_start_line(attributes)
