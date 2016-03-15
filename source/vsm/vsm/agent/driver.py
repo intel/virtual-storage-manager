@@ -2977,7 +2977,7 @@ class CephDriver(object):
 
     def create_keyring_and_key_for_rgw(self, context, rgw_instance_name,
                                        rgw_keyring_path="/etc/ceph"):
-        rgw_keyring = rgw_keyring_path + "/keyring.radosgw." + rgw_instance_name
+        rgw_keyring = rgw_keyring_path + "/keyring." + rgw_instance_name
         try:
             utils.execute("rm", rgw_keyring, run_as_root=True)
         except:
@@ -2986,17 +2986,17 @@ class CephDriver(object):
                       run_as_root=True)
         utils.execute("chmod", "+r", rgw_keyring, run_as_root=True)
         try:
-            utils.execute("ceph", "auth", "del", "client.radosgw." + rgw_instance_name,
+            utils.execute("ceph", "auth", "del", "client." + rgw_instance_name,
                           run_as_root=True)
         except:
             pass
-        utils.execute("ceph-authtool", rgw_keyring, "-n", "client.radosgw." + rgw_instance_name,
+        utils.execute("ceph-authtool", rgw_keyring, "-n", "client." + rgw_instance_name,
                       "--gen-key", run_as_root=True)
-        utils.execute("ceph-authtool", "-n", "client.radosgw." + rgw_instance_name,
+        utils.execute("ceph-authtool", "-n", "client." + rgw_instance_name,
                       "--cap", "osd", "allow rwx", "--cap", "mon", "allow rw",
                       rgw_keyring, run_as_root=True)
         utils.execute("ceph", "-k", FLAGS.keyring_admin, "auth", "add",
-                      "client.radosgw." + rgw_instance_name, "-i", rgw_keyring,
+                      "client." + rgw_instance_name, "-i", rgw_keyring,
                       run_as_root=True)
 
     def add_rgw_conf_into_ceph_conf(self, context, server_name, rgw_instance_name):

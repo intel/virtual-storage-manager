@@ -59,8 +59,6 @@ Options:
     Run agent installation only - e.g., --agent ip,ip or hostname with no blank.
   --check-dependence-package
     Check the dependent packages, assuming the dependence repo exists.
-  --rgw [ip or hostname]
-    The server as radosgw.
 EOF
     exit 0
 }
@@ -82,7 +80,6 @@ IS_AGENT_INSTALL=False
 CONTROLLER_IP=""
 AGENT_IPS=""
 IS_CHECK_DEPENDENCE_PACKAGE=False
-RGW_ADDRESS=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -96,7 +93,6 @@ while [ $# -gt 0 ]; do
     --controller) shift; IS_CONTROLLER_INSTALL=True; CONTROLLER_IP=$1 ;;
     --agent) shift; IS_AGENT_INSTALL=True; AGENT_IPS=${1//,/ } ;;
     --check-dependence-package) shift; IS_CHECK_DEPENDENCE_PACKAGE=True ;;
-    --rgw) shift; RGW_ADDRESS=$1 ;;
     *) shift ;;
   esac
   shift
@@ -515,81 +511,9 @@ function install_agent() { # install_agent <node>
 #    $SSH $USER@$1 "if [ -r /etc/init/ceph-all.conf ] && [ ! -e /etc/init/ceph.conf ]; then sudo ln -s /etc/init/ceph-all.conf /etc/init/ceph.conf; sudo initctl reload-configuration; fi"
 
     setup_remote_agent $1
-    if [[ $RGW_ADDRESS == $1 ]]; then
-        install_configure_rgw $1
-    fi
     install_setup_diamond $1
     cleanup_remote_sources_list $1
     echo "=== Install agent [$1] complete."
-}
-
-function install_configure_rgw() {
-    RGW_CONF=$RGW_CONF_PATH/$RGW_CONF_FILE
-    TMP_RGW_CONF=/tmp/$RGW_CONF_FILE
-    S3GW_FCGI=$S3GW_FCGI_PATH/$S3GW_FCGI_FILE
-    RADOSGW_SOCK=$RADOSGW_SOCK_PATH/$RADOSGW_SOCK_FILE
-    $SSH $USER@$1 "bash -x -s" <<EOF
-$SUDO apt-get install apache2 libapache2-mod-fastcgi --yes
-echo "ServerName $1" | $SUDO tee -a /etc/apache2/apache2.conf
-$SUDO a2enmod rewrite
-$SUDO a2enmod fastcgi
-$SUDO apt-get install radosgw --yes
-if [[ -f $RGW_CONF ]]; then $SUDO rm $RGW_CONF; fi
-if [[ ! -d $RADOSGW_SOCK_PATH ]]; then $SUDO mkdir -p $RADOSGW_SOCK_PATH; fi
-exit 0
-EOF
-
-    cat <<"EOF" >$TMP_RGW_CONF
-FastCgiExternalServer S3GW_FCGI -socket RADOSGW_SOCK
-
-<VirtualHost *:80>
-        ServerName HOST_NAME
-        ServerAdmin EMAIL_ADDRESS
-        DocumentRoot /var/www
-        RewriteEngine On
-		RewriteRule ^/([a-zA-Z0-9-_.]*)([/]?.*) /s3gw.fcgi?page=$1&params=$2&%{QUERY_STRING} [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
-        <IfModule mod_fastcgi.c>
-                <Directory /var/www>
-                        Options +ExecCGI
-                        AllowOverride All
-                        SetHandler fastcgi-script
-                        Order allow,deny
-                        Allow from all
-                        AuthBasicAuthoritative Off
-                </Directory>
-        </IfModule>
-        AllowEncodedSlashes On
-        ErrorLog /var/log/apache2/error.log
-        CustomLog /var/log/apache2/access.log combined
-        ServerSignature Off
-</VirtualHost>
-EOF
-
-    sed -i "s,S3GW_FCGI,$S3GW_FCGI,g" $TMP_RGW_CONF
-    sed -i "s,RADOSGW_SOCK,$RADOSGW_SOCK,g" $TMP_RGW_CONF
-	sed -i "s,HOST_NAME,$1,g" $TMP_RGW_CONF
-	sed -i "s,EMAIL_ADDRESS,$EMAIL_ADDRESS,g" $TMP_RGW_CONF
-	scp $TMP_RGW_CONF $USER@$1:$TMP_RGW_CONF
-	$SSH $USER@$1 "$SUDO mv $TMP_RGW_CONF $RGW_CONF"
-
-    TMP_SCRIPT_FILE=/tmp/$S3GW_FCGI_FILE
-    $SSH $USER@$1 "bash -x -s" <<EOF
-$SUDO a2ensite rgw.conf
-$SUDO a2dissite 000-default
-if [[ -f $S3GW_FCGI ]]; then $SUDO rm $S3GW_FCGI; fi
-exit 0
-EOF
-
-    cat <<"EOF" >$TMP_SCRIPT_FILE
-#!/bin/bash
-exec /usr/bin/radosgw -c /etc/ceph/ceph.conf -n client.radosgw.gateway
-EOF
-    scp $TMP_SCRIPT_FILE $USER@$1:$TMP_SCRIPT_FILE
-    $SSH $USER@$1 "bash -x -s" <<EOF
-$SUDO mv $TMP_SCRIPT_FILE $S3GW_FCGI
-$SUDO chmod +x $S3GW_FCGI
-$SUDO service apache2 restart
-EOF
 }
 
 function generate_token() {

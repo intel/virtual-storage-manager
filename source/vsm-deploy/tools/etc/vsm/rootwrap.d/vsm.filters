@@ -45,6 +45,8 @@ start_osd: CommandFilter, /usr/local/bin/start_osd, root
 mkfs: CommandFilter, /sbin/mkfs, root
 mount: CommandFilter, /bin/mount, root
 umount: CommandFilter, /bin/umount, root
+ceph-radosgw: CommandFilter, /etc/init.d/ceph-radosgw, root
+radosgw-admin: CommandFilter, /usr/bin/radosgw-admin, root
 
 #common
 ssh: CommandFilter, /usr/bin/ssh, root

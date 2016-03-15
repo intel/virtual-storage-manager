@@ -2325,22 +2325,31 @@ class AgentManager(manager.Manager):
         self.ceph_driver.add_rgw_conf_into_ceph_conf(context, server_name,
                                                      rgw_instance_name)
         try:
-            utils.execute("ls", "/var/lib/ceph/radosgw/ceph-radosgw." + rgw_instance_name,
+            utils.execute("ls", "/var/lib/ceph/radosgw/ceph-" + rgw_instance_name,
                           run_as_root=True)
         except:
-            utils.execute("mkdir", "-p", "/var/lib/ceph/radosgw/ceph-radosgw." + rgw_instance_name,
+            utils.execute("mkdir", "-p", "/var/lib/ceph/radosgw/ceph-" + rgw_instance_name,
                           run_as_root=True)
         self.ceph_driver.create_default_pools_for_rgw(context)
-        utils.execute("sed", "-i", "s/gateway/%s/g" % rgw_instance_name, "/var/www/s3gw.fcgi",
-                      run_as_root=True)
-        utils.execute("service", "ceph", "restart", run_as_root=True)
-        try:
-            utils.execute("service", "apache2", "restart", run_as_root=True)
-            LOG.info("==========sudo service apache2 restart")
-        except:
-            utils.execute("service", "httpd", "restart", run_as_root=True)
-        utils.execute("radosgw", "restart", run_as_root=True)
-        LOG.info("=======sudo /etc/init.d/radosgw restart")
+        # utils.execute("sed", "-i", "s/gateway/%s/g" % rgw_instance_name, "/var/www/s3gw.fcgi",
+        #               run_as_root=True)
+        # utils.execute("service", "ceph", "restart", run_as_root=True)
+        # try:
+        #     utils.execute("service", "apache2", "restart", run_as_root=True)
+        #     LOG.info("==========sudo service apache2 restart")
+        # except:
+        #     utils.execute("service", "httpd", "restart", run_as_root=True)
+
+        def _get_os():
+            (distro, release, codename) = platform.dist()
+            return distro
+        distro = _get_os()
+        if distro.lower() == "centos":
+            utils.execute("ceph-radosgw", "restart", run_as_root=True)
+            LOG.info("=======sudo /etc/init.d/ceph-radosgw restart")
+        elif distro.lower() == "ubuntu":
+            utils.execute("radosgw", "restart", run_as_root=True)
+            LOG.info("=======sudo /etc/init.d/radosgw restart")
 
         utils.execute("radosgw-admin", "user", "create", "--uid=%s" % str(uid),
                       "--display-name=%s" % str(display_name), "--email=%s" % str(email),
