@@ -19,6 +19,8 @@
 """The rgws api."""
 
 
+import platform
+
 from vsm.api.openstack import wsgi
 from vsm.api.views import mdses as mds_views
 from vsm import conductor
@@ -52,7 +54,7 @@ class RgwController(wsgi.Controller):
             "rgw": {
                 "rgw_info": {
                     "server_name": "rgw-node1",
-                    "rgw_instance_name": "gateway",
+                    "rgw_instance_name": "radosgw.gateway",
                     "is_ssl": False
                 },
                 "user_info": {
@@ -70,18 +72,23 @@ class RgwController(wsgi.Controller):
         context = req.environ['vsm.context']
 
         # check if the server has been installed radosgw
-        try:
-            utils.execute("ls", "/etc/init.d/radosgw", run_as_root=True)
-        except:
-            LOG.error("Not installed radosgw")
-            raise exception.VsmException()
-        try:
-            utils.execute("ls", "/etc/init.d/apache2", run_as_root=True)
-        except:
+
+        def _get_os():
+            (distro, release, codename) = platform.dist()
+            return distro
+
+        distro = _get_os()
+        if distro.lower() == "centos":
             try:
-                utils.execute("ls", "/etc/init.d/httpd", run_as_root=True)
+                utils.execute("ls", "/etc/init.d/ceph-radosgw", run_as_root=True)
             except:
-                LOG.error("Not installed apache2 or httpd")
+                LOG.error("Not installed ceph-radosgw")
+                raise exception.VsmException()
+        elif distro.lower() == "ubuntu":
+            try:
+                utils.execute("ls", "/etc/init.d/radosgw", run_as_root=True)
+            except:
+                LOG.error("Not installed radosgw")
                 raise exception.VsmException()
 
         rgw = body['rgw']
