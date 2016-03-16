@@ -2009,10 +2009,11 @@ class CephDriver(object):
 
         return max_line + 1
 
-    def parse_nvme_output(self, attributes):
+    def parse_nvme_output(self, attributes, start_offset=0, end_offset=-1):
         import string
 
         att_list = attributes.split('\n')
+        att_list = att_list[start_offset:end_offset]
         dev_info={}
         for att in att_list:
             att_kv = att.split(':')
@@ -2051,7 +2052,7 @@ class CephDriver(object):
             # get nvme devic smart data
             attributes, err = utils.execute('nvme', 'smart-log', device, run_as_root=True)
             if not err:
-                dev_smart_log_dict = self.parse_nvme_output(attributes)
+                dev_smart_log_dict = self.parse_nvme_output(attributes, 1)
                 LOG.info("device smart log=" + str(dev_smart_log_dict))
                 for key in dev_smart_log_dict:
                     smart_info_dict['smart'][key] = dev_smart_log_dict[key]
@@ -2062,7 +2063,7 @@ class CephDriver(object):
             # get nvme device smart additional data
             attributes, err = utils.execute('nvme', 'smart-log-add', device, run_as_root=True)
             if not err:
-                dev_smart_log_add_dict = self.parse_nvme_output(attributes)
+                dev_smart_log_add_dict = self.parse_nvme_output(attributes, 2)
                 LOG.info("device additional smart log=" + str(dev_smart_log_add_dict))
                 smart_info_dict['smart']['<<< additional smart log'] = ' >>>'
                 for key in dev_smart_log_add_dict:
