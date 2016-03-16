@@ -123,7 +123,7 @@ class Parser(object):
 
         def _secs_as_str(sec_type):
             strs = ''
-            if sec_type != "client.radosgw":
+            if sec_type != "client":
                 strs = _sec_as_str(sec_type)
                 d.pop(sec_type)
             drop_list = []
@@ -153,7 +153,7 @@ class Parser(object):
             lines = lines + _secs_as_str('osd')
 
         if rgw:
-            lines = lines + _secs_as_str("client.radosgw")
+            lines = lines + _secs_as_str("client")
 
         lines = lines.strip()
 
