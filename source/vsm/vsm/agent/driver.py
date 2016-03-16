@@ -3001,12 +3001,13 @@ class CephDriver(object):
 
     def add_rgw_conf_into_ceph_conf(self, context, server_name, rgw_instance_name):
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        rgw_section = "client.radosgw." + str(rgw_instance_name)
+        rgw_section = "client." + str(rgw_instance_name)
         host = server_name
-        keyring = "/etc/ceph/keyring.radosgw." + str(rgw_instance_name)
+        keyring = "/etc/ceph/keyring." + str(rgw_instance_name)
         rsp = "/var/run/ceph/radosgw.sock"
         log_file = "/var/log/ceph/radosgw.log"
-        config.add_rgw(rgw_section, host, keyring, rsp, log_file)
+        rgw_frontends = "\"civetweb port=80\""
+        config.add_rgw(rgw_section, host, keyring, rsp, log_file, rgw_frontends)
         config.save_conf(rgw=True)
         LOG.info("+++++++++++++++end add_rgw_conf_into_ceph_conf")
 
@@ -3893,9 +3894,3 @@ def get_crushmap_json_format(keyring=None):
         json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump', run_as_root=True)
     crushmap = CrushMap(json_context=json_crushmap)
     return crushmap
-
-
-
-
-
-
