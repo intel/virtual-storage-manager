@@ -80,13 +80,13 @@ class RgwController(wsgi.Controller):
         distro = _get_os()
         if distro.lower() == "centos":
             try:
-                utils.execute("ls", "/etc/init.d/ceph-radosgw", run_as_root=True)
+                utils.execute("ls", "/usr/bin/radosgw", run_as_root=True)
             except:
                 LOG.error("Not installed ceph-radosgw")
                 raise exception.VsmException()
         elif distro.lower() == "ubuntu":
             try:
-                utils.execute("ls", "/etc/init.d/radosgw", run_as_root=True)
+                utils.execute("ls", "/usr/bin/radosgw", run_as_root=True)
             except:
                 LOG.error("Not installed radosgw")
                 raise exception.VsmException()

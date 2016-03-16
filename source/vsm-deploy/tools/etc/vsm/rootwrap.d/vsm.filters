@@ -47,6 +47,7 @@ mount: CommandFilter, /bin/mount, root
 umount: CommandFilter, /bin/umount, root
 ceph-radosgw: CommandFilter, /etc/init.d/ceph-radosgw, root
 radosgw-admin: CommandFilter, /usr/bin/radosgw-admin, root
+radosgw: CommandFilter, /usr/bin/radosgw, root
 
 #common
 ssh: CommandFilter, /usr/bin/ssh, root
@@ -61,7 +62,9 @@ hostname: CommandFilter, /bin/hostname, root
 ls: CommandFilter, /bin/ls, root
 pgrep: CommandFilter, /usr/bin/pgrep, root
 kill: CommandFilter, /bin/kill, root
+killall: CommandFilter, /usr/bin/killall, root
 ssh-keygen: CommandFilter, /usr/bin/ssh-keygen, root
+systemctl: CommandFilter, /usr/bin/systemctl, root
 ##end changed by YOURONG
 
 # vsm/storage/driver.py: 'vgs', '--noheadings', '-o', 'name'
