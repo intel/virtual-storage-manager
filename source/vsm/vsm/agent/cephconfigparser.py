@@ -491,7 +491,7 @@ class CephConfigParser(manager.Manager):
     def remove_mds(self, mds_id):
         return self._remove_section('mds', mds_id)
 
-    def add_rgw(self, rgw_sec, host, keyring, rsp, log_file):
+    def add_rgw(self, rgw_sec, host, keyring, rsp, log_file, rgw_frontends):
         if self._parser.has_section(rgw_sec):
             self._parser.remove_section(rgw_sec)
         self._parser.add_section(rgw_sec)
@@ -499,3 +499,4 @@ class CephConfigParser(manager.Manager):
         self._parser.set(rgw_sec, "keyring", keyring)
         self._parser.set(rgw_sec, "rgw socket path", rsp)
         self._parser.set(rgw_sec, "log file", log_file)
+        self._parser.set(rgw_sec, "rgw frontends", rgw_frontends)
