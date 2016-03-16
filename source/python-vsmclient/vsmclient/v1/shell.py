@@ -1296,8 +1296,8 @@ def do_zone_list(cs, args):
            help='The host of rgw.')
 @utils.arg('--name',
            metavar='<name>',
-           default="gateway",
-           help='The name of rgw instance. Default=gateway.')
+           default="radosgw.gateway",
+           help='The name of rgw instance. Default=radosgw.gateway.')
 @utils.arg('--is-ssl',
            action='store_true',
            help='SSL of not. Default=False.')

@@ -32,7 +32,7 @@ class RgwManager(base.ManagerWithFind):
     """
     resource_class = Rgw
 
-    def create(self, host, rgw_instance_name="gateway", is_ssl=False, uid="johndoe",
+    def create(self, host, rgw_instance_name="radosgw.gateway", is_ssl=False, uid="johndoe",
                display_name="John Doe", email="john@example.comjohn@example.com",
                sub_user="johndoe:swift", access="full", key_type="swift"):
         """

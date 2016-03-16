@@ -2352,10 +2352,27 @@ class AgentManager(manager.Manager):
         def _get_os():
             (distro, release, codename) = platform.dist()
             return distro
+
+        ceph_version = self.ceph_driver.get_ceph_version()
+        ceph_v = "firefly"
+        if "0.80." in ceph_version:
+            ceph_v = "firefly"
+        elif "0.94." in ceph_version:
+            ceph_v = "hammer"
+        elif "9.2." in ceph_version:
+            ceph_v = "infernalis"
         distro = _get_os()
         if distro.lower() == "centos":
-            utils.execute("ceph-radosgw", "restart", run_as_root=True)
-            LOG.info("=======sudo /etc/init.d/ceph-radosgw restart")
+            if ceph_v != "hammer":
+                try:
+                    utils.execute("killall", "radosgw", run_as_root=True)
+                    utils.execute("radosgw", "--id=%s" % rgw_instance_name, run_as_root=True)
+                except:
+                    utils.execute("radosgw", "--id=%s" % rgw_instance_name, run_as_root=True)
+                LOG.info("=======sudo radosgw --id=%s" % rgw_instance_name)
+            else:
+                utils.execute("ceph-radosgw", "restart", run_as_root=True)
+                LOG.info("=======sudo /etc/init.d/ceph-radosgw restart")
         elif distro.lower() == "ubuntu":
             utils.execute("radosgw", "restart", run_as_root=True)
             LOG.info("=======sudo /etc/init.d/radosgw restart")
