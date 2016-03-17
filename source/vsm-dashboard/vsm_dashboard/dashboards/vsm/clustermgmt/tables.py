@@ -153,6 +153,7 @@ class CreateClusterTable(tables.DataTable):
     monitor = tables.Column("monitor", verbose_name=_("Monitor"),
         classes=('monitor',))
     mds = tables.Column("mds", verbose_name=_("MDS"))
+    rgw = tables.Column("rgw", verbose_name=_("RGW"))
     is_monitor = tables.Column("ismonitor", verbose_name=_("Monitor"), classes=('is_monitor',),
         empty_value=empty_value_maker("checkbox","is_monitor",1), hidden=True)
     is_storage = tables.Column("isstorage", verbose_name=_("Storage"), classes=('is_storage',),

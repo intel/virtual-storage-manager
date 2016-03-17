@@ -118,6 +118,14 @@ class ClusterController(wsgi.Controller):
         if mds_count > 1:
             raise exc.HTTPBadRequest("More than one mds.")
 
+        # only and should only one rgw
+        rgw_count = 0
+        for server in server_list:
+            if server['is_rgw'] == True:
+                rgw_count = rgw_count + 1
+        if rgw_count > 1:
+            raise exc.HTTPBadRequest("More than one rgw.")
+
         self.scheduler_api.create_cluster(context, server_list)
         return webob.Response(status_int=202)
 
