@@ -116,7 +116,7 @@ class CephDriver(object):
             LOG.error("Required parameter type or id is blank")
             return False
 
-        # host is localhost if not specified
+        # host is local host if not specified
         if not host:
             host = platform.node()
 
@@ -133,7 +133,7 @@ class CephDriver(object):
         # path = os.path.dirname(data_dir)
 
         file = data_dir.replace("$cluster", cluster).\
-                    replace("$id", id).replace("$host", host) + "/upstart"
+                    replace("$id", str(id)).replace("$host", host) + "/upstart"
         # no using os.path.exists(), because if the file is owned by ceph
         # user, the result will return false
         if ssh:
@@ -1617,18 +1617,21 @@ class CephDriver(object):
         # utils.execute('service', 'ceph', 'start', mds_name, run_as_root=True)
         self._operate_ceph_daemon("start", "mds", id=num)
 
+    def _get_ceph_mon_map(self):
+        output = utils.execute("ceph", "mon", "dump", "-f", "json", run_as_root=True)[0]
+        return json.loads(output)
+
     def start_monitor(self, context):
         # Get info from db.
         res = self._conductor_rpcapi.init_node_get_by_host(context, FLAGS.host)
         node_type = res.get('type', None)
         # get mon_id
         mon_id = None
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        for section in config_dict:
-            if section.startswith("mon."):
-                if config_dict[section]['host'] == FLAGS.host:
-                    mon_id = section.replace("mon.", "")
+        monmap = self._get_ceph_mon_map()
+        mons = monmap['mons']
+        for mon in mons:
+            if mon['name'] == FLAGS.host:
+                mon_id = mon['rank']
 
         # Try to start monitor service.
         if mon_id:
@@ -1642,12 +1645,11 @@ class CephDriver(object):
         node_type = res.get('type', None)
         # get mon_id
         mon_id = None
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        for section in config_dict:
-            if section.startswith("mon."):
-                if config_dict[section]['host'] == FLAGS.host:
-                    mon_id = section.replace("mon.", "")
+        monmap = self._get_ceph_mon_map()
+        mons = monmap['mons']
+        for mon in mons:
+            if mon['name'] == FLAGS.host:
+                mon_id = mon['rank']
 
         # Try to stop monitor service.
         if mon_id:
@@ -1902,25 +1904,20 @@ class CephDriver(object):
         osd_states = self._conductor_rpcapi.\
                 osd_state_get_by_service_id(context, service_id)
         if not len(osd_states) > 0:
-            LOG.info("There is no osd on node %s" % node_id)
-            self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Stopped')
-            return True
-
-        LOG.info('Step 2. ceph osd set noout')
-        utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
-        for item in osd_states:
-            osd_name = item['osd_name']
-            LOG.info('>> Stop ceph %s' % osd_name)
-            # utils.execute('service', 'ceph', 'stop', osd_name,
-            #                 run_as_root=True)
-            self.stop_osd_daemon(context, osd_name.split(".")[1])
-            # self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
-            values = {'state': 'In-Down', 'osd_name': osd_name}
-            LOG.info('>> update status into db %s' % osd_name)
-            self._conductor_rpcapi.\
-                    osd_state_update_or_create(context, values)
+            LOG.info("There is no osd on node %s; skipping osd shutdown." % node_id)
+        else:
+            LOG.info('Step 2. ceph osd set noout')
+            utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
+            for item in osd_states:
+                osd_name = item['osd_name']
+                LOG.info('>> Stop ceph %s' % osd_name)
+                # utils.execute('service', 'ceph', 'stop', osd_name,
+                #                 run_as_root=True)
+                self.stop_osd_daemon(context, osd_name.split(".")[1])
+                # self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
+                values = {'state': 'In-Down', 'osd_name': osd_name}
+                LOG.info('>> update status into db %s' % osd_name)
+                self._conductor_rpcapi.osd_state_update_or_create(context, values)
 
         # Stop monitor service.
         self.stop_monitor(context)
