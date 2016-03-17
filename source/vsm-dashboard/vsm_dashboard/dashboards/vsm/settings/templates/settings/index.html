@@ -52,7 +52,11 @@
           <td class="sortable normal_column">
               <input id="txt_{{ setting.verbose_name }}" type="text" value="{{ setting.value }}" class="form-control new_value" onchange="check_text(this)" />
               {% if  setting.verbose_name  == 'CPU_DIAMOND_COLLECT_INTERVAL' or setting.verbose_name  == 'CEPH_DIAMOND_COLLECT_INTERVAL'  %}
-              <input id="id_enable_{{ setting.verbose_name }}" class="enable_or_disable" type="checkbox" name="enable_collect" > Disable
+                {% if  setting.value  == '0' or setting.value  == ''  %}
+                    <input id="id_enable_{{ setting.verbose_name }}" class="enable_or_disable" type="checkbox" name="enable_collect" checked="true" > Disable
+                {% else %}
+                    <input id="id_enable_{{ setting.verbose_name }}" class="enable_or_disable" type="checkbox" name="enable_collect" > Disable
+                {% endif %}
               {% else %}{% endif %}
           </td>
           <td class="sortable normal_column">
