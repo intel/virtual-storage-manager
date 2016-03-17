@@ -2085,7 +2085,7 @@ class AgentManager(manager.Manager):
         osd_state_values = []
 
         for osd in osd_info['osds']:
-            osd_name = osd.get('osd')
+            osd_name = 'osd.'+str(osd.get('osd'))
             cd = osd.get('cd')
             if cd:
                 service_id = db.init_node_get_by_host(context,osd['host'])['service_id']

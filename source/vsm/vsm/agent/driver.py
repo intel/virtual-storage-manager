@@ -2314,15 +2314,17 @@ class CephDriver(object):
                       run_as_root=True)
         return True
 
-    def ceph_osd_stop(self, context, osd_name, osd_host):
+    def ceph_osd_stop(self, context, osd_name):
         # utils.execute('service',
         #               'ceph',
         #               '-a',
         #               'stop',
         #               osd_name,
         #               run_as_root=True)
-        self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1],
-                                  ssh=True, host=osd_host)
+        osd_id = osd_name.split('.')[-1]
+        self.stop_osd_daemon(context, osd_id)
+        #self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1],
+        #                          ssh=True, host=osd_host)
         #osd_id = osd_name.split('.')[-1]
         #values = {'state': 'Out-Down', 'osd_name': osd_name}
         #ret = self._conductor_rpcapi.\
@@ -2341,7 +2343,7 @@ class CephDriver(object):
         osd=osd[0]
         #stop
         utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
-        self.ceph_osd_stop(context, osd['osd_name'], osd['service']['host'])
+        self.ceph_osd_stop(context, osd['osd_name'])
         #start
         utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
         self.ceph_osd_start(context, osd['osd_name'])
