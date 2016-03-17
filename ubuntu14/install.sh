@@ -565,7 +565,6 @@ if [[ $IS_AGENT_INSTALL == True ]]; then
     # wait for agents to complete installing in background
     for p in $pids; do
         if ! wait $p; then
-            echo "At least one agent installation failed!"
             exit_code=1
         fi
     done
@@ -584,6 +583,8 @@ if [[ $IS_AGENT_INSTALL == True ]]; then
         echo "sync /etc/hosts to controller"
         #sync_hosts $CONTROLLER_IP
     fi
+
+    test ${exit_code} -ne 0 && echo "ERROR: At least one agent failed to install properly."
 fi
 
 #-------------------------------------------------------------------------------
