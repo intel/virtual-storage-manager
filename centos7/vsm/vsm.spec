@@ -1,6 +1,7 @@
 %global with_doc %{!?_without_doc:1}%{?_without_doc:0}
 %define version %{getenv:VERSION}
 %define release %{getenv:RELEASE}
+%define _binaries_in_noarch_packages_terminate_build 0
 
 Name:             vsm
 Version:          %{version}
