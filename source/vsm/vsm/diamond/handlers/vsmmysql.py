@@ -78,13 +78,13 @@ class VSMMySQLHandler(Handler):
         """
         data = data.strip().split(' ')
         data_name = data[0].split('.')
-        if data_name[2] == 'cpu' and data_name[4] in ['system', 'user'] and data_name[3] == 'total' :
+        if data_name[2] == 'cpu' and data_name[4] == 'idle' and data_name[3] != 'total' :
             try:
                 cursor = self.conn.cursor()
                 cursor.execute("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES(%%s, %%s, %%s ,%%s, %%s)"
                                % (self.table, self.col_metric, self.col_hostname, self.col_instance,
                                   self.col_time, self.col_value),
-                               (data_name[4], data_name[1], '_'.join(data_name[2:4]), data[2], data[1]))
+                               ('_'.join(data_name[2:4]), data_name[1], data_name[4], data[2], data[1]))
 
                 cursor.close()
                 self.conn.commit()
