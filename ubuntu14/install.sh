@@ -231,18 +231,12 @@ function download_dependencies() {
     elif [[ -d $REPO_PATH ]] && [[ $IS_CHECK_DEPENDENCE_PACKAGE == True ]]; then
         cd $REPO_PATH
         for i in `cat $TOPDIR/debs.lst`; do
-            if [[ `ls |grep $i|wc -l` -eq 0 ]]; then
+            pkg_name=${i%%_*}_
+            if [[ `ls |grep $pkg_name|wc -l` -eq 0 ]]; then
                 wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
             else
-                COUNT=0
-                for j in `ls |grep $i`; do
-                    if [[ $i == $j ]]; then
-                        let COUNT+=1
-                    fi
-                done
-                if [[ $COUNT -eq 0 ]]; then
-                    wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
-                fi
+                rm $pkg_name*
+                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
             fi
         done
         $SUDO rm -rf *.deb.*
