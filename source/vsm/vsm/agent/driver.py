@@ -904,7 +904,7 @@ class CephDriver(object):
         arglist.extend(['config', 'show'] if reqtype == 'config' else ['status'])
         output = utils.execute(*arglist, run_as_root=True)[0]
         for line in output.split('\n'):
-            if len(line.strip()) > 0:
+            if len(line.strip()) > 1:
                 attr, val = tuple(line.translate(None, ' {"\},').split(':', 1))
                 values[attr] = val
         return values
