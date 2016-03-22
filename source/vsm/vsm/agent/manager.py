@@ -2010,9 +2010,10 @@ class AgentManager(manager.Manager):
             for server in servers:
                 if cluster_ip == server['cluster_ip']:
                     server['data_drives_number'] = int(server['data_drives_number']) + 1
+                    server['status'] = 'Active'
                     break
         for server in servers:
-            values = {'data_drives_number':server['data_drives_number'],'status':'Active'}
+            values = {'data_drives_number':server['data_drives_number'],'status':server['status']}
             db.init_node_update(context,server['id'],values)
 
     def _insert_devices_from_config_to_db(self,context,osd_info):
