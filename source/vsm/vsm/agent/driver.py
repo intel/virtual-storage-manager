@@ -1628,7 +1628,11 @@ class CephDriver(object):
         (out, err) = utils.execute(*cmd, run_as_root=True)
         json_data = None
         if out:
-            json_data = json.loads(out)
+            try:
+                json_data = json.loads(out)
+            except:
+                json_data = None
+                LOG.error('CMD result is invalid.cmd is %s.ret of cmd is %s.'%(cmd,out))
         return json_data
 
     def get_osds_total_num(self):
