@@ -12,6 +12,7 @@ var cIOPs;
 var cLatency;
 var cBandwidth;
 var cCPU;
+var refreshInterval=15000;
 var IOPs_EndTime = "";
 var Latency_EndTime = "";
 var BandWidth_EndTime = "";
@@ -44,14 +45,14 @@ require(
         loadCapacity();
         setInterval(function(){
             loadCapacity();
-        },15000);
+        },refreshInterval);
 
   
     	//load Capacity
         loadPG();
         setInterval(function(){
             loadPG();
-        },15000);
+        },refreshInterval);
     
 
         //IOPS  
@@ -91,7 +92,7 @@ function loadInterval(){
         loadMonitor();
         loadMDS();
 	    loadStorage();
-     } ,15000);
+     } ,refreshInterval);
 }
 
 function HidePageHeader(){
@@ -425,7 +426,7 @@ function loadIOP(){
             });
         }
         loadIOP();
-    }, 15000);
+    }, refreshInterval);
 }
 
 
@@ -484,7 +485,7 @@ function loadLatency(){
             });
         }
         loadLatency();
-    }, 15000);
+    }, refreshInterval);
 }
 
 function loadBandwidth(){
@@ -536,7 +537,7 @@ function loadBandwidth(){
             });
         }
         loadBandwidth();
-    }, 15000);
+    }, refreshInterval);
 }
 
 function loadCPU(){
@@ -599,7 +600,7 @@ function loadCPU(){
             });
         }
         loadCPU();
-    },15000);
+    },refreshInterval);
 }
 
 function GenerateGaugeOption(value) {
