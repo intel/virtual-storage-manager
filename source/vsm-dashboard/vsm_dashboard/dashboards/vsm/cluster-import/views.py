@@ -115,7 +115,8 @@ def validate_conf(request):
     except:
         status = "Failed"
         msg = "Validate Cluster Failed!"
-    crushmap_tree_data = get_crushmap_series(crushmap_tree_data)
+    if crushmap_tree_data is not None:
+        crushmap_tree_data = get_crushmap_series(crushmap_tree_data)
     resp = dict(message=msg, status=status, crushmap=crushmap_tree_data )
     resp = json.dumps(resp)
     return HttpResponse(resp)
