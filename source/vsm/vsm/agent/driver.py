@@ -2491,6 +2491,32 @@ class CephDriver(object):
         args= ['ceph', 'osd', 'pool', 'set', pool, 'pgp_num', pgp_num]
         utils.execute(*args, run_as_root=True)
 
+    def get_ec_profiles(self):
+        DEFAULT_PLUGIN_PATH = "/usr/lib/ceph/erasure-code"
+        args = ['ceph', 'osd', 'erasure-code-profile', 'ls']
+        (out, err) = utils.execute(*args, run_as_root=True)
+        profile_names = out.splitlines()
+        profiles = []
+        for profile_name in profile_names:
+            args = ['ceph', 'osd', 'erasure-code-profile', 'get', profile_name]
+            (out, err) = utils.execute(*args, run_as_root=True)
+            profile = {}
+            profile['name'] = profile_name
+            profile['plugin_path'] = DEFAULT_PLUGIN_PATH
+            profile_kv = {}
+            for item in out.splitlines():
+                key, val = item.split('=')
+                if key == 'plugin':
+                    profile['plugin'] = val
+                elif key == 'directory':
+                    profile['plugin_path'] = val
+                else:
+                    profile_kv[key] = val
+            profile['pg_num'] = int(profile_kv['k']) + int(profile_kv['m'])
+            profile['plugin_kv_pair'] = json.dumps(profile_kv)
+            profiles.append(profile)
+        return profiles
+
     def get_osds_status(self):
         args = ['ceph', 'osd', 'dump', '-f', 'json']
         #args = ['hostname', '-I']
