@@ -32,9 +32,10 @@ function AddPool(){
 			"pool":{
 				"name":$("#txtPoolName").val(),
 				"storageGroupId":$("#selStorageGroup").val(),
-                'storageGroupName': $("#selStorageGroup")[0].options[$("#selStorageGroup")[0].selectedIndex].text,
+				'storageGroupName': $("#selStorageGroup")[0].options[$("#selStorageGroup")[0].selectedIndex].text,
 				"replicatedStorageGroupId":'replica',
-                'auto_growth_pg': $("#txtPGNumber").val(),
+				'pg_num': $("#txtPGNumber").val(),
+				'auto_growth_pg': $("#chkPGNumber")[0].checked ? 1 : 0,
 				'tag': $("#txtTag").val(),
 				'clusterId': "0",
 				'createdBy': "VSM",
