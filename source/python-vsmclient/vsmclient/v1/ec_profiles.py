@@ -76,7 +76,7 @@ class ECProfilesManager(base.ManagerWithFind):
                     }
         :return:
         '''
-        url = '/rbd_groups/rbd_group_create'
+        url = '/ec_profiles/ec_profile_create'
         return self.api.client.post(url, body=body)
 
     def ec_profile_update(self, body):
@@ -93,12 +93,12 @@ class ECProfilesManager(base.ManagerWithFind):
         url = '/ec_profiles/ec_profile_update'
         return self.api.client.post(url, body=body)
 
-    def ec_profile_remove(self, body):
+    def ec_profiles_remove(self, body):
         '''
         :param request:
         :param body:{'ec_profiles':[2,]}
         :return:
         '''
-        url = '/ec_profiles/ec_profile_remove'
+        url = '/ec_profiles/ec_profiles_remove'
         return self.api.client.post(url, body=body)
 

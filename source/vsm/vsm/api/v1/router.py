@@ -250,6 +250,6 @@ class APIRouter(vsm.api.openstack.APIRouter):
                             'detail':"get",
                             'ec_profile_create': "post",
                             'ec_profile_update': "post",
-                            'ec_profile_remove': "post",
+                            'ec_profiles_remove': "post",
                             },
                         member={'action': 'post'})

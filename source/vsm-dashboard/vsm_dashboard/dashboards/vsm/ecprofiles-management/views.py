@@ -69,7 +69,7 @@ def remove_ec_profiles(request):
     #print '---rbd_groups remove-%s'%rbd_groups
     #ret,message = vsmapi.rbd_remove(request, rbds)
     try:
-        rsp, ret = vsmapi.ec_profile_remove(request, ec_profiles)
+        rsp, ret = vsmapi.ec_profiles_remove(request, ec_profiles)
         ret = ret['message']
     except:
         ret = {'error_code':'-2','error_msg':'Unkown Error!'}
