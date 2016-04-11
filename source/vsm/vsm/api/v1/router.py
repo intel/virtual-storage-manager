@@ -43,7 +43,7 @@ from vsm.api.v1 import vsms
 from vsm.api.v1 import licenses
 from vsm.api.v1 import performance_metrics
 from vsm.api.contrib import poolusages
-
+from vsm.api.v1 import ec_profiles
 from vsm.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -242,3 +242,14 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         controller=self.resources['poolusages'],
                         collection={'revoke_pool': "post"},
                         member={'action':'post'})
+
+        self.resources['ec_profiles'] = ec_profiles.create_resource(ext_mgr)
+        mapper.resource("ec_profiles", "ec_profiles",
+                        controller=self.resources['ec_profiles'],
+                        collection={
+                            'detail':"get",
+                            'ec_profile_create': "post",
+                            'ec_profile_update': "post",
+                            'ec_profile_remove': "post",
+                            },
+                        member={'action': 'post'})

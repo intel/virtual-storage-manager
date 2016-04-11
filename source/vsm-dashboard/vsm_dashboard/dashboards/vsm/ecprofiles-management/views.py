@@ -23,7 +23,7 @@ from horizon import exceptions
 from horizon import tables
 from horizon import forms
 from vsm_dashboard.api import vsm as vsmapi
-from .tables import RBDGroupsTable
+from .tables import ECProfilesTable
 from django.http import HttpResponse,HttpResponseRedirect
 from vsm_dashboard.utils import get_time_delta
 import json
@@ -31,29 +31,13 @@ LOG = logging.getLogger(__name__)
 
 
 class IndexView(tables.DataTableView):
-    table_class = RBDGroupsTable
+    table_class = ECProfilesTable
     template_name = 'vsm/ecprofiles-management/index.html'
 
     def get_data(self):
-        _ec_profiles = []
-        try:
-            _ec_profiles = vsmapi.ec_profile_get_all(self.request)
-            #print '_rbdgroup_status===%s'%_rbdgroup_status
-            if _ec_profiles:
-                logging.debug("resp body in view: %s" % _ec_profiles)
-        except:
-            exceptions.handle(self.request,
-                              _('Unable to retrieve sever list. '))
 
-        ec_profiles = []
-        for _ec_profile in _ec_profiles:
-            ec_profile = {
-                      "id": _ec_profile.id,
-                      "name":_ec_profile.name,
-                      "plugin": _ec_profile.plugin,
-                    }
-
-            ec_profiles.append(ec_profile)
+        ec_profiles = vsmapi.ec_profile_get_all(self.request)
+        print 'ec_profiles===%s'%ec_profiles
         return ec_profiles
 
 

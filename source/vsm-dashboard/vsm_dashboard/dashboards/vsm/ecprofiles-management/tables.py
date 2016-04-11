@@ -39,13 +39,13 @@ class RemoveECProfilesAction(tables.LinkAction):
 
 
 
-class RBDGroupsTable(tables.DataTable):
+class ECProfilesTable(tables.DataTable):
     id = tables.Column("id", verbose_name=_("ID"), hidden=True)
     name = tables.Column("name", verbose_name=_("Name"))
     plugin = tables.Column("plugin", verbose_name=_("Plugin Name"))
     plugin_path = tables.Column("plugin_path", verbose_name=_("Plugin Path"))
     pg_num = tables.Column("pg_num", verbose_name=_("PG Number"))
-    k_v_dict = tables.Column("k_v_pairs", verbose_name=_("Key Values Pairs"))
+    k_v_dict = tables.Column("plugin_kv_pair", verbose_name=_("Key Values Pairs"))
     class Meta:
         name = "ec_profiles"
         verbose_name = _("EC Pro Files List")

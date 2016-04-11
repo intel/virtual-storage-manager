@@ -252,6 +252,15 @@ def pool_status(request):
 def ec_profiles(request):
     return vsmclient(request).storage_pools.ec_profiles()
 
+def ec_profile_remove(request,body):
+    return vsmclient(request).ec_profiles.ec_profile_remove(body=body)
+
+def ec_profile_create(request,body):
+    return vsmclient(request).ec_profiles.ec_profile_create(body=body)
+
+def ec_profile_get_all(request):
+    return vsmclient(request).ec_profiles.list()
+
 #device api
 def device_list(request):
     return vsmclient(request).devices.list()
