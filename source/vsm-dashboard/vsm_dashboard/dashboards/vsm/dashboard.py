@@ -31,7 +31,8 @@ class ClusterMgmt(horizon.PanelGroup):
 class ClusterMonitor(horizon.PanelGroup):
     slug = "clustermonitor"
     name = _("Cluster Monitoring")
-    panels = ('storage-group-status', 'pool-status', 'osd-status', 'monitor-status', 'mds-status', 'pg-status', 'rbd-status')
+    panels = ('storage-group-status', 'pool-status', 'osd-status', 'monitor-status', \
+              'mds-status', 'pg-status', 'rbd-status','ecprofiles-management')
 
 class ServerMgmt(horizon.PanelGroup):
     slug = "servermgmt"
