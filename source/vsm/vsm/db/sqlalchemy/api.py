@@ -4098,7 +4098,11 @@ def ec_profile_update(context, profile_id, values, session=None):
         convert_datetimes(values, 'created_at', 'deleted_at', 'updated_at')
         ec_profile_ref.update(values)
         ec_profile_ref.save(session=session)
-    return ec_profile_ref 
+    return ec_profile_ref
+
+def ec_profile_remove(context, ec_profile_id):
+    values = {"deleted":1,"deleted_at":timeutils.utcnow()}
+    ec_profile_update(context, ec_profile_id,values)
 
 def ec_profile_update_or_create(context, values, session=None):
     if not session:

@@ -1,0 +1,91 @@
+
+<!-- Copyright 2014 Intel Corporation, All Rights Reserved.
+
+ Licensed under the Apache License, Version 2.0 (the"License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+ -->
+
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Create EC Pro files{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=_("Create EC Pro file") %}
+  <link href="{{ STATIC_URL }}dashboard/css/poolmgmt.css" rel="stylesheet">
+
+{% endblock page_header %}
+
+{% block main %}
+    {% csrf_token %}
+    <div id="divECProFileForm" >
+
+	    <form>
+		    <div class="left">
+			    <fieldset>
+
+			    	<div class="control-group form-field clearfix required">
+                        <label>Name:</label>
+                        <span class="help-block"></span>
+                        <div class="input">
+                            <input id="txtName" maxlength="255"  type="text"  class="form-control">
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix required">
+                        <label>Plugin Name:</label>
+                        <span class="help-block"></span>
+                        <div class="input">
+                            <input id="txtPluginName" maxlength="255"  type="text"  class="form-control">
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix required">
+                        <label>Plugin Path:</label>
+                        <span class="help-block"></span>
+                        <div class="input">
+                            <input id="txtPluginPath" maxlength="255"  type="text"  class="form-control">
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix required">
+                        <label>PG Number:</label>
+                        <span class="help-block"></span>
+                        <div class="input">
+                            <input id="txtPGNum" maxlength="255"  type="text"  class="form-control">
+                        </div>
+                    </div>
+                    <div class="control-group form-field clearfix required">
+                        <label>Plugin Key_Value pairs:</label>
+                        <span class="help-block"></span>
+                        <div class="input">
+                            <input id="txtKVPair" maxlength="255"  type="text"  class="form-control">
+                        </div>
+                    </div>
+			    </fieldset>
+			</div>
+			<div class="right">
+			    <h3>{% trans "Description" %}:</h3>
+			    <p>{% trans "From here you can create a ec profile." %}</p>
+			</div>
+		</form>
+		 <div id="divFormOptions" class="vsm-options-bar">
+	    	<button id="btnGreateECProfile" class="btn btn-primary" onclick="CreateECProFile()">Submit</button>
+	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/ecprofiles-management/">Cancel</a>
+	    </div>
+	</div>
+{% endblock %}
+
+
+{% block js %}
+    {{ block.super }}
+    <script src='{{ STATIC_URL }}dashboard/js/vsm.spin.js' type='text/javascript' charset='utf-8'></script>
+    <script src='{{ STATIC_URL }}dashboard/js/addecprofile.js' type='text/javascript' charset='utf-8'></script>
+{% endblock %}
+
