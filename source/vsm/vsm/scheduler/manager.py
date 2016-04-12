@@ -626,6 +626,8 @@ class SchedulerManager(manager.Manager):
                 node_type += "storage,"
             if ser['is_monitor'] == True:
                 node_type += "monitor,"
+            if ser['is_rgw'] == True:
+                node_type += "rgw,"
             values['type'] = node_type
             db.init_node_update(context, ser['id'], values)
 
@@ -1456,11 +1458,13 @@ class SchedulerManager(manager.Manager):
                {u'is_storage': True,
                 u'is_monitor': True,
                 u'is_mds': True,
+                u'is_rgw': True,
                 u'id': u'1',
                 u'zone_id': u'1'},
                {u'is_storage': True,
                 u'is_monitor': False,
                 u'is_mds': False,
+                u'is_rgw': False,
                 u'id': u'2',
                 u'zone_id': u'2'}
            ]
@@ -1486,6 +1490,7 @@ class SchedulerManager(manager.Manager):
         pool_default_size = int(pool_default_size.value)
         nums = len(server_list)
         mds_node = None
+        rgw_node = None
         if nums >= pool_default_size:
             count = 0
             rest_mon_num = 0
@@ -1494,6 +1499,8 @@ class SchedulerManager(manager.Manager):
                     count += 1
                 if ser['is_mds'] == True:
                     mds_node = ser
+                if ser['is_rgw'] == True:
+                    rgw_node = ser
             if count < pool_default_size:
                 rest_mon_num = pool_default_size - count
             if rest_mon_num > 0:
@@ -1504,7 +1511,7 @@ class SchedulerManager(manager.Manager):
                         if rest_mon_num <= 0:
                             break
         # Use mkcephfs to set up ceph system.
-        LOG.info('server_list111 = %s' % server_list)
+        LOG.info('server_list = %s' % server_list)
         monitor_node = self._select_monitor(context, server_list)
         LOG.info('Choose monitor node = %s' % monitor_node)
         # Clean ceph data.
@@ -1638,8 +1645,8 @@ class SchedulerManager(manager.Manager):
                 self._agent_rpcapi.add_mds(context, host=mds_node['host'])
             except:
                 _update("ERROR: mds")
-        # Created begin to get ceph status
 
+        # Created begin to get ceph status
         try:
             _update('Ceph status')
             stat = self._agent_rpcapi.get_ceph_health(context,
@@ -1663,13 +1670,33 @@ class SchedulerManager(manager.Manager):
             def __set_crushmap(context, host):
                 self._agent_rpcapi.set_crushmap(context,
                                                 host)
-                _update('Active')
             set_crushmap = utils.MultiThread(__set_crushmap,
                                              context=context,
                                              host=monitor_node['host'])
             set_crushmap.start()
         except:
             _update('ERROR: set crushmap')
+
+        # add rgw service
+        # TODO hardcode list as followed:
+        # [rgw_instance_name, is_ssl, uid, display_name,
+        # email, sub_user, access, key_type]
+        if rgw_node:
+            try:
+                _update("Start rgw")
+                LOG.info("start rgw service, host = %s" % rgw_node['host'])
+                self._agent_rpcapi.rgw_create(context, host=rgw_node['host'],
+                                              server_name=rgw_node['host'],
+                                              rgw_instance_name="radosgw.gateway",
+                                              is_ssl=False, uid="johndoe",
+                                              display_name="John Doe",
+                                              email="john@example.comjohn@example.com",
+                                              sub_user="johndoe:swift",
+                                              access="full", key_type="swift")
+            except:
+                _update("ERROR: rgw")
+
+        _update('Active')
 
         self._update_init_node(context, server_list)
         while set_crushmap.is_alive():
@@ -2092,3 +2119,10 @@ class SchedulerManager(manager.Manager):
         LOG.info('get_default_pg_num_by_storage_group sync call to host = %s' % active_monitor['host'])
         pg_num_default = self._agent_rpcapi.get_default_pg_num_by_storage_group(context,body,active_monitor['host'])
         return {'pg_num_default':pg_num_default}
+
+    def rgw_create(self, context, server_name, rgw_instance_name, is_ssl,
+                   uid, display_name, email, sub_user, access, key_type):
+        host = server_name
+        self._agent_rpcapi.rgw_create(context, host, server_name, rgw_instance_name,
+                                      is_ssl, uid, display_name, email, sub_user,
+                                      access, key_type)

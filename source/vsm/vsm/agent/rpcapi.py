@@ -629,3 +629,16 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         topic,
                         version='1.0', timeout=6000)
         return res
+
+    def rgw_create(self, context, host, server_name, rgw_instance_name, is_ssl,
+                   uid, display_name, email, sub_user, access, key_type):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('rgw_create', server_name=server_name,
+                                      rgw_instance_name=rgw_instance_name,
+                                      is_ssl=is_ssl, uid=uid,
+                                      display_name=display_name,
+                                      email=email, sub_user=sub_user,
+                                      access=access, key_type=key_type),
+                        topic, version='1.0', timeout=6000)
+        return res

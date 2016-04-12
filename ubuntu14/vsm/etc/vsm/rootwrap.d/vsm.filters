@@ -45,6 +45,8 @@ start_osd: CommandFilter, /usr/local/bin/start_osd, root
 mkfs: CommandFilter, /sbin/mkfs, root
 mount: CommandFilter, /bin/mount, root
 umount: CommandFilter, /bin/umount, root
+radosgw: CommandFilter, /etc/init.d/radosgw, root
+radosgw-admin: CommandFilter, /usr/bin/radosgw-admin, root
 
 #common
 su: CommandFilter, /bin/su, root
