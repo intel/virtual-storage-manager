@@ -20,7 +20,7 @@ import horizon
 from vsm_dashboard.dashboards.vsm import dashboard
 
 class ECProFilesManagement(horizon.Panel):
-    name = _("Manage EC Pro files")
+    name = _("Manage EC Profiles")
     slug = 'ecprofiles-management'
 
 dashboard.VizDash.register(ECProFilesManagement)
