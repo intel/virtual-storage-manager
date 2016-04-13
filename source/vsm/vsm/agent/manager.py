@@ -1988,7 +1988,8 @@ class AgentManager(manager.Manager):
             utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
             config_content = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new))._parser.as_str()
             osd_info = self.ceph_driver.get_ceph_osd_info()
-            self._modify_init_nodes_from_config_to_db(context,osd_info)
+            mon_info = self.ceph_driver._get_ceph_mon_map()
+            self._modify_init_nodes_from_config_to_db(context,osd_info,mon_info)
             self._insert_devices_from_config_to_db(context,osd_info)
             self._insert_osd_states_from_config_to_db(context,osd_info,crushmap)
             self._insert_or_modified_clusters(context,config_content,keyring_file_path)
@@ -2003,9 +2004,10 @@ class AgentManager(manager.Manager):
         #LOG.info('import cluster-----88888888--%s'%message)
         return message
 
-    def _modify_init_nodes_from_config_to_db(self,context,osd_info):
+    def _modify_init_nodes_from_config_to_db(self,context,osd_info,mon_info):
         '''
         Update 'data_drives_number' field in 'init_nodes' table with correct number of OSD devices.
+        Set server status 'Active' for all OSD and monitor nodes in cluster
         :param context:
         :param osd_info: output from 'ceph osd dump -f json' loaded into a python object with json.load()
         :return: None
@@ -2018,6 +2020,12 @@ class AgentManager(manager.Manager):
             for server in servers:
                 if cluster_ip == server['cluster_ip']:
                     server['data_drives_number'] = int(server['data_drives_number']) + 1
+                    server['status'] = 'Active'
+                    break
+        for mon in mon_info['mons']:
+            cluster_ip = mon['addr'].split(':')[0]
+            for server in servers:
+                if cluster_ip == server['cluster_ip']:
                     server['status'] = 'Active'
                     break
         for server in servers:
