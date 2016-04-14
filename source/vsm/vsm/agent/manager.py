@@ -643,6 +643,7 @@ class AgentManager(manager.Manager):
         _try_pass(self.update_mds_status)
         _try_pass(self.update_pg_and_pgp)
         _try_pass(self.update_pg_status)
+        _try_pass(self.update_ec_profiles)
         _try_pass(self.update_pool_usage)
         _try_pass(self.update_mon_health)
         _try_pass(self.update_server_status)
@@ -1290,32 +1291,30 @@ class AgentManager(manager.Manager):
                          max_pg_num_per_osd = int(setting['value'])
             auto_growth_pg = pool['auto_growth_pg']
             if auto_growth_pg:
-                max_pg_num_finally = auto_growth_pg
-            else:
                 size = pool['size']
                 if pool['size'] == 0:
                     pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
                     size = int(pool_default_size.value)
                 max_pg_num_finally = max_pg_num_per_osd * osd_num_per_group//size
-            if max_pg_num_finally > pool['pg_num']:
-                pg_num = max_pg_num_finally#self._compute_pg_num(context, osd_num_per_group, pool['size'])
-                LOG.info("pool['crush_ruleset'] id %s has %s osds" % (pool['crush_ruleset'], osd_num_per_group))
-                if osd_num_per_group > 64:
-                    osd_num_per_group = 64
-                    LOG.info("osd_num_per_group > 64, use osd_num_per_group=64")
-                step_max_pg_num = osd_num_per_group * 32
-                max_pg_num = step_max_pg_num + pool['pg_num']
-                if pg_num > max_pg_num_finally:
-                    pgp_num = pg_num = max_pg_num_finally
-                    self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
-                elif pg_num > max_pg_num:
-                    pgp_num = pg_num = max_pg_num
-                    self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
-                elif pg_num > pool['pg_num']:
-                    pgp_num = pg_num
-                    self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
-                else:
-                    continue
+                if max_pg_num_finally > pool['pg_num']:
+                    pg_num = max_pg_num_finally#self._compute_pg_num(context, osd_num_per_group, pool['size'])
+                    LOG.info("pool['crush_ruleset'] id %s has %s osds" % (pool['crush_ruleset'], osd_num_per_group))
+                    if osd_num_per_group > 64:
+                        osd_num_per_group = 64
+                        LOG.info("osd_num_per_group > 64, use osd_num_per_group=64")
+                    step_max_pg_num = osd_num_per_group * 32
+                    max_pg_num = step_max_pg_num + pool['pg_num']
+                    if pg_num > max_pg_num_finally:
+                        pgp_num = pg_num = max_pg_num_finally
+                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                    elif pg_num > max_pg_num:
+                        pgp_num = pg_num = max_pg_num
+                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                    elif pg_num > pool['pg_num']:
+                        pgp_num = pg_num
+                        self.set_pool_pg_pgp_num(context, pool['name'], pg_num, pgp_num)
+                    else:
+                        continue
 
         ceph_pools = self.ceph_driver.get_pool_status()
         for pool in ceph_pools:
@@ -1464,6 +1463,15 @@ class AgentManager(manager.Manager):
                         self._conductor_rpcapi.update_storage_pool(context, pid, values)
                     else:
                         LOG.info('No client io rate update for pool %s.' % pid)
+
+    @periodic_task(run_immediately=True,
+                    service_topic=FLAGS.agent_topic,
+                    spacing=FLAGS.ceph_ec_profile_update)
+    def update_ec_profiles(self, context):
+        ec_profiles = self.ceph_driver.get_ec_profiles()
+        if ec_profiles:
+            for profile in ec_profiles:
+                db.ec_profile_update_or_create(context, profile)
 
     #@require_active_host
     @periodic_task(run_immediately=True,
@@ -2010,9 +2018,10 @@ class AgentManager(manager.Manager):
             for server in servers:
                 if cluster_ip == server['cluster_ip']:
                     server['data_drives_number'] = int(server['data_drives_number']) + 1
+                    server['status'] = 'Active'
                     break
         for server in servers:
-            values = {'data_drives_number':server['data_drives_number'],'status':'Active'}
+            values = {'data_drives_number':server['data_drives_number'],'status':server['status']}
             db.init_node_update(context,server['id'],values)
 
     def _insert_devices_from_config_to_db(self,context,osd_info):
@@ -2085,7 +2094,7 @@ class AgentManager(manager.Manager):
         osd_state_values = []
 
         for osd in osd_info['osds']:
-            osd_name = osd.get('osd')
+            osd_name = 'osd.'+str(osd.get('osd'))
             cd = osd.get('cd')
             if cd:
                 service_id = db.init_node_get_by_host(context,osd['host'])['service_id']

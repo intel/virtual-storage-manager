@@ -4098,7 +4098,11 @@ def ec_profile_update(context, profile_id, values, session=None):
         convert_datetimes(values, 'created_at', 'deleted_at', 'updated_at')
         ec_profile_ref.update(values)
         ec_profile_ref.save(session=session)
-    return ec_profile_ref 
+    return ec_profile_ref
+
+def ec_profile_remove(context, ec_profile_id):
+    values = {"deleted":1,"deleted_at":timeutils.utcnow()}
+    ec_profile_update(context, ec_profile_id,values)
 
 def ec_profile_update_or_create(context, values, session=None):
     if not session:
@@ -4271,11 +4275,16 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
     ret_list = []
     session = get_session()
     if timestamp_start :
-        sql_str = '''select timestamp, hostname, sum(value) as metric_value from metrics where instance='cpu_total' and metric in ('user','system') and timestamp>=%(start_time)s  group by timestamp,hostname
+        sql_str = '''select timestamp, hostname, sum(value) as metric_value, count(value) as cpu_count from metrics where instance='idle' and timestamp>=%(start_time)s  group by timestamp,hostname
             '''%{'start_time':timestamp_start}
         sql_ret = session.execute(sql_str).fetchall()
+        LOG.info("======================sql_ret: %s" % sql_ret)
         for cell in sql_ret:
-            metrics_value = cell[2] or 0
+            cpu_total_idle = int(cell[2]) or 0
+            cpu_total_count = int(cell[3])
+            LOG.info("=================cpu_total_idle: %s" % str(cpu_total_idle))
+            LOG.info("=================cpu_total_count: %s" % str(cpu_total_count))
+            metrics_value = 100 - round(cpu_total_idle/cpu_total_count, 1)
             timestamp = cell[0]/diamond_collect_interval*diamond_collect_interval
             ret_list.append({'host':cell[1], 'timestamp':timestamp, 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list

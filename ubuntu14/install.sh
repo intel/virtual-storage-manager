@@ -231,18 +231,12 @@ function download_dependencies() {
     elif [[ -d $REPO_PATH ]] && [[ $IS_CHECK_DEPENDENCE_PACKAGE == True ]]; then
         cd $REPO_PATH
         for i in `cat $TOPDIR/debs.lst`; do
-            if [[ `ls |grep $i|wc -l` -eq 0 ]]; then
+            pkg_name=${i%%_*}_
+            if [[ `ls |grep $pkg_name|wc -l` -eq 0 ]]; then
                 wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
             else
-                COUNT=0
-                for j in `ls |grep $i`; do
-                    if [[ $i == $j ]]; then
-                        let COUNT+=1
-                    fi
-                done
-                if [[ $COUNT -eq 0 ]]; then
-                    wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
-                fi
+                rm $pkg_name*
+                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/ubuntu14/$i
             fi
         done
         $SUDO rm -rf *.deb.*
@@ -486,11 +480,11 @@ function setup_remote_agent() { # setup_remote_agent <node>
     $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
     $SSH $USER@$1 "$SUDO mv /tmp/server.manifest /etc/manifest"
     $SSH $USER@$1 "$SUDO chown root:vsm /etc/manifest/server.manifest; $SUDO chmod 755 /etc/manifest/server.manifest"
-    is_server_manifest_error=`$SSH $USER@$1 "server_manifest" |grep ERROR|wc -l`
+    is_server_manifest_error=`$SSH $USER@$1 "unset http_proxy;server_manifest" |grep ERROR|wc -l`
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
     else
-        $SSH $USER@$1 "$SUDO vsm-node"
+        $SSH $USER@$1 "unset http_proxy;$SUDO vsm-node"
     fi
 }
 
@@ -565,7 +559,6 @@ if [[ $IS_AGENT_INSTALL == True ]]; then
     # wait for agents to complete installing in background
     for p in $pids; do
         if ! wait $p; then
-            echo "At least one agent installation failed!"
             exit_code=1
         fi
     done
@@ -584,6 +577,8 @@ if [[ $IS_AGENT_INSTALL == True ]]; then
         echo "sync /etc/hosts to controller"
         #sync_hosts $CONTROLLER_IP
     fi
+
+    test ${exit_code} -ne 0 && echo "ERROR: At least one agent failed to install properly."
 fi
 
 #-------------------------------------------------------------------------------

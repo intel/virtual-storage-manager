@@ -1237,20 +1237,21 @@ class SchedulerManager(manager.Manager):
         mon_header = {}
         global_header = {}
         for key,value in config_dict.iteritems():
-            if key.find('osd.')!=-1:
-                osd_list.append({key:value})
-            elif key.find('osd')!=-1:
-                osd_header = value
-            elif key.find('mon.')!=-1:
-                mon_list.append({key:value})
-            elif key.find('mon')!=-1:
-                mon_header = value
-            elif key.find('mds.')!=-1:
-                mds_list.append({key:value})
-            elif key.find('mds')!=-1:
-                mds_header = value
-            elif key.find('global')!=-1:
-                global_header = value
+            if key:
+                if key.find('osd.')!=-1:
+                    osd_list.append({key:value})
+                elif key.find('osd')!=-1:
+                    osd_header = value
+                elif key.find('mon.')!=-1:
+                    mon_list.append({key:value})
+                elif key.find('mon')!=-1:
+                    mon_header = value
+                elif key.find('mds.')!=-1:
+                    mds_list.append({key:value})
+                elif key.find('mds')!=-1:
+                    mds_header = value
+                elif key.find('global')!=-1:
+                    global_header = value
         if not global_header:
             message['code'].append('-21')
             message['error'].append('missing global section in ceph configration file.')
@@ -1302,6 +1303,7 @@ class SchedulerManager(manager.Manager):
         crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
         utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
         osd_num = 0
+        tree_node = None
         try:
             crushmap = CrushMap(json_file=crush_map_new)
             tree_node = crushmap._show_as_tree_dict()

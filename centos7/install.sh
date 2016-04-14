@@ -182,12 +182,12 @@ function download_dependencies() {
     elif [[ -d $REPO_PATH ]] && [[ $IS_CHECK_DEPENDENCE_PACKAGE == True ]]; then
         cd $REPO_PATH
         for i in `cat $TOPDIR/rpms.lst`; do
-	    pkg_name=${i%%_*}_
-	    if [[ `ls |grep $pkg_name|wc -l` -eq 0 ]]; then
-	        wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
+            pkg_name=${i%%_*}_
+            if [[ `ls |grep $pkg_name|wc -l` -eq 0 ]]; then
+                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
             else
-	        rm $pkg_name*
-	        wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
+                rm $pkg_name*
+                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
             fi
         done
         $SUDO rm -rf *.rpm.*

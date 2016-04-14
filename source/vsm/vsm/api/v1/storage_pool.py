@@ -359,10 +359,7 @@ class StoragePoolController(wsgi.Controller):
             #pg_num = self._compute_pg_num(context, osd_num, size)
 
             #vsm_id = str(uuid.uuid1()).split('-')[0]
-            pg_num = 64
-            auto_growth_pg = pool_dict.get("auto_growth_pg",0)
-            if  auto_growth_pg and int(auto_growth_pg) < pg_num and int(auto_growth_pg) > 0:
-                pg_num = int(auto_growth_pg)
+            pg_num = pool_dict.get('pg_num', 64)
             #self._compute_pg_num(context, osd_num, size)
             body_info = {'name': name, #+ "-vsm" + vsm_id,
                         'cluster_id':cluster_id,

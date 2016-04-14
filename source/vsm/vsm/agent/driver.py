@@ -116,7 +116,7 @@ class CephDriver(object):
             LOG.error("Required parameter type or id is blank")
             return False
 
-        # host is localhost if not specified
+        # host is local host if not specified
         if not host:
             host = platform.node()
 
@@ -133,7 +133,7 @@ class CephDriver(object):
         # path = os.path.dirname(data_dir)
 
         file = data_dir.replace("$cluster", cluster).\
-                    replace("$id", id).replace("$host", host) + "/upstart"
+                    replace("$id", str(id)).replace("$host", host) + "/upstart"
         # no using os.path.exists(), because if the file is owned by ceph
         # user, the result will return false
         if ssh:
@@ -595,8 +595,7 @@ class CephDriver(object):
                             (json.dumps(strg, sort_keys=True, indent=4)))
 
                     config.add_osd(strg['host'],
-                                   (strg['secondary_public_ip'],
-                                    strg['primary_public_ip']),
+                                   strg['secondary_public_ip'],
                                    strg['cluster_ip'],
                                    strg['dev_name'],
                                    strg['dev_journal'],
@@ -905,7 +904,7 @@ class CephDriver(object):
         arglist.extend(['config', 'show'] if reqtype == 'config' else ['status'])
         output = utils.execute(*arglist, run_as_root=True)[0]
         for line in output.split('\n'):
-            if len(line.strip()) > 0:
+            if len(line.strip()) > 1:
                 attr, val = tuple(line.translate(None, ' {"\},').split(':', 1))
                 values[attr] = val
         return values
@@ -1178,7 +1177,7 @@ class CephDriver(object):
     def _add_ceph_osd_to_config(self, context, strg, osd_id):
         LOG.info('>>>> _add_ceph_osd_to_config start')
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        ip = (strg['secondary_public_ip'], strg['primary_public_ip'])
+        ip = strg['secondary_public_ip']
 
         config.add_osd(strg['host'], ip, strg['cluster_ip'],
                 strg['dev_name'], strg['dev_journal'], osd_id)
@@ -1618,18 +1617,21 @@ class CephDriver(object):
         # utils.execute('service', 'ceph', 'start', mds_name, run_as_root=True)
         self._operate_ceph_daemon("start", "mds", id=num)
 
+    def _get_ceph_mon_map(self):
+        output = utils.execute("ceph", "mon", "dump", "-f", "json", run_as_root=True)[0]
+        return json.loads(output)
+
     def start_monitor(self, context):
         # Get info from db.
         res = self._conductor_rpcapi.init_node_get_by_host(context, FLAGS.host)
         node_type = res.get('type', None)
         # get mon_id
         mon_id = None
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        for section in config_dict:
-            if section.startswith("mon."):
-                if config_dict[section]['host'] == FLAGS.host:
-                    mon_id = section.replace("mon.", "")
+        monmap = self._get_ceph_mon_map()
+        mons = monmap['mons']
+        for mon in mons:
+            if mon['name'] == FLAGS.host:
+                mon_id = mon['rank']
 
         # Try to start monitor service.
         if mon_id:
@@ -1643,12 +1645,11 @@ class CephDriver(object):
         node_type = res.get('type', None)
         # get mon_id
         mon_id = None
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        for section in config_dict:
-            if section.startswith("mon."):
-                if config_dict[section]['host'] == FLAGS.host:
-                    mon_id = section.replace("mon.", "")
+        monmap = self._get_ceph_mon_map()
+        mons = monmap['mons']
+        for mon in mons:
+            if mon['name'] == FLAGS.host:
+                mon_id = mon['rank']
 
         # Try to stop monitor service.
         if mon_id:
@@ -1903,25 +1904,20 @@ class CephDriver(object):
         osd_states = self._conductor_rpcapi.\
                 osd_state_get_by_service_id(context, service_id)
         if not len(osd_states) > 0:
-            LOG.info("There is no osd on node %s" % node_id)
-            self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Stopped')
-            return True
-
-        LOG.info('Step 2. ceph osd set noout')
-        utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
-        for item in osd_states:
-            osd_name = item['osd_name']
-            LOG.info('>> Stop ceph %s' % osd_name)
-            # utils.execute('service', 'ceph', 'stop', osd_name,
-            #                 run_as_root=True)
-            self.stop_osd_daemon(context, osd_name.split(".")[1])
-            # self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
-            values = {'state': 'In-Down', 'osd_name': osd_name}
-            LOG.info('>> update status into db %s' % osd_name)
-            self._conductor_rpcapi.\
-                    osd_state_update_or_create(context, values)
+            LOG.info("There is no osd on node %s; skipping osd shutdown." % node_id)
+        else:
+            LOG.info('Step 2. ceph osd set noout')
+            utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
+            for item in osd_states:
+                osd_name = item['osd_name']
+                LOG.info('>> Stop ceph %s' % osd_name)
+                # utils.execute('service', 'ceph', 'stop', osd_name,
+                #                 run_as_root=True)
+                self.stop_osd_daemon(context, osd_name.split(".")[1])
+                # self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
+                values = {'state': 'In-Down', 'osd_name': osd_name}
+                LOG.info('>> update status into db %s' % osd_name)
+                self._conductor_rpcapi.osd_state_update_or_create(context, values)
 
         # Stop monitor service.
         self.stop_monitor(context)
@@ -2010,7 +2006,77 @@ class CephDriver(object):
 
         return max_line + 1
 
+    def parse_nvme_output(self, attributes, start_offset=0, end_offset=-1):
+        import string
+
+        att_list = attributes.split('\n')
+        att_list = att_list[start_offset:end_offset]
+        dev_info={}
+        for att in att_list:
+            att_kv = att.split(':')
+            if not att_kv[0]: continue
+            if len(att_kv) > 1:
+                dev_info[string.strip(att_kv[0])] = string.strip(att_kv[1])
+            else:
+                dev_info[string.strip(att_kv[0])] = ''
+
+        return dev_info
+
+    def get_nvme_smart_info(self, device):
+        smart_info_dict = {'basic':{},'smart':{}}
+
+        if "/dev/nvme" in device:
+            LOG.info("This is a nvme device : " + device)
+            dev_info = {}
+            dev_smart_log = {}
+            dev_smart_add_log = {}
+
+            import commands
+
+            # get nvme device meta data
+            attributes, err =  utils.execute('nvme', 'id-ctrl', device, run_as_root=True)
+            if not err:
+                basic_info_dict = self.parse_nvme_output(attributes)
+                LOG.info("basic_info_dict=" + str(basic_info_dict))
+                smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('mn') or ''
+                smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('sn') or ''
+                smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('fr') or ''
+                smart_info_dict['basic']['Drive Status'] = 'PASSED'
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device identification with error: " + str(err))
+
+            # get nvme devic smart data
+            attributes, err = utils.execute('nvme', 'smart-log', device, run_as_root=True)
+            if not err:
+                dev_smart_log_dict = self.parse_nvme_output(attributes, 1)
+                LOG.info("device smart log=" + str(dev_smart_log_dict))
+                for key in dev_smart_log_dict:
+                    smart_info_dict['smart'][key] = dev_smart_log_dict[key]
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device smart log with error: " + str(err))
+
+            # get nvme device smart additional data
+            attributes, err = utils.execute('nvme', 'smart-log-add', device, run_as_root=True)
+            if not err:
+                dev_smart_log_add_dict = self.parse_nvme_output(attributes, 2)
+                LOG.info("device additional smart log=" + str(dev_smart_log_add_dict))
+                smart_info_dict['smart']['<<< additional smart log'] = ' >>>'
+                for key in dev_smart_log_add_dict:
+                    smart_info_dict['smart'][key] = dev_smart_log_add_dict[key]
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device additional (vendor specific) smart log with error: "  + str(err))
+
+        LOG.info(smart_info_dict)
+        return smart_info_dict
+
     def get_smart_info(self, context, device):
+        LOG.info('retrieve device info for ' + str(device))
+        if "/dev/nvme" in device:
+            return self.get_nvme_smart_info(device)
+
         attributes, err = utils.execute('smartctl', '-A', device, run_as_root=True)
         attributes = attributes.split('\n')
         start_line = self.find_attr_start_line(attributes)
@@ -2245,15 +2311,17 @@ class CephDriver(object):
                       run_as_root=True)
         return True
 
-    def ceph_osd_stop(self, context, osd_name, osd_host):
+    def ceph_osd_stop(self, context, osd_name):
         # utils.execute('service',
         #               'ceph',
         #               '-a',
         #               'stop',
         #               osd_name,
         #               run_as_root=True)
-        self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1],
-                                  ssh=True, host=osd_host)
+        osd_id = osd_name.split('.')[-1]
+        self.stop_osd_daemon(context, osd_id)
+        #self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1],
+        #                          ssh=True, host=osd_host)
         #osd_id = osd_name.split('.')[-1]
         #values = {'state': 'Out-Down', 'osd_name': osd_name}
         #ret = self._conductor_rpcapi.\
@@ -2272,7 +2340,7 @@ class CephDriver(object):
         osd=osd[0]
         #stop
         utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
-        self.ceph_osd_stop(context, osd['osd_name'], osd['service']['host'])
+        self.ceph_osd_stop(context, osd['osd_name'])
         #start
         utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
         self.ceph_osd_start(context, osd['osd_name'])
@@ -2423,6 +2491,32 @@ class CephDriver(object):
         args= ['ceph', 'osd', 'pool', 'set', pool, 'pgp_num', pgp_num]
         utils.execute(*args, run_as_root=True)
 
+    def get_ec_profiles(self):
+        DEFAULT_PLUGIN_PATH = "/usr/lib/ceph/erasure-code"
+        args = ['ceph', 'osd', 'erasure-code-profile', 'ls']
+        (out, err) = utils.execute(*args, run_as_root=True)
+        profile_names = out.splitlines()
+        profiles = []
+        for profile_name in profile_names:
+            args = ['ceph', 'osd', 'erasure-code-profile', 'get', profile_name]
+            (out, err) = utils.execute(*args, run_as_root=True)
+            profile = {}
+            profile['name'] = profile_name
+            profile['plugin_path'] = DEFAULT_PLUGIN_PATH
+            profile_kv = {}
+            for item in out.splitlines():
+                key, val = item.split('=')
+                if key == 'plugin':
+                    profile['plugin'] = val
+                elif key == 'directory':
+                    profile['plugin_path'] = val
+                else:
+                    profile_kv[key] = val
+            profile['pg_num'] = int(profile_kv['k']) + int(profile_kv['m'])
+            profile['plugin_kv_pair'] = json.dumps(profile_kv)
+            profiles.append(profile)
+        return profiles
+
     def get_osds_status(self):
         args = ['ceph', 'osd', 'dump', '-f', 'json']
         #args = ['hostname', '-I']
@@ -2482,7 +2576,11 @@ class CephDriver(object):
         (out, err) = utils.execute(*cmd, run_as_root=True)
         json_data = None
         if out:
-            json_data = json.loads(out)
+            try:
+                json_data = json.loads(out)
+            except:
+                json_data = None
+                LOG.error('CMD result is invalid.cmd is %s.ret of cmd is %s.'%(cmd,out))
         return json_data
 
     def get_osds_total_num(self):
@@ -3387,8 +3485,10 @@ class CreateCrushMapDriver(object):
         return dic['rule_id']
 
     def _generate_rule(self, context, zone_tag):
-        storage_groups = self.conductor_api.storage_group_get_all(context)
-        if storage_groups is None:
+        osds = self.conductor_api.osd_state_get_all(context)
+        storage_groups = [ osd['storage_group']['id'] for osd in osds if osd['storage_group']]
+        storage_groups = list(set(storage_groups))
+        if not storage_groups :#is None:
             LOG.info("Error in getting storage_groups")
             try:
                 raise exception.GetNoneError
@@ -3397,8 +3497,8 @@ class CreateCrushMapDriver(object):
             return False
         LOG.info("DEBUG in generate rule begin")
         LOG.info("DEBUG storage_groups from conductor %s " % storage_groups)
-        sorted_storage_groups = sorted(storage_groups, key=self._key_for_sort)
-        LOG.info("DEBUG storage_groups after sorted %s" % sorted_storage_groups)
+        #sorted_storage_groups = sorted(storage_groups, key=self._key_for_sort)
+        #LOG.info("DEBUG storage_groups after sorted %s" % sorted_storage_groups)
         sting_common = """    type replicated
     min_size 0
     max_size 10
@@ -3413,7 +3513,8 @@ class CreateCrushMapDriver(object):
     step emit
 }
 """
-        for storage_group in sorted_storage_groups:
+        for storage_group_id in storage_groups:
+            storage_group = db.storage_group_get(context,storage_group_id)
             storage_group_name = storage_group["name"]
             rule_id = storage_group["rule_id"]
             string = ""

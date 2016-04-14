@@ -20,7 +20,7 @@ REMOVE_CEPH_PKGS=1
 
 # Parse command line options to change defaults
 OPTIND=1
-while getopts "h?kmac" opt; do
+while getopts "h?kmadc" opt; do
     case "$opt" in
     h|\?)
         echo "Uninstall VSM and other components and clean up any remaining file system items and processes."
@@ -28,12 +28,14 @@ while getopts "h?kmac" opt; do
         echo "By default: Do NOT uninstall MySQL/MariaDB components."
         echo "By default: Do NOT uninstall Apache2 server components."
         echo "By default: Do NOT uninstall Keystone components."
+        echo "By default: Do NOT uninstall VSM dependency packages."
         echo ""
         echo "Usage: uninstall.sh [options]"
         echo "options:"
         echo "   -k  Uninstall Keystone components."
         echo "   -m  Uninstall MySQL/MariaDB components."
         echo "   -a  Uninstall Apache2 server components."
+        echo "   -d  Uninstall VSM depencency packages."
         echo "   -c  Suppress removal of Ceph cluster and components."
         exit 0
         ;;
@@ -42,6 +44,8 @@ while getopts "h?kmac" opt; do
     m)  REMOVE_MYSQL_PKGS=1
         ;;
     a)  REMOVE_APACHE2_PKGS=1
+        ;;
+    d)  REMOVE_VSM_DEP_PKGS=1
         ;;
     c)  unset REMOVE_CEPH_PKGS
         ;;
@@ -54,6 +58,14 @@ TOPDIR=$(cd $(dirname "$0") && pwd)
 USER=`whoami`
 
 source $TOPDIR/installrc
+
+VSM_DEP_PKGS="python-amqp python-amqplib python-babel python-babel-localedata python-django\
+ python-django-horizon python-django-pyscss python-dogpile.cache python-dogpile.core python-eventlet\
+ python-flask python-greenlet python-httplib2 python-iso8601 python-itsdangerous python-jinja2 python-kombu\
+ python-lxml python-migrate python-novaclient python-numpy python-openstack-auth python-oslo.config\
+ python-oslo.db python-oslo.i18n python-oslo.messaging python-oslo.serialization python-oslo.utils\
+ python-paramiko python-paste python-pastedeploy python-pastedeploy-tpl python-pastescript python-simplejson\
+ python-sqlalchemy python-sqlalchemy-ext python-stevedore python-suds python-tempita python-webob"
 
 function uninstall_controller()
 {
@@ -88,6 +100,9 @@ if [ -n "${REMOVE_APACHE2_PKGS}" ]; then
     sudo killall apache2
     sudo rm -rf /etc/apache2
 fi
+if [ -n "${REMOVE_VSM_DEP_PKGS}" ]; then
+    sudo apt-get purge --yes ${VSM_DEP_PKGS}
+fi
 sudo apt-get autoremove --yes
 sudo apt-get autoclean --yes
 sudo rm -rf /etc/vsm /etc/vsm-dashboard /etc/vsmdeploy /var/lib/vsm /var/log/vsm
@@ -110,6 +125,9 @@ sudo apt-get purge --yes python-keystoneclient
 if [ -n "${REMOVE_MYSQL_PKGS}" ]; then
     sudo apt-get purge --yes libdbd-mysql-perl libmysqlclient18:amd64 mysql-common python-mysqldb
     sudo rm -rf /etc/mysql
+fi
+if [ -n "${REMOVE_VSM_DEP_PKGS}" ]; then
+    sudo apt-get purge --yes ${VSM_DEP_PKGS}
 fi
 sudo apt-get autoremove --yes
 sudo apt-get autoclean --yes
