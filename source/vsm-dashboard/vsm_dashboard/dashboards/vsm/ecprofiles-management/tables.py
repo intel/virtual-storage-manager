@@ -48,7 +48,7 @@ class ECProfilesTable(tables.DataTable):
     k_v_dict = tables.Column("plugin_kv_pair", verbose_name=_("Key Values Pairs"))
     class Meta:
         name = "ec_profiles"
-        verbose_name = _("EC Pro Files List")
+        verbose_name = _("EC Profiles List")
         table_actions = (AddECProfileAction,RemoveECProfilesAction)
 
     def get_object_id(self, datum):

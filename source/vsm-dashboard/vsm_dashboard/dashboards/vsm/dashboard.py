@@ -26,13 +26,13 @@ class Dashboard(horizon.PanelGroup):
 class ClusterMgmt(horizon.PanelGroup):
     slug = "clustermgmt"
     name = _("Cluster Management")
-    panels = ('clustermgmt', 'cluster-import', 'cephupgrade', 'poolsmanagement','crushmap','zonemgmt')
+    panels = ('clustermgmt', 'cluster-import', 'cephupgrade', 'poolsmanagement','ecprofiles-management','crushmap','zonemgmt')
 
 class ClusterMonitor(horizon.PanelGroup):
     slug = "clustermonitor"
     name = _("Cluster Monitoring")
     panels = ('storage-group-status', 'pool-status', 'osd-status', 'monitor-status', \
-              'mds-status', 'pg-status', 'rbd-status','ecprofiles-management')
+              'mds-status', 'pg-status', 'rbd-status')
 
 class ServerMgmt(horizon.PanelGroup):
     slug = "servermgmt"
