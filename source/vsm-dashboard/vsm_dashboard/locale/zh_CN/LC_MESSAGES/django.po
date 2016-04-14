@@ -1,0 +1,142 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-04-14 08:08+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\dashboard\templates\dashboard\index.html:23
+msgid "VSM Status"
+msgstr "VSM 状态"
+
+#: .\dashboard\views.py:8
+msgid "Dashboard"
+msgstr "控制台"
+
+#: .\dashboard\views.py:9
+msgid "Cluster Management"
+msgstr "集群管理"
+
+#: .\dashboard\views.py:10
+msgid "Cluster Monitoring"
+msgstr "集群监控"
+
+#: .\dashboard\views.py:11
+msgid "Server Management"
+msgstr "服务器管理"
+
+#: .\dashboard\views.py:12
+msgid "Openstack Integration"
+msgstr "Openstack 集成"
+
+#: .\dashboard\views.py:13
+msgid "VSM Management"
+msgstr "VSM 管理"
+
+#: .\dashboard\views.py:14
+msgid "VSM"
+msgstr "VSM"
+
+#: .\dashboard\views.py:19
+msgid "Cluster Status"
+msgstr "集群状态"
+
+#: .\dashboard\views.py:20
+msgid "Manage Servers"
+msgstr "管理服务器"
+
+#: .\dashboard\views.py:21
+msgid "Manage Devices"
+msgstr "管理设备"
+
+#: .\dashboard\views.py:22
+msgid "Create Cluster"
+msgstr "创建集群"
+
+#: .\dashboard\views.py:23
+msgid "Import Cluster"
+msgstr "导入集群"
+
+#: .\dashboard\views.py:24
+msgid "Ceph Upgrade"
+msgstr "Ceph升级"
+
+#: .\dashboard\views.py:25
+msgid "Manage Pools"
+msgstr "管理存储池"
+
+#: .\dashboard\views.py:26
+msgid "Manage EC Profiles"
+msgstr "管理EC Profiles"
+
+#: .\dashboard\views.py:27
+msgid "Manage Storage Group"
+msgstr "管理存储组"
+
+#: .\dashboard\views.py:28
+msgid "Manage Zones"
+msgstr "管理域"
+
+#: .\dashboard\views.py:29
+msgid "Storage Group Status"
+msgstr "存储组状态"
+
+#: .\dashboard\views.py:30
+msgid "Pool Status"
+msgstr "存储池状态"
+
+#: .\dashboard\views.py:31
+msgid "OSD Status"
+msgstr "OSD状态"
+
+#: .\dashboard\views.py:32
+msgid "Monitor Status"
+msgstr "监视器状态"
+
+#: .\dashboard\views.py:33
+msgid "MDS Status"
+msgstr "MDS状态"
+
+#: .\dashboard\views.py:34
+msgid "PG Status"
+msgstr "PG状态"
+
+#: .\dashboard\views.py:35
+msgid "RBD Status"
+msgstr "RBD状态"
+
+#: .\dashboard\views.py:36
+msgid "Manage RBD Pools"
+msgstr "管理RBD存储池"
+
+#: .\dashboard\views.py:37
+msgid "Openstack Access"
+msgstr "Openstack接口"
+
+#: .\dashboard\views.py:38
+msgid "Add/Remove User"
+msgstr "新增/移除 用户"
+
+#: .\dashboard\views.py:39
+msgid "Settings"
+msgstr "系统设置"
+
+#: .\dashboard\views.py:43
+msgid "Logged in as"
+msgstr "当前用户"
+
+#: .\dashboard\views.py:44
+msgid "Sign Out"
+msgstr "注销"
