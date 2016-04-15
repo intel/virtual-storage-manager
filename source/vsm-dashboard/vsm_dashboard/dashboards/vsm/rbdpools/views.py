@@ -237,8 +237,8 @@ def get_select_data(request):
                             if cinder["binary"] == "cinder-volume" and \
                                             "@" in cinder["host"]:
                                 host = cinder["host"].split("@")[0]
-                                if host not in [x["host"] for x in cinder_service_list]:
-                                    service_list.append(cinder["host"])
+                                if host not in service_list:
+                                    service_list.append(host)
                             elif cinder["binary"] == "cinder-volume" and \
                                             "@" not in cinder["host"]:
                                 service_list.append(cinder["host"])
