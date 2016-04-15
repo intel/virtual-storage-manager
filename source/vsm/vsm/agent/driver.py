@@ -575,14 +575,14 @@ class CephDriver(object):
                     req.get_method = lambda: 'POST'
                     req.add_header("content-type", "application/json")
                     req.add_header("X-Auth-Token", token)
-                    type_data = {"volume_type": {"os-volume-type-access:is_public": True, "name": "test", "description": None}}
+                    type_data = {"volume_type": {"os-volume-type-access:is_public": True, "name": volume_type, "description": None}}
                     req.add_data(json.dumps(type_data))
                     resp = urllib2.urlopen(req)
                     volume_resp = json.loads(resp.read())
                     _volume_type = volume_resp['volume_type']
                     type_id = _volume_type['id']
                     LOG.info("creating volume type = %s" % volume_type)
-                    url = url + "/types/%s/extra_specs" % str(type_id)
+                    url = url + "/%s/extra_specs" % str(type_id)
                     req = urllib2.Request(url)
                     req.get_method = lambda: 'POST'
                     req.add_header("content-type", "application/json")
