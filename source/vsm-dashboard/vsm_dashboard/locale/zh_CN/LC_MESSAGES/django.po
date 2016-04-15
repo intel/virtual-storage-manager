@@ -1,0 +1,111 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-04-14 08:08+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "VSM Status"
+msgstr "VSM 状态"
+
+msgid "Dashboard"
+msgstr "控制台"
+
+msgid "Cluster Management"
+msgstr "集群管理"
+
+msgid "Cluster Monitoring"
+msgstr "集群监控"
+
+msgid "Server Management"
+msgstr "服务器管理"
+
+msgid "Openstack Integration"
+msgstr "Openstack 集成"
+
+msgid "VSM Management"
+msgstr "VSM 管理"
+
+msgid "VSM"
+msgstr "VSM"
+
+msgid "Cluster Status"
+msgstr "集群状态"
+
+msgid "Manage Servers"
+msgstr "管理服务器"
+
+msgid "Manage Devices"
+msgstr "管理设备"
+
+msgid "Create Cluster"
+msgstr "创建集群"
+
+msgid "Import Cluster"
+msgstr "导入集群"
+
+msgid "Ceph Upgrade"
+msgstr "Ceph升级"
+
+msgid "Manage Pools"
+msgstr "管理存储池"
+
+msgid "Manage EC Profiles"
+msgstr "管理EC Profiles"
+
+msgid "Manage Storage Group"
+msgstr "管理存储组"
+
+msgid "Manage Zones"
+msgstr "管理域"
+
+msgid "Storage Group Status"
+msgstr "存储组状态"
+
+msgid "Pool Status"
+msgstr "存储池状态"
+
+msgid "OSD Status"
+msgstr "OSD状态"
+
+msgid "Monitor Status"
+msgstr "监视器状态"
+
+msgid "MDS Status"
+msgstr "MDS状态"
+
+msgid "PG Status"
+msgstr "PG状态"
+
+msgid "RBD Status"
+msgstr "RBD状态"
+
+msgid "Manage RBD Pools"
+msgstr "管理RBD存储池"
+
+msgid "Openstack Access"
+msgstr "Openstack接口"
+
+msgid "Add/Remove User"
+msgstr "新增/移除 用户"
+
+msgid "Settings"
+msgstr "系统设置"
+
+msgid "Logged in as"
+msgstr "当前用户"
+
+msgid "Sign Out"
+msgstr "注销"
