@@ -102,56 +102,6 @@ def get_instances_data(request):
     return instances
 
 
-class GenAuthToken(object):
-    """Generate token from vsm-api WSGI service."""
-
-    def __init__(self, tenant_name, username, password, host, region_name):
-        """Initialized the url requestion and RUL."""
-        self._tenant_namt = tenant_name
-        self._username = username
-        self._password = password
-        self._auth_url = "http://%s:5000/v2.0/tokens" % host
-        self._region_name = region_name
-        self._token = None
-        self._url = None
-
-    def get_token(self):
-        """Get auth info from keystone."""
-        auth_data = {
-            "auth": {
-                "tenantName": self._tenant_namt,
-                "passwordCredentials":{
-                    "username": self._username,
-                    "password": self._password
-                }
-            }
-        }
-
-        auth_request = urllib2.Request(self._auth_url)
-        auth_request.add_header("content-type", "application/json")
-        auth_request.add_header('Accept', 'application/json')
-        auth_request.add_header('User-Agent', 'python-mikeyp')
-        auth_request.add_data(json.dumps(auth_data))
-        auth_response = urllib2.urlopen(auth_request)
-        response_data = json.loads(auth_response.read())
-
-        self._token = response_data['access']['token']['id']
-
-        service_list = response_data['access']['serviceCatalog']
-        for service in service_list:
-            if service['type'] == 'volume' and service['name'] == 'cinder':
-                for endpoint in service['endpoints']:
-                    if self._region_name != None and endpoint['region'] == self._region_name:
-                        self._url = endpoint['publicURL']
-                        break
-                    elif self._region_name == None or self._region_name == "" and len(service['endpoints']) == 1:
-                        self._url = endpoint['publicURL']
-                        break
-
-        url_id = self._url.split('/')[-1]
-        host = self._url.split('/')[2].split(':')[0]
-        return self._token, url_id, host
-
 def list_cinder_service(host, token, tenant_id):
     req_url = "http://%s:8776/v1/%s" % (host, tenant_id) + "/os-services"
     req = urllib2.Request(req_url)
@@ -162,3 +112,97 @@ def list_cinder_service(host, token, tenant_id):
     cinder_service_dict = json.loads(resp.read())
     cinder_service_list = cinder_service_dict['services']
     return cinder_service_list
+
+def from_keystone_v3(tenant_name, username, password, auth_url, region_name):
+    auth_url = auth_url + "/auth/tokens"
+    user_id = username
+    user_password = password
+    project_id = tenant_name
+    auth_data = {
+        "auth": {
+            "identity": {
+                "methods": ["password"],
+                "password": {
+                    "user": {
+                        "id": user_id,
+                        "password": user_password
+                    }
+                }
+            },
+            "scope": {
+                "project": {
+                    "id": project_id
+                }
+            }
+        }
+    }
+    auth_request = urllib2.Request(auth_url)
+    auth_request.add_header("content-type", "application/json")
+    auth_request.add_header('Accept', 'application/json')
+    auth_request.add_header('User-Agent', 'python-mikeyp')
+    auth_request.add_data(json.dumps(auth_data))
+    auth_response = urllib2.urlopen(auth_request)
+    response_data = json.loads(auth_response.read())
+    services_list = response_data['token']['catalog']
+    endpoints_list = []
+    _url = None
+    for service in services_list:
+        service_type = service['type']
+        service_name = service['name']
+        if service_type == "volume" and service_name == "cinder":
+            endpoints_list = service['endpoints']
+            break
+    for endpoint in endpoints_list:
+        interface = endpoint['interface']
+        region_id = endpoint['region_id']
+        if region_name:
+            if interface == "public" and region_id == region_name:
+                _url = endpoint['url']
+                break
+        else:
+            if len(endpoints_list) == 3:
+                _url = endpoint['url']
+                break
+    host = _url.split('/')[2].split(':')[0]
+    _token = auth_response.info().getheader('X-Subject-Token')
+    return _token, host
+
+
+
+def from_keystone_v2(tenant_name, username, password, auth_url, region_name):
+    auth_url = auth_url + "/tokens"
+    auth_data = {
+        "auth": {
+            "tenantName": tenant_name,
+            "passwordCredentials":{
+                "username": username,
+                "password": password
+            }
+        }
+    }
+
+    auth_request = urllib2.Request(auth_url)
+    auth_request.add_header("content-type", "application/json")
+    auth_request.add_header('Accept', 'application/json')
+    auth_request.add_header('User-Agent', 'python-mikeyp')
+    auth_request.add_data(json.dumps(auth_data))
+    auth_response = urllib2.urlopen(auth_request)
+    response_data = json.loads(auth_response.read())
+
+    _token = response_data['access']['token']['id']
+
+    service_list = response_data['access']['serviceCatalog']
+    _url = None
+    for service in service_list:
+        if service['type'] == 'volume' and service['name'] == 'cinder':
+            for endpoint in service['endpoints']:
+                if region_name != None and endpoint['region'] == region_name:
+                    _url = endpoint['publicURL']
+                    break
+                elif region_name == None or region_name == "" and len(service['endpoints']) == 1:
+                    _url = endpoint['publicURL']
+                    break
+
+    url_id = _url.split('/')[-1]
+    host = _url.split('/')[2].split(':')[0]
+    return _token, url_id, host

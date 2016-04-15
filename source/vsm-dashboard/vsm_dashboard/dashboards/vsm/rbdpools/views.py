@@ -27,8 +27,9 @@ from vsm_dashboard.dashboards.vsm.poolsmanagement import utils
 from .form import CreatePool
 from .tables import ListPoolTable
 from .tables import ListPresentPoolTable
-from .utils import GenAuthToken
 from .utils import list_cinder_service
+from .utils import from_keystone_v2
+from .utils import from_keystone_v3
 import os
 
 import json
@@ -207,10 +208,19 @@ def get_select_data(request):
                 password = appnode.os_password
                 auth_url = appnode.os_auth_url
                 region_name = appnode.os_region_name
-                auth_host = auth_url.split(":")[1][2:]
                 try:
-                    genauthtoken = GenAuthToken(tenant_name, username, password, auth_host, region_name)
-                    token, tenant_id, cinder_api_host = genauthtoken.get_token()
+                    keystone_version = auth_url.strip("/").split("/")[-1]
+                    if keystone_version == "v3":
+                        tenant_id = tenant_name
+                        token, cinder_api_host = from_keystone_v3(tenant_name,
+                                                                  username,
+                                                                  password,
+                                                                  auth_url,
+                                                                  region_name)
+                    else:
+                        token, tenant_id, cinder_api_host = \
+                            from_keystone_v2(tenant_name, username, password,
+                                             auth_url, region_name)
                     cinder_service_list = list_cinder_service(cinder_api_host, token, tenant_id)
 
                     cinder_volume_down_list = []
