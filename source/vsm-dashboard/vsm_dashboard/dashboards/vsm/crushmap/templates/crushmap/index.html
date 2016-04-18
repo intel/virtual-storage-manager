@@ -20,9 +20,9 @@
                     <thead>
                         <tr class="table_caption">
                             <th class="table_header" colspan="7" data-column="0">
-                                <h3 class="table_title">Storage Group List</h3>
+                                <h3 class="table_title">{% trans "Storage Group List" %}</h3>
                                 <div class="table_actions clearfix">
-                                    <button href="#" title="Add Storage Group" class="btn btn-default  btn-primary" onclick="addAction()">Add Storage Group</button>
+                                    <button href="#" title="Add Storage Group" class="btn btn-default  btn-primary" onclick="addAction()">{% trans "Add Storage Group" %}</button>
                                 </div>
                             </th>
                         </tr>
@@ -33,22 +33,22 @@
                                 </div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="1" tabindex="0">
-                                <div class="tablesorter-header-inner">Name</div>
+                                <div class="tablesorter-header-inner">{% trans "Name" %}</div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0">
-                                <div class="tablesorter-header-inner">Class</div>
+                                <div class="tablesorter-header-inner">{% trans "Class" %}</div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
-                                <div class="tablesorter-header-inner">Friendly Name</div>
+                                <div class="tablesorter-header-inner">{% trans "Friendly Name" %}</div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
-                                <div class="tablesorter-header-inner">Take Name(Choose Type, Type Number)</div>
+                                <div class="tablesorter-header-inner">{% trans "Take Name(Choose Type, Type Number)" %}</div>
                             </th>
                             <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0">
-                                <div class="tablesorter-header-inner">Marker</div>
+                                <div class="tablesorter-header-inner">{% trans "Marker" %}</div>
                             </th>
                             <th class="sortable normal_column" data-column="3" tabindex="0">
-                                <div class="tablesorter-header-inner">Action</div>
+                                <div class="tablesorter-header-inner">{% trans "Action" %}</div>
                             </th>
                         </tr>
                     </thead>
@@ -102,7 +102,7 @@
             <div id="divBaseForm">
                 <div id="divStorageGroupFormLeft">
                     <div class="control-group form-field clearfix required">
-                        <label>Name:</label>
+                        <label>{% trans "Name" %}:</label>
                         <span class="required-star">*</span>
                         <span class="help-block"></span>
                         <div class="input">
@@ -110,7 +110,7 @@
                         </div>
                     </div>
                     <div class="control-group form-field clearfix required">
-                        <label>Class:</label>
+                        <label>{% trans "Class" %}:</label>
                         <span class="required-star">*</span>
                         <span class="help-block"></span>
                         <div class="input" style="position: relative;width: 280px;height: 40px;">
@@ -125,7 +125,7 @@
                 </div>
                 <div id="divStorageGroupFormRight">
                     <div class="control-group form-field clearfix required">
-                        <label>Friendly Name:</label>
+                        <label>{% trans "Friendly Name" %}:</label>
                         <span class="required-star">*</span>
                         <span class="help-block"></span>
                         <div class="input">
@@ -133,7 +133,7 @@
                         </div>
                     </div>
                     <div class="control-group form-field clearfix required">
-                        <label>Marker:</label>
+                        <label>{% trans "Marker" %}:</label>
                         <span class="required-star">*</span>
                         <span class="help-block"></span>
                         <div class="input">
@@ -145,7 +145,7 @@
 
             <div id="divTakeFrom">
                 <div class="control-group form-field clearfix required" >
-                    <label>Take:</label>
+                    <label>{% trans "Take" %}:</label>
                     <span class="help-block"></span>
                     <table id="tTakeList">
                         <tbody>
@@ -155,8 +155,8 @@
             </div>
 
             <div id="divFormOptions" class="vsm-options-bar">
-                <button id="btnAddStorageGroup" class="btn btn-primary" onclick="PostAction('create')">Add</button>
-                <button id="btnUpdateStorageGroup" class="btn btn-primary" style="display:none" onclick="PostAction('update')">Update</button>
+                <button id="btnAddStorageGroup" class="btn btn-primary" onclick="PostAction('create')">{% trans "Add" %}</button>
+                <button id="btnUpdateStorageGroup" class="btn btn-primary" style="display:none" onclick="PostAction('update')">{% trans "Update" %}</button>
 
             </div>
         </div>
