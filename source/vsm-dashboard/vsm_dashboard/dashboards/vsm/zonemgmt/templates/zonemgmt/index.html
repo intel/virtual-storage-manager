@@ -38,7 +38,7 @@
 		<div id="divBaseForm">
             <div id="divZoneFormLeft">
                 <div class="control-group form-field clearfix required">
-                    <label>Zone Name:</label>
+                    <label>{% trans "Zone Name" %}:</label>
                     <span class="required-star">*</span>
                     <span class="help-block"></span>
                     <div class="input">
@@ -47,7 +47,7 @@
                 </div>
 
                 <div class="control-group form-field clearfix required">
-                    <label>Parent Zone Name:</label>
+                    <label>{% trans "Parent Zone Name" %}:</label>
                     <span class="help-block"></span>
                     <div class="input">
                         <input id="txtParentName" type="text" class="form-control" readOnly>
@@ -56,7 +56,7 @@
                 </div>
 
                 <div class="control-group form-field clearfix required" >
-                    <label>Parent Zone Type:</label>
+                    <label>{% trans "Parent Zone Type" %}:</label>
                     <span class="help-block"></span>
                     <div class="input">
                         <input id="txtTypeName" type="text" class="form-control" readOnly>
@@ -72,7 +72,7 @@
             </div>
         </div>
         <div id="divFormOptions" class="vsm-options-bar">
-        	<button id="btnAddZone" class="btn btn-primary" onclick="addZone()">Add</button>
+        	<button id="btnAddZone" class="btn btn-primary" onclick="addZone()">{% trans "Add" %}</button>
         </div>
 	</div>
 </div>
