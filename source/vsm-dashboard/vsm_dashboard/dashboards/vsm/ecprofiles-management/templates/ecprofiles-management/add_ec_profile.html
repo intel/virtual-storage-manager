@@ -17,7 +17,7 @@
 
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}Create EC Profiles{% endblock %}
+{% block title %}{% trans "Create EC Profile" %}{% endblock %}
 
 {% block page_header %}
   {% include "horizon/common/_page_header.html" with title=_("Create EC Profile") %}
@@ -34,35 +34,35 @@
 			    <fieldset>
 
 			    	<div class="control-group form-field clearfix required">
-                        <label>Name:</label>
+                        <label>{% trans "Name" %}:</label>
                         <span class="help-block"></span>
                         <div class="input">
                             <input id="txtName" maxlength="255"  type="text"  class="form-control">
                         </div>
                     </div>
                     <div class="control-group form-field clearfix required">
-                        <label>Plugin Name:</label>
+                        <label>{% trans "Plugin Name" %}:</label>
                         <span class="help-block"></span>
                         <div class="input">
                             <input id="txtPluginName" maxlength="255"  type="text"  class="form-control">
                         </div>
                     </div>
                     <div class="control-group form-field clearfix required">
-                        <label>Plugin Path:</label>
+                        <label>{% trans "Plugin Path" %}:</label>
                         <span class="help-block"></span>
                         <div class="input">
                             <input id="txtPluginPath" maxlength="255"  type="text"  class="form-control">
                         </div>
                     </div>
                     <div class="control-group form-field clearfix required">
-                        <label>PG Number:</label>
+                        <label>{% trans "PG Number" %}:</label>
                         <span class="help-block"></span>
                         <div class="input">
                             <input id="txtPGNum" maxlength="255"  type="text"  class="form-control">
                         </div>
                     </div>
                     <div class="control-group form-field clearfix required">
-                        <label>Plugin Key_Value pairs:</label>
+                        <label>{% trans "Plugin Key_Value Pairs" %}:</label>
                         <span class="help-block"></span>
                         <div class="input">
                             <input id="txtKVPair" maxlength="255"  type="text"  class="form-control">
@@ -76,8 +76,8 @@
 			</div>
 		</form>
 		 <div id="divFormOptions" class="vsm-options-bar">
-	    	<button id="btnGreateECProfile" class="btn btn-primary" onclick="CreateECProFile()">Submit</button>
-	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/ecprofiles-management/">Cancel</a>
+	    	<button id="btnGreateECProfile" class="btn btn-primary" onclick="CreateECProFile()">{% trans "Submit" %}</button>
+	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/ecprofiles-management/">{% trans "Cancel" %}</a>
 	    </div>
 	</div>
 {% endblock %}
