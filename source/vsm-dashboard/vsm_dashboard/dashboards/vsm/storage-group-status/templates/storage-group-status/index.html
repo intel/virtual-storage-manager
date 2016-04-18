@@ -26,29 +26,29 @@
 
 {% block main %}
   <div id="divPieCharts" class="sgs-block" style="min-height: 220px;">
-    <h3 class="table_title">Threshold</h3>
+    <h3 class="table_title">{% trans "Threshold" %}</h3>
     <div id="divPieChartsContent"></div>
   </div>  
 
   <div id="divStandardSettings" class="sgs-block" style="height: 80px;">
-    <h3 class="table_title">Capacity Warning Thresholds</h3>
+    <h3 class="table_title">{% trans "Capacity Warning Thresholds" %}</h3>
     <div id="divStandardSettingsContent">
       <table id="tSettings">
         <tr>
           <td>
-            <label>Storage Group Near Full:</label>
+            <label>{% trans "Storage Group Near Full" %}:</label>
             <span>{{ settings.storage_group_near_full_threshold}}</span>
           </td>
           <td>
-            <label>Storage Group Full:</label>
+            <label>{% trans "Storage Group Full" %}:</label>
             <span>{{ settings.storage_group_full_threshold }}</span>
           </td>
           <td>
-            <label>Ceph OSD Near Full:</label>
+            <label>{% trans "Ceph OSD Near Full" %}:</label>
             <span>{{ settings.ceph_near_full_threshold}}</span>
           </td>
           <td>
-            <label>Ceph OSD Full:</label>
+            <label>{% trans "Ceph OSD Full" %}:</label>
             <span>{{ settings.ceph_full_threshold}}</span>
           </td>
         </tr>
