@@ -27,8 +27,8 @@
     {{ table.render }}
     {% csrf_token %}
     <div id="divFormOptions" class="vsm-options-bar">
-    	<button id="btnSubmit" class="btn btn-primary">Submit</button>
-    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/storageservermgmt/">Cancel</a>
+    	<button id="btnSubmit" class="btn btn-primary">{% trans "Submit" %}</button>
+    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/storageservermgmt/">{% trans "Cancel" %}</a>
     </div>
 
 {% endblock %}
