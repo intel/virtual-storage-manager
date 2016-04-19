@@ -1685,9 +1685,9 @@ class CephDriver(object):
                               '/var/lib/ceph', run_as_root=True)
                 utils.execute('chown', '-R', 'ceph:ceph',
                               '/etc/ceph', run_as_root=True)
-            utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
-        else:
-            self._operate_ceph_daemon("start", "osd", id=num)
+            #utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
+        #else:
+        self._operate_ceph_daemon("start", "osd", id=num)
         return True
 
     def stop_mon_daemon(self, context, num):

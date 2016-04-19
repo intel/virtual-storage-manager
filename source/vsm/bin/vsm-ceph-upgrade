@@ -148,12 +148,16 @@ gpgkey=${KEY_URL}
     yum -y install ceph;
     cd  /var/cache/yum/x86_64/7/
 
-    if [[ `ls -l Ceph/packages|grep "^-"|wc -l` -gt 0 ]];then
-         cp Ceph/packages/*.rpm /tmp/ceph_upgrade/ceph_repo
-    fi
-    if [[ `ls -l base/packages|grep "^-"|wc -l` -gt 0 ]];then
-        cp base/packages/*.rpm /tmp/ceph_upgrade/ceph_repo
-    fi
+    for file in ./*
+        do
+            if [ -d $file ]
+            then
+                if [[ `ls -l $file/packages|grep "^-"|wc -l` -gt 0 ]];then
+                    cp $file/packages/*.rpm /tmp/ceph_upgrade/ceph_repo
+                fi
+            fi
+        done
+
     cd /tmp/ceph_upgrade
     createrepo ceph_repo
     if [[ -n $SSH_USER ]];then
