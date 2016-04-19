@@ -346,7 +346,7 @@ msgstr "允许PG Auto-tune"
 
 #: .\dashboard\templates\dashboard\index.html:160
 msgid "Pool Quota(GB)"
-msgstr "Pool Quta(GB)未翻译"
+msgstr "Pool Quta(GB)"
 
 #: .\dashboard\templates\dashboard\index.html:162
 msgid "Create Erasure Coded Pool"
@@ -411,7 +411,7 @@ msgstr "标记"
 
 #: .\dashboard\templates\dashboard\index.html:185
 msgid "Take"
-msgstr "Take未翻译"
+msgstr "Take"
 
 #: .\dashboard\templates\dashboard\index.html:189
 msgid "Zone Name"
@@ -826,7 +826,7 @@ msgstr "创建于"
 
 #: .\dashboard\views.py:116
 msgid "Erasure Coded Profile"
-msgstr "Erasure Coded Profile未翻译"
+msgstr "Erasure Coded Profile"
 
 #: .\dashboard\views.py:117
 msgid "Erasure Coded Failure Domain"
@@ -1055,7 +1055,7 @@ msgstr "重置Pools"
 
 #: .\dashboard\views.py:242
 msgid "Replication Factor"
-msgstr "Replication Factor(未翻译)"
+msgstr "Replication Factor"
 
 #: .\dashboard\views.py:243
 msgid "OpenStack/Region"
