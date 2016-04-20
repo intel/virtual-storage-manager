@@ -85,6 +85,7 @@ class ListStorageGroupStatusTable(tables.DataTable):
 
     #server_id = tables.Column("id", verbose_name=_("ID"))
     storage_group = tables.Column("name", verbose_name=_("Storage Group"))
+    friendly_name = tables.Column("friendly_name", verbose_name=_("Friendly Name"))
     #attached_osds = tables.Column("attached_osds", verbose_name=_("Attached Osds"))
     attached_pools = tables.Column("attached_pools", verbose_name=_("Attached Pools"))
     capacity_total = tables.Column("capacity_total", verbose_name=_("Capacity Total (GB)"))
