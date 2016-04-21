@@ -2913,7 +2913,9 @@ class CephDriver(object):
 
     def _mds_summary(self, sum_dict):
         if sum_dict:
-            mdsmap = sum_dict.get('mdsmap')
+            mdsmap = sum_dict.get('mdsmap', '')
+            if not mdsmap:
+                return None
             mds_dict = self.get_mds_dump()
             if mds_dict:
                 mdsmap['failed'] = len(mds_dict['failed'])
