@@ -3489,7 +3489,8 @@ class CreateCrushMapDriver(object):
                   "tunable choose_local_fallback_tries 0\n" \
                   "tunable choose_total_tries 50\n" \
                   "tunable chooseleaf_descend_once 1\n" \
-                  "tunable chooseleaf_vary_r 1\n"
+                  "tunable chooseleaf_vary_r 1\n" \
+                  "tunable straw_calc_version 1\n"
         self._write_to_crushmap(optimal)
 
     def _gen_device_osd(self, osd_num):
