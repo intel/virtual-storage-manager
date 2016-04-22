@@ -1535,13 +1535,16 @@ class AgentManager(manager.Manager):
         if health_stat:
             mon_stat = health_stat.get('timechecks').get('mons')
             mon_health = health_stat.get('health').get('health_services')[0].get('mons')
+            if not mon_stat and len(mon_health) == 1:
+                # If there is only a single monitor, ceph will return health but no timecheck data
+                stat = {'name' : mon_health[0].get('name'), 'skew' : 0, 'latency' : 0}
+                mon_stat = [stat]
             LOG.debug("mon stat: %s \t\n mon health: %s" % (mon_stat, mon_health))
 
             if mon_stat and mon_health:
                 for health in mon_health:
                     for stat in mon_stat:
                         if health.get('name') == stat.get('name'):
-                            health.pop('health')
                             stat.update(health)
                             name = health.get('name')
                             if name in mons_address:
