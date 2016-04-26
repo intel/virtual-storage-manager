@@ -26,6 +26,7 @@ Drivers for testdbs.
 import os
 import time
 import json
+import urllib2
 import platform
 from vsm import db
 from vsm import exception
@@ -325,6 +326,38 @@ class CephDriver(object):
 
         return res
 
+    def _keystone_v3(self, tenant_name, username, password,
+                     auth_url, region_name):
+        auth_url = auth_url + "/auth/tokens"
+        user_id = username
+        user_password = password
+        project_id = tenant_name
+        auth_data = {
+            "auth": {
+                "identity": {
+                    "methods": ["password"],
+                    "password": {
+                        "user": {
+                            "id": user_id,
+                            "password": user_password
+                        }
+                    }
+                },
+                "scope": {
+                    "project": {
+                        "id": project_id
+                    }
+                }
+            }
+        }
+        auth_request = urllib2.Request(auth_url)
+        auth_request.add_header("content-type", "application/json")
+        auth_request.add_header('Accept', 'application/json')
+        auth_request.add_header('User-Agent', 'python-mikeyp')
+        auth_request.add_data(json.dumps(auth_data))
+        auth_response = urllib2.urlopen(auth_request)
+        return auth_response
+
     def _config_cinder_conf(self, **kwargs):
         LOG.info("_config_cinder_conf")
         uuid = kwargs.pop('uuid', None)
@@ -368,22 +401,62 @@ class CephDriver(object):
         region_name = kwargs.pop('region_name', "")
         ssh_user = kwargs.pop('ssh_user', None)
         os_controller_host = kwargs.pop('os_controller_host', None)
+        nova_compute_hosts = []
 
         LOG.info("uuid = %s, username = %s, password = %s, tenant name = %s, "
         "auth url = %s, region name = %s, ssh_user = %s, os_controller_host = %s" %
                  (uuid, username, password, tenant_name, auth_url, region_name,
                   ssh_user, os_controller_host))
-
-        novaclient = nc.Client(
-            username, password, tenant_name, auth_url, region_name=region_name
-        )
-        nova_services = novaclient.services.list()
-        LOG.info("nova services = %s " % str(nova_services))
-        nova_compute_hosts = []
-        for nova_service in nova_services:
-            if nova_service.binary == "nova-compute":
-                nova_compute_hosts.append(nova_service.host)
-        LOG.info("nova-compute hosts = %s" % str(nova_compute_hosts))
+        if "v3" in auth_url:
+            connection = self._keystone_v3(tenant_name, username, password, auth_url, region_name)
+            response_data = json.loads(connection.read())
+            services_list = response_data['token']['catalog']
+            endpoints_list = []
+            _url = None
+            for service in services_list:
+                service_type = service['type']
+                service_name = service['name']
+                if service_type == "compute" and service_name == "nova":
+                    endpoints_list = service['endpoints']
+                    break
+            for endpoint in endpoints_list:
+                interface = endpoint['interface']
+                region_id = endpoint['region_id']
+                if region_name:
+                    if interface == "public" and region_id == region_name:
+                        _url = endpoint['url']
+                        break
+                else:
+                    if len(endpoints_list) == 3:
+                        _url = endpoint['url']
+                        break
+            token = connection.info().getheader('X-Subject-Token')
+            url_list = _url.split(":")
+            auth_url_list = auth_url.split(":")
+            url_list[1] = auth_url_list[1]
+            url = ":".join(url_list) + "/os-services"
+            req = urllib2.Request(url)
+            req.get_method = lambda: 'GET'
+            req.add_header("content-type", "application/json")
+            req.add_header("X-Auth-Token", token)
+            resp = urllib2.urlopen(req)
+            nova_services = json.loads(resp.read())
+            nova_services = nova_services['services']
+            LOG.info("nova services = %s " % str(nova_services))
+            for nova_service in nova_services:
+                if nova_service['binary'] == "nova-compute":
+                    nova_compute_hosts.append(nova_service['host'])
+            LOG.info("nova-compute hosts = %s" % str(nova_compute_hosts))
+        else:
+            novaclient = nc.Client(
+                username, password, tenant_name, auth_url, region_name=region_name
+            )
+            nova_services = novaclient.services.list()
+            LOG.info("nova services = %s " % str(nova_services))
+            for nova_service in nova_services:
+                if nova_service.binary == "nova-compute":
+                    nova_compute_hosts.append(nova_service.host)
+            LOG.info("nova-compute hosts = %s" % str(nova_compute_hosts))
 
         for nova_compute_host in nova_compute_hosts:
             try:
@@ -448,37 +521,108 @@ class CephDriver(object):
                                        )
 
             volume_type = pool_type + "-" + pool_name
-            def _get_volume_type_list():
-                volume_type_list = []
-                i = 0
-                while i < 60:
-                    try:
-                        cinderclient = cc.Client(
-                            username,
-                            password,
-                            tenant_name,
-                            auth_url,
-                            region_name=region_name
-                        )
-                        volume_type_list = cinderclient.volume_types.list()
-                        i = 60
-                    except:
-                        i = i + 1
-                        time.sleep(i)
-                return volume_type_list
+            if "v3" in auth_url:
+                def _get_volume_type_list():
+                    volume_type_list = []
+                    i = 0
+                    while i < 60:
+                        try:
+                            connection = self._keystone_v3(tenant_name, username, password,
+                                                           auth_url, region_name)
+                            response_data = json.loads(connection.read())
+                            services_list = response_data['token']['catalog']
+                            endpoints_list = []
+                            _url = None
+                            for service in services_list:
+                                service_type = service['type']
+                                service_name = service['name']
+                                if service_type == "volume" and service_name == "cinder":
+                                    endpoints_list = service['endpoints']
+                                    break
+                            for endpoint in endpoints_list:
+                                interface = endpoint['interface']
+                                region_id = endpoint['region_id']
+                                if region_name:
+                                    if interface == "public" and region_id == region_name:
+                                        _url = endpoint['url']
+                                        break
+                                else:
+                                    if len(endpoints_list) == 3:
+                                        _url = endpoint['url']
+                                        break
+                            token = connection.info().getheader('X-Subject-Token')
+                            url_list = _url.split(":")
+                            auth_url_list = auth_url.split(":")
+                            url_list[1] = auth_url_list[1]
+                            url = ":".join(url_list) + "/types?is_public=None"
+                            req = urllib2.Request(url)
+                            req.get_method = lambda: 'GET'
+                            req.add_header("content-type", "application/json")
+                            req.add_header("X-Auth-Token", token)
+                            resp = urllib2.urlopen(req)
+                            volume_type_list = json.loads(resp.read())
+                            volume_type_list = volume_type_list['volume_types']
+                            i = 60
+                        except:
+                            i = i + 1
+                            time.sleep(i)
+                    return volume_type_list, token, ":".join(url_list)
 
-            if volume_type not in [type.name for type in _get_volume_type_list()]:
-                cinderclient = cc.Client(
-                    username,
-                    password,
-                    tenant_name,
-                    auth_url,
-                    region_name=region_name
-                )
-                cinder = cinderclient.volume_types.create(volume_type)
-                LOG.info("creating volume type = %s" % volume_type)
-                cinder.set_keys({"volume_backend_name": pool_name})
-                LOG.info("Set extra specs {volume_backend_name: %s} on a volume type" % pool_name)
+                type_list, token, url = _get_volume_type_list()
+                if volume_type not in [type['name'] for type in type_list]:
+                    url = url + "/types"
+                    req = urllib2.Request(url)
+                    req.get_method = lambda: 'POST'
+                    req.add_header("content-type", "application/json")
+                    req.add_header("X-Auth-Token", token)
+                    type_data = {"volume_type": {"os-volume-type-access:is_public": True, "name": volume_type, "description": None}}
+                    req.add_data(json.dumps(type_data))
+                    resp = urllib2.urlopen(req)
+                    volume_resp = json.loads(resp.read())
+                    _volume_type = volume_resp['volume_type']
+                    type_id = _volume_type['id']
+                    LOG.info("creating volume type = %s" % volume_type)
+                    url = url + "/%s/extra_specs" % str(type_id)
+                    req = urllib2.Request(url)
+                    req.get_method = lambda: 'POST'
+                    req.add_header("content-type", "application/json")
+                    req.add_header("X-Auth-Token", token)
+                    key_data = {"extra_specs": {"volume_backend_name": pool_name}}
+                    req.add_data(json.dumps(key_data))
+                    urllib2.urlopen(req)
+                    LOG.info("Set extra specs {volume_backend_name: %s} on a volume type" % pool_name)
+            else:
+                def _get_volume_type_list():
+                    volume_type_list = []
+                    i = 0
+                    while i < 60:
+                        try:
+                            cinderclient = cc.Client(
+                                username,
+                                password,
+                                tenant_name,
+                                auth_url,
+                                region_name=region_name
+                            )
+                            volume_type_list = cinderclient.volume_types.list()
+                            i = 60
+                        except:
+                            i = i + 1
+                            time.sleep(i)
+                    return volume_type_list
+
+                if volume_type not in [type.name for type in _get_volume_type_list()]:
+                    cinderclient = cc.Client(
+                        username,
+                        password,
+                        tenant_name,
+                        auth_url,
+                        region_name=region_name
+                    )
+                    cinder = cinderclient.volume_types.create(volume_type)
+                    LOG.info("creating volume type = %s" % volume_type)
+                    cinder.set_keys({"volume_backend_name": pool_name})
+                    LOG.info("Set extra specs {volume_backend_name: %s} on a volume type" % pool_name)
 
 
     def _create_osd_state(self, context, strg, osd_id):
@@ -1541,9 +1685,9 @@ class CephDriver(object):
                               '/var/lib/ceph', run_as_root=True)
                 utils.execute('chown', '-R', 'ceph:ceph',
                               '/etc/ceph', run_as_root=True)
-            utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
-        else:
-            self._operate_ceph_daemon("start", "osd", id=num)
+            #utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
+        #else:
+        self._operate_ceph_daemon("start", "osd", id=num)
         return True
 
     def stop_mon_daemon(self, context, num):
@@ -2769,7 +2913,9 @@ class CephDriver(object):
 
     def _mds_summary(self, sum_dict):
         if sum_dict:
-            mdsmap = sum_dict.get('mdsmap')
+            mdsmap = sum_dict.get('mdsmap', '')
+            if not mdsmap:
+                return None
             mds_dict = self.get_mds_dump()
             if mds_dict:
                 mdsmap['failed'] = len(mds_dict['failed'])
@@ -3074,6 +3220,55 @@ class CephDriver(object):
             utils.execute("service", "openstack-cinder-volume", "restart", run_as_root=True)
             LOG.info("Restart openstack-cinder-api and openstack-cinder-volume successfully")
 
+    def create_keyring_and_key_for_rgw(self, context, rgw_instance_name,
+                                       rgw_keyring_path="/etc/ceph"):
+        rgw_keyring = rgw_keyring_path + "/keyring." + rgw_instance_name
+        try:
+            utils.execute("rm", rgw_keyring, run_as_root=True)
+        except:
+            pass
+        utils.execute("ceph-authtool", "--create-keyring", rgw_keyring,
+                      run_as_root=True)
+        utils.execute("chmod", "+r", rgw_keyring, run_as_root=True)
+        try:
+            utils.execute("ceph", "auth", "del", "client." + rgw_instance_name,
+                          run_as_root=True)
+        except:
+            pass
+        utils.execute("ceph-authtool", rgw_keyring, "-n", "client." + rgw_instance_name,
+                      "--gen-key", run_as_root=True)
+        utils.execute("ceph-authtool", "-n", "client." + rgw_instance_name,
+                      "--cap", "osd", "allow rwx", "--cap", "mon", "allow rw",
+                      rgw_keyring, run_as_root=True)
+        utils.execute("ceph", "-k", FLAGS.keyring_admin, "auth", "add",
+                      "client." + rgw_instance_name, "-i", rgw_keyring,
+                      run_as_root=True)
+
+    def add_rgw_conf_into_ceph_conf(self, context, server_name, rgw_instance_name):
+        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        rgw_section = "client." + str(rgw_instance_name)
+        host = server_name
+        keyring = "/etc/ceph/keyring." + str(rgw_instance_name)
+        rsp = "/var/run/ceph/radosgw.sock"
+        log_file = "/var/log/ceph/radosgw.log"
+        rgw_frontends = "\"civetweb port=80\""
+        config.add_rgw(rgw_section, host, keyring, rsp, log_file, rgw_frontends)
+        config.save_conf(rgw=True)
+        LOG.info("+++++++++++++++end add_rgw_conf_into_ceph_conf")
+
+    def create_default_pools_for_rgw(self, context):
+        utils.execute("ceph", "osd", "pool", "create", ".rgw", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".rgw.control", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".rgw.gc", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".log", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".intent-log", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".usage", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.email", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.swift", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.uid", 100, 100, run_as_root=True)
+
+
 class DbDriver(object):
     """Executes commands relating to TestDBs."""
     def __init__(self, execute=utils.execute, *args, **kwargs):
@@ -3296,7 +3491,8 @@ class CreateCrushMapDriver(object):
                   "tunable choose_local_fallback_tries 0\n" \
                   "tunable choose_total_tries 50\n" \
                   "tunable chooseleaf_descend_once 1\n" \
-                  "tunable chooseleaf_vary_r 1\n"
+                  "tunable chooseleaf_vary_r 1\n" \
+                  "tunable straw_calc_version 1\n"
         self._write_to_crushmap(optimal)
 
     def _gen_device_osd(self, osd_num):
@@ -3938,9 +4134,3 @@ def get_crushmap_json_format(keyring=None):
         json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump', run_as_root=True)
     crushmap = CrushMap(json_context=json_crushmap)
     return crushmap
-
-
-
-
-
-

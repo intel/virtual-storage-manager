@@ -57,6 +57,8 @@ function clean_controller() {
 
 function _clean_agent() {
     pgrep ceph | xargs -i kill -9 {}
+    # kill radosgw
+    pgrep radosgw | xargs -i kill -9 {}
     rm -rf /etc/ceph/*
 
     file=/etc/manifest/server.manifest

@@ -44,7 +44,7 @@
 		    	<!-- Crushmap field -->
 
 		    	<div id="divMonitorHost2" class="control-group form-field clearfix required" style="display:none">
-		    		<label>Monitor Host:</label>
+		    		<label>{% trans "Monitor Host" %}:</label>
 		    		<span class="help-block"></span>
 		    		<div class="input">
 		      			<select id="selMonitorHost2"  class="form-control">
@@ -56,7 +56,7 @@
 	  			</div>
 
 		  		<div id="divtxtMonitorKeyring2" class="control-group form-field clearfix required" style="display:none">
-		    		<label>Monitor Keyring:</label>
+		    		<label>{% trans "Monitor Keyring" %}:</label>
 		    		<span class="help-block"></span>
 		    		<div class="input">
 		      			<input id="txtMonitorKeyring2" type="text" value="/etc/ceph/ceph.client.admin.keyring" class="form-control">
@@ -64,8 +64,8 @@
 		  		</div>
 
 		    	<div class="control-group form-field clearfix required">
-				    <label for="id_crushmap">Crushmap:</label>
-				    <a id="btnAutoDetect" class="btn btn-primary" onclick="openAddDetectDialog()">Auto Detect</a>
+				    <label for="id_crushmap">{% trans "Crushmap" %}:</label>
+				    <a id="btnAutoDetect" class="btn btn-primary" onclick="openAddDetectDialog()">{% trans "Auto Detect" %}</a>
 				    <span class="help-block"></span>
 				    <div id="divTxtCrushmap" class="input">
 				      <textarea cols="35" id="txtCrushmap" rows="10"></textarea>
@@ -79,14 +79,15 @@
 			</div>
 			<div class="right">
 			    <h3>{% trans "Description" %}:</h3>
-				<p>{% trans "From here you can import a cluster." %}</p>
-
+			    <p>{% blocktrans %}From here you can import a cluster{% endblocktrans %}</p>
 			</div>
 		</form>
 		 <div id="divFormOptions" class="vsm-options-bar">
-		 	<button id="btnImportValidate" class="btn btn-primary" onclick="validate()">Validate</button>
-	    	<button id="btnImportCluster" class="btn btn-primary" style="display:none" onclick="importCluster()">Submit</button>
-	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/cluster-import/">Cancel</a>
+		 	<button id="btnImportValidate" class="btn btn-primary" onclick="validate()">{% trans "Validate" %}</button>
+	    	<button id="btnImportCluster" class="btn btn-primary" style="display:none" onclick="importCluster()">
+	    		{% trans "Submit" %}
+	    	</button>
+	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/cluster-import/">{% trans "Cancel" %}</a>
 	    </div>
 	</div>
 
@@ -94,7 +95,7 @@
 	<div id="divAutoDetectInfo" style="display:none">
 		<div id="divAutoDetectInfoContext" style="width:300px;">
 			<div class="control-group form-field clearfix required">
-	    		<label>Monitor Host:</label>
+	    		<label>{% trans "Monitor Host" %}:</label>
 	    		<span class="help-block"></span>
 	    		<div class="input">
 	      			<select id="selMonitorHost"  class="form-control">
@@ -106,7 +107,7 @@
 	  		</div>
 
 	  		<div class="control-group form-field clearfix required">
-	    		<label>Monitor Keyring:</label>
+	    		<label>{% trans "Monitor Keyring" %}:</label>
 	    		<span class="help-block"></span>
 	    		<div class="input">
 	      			<input id="txtMonitorKeyring" type="text" value="/etc/ceph/ceph.client.admin.keyring" class="form-control">

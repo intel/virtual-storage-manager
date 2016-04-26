@@ -45,6 +45,8 @@ start_osd: CommandFilter, /usr/local/bin/start_osd, root
 mkfs: CommandFilter, /sbin/mkfs, root
 mount: CommandFilter, /bin/mount, root
 umount: CommandFilter, /bin/umount, root
+radosgw: CommandFilter, /etc/init.d/radosgw, root
+radosgw-admin: CommandFilter, /usr/bin/radosgw-admin, root
 
 #common
 ssh: CommandFilter, /usr/bin/ssh, root
@@ -55,6 +57,7 @@ cp: CommandFilter, /bin/cp, root
 scp: CommandFilter, /usr/bin/scp, root
 service: CommandFilter, /usr/sbin/service, root
 mkdir: CommandFilter, /bin/mkdir, root
+systemctl: CommandFilter, /usr/bin/systemctl, root
 hostname: CommandFilter, /bin/hostname, root
 ls: CommandFilter, /bin/ls, root
 pgrep: CommandFilter, /usr/bin/pgrep, root

@@ -106,6 +106,8 @@ fi
 sudo apt-get autoremove --yes
 sudo apt-get autoclean --yes
 sudo rm -rf /etc/vsm /etc/vsm-dashboard /etc/vsmdeploy /var/lib/vsm /var/log/vsm
+sudo rm -rf /opt/vsmrepo /opt/vsm-dep-repo
+sudo rm -f /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list
 EOF
     echo "=== Uninstall controller [$1] complete."
 }
@@ -132,6 +134,8 @@ fi
 sudo apt-get autoremove --yes
 sudo apt-get autoclean --yes
 sudo rm -rf /var/lib/vsm /var/log/vsm /etc/vsm
+sudo rm -rf /opt/vsmrepo /opt/vsm-dep-repo
+sudo rm -f /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list
 EOF
     echo "=== Uninstall agent [$1] complete."
 }

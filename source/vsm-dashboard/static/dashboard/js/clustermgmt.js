@@ -30,15 +30,28 @@
                 colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0' checked='true'>";
             else
                 colIsMonitor.innerHTML = "<input type='checkbox' class='chkIsMonitor' value='0'>";
+
             var colIsMDS = this.children[9];
-            colIsMDS.innerHTML = "<input type='checkbox' class='chkIsMDS' value='0'>";
+            var mdsValue = colIsMDS.innerHTML;
+            if(mdsValue == "yes")
+                colIsMDS.innerHTML = "<input type='checkbox' class='chkIsMDS' value='0' checked='true'>";
+            else
+                colIsMDS.innerHTML = "<input type='checkbox' class='chkIsMDS' value='0'>";
+
+            var colIsRGW = this.children[10];
+            var rgwValue = colIsRGW.innerHTML;
+            if(rgwValue == "yes")
+                colIsRGW.innerHTML = "<input type='checkbox' class='chkIsRGW' value='0' checked='true'>";
+            else
+                colIsRGW.innerHTML = "<input type='checkbox' class='chkIsRGW' value='0'>";
         })
     }
     $(".create-cluster-commit").click(function(){
         var data_list = new Array();
         var zone_id_has_monitor_list = new Array();
         var zone_id_all = new Array();
-
+        var mds_count = new Array();
+        var rgw_count = new Array();
 
         //get the data list
         for (var i=1; i <= $("td.zone").length; i++)
@@ -53,12 +66,16 @@
                 is_monitor = row.find(".chkIsMonitor")[0].checked; 
                 is_storage = true;
                 is_mds = row.find(".chkIsMDS")[0].checked;
+                is_rgw = row.find(".chkIsRGW")[0].checked;
                 if(row.find(".is_storage ")[0].innerText == "no")
                     is_storage = false;
-
                 zone_id = row.find(".zone").find("select").val();
                 zone_name = row.find(".zone").html();
-                data = {id:id, is_monitor:is_monitor, is_storage:is_storage, is_mds:is_mds, zone_id:zone_id};
+                data = {id:id, is_monitor:is_monitor, is_storage:is_storage, is_mds:is_mds, is_rgw:is_rgw, zone_id:zone_id};
+                if(is_mds == true)
+                    mds_count.push(data);
+                if(is_rgw == true)
+                    rgw_count.push(data);
                 data_list.push(data);
                 if ($.inArray(zone_name,zone_id_all)==-1){zone_id_all.push(zone_name)}
                 if(is_monitor == true){
@@ -66,6 +83,16 @@
                 }
             }
         }
+
+        if (mds_count.length > 1){
+            alert("Warning: More than one mds selected!");
+            return false;
+        }
+        if (rgw_count.length > 1){
+            alert("Warning: More than one rgw selected!");
+            return false;
+        }
+
         if (zone_id_all.length>zone_id_has_monitor_list.length){
             alert("Warning:there is some zone which no monitor in!");
             return false;

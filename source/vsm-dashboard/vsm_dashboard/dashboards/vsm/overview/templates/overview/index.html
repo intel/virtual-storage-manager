@@ -18,15 +18,17 @@
 
             <!--VSM Info summary-->
             <div id="divVSMVersion" class="vsm-block">
-                 <h4 id="lblVSMVersionInfo" class="vsm-block-title" >VSM Status</h4>
+                 <h4 id="lblVSMVersionInfo" class="vsm-block-title" >
+                 {% trans "VSM Status" %}
+                 </h4>
                  <div id="divVSMVersionContent"  class="vsm-block-content">
-                    <span id="lblVersionMark" class="vsm-label-90">VSM Version:</span>
+                    <span id="lblVersionMark" class="vsm-label-90">{% trans "VSM Version" %}:</span>
                     <span id="lblVersion" class="vsm-label-90">--</span>
                     
-                    <span id="lblVersionUpdateMark" class="vsm-label-90">Uptime:</span>
+                    <span id="lblVersionUpdateMark" class="vsm-label-90">{% trans "Uptime" %}:</span>
                     <span id="lblVersionUpdate" class="vsm-label-90">--</span>
                     
-                    <span id="lblCephVersionMark" class="vsm-label-90">Ceph Version:</span>
+                    <span id="lblCephVersionMark" class="vsm-label-90">{% trans "Ceph Version" %}:</span>
                     <span id="lblCephVersion" class="vsm-label-90">--</span>                   
                 </div>  
             </div>
@@ -34,7 +36,7 @@
 
             <!--VSM Cluster summary-->
             <div id="divCluster" class="vsm-block">
-                <h4 class="vsm-block-title">Cluster Status</h4>
+                <h4 class="vsm-block-title">{% trans "Cluster Status" %}</h4>
                 <div id="divVSMVersionContent"  class="vsm-block-content">
                     <div id="divClusterNote" >
                         <div >
@@ -50,11 +52,11 @@
                         <div id="divCapacityInfo">
                             <table id="tCapacityInfo">
                                 <tr>
-                                    <td><span id="lblCapacityUsedMark">Used:</span></td>
+                                    <td><span id="lblCapacityUsedMark">{% trans "Used" %}:</span></td>
                                     <td><span id="lblCapacityUsed">--</span></td>
                                 </tr>
                                 <tr>
-                                    <td><span id="lblCapacityTotalMark">Total:</span></td>
+                                    <td><span id="lblCapacityTotalMark">{% trans "Total" %}:</span></td>
                                     <td><span id="lblCapacityTotal" >--</span></td>
                                 </tr>
                             </table>
@@ -65,20 +67,20 @@
 
             <!--Storage summary-->
              <div id="divStorage" class="vsm-block">
-                <h4 class="vsm-block-title">Storage Group</h4>
+                <h4 class="vsm-block-title">{% trans "Storage Group" %}</h4>
                 <a href="/dashboard/vsm/storage-group-status/" class="vsm-block-link">
                     <img id="imgStorageInfo" class="vsm-status-icon" src="{{ STATIC_URL }}dashboard/img/info_health.png" />
                 </a>
                 <div id="divStorageContent" class="vsm-block-content">
-                    <span id="lblStorageUpdateMark" class="vsm-label-60">Updated at:</span>
+                    <span id="lblStorageUpdateMark" class="vsm-label-60">{% trans "Updated at" %}:</span>
                     <span id="lblStorageUpdate" class="vsm-label-60">--</span>
                     <br/>
                     <table id="tStorage">
                         <tbody>
                             <tr id="trStorageLabel">
-                                <td>Normal</td>
-                                <td>Near Full</td>
-                                <td>Full</td>
+                                <td>{% trans "Normal" %}</td>
+                                <td>{% trans "Near Full" %}</td>
+                                <td>{% trans "Full" %}</td>
                             </tr>
                             <tr id="trStorageMark">
                                 <td>
@@ -98,26 +100,26 @@
 
             <!--OSD Area-->
             <div id="divOSD" class="vsm-block">
-                <h4 class="vsm-block-title">OSD</h4>
+                <h4 class="vsm-block-title">{% trans "OSD" %}</h4>
                 <a href="/dashboard/vsm/osd-status/" class="vsm-block-link">
                     <img id="imgOSDInfo" class="vsm-status-icon" src="{{ STATIC_URL }}dashboard/img/info_health.png" />
                 </a>
                     <div id="divOSDContent" class="vsm-block-content">
-                        <span id="lblOSDEpochMark" class="vsm-label-60">Epoch:</span>
+                        <span id="lblOSDEpochMark" class="vsm-label-60">{% trans "Epoch" %}:</span>
                         <span id="lblOSDEpoch" class="vsm-label-60">--</span>
                         <br>
-                        <span id="lblOSDUpdateMark" class="vsm-label-60">Updated at:</span>
+                        <span id="lblOSDUpdateMark" class="vsm-label-60">{% trans "Updated at" %}:</span>
                         <span id="lblOSDUpdate" class="vsm-label-60">--</span>
                         <br />
                         <table id="tOSD">
                             <tbody>
                                 <tr id="trOSD_Up_Down" >
                                     <td class="td-60"></td>
-                                    <td class="td-150">Up</td>
-                                    <td class="td-150">Down</td>
+                                    <td class="td-150">{% trans "Up" %}</td>
+                                    <td class="td-150">{% trans "Down" %}</td>
                                 </tr>
                                 <tr >
-                                    <td>In</td>
+                                    <td>{% trans "In" %}</td>
                                     <td>
                                         <div id="divOSD_INUP" class="vsm-rect vsm-rect-green">0</div>
                                     </td>
@@ -126,7 +128,7 @@
                                     </td>
                                 </tr>
                                 <tr >
-                                    <td>Out</td>
+                                    <td>{% trans "Out" %}</td>
                                     <td>
                                         <div id="divOSD_OUTUP" class="vsm-rect vsm-rect-orange">0</div>
                                     </td>
@@ -140,9 +142,9 @@
                         <table id="tDeviceCapacity">
                         <tbody>
                             <tr id="trDeviceCapacity">
-                                <td>Normal</td>
-                                <td>Near Full</td>
-                                <td>Full</td>
+                                <td>{% trans "Normal" %}</td>
+                                <td>{% trans "Near Full" %}</td>
+                                <td>{% trans "Full" %}</td>
                             </tr>
                             <tr id="trStorageMark">
                                 <td>
@@ -164,16 +166,16 @@
 
              <!--Monitor Area-->
             <div id="divMonitor" class="vsm-block">
-                <h4 class="vsm-block-title">Monitor</h4>
+                <h4 class="vsm-block-title">{% trans "Monitor" %}</h4>
                 <a href="/dashboard/vsm/monitor-status/" class="vsm-block-link">
                     <img id="imgMonitorInfo" class="vsm-status-icon" src="{{ STATIC_URL }}dashboard/img/info_health.png" />
                 </a>
                 <div id="divMonitorContent" class="vsm-block-content">
                     <div>
-                        <span id="lblMonitorEpochMark" class="vsm-label-60">Epoch:</span>
+                        <span id="lblMonitorEpochMark" class="vsm-label-60">{% trans "Epoch" %}:</span>
                         <span id="lblMonitorEpoch" class="vsm-label-60">--</span>
                         <br>
-                        <span id="lblMonitorUpdateMark" class="vsm-label-60">Updated at:</span>
+                        <span id="lblMonitorUpdateMark" class="vsm-label-60">{% trans "Updated at" %}:</span>
                         <span id="lblMonitorUpdate" class="vsm-label-60">--</span>
                     </div>
                     <div id="divMonitorRect">
@@ -185,30 +187,30 @@
 
             <!--MDS Area-->
             <div id="divMDS" class="vsm-block">
-                <h4 class="vsm-block-title">MDS</h4>
+                <h4 class="vsm-block-title">{% trans "MDS" %}</h4>
                 <a href="/dashboard/vsm/mds-status/" class="vsm-block-link">
                     <img id="imgMDSInfo" class="vsm-status-icon" src="{{ STATIC_URL }}dashboard/img/info_health.png" />
                 </a>
                 <div id="divMDSContent" class="vsm-block-content">
                     <div>
-                        <span id="lblMDSEpochMark" class="vsm-label-60">Epoch:</span>
+                        <span id="lblMDSEpochMark" class="vsm-label-60">{% trans "Epoch" %}:</span>
                         <span id="lblMDSEpoch" class="vsm-label-60">--</span>
                         <br>
-                        <span id="lblMDSUpdateMark" class="vsm-label-60">Updated at:</span>
+                        <span id="lblMDSUpdateMark" class="vsm-label-60">{% trans "Updated at" %}:</span>
                         <span id="lblMDSUpdate" class="vsm-label-60">--</span>
                     </div>
                     <div id="divMDSRect">
                          <table id="tMDS">
                             <tr>
                                 <td class="td-100">
-                                    Data
-                                </td >
+                                    {% trans "Data" %}
+                                </td>
                                 <td class="td-100">
-                                    In
-                                </td >
+                                    {% trans "In" %}
+                                </td>
                                 <td class="td-100">
-                                    Up
-                                </td >
+                                    {% trans "Up" %}
+                                </td>
                             </tr>
                             <tr>
                                 <td class="td-100">
@@ -223,13 +225,13 @@
                             </tr>
                             <tr>
                                 <td class="td-100">
-                                    Metadata
+                                    {% trans "Metadata" %}
                                 </td >
                                 <td class="td-100">
-                                    Failed
+                                    {% trans "Failed" %}
                                 </td >
                                 <td class="td-100">
-                                    Stopped
+                                    {% trans "Stopped" %}
                                 </td >
                             </tr>
                             <tr>
@@ -251,12 +253,12 @@
 
             <!--Pool Area-->
             <div id="divPG" class="vsm-block">
-                <h4 class="vsm-block-title">PG</h4>
+                <h4 class="vsm-block-title">{% trans "PG" %}</h4>
                 <a href="/dashboard/vsm/pg-status/" class="vsm-block-link">
                      <img id="imgMDSInfo" class="vsm-status-icon" src="{{ STATIC_URL }}dashboard/img/info_health.png" />
                 </a>
                 <div id="divPGContent" class="vsm-block-content">
-                    <span id="lblPGUpdateMark" class="vsm-label-60">Updated at:</span>
+                    <span id="lblPGUpdateMark" class="vsm-label-60">{% trans "Updated at" %}:</span>
                     <span id="lblPGUpdate" class="vsm-label-60">--</span>
                     <br />
                     <div id="divPGRect"> 
@@ -269,34 +271,34 @@
             <!--VSM Throughput & Latency-->
             <div id="divPerformance" style="border:0px solid #ccc;overflow:hidden;float:left;width:100%">
                 <div id="divPerformanceOption" style="height:60px;line-height:30px;border-bottom:0px solid #ccc;padding:5px;overflow:hidden;width:100%">
-                     <h4 style="display:inline-block">Performance</h4>
+                     <h4 style="display:inline-block">{% trans "Performance" %}</h4>
                      <img id="imgExpandCollapse" src="{{ STATIC_URL }}dashboard/img/collapse.png" onclick="ShowPerformace()" />
                      <hr/>
                 </div>
                 <div id="divPerformanceCantainer" >
                     <div id="divIOPs" class="vsm-block">
-                        <h4 class="vsm-block-title">IOPS</h4>
+                        <h4 class="vsm-block-title">{% trans "IOPS" %}</h4>
                         <div class="vsm-block-content">
                              <div id="divIOPsContent" class="vsm-chart-rect">
                              </div>
                         </div>
                     </div>
                     <div id="divLatency" class="vsm-block">
-                         <h4 class="vsm-block-title">Latency (MilliSeconds)</h4>
+                         <h4 class="vsm-block-title">{% trans "Latency (MilliSeconds)" %}</h4>
                          <div class="vsm-block-content">
                             <div id="divLatencyContent" class="vsm-chart-rect">
                             </div>
                          </div>
                     </div>
                     <div id="divBandwidth" class="vsm-block">
-                         <h4 class="vsm-block-title">Bandwidth (MB/s)</h4>
+                         <h4 class="vsm-block-title">{% trans "Bandwidth (MB/s)" %}</h4>
                          <div class="vsm-block-content">
                             <div id="divBandwidthContent" class="vsm-chart-rect">
                             </div>
                          </div>
                     </div>
                     <div id="divCPU" class="vsm-block">
-                         <h4 class="vsm-block-title">CPU (%)</h4>
+                         <h4 class="vsm-block-title">{% trans "CPU (%)" %}</h4>
                          <div class="vsm-block-content">
                             <div id="divCPUContent" class="vsm-chart-rect">
                             </div>

@@ -30,7 +30,7 @@
 
 <div id="divSelectServer">
   <div class="control-group required">
-    <label id="lblServer" >Select Server</label>
+    <label id="lblServer" >{% trans "Select Server" %}</label>
     <select id="selServer" class="form-control" style="width: 342px;" onchange="ChangeServer()">
       {% for server in servers %}
         {%if init_service_id == server.service_id %}
@@ -46,7 +46,7 @@
 <div id="divAddOSDForm">
   <div class="left">
       <div class="control-group required">
-        <label >Journal Device :</label>
+        <label >{% trans "Journal Device" %}:</label>
         <span id="lblJournalDeviceHelp" class="form-required">*</span>
         <div class="input" style="position: relative;width: 342px;height: 40px;">
           <select id="selJournalDevice"  class="form-control" style="z-index:88;" onchange="SelectDevice('journal',this.value)">
@@ -58,7 +58,7 @@
         </div>
       </div>
       <div class="control-group required">
-        <label >Storage Group :</label>
+        <label >{% trans "Storage Group" %}:</label>
         <span class="form-required">*</span>
         <div class="input">
           <select id="selStorageGroup" class="form-control">
@@ -71,7 +71,7 @@
   </div>
   <div class="right">
       <div class="control-group required">
-        <label >Data Device :</label>
+        <label >{% trans "Data Device" %}:</label>
         <span id="lblDataDeviceHelp" class="form-required">*</span>
         <div class="input" style="position: relative;width: 342px;height: 40px;">
             <select id="selDataDevice"  class="form-control" style="z-index:88;" onchange="SelectDevice('data',this.value)">
@@ -84,7 +84,7 @@
       </div>
 
        <div class="control-group required">
-        <label >OSD Location :</label>
+        <label >{% trans "OSD Location" %}:</label>
         <span class="form-required">*</span>
         <div class="input">
           <select id="selOSDLocation" class="form-control">
@@ -95,7 +95,7 @@
         </div>
       </div>
        <div class="control-group  required">
-        <label >Weight :</label>
+        <label >{% trans "Weight" %}:</label>
         <span class="form-required">*</span>
         <div class="input">
           <input id="txtWeight" class="form-control" type="text" value="" >
@@ -103,7 +103,8 @@
       </div>
   </div>
   <div id="divFormOptions" class="vsm-options-bar">
-    <button id="btnAddOSD" class="btn btn-primary" onclick="CheckOSDForm()">Add</button>
+    <button id="btnAddOSD" class="btn btn-primary" onclick="CheckOSDForm()">
+    {% trans "Add" %}</button>
 
 
 <!--this form for upload the file-->
@@ -111,7 +112,7 @@
     <input type="hidden" name="csrfmiddlewaretoken" value="{% csrf_token %}"/>
     <a id="linkUploadfile" href="#" class="file btn btn-primary">
       {{upload_file}}
-      <span>Batch Import OSD</span>
+      <span>{% trans "Batch Import OSD" %}</span>
     </a>    
   </div>
 </div>
@@ -130,12 +131,12 @@
     <thead>
       <tr>
         <th  class="normal_column hidden"></th>
-        <th  class="normal_column">Server</th>
-        <th  class="normal_column">Weight</th>
-        <th  class="normal_column">Storage Group</th><th  class="normal_column">OSD Location</th>
-        <th  class="normal_column">Journal Device</th>
-        <th  class="normal_column">Data Device</th>      
-        <th  class="normal_column">Action</th>
+        <th  class="normal_column">{% trans "Server" %}</th>
+        <th  class="normal_column">{% trans "Weight" %}</th>
+        <th  class="normal_column">{% trans "Storage Group" %}</th><th  class="normal_column">{% trans "OSD Location" %}</th>
+        <th  class="normal_column">{% trans "Journal Device" %}</th>
+        <th  class="normal_column">{% trans "Data Device" %}</th>      
+        <th  class="normal_column">{% trans "Action" %}</th>
       </tr>
     </thead>
 
@@ -151,7 +152,7 @@
                   <td class="sortable normal_column journal">{{osd.journal}}</td>
                   <td class="sortable normal_column device">{{ osd.data }}</td>
                   <td class="sortable normal_column">
-                    <button class="btn btn-danger" onclick="RemoveOSD(this)">Remove</button>
+                    <button class="btn btn-danger" onclick="RemoveOSD(this)">{% trans "Remove"%}</button>
                   </td>
               </tr>
             {% endfor %}
@@ -172,8 +173,8 @@
 <div>
 
 <div id="divFormOptions" class="vsm-options-bar">
-  <button id="btnSubmit" class="btn btn-primary" onclick="AddOSD()">Submit</button>
-{#  <button id="btnReset" class="btn btn-default" onclick="ResetOSD()">Reset</button>#}
+  <button id="btnSubmit" class="btn btn-primary" onclick="AddOSD()">{% trans "Submit"%}</button>
+{#  <button id="btnReset" class="btn btn-default" onclick="ResetOSD()">{% trans "Reset"%}</button>#}
 
 </div>
 

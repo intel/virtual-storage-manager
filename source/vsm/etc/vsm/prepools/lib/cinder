@@ -183,7 +183,7 @@ function configure_multiple_cinder() {
         _del_default_cinder rbd_user=${AUTH_CINDER_USER#*.}
         _del_default_cinder rbd_secret_uuid=${AUTH_CINDER_UUID}
 
-        if [[ `cat $cinder_file|grep -c "enabled_backends = *"` -gt 0 ]]; then
+        if [[ `cat $cinder_file|grep -c "^enabled_backends = *"` -gt 0 ]]; then
             enabled_backends_value=`crudini --get /etc/cinder/cinder.conf DEFAULT enabled_backends`
             BACKEND_LIST=${enabled_backends_value},${BACKEND_LIST}
         fi
