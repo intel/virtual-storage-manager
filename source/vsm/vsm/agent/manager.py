@@ -1992,7 +1992,7 @@ class AgentManager(manager.Manager):
             config_content = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new))._parser.as_str()
             osd_info = self.ceph_driver.get_ceph_osd_info()
             mon_info = self.ceph_driver._get_ceph_mon_map()
-            self._modify_init_nodes_from_config_to_db(context,osd_info,mon_info)
+            self._modify_init_nodes_from_config_to_db(context,osd_info,mon_info,crushmap)
             self._insert_devices_from_config_to_db(context,osd_info)
             self._insert_osd_states_from_config_to_db(context,osd_info,crushmap)
             self._insert_or_modified_clusters(context,config_content,keyring_file_path)
@@ -2007,7 +2007,7 @@ class AgentManager(manager.Manager):
         #LOG.info('import cluster-----88888888--%s'%message)
         return message
 
-    def _modify_init_nodes_from_config_to_db(self,context,osd_info,mon_info):
+    def _modify_init_nodes_from_config_to_db(self,context,osd_info,mon_info,crushmap):
         '''
         Update 'data_drives_number' field in 'init_nodes' table with correct number of OSD devices.
         Set server status 'Active' for all OSD and monitor nodes in cluster
@@ -2018,6 +2018,7 @@ class AgentManager(manager.Manager):
         servers = db.init_node_get_all(context)
         for server in servers:
             server['data_drives_number'] = 0
+            server['zone_id'] = crushmap.get_zone_id_by_host_name(server.host)
         for osd in osd_info['osds']:
             cluster_ip = osd['cluster_addr'].split(':')[0]
             for server in servers:
@@ -2032,7 +2033,11 @@ class AgentManager(manager.Manager):
                     server['status'] = 'Active'
                     break
         for server in servers:
-            values = {'data_drives_number':server['data_drives_number'],'status':server['status']}
+            values = {
+                'data_drives_number' : server['data_drives_number'],
+                'status' : server['status'],
+                'zone_id' : server['zone_id'],
+            }
             db.init_node_update(context,server['id'],values)
 
     def _insert_devices_from_config_to_db(self,context,osd_info):
@@ -2117,7 +2122,7 @@ class AgentManager(manager.Manager):
                 weight = crushmap.get_weight_by_osd_name(osd_name)
                 public_ip = osd['public_addr'].split(':')[0]
                 cluster_ip = osd['cluster_addr'].split(':')[0]
-                zone_id = 1
+                zone_id = crushmap.get_zone_id_by_osd_name(osd_name)
                 values = {'id':device_id,
                           'osd_name':osd_name,
                           'device_id':device_id,
