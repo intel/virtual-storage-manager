@@ -315,7 +315,7 @@ def get_PG():
 
 def get_performance_IOPs(request):
     data = json.loads(request.body)
-    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-60
+    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-120
     end_time = None
 
     ops_r_opts = {
@@ -364,7 +364,7 @@ def get_performance_IOPs(request):
 
 def get_performance_Latency(request):
     data = json.loads(request.body)
-    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-60
+    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-120
     end_time = None
     latency_r_opts = {
          "metrics_name": "op_r_latency",
@@ -412,7 +412,7 @@ def get_performance_Latency(request):
 
 def get_performance_Bandwith(request):
     data = json.loads(request.body)
-    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-60
+    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-120
     end_time = None
     bandwidth_in_opts = {
          "metrics_name":"op_in_bytes"
