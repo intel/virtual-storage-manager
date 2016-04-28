@@ -27,7 +27,7 @@ class ViewBuilder(common.ViewBuilder):
         pass
 
     def basic(self, request, setting):
-        LOG.info("vsm settings api view %s " % setting)
+        #LOG.info("vsm settings api view %s " % setting)
 
         return {
             "setting": {
@@ -38,7 +38,7 @@ class ViewBuilder(common.ViewBuilder):
         }
 
     def _detail(self, request, setting):
-        LOG.info("vsm settings api view %s " % setting)
+        #LOG.info("vsm settings api view %s " % setting)
         return {
             "setting": {
                 "id": setting['id'],
