@@ -4177,7 +4177,8 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
     elif timestamp_start  and  timestamp_end is None:
         timestamp_start = timestamp_start + diamond_collect_interval
         timestamp_end = get_max_timestamp_by_metrics_name(context, metrics_name) or timestamp_start
-    if timestamp_start > timestamp_end : timestamp_start = timestamp_end - diamond_collect_interval
+    if timestamp_start > timestamp_end:
+        timestamp_start = timestamp_end - 120
     ret_list = []
     timestamp_cur = timestamp_start
     session = get_session()
@@ -4223,7 +4224,8 @@ def latency_performance_metrics(context, search_opts, session=None):#for latency
     elif timestamp_start  and  timestamp_end is None:
         timestamp_start = timestamp_start + diamond_collect_interval
         timestamp_end = get_max_timestamp_by_metrics_name(context, '%s_sum'%metrics_name) or timestamp_start
-    if timestamp_start > timestamp_end : timestamp_start = timestamp_end - diamond_collect_interval
+    if timestamp_start > timestamp_end :
+        timestamp_start = timestamp_end - 120
     ret_list = []
     timestamp_cur = timestamp_start
     session = get_session()
@@ -4278,12 +4280,12 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
         sql_str = '''select timestamp, hostname, sum(value) as metric_value, count(value) as cpu_count from metrics where instance='idle' and timestamp>=%(start_time)s  group by timestamp,hostname
             '''%{'start_time':timestamp_start}
         sql_ret = session.execute(sql_str).fetchall()
-        LOG.info("======================sql_ret: %s" % sql_ret)
+        #LOG.info("======================sql_ret: %s" % sql_ret)
         for cell in sql_ret:
             cpu_total_idle = int(cell[2]) or 0
             cpu_total_count = int(cell[3])
-            LOG.info("=================cpu_total_idle: %s" % str(cpu_total_idle))
-            LOG.info("=================cpu_total_count: %s" % str(cpu_total_count))
+            #LOG.info("=================cpu_total_idle: %s" % str(cpu_total_idle))
+            #LOG.info("=================cpu_total_count: %s" % str(cpu_total_count))
             metrics_value = 100 - round(cpu_total_idle/cpu_total_count, 1)
             timestamp = cell[0]/diamond_collect_interval*diamond_collect_interval
             ret_list.append({'host':cell[1], 'timestamp':timestamp, 'metrics_value':metrics_value,'metrics':metrics_name,})
