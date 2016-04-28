@@ -66,7 +66,6 @@ class CrushMap():
                     return item['weight']
         return 'no osd:%s'%osd_name
 
-
     def get_bucket_by_id(self, id):
         return filter(lambda item: id == item['id'], self._buckets)[0]
 
@@ -266,6 +265,29 @@ class CrushMap():
                     break
         return parent_bucket
 
+    def get_parent_bucket_by_name(self, name):
+        parent_bucket = {}
+        self_bucket = self.get_buckets_by_name(name)
+        if self_bucket:
+            bucket_id = self_bucket['id']
+            buckets = self._buckets
+            for bucket in buckets:
+                for item in bucket['items']:
+                    if int(bucket_id) == int(item['id']):
+                        parent_bucket['id'] = bucket['id']
+                        parent_bucket['name'] = bucket['name']
+                        parent_bucket['type_name'] = bucket['type_name']
+                        break
+        return parent_bucket
+
+    def get_zone_id_by_host_name(self, host_name):
+        zone = self.get_parent_bucket_by_name(host_name)
+        return zone['id'] if zone else None
+
+    def get_zone_id_by_osd_name(self, osd_name):
+        host_bucket = self._get_location_by_osd_name(osd_name)
+        host_name = host_bucket['name']
+        return self.get_zone_id_by_host_name(host_name)
 
     def _show_as_tree_dict(self):
         buckets = self._buckets
