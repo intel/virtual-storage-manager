@@ -4178,7 +4178,7 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
         timestamp_start = timestamp_start + diamond_collect_interval
         timestamp_end = get_max_timestamp_by_metrics_name(context, metrics_name) or timestamp_start
     if timestamp_start > timestamp_end:
-        timestamp_start = timestamp_end - 120
+        return []
     ret_list = []
     timestamp_cur = timestamp_start
     session = get_session()
@@ -4225,7 +4225,7 @@ def latency_performance_metrics(context, search_opts, session=None):#for latency
         timestamp_start = timestamp_start + diamond_collect_interval
         timestamp_end = get_max_timestamp_by_metrics_name(context, '%s_sum'%metrics_name) or timestamp_start
     if timestamp_start > timestamp_end :
-        timestamp_start = timestamp_end - 120
+        return []
     ret_list = []
     timestamp_cur = timestamp_start
     session = get_session()
