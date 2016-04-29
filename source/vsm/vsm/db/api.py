@@ -1300,6 +1300,15 @@ def get_latency(context, search_opts):
 def get_cpu_usage(context, search_opts):
     return IMPL.cpu_data_get_usage(context, search_opts=search_opts)
 
+def get_latency_all_types(context, search_opts):
+    return IMPL.latency_all_types(context, search_opts=search_opts)
+
+def get_iops_all_types(context, search_opts):
+    return IMPL.iops_all_type(context, search_opts=search_opts)
+
+def get_bandwidth_all_types(context, search_opts):
+    return IMPL.bandwidth_all_type(context, search_opts=search_opts)
+
 def clean_performance_history_data(context,days):
     return IMPL.clean_performance_history_data(context,days)
 
