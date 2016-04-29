@@ -10,7 +10,7 @@ function preinstall_controller() {
 }
 
 function preinstall_agent() {
-    apt-get install -y ceph ceph-mds librbd1 rbd-fuse radosgw \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y ceph ceph-mds librbd1 rbd-fuse radosgw \
     ntp openssh-server python-keystoneclient expect smartmontools
 }
 
