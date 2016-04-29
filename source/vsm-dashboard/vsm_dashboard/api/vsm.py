@@ -299,6 +299,9 @@ def update_setting(request, name, value):
 def get_metrics(request,search_opts):
     return vsmclient(request).performance_metrics.get_metrics(search_opts=search_opts)
 
+def get_metrics_all_types(request,search_opts):
+    return vsmclient(request).performance_metrics.get_metrics_all_types(search_opts=search_opts)
+
 def add_osd_from_node_in_cluster(request,osd_states_id):
     return  vsmclient(request).osds.add_osd_from_node_in_cluster(osd_states_id)
 
