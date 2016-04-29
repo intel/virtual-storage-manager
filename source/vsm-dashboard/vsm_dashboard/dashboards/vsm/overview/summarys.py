@@ -14,6 +14,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import math
 import logging
 from vsm_dashboard.common.horizon.summary import SummaryRenderer
 from vsm_dashboard.api import vsm as vsmapi
@@ -98,17 +99,29 @@ def pg():
     }
     return pg_summary_dict
 
+def format_data_size(data_size):
+    """ Return a formatted string in bytes, MB, GB, or TB, not allowing any value to go over 1000.
+    :param data_bytes: the integer number of bytes to be formatted.
+    :return: the string formatted with a proper units suffix.
+    """
+    if not data_size:
+        return str(0)
+    if data_size > 1:
+        units = [" B", " KiB", " MiB", " GiB", " TiB", " PiB", " EiB", " ZiB", " YiB"]
+        idx = int(math.ceil(math.log(data_size, 1000))) - 1
+        val = data_size / (math.pow(1024, idx))
+        return str(round(val, 2)) + units[idx]
+    return "1 B"
+
 def capactiy():
     pg_summary = vsmapi.placement_group_summary(None)
     capactiy_summary_dict = {
-         "data_used": str(0 if not pg_summary.data_bytes else round(pg_summary.data_bytes * 1.0/1024/1024/1024, 1)) + " GB"
-        ,"total_used": str(0 if not pg_summary.bytes_used else round(pg_summary.bytes_used * 1.0/1024/1024/1024, 1)) + " GB"
-        ,"available": str(0 if not pg_summary.bytes_avail else round(pg_summary.bytes_avail * 1.0/1024/1024/1024, 1)) + " GB"
-        ,"total":  str(0 if not pg_summary.bytes_total else round(pg_summary.bytes_total * 1.0/1024/1024/1024, 1)) + " GB"
+         "data_used": format_data_size(pg_summary.data_bytes)
+        ,"total_used": format_data_size(pg_summary.bytes_used)
+        ,"available": format_data_size(pg_summary.bytes_avail)
+        ,"total":  format_data_size(pg_summary.bytes_total)
     }
     return capactiy_summary_dict
-
-   
 
 
 class StorageGroupSummary(SummaryRenderer):
@@ -260,14 +273,10 @@ class CapacitySummary(SummaryRenderer):
     def get_summary(self):
         pg_summary = vsmapi.placement_group_summary(self.request)
         data = SortedDict()
-        data['Data Capacity Used'] = str(0 if not pg_summary.data_bytes \
-		else round(pg_summary.data_bytes * 1.0/1024/1024/1024, 1)) + " GB"
-        data['Total Capacity Used'] = str(0 if not pg_summary.bytes_used \
-		else round(pg_summary.bytes_used* 1.0/1024/1024/1024, 1)) + " GB"
-        data['Capacity available'] = str(0 if not pg_summary.bytes_avail \
-		else round(pg_summary.bytes_avail * 1.0/1024/1024/1024, 1)) + " GB"
-        data['Capacity Total'] = str(0 if not pg_summary.bytes_total \
-		else round(pg_summary.bytes_total * 1.0/1024/1024/1024, 1)) + " GB"
+        data['Data Capacity Used'] = format_data_size(pg_summary.data_bytes)
+        data['Total Capacity Used'] = format_data_size(pg_summary.bytes_used)
+        data['Capacity available'] = format_data_size(pg_summary.bytes_avail)
+        data['Capacity Total'] = format_data_size(pg_summary.bytes_total)
         return data
 
 class PerformanceSummary(SummaryRenderer):
