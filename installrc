@@ -13,9 +13,14 @@
 #OS_KEYSTONE_ADMIN_TOKEN=9cce7e100280e928521b
 
 
-# If you want to use OpenStack MySQL, you should set as followed[not supported].
-#MYSQL_HOST=10.0.0.10
+# If you want to use OpenStack DB, you should set as followed.
+#DB_HOST=10.0.0.10
+#DB_USER=root
+#DB_PASSWORD=root
 
 
-# If you want to use OpenStack Message Queue, you should set as followed[not supported].
+# If you want to use OpenStack Message Queue, you should set as followed.
 #MQ_HOST=10.0.0.10
+#MQ_USERID=openstack
+#MQ_PASSWORD=openstack
+#MQ_PORT=5672
