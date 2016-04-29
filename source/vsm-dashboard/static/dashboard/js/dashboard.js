@@ -335,6 +335,19 @@ function loadStorage(){
     });
 }
 
+function format_data_size(data_size) {
+    if(data_size == 0){
+        return "0";
+    }
+    var units = [" B", " KiB", " MiB", " GiB", " TiB", " PiB", " EiB", " ZiB", " YiB"]
+    var idx = 0;
+    var ds = 1.0 * data_size;
+    while(ds > 1000 && ++idx < units.length){
+        ds /= 1024;
+    }
+    return ds.toFixed(2).toString() + units[idx];
+}
+
 function loadCapacity(){
     $.ajax({
         type: "get",
@@ -344,8 +357,8 @@ function loadCapacity(){
         success: function(data){
             cClusterGague.setOption(GenerateGaugeOption(data.percent));
             //update the capacity value
-            $("#lblCapacityUsed")[0].innerHTML = ((parseInt(data.used)/1024)/1024/1024).toFixed(2).toString() + " GB";
-            $("#lblCapacityTotal")[0].innerHTML = ((parseInt(data.total)/1024)/1024/1024).toFixed(2).toString() + " GB";
+            $("#lblCapacityUsed")[0].innerHTML = format_data_size(parseInt(data.used));
+            $("#lblCapacityTotal")[0].innerHTML = format_data_size(parseInt(data.total));
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             if(XMLHttpRequest.status == 401)
