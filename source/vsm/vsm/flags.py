@@ -488,7 +488,7 @@ vsm_settings_opts = [
                default=600,
                help='update ceph version info(secs)'),
     cfg.IntOpt('ceph_osd_dump',
-               default=600,
+               default=60,
                help='ceph osd dump (secs)'),
     cfg.IntOpt('ceph_pg_dump_osds',
                default=600,
