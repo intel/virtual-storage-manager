@@ -28,14 +28,14 @@ while getopts "h?kmadc" opt; do
         echo "By default: Do NOT uninstall MySQL/MariaDB components."
         echo "By default: Do NOT uninstall Apache2 server components."
         echo "By default: Do NOT uninstall Keystone components."
-        echo "By default: Do NOT uninstall VSM dependency packages."
+        echo "By default: Do NOT uninstall all VSM dependency packages on controller."
         echo ""
         echo "Usage: uninstall.sh [options]"
         echo "options:"
         echo "   -k  Uninstall Keystone components."
         echo "   -m  Uninstall MySQL/MariaDB components."
         echo "   -a  Uninstall Apache2 server components."
-        echo "   -d  Uninstall VSM depencency packages."
+        echo "   -d  Uninstall all VSM dependency packages on controller."
         echo "   -c  Suppress removal of Ceph cluster and components."
         exit 0
         ;;
@@ -59,13 +59,49 @@ USER=`whoami`
 
 source $TOPDIR/installrc
 
-VSM_DEP_PKGS="python-amqp python-amqplib python-babel python-babel-localedata python-django\
- python-django-horizon python-django-pyscss python-dogpile.cache python-dogpile.core python-eventlet\
- python-flask python-greenlet python-httplib2 python-iso8601 python-itsdangerous python-jinja2 python-kombu\
- python-lxml python-migrate python-novaclient python-numpy python-openstack-auth python-oslo.config\
- python-oslo.db python-oslo.i18n python-oslo.messaging python-oslo.serialization python-oslo.utils\
- python-paramiko python-paste python-pastedeploy python-pastedeploy-tpl python-pastescript python-simplejson\
- python-sqlalchemy python-sqlalchemy-ext python-stevedore python-suds python-tempita python-webob"
+VSM_DEP_PKGS="alembic apache2 apache2-bin apache2-data binutils build-essential ceph ceph-common\
+ ceph-fs-common ceph-fuse ceph-mds cpp cpp-4.8 cryptsetup-bin diamond dpkg-dev erlang-asn1 erlang-base\
+ erlang-corba erlang-crypto erlang-diameter erlang-edoc erlang-eldap erlang-erl-docgen erlang-eunit\
+ erlang-ic erlang-inets erlang-mnesia erlang-nox erlang-odbc erlang-os-mon erlang-parsetools erlang-percept\
+ erlang-public-key erlang-runtime-tools erlang-snmp erlang-ssh erlang-ssl erlang-syntax-tools erlang-tools\
+ erlang-webtool erlang-xmerl expect fakeroot fontconfig fontconfig-config fonts-dejavu-core fonts-liberation\
+ g++ g++-4.8 gcc gcc-4.8 gdisk graphviz heirloom-mailx ieee-data keystone libaio1:amd64 libalgorithm-diff-perl\
+ libalgorithm-diff-xs-perl libalgorithm-merge-perl libapache2-mod-wsgi libapr1:amd64 libaprutil1:amd64\
+ libaprutil1-dbd-sqlite3:amd64 libaprutil1-ldap:amd64 libasan0:amd64 libatomic1:amd64 libblas3\
+ libboost-system1.54.0:amd64 libboost-thread1.54.0:amd64 libc6-dev:amd64 libcairo2:amd64 libc-dev-bin\
+ libcdt5 libcephfs1 libcgraph6 libcloog-isl4:amd64 libcryptsetup4 libdatrie1:amd64 libdbd-mysql-perl\
+ libdbi-perl libdpkg-perl libfakeroot:amd64 libfile-fcntllock-perl libfontconfig1:amd64 libgcc-4.8-dev:amd64\
+ libgd3:amd64 libgfortran3:amd64 libgmp10:amd64 libgomp1:amd64 libgoogle-perftools4 libgraphite2-3:amd64\
+ libgvc6 libgvpr2 libharfbuzz0b:amd64 libhtml-template-perl libice6:amd64 libicu52:amd64 libisl10:amd64\
+ libitm1:amd64 libjbig0:amd64 libjpeg8:amd64 libjpeg-turbo8:amd64 libjs-jquery libjs-sphinxdoc\
+ libjs-underscore liblapack3 libleveldb1:amd64 libltdl7:amd64 libmariadbclient18:amd64 libmpc3:amd64\
+ libmpfr4:amd64 libmysqlclient18:amd64 libnspr4:amd64 libnss3:amd64 libnss3-nssdb libodbc1:amd64\
+ libopts25:amd64 libpango-1.0-0:amd64 libpangocairo-1.0-0:amd64 libpangoft2-1.0-0:amd64 libpathplan4\
+ libpixman-1-0:amd64 libquadmath0:amd64 librabbitmq1 librados2 librbd1 libsctp1:amd64 libsm6:amd64\
+ libsnappy1 libstdc++-4.8-dev:amd64 libtcl8.6:amd64 libtcmalloc-minimal4 libterm-readkey-perl libthai0:amd64\
+ libthai-data libtiff5:amd64 libtsan0:amd64 libunwind8 libvpx1:amd64 libxaw7:amd64 libxcb-render0:amd64\
+ libxcb-shm0:amd64 libxmu6:amd64 libxpm4:amd64 libxrender1:amd64 libxslt1.1:amd64 libxt6:amd64\
+ libyaml-0-2:amd64 linux-libc-dev:amd64 lksctp-tools make manpages-dev mariadb-client-5.5\
+ mariadb-client-core-5.5 mariadb-common mariadb-server mariadb-server-5.5 mariadb-server-core-5.5\
+ memcached mysql-common ntp python-alembic python-amqp python-amqplib python-anyjson python-appconf\
+ python-babel python-babel-localedata python-backports.ssl-match-hostname python-blinker\
+ python-ceilometerclient python-ceph python-cinderclient python-cliff python-cliff-doc python-cmd2\
+ python-compressor python-concurrent.futures python-crypto python-dbus python-dbus-dev python-decorator\
+ python-django python-django-horizon python-django-pyscss python-dns python-dogpile.cache python-dogpile.core\
+ python-ecdsa python-eventlet python-flask python-formencode python-gi python-glanceclient python-greenlet\
+ python-heatclient python-httplib2 python-iso8601 python-itsdangerous python-jinja2 python-jsonpatch\
+ python-json-patch python-json-pointer python-jsonschema python-keyring python-keystone python-keystoneclient\
+ python-keystonemiddleware python-kombu python-ldap python-ldappool python-librabbitmq python-lockfile\
+ python-lxml python-mako python-markupsafe python-memcache python-migrate python-mock python-mysqldb\
+ python-netaddr python-neutronclient python-novaclient python-numpy python-oauthlib python-openid\
+ python-openstack-auth python-oslo.config python-oslo.db python-oslo.i18n python-oslo.messaging\
+ python-oslo.serialization python-oslo.utils python-paramiko python-passlib python-paste python-pastedeploy\
+ python-pastedeploy-tpl python-pastescript python-pbr python-posix-ipc python-prettytable python-psutil\
+ python-pycadf python-pyinotify python-pyparsing python-pyscss python-repoze.lru python-routes\
+ python-saharaclient python-scgi python-secretstorage python-setuptools python-simplejson python-sqlalchemy\
+ python-sqlalchemy-ext python-stevedore python-suds python-support python-swiftclient python-tempita\
+ python-troveclient python-tz python-versiontools python-vsmclient python-warlock python-webob python-werkzeug\
+ python-yaml rabbitmq-server rbd-fuse smartmontools ssl-cert vsm vsm-dashboard vsm-deploy x11-common xfsprogs"
 
 function uninstall_controller()
 {
@@ -127,9 +163,6 @@ sudo apt-get purge --yes python-keystoneclient
 if [ -n "${REMOVE_MYSQL_PKGS}" ]; then
     sudo apt-get purge --yes libdbd-mysql-perl libmysqlclient18:amd64 mysql-common python-mysqldb
     sudo rm -rf /etc/mysql
-fi
-if [ -n "${REMOVE_VSM_DEP_PKGS}" ]; then
-    sudo apt-get purge --yes ${VSM_DEP_PKGS}
 fi
 sudo apt-get autoremove --yes
 sudo apt-get autoclean --yes
