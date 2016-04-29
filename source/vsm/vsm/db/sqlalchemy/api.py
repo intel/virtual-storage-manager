@@ -4139,7 +4139,7 @@ def ec_profile_get_by_name(context, name, session=None):
 
 def get_max_timestamp_by_metrics_name(context, metrics_name, session=None):
     session = get_session()
-    sql_str = "select max(timestamp) from metrics where metric='%s'"%metrics_name
+    sql_str = "select timestamp from metrics where metric='%s' order by timestamp desc limit 1;"%metrics_name
     sql_ret = session.execute(sql_str).fetchall()
     return sql_ret[0][0]
 
