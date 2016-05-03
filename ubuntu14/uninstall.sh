@@ -28,14 +28,14 @@ while getopts "h?kmadc" opt; do
         echo "By default: Do NOT uninstall MySQL/MariaDB components."
         echo "By default: Do NOT uninstall Apache2 server components."
         echo "By default: Do NOT uninstall Keystone components."
-        echo "By default: Do NOT uninstall VSM dependency packages."
+        echo "By default: Do NOT uninstall all VSM dependency packages on controller."
         echo ""
         echo "Usage: uninstall.sh [options]"
         echo "options:"
         echo "   -k  Uninstall Keystone components."
         echo "   -m  Uninstall MySQL/MariaDB components."
         echo "   -a  Uninstall Apache2 server components."
-        echo "   -d  Uninstall VSM depencency packages."
+        echo "   -d  Uninstall all VSM dependency packages on controller."
         echo "   -c  Suppress removal of Ceph cluster and components."
         exit 0
         ;;
@@ -59,13 +59,16 @@ USER=`whoami`
 
 source $TOPDIR/installrc
 
-VSM_DEP_PKGS="python-amqp python-amqplib python-babel python-babel-localedata python-django\
- python-django-horizon python-django-pyscss python-dogpile.cache python-dogpile.core python-eventlet\
- python-flask python-greenlet python-httplib2 python-iso8601 python-itsdangerous python-jinja2 python-kombu\
- python-lxml python-migrate python-novaclient python-numpy python-openstack-auth python-oslo.config\
- python-oslo.db python-oslo.i18n python-oslo.messaging python-oslo.serialization python-oslo.utils\
- python-paramiko python-paste python-pastedeploy python-pastedeploy-tpl python-pastescript python-simplejson\
- python-sqlalchemy python-sqlalchemy-ext python-stevedore python-suds python-tempita python-webob"
+# build a list of package names from a directory specified in an apt .list file
+function deps_from_local_repo()
+{
+    PKG_DIR="$(sed 's|^.*file://\(.*\) \(.*\)|\1/\2|' "$1")"
+    for pkg in $(ls ${PKG_DIR}/*.deb); do
+        echo -n "$(dpkg-deb -f $pkg Package) "
+    done
+}
+
+VSM_DEP_PKGS="$(deps_from_local_repo vsm-dep.list)"
 
 function uninstall_controller()
 {
@@ -127,9 +130,6 @@ sudo apt-get purge --yes python-keystoneclient
 if [ -n "${REMOVE_MYSQL_PKGS}" ]; then
     sudo apt-get purge --yes libdbd-mysql-perl libmysqlclient18:amd64 mysql-common python-mysqldb
     sudo rm -rf /etc/mysql
-fi
-if [ -n "${REMOVE_VSM_DEP_PKGS}" ]; then
-    sudo apt-get purge --yes ${VSM_DEP_PKGS}
 fi
 sudo apt-get autoremove --yes
 sudo apt-get autoclean --yes
