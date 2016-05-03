@@ -1600,12 +1600,15 @@ class AgentManager(manager.Manager):
 
         if cluster_id and sum_dict:
             for typ in sum_types:
-                sum_map = self.ceph_driver.get_summary(typ, sum_dict)
-                if sum_map:
-                    val = {'summary_data': sum_map}
-                    db.summary_update(context, cluster_id, typ, val)
-                    if typ.find('cluster') != -1:
-                        db.summary_update(context, cluster_id, 'ceph', val)
+                try:
+                    sum_map = self.ceph_driver.get_summary(typ, sum_dict)
+                    if sum_map:
+                        val = {'summary_data': sum_map}
+                        db.summary_update(context, cluster_id, typ, val)
+                        if typ.find('cluster') != -1:
+                            db.summary_update(context, cluster_id, 'ceph', val)
+                except Exception:
+                    LOG.warn('Exception in update_summary:', exc_info=True)
 
     @periodic_task(service_topic=FLAGS.agent_topic, spacing=FLAGS.server_ping_time)
     def update_server_status(self, context):

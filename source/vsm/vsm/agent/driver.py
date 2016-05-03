@@ -2885,6 +2885,10 @@ class CephDriver(object):
             if not sum_dict:
                 sum_dict = self.get_ceph_status()
 
+            # newer versions of 'ceph status' don't display mdsmap - use 'ceph mds dump' instead
+            if not 'mdsmap' in sum_dict:
+                sum_dict['mdsmap'] = self._run_cmd_to_json(['ceph', 'mds', 'dump'])
+
             if sum_dict:
                 if sum_type == FLAGS.summary_type_pg:
                     return self._pg_summary(sum_dict)
