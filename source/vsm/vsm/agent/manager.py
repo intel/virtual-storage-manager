@@ -1162,9 +1162,15 @@ class AgentManager(manager.Manager):
             return None
         osd_dict = json.loads(osd_json)
         osd_list = osd_dict['osds']
+        db_osds = db.osd_get_all(context)
         for osd in osd_list:
             osd_num = osd['osd']
             osd_name = 'osd.' + (str(osd_num))
+            for db_osd in db_osds:
+                if osd_name == db_osd.osd_name:
+                    # OSD is present in Ceph and in DB
+                    db_osds.remove(db_osd)
+                    break
             if osd['in'] and osd['up']:
                 osd_status = FLAGS.osd_in_up
             elif osd['in'] and not osd['up']:
@@ -1181,6 +1187,15 @@ class AgentManager(manager.Manager):
             values['state'] = osd_status
             self._conductor_rpcapi.\
                 osd_state_update(context, values)
+        for db_osd in db_osds:
+            # OSD's remaining in the db_osds list were found in the DB but not in Ceph output
+            # They have been removed from the cluster and should be removed from the DB
+            LOG.info("OSD removed from cluster: %s" % db_osd.osd_name)
+            osd_id = db_osd.id
+            device_id = db_osd.device_id
+            db.osd_delete(context, osd_id)
+            db.device_delete(context, device_id)
+
     @periodic_task(service_topic=FLAGS.agent_topic,
                    spacing=10)
     def clean_performance_history_data(self, context):
