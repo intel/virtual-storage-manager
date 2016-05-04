@@ -2226,21 +2226,21 @@ class AgentManager(manager.Manager):
                 mds_header = value
             elif key.find('global')!=-1:
                 global_header = value
-        if not global_header:
-            message['code'].append('-21')
-            message['error'].append('missing global section in ceph configration file.')
-        else:
-            pass
-        if not mon_header:
-            message['code'].append('-22')
-            message['error'].append('missing mon header section in ceph configration file.')
-        else:
-            pass
-        if not osd_header:
-            message['code'].append('-23')
-            message['error'].append('missing osd header section in ceph configration file.')
-        else:
-            pass
+        # if not global_header:
+        #     message['code'].append('-21')
+        #     message['error'].append('missing global section in ceph configration file.')
+        # else:
+        #     pass
+        # if not mon_header:
+        #     message['code'].append('-22')
+        #     message['error'].append('missing mon header section in ceph configration file.')
+        # else:
+        #     pass
+        # if not osd_header:
+        #     message['code'].append('-23')
+        #     message['error'].append('missing osd header section in ceph configration file.')
+        # else:
+        #     pass
 
         osd_fields = ['devs','host','cluster addr','public addr','osd journal']
         for osd in osd_list:
