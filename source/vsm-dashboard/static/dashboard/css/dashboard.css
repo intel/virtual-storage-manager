@@ -272,8 +272,11 @@
     margin-left: 10px;
 }
 
-#tCapacityInfo tr td{
-    width: 70px;
+#tCapacityLabel{
+    width: 50px;
 }
 
+#tCapacityValue{
+    width: 100px;
+}
 
