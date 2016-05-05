@@ -233,6 +233,8 @@ class ManifestParser(object):
 
         ret = {'cluster_name': _get_cluster_value('cluster'),
                'file_system': _get_cluster_value('file_system'),
+               'mkfs_option': _get_cluster_value('mkfs_option'),
+               'mount_option': _get_cluster_value('mount_option'),
                'public_addr': _get_cluster_value('management_addr'),
                'secondary_public_addr':
                               _get_cluster_value('ceph_public_addr'),

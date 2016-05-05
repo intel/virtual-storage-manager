@@ -865,10 +865,11 @@ class CephDriver(object):
         except:
             LOG.info('build dirs in /var/lib/ceph failed!')
 
-    def __format_devs(self, disks, file_system):
+    def __format_devs(self, context, disks, file_system):
         # format devices to xfs.
         def ___fdisk(disk):
-            mkfs_option = utils.get_fs_options(file_system)[0]
+            cluster = db.cluster_get_all(context)[0]
+            mkfs_option = cluster['mkfs_option']
             utils.execute('mkfs.%s' % file_system,
                           mkfs_option,
                           disk,
@@ -893,7 +894,7 @@ class CephDriver(object):
         self._clean_ceph_conf()
         self._clean_lib_ceph_files()
         self._build_lib_ceph_dirs()
-        self.__format_devs(osd_disks + journal_disks, file_system)
+        self.__format_devs(context, osd_disks + journal_disks, file_system)
         return {'status': 'ok'}
 
     def get_dev_by_mpoint(self, directory):
@@ -915,7 +916,7 @@ class CephDriver(object):
         parts = _parse_proc_partitions()
         return '/dev/' + parts[(major, minor)]
 
-    def mount_disks(self, devices, fs_type):
+    def mount_disks(self, context, devices, fs_type):
         def __mount_disk(disk):
             utils.execute('mkdir',
                           '-p',
@@ -935,7 +936,8 @@ class CephDriver(object):
                               'ceph:ceph',
                               disk['journal'],
                               run_as_root=True)
-            mount_options = utils.get_fs_options(fs_type)[1]
+            cluster = db.cluster_get_all(context)[0]
+            mount_options = cluster['mount_option']
             utils.execute('mount',
                           '-t', fs_type,
                           '-o', mount_options,
@@ -1232,7 +1234,8 @@ class CephDriver(object):
         if osd_conf_dict['file_system']:
             file_system = osd_conf_dict['file_system']
 
-        mkfs_option = utils.get_fs_options(file_system)[0]
+        cluster = db.cluster_get_all(context)[0]
+        mkfs_option = cluster['mkfs_option']
         utils.execute("mkfs",
                       "-t", file_system,
                       mkfs_option, osd_conf_dict['dev_name'],
@@ -1240,7 +1243,7 @@ class CephDriver(object):
 
         # TODO: does not support ext4 for now.
         # Need to use -o user_xattr for ext4
-        fs_opt = utils.get_fs_options(file_system)[1]
+        mount_option = cluster['mount_option']
 
         ceph_version = self.get_ceph_version()
         if int(ceph_version.split(".")[0]) > 0:
@@ -1255,7 +1258,7 @@ class CephDriver(object):
 
         utils.execute("mount",
                       "-t", file_system,
-                      "-o", fs_opt,
+                      "-o", mount_option,
                       osd_conf_dict['dev_name'],
                       osd_pth,
                       run_as_root=True)
@@ -2525,7 +2528,8 @@ class CephDriver(object):
         if osd['device']['fs_type']:
             file_system = osd['device']['fs_type']
 
-        mkfs_option = utils.get_fs_options(file_system)[0]
+        cluster = db.cluster_get_all(context)[0]
+        mkfs_option = cluster['mkfs_option']
         utils.execute("mkfs",
                       "-t", file_system,
                       mkfs_option,
@@ -2537,10 +2541,11 @@ class CephDriver(object):
         osd_pth = osd_data_path.replace('$id',osd_inner_id)
         LOG.info('osd restore osd_pth =%s'%osd_pth)
         utils.ensure_tree(osd_pth)
-        fs_opt = utils.get_fs_options(file_system)[1]
+        cluster = db.cluster_get_all(context)[0]
+        mount_option = cluster['mount_option']
         utils.execute("mount",
                       "-t", file_system,
-                      "-o", fs_opt,
+                      "-o", mount_option,
                       osd['device']['name'],
                       osd_pth,
                       run_as_root=True)

@@ -20,6 +20,18 @@ cluster_a
 [file_system]
 xfs
 
+# -f or -F
+# -f for such as btrfs, xfs and so on
+# -F for such as ext4 and so on
+[mkfs_option]
+-f
+
+# for ext4, it can be like user_xattr,rw,noatime or others
+# for btrfs, it can be like noatime,nodiratime or others
+# for xfs, it can be like rw,noatime,inode64,logbsize=256k,delaylog or others
+[mount_option]
+rw,noatime,inode64,logbsize=256k,delaylog
+
 [management_addr]
 192.168.123.0/24
 

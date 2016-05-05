@@ -736,7 +736,7 @@ class AgentManager(manager.Manager):
         file_system = cluster_ref['file_system']
         devices = db.device_get_all_by_service_id(context,
                                                   self._service_id)
-        return self.ceph_driver.mount_disks(devices, file_system)
+        return self.ceph_driver.mount_disks(context, devices, file_system)
 
     def _get_mon_id(self):
         # Get monitor id
