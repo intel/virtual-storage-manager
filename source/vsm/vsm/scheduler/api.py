@@ -150,6 +150,9 @@ class API(object):
     def check_pre_existing_cluster(self,context,body):
         return self.scheduler_rpcapi.check_pre_existing_cluster(context,body)
 
+    def detect_cephconf(self,context,body):
+        return self.scheduler_rpcapi.detect_cephconf(context,body)
+
 
     def detect_crushmap(self,context,body):
         return self.scheduler_rpcapi.detect_crushmap(context,body)

@@ -566,6 +566,14 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         version='1.0', timeout=6000)
         return res
 
+    def detect_cephconf(self, context, keyring, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('detect_cephconf',
+                                      keyring=keyring),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res
 
     def detect_crushmap(self, context, keyring, host):
         topic = rpc.queue_get_for(context, self.topic, host)

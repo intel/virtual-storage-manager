@@ -121,6 +121,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
                                     'get_ceph_health_list':'get',
                                     'check_pre_existing_cluster':'post',
                                     'import_cluster':'post',
+                                    'detect_cephconf':'post',
                                     'detect_crushmap':'post',
                                     'get_crushmap_tree_data':'post',
                                     'get_service_list':'get'
