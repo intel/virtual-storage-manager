@@ -237,7 +237,9 @@ class CephConfigParser(manager.Manager):
         parser = Parser()
         parser.read(FLAGS.ceph_conf)
         fs_type = parser.get('osd', 'osd mkfs type', 'xfs')
-        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type, utils.get_fs_options(fs_type))
+        cluster = db.cluster_get_all(self.context)[0]
+        mount_option = cluster['mount_option']
+        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type, mount_option)
 
         for sec in parser.sections():
             if sec.find('osd.') != -1:
@@ -425,7 +427,8 @@ class CephConfigParser(manager.Manager):
         self._parser.set('osd', 'osd heartbeat interval', str(osd_heartbeat_interval))
         self._parser.set('osd', 'osd heartbeat grace', str(osd_heartbeat_grace))
         self._parser.set('osd', 'osd mkfs type', osd_type)
-        mount_option = utils.get_fs_options(osd_type)[1]
+        cluster = db.cluster_get_all(self.context)[0]
+        mount_option = cluster['mount_option']
         self._parser.set('osd', 'osd mount options %s' % osd_type, mount_option)
 
 

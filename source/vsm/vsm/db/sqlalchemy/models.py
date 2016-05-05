@@ -511,6 +511,8 @@ class Cluster(BASE, VsmBase):
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(length=255), nullable=True)
     file_system = Column(String(length=255), default='xfs', nullable=True)
+    mkfs_option = Column(String(length=255), nullable=True)
+    mount_option = Column(String(length=255), nullable=True)
     management_network = Column(String(length=255), nullable=True)
     ceph_public_network = Column(String(length=255), nullable=True)
     cluster_network = Column(String(length=255), nullable=True)
