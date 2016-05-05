@@ -45,6 +45,8 @@ from vsm.openstack.common.periodic_task import periodic_task
 from vsm.openstack.common.rpc import common as rpc_exc
 from vsm.agent import rpcapi as agent_rpc
 from vsm import context
+from cephconf_discover import cephconf_discover
+
 
 import operator
 from crushmap_parser import CrushMap
@@ -1957,6 +1959,21 @@ class AgentManager(manager.Manager):
             storage_group['status'] = 'IN'
             db.storage_group_update_or_create(context,storage_group)
 
+    def detect_cephconf(self,context,keyring):
+        message = {'error':'','code':'','info':''}
+        try:
+            discover = cephconf_discover(keyring=keyring)
+            cephconf = discover.detect_ceph_conf()
+            message['error'] = ''
+            message['code'] = ''
+            message['info'] = 'Success'
+            message['cephconf'] = cephconf
+        except:
+            message['error'] = 'failed'
+            message['code'] = '-1'
+            message['info'] = 'Fail'
+        return message
+
     def detect_crushmap(self,context,keyring):
         message = {'error':'','code':'','info':''}
         try:
@@ -1969,7 +1986,6 @@ class AgentManager(manager.Manager):
             message['error'] = 'failed'
             message['code'] = '-1'
             message['info'] = 'Fail'
-            raise
         return message
 
     def import_cluster(self,context,body):

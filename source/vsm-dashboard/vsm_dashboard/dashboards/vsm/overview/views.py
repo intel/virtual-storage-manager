@@ -361,9 +361,7 @@ def get_performance_Latency(request):
          "timestamp_end": end_time,
          "correct_cnt": None,
     }
-    print 'test333'
     lantency_data = vsmapi.get_metrics_all_types(request,latency_opts)
-    print 'test444'
     latency_r_data = lantency_data.get('osd_op_r_latency',[])
     latency_w_data = lantency_data.get('osd_op_w_latency',[])
     latency_rw_data = lantency_data.get('osd_op_rw_latency',[])

@@ -1329,6 +1329,27 @@ class SchedulerManager(manager.Manager):
         message = {'code':code,'error':error,'info':info,'osd_num':osd_num,'tree_data':tree_node}
         return message
 
+    def detect_cephconf(self,context,body):
+        '''
+        :param context:
+        :param body:
+        { u'monitor_host_name': u'centos-storage1', u'monitor_id': u'1', u'monitor_keyring': u'******'}
+        :return:
+        '''
+        monitor_pitched_host = body.get('monitor_host_name')
+        monitor_keyring = body.get('monitor_keyring')
+        message = {}
+        try:
+            message = self._agent_rpcapi.detect_cephconf(context, monitor_keyring, monitor_pitched_host)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: detect_cephconf rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: detect_cephconf rpc remote')
+        except:
+            LOG.error('ERROR: detect_cephconf')
+            raise
+        return message
+
     def detect_crushmap(self,context,body):
         '''
         :param context:

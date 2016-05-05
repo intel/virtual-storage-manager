@@ -218,6 +218,9 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def import_cluster(self,ctxt,body):
         return self.call(ctxt, self.make_msg('import_cluster', body=body),timeout=6000)
 
+    def detect_cephconf(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('detect_cephconf', body=body))
+
     def detect_crushmap(self,ctxt,body):
         return self.call(ctxt, self.make_msg('detect_crushmap', body=body))
 

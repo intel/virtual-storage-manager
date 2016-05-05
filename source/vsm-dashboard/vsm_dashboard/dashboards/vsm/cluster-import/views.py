@@ -85,15 +85,19 @@ def auto_detect(request):
     msg = ""
     body = json.loads(request.body)
     print body
+    data = {}
     try:
         ret = vsmapi.detect_crushmap(request,body=body)
+        ret_cephconf = vsmapi.detect_cephconf(request,body=body)
         status = "OK"
         msg = ret[1].get('crushmap')
+        data['crushmap'] = ret[1].get('crushmap')
+        data['cephconf'] = ret_cephconf[1].get('cephconf')
     except:
         status = "Failed"
         msg = "Auto detect crush map Failed!"
 
-    resp = dict(message=msg, status=status)
+    resp = dict(message=msg, status=status, data=data)
     resp = json.dumps(resp)
     return HttpResponse(resp)
 

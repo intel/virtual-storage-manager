@@ -363,3 +363,12 @@ def add_zone_to_crushmap_and_db(request, body):
     :return:
     '''
     return vsmclient(request).zones.add_zone_to_crushmap_and_db(body)
+
+def detect_cephconf(request, body=None):
+    """check_pre_existing_cluster.
+        body : {u'cluster_conf': u'/etc/ceph/ceph.conf',
+        u'monitor_host_name': u'centos-storage1',
+        u'monitor_host_id': u'1',
+         u'monitor_keyring': u'/etc/keying'}
+    """
+    return vsmclient(request).clusters.detect_cephconf(body)
