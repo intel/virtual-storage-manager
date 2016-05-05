@@ -272,10 +272,14 @@
             <div id="divPerformance" style="border:0px solid #ccc;overflow:hidden;float:left;width:100%">
                 <div id="divPerformanceOption" style="height:60px;line-height:30px;border-bottom:0px solid #ccc;padding:5px;overflow:hidden;width:100%">
                      <h4 style="display:inline-block">{% trans "Performance" %}</h4>
-                     <img id="imgExpandCollapse" src="{{ STATIC_URL }}dashboard/img/collapse.png" onclick="ShowPerformace()" />
+                     <img id="imgExpandCollapse" src="{{ STATIC_URL }}dashboard/img/collapse.png" onclick="ShowPerformance()" />
                      <hr/>
                 </div>
-                <div id="divPerformanceCantainer" >
+                <div id="divPerformanceDisabledText">
+                    <label>{% trans "Disabled:" %}</label>
+                    <span>{% trans "Performance graphs are disabled. Enable in VSM settings" %}</span>
+                </div>
+                <div id="divPerformanceContainer" >
                     <div id="divIOPs" class="vsm-block">
                         <h4 class="vsm-block-title">{% trans "IOPS" %}</h4>
                         <div class="vsm-block-content">

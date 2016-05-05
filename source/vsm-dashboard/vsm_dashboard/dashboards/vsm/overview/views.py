@@ -115,6 +115,9 @@ def CPU(request):
     if request.body:
         return HttpResponse(get_performance_cpu(request))
 
+def perf_enabled(request):
+    return HttpResponse(get_performance_enabled(request))
+
 def get_vsm_version():
     try:
         (status, out) = commands.getstatusoutput('vsm --version')
@@ -447,3 +450,11 @@ def get_performance_cpu(request):
         cpu_data_dict['cpus'].append({'name':host_name,'data':data_sort_split})
     cpu_data_json = json.dumps(cpu_data_dict)
     return cpu_data_json
+
+def get_performance_enabled(request):
+    settings = vsmapi.get_settings(request)
+    perf_settings = [setting for setting in settings if setting.name in ('ceph_diamond_collect_interval', 'cpu_diamond_collect_interval')]
+    enabled = any(setting.value != '0' for setting in perf_settings)
+    perf_enabled = { "enabled": enabled }
+    perf_enabled_data = json.dumps(perf_enabled)
+    return perf_enabled_data

@@ -16,7 +16,7 @@
 
 from django.conf.urls import patterns, url
 from .views import index
-from .views import version,cluster,capacity,OSD,monitor,MDS,storage,IOPS,PG,latency,bandwidth,CPU
+from .views import version,cluster,capacity,OSD,monitor,MDS,storage,IOPS,PG,latency,bandwidth,CPU,perf_enabled
 from .views import osd_summary,monitor_summary,mds_summary,objects_summary,performance_summary,pg_summary,capacity_summary
 
 urlpatterns = patterns('',
@@ -33,6 +33,7 @@ urlpatterns = patterns('',
     url(r'^latency/$', latency, name='latency'),
     url(r'^bandwidth/$', bandwidth, name='bandwidth'),
     url(r'^CPU/$', CPU, name='CPU'),
+    url(r'^perf_enabled/$', perf_enabled, name='perf_enabled'),
 
     url(r'^osd_summary/$', osd_summary, name='osd_summary'),
     url(r'^monitor_summary/$', monitor_summary, name='monitor_summary'),
