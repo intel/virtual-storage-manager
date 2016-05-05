@@ -80,6 +80,7 @@ $(document).ready(function(){
     loadMonitor();
     loadMDS();
     loadStorage();
+    loadPerformanceEnabled();
 
     //Load Interval
     loadInterval();
@@ -99,15 +100,41 @@ function HidePageHeader(){
     $(".page-header").hide();
 }
 
-function ShowPerformace(){
-    if($("#divPerformanceCantainer")[0].style.display == "none"){
-        $("#divPerformanceCantainer").show();
+function ShowPerformance(){
+    if($("#divPerformanceContainer")[0].style.display == "none"){
+        $("#divPerformanceContainer").show();
         $("#imgExpandCollapse")[0].src = "/static/dashboard/img/collapse.png";
     }
     else{
-        $("#divPerformanceCantainer").hide();
+        $("#divPerformanceContainer").hide();
         $("#imgExpandCollapse")[0].src = "/static/dashboard/img/expand.png";
     }
+}
+
+function loadPerformanceEnabled(){
+    $.ajax({
+    type: "get",
+    url: "/dashboard/vsm/perf_enabled/",
+    data: null,
+    dataType: "json",
+    success: function(data){
+        //console.log(data);
+        if(data.enabled) {
+            $("#divPerformanceDisabledText").hide();
+            if($("#divPerformanceContainer")[0].style.display == "none")
+                ShowPerformance();
+        }
+        else {
+            $("#divPerformanceDisabledText").show();
+            if($("#divPerformanceContainer")[0].style.display != "none")
+                ShowPerformance();
+        }
+        },
+    error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
+        }
+    });
 }
 
 function loadVersion(){
@@ -386,7 +413,7 @@ function loadPG(){
 
 function loadIOP(){
     setTimeout(function (){
-        if($("#divPerformanceCantainer")[0].style.display != "none") {
+        if($("#divPerformanceContainer")[0].style.display != "none") {
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/IOPS/",
@@ -445,7 +472,7 @@ function loadIOP(){
 
 function loadLatency(){
     setTimeout(function (){
-        if($("#divPerformanceCantainer")[0].style.display != "none") {
+        if($("#divPerformanceContainer")[0].style.display != "none") {
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/latency/",
@@ -503,7 +530,7 @@ function loadLatency(){
 
 function loadBandwidth(){
     setTimeout(function (){
-        if($("#divPerformanceCantainer")[0].style.display != "none") {
+        if($("#divPerformanceContainer")[0].style.display != "none") {
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/bandwidth/",
@@ -555,7 +582,7 @@ function loadBandwidth(){
 
 function loadCPU(){
     setTimeout(function (){
-        if($("#divPerformanceCantainer")[0].style.display != "none") {
+        if($("#divPerformanceContainer")[0].style.display != "none") {
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/CPU/",
