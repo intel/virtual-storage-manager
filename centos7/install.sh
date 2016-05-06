@@ -394,13 +394,17 @@ function install_setup_diamond() {
     VSMMYSQL_FILE_PATH="/usr/lib/python$PY_VER/site-packages/vsm/diamond/handlers/vsmmysql.py"
     HANDLER_PATH="/usr/lib/python$PY_VER/site-packages/diamond/handler"
     DIAMOND_CONFIG_PATH="/etc/diamond"
+    DIAMOND_DB_HOST=$CONTROLLER_ADDRESS
+    if [[ $DB_HOST ]] && [[ $DB_USER ]] && [[ $DB_PASSWORD ]]; then
+        DIAMOND_DB_HOST=$DB_HOST
+    fi
 
     $SSH $USER@$1 "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
     "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.vsmmysql.VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $DIAMOND_DB_HOST/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/password*=*.*/password    = $MYSQL_VSM_PASSWORD/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/database    = diamond/database    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
