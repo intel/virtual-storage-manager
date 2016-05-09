@@ -124,6 +124,40 @@ $("#btnUpdateUser").click(function(){
 
 })
 
+
+//User Setting
+$("#btnUserSetting").click(function(){
+	var pagesize = $("#id_pagesize").val();
+
+	//Send the pagesize
+	var data = {
+		"pagesize":pagesize
+	};
+	var postData = JSON.stringify(data);
+	token = $("input[name=csrfmiddlewaretoken]").val();
+
+	$.ajax({
+		type: "post",
+		url: "/dashboard/vsm/usermgmt/user_setting/",
+		data: postData,
+		dataType:"json",
+		success: function(data){
+			window.location.href="/dashboard/vsm/usermgmt/";
+		},
+		error: function (XMLHttpRequest, textStatus, errorThrown) {
+			if(XMLHttpRequest.status == 500)
+                showTip("error","INTERNAL SERVER ERROR")
+		},
+		headers: {
+			"X-CSRFToken": token
+		},
+		complete: function(){
+
+		}
+    });
+
+})
+
 function CheckUserReg(username){
 	$("#divWarningInfo").empty();
 	$("#divWarningInfo").hide();

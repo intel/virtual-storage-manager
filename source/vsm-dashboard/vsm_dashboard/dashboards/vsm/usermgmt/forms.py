@@ -14,33 +14,25 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from django.core.urlresolvers import reverse
+import logging
+
+from horizon import forms
+from horizon.utils import validators
+
+from django.forms import ValidationError
+from django.conf import settings
 try:
     from django.utils.translation import force_unicode
 except:
     from django.utils.translation import force_text as force_unicode
-
 from django.utils.translation import  ugettext_lazy as _
 
-from horizon import exceptions
-from horizon import forms
-from horizon import messages
-from horizon.utils.validators import validate_port_range
-from horizon.utils import validators
-# from horizon.utils import fields
-from .utils import get_admin_tenant
-import logging
-from django.forms import ValidationError
-from django import http
-from django.conf import settings
-from django import shortcuts
-
-from vsm_dashboard.api import vsm as vsm_api
 from vsm_dashboard import api
 from vsm_dashboard.utils.validators import validate_user_name
 from vsm_dashboard.utils.validators import password_validate_regrex
 
 LOG = logging.getLogger(__name__)
+
 
 class BaseUserForm(forms.SelfHandlingForm):
     def __init__(self, request, *args, **kwargs):
@@ -92,31 +84,7 @@ class CreateUserForm(BaseUserForm):
 
     def handle(self, request, data):
         pass
-        # LOG.error("CEPH_LOG> data %s " % data)
-        # data['email'] = ''
 
-        # try:
-        #     admin_tenant = get_admin_tenant(request)
-        #     tenant_id = admin_tenant.id
-        #     ret = api.keystone.user_create(request, data['name'], data['email'],
-        #                                    data['password'], tenant_id, enabled=True)
-        #     LOG.error("CEPH_LOG> ret: %s " % ret)
-
-        #     roles = api.keystone.role_list(request)
-        #     for role in roles:
-        #         if role.name in ['admin', 'KeystoneAdmin']:
-        #             api.keystone.add_tenant_user_role(request, tenant_id, ret.id, role.id)
-
-        #     LOG.error(api.keystone.user_get(request, ret.id))
-        #     messages.success(request,
-        #              _('Successfully created user: %s')
-        #              % data['name'])
-        #     return ret
-        # except:
-        #     redirect = reverse("horizon:vsm:usermgmt:index")
-        #     exceptions.handle(request,
-        #                       _('Unable to create User.'),
-        #                       redirect=redirect)
 
 class UpdateUserForm(BaseUserForm):
     id = forms.CharField(label=_("ID"), widget=forms.HiddenInput)
@@ -142,56 +110,18 @@ class UpdateUserForm(BaseUserForm):
 
     def handle(self, request, data):
         pass
-        # failed, succeeded = [], []
-        # user_is_editable = api.keystone.keystone_can_edit_user()
-        # user = data.pop('id')
-        # tenant = get_admin_tenant(request)
 
-        # if user_is_editable:
-        #     password = data.pop('password')
-        #     data.pop('confirm_password', None)
 
-        # if user_is_editable:
-        #     # Update user details
-        #     msg_bits = (_('name'), _('email'))
-        #     try:
-        #         api.keystone.user_update(request, user, **data)
-        #         succeeded.extend(msg_bits)
-        #     except:
-        #         failed.extend(msg_bits)
-        #         exceptions.handle(request, ignore=True)
+class UserSettingsForm(forms.SelfHandlingForm):
+    pagesize = forms.IntegerField(label=_("Items Per Page"),
+                                  min_value=1,
+                                  max_value=getattr(settings,
+                                                    'API_RESULT_LIMIT',
+                                                    1000))
 
-        # # Update default tenant
-        # msg_bits = (_('primary project'),)
-        # try:
-        #     api.keystone.user_update_tenant(request, user, tenant)
-        #     succeeded.extend(msg_bits)
-        # except:
-        #     failed.append(msg_bits)
-        #     exceptions.handle(request, ignore=True)
+    def __init__(self, *args, **kwargs):
+        super(UserSettingsForm, self).__init__(*args, **kwargs)
 
-        # if user_is_editable:
-        #     # If present, update password
-        #     if password:
-        #         msg_bits = (_('password'),)
-        #         try:
-        #             api.keystone.user_update_password(request, user, password)
-        #             succeeded.extend(msg_bits)
-        #         except:
-        #             failed.extend(msg_bits)
-        #             exceptions.handle(request, ignore=True)
 
-        # if succeeded:
-        #     messages.success(request, _('User has been updated successfully.'))
-        # if failed:
-        #     failed = map(force_unicode, failed)
-        #     messages.error(request,
-        #                    _('Unable to update %(attributes)s for the user.')
-        #                      % {"attributes": ", ".join(failed)})
-        # LOG.error(request.user.id)
-        # LOG.error(user)
-        # if request.user.id == user:
-        #     response = http.HttpResponseRedirect(settings.LOGOUT_URL)
-        #     return response
-        # return True
-
+    def handle(self, request, data):
+        pass
