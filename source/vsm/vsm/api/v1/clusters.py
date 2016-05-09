@@ -150,6 +150,19 @@ class ClusterController(wsgi.Controller):
         else:
             return {"message":"No such cluster which named  %s in DB"%cluster_name}
 
+    def detect_cephconf(self, req, body=None):
+        '''
+
+        :param res:
+        :param body:
+        :return:
+        '''
+        LOG.info("CEPH_LOG detect_cephconf body=%s"%body )
+        context = req.environ['vsm.context']
+        ret = self.scheduler_api.detect_cephconf(context,body)
+        LOG.info('CEPH_LOG detect_cephconf get ret=%s'%ret)
+        return ret
+
     def detect_crushmap(self, req, body=None):
         '''
 

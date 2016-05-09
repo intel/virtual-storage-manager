@@ -1254,21 +1254,21 @@ class SchedulerManager(manager.Manager):
                     mds_header = value
                 elif key.find('global')!=-1:
                     global_header = value
-        if not global_header:
-            message['code'].append('-21')
-            message['error'].append('missing global section in ceph configration file.')
-        else:
-            pass
-        if not mon_header:
-            message['code'].append('-22')
-            message['error'].append('missing mon header section in ceph configration file.')
-        else:
-            pass
-        if not osd_header:
-            message['code'].append('-23')
-            message['error'].append('missing osd header section in ceph configration file.')
-        else:
-            pass
+        # if not global_header:
+        #     message['code'].append('-21')
+        #     message['error'].append('missing global section in ceph configration file.')
+        # else:
+        #     pass
+        # if not mon_header:
+        #     message['code'].append('-22')
+        #     message['error'].append('missing mon header section in ceph configration file.')
+        # else:
+        #     pass
+        # if not osd_header:
+        #     message['code'].append('-23')
+        #     message['error'].append('missing osd header section in ceph configration file.')
+        # else:
+        #     pass
 
         osd_fields = ['devs','host','cluster addr','public addr','osd journal']
         for osd in osd_list:
@@ -1327,6 +1327,27 @@ class SchedulerManager(manager.Manager):
             code.append('-13')
 
         message = {'code':code,'error':error,'info':info,'osd_num':osd_num,'tree_data':tree_node}
+        return message
+
+    def detect_cephconf(self,context,body):
+        '''
+        :param context:
+        :param body:
+        { u'monitor_host_name': u'centos-storage1', u'monitor_id': u'1', u'monitor_keyring': u'******'}
+        :return:
+        '''
+        monitor_pitched_host = body.get('monitor_host_name')
+        monitor_keyring = body.get('monitor_keyring')
+        message = {}
+        try:
+            message = self._agent_rpcapi.detect_cephconf(context, monitor_keyring, monitor_pitched_host)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: detect_cephconf rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: detect_cephconf rpc remote')
+        except:
+            LOG.error('ERROR: detect_cephconf')
+            raise
         return message
 
     def detect_crushmap(self,context,body):
