@@ -15,35 +15,30 @@
 #    under the License.
 
 import logging
-import os
+
 from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse_lazy
 
 from horizon import exceptions
 from horizon import tables
-from horizon import forms
-from horizon import views
+from horizon.utils import functions as utils
 
 from vsm_dashboard.api import vsm as vsmapi
-from .tables import ListRBDStatusTable
-from django.http import HttpResponse
-
-import json
-LOG = logging.getLogger(__name__)
 from vsm_dashboard.utils import get_time_delta
+from .tables import ListRBDStatusTable
+
+LOG = logging.getLogger(__name__)
+
 
 class IndexView(tables.DataTableView):
     table_class = ListRBDStatusTable
     template_name = 'vsm/rbd-status/index.html'
 
     def get_data(self):
-        default_limit = 100;
-        default_sort_dir = "asc";
-        default_sort_keys = ['id']
+        default_limit = utils.get_page_size(self.request)
+        default_sort_dir = "asc"
         marker = self.request.GET.get('marker', "")
 
         _rbd_status = []
-        #_rbds= vsmapi.get_rbd_list(self.request,)
         try:
             _rbd_status = vsmapi.rbd_pool_status(self.request, paginate_opts={
                 "limit": default_limit,
