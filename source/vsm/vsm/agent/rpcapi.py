@@ -424,11 +424,12 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return self.call(context, self.make_msg('start_osd'), topic,
                         version='1.0', timeout=6000)
 
-    def inital_ceph_osd_db_conf(self, context, server_list, host):
+    def inital_ceph_osd_db_conf(self, context, server_list,ceph_conf_in_cluster_manifest,host):
         topic = rpc.queue_get_for(context, self.topic, host)
         return self.call(context,
                          self.make_msg('inital_ceph_osd_db_conf',
-                                       server_list=server_list),
+                                       server_list=server_list,
+                                       ceph_conf_in_cluster_manifest=ceph_conf_in_cluster_manifest),
                          topic,
                          version='1.0',
                          timeout=6000)

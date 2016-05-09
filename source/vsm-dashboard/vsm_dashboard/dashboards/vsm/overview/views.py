@@ -328,9 +328,9 @@ def get_performance_IOPs(request):
          "correct_cnt": None,
     }
 
-    print 'test1111'
+    #print 'test1111'
     iops_data = vsmapi.get_metrics_all_types(request,ops_opts)
-    print 'test222'
+    #print 'test222'
     ops_r_data = iops_data.get('osd_op_r',[])
     ops_w_data = iops_data.get('osd_op_w',[])
     ops_rw_data = iops_data.get('osd_op_rw',[])

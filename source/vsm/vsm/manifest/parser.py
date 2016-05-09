@@ -499,6 +499,18 @@ class ManifestParser(object):
         """Return the segments of cluster name."""
         #return self._get_segment("cluster")
         self._map['cluster'] = self._get_segment("cluster")
+
+    def _dict_insert_ceph_conf(self):
+        """ Return the segments of ceph_conf."""
+        name_dict = self._get_segment("ceph_conf")
+        LOG.info('name_dict===%s'%name_dict)
+        self._map['ceph_conf'] = []
+        for idx in range(0, len(name_dict['first'])):
+            ceph_conf = {'name': name_dict['first'][idx],
+                       'default_value': name_dict['second'][idx]}
+            self._map['ceph_conf'].append(ceph_conf)
+        LOG.info("ceph_conf (key/value) set: %s" % self._map['ceph_conf'])
+
     def _dict_insert_settings_c(self):
         """ Return the segments of vsm settings."""
         name_dict = self._get_segment("settings")
@@ -574,6 +586,7 @@ class ManifestParser(object):
         self._dict_insert_settings_c()
         self._dict_insert_cache_tier_defaults_c()
         self._dict_insert_ec_profiles_c()
+        self._dict_insert_ceph_conf()
         #self._dict_insert_periodic_parameters_c()
         self._trans_between_db()
         return self._map
