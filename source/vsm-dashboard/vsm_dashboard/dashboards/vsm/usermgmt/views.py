@@ -14,29 +14,33 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+
+from datetime import datetime
 import logging
-import os
-from django.utils.translation import ugettext_lazy as _
+import json
+
 from django.core.urlresolvers import reverse, reverse_lazy
+from django import http
+from django.http import HttpResponse
+from django import shortcuts
+from django.utils.translation import ugettext_lazy as _
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 
 from horizon import exceptions
-from horizon import tables
 from horizon import forms
-from horizon import views
+from horizon import tables
+from horizon.utils import functions as utils
 
 from vsm_dashboard import api
 from .utils import get_admin_tenant
-
 from .tables import ListUserTable
 from .forms import CreateUserForm
 from .forms import UpdateUserForm
-from django.http import HttpResponse
-from django import http
+from .forms import UserSettingsForm
 
-import json
 LOG = logging.getLogger(__name__)
+
 
 class IndexView(tables.DataTableView):
     table_class = ListUserTable
@@ -47,9 +51,6 @@ class IndexView(tables.DataTableView):
         admin_tenant = get_admin_tenant(self.request)
         _user_list = api.keystone.user_list(self.request, admin_tenant.id)
         LOG.info("USER LIST")
-        #LOG.error(dir(self.request.user))
-        #LOG.error(self.request.user.roles)
-        #LOG.error(api.keystone.role_list(self.request))
         if self.request.user.username != "admin":
             _user_list = [x for x in _user_list if x.id == self.request.user.id]
 
@@ -169,6 +170,30 @@ def update_pwd(request):
     return HttpResponse(resp)
 
 
+class UserSettingsView(forms.ModalFormView):
+    form_class = UserSettingsForm
+    template_name = 'vsm/usermgmt/settings.html'
+    success_url = reverse_lazy("horizon:vsm:usermgmt:index")
 
+    def get_initial(self):
+        return {
+            'pagesize': utils.get_page_size(self.request)
+        }
 
+    def form_valid(self, form):
+        return form.handle(self.request, form.cleaned_data)
 
+def _one_year():
+    now = datetime.utcnow()
+    return datetime(now.year + 1, now.month, now.day, now.hour,
+                    now.minute, now.second, now.microsecond, now.tzinfo)
+
+def user_setting(request):
+    data = json.loads(request.body)
+    response = shortcuts.redirect(request.build_absolute_uri())
+
+    request.session['horizon_pagesize'] = data['pagesize']
+    response.set_cookie('horizon_pagesize', data['pagesize'],
+                        expires=_one_year())
+
+    return response
