@@ -1009,26 +1009,53 @@ function GetBandwidthOption(){
 //NAC: not active+clean
 function GetPieOption(AC,NAC){
     var option = {
-	    tooltip : {
-		trigger: 'item',
-		formatter: "{b} : {c} ({d}%)"
-	    },
+            tooltip : {
+                trigger: 'item',
+                formatter: "{b} : {c} ({d}%)",
+                position: function(p) {
+                    return [0, p[1]];
+                }
+            },
+            legend: {
+                x: 'left',
+                y: 'top',
+                orient: 'vertical',
+                textStyle: {
+                    color: 'auto',
+                    fontSize: 14
+                },
+                data: [
+                    {name: 'Active+Clean'},
+                    {name: 'Not Active+Clean'},
+                ]
+            },
             series : [
-		{
-		    name:'PG Summary',
-		    type:'pie',
-		    radius : '60%',
-		    center: ['50%', '50%'],
-		    data:[
-		        {value:AC, name:'Active+Clean'},
-		        {value:NAC, name:'Not Active+Clean'},
-		    ]
-		}
-	    ],
+                {
+                    name:'PG Summary',
+                    type:'pie',
+                    radius : '75%',
+                    center: ['50%', '65%'],
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            }
+                        }
+                    },
+                    data: [
+                        {value:AC, name: 'Active+Clean'},
+                        {value:NAC, name: 'Not Active+Clean'},
+                    ],
+                }
+            ],
             color:["green","orange"]
- 	};
-                    
-	return option;
+        };
+
+
+    return option;
 }
 
 function InitAxis_X(){
