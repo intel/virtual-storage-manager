@@ -443,7 +443,7 @@ class CephConfigParser(manager.Manager):
         self._parser.set('osd', 'osd mkfs type', dict_kvs['osd_type'])
         cluster = db.cluster_get_all(self.context)[0]
         mount_option = cluster['mount_option']
-        self._parser.set('osd', 'osd mount options %s' % osd_type, mount_option)
+        self._parser.set('osd', 'osd mount options %s' % dict_kvs['osd_type'], mount_option)
 
         # Below is very important for set file system.
         # Do not change any of them.
