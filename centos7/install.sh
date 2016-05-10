@@ -75,7 +75,7 @@ while [ $# -gt 0 ]; do
     -r| --repo-path) shift; REPO_PATH=$1 ;;
     -v| --version) shift; DEPENDENCE_BRANCH=$1 ;;
     -u| --user) shift; USER=$1 ;;
-    -k| --key) shift; keyfile=$1; export SSH='ssh -i $keyfile'; export SCP='scp -i $keyfile' ;;
+    -k| --key) shift; keyfile=$1; export SSH="ssh -i $keyfile -t "; export SCP="scp -i $keyfile" ;;
     --prepare) IS_PREPARE=True ;;
     --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_ADDRESS=$1 ;;
     --agent) shift; IS_AGENT_INSTALL=True; NEW_AGENT_IPS=$1 ;;
