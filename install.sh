@@ -238,10 +238,13 @@ if [ $distro_check -eq 0 ]; then
 	    sudo service httpd restart
 	fi
 else
-	is_httpd=`dpkg -l|grep apache2|wc -l`
+	is_httpd=`dpkg -l|grep -E '\sapache2\s'|wc -l`
 	if [[ $is_httpd -gt 0 ]]; then
 	    sudo sed -i "s,#*Listen 80,Listen 80,g" /etc/apache2/ports.conf
 	    sudo service apache2 restart
+	else
+	    sudo apt-get install -y apache2
+	    sudo apt-get install -y --reinstall libapache2-mod-wsgi
 	fi
 
 fi
@@ -427,6 +430,9 @@ function setup_controller() {
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
+	# since there is no getip command, better to use the eth2 address
+	# whihc is not so neath solution though
+	$SSH $USER@$CONTROLLER_ADDRESS "sudo patch /usr/local/bin/vsm-controller < vsm-controller.patch"
         $SSH $USER@$CONTROLLER_ADDRESS "sudo vsm-controller"
     fi
 }
@@ -442,6 +448,7 @@ else
         echo "please check the cluster.manifest, then try again"
         exit 1
     else
+	sudo patch /usr/local/bin/vsm-controller < vsm-controller.patch
         sudo vsm-controller
     fi
 fi
