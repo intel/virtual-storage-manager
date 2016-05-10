@@ -1781,13 +1781,14 @@ class AgentManager(manager.Manager):
     def health_status(self, context):
         return self.update_ceph_status(context)
 
-    def inital_ceph_osd_db_conf(self, context, server_list):
+    def inital_ceph_osd_db_conf(self, context, server_list, ceph_conf_in_cluster_manifest):
         """Begin to reate ceph.conf and initial ceph osd in ceph."""
         cluster_ref = db.cluster_get(context, self._cluster_id)
         file_system = cluster_ref['file_system']
         return self.ceph_driver.inital_ceph_osd_db_conf(context,
                                                         server_list,
-                                                        file_system)
+                                                        file_system,
+                                                        ceph_conf_in_cluster_manifest)
 
     def add_cache_tier(self, context, body):
         return self.ceph_driver.add_cache_tier(context, body)

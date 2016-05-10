@@ -664,7 +664,7 @@ class CephDriver(object):
         config.save_conf(FLAGS.ceph_conf)
         return True
 
-    def inital_ceph_osd_db_conf(self, context, server_list, file_system):
+    def inital_ceph_osd_db_conf(self, context, server_list, file_system, ceph_conf_in_cluster_manifest=None):
         config = cephconfigparser.CephConfigParser()
         osd_num = db.device_get_count(context)
         LOG.info("osd_num:%d" % osd_num)
@@ -685,10 +685,18 @@ class CephDriver(object):
             elif setting['name'] == 'osd_pool_default_size':
                 pool_default_size = setting['value']
 
-        config.add_global(heartbeat_interval=heartbeat_interval,
-                          osd_heartbeat_interval=osd_heartbeat_interval,
-                          osd_heartbeat_grace=osd_heartbeat_grace,
-                          pool_default_size=pool_default_size)
+        global_kvs = {'heartbeat_interval':heartbeat_interval,
+                      'osd_heartbeat_interval':osd_heartbeat_interval,
+                      'osd_heartbeat_grace':osd_heartbeat_grace,
+                      'pool_default_size':pool_default_size,
+                      }
+
+        if ceph_conf_in_cluster_manifest:
+            for cell in ceph_conf_in_cluster_manifest:
+                if not cell['name'].startswith('osd_') and not cell['name'].startswith('mon_'):
+                    global_kvs[cell['name']] = cell['default_value']
+
+        config.add_global(global_kvs)
 
         is_first_mon = True
         is_first_osd = True
@@ -708,7 +716,16 @@ class CephDriver(object):
                     #config.add_mds(hostname, hostip, '0')
                     #values = {'mds': 'yes'}
                     #db.init_node_update(context, host['id'], values)
-                    config.add_mon_header(cnfth=cnfth,cfth=cfth)
+                    mon_header_kvs = {
+                        'cnfth':cnfth,
+                        'cfth':cfth,
+                    }
+                    if ceph_conf_in_cluster_manifest:
+                        for cell in ceph_conf_in_cluster_manifest:
+                            if cell['name'].startswith('mon_'):
+                                global_kvs[cell['name']] = cell['default_value']
+
+                    config.add_mon_header(mon_header_kvs)
                     is_first_mon = False
                     config.add_mon(hostname, hostip, mon_cnt)
                 else:
@@ -728,7 +745,17 @@ class CephDriver(object):
                     # validate fs type
                     if fs_type in ['xfs', 'ext3', 'ext4', 'btrfs']:
                         #config.add_osd_header(osd_type=fs_type)
-                        config.add_osd_header(osd_type=fs_type,osd_heartbeat_interval=osd_heartbeat_interval,osd_heartbeat_grace=osd_heartbeat_grace)
+                        osd_header_kvs = {
+                            'osd_type':fs_type,
+                            'osd_heartbeat_interval':osd_heartbeat_interval,
+                            'osd_heartbeat_grace':osd_heartbeat_grace,
+
+                        }
+                        if ceph_conf_in_cluster_manifest:
+                            for cell in ceph_conf_in_cluster_manifest:
+                                if cell['name'].startswith('osd_'):
+                                    osd_header_kvs[cell['name']] = cell['default_value']
+                        config.add_osd_header(osd_header_kvs)
                     else:
                         config.add_osd_header()
                     is_first_osd = False

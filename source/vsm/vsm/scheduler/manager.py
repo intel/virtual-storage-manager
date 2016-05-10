@@ -45,7 +45,7 @@ from vsm.conductor import api as conductor_api
 from vsm.agent import cephconfigparser
 from vsm.agent.crushmap_parser import CrushMap
 from vsm.exception import *
-
+from vsm.manifest.parser import ManifestParser
 LOG = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
 
@@ -1562,8 +1562,12 @@ class SchedulerManager(manager.Manager):
         # It maybe cleaned by clean_data.
         try:
             _update("Create ceph.conf")
+            manifest_json = ManifestParser(FLAGS.cluster_manifest, False).format_to_json()
+            ceph_conf_in_cluster_manifest = manifest_json['ceph_conf']
+            LOG.info('ceph_conf_in_cluster_manifest==scheduler===%s'%ceph_conf_in_cluster_manifest)
             self._agent_rpcapi.inital_ceph_osd_db_conf(context,
                                                        server_list=server_list,
+                                                       ceph_conf_in_cluster_manifest=ceph_conf_in_cluster_manifest,
                                                        host=monitor_node['host'])
             _update("Create ceph.conf success")
         except:
