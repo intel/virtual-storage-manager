@@ -102,7 +102,7 @@ class ListUserTable(tables.DataTable):
     class Meta:
         name = "user_list"
         verbose_name = _("User List")
-        table_actions = (CreateUserAction, UserSettingAction)
+        table_actions = (CreateUserAction)
         row_actions = (EditUser, DeleteUser)
         multi_select = False
 
