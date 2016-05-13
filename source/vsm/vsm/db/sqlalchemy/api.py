@@ -4139,7 +4139,10 @@ def ec_profile_get_by_name(context, name, session=None):
 
 def get_max_timestamp_by_metrics_name(context, metrics_name, session=None):
     session = get_session()
-    sql_str = "select timestamp from metrics where metric='%s' order by timestamp desc limit 1;"%metrics_name
+    if "cpu" in metrics_name:
+        sql_str = "select timestamp from metrics where metric like 'cpu%' order by timestamp desc limit 1;"
+    else:
+        sql_str = "select timestamp from metrics where metric='%s' order by timestamp desc limit 1;"%metrics_name
     sql_ret = session.execute(sql_str).fetchall()
     return sql_ret[0][0]
 
@@ -4253,7 +4256,7 @@ def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
         return []
     # Get timestamps for metric interval
     metrics_name = search_opts['metrics_name']
-    timestamp_start, timestamp_end = get_metric_timestamp_range(context, search_opts, diamond_collect_interval)
+    timestamp_start, timestamp_end = get_metric_timestamp_range(context, search_opts, diamond_collect_interval, metrics_name=metrics_name)
     if timestamp_start > timestamp_end:
         return []
     ret_list = []
