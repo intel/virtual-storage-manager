@@ -244,7 +244,7 @@ else
 	    sudo service apache2 restart
 	else
 	    sudo apt-get install -y apache2
-	    sudo apt-get install -y --reinstall libapache2-mod-wsgi
+	    sudo apt-get --reinstall install -y libapache2-mod-wsgi
 	fi
 
 fi
@@ -449,6 +449,7 @@ else
         exit 1
     else
 	sudo patch /usr/local/bin/vsm-controller < vsm-controller.patch
+        sudo patch /usr/local/bin/keys/https < https.patch
         sudo vsm-controller
     fi
 fi
@@ -471,25 +472,27 @@ fi
 success=""
 failure=""
 if [ $is_controller -eq 0 ]; then
-    token=`$SSH $USER@$CONTROLLER_ADDRESS "agent-token"`
+    token=`$SSH $USER@$CONTROLLER_ADDRESS "sudo agent-token"`
 else
-    token=`agent-token`
+    token=`sudo agent-token`
 fi
 
 function setup_storage() {
-    $SSH $USER@$1 "rm -rf /etc/manifest/server.manifest"
+    $SSH $USER@$1 "sudo rm -rf /etc/manifest/server.manifest"
     #sed -i "s/token-tenant/$token/g" $MANIFEST_PATH/$1/server.manifest
     #old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
     #sed -i "s/$old_str/$token/g" $MANIFEST_PATH/$1/server.manifest
-    sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
-    $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/etc/manifest
-    $SSH $USER@$1 "chown root:vsm /etc/manifest/server.manifest; chmod 755 /etc/manifest/server.manifest"
-    is_server_manifest_error=`$SSH $USER@$1 "server_manifest" |grep ERROR|wc -l`
+    sudo sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
+    #$SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/etc/manifest
+    $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:~
+    $SSH $USER@$1 "sudo mv ~/server.manifest /etc/manifest"
+    $SSH $USER@$1 "sudo chown root:vsm /etc/manifest/server.manifest; sudo chmod 755 /etc/manifest/server.manifest"
+    is_server_manifest_error=`$SSH $USER@$1 "sudo server_manifest" |grep ERROR|wc -l`
     if [ $is_server_manifest_error -gt 0 ]; then
         echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
         failure=$failure"$1 "
     else
-        $SSH $USER@$1 "vsm-node"
+        $SSH $USER@$1 "sudo vsm-node"
         success=$success"$1 "
     fi
 }
