@@ -62,13 +62,15 @@ source $TOPDIR/installrc
 # build a list of package names from a directory specified in an apt .list file
 function deps_from_local_repo()
 {
-    PKG_DIR="$(sed 's|^.*file://\(.*\) \(.*\)|\1/\2|' "$1")"
-    for pkg in $(ls ${PKG_DIR}/*.deb); do
-        echo -n "$(dpkg-deb -f $pkg Package) "
+    for deb in "$1"/*.deb; do
+        PKG_NAME="$(dpkg-deb -f ${deb} Package 2>/dev/null)"
+        if test ! -z "${PKG_NAME}" && grep "${PKG_NAME}" "$2" >/dev/null 2>&1; then
+            echo -n "${PKG_NAME} "
+        fi
     done
 }
 
-VSM_DEP_PKGS="$(deps_from_local_repo vsm-dep.list)"
+VSM_DEP_PKGS="$(deps_from_local_repo vsm-dep-repo debs.lst)"
 
 function uninstall_controller()
 {
