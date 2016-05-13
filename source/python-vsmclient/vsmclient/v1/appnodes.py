@@ -11,14 +11,17 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-""" App node Interface
+
+"""
+Appnodes interface.
 """
 
 from vsmclient import base
 import urllib
 
-class AppNode(base.Resource):
 
+class AppNode(base.Resource):
+    """An appnode connects to openstack cinder."""
     def __repr__(self):
         return "<App Node: %s>" % self.id
 
@@ -51,6 +54,12 @@ class AppNodeManager(base.ManagerWithFind):
         body = {'appnodes':  auth_openstack}
         return self._create('/appnodes', body, 'appnodes')
 
+    def get(self, appnode_id):
+        """
+        Get details of an appnode.
+        """
+        return self._get("/appnodes/%s" % appnode_id, "appnode")
+
     def list(self, detailed=False, search_opts=None):
         """
         Get a list of all appnodes.
@@ -81,13 +90,13 @@ class AppNodeManager(base.ManagerWithFind):
         """
         self._delete("/appnodes/%s" % base.getid(appnode))
 
-    def update(self, appnode, **kargs):
+    def update(self, appnode, appnode_info):
         """
         Update the ssh_status or log_info for an appnode.
 
         """
-        if not kargs:
+        if not appnode_info:
             return
 
-        body = {"appnode": kargs}
+        body = {"appnode": appnode_info}
         self._update("/appnodes/%s" % base.getid(appnode), body)

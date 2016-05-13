@@ -15,21 +15,12 @@
 #    under the License.
 
 import logging
-from django.template.defaultfilters import filesizeformat
-from django.utils.translation import ugettext_lazy as _
-from django.utils.datastructures import SortedDict
-from django import forms
 
-from django.utils.safestring import mark_safe
-#from vsm_dashboard.dashboards.admin.instances.tables import \
-#        AdminUpdateRow
+from django.utils.translation import ugettext_lazy as _
 
 from horizon import tables
-from horizon.utils import html
-from horizon import exceptions
-from vsm_dashboard import api
 
-from .utils import checkbox_transform
+from vsm_dashboard import api
 
 STRING_SEPARATOR = "__"
 LOG = logging.getLogger(__name__)
@@ -94,6 +85,13 @@ class CreateUserAction(tables.LinkAction):
     def allowed(self, request, datum):
         return (request.user.username == "admin")  
 
+class UserSettingAction(tables.LinkAction):
+    name = "set"
+    verbose_name = _("Setting")
+    url = "horizon:vsm:usermgmt:setting"
+    classes = ("ajax-modal", "btn-primary")
+
+
 class ListUserTable(tables.DataTable):
 
     user_id = tables.Column("id", verbose_name=_("ID"), classes=("user_list",),hidden=True)
@@ -104,7 +102,7 @@ class ListUserTable(tables.DataTable):
     class Meta:
         name = "user_list"
         verbose_name = _("User List")
-        table_actions = (CreateUserAction, )
+        table_actions = (CreateUserAction,)
         row_actions = (EditUser, DeleteUser)
         multi_select = False
 

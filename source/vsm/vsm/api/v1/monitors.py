@@ -56,14 +56,14 @@ mon_nsmap = {None: xmlutil.XMLNS_V11, 'atom': xmlutil.XMLNS_ATOM}
 class MonitorTemplate(xmlutil.TemplateBuilder):
     def construct(self):
         root = xmlutil.TemplateElement('mon', selector='mon')
-        make_mon(root, detailed=True)
+        make_monitor(root, detailed=True)
         return xmlutil.MasterTemplate(root, 1, nsmap=mon_nsmap)
 
 class MonitorsTemplate(xmlutil.TemplateBuilder):
     def construct(self):
         root = xmlutil.TemplateElement('mons')
         elem = xmlutil.SubTemplateElement(root, 'mon', selector='mons')
-        make_mon(elem, detailed=True)
+        make_monitor(elem, detailed=True)
         return xmlutil.MasterTemplate(root, 1, nsmap=mon_nsmap)
 
 class Controller(wsgi.Controller):
@@ -89,7 +89,7 @@ class Controller(wsgi.Controller):
         except exception.NotFound:
             raise exc.HTTPNotFound()
 
-        return self._view_builder.show(context, mon)
+        return self._view_builder.show(mon)
 
     @wsgi.serializers(xml=MonitorsTemplate)
     def index(self, req):

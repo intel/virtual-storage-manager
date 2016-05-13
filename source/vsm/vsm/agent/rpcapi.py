@@ -134,6 +134,13 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                          topic,
                          version='1.0', timeout=6000)
 
+    def get_ceph_disk_list(self, context, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        self.test_service(context, topic)
+        return self.call(context,
+                        self.make_msg('get_ceph_disk_list',),
+                        topic, version='1.0', timeout=6000)
+
     def get_ceph_config(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         self.test_service(context, topic)
@@ -417,11 +424,12 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
         return self.call(context, self.make_msg('start_osd'), topic,
                         version='1.0', timeout=6000)
 
-    def inital_ceph_osd_db_conf(self, context, server_list, host):
+    def inital_ceph_osd_db_conf(self, context, server_list,ceph_conf_in_cluster_manifest,host):
         topic = rpc.queue_get_for(context, self.topic, host)
         return self.call(context,
                          self.make_msg('inital_ceph_osd_db_conf',
-                                       server_list=server_list),
+                                       server_list=server_list,
+                                       ceph_conf_in_cluster_manifest=ceph_conf_in_cluster_manifest),
                          topic,
                          version='1.0',
                          timeout=6000)
@@ -559,6 +567,14 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         version='1.0', timeout=6000)
         return res
 
+    def detect_cephconf(self, context, keyring, host):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('detect_cephconf',
+                                      keyring=keyring),
+                        topic,
+                        version='1.0', timeout=6000)
+        return res
 
     def detect_crushmap(self, context, keyring, host):
         topic = rpc.queue_get_for(context, self.topic, host)
@@ -621,4 +637,17 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                       body=body),
                         topic,
                         version='1.0', timeout=6000)
+        return res
+
+    def rgw_create(self, context, host, server_name, rgw_instance_name, is_ssl,
+                   uid, display_name, email, sub_user, access, key_type):
+        topic = rpc.queue_get_for(context, self.topic, host)
+        res = self.call(context,
+                        self.make_msg('rgw_create', server_name=server_name,
+                                      rgw_instance_name=rgw_instance_name,
+                                      is_ssl=is_ssl, uid=uid,
+                                      display_name=display_name,
+                                      email=email, sub_user=sub_user,
+                                      access=access, key_type=key_type),
+                        topic, version='1.0', timeout=6000)
         return res

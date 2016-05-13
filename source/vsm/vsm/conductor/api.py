@@ -239,6 +239,9 @@ class API(object):
     def storage_group_get_all(self, context):
         return self.conductor_rpcapi.storage_group_get_all(context)
 
+    def storage_group_get(self, context, id):
+        return self.conductor_rpcapi.storage_group_get(context, id)
+
     def create_storage_group(self, context, attrs):
         return self.conductor_rpcapi.create_storage_group(context, attrs)
 
@@ -269,10 +272,16 @@ class API(object):
         return self.conductor_rpcapi.\
                pg_get_all(context, limit, marker, sort_keys, sort_dir)
 
+    def pg_get(self, context, id):
+        return self.conductor_rpcapi.pg_get(context, id)
+
     #rbd
     def rbd_get_all(self, context, limit, marker, sort_keys, sort_dir):
         return self.conductor_rpcapi.\
                rbd_get_all(context, limit, marker, sort_keys, sort_dir)
+
+    def rbd_get(self, context, id):
+        return self.conductor_rpcapi.rbd_get(context, id)
 
     #license_status
     def license_status_create(self, context, values):
@@ -290,6 +299,9 @@ class API(object):
     def mds_get_all(self, context):
         return self.conductor_rpcapi.\
                mds_get_all(context)
+
+    def mds_get(self, context, id):
+        return self.conductor_rpcapi.mds_get(context, id)
 
     def ceph_error(self, context):
         return self.conductor_rpcapi.\
@@ -313,3 +325,6 @@ class API(object):
 
     def get_poolusage(self, context, poolusage_id):
         return self.conductor_rpcapi.get_poolusage(context, poolusage_id)
+
+    def get_appnode(self, context, id):
+        return self.conductor_rpcapi.get_appnode(context, id)

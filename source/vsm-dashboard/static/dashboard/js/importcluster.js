@@ -170,6 +170,10 @@ function validate(){
 
                         //Create the crushmap
 						loadTree(data.crushmap);
+
+	                    $("#divTxtCrushmap")[0].style.display = "none";
+	                    $("#divTxtCephConf")[0].style.display = "none";
+	                    $("#divCrushmapTree")[0].style.display = "";
 						break;
 					case "Failed":
 						showTip("error",data.message);

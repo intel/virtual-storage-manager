@@ -13,14 +13,15 @@
 #    under the License.
 
 """
-Cluster interface (1.1 extension).
+Clusters interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class Cluster(base.Resource):
-    """A vsm is an extra block level storage to the OpenStack instances."""
+    """A cluster is created to manage ceph."""
     def __repr__(self):
         try:
             return "<Cluster: %s>" % self.id
@@ -34,69 +35,6 @@ class Cluster(base.Resource):
     def update(self, **kwargs):
         """Update the display_name or display_description for this vsm."""
         self.manager.update(self, **kwargs)
-
-    def attach(self, instance_uuid, mountpoint):
-        """Set attachment metadata.
-
-        :param instance_uuid: uuid of the attaching instance.
-        :param mountpoint: mountpoint on the attaching instance.
-        """
-        return self.manager.attach(self, instance_uuid, mountpoint)
-
-    def detach(self):
-        """Clear attachment metadata."""
-        return self.manager.detach(self)
-
-    def reserve(self, vsm):
-        """Reserve this vsm."""
-        return self.manager.reserve(self)
-
-    def unreserve(self, vsm):
-        """Unreserve this vsm."""
-        return self.manager.unreserve(self)
-
-    def begin_detaching(self, vsm):
-        """Begin detaching vsm."""
-        return self.manager.begin_detaching(self)
-
-    def roll_detaching(self, vsm):
-        """Roll detaching vsm."""
-        return self.manager.roll_detaching(self)
-
-    def initialize_connection(self, vsm, connector):
-        """Initialize a vsm connection.
-
-        :param connector: connector dict from nova.
-        """
-        return self.manager.initialize_connection(self, connector)
-
-    def terminate_connection(self, vsm, connector):
-        """Terminate a vsm connection.
-
-        :param connector: connector dict from nova.
-        """
-        return self.manager.terminate_connection(self, connector)
-
-    def set_metadata(self, vsm, metadata):
-        """Set or Append metadata to a vsm.
-
-        :param type : The :class: `Cluster` to set metadata on
-        :param metadata: A dict of key/value pairs to set
-        """
-        return self.manager.set_metadata(self, metadata)
-
-    def upload_to_image(self, force, image_name, container_format,
-                        disk_format):
-        """Upload a vsm to image service as an image."""
-        self.manager.upload_to_image(self, force, image_name, container_format,
-                                     disk_format)
-
-    def force_delete(self):
-        """Delete the specified vsm ignoring its current state.
-
-        :param vsm: The UUID of the vsm to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class ClusterManager(base.ManagerWithFind):
     """
@@ -128,18 +66,18 @@ class ClusterManager(base.ManagerWithFind):
                            }}
         return self._create('/clusters', body, 'cluster')
 
-    def get(self, vsm_id):
+    def get(self, cluster_id):
         """
-        Get a vsm.
+        Get a cluster.
 
-        :param vsm_id: The ID of the vsm to delete.
+        :param cluster_id: The ID of the cluster to delete.
         :rtype: :class:`Cluster`
         """
-        return self._get("/clusters/%s" % vsm_id, "cluster")
+        return self._get("/clusters/%s" % cluster_id, "cluster")
 
     def list(self, detailed=False, search_opts=None):
         """
-        Get a list of all vsms.
+        Get a list of all clusters.
 
         :rtype: list of :class:`Cluster`
         """
@@ -163,55 +101,35 @@ class ClusterManager(base.ManagerWithFind):
                           "clusters")
         return ret
 
-    def delete(self, vsm):
+    def delete(self, cluster):
         """
-        Delete a vsm.
+        Delete a cluster.
 
-        :param vsm: The :class:`Cluster` to delete.
+        :param cluster: The :class:`Cluster` to delete.
         """
-        self._delete("/clusters/%s" % base.getid(vsm))
+        self._delete("/clusters/%s" % base.getid(cluster))
 
-    def update(self, vsm, **kwargs):
+    def update(self, cluster, **kwargs):
         """
-        Update the display_name or display_description for a vsm.
+        Update the display_name or display_description for a cluster.
 
-        :param vsm: The :class:`Cluster` to delete.
+        :param cluster: The :class:`Cluster` to delete.
         """
         if not kwargs:
             return
 
         body = {"cluster": kwargs}
 
-        self._update("/clusters/%s" % base.getid(vsm), body)
+        self._update("/clusters/%s" % base.getid(cluster), body)
 
-    def _action(self, action, vsm, info=None, **kwargs):
-        """
-        Perform a vsm "action."
-        """
-        body = {action: info}
-        self.run_hooks('modify_body_for_action', body, **kwargs)
-        url = '/clusters/%s/action' % base.getid(vsm)
-        return self.api.client.post(url, body=body)
-
-    def initialize_connection(self, vsm, connector):
-        """
-        Initialize a vsm connection.
-
-        :param vsm: The :class:`Cluster` (or its ID).
-        :param connector: connector dict from nova.
-        """
-        return self._action('os-initialize_connection', vsm,
-                            {'connector': connector})[1]['connection_info']
-
-    def terminate_connection(self, vsm, connector):
-        """
-        Terminate a vsm connection.
-
-        :param vsm: The :class:`Cluster` (or its ID).
-        :param connector: connector dict from nova.
-        """
-        self._action('os-terminate_connection', vsm,
-                     {'connector': connector})
+    # def _action(self, action, vsm, info=None, **kwargs):
+    #     """
+    #     Perform a vsm "action."
+    #     """
+    #     body = {action: info}
+    #     self.run_hooks('modify_body_for_action', body, **kwargs)
+    #     url = '/clusters/%s/action' % base.getid(vsm)
+    #     return self.api.client.post(url, body=body)
 
     def summary(self):
         """
@@ -225,7 +143,7 @@ class ClusterManager(base.ManagerWithFind):
         get_service_list
         """
         url = "/clusters/get_service_list"
-        return self.api.client.get(url)
+        return self._list(url, 'services')
 
     def refresh(self):
         url = "/clusters/refresh"
@@ -247,6 +165,9 @@ class ClusterManager(base.ManagerWithFind):
         url = "/clusters/import_cluster"
         return self.api.client.post(url,body=body)
 
+    def detect_cephconf(self,body):
+        url = "/clusters/detect_cephconf"
+        return self.api.client.post(url,body=body)
 
     def detect_crushmap(self,body):
         url = "/clusters/detect_crushmap"

@@ -43,6 +43,8 @@ from vsm.api.v1 import vsms
 from vsm.api.v1 import licenses
 from vsm.api.v1 import performance_metrics
 from vsm.api.contrib import poolusages
+from vsm.api.v1 import ec_profiles
+from vsm.api.v1 import rgw
 
 from vsm.openstack.common import log as logging
 
@@ -119,6 +121,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
                                     'get_ceph_health_list':'get',
                                     'check_pre_existing_cluster':'post',
                                     'import_cluster':'post',
+                                    'detect_cephconf':'post',
                                     'detect_crushmap':'post',
                                     'get_crushmap_tree_data':'post',
                                     'get_service_list':'get'
@@ -234,6 +237,7 @@ class APIRouter(vsm.api.openstack.APIRouter):
                         controller=self.resources['performance_metrics'],
                         collection={"get_list": "get",
                                     "get_metrics": "get",
+                                    "get_metrics_all_types": "get",
                                     },
                         member={'action':'post'})
 
@@ -241,4 +245,21 @@ class APIRouter(vsm.api.openstack.APIRouter):
         mapper.resource("poolusages", "poolusages",
                         controller=self.resources['poolusages'],
                         collection={'revoke_pool': "post"},
+                        member={'action':'post'})
+
+        self.resources['ec_profiles'] = ec_profiles.create_resource(ext_mgr)
+        mapper.resource("ec_profiles", "ec_profiles",
+                        controller=self.resources['ec_profiles'],
+                        collection={
+                            'detail':"get",
+                            'ec_profile_create': "post",
+                            'ec_profile_update': "post",
+                            'ec_profiles_remove': "post",
+                            },
+                        member={'action': 'post'})
+
+        self.resources['rgws'] = rgw.create_resource(ext_mgr)
+        mapper.resource("rgws", "rgws",
+                        controller=self.resources['rgws'],
+                        collection={},
                         member={'action':'post'})

@@ -109,6 +109,23 @@ class ClusterController(wsgi.Controller):
         context = req.environ['vsm.context']
         server_list = body['cluster']['servers']
         LOG.info('Begin to call scheduler.createcluster')
+
+        # only and should only one mds
+        mds_count = 0
+        for server in server_list:
+            if server['is_mds'] == True:
+                mds_count = mds_count + 1
+        if mds_count > 1:
+            raise exc.HTTPBadRequest("More than one mds.")
+
+        # only and should only one rgw
+        rgw_count = 0
+        for server in server_list:
+            if server['is_rgw'] == True:
+                rgw_count = rgw_count + 1
+        if rgw_count > 1:
+            raise exc.HTTPBadRequest("More than one rgw.")
+
         self.scheduler_api.create_cluster(context, server_list)
         return webob.Response(status_int=202)
 
@@ -132,6 +149,19 @@ class ClusterController(wsgi.Controller):
             return {"message":"Success"}
         else:
             return {"message":"No such cluster which named  %s in DB"%cluster_name}
+
+    def detect_cephconf(self, req, body=None):
+        '''
+
+        :param res:
+        :param body:
+        :return:
+        '''
+        LOG.info("CEPH_LOG detect_cephconf body=%s"%body )
+        context = req.environ['vsm.context']
+        ret = self.scheduler_api.detect_cephconf(context,body)
+        LOG.info('CEPH_LOG detect_cephconf get ret=%s'%ret)
+        return ret
 
     def detect_crushmap(self, req, body=None):
         '''

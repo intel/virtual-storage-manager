@@ -45,7 +45,7 @@ from vsm.conductor import api as conductor_api
 from vsm.agent import cephconfigparser
 from vsm.agent.crushmap_parser import CrushMap
 from vsm.exception import *
-
+from vsm.manifest.parser import ManifestParser
 LOG = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
 
@@ -170,18 +170,13 @@ class SchedulerManager(manager.Manager):
                 raise MonitorAddFailed
             except Exception, e:
                 LOG.error("%s: %s" %(e.code, e.message))
-        pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
-        pool_default_size = int(pool_default_size.value)
-        if len(monitor_list) < pool_default_size:
-            LOG.error('There must be at least %s monitors.'%pool_default_size)
+
+        monitor_default_size = 3
+        if len(monitor_list) < monitor_default_size:
+            LOG.error('For reliability, it is suggested to have at least %s monitors.'%monitor_default_size)
             self._update_server_list_status(context,
                                             server_list,
-                                            "Error: monitors < %s"%pool_default_size)
-            try:
-                raise MonitorAddFailed
-            except Exception, e:
-                LOG.error("%s: %s" %(e.code, e.message))
-            raise
+                                            "Warn: monitors < %s"%monitor_default_size)
 
         LOG.info(' monitor_list = %s' % monitor_list)
         if len(monitor_list) == 1:
@@ -631,6 +626,8 @@ class SchedulerManager(manager.Manager):
                 node_type += "storage,"
             if ser['is_monitor'] == True:
                 node_type += "monitor,"
+            if ser['is_rgw'] == True:
+                node_type += "rgw,"
             values['type'] = node_type
             db.init_node_update(context, ser['id'], values)
 
@@ -826,7 +823,7 @@ class SchedulerManager(manager.Manager):
             if need_change_mds:
                 LOG.info("start to remove mds")
                 self.remove_mds(context, server_list)
-                self.add_mds(context, server_list)
+                # self.add_mds(context, server_list)
             return True
         except rpc_exc.Timeout:
             self._update_server_list_status(context,
@@ -955,9 +952,9 @@ class SchedulerManager(manager.Manager):
                                                 'ERROR')
                 raise
 
-        active_count = db.init_node_count_by_status(context,status='Active')
-        if need_change_mds and active_count > 0:
-            self.add_mds(context, server_list)
+        # active_count = db.init_node_count_by_status(context,status='Active')
+        # if need_change_mds and active_count > 0:
+        #     self.add_mds(context, server_list)
         return True
 
 
@@ -1064,6 +1061,13 @@ class SchedulerManager(manager.Manager):
     def get_cluster_list(self, context):
         res = self._conductor_rpcapi.get_server_list(context)
         LOG.info('scheduler/manager.py get cluster_list values %s' % res)
+        return res
+
+    def get_ceph_health_list(self, context, body=None):
+        cluster_id = body and body.get('cluster_id',1) or 1
+        active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
+        res = self._agent_rpcapi.get_ceph_health_list(context,active_monitor['host'])
+        LOG.info('scheduler/manager.py get_ceph_health_list values %s' % res)
         return res
 
     def _get_monitor_by_cluster_id(self, context, cluster_id):
@@ -1235,35 +1239,36 @@ class SchedulerManager(manager.Manager):
         mon_header = {}
         global_header = {}
         for key,value in config_dict.iteritems():
-            if key.find('osd.')!=-1:
-                osd_list.append({key:value})
-            elif key.find('osd')!=-1:
-                osd_header = value
-            elif key.find('mon.')!=-1:
-                mon_list.append({key:value})
-            elif key.find('mon')!=-1:
-                mon_header = value
-            elif key.find('mds.')!=-1:
-                mds_list.append({key:value})
-            elif key.find('mds')!=-1:
-                mds_header = value
-            elif key.find('global')!=-1:
-                global_header = value
-        if not global_header:
-            message['code'].append('-21')
-            message['error'].append('missing global section in ceph configration file.')
-        else:
-            pass
-        if not mon_header:
-            message['code'].append('-22')
-            message['error'].append('missing mon header section in ceph configration file.')
-        else:
-            pass
-        if not osd_header:
-            message['code'].append('-23')
-            message['error'].append('missing osd header section in ceph configration file.')
-        else:
-            pass
+            if key:
+                if key.find('osd.')!=-1:
+                    osd_list.append({key:value})
+                elif key.find('osd')!=-1:
+                    osd_header = value
+                elif key.find('mon.')!=-1:
+                    mon_list.append({key:value})
+                elif key.find('mon')!=-1:
+                    mon_header = value
+                elif key.find('mds.')!=-1:
+                    mds_list.append({key:value})
+                elif key.find('mds')!=-1:
+                    mds_header = value
+                elif key.find('global')!=-1:
+                    global_header = value
+        # if not global_header:
+        #     message['code'].append('-21')
+        #     message['error'].append('missing global section in ceph configration file.')
+        # else:
+        #     pass
+        # if not mon_header:
+        #     message['code'].append('-22')
+        #     message['error'].append('missing mon header section in ceph configration file.')
+        # else:
+        #     pass
+        # if not osd_header:
+        #     message['code'].append('-23')
+        #     message['error'].append('missing osd header section in ceph configration file.')
+        # else:
+        #     pass
 
         osd_fields = ['devs','host','cluster addr','public addr','osd journal']
         for osd in osd_list:
@@ -1300,6 +1305,7 @@ class SchedulerManager(manager.Manager):
         crush_map_new = '%s-crushmap.json'%FLAGS.ceph_conf
         utils.write_file_as_root(crush_map_new, crushmap_str, 'w')
         osd_num = 0
+        tree_node = None
         try:
             crushmap = CrushMap(json_file=crush_map_new)
             tree_node = crushmap._show_as_tree_dict()
@@ -1321,6 +1327,27 @@ class SchedulerManager(manager.Manager):
             code.append('-13')
 
         message = {'code':code,'error':error,'info':info,'osd_num':osd_num,'tree_data':tree_node}
+        return message
+
+    def detect_cephconf(self,context,body):
+        '''
+        :param context:
+        :param body:
+        { u'monitor_host_name': u'centos-storage1', u'monitor_id': u'1', u'monitor_keyring': u'******'}
+        :return:
+        '''
+        monitor_pitched_host = body.get('monitor_host_name')
+        monitor_keyring = body.get('monitor_keyring')
+        message = {}
+        try:
+            message = self._agent_rpcapi.detect_cephconf(context, monitor_keyring, monitor_pitched_host)
+        except rpc_exc.Timeout:
+            LOG.error('ERROR: detect_cephconf rpc timeout')
+        except rpc_exc.RemoteError:
+            LOG.error('ERROR: detect_cephconf rpc remote')
+        except:
+            LOG.error('ERROR: detect_cephconf')
+            raise
         return message
 
     def detect_crushmap(self,context,body):
@@ -1451,10 +1478,14 @@ class SchedulerManager(manager.Manager):
            [
                {u'is_storage': True,
                 u'is_monitor': True,
+                u'is_mds': True,
+                u'is_rgw': True,
                 u'id': u'1',
                 u'zone_id': u'1'},
                {u'is_storage': True,
                 u'is_monitor': False,
+                u'is_mds': False,
+                u'is_rgw': False,
                 u'id': u'2',
                 u'zone_id': u'2'}
            ]
@@ -1465,7 +1496,6 @@ class SchedulerManager(manager.Manager):
         for ser in server_list:
             ser_ref = db.init_node_get(context, ser['id'])
             ser['host'] = ser_ref['host']
-
 
 
         def _update(status):
@@ -1480,12 +1510,18 @@ class SchedulerManager(manager.Manager):
         pool_default_size = db.vsm_settings_get_by_name(context,'osd_pool_default_size')
         pool_default_size = int(pool_default_size.value)
         nums = len(server_list)
+        mds_node = None
+        rgw_node = None
         if nums >= pool_default_size:
             count = 0
             rest_mon_num = 0
             for ser in server_list:
                 if ser['is_monitor'] == True:
                     count += 1
+                if ser['is_mds'] == True:
+                    mds_node = ser
+                if ser['is_rgw'] == True:
+                    rgw_node = ser
             if count < pool_default_size:
                 rest_mon_num = pool_default_size - count
             if rest_mon_num > 0:
@@ -1496,7 +1532,7 @@ class SchedulerManager(manager.Manager):
                         if rest_mon_num <= 0:
                             break
         # Use mkcephfs to set up ceph system.
-        LOG.info('server_list111 = %s' % server_list)
+        LOG.info('server_list = %s' % server_list)
         monitor_node = self._select_monitor(context, server_list)
         LOG.info('Choose monitor node = %s' % monitor_node)
         # Clean ceph data.
@@ -1526,8 +1562,12 @@ class SchedulerManager(manager.Manager):
         # It maybe cleaned by clean_data.
         try:
             _update("Create ceph.conf")
+            manifest_json = ManifestParser(FLAGS.cluster_manifest, False).format_to_json()
+            ceph_conf_in_cluster_manifest = manifest_json['ceph_conf']
+            LOG.info('ceph_conf_in_cluster_manifest==scheduler===%s'%ceph_conf_in_cluster_manifest)
             self._agent_rpcapi.inital_ceph_osd_db_conf(context,
                                                        server_list=server_list,
+                                                       ceph_conf_in_cluster_manifest=ceph_conf_in_cluster_manifest,
                                                        host=monitor_node['host'])
             _update("Create ceph.conf success")
         except:
@@ -1623,14 +1663,15 @@ class SchedulerManager(manager.Manager):
             _update("ERROR: start osd")
 
         # add mds service
-        try:
-            _update("Start mds")
-            LOG.info('start mds services, host = %s' % monitor_node['host'])
-            self._agent_rpcapi.add_mds(context, host=monitor_node['host'])
-        except:
-            _update("ERROR: mds")
-        # Created begin to get ceph status
+        if mds_node:
+            try:
+                _update("Start mds")
+                LOG.info('start mds services, host = %s' % mds_node['host'])
+                self._agent_rpcapi.add_mds(context, host=mds_node['host'])
+            except:
+                _update("ERROR: mds")
 
+        # Created begin to get ceph status
         try:
             _update('Ceph status')
             stat = self._agent_rpcapi.get_ceph_health(context,
@@ -1654,13 +1695,33 @@ class SchedulerManager(manager.Manager):
             def __set_crushmap(context, host):
                 self._agent_rpcapi.set_crushmap(context,
                                                 host)
-                _update('Active')
             set_crushmap = utils.MultiThread(__set_crushmap,
                                              context=context,
                                              host=monitor_node['host'])
             set_crushmap.start()
         except:
             _update('ERROR: set crushmap')
+
+        # add rgw service
+        # TODO hardcode list as followed:
+        # [rgw_instance_name, is_ssl, uid, display_name,
+        # email, sub_user, access, key_type]
+        if rgw_node:
+            try:
+                _update("Start rgw")
+                LOG.info("start rgw service, host = %s" % rgw_node['host'])
+                self._agent_rpcapi.rgw_create(context, host=rgw_node['host'],
+                                              server_name=rgw_node['host'],
+                                              rgw_instance_name="radosgw.gateway",
+                                              is_ssl=False, uid="johndoe",
+                                              display_name="John Doe",
+                                              email="john@example.comjohn@example.com",
+                                              sub_user="johndoe:swift",
+                                              access="full", key_type="swift")
+            except:
+                _update("ERROR: rgw")
+
+        _update('Active')
 
         self._update_init_node(context, server_list)
         while set_crushmap.is_alive():
@@ -2083,3 +2144,10 @@ class SchedulerManager(manager.Manager):
         LOG.info('get_default_pg_num_by_storage_group sync call to host = %s' % active_monitor['host'])
         pg_num_default = self._agent_rpcapi.get_default_pg_num_by_storage_group(context,body,active_monitor['host'])
         return {'pg_num_default':pg_num_default}
+
+    def rgw_create(self, context, server_name, rgw_instance_name, is_ssl,
+                   uid, display_name, email, sub_user, access, key_type):
+        host = server_name
+        self._agent_rpcapi.rgw_create(context, host, server_name, rgw_instance_name,
+                                      is_ssl, uid, display_name, email, sub_user,
+                                      access, key_type)

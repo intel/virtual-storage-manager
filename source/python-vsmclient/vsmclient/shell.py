@@ -79,13 +79,14 @@ class OpenStackVsmShell(object):
 
         parser.add_argument('--version',
                             action='version',
-                            version=vsmclient.__version__)
+                            version=vsmclient.__version__,
+                            help="show program's version number and exit.")
 
         parser.add_argument('--debug',
                             action='store_true',
                             default=utils.env('VSMCLIENT_DEBUG',
                                               default=False),
-                            help="Print debugging output")
+                            help="Print debugging output.")
 
         parser.add_argument('--os-username',
                             metavar='<auth-user-name>',
@@ -115,7 +116,8 @@ class OpenStackVsmShell(object):
                             metavar='<auth-tenant-id>',
                             default=utils.env('OS_TENANT_ID',
                                               'VSM_TENANT_ID'),
-                            help='Defaults to env[OS_TENANT_ID].')
+                            help=argparse.SUPPRESS)
+                            # help='Defaults to env[OS_TENANT_ID].')
         parser.add_argument('--os_tenant_id',
                             help=argparse.SUPPRESS)
 
@@ -137,21 +139,24 @@ class OpenStackVsmShell(object):
 
         parser.add_argument('--service-type',
                             metavar='<service-type>',
-                            help='Defaults to compute for most actions')
+                            help=argparse.SUPPRESS)
+                            # help='Defaults to compute for most actions')
         parser.add_argument('--service_type',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--service-name',
                             metavar='<service-name>',
                             default=utils.env('VSM_SERVICE_NAME'),
-                            help='Defaults to env[VSM_SERVICE_NAME]')
+                            help=argparse.SUPPRESS)
+                            # help='Defaults to env[VSM_SERVICE_NAME]')
         parser.add_argument('--service_name',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--vsm-service-name',
                             metavar='<vsm-service-name>',
                             default=utils.env('VSM_VOLUME_SERVICE_NAME'),
-                            help='Defaults to env[VSM_VOLUME_SERVICE_NAME]')
+                            help=argparse.SUPPRESS)
+                            # help='Defaults to env[VSM_VOLUME_SERVICE_NAME]')
         parser.add_argument('--vsm_service_name',
                             help=argparse.SUPPRESS)
 
@@ -159,8 +164,9 @@ class OpenStackVsmShell(object):
                             metavar='<endpoint-type>',
                             default=utils.env('VSM_ENDPOINT_TYPE',
                             default=DEFAULT_VSM_ENDPOINT_TYPE),
-                            help='Defaults to env[VSM_ENDPOINT_TYPE] or '
-                            + DEFAULT_VSM_ENDPOINT_TYPE + '.')
+                            help=argparse.SUPPRESS)
+                            # help='Defaults to env[VSM_ENDPOINT_TYPE] or '
+                            # + DEFAULT_VSM_ENDPOINT_TYPE + '.')
         parser.add_argument('--endpoint_type',
                             help=argparse.SUPPRESS)
 
@@ -168,17 +174,19 @@ class OpenStackVsmShell(object):
                             metavar='<compute-api-ver>',
                             default=utils.env('OS_VOLUME_API_VERSION',
                             default=DEFAULT_OS_VOLUME_API_VERSION),
-                            help='Accepts 1 or 2,defaults '
-                                 'to env[OS_VOLUME_API_VERSION].')
+                            help=argparse.SUPPRESS)
+                            # help='Accepts 1 or 2,defaults '
+                            #      'to env[OS_VOLUME_API_VERSION].')
         parser.add_argument('--os_vsm_api_version',
                             help=argparse.SUPPRESS)
 
         parser.add_argument('--os-cacert',
                             metavar='<ca-certificate>',
                             default=utils.env('OS_CACERT', default=None),
-                            help='Specify a CA bundle file to use in '
-                            'verifying a TLS (https) server certificate. '
-                            'Defaults to env[OS_CACERT]')
+                            help=argparse.SUPPRESS)
+                            # help='Specify a CA bundle file to use in '
+                            # 'verifying a TLS (https) server certificate. '
+                            # 'Defaults to env[OS_CACERT]')
 
         parser.add_argument('--insecure',
                             default=utils.env('VSMCLIENT_INSECURE',
@@ -190,7 +198,8 @@ class OpenStackVsmShell(object):
                             metavar='<retries>',
                             type=int,
                             default=0,
-                            help='Number of retries.')
+                            help=argparse.SUPPRESS)
+                            # help='Number of retries.')
 
         # FIXME(dtroyer): The args below are here for diablo compatibility,
         #                 remove them in folsum cycle

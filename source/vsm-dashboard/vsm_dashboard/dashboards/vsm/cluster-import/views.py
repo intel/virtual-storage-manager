@@ -85,15 +85,19 @@ def auto_detect(request):
     msg = ""
     body = json.loads(request.body)
     print body
+    data = {}
     try:
         ret = vsmapi.detect_crushmap(request,body=body)
+        ret_cephconf = vsmapi.detect_cephconf(request,body=body)
         status = "OK"
         msg = ret[1].get('crushmap')
+        data['crushmap'] = ret[1].get('crushmap')
+        data['cephconf'] = ret_cephconf[1].get('cephconf')
     except:
         status = "Failed"
         msg = "Auto detect crush map Failed!"
 
-    resp = dict(message=msg, status=status)
+    resp = dict(message=msg, status=status, data=data)
     resp = json.dumps(resp)
     return HttpResponse(resp)
 
@@ -115,7 +119,8 @@ def validate_conf(request):
     except:
         status = "Failed"
         msg = "Validate Cluster Failed!"
-    crushmap_tree_data = get_crushmap_series(crushmap_tree_data)
+    if crushmap_tree_data is not None:
+        crushmap_tree_data = get_crushmap_series(crushmap_tree_data)
     resp = dict(message=msg, status=status, crushmap=crushmap_tree_data )
     resp = json.dumps(resp)
     return HttpResponse(resp)

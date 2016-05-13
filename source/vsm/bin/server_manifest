@@ -93,6 +93,8 @@ class ManifestChecker(object):
                 continue
             if r.find('mds') != -1:
                 continue
+            if r.find('rgw') != -1:
+                continue
             if r.find('unspecified') != -1:
                 continue
 

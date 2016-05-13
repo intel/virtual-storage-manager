@@ -106,8 +106,8 @@ class Parser(object):
             content = f.readlines()
             self.init(content)
 
-    def write(self, file_path):
-        content = self.as_str()
+    def write(self, file_path, rgw=False):
+        content = self.as_str(rgw)
         with open(FLAGS.ceph_conf, 'w') as f:
             f.write(content)
             f.write('\n')
@@ -115,15 +115,17 @@ class Parser(object):
     def as_dict(self):
         return self._sections
 
-    def as_str(self):
+    def as_str(self, rgw=False):
         lines = ""
         d = self._sections.copy()
         def _sec_as_str(sec_name):
             return Section(sec_name, d[sec_name]).as_str() + '\n'
 
         def _secs_as_str(sec_type):
-            strs = _sec_as_str(sec_type)
-            d.pop(sec_type)
+            strs = ''
+            if sec_type != "client":
+                strs = _sec_as_str(sec_type)
+                d.pop(sec_type)
             drop_list = []
             for sec in d:
                 if sec.find(sec_type+'.') != -1:
@@ -149,6 +151,9 @@ class Parser(object):
 
         if self.has_section('osd'):
             lines = lines + _secs_as_str('osd')
+
+        if rgw:
+            lines = lines + _secs_as_str("client")
 
         lines = lines.strip()
 
@@ -232,7 +237,9 @@ class CephConfigParser(manager.Manager):
         parser = Parser()
         parser.read(FLAGS.ceph_conf)
         fs_type = parser.get('osd', 'osd mkfs type', 'xfs')
-        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type)
+        cluster = db.cluster_get_all(self.context)[0]
+        mount_option = cluster['mount_option']
+        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type, mount_option)
 
         for sec in parser.sections():
             if sec.find('osd.') != -1:
@@ -254,7 +261,7 @@ class CephConfigParser(manager.Manager):
 
         try:
             if not fp is None:
-                if isinstance(fp, str):
+                if isinstance(fp, str) or isinstance(fp, unicode):
                     if os.path.exists(fp) and os.path.isfile(fp):
                         self._parser.read(fp)
                 elif isinstance(fp, dict):
@@ -288,38 +295,37 @@ class CephConfigParser(manager.Manager):
     def as_dict(self):
         return self._parser.as_dict()
 
-    def add_global(self,
-                   pg_num=None,
-                   heartbeat_interval=None,
-                   osd_heartbeat_interval=None,
-                   osd_heartbeat_grace=None, 
-                   is_cephx=True,
-                   max_file=131072,
-                   down_out_interval=90,
-                   pool_default_size=3):
+    # def add_global(self,
+    #                pg_num=None,
+    #                heartbeat_interval=None,
+    #                osd_heartbeat_interval=None,
+    #                osd_heartbeat_grace=None,
+    #                is_cephx=True,
+    #                max_file=131072,
+    #                down_out_interval=90,
+    #                pool_default_size=3):
+
+    def add_global(self,dict_kvs={}):
+        dict_kvs['max_file'] = dict_kvs.get('max_file',131072)
+        dict_kvs['is_cephx'] = dict_kvs.get('is_cephx',True)
+        dict_kvs['down_out_interval'] = dict_kvs.get('down_out_interval',True)
+        dict_kvs['pool_default_size'] = dict_kvs.get('pool_default_size',3)
 
         self._parser.add_section('global')
-        if not is_cephx:
+        if not dict_kvs['is_cephx']:
             self._parser.set('global', 'auth supported', 'none')
         else:
             self._parser.set('global', 'auth supported', 'cephx')
-        self._parser.set('global', 'max open files', str(max_file))
+        self._parser.set('global', 'max open files', str(dict_kvs['max_file']))
         self._parser.set('global',
                          'mon osd down out interval',
-                         str(down_out_interval))
-        #if pg_num:
-            #self._parser.set('global', 'osd pool default pg num', str(pg_num))
-            #self._parser.set('global', 'osd pool default pgp num', str(pg_num))
+                         str(dict_kvs['down_out_interval']))
 
-        if heartbeat_interval:
-            self._parser.set('global', 'heartbeat interval', str(heartbeat_interval))
-        if osd_heartbeat_interval:
-            self._parser.set('global', 'osd heartbeat interval', str(osd_heartbeat_interval))
-        if osd_heartbeat_grace:
-            self._parser.set('global', 'osd heartbeat grace', str(osd_heartbeat_grace))
-        if pool_default_size:
-            self._parser.set('global', 'osd pool default size', str(pool_default_size))
-
+        for key,value in dict_kvs.items():
+            if  key not in ['max_file','is_cephx','down_out_interval','pool_default_size']:
+                self._parser.set('global',
+                         key.replace('_',' '),
+                         str(dict_kvs[key]))
         # Must add fsid for create cluster in newer version of ceph.
         # In order to support lower version of vsm.
         # We set keyring path here.
@@ -328,20 +334,28 @@ class CephConfigParser(manager.Manager):
         # Have to setup fsid.
         self._parser.set('global', 'fsid', str(uuid.uuid1()))
 
-    def add_mds_header(self, keyring='false'):
+    def add_mds_header(self, dict_kvs={}):
         if self._parser.has_section('mds'):
             return
+        dict_kvs['keyring'] = dict_kvs.get('keyring','false')
 
         self._parser.add_section('mds')
         # NOTE : settings for mds.
         self._parser.set('mds', 'mds data', '/var/lib/ceph/mds/ceph-$id')
-        self._parser.set('mds', 'mds standby replay', keyring)
+        self._parser.set('mds', 'mds standby replay', dict_kvs['keyring'])
         self._parser.set('mds', 'keyring', '/etc/ceph/keyring.$name')
+        for key,value in dict_kvs.items():
+            if  key not in ['keyring']:
+                self._parser.set('mds',
+                         key.replace('_',' '),
+                         str(dict_kvs[key]))
 
-
-    def add_mon_header(self, clock_drift=200, cnfth=None, cfth=None):
+    def add_mon_header(self, dict_kvs={}):
         if self._parser.has_section('mon'):
             return
+        dict_kvs['clock_drift'] = dict_kvs.get('clock_drift',200)
+        dict_kvs['cnfth'] = dict_kvs.get('cnfth',None)
+        dict_kvs['cfth'] = dict_kvs.get('cfth',None)
 
         self._parser.add_section('mon')
         # NOTE
@@ -354,11 +368,16 @@ class CephConfigParser(manager.Manager):
         self._parser.set('mon', 'mon data', mon_data)
         self._parser.set('mon',
                          'mon clock drift allowed',
-                         '.' + str(clock_drift))
-        if cfth:
-            self._parser.set('mon', 'mon osd full ratio', '.' + str(cfth))
-        if cnfth:
-            self._parser.set('mon', 'mon osd nearfull ratio', '.' + str(cnfth))
+                         '.' + str(dict_kvs['clock_drift']))
+        if dict_kvs['cfth']:
+            self._parser.set('mon', 'mon osd full ratio', '.' + str(dict_kvs['cfth']))
+        if dict_kvs['cnfth']:
+            self._parser.set('mon', 'mon osd nearfull ratio', '.' + str(dict_kvs['cnfth']))
+        for key,value in dict_kvs.items():
+            if  key not in ['clock_drift','cnfth','cfth']:
+                self._parser.set('mon',
+                         key.replace('_',' '),
+                         str(dict_kvs[key]))
 
     def _update_ceph_conf_into_db(self, content):
         if not self.cluster_id:
@@ -370,15 +389,15 @@ class CephConfigParser(manager.Manager):
         for ser in server_list:
             self._agent_rpcapi.update_ceph_conf(self.context, ser['host'])
 
-    def save_conf(self, file_path=FLAGS.ceph_conf):
+    def save_conf(self, file_path=FLAGS.ceph_conf, rgw=False):
         utils.execute('chown',
                       '-R',
                       'vsm:vsm',
                       '/etc/ceph/',
                       run_as_root=True)
 
-        self._parser.write(file_path)
-        self._update_ceph_conf_into_db(self._parser.as_str())
+        self._parser.write(file_path, rgw)
+        self._update_ceph_conf_into_db(self._parser.as_str(rgw))
 
     def add_mon(self, hostname, ip, mon_id):
         sec = 'mon.%s' % mon_id
@@ -401,15 +420,17 @@ class CephConfigParser(manager.Manager):
         self._parser.set(sec, 'host', hostname)
         self._parser.set(sec, 'public addr', '%s' % ip)
 
-    def add_osd_header(self,
-                       journal_size=0,
-                       osd_type='xfs',osd_heartbeat_interval=10,osd_heartbeat_grace=10):
+
+    def add_osd_header(self, dict_kvs={}):
         if self._parser.has_section('osd'):
             return
-
+        dict_kvs['journal_size'] = dict_kvs.get('journal_size',0)
+        dict_kvs['osd_type'] = dict_kvs.get('osd_type','xfs')
+        dict_kvs['osd_heartbeat_interval'] = dict_kvs.get('osd_heartbeat_interval',10)
+        dict_kvs['osd_heartbeat_grace'] = dict_kvs.get('osd_heartbeat_grace',10)
         self._parser.add_section('osd')
         # NOTE Do not add osd data here.
-        self._parser.set('osd', 'osd journal size', str(journal_size))
+        self._parser.set('osd', 'osd journal size', str(dict_kvs['journal_size']))
         self._parser.set('osd', 'filestore xattr use omap', 'true')
         self._parser.set('osd', 'osd crush update on start', 'false' )
         osd_data = "/var/lib/ceph/osd/osd$id"
@@ -417,19 +438,22 @@ class CephConfigParser(manager.Manager):
         # NOTE add keyring to support lower version of OSD.
         # keyring = /etc/ceph/keyring.$name
         self._parser.set('osd', 'keyring', '/etc/ceph/keyring.$name')
-        self._parser.set('osd', 'osd heartbeat interval', str(osd_heartbeat_interval))
-        self._parser.set('osd', 'osd heartbeat grace', str(osd_heartbeat_grace))
-        self._parser.set('osd', 'osd mkfs type', osd_type)
-        mount_option = utils.get_fs_options(osd_type)[1]
-        self._parser.set('osd', 'osd mount options %s' % osd_type, mount_option)
-
+        self._parser.set('osd', 'osd heartbeat interval', str(dict_kvs['osd_heartbeat_interval']))
+        self._parser.set('osd', 'osd heartbeat grace', str(dict_kvs['osd_heartbeat_grace']))
+        self._parser.set('osd', 'osd mkfs type', dict_kvs['osd_type'])
+        cluster = db.cluster_get_all(self.context)[0]
+        mount_option = cluster['mount_option']
+        self._parser.set('osd', 'osd mount options %s' % dict_kvs['osd_type'], mount_option)
 
         # Below is very important for set file system.
         # Do not change any of them.
         format_type = '-f'
-        if osd_type.lower() == 'ext4':
+        if dict_kvs['osd_type'].lower() == 'ext4':
             format_type = '-F'
-        self._parser.set('osd', 'osd mkfs options %s' % osd_type, format_type)
+        self._parser.set('osd', 'osd mkfs options %s' % dict_kvs['osd_type'], format_type)
+        for key,value in dict_kvs.items():
+            if key not in ['journal_size','osd_type','osd_heartbeat_interval','osd_heartbeat_grace']:
+                self._parser.set('osd', key.replace("_",' '), str(value))
 
     def add_osd(self,
                 hostname,
@@ -485,3 +509,13 @@ class CephConfigParser(manager.Manager):
 
     def remove_mds(self, mds_id):
         return self._remove_section('mds', mds_id)
+
+    def add_rgw(self, rgw_sec, host, keyring, rsp, log_file, rgw_frontends):
+        if self._parser.has_section(rgw_sec):
+            self._parser.remove_section(rgw_sec)
+        self._parser.add_section(rgw_sec)
+        self._parser.set(rgw_sec, "host", host)
+        self._parser.set(rgw_sec, "keyring", keyring)
+        self._parser.set(rgw_sec, "rgw socket path", rsp)
+        self._parser.set(rgw_sec, "log file", log_file)
+        self._parser.set(rgw_sec, "rgw frontends", rgw_frontends)

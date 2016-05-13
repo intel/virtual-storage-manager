@@ -150,6 +150,9 @@ class API(object):
     def check_pre_existing_cluster(self,context,body):
         return self.scheduler_rpcapi.check_pre_existing_cluster(context,body)
 
+    def detect_cephconf(self,context,body):
+        return self.scheduler_rpcapi.detect_cephconf(context,body)
+
 
     def detect_crushmap(self,context,body):
         return self.scheduler_rpcapi.detect_crushmap(context,body)
@@ -174,3 +177,9 @@ class API(object):
 
     def get_default_pg_num_by_storage_group(self,context,body):
         return self.scheduler_rpcapi.get_default_pg_num_by_storage_group(context,body)
+
+    def rgw_create(self, context, server_name, rgw_instance_name, is_ssl,
+                   uid, display_name, email, sub_user, access, key_type):
+        return self.scheduler_rpcapi.rgw_create(context, server_name, rgw_instance_name,
+                                                is_ssl, uid, display_name, email, sub_user,
+                                                access, key_type)

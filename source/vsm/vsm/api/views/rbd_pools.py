@@ -28,13 +28,13 @@ class ViewBuilder(common.ViewBuilder):
         LOG.info("rbd_pools api view %s " % rbd_pool)
         rbd = {
             "rbd_pool": {
-                "id":1234,
-                "pool": 'rbd_pool_name',
-                "image_name": 'abc',
-                "size": 1,
-                "objects": 1,
-                "order": 'state',
-                "format": 'state',
+                "id": rbd_pool['id'],
+                "pool": rbd_pool['pool'],
+                "image_name": rbd_pool['image'],
+                "size": rbd_pool['size'],
+                "objects": rbd_pool['objects'],
+                "order": rbd_pool['order'],
+                "format": rbd_pool['format'],
             }
         }
         rbd['rbd_pool']['updated_at'] = time.strftime("%Y-%m-%d %H:%M:%S", time.strptime(rbd_pool['updated_at'], "%Y-%m-%dT%H:%M:%S.000000"))

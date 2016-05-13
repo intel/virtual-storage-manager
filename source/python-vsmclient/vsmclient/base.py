@@ -145,7 +145,7 @@ class Manager(utils.HookableMixin):
 
     def _get(self, url, response_key=None):
         resp, body = self.api.client.get(url)
-        print 'get return body %s' % body
+        # print 'get return body %s' % body
         if response_key:
             return self.resource_class(self, body[response_key], loaded=True)
         else:
@@ -154,9 +154,10 @@ class Manager(utils.HookableMixin):
     def _create(self, url, body, response_key, return_raw=False, **kwargs):
         self.run_hooks('modify_body_for_create', body, **kwargs)
         resp, body = self.api.client.post(url, body=body)
-        return body
         if return_raw:
             return body[response_key]
+        else:
+            return body
 
         with self.completion_cache('human_id', self.resource_class, mode="a"):
             with self.completion_cache('uuid', self.resource_class, mode="a"):

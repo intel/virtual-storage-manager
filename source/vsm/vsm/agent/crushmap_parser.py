@@ -66,7 +66,6 @@ class CrushMap():
                     return item['weight']
         return 'no osd:%s'%osd_name
 
-
     def get_bucket_by_id(self, id):
         return filter(lambda item: id == item['id'], self._buckets)[0]
 
@@ -148,6 +147,21 @@ class CrushMap():
 
         return devices
 
+    def get_bucket_root_by_rule_name(self, rule_name):
+        '''
+        this function will try to get bucket root for ec pool from storage group
+        :param rule:
+        :return:
+        '''
+        rule = self.get_rules_by_name(rule_name)
+        bucket_root = "default"
+
+        if len(rule['steps']) > 0:
+            step = rule['steps'][0]
+            bucket_root = step['item_name']
+
+        return bucket_root
+
     def get_storage_groups_by_rule(self, rule):
         '''
         this function will execute each op.in detail,
@@ -189,6 +203,11 @@ class CrushMap():
 
         print storage_groups
         return storage_groups
+
+    def get_storage_group_value_by_rule_name(self,rule_name):
+        rule = self.get_rules_by_name(rule_name)
+        values = self.get_storage_groups_dict_by_rule([rule])
+        return values
 
     def get_storage_groups_dict_by_rule(self, rules):
         '''
@@ -246,6 +265,29 @@ class CrushMap():
                     break
         return parent_bucket
 
+    def get_parent_bucket_by_name(self, name):
+        parent_bucket = {}
+        self_bucket = self.get_buckets_by_name(name)
+        if self_bucket:
+            bucket_id = self_bucket['id']
+            buckets = self._buckets
+            for bucket in buckets:
+                for item in bucket['items']:
+                    if int(bucket_id) == int(item['id']):
+                        parent_bucket['id'] = bucket['id']
+                        parent_bucket['name'] = bucket['name']
+                        parent_bucket['type_name'] = bucket['type_name']
+                        break
+        return parent_bucket
+
+    def get_zone_id_by_host_name(self, host_name):
+        zone = self.get_parent_bucket_by_name(host_name)
+        return zone['id'] if zone else None
+
+    def get_zone_id_by_osd_name(self, osd_name):
+        host_bucket = self._get_location_by_osd_name(osd_name)
+        host_name = host_bucket['name']
+        return self.get_zone_id_by_host_name(host_name)
 
     def _show_as_tree_dict(self):
         buckets = self._buckets
@@ -296,6 +338,12 @@ if __name__ == '__main__':
     # tunables = crushmap.get_all_tunables()
     ret = crushmap._get_location_by_osd_name('osd.1')
     print 'location----%s-'%ret
+
+    bucket_root = crushmap.get_bucket_root_by_rule_id('performance')
+    print 'bucket root = %s' %bucket_root
+
+    ret = crushmap.get_storage_group_value_by_rule_name('ecpooltest3')
+    print 'ecpooltest3---storage_group===',ret
 
 #    for name in tunables:
 #        print name, tunables[name]

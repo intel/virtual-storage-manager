@@ -218,6 +218,9 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def import_cluster(self,ctxt,body):
         return self.call(ctxt, self.make_msg('import_cluster', body=body),timeout=6000)
 
+    def detect_cephconf(self,ctxt,body):
+        return self.call(ctxt, self.make_msg('detect_cephconf', body=body))
+
     def detect_crushmap(self,ctxt,body):
         return self.call(ctxt, self.make_msg('detect_crushmap', body=body))
 
@@ -241,3 +244,12 @@ class SchedulerAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 
     def get_default_pg_num_by_storage_group(self,ctxt,body):
         return self.call(ctxt, self.make_msg('get_default_pg_num_by_storage_group', body=body))
+
+    def rgw_create(self, ctxt, server_name, rgw_instance_name, is_ssl, uid,
+                   display_name, email, sub_user, access, key_type):
+        return self.call(ctxt, self.make_msg('rgw_create', server_name=server_name,
+                                             rgw_instance_name=rgw_instance_name,
+                                             is_ssl=is_ssl, uid=uid,
+                                             display_name=display_name,
+                                             email=email, sub_user=sub_user,
+                                             access=access, key_type=key_type))

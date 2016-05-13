@@ -26,6 +26,7 @@ Drivers for testdbs.
 import os
 import time
 import json
+import urllib2
 import platform
 from vsm import db
 from vsm import exception
@@ -89,7 +90,6 @@ class CephDriver(object):
 
     def _operate_ceph_daemon(self, operate, type, id=None, ssh=False, host=None):
         """
-
         start/stop ceph-$type id=$id.
         service ceph start/stop $type.$id
         systemctl start/stop ceph-$type@$id
@@ -108,7 +108,8 @@ class CephDriver(object):
         # assumes the cluster is named 'ceph' - just creating a variable here
         # makes it simpler to fix this issue later - at least in this function
         DEFAULT_CLUSTER_NAME = "ceph"
-        DEFAULT_DATA_DIR = "/var/lib/ceph/osd/$cluster-$id"
+        DEFAULT_OSD_DATA_DIR = "/var/lib/ceph/osd/$cluster-$id"
+        DEFAULT_MON_DATA_DIR = "/var/lib/ceph/mon/$cluster-$host"
 
         # type and id is required here.
         # not support operate all ceph daemons
@@ -116,16 +117,24 @@ class CephDriver(object):
             LOG.error("Required parameter type or id is blank")
             return False
 
+        # host is local host if not specified
+        if not host:
+            host = platform.node()
+
+        # get cluster from config - use default if not found
+        cluster = DEFAULT_CLUSTER_NAME
+
         LOG.info("Operate %s type %s, id %s" % (operate, type, id))
         is_systemctl = self._is_systemctl()
 
         ceph_config_parser = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
         data_dir = ceph_config_parser._parser.get(type, type + " data")
         if not data_dir:
-            data_dir = DEFAULT_DATA_DIR
+            data_dir = DEFAULT_OSD_DATA_DIR if type == "osd" else DEFAULT_MON_DATA_DIR
         # path = os.path.dirname(data_dir)
 
-        file = data_dir.replace("$cluster", DEFAULT_CLUSTER_NAME).replace("$id", id) + "/upstart"
+        file = data_dir.replace("$cluster", cluster).\
+                    replace("$id", str(id)).replace("$host", host) + "/upstart"
         # no using os.path.exists(), because if the file is owned by ceph
         # user, the result will return false
         if ssh:
@@ -139,16 +148,19 @@ class CephDriver(object):
                 out, err = utils.execute('ls', file, run_as_root=True)
             except:
                 out = ""
+
         # is_file_exist = os.path.exists(file)
         if out:
-            type_id = "id=%s" % id
+            id_assignment = "id=%s" % (host if "-$host" in data_dir else id)
+            cluster_assignment = "cluster=%s" % cluster
+            service = "ceph-%s" % type
             if ssh:
                 utils.execute('ssh', '-t', 'root@'+host,
-                              operate, 'ceph-%s' % type,
-                              type_id, run_as_root=True)
+                                  operate, service, cluster_assignment,
+                                  id_assignment, run_as_root=True)
             else:
-                utils.execute(operate, 'ceph-%s' % type, type_id,
-                              run_as_root=True)
+                utils.execute(operate, service, cluster_assignment,
+                                  id_assignment, run_as_root=True)
         else:
             if is_systemctl:
                 if ssh:
@@ -218,7 +230,9 @@ class CephDriver(object):
             profile_ref = db.ec_profile_get(context, body['ec_profile_id'])
             pgp_num = pg_num = profile_ref['pg_num'] 
             plugin = "plugin=" + profile_ref['plugin']
-            ruleset_root = "ruleset-root=" + body['ec_ruleset_root']
+
+            crushmap = self.get_crushmap_json_format()
+            ruleset_root = "ruleset-root=" +  crushmap.get_bucket_root_by_rule_name(body['ec_ruleset_root'])
             failure_domain = "ruleset-failure-domain=" + body['ec_failure_domain']
             rule_name = pool_name
 
@@ -236,7 +250,14 @@ class CephDriver(object):
 
             res = utils.execute('ceph', 'osd', 'pool', 'create', pool_name, pg_num, \
                             pgp_num, 'erasure', profile_ref['name'], rule_name, \
-                            run_as_root=True) 
+                            run_as_root=True)
+            new_crushmap = self.get_crushmap_json_format()
+            storage_group_values = new_crushmap.get_storage_group_value_by_rule_name(rule_name)
+            if len(storage_group_values) == 1:
+                storage_group_values = storage_group_values[0]
+                storage_group_values['status'] = 'IN'
+                ref_storge_group = db.storage_group_update_or_create(context,storage_group_values)
+                body['storage_group_id'] = ref_storge_group.id
         elif body.get('pool_type') == 'replicated':
             try:
                 utils.execute('ceph', 'osd', 'getcrushmap', '-o', FLAGS.crushmap_bin,
@@ -305,6 +326,38 @@ class CephDriver(object):
 
         return res
 
+    def _keystone_v3(self, tenant_name, username, password,
+                     auth_url, region_name):
+        auth_url = auth_url + "/auth/tokens"
+        user_id = username
+        user_password = password
+        project_id = tenant_name
+        auth_data = {
+            "auth": {
+                "identity": {
+                    "methods": ["password"],
+                    "password": {
+                        "user": {
+                            "id": user_id,
+                            "password": user_password
+                        }
+                    }
+                },
+                "scope": {
+                    "project": {
+                        "id": project_id
+                    }
+                }
+            }
+        }
+        auth_request = urllib2.Request(auth_url)
+        auth_request.add_header("content-type", "application/json")
+        auth_request.add_header('Accept', 'application/json')
+        auth_request.add_header('User-Agent', 'python-mikeyp')
+        auth_request.add_data(json.dumps(auth_data))
+        auth_response = urllib2.urlopen(auth_request)
+        return auth_response
+
     def _config_cinder_conf(self, **kwargs):
         LOG.info("_config_cinder_conf")
         uuid = kwargs.pop('uuid', None)
@@ -348,22 +401,62 @@ class CephDriver(object):
         region_name = kwargs.pop('region_name', "")
         ssh_user = kwargs.pop('ssh_user', None)
         os_controller_host = kwargs.pop('os_controller_host', None)
+        nova_compute_hosts = []
 
         LOG.info("uuid = %s, username = %s, password = %s, tenant name = %s, "
         "auth url = %s, region name = %s, ssh_user = %s, os_controller_host = %s" %
                  (uuid, username, password, tenant_name, auth_url, region_name,
                   ssh_user, os_controller_host))
-
-        novaclient = nc.Client(
-            username, password, tenant_name, auth_url, region_name=region_name
-        )
-        nova_services = novaclient.services.list()
-        LOG.info("nova services = %s " % str(nova_services))
-        nova_compute_hosts = []
-        for nova_service in nova_services:
-            if nova_service.binary == "nova-compute":
-                nova_compute_hosts.append(nova_service.host)
-        LOG.info("nova-compute hosts = %s" % str(nova_compute_hosts))
+        if "v3" in auth_url:
+            connection = self._keystone_v3(tenant_name, username, password, auth_url, region_name)
+            response_data = json.loads(connection.read())
+            services_list = response_data['token']['catalog']
+            endpoints_list = []
+            _url = None
+            for service in services_list:
+                service_type = service['type']
+                service_name = service['name']
+                if service_type == "compute" and service_name == "nova":
+                    endpoints_list = service['endpoints']
+                    break
+            for endpoint in endpoints_list:
+                interface = endpoint['interface']
+                region_id = endpoint['region_id']
+                if region_name:
+                    if interface == "public" and region_id == region_name:
+                        _url = endpoint['url']
+                        break
+                else:
+                    if len(endpoints_list) == 3:
+                        _url = endpoint['url']
+                        break
+            token = connection.info().getheader('X-Subject-Token')
+            url_list = _url.split(":")
+            auth_url_list = auth_url.split(":")
+            url_list[1] = auth_url_list[1]
+            url = ":".join(url_list) + "/os-services"
+            req = urllib2.Request(url)
+            req.get_method = lambda: 'GET'
+            req.add_header("content-type", "application/json")
+            req.add_header("X-Auth-Token", token)
+            resp = urllib2.urlopen(req)
+            nova_services = json.loads(resp.read())
+            nova_services = nova_services['services']
+            LOG.info("nova services = %s " % str(nova_services))
+            for nova_service in nova_services:
+                if nova_service['binary'] == "nova-compute":
+                    nova_compute_hosts.append(nova_service['host'])
+            LOG.info("nova-compute hosts = %s" % str(nova_compute_hosts))
+        else:
+            novaclient = nc.Client(
+                username, password, tenant_name, auth_url, region_name=region_name
+            )
+            nova_services = novaclient.services.list()
+            LOG.info("nova services = %s " % str(nova_services))
+            for nova_service in nova_services:
+                if nova_service.binary == "nova-compute":
+                    nova_compute_hosts.append(nova_service.host)
+            LOG.info("nova-compute hosts = %s" % str(nova_compute_hosts))
 
         for nova_compute_host in nova_compute_hosts:
             try:
@@ -428,37 +521,108 @@ class CephDriver(object):
                                        )
 
             volume_type = pool_type + "-" + pool_name
-            def _get_volume_type_list():
-                volume_type_list = []
-                i = 0
-                while i < 60:
-                    try:
-                        cinderclient = cc.Client(
-                            username,
-                            password,
-                            tenant_name,
-                            auth_url,
-                            region_name=region_name
-                        )
-                        volume_type_list = cinderclient.volume_types.list()
-                        i = 60
-                    except:
-                        i = i + 1
-                        time.sleep(i)
-                return volume_type_list
+            if "v3" in auth_url:
+                def _get_volume_type_list():
+                    volume_type_list = []
+                    i = 0
+                    while i < 60:
+                        try:
+                            connection = self._keystone_v3(tenant_name, username, password,
+                                                           auth_url, region_name)
+                            response_data = json.loads(connection.read())
+                            services_list = response_data['token']['catalog']
+                            endpoints_list = []
+                            _url = None
+                            for service in services_list:
+                                service_type = service['type']
+                                service_name = service['name']
+                                if service_type == "volume" and service_name == "cinder":
+                                    endpoints_list = service['endpoints']
+                                    break
+                            for endpoint in endpoints_list:
+                                interface = endpoint['interface']
+                                region_id = endpoint['region_id']
+                                if region_name:
+                                    if interface == "public" and region_id == region_name:
+                                        _url = endpoint['url']
+                                        break
+                                else:
+                                    if len(endpoints_list) == 3:
+                                        _url = endpoint['url']
+                                        break
+                            token = connection.info().getheader('X-Subject-Token')
+                            url_list = _url.split(":")
+                            auth_url_list = auth_url.split(":")
+                            url_list[1] = auth_url_list[1]
+                            url = ":".join(url_list) + "/types?is_public=None"
+                            req = urllib2.Request(url)
+                            req.get_method = lambda: 'GET'
+                            req.add_header("content-type", "application/json")
+                            req.add_header("X-Auth-Token", token)
+                            resp = urllib2.urlopen(req)
+                            volume_type_list = json.loads(resp.read())
+                            volume_type_list = volume_type_list['volume_types']
+                            i = 60
+                        except:
+                            i = i + 1
+                            time.sleep(i)
+                    return volume_type_list, token, ":".join(url_list)
 
-            if volume_type not in [type.name for type in _get_volume_type_list()]:
-                cinderclient = cc.Client(
-                    username,
-                    password,
-                    tenant_name,
-                    auth_url,
-                    region_name=region_name
-                )
-                cinder = cinderclient.volume_types.create(volume_type)
-                LOG.info("creating volume type = %s" % volume_type)
-                cinder.set_keys({"volume_backend_name": pool_name})
-                LOG.info("Set extra specs {volume_backend_name: %s} on a volume type" % pool_name)
+                type_list, token, url = _get_volume_type_list()
+                if volume_type not in [type['name'] for type in type_list]:
+                    url = url + "/types"
+                    req = urllib2.Request(url)
+                    req.get_method = lambda: 'POST'
+                    req.add_header("content-type", "application/json")
+                    req.add_header("X-Auth-Token", token)
+                    type_data = {"volume_type": {"os-volume-type-access:is_public": True, "name": volume_type, "description": None}}
+                    req.add_data(json.dumps(type_data))
+                    resp = urllib2.urlopen(req)
+                    volume_resp = json.loads(resp.read())
+                    _volume_type = volume_resp['volume_type']
+                    type_id = _volume_type['id']
+                    LOG.info("creating volume type = %s" % volume_type)
+                    url = url + "/%s/extra_specs" % str(type_id)
+                    req = urllib2.Request(url)
+                    req.get_method = lambda: 'POST'
+                    req.add_header("content-type", "application/json")
+                    req.add_header("X-Auth-Token", token)
+                    key_data = {"extra_specs": {"volume_backend_name": pool_name}}
+                    req.add_data(json.dumps(key_data))
+                    urllib2.urlopen(req)
+                    LOG.info("Set extra specs {volume_backend_name: %s} on a volume type" % pool_name)
+            else:
+                def _get_volume_type_list():
+                    volume_type_list = []
+                    i = 0
+                    while i < 60:
+                        try:
+                            cinderclient = cc.Client(
+                                username,
+                                password,
+                                tenant_name,
+                                auth_url,
+                                region_name=region_name
+                            )
+                            volume_type_list = cinderclient.volume_types.list()
+                            i = 60
+                        except:
+                            i = i + 1
+                            time.sleep(i)
+                    return volume_type_list
+
+                if volume_type not in [type.name for type in _get_volume_type_list()]:
+                    cinderclient = cc.Client(
+                        username,
+                        password,
+                        tenant_name,
+                        auth_url,
+                        region_name=region_name
+                    )
+                    cinder = cinderclient.volume_types.create(volume_type)
+                    LOG.info("creating volume type = %s" % volume_type)
+                    cinder.set_keys({"volume_backend_name": pool_name})
+                    LOG.info("Set extra specs {volume_backend_name: %s} on a volume type" % pool_name)
 
 
     def _create_osd_state(self, context, strg, osd_id):
@@ -500,7 +664,7 @@ class CephDriver(object):
         config.save_conf(FLAGS.ceph_conf)
         return True
 
-    def inital_ceph_osd_db_conf(self, context, server_list, file_system):
+    def inital_ceph_osd_db_conf(self, context, server_list, file_system, ceph_conf_in_cluster_manifest=None):
         config = cephconfigparser.CephConfigParser()
         osd_num = db.device_get_count(context)
         LOG.info("osd_num:%d" % osd_num)
@@ -521,10 +685,18 @@ class CephDriver(object):
             elif setting['name'] == 'osd_pool_default_size':
                 pool_default_size = setting['value']
 
-        config.add_global(heartbeat_interval=heartbeat_interval,
-                          osd_heartbeat_interval=osd_heartbeat_interval,
-                          osd_heartbeat_grace=osd_heartbeat_grace,
-                          pool_default_size=pool_default_size)
+        global_kvs = {'heartbeat_interval':heartbeat_interval,
+                      'osd_heartbeat_interval':osd_heartbeat_interval,
+                      'osd_heartbeat_grace':osd_heartbeat_grace,
+                      'pool_default_size':pool_default_size,
+                      }
+
+        if ceph_conf_in_cluster_manifest:
+            for cell in ceph_conf_in_cluster_manifest:
+                if not cell['name'].startswith('osd_') and not cell['name'].startswith('mon_'):
+                    global_kvs[cell['name']] = cell['default_value']
+
+        config.add_global(global_kvs)
 
         is_first_mon = True
         is_first_osd = True
@@ -540,11 +712,20 @@ class CephDriver(object):
                 hostname = monitor['host']
                 hostip = monitor['secondary_public_ip']
                 if is_first_mon:
-                    config.add_mds_header()
+                    # config.add_mds_header()
                     #config.add_mds(hostname, hostip, '0')
                     #values = {'mds': 'yes'}
                     #db.init_node_update(context, host['id'], values)
-                    config.add_mon_header(cnfth=cnfth,cfth=cfth)
+                    mon_header_kvs = {
+                        'cnfth':cnfth,
+                        'cfth':cfth,
+                    }
+                    if ceph_conf_in_cluster_manifest:
+                        for cell in ceph_conf_in_cluster_manifest:
+                            if cell['name'].startswith('mon_'):
+                                global_kvs[cell['name']] = cell['default_value']
+
+                    config.add_mon_header(mon_header_kvs)
                     is_first_mon = False
                     config.add_mon(hostname, hostip, mon_cnt)
                 else:
@@ -564,7 +745,17 @@ class CephDriver(object):
                     # validate fs type
                     if fs_type in ['xfs', 'ext3', 'ext4', 'btrfs']:
                         #config.add_osd_header(osd_type=fs_type)
-                        config.add_osd_header(osd_type=fs_type,osd_heartbeat_interval=osd_heartbeat_interval,osd_heartbeat_grace=osd_heartbeat_grace)
+                        osd_header_kvs = {
+                            'osd_type':fs_type,
+                            'osd_heartbeat_interval':osd_heartbeat_interval,
+                            'osd_heartbeat_grace':osd_heartbeat_grace,
+
+                        }
+                        if ceph_conf_in_cluster_manifest:
+                            for cell in ceph_conf_in_cluster_manifest:
+                                if cell['name'].startswith('osd_'):
+                                    osd_header_kvs[cell['name']] = cell['default_value']
+                        config.add_osd_header(osd_header_kvs)
                     else:
                         config.add_osd_header()
                     is_first_osd = False
@@ -575,8 +766,7 @@ class CephDriver(object):
                             (json.dumps(strg, sort_keys=True, indent=4)))
 
                     config.add_osd(strg['host'],
-                                   (strg['secondary_public_ip'],
-                                    strg['primary_public_ip']),
+                                   strg['secondary_public_ip'],
                                    strg['cluster_ip'],
                                    strg['dev_name'],
                                    strg['dev_journal'],
@@ -702,10 +892,11 @@ class CephDriver(object):
         except:
             LOG.info('build dirs in /var/lib/ceph failed!')
 
-    def __format_devs(self, disks, file_system):
+    def __format_devs(self, context, disks, file_system):
         # format devices to xfs.
         def ___fdisk(disk):
-            mkfs_option = utils.get_fs_options(file_system)[0]
+            cluster = db.cluster_get_all(context)[0]
+            mkfs_option = cluster['mkfs_option']
             utils.execute('mkfs.%s' % file_system,
                           mkfs_option,
                           disk,
@@ -730,7 +921,7 @@ class CephDriver(object):
         self._clean_ceph_conf()
         self._clean_lib_ceph_files()
         self._build_lib_ceph_dirs()
-        self.__format_devs(osd_disks + journal_disks, file_system)
+        self.__format_devs(context, osd_disks + journal_disks, file_system)
         return {'status': 'ok'}
 
     def get_dev_by_mpoint(self, directory):
@@ -752,7 +943,7 @@ class CephDriver(object):
         parts = _parse_proc_partitions()
         return '/dev/' + parts[(major, minor)]
 
-    def mount_disks(self, devices, fs_type):
+    def mount_disks(self, context, devices, fs_type):
         def __mount_disk(disk):
             utils.execute('mkdir',
                           '-p',
@@ -772,7 +963,8 @@ class CephDriver(object):
                               'ceph:ceph',
                               disk['journal'],
                               run_as_root=True)
-            mount_options = utils.get_fs_options(fs_type)[1]
+            cluster = db.cluster_get_all(context)[0]
+            mount_options = cluster['mount_option']
             utils.execute('mount',
                           '-t', fs_type,
                           '-o', mount_options,
@@ -792,6 +984,103 @@ class CephDriver(object):
             if storage_group == node['name']:
                 return False
         return True
+
+    def is_new_zone(self, zone):
+        nodes = self.get_crushmap_nodes()
+        for node in nodes:
+            if zone == node['name']:
+                return False
+        return True
+
+    def get_ceph_osd_info(self):
+        '''
+        Locally execute 'ceph osd dump -f json' and return the json block as a python data structure.
+        :return: a python data structure containing the json content returned by 'ceph osd dump -f json'
+        '''
+        output = utils.execute("ceph", "osd", "dump", "-f", "json", run_as_root=True)[0]
+        return json.loads(output)
+
+    def get_ceph_disk_list(self):
+        '''
+        Execute 'sudo ceph-disk list' and gather ceph partition info.
+        :return: a python data structure containing the content of 'sudo ceph-disk list'
+        '''
+        output = utils.execute('ceph-disk', 'list', run_as_root=True)[0]
+        return self.v09_ceph_disk_list_parser(output) if 'ceph data' in output\
+          else self.v08_ceph_disk_list_parser(output)
+
+    def v09_ceph_disk_list_parser(self, output):
+        '''
+        Parse the output of 'ceph-disk list' as if we're running against a v0.9 ceph (infernalis) or higher.
+        :param output: the output to be parsed.
+        :return: a list of disk-info dictionaries.
+        '''
+        disk_list = []
+        for line in output.split('\n'):
+            if 'ceph data' in line:
+                # /dev/sdb1 ceph data, active, cluster ceph, osd.0, journal /dev/sdb2
+                disk_dict = {}
+                parts = line.strip().split(', ')
+                disk_dict[u'dev'] = parts[0].split()[0]
+                disk_dict[u'state'] = parts[1]
+                disk_dict[u'cluster'] = parts[2].split()[-1]
+                disk_dict[u'id'] = int(parts[3].split('.')[-1])
+                disk_dict[u'journal'] = parts[4].split()[-1]
+                disk_list.append(disk_dict)
+        return disk_list
+
+    def v08_ceph_disk_list_parser(self, output):
+        '''
+        Parse the output of 'ceph-disk list' as if we're running against a v0.8 ceph (firefly) or lower.
+        :param output: the output to be parsed.
+        :return: a list of disk-info dictionaries.
+        '''
+        disk_list = []
+        for line in output.split('\n'):
+            if '/osd/' in line:
+                # /dev/sdb4 other, xfs, mounted on /var/lib/ceph/osd/osd0
+                disk_dict = {}
+                parts = line.strip().split(', ')
+                osd_path = parts[-1].split()[-1]
+                osd_id = self.get_osd_whoami(osd_path)
+                osd_daemon_cfg = self.get_osd_daemon_map(osd_id, 'config')
+                osd_daemon_status = self.get_osd_daemon_map(osd_id, 'status')
+                disk_dict[u'dev'] = parts[0].split()[0]
+                disk_dict[u'state'] = osd_daemon_status['state']
+                disk_dict[u'cluster'] = osd_daemon_cfg['cluster']
+                disk_dict[u'id'] = osd_id
+                disk_dict[u'journal'] = osd_daemon_cfg['osd_journal']
+                disk_list.append(disk_dict)
+        return disk_list
+
+    def get_osd_whoami(self, osd_path):
+        '''
+        Return the osd id number for the osd on the specified path.
+        :param osd_path: the device path of the osd - e.g., /var/lib/ceph/osd...
+        :return: an integer value representing the osd id number for the target osd.
+        '''
+        output = utils.execute('cat', osd_path+'/whoami', run_as_root=True)[0]
+        return int(output)
+
+    def get_osd_daemon_map(self, oid, reqtype):
+        '''
+        command: ceph daemon osd.{oid} config show
+        output: { "cluster": "ceph",
+                  ...
+                  "osd_journal": "\/dev\/sdc1"}
+        :param oid: the id number of the osd for which to obtain a journal device path.
+        :param reqtype: the type of request - 'config' or 'status' (could be expanded to other types later).
+        :return: a dictionary containing configuration parameters and values for the specified osd.
+        '''
+        values = {}
+        arglist = ['ceph', 'daemon', 'osd.'+str(oid)]
+        arglist.extend(['config', 'show'] if reqtype == 'config' else ['status'])
+        output = utils.execute(*arglist, run_as_root=True)[0]
+        for line in output.split('\n'):
+            if len(line.strip()) > 1:
+                attr, val = tuple(line.translate(None, ' {"\},').split(':', 1))
+                values[attr] = val
+        return values
 
     def add_osd(self, context, host_id, osd_id_in=None):
 
@@ -882,12 +1171,12 @@ class CephDriver(object):
             if self.is_new_storage_group(crush_dict['storage_group']):
                 self._crushmap_mgmt.add_storage_group(crush_dict['storage_group'],\
                                                   crush_dict['root'],types=types)
-                zones = db.zone_get_all_not_in_crush(context)
-                for item in zones: 
-                    zone_item = item['name'] + '_' + crush_dict['storage_group'] 
-                    self._crushmap_mgmt.add_zone(zone_item, \
-                                                crush_dict['storage_group'],types=types)
-                
+                # zones = db.zone_get_all_not_in_crush(context)
+                # for item in zones:
+                #     zone_item = item['name'] + '_' + crush_dict['storage_group']
+                #     self._crushmap_mgmt.add_zone(zone_item, \
+                #                                 crush_dict['storage_group'],types=types)
+                #
                 if zone == FLAGS.default_zone:
                     self._crushmap_mgmt.add_rule(crush_dict['storage_group'], 'host')
                 else:
@@ -898,8 +1187,11 @@ class CephDriver(object):
                 LOG.info("rule_dict:%s" % rule_dict)
                 values['rule_id'] = rule_dict['rule_id']
 
+            if self.is_new_zone(crush_dict['zone']):
+                self._crushmap_mgmt.add_zone(crush_dict['zone'], \
+                                             crush_dict['storage_group'], types=types)
             self._crushmap_mgmt.add_host(crush_dict['host'],
-                                         crush_dict['zone'],types=types)
+                                         crush_dict['zone'], types=types)
             #    added_to_crushmap = True
 
             #There must be at least 3 hosts in every storage group when the status is "IN"
@@ -969,7 +1261,8 @@ class CephDriver(object):
         if osd_conf_dict['file_system']:
             file_system = osd_conf_dict['file_system']
 
-        mkfs_option = utils.get_fs_options(file_system)[0]
+        cluster = db.cluster_get_all(context)[0]
+        mkfs_option = cluster['mkfs_option']
         utils.execute("mkfs",
                       "-t", file_system,
                       mkfs_option, osd_conf_dict['dev_name'],
@@ -977,7 +1270,7 @@ class CephDriver(object):
 
         # TODO: does not support ext4 for now.
         # Need to use -o user_xattr for ext4
-        fs_opt = utils.get_fs_options(file_system)[1]
+        mount_option = cluster['mount_option']
 
         ceph_version = self.get_ceph_version()
         if int(ceph_version.split(".")[0]) > 0:
@@ -992,7 +1285,7 @@ class CephDriver(object):
 
         utils.execute("mount",
                       "-t", file_system,
-                      "-o", fs_opt,
+                      "-o", mount_option,
                       osd_conf_dict['dev_name'],
                       osd_pth,
                       run_as_root=True)
@@ -1058,7 +1351,7 @@ class CephDriver(object):
     def _add_ceph_osd_to_config(self, context, strg, osd_id):
         LOG.info('>>>> _add_ceph_osd_to_config start')
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        ip = (strg['secondary_public_ip'], strg['primary_public_ip'])
+        ip = strg['secondary_public_ip']
 
         config.add_osd(strg['host'], ip, strg['cluster_ip'],
                 strg['dev_name'], strg['dev_journal'], osd_id)
@@ -1131,7 +1424,7 @@ class CephDriver(object):
 
         # step 7
         LOG.info('>> add mon step 7 ')
-        utils.execute("ceph", "mon", "add", mon_id, host, run_as_root=True)
+        # utils.execute("ceph", "mon", "add", mon_id, host, run_as_root=True)
         self.start_mon_daemon(context, mon_id)
         LOG.info('>> add mon finish %s' % mon_id)
         return True
@@ -1409,7 +1702,7 @@ class CephDriver(object):
                 LOG.info("Try to stop osd %s daemon by ceph or ceph-osd command" % num)
                 self._operate_ceph_daemon("stop", "osd", id=num)
             except:
-                LOG.warn("Osd %s has been stopped" % num)
+                LOG.warn("Osd %s has NOT been stopped" % num)
         return True
 
     def start_osd_daemon(self, context, num, is_vsm_add_osd=False):
@@ -1422,9 +1715,9 @@ class CephDriver(object):
                               '/var/lib/ceph', run_as_root=True)
                 utils.execute('chown', '-R', 'ceph:ceph',
                               '/etc/ceph', run_as_root=True)
-            utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
-        else:
-            self._operate_ceph_daemon("start", "osd", id=num)
+            #utils.execute('service', 'ceph', 'start', osd, run_as_root=True)
+        #else:
+        self._operate_ceph_daemon("start", "osd", id=num)
         return True
 
     def stop_mon_daemon(self, context, num):
@@ -1444,15 +1737,20 @@ class CephDriver(object):
                 LOG.info("Try to stop mon %s daemon by ceph or ceph-mon command" % num)
                 self._operate_ceph_daemon("stop", "mon", id=num)
             except:
-                LOG.warn("Mon %s has been stopped" % num)
+                LOG.warn("Mon %s has NOT been stopped" % num)
         return True
 
     def start_mon_daemon(self, context, num):
-        if not self.stop_mon_daemon(context, num):
-            return False
+        try:
+            self.stop_mon_daemon(context, num)
+        except:
+            pass
         # mon_name = 'mon.%s' % num
         # utils.execute('service', 'ceph', 'start', mon_name, run_as_root=True)
-        self._operate_ceph_daemon("start", "mon", id=num)
+        try:
+            self._operate_ceph_daemon("start", "mon", id=num)
+        except:
+            LOG.warn("Monitor has NOT been started!")
         return True
 
     def stop_mds_daemon(self, context, num):
@@ -1465,7 +1763,7 @@ class CephDriver(object):
                 LOG.info("Try to stop mds %s daemon by ceph or ceph-mds command" % num)
                 self._operate_ceph_daemon("stop", "mds", id=num)
             except:
-                LOG.warn("Mds %s has been stopped" % num)
+                LOG.warn("Mds %s has NOT been stopped" % num)
         return True
 
     def get_mds_id(self, host=FLAGS.host):
@@ -1493,42 +1791,46 @@ class CephDriver(object):
         # utils.execute('service', 'ceph', 'start', mds_name, run_as_root=True)
         self._operate_ceph_daemon("start", "mds", id=num)
 
+    def _get_ceph_mon_map(self):
+        output = utils.execute("ceph", "mon", "dump", "-f", "json", run_as_root=True)[0]
+        return json.loads(output)
+
     def start_monitor(self, context):
         # Get info from db.
         res = self._conductor_rpcapi.init_node_get_by_host(context, FLAGS.host)
         node_type = res.get('type', None)
         # get mon_id
         mon_id = None
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        for section in config_dict:
-            if section.startswith("mon."):
-                if config_dict[section]['host'] == FLAGS.host:
-                    mon_id = section.replace("mon.", "")
+        monmap = self._get_ceph_mon_map()
+        mons = monmap['mons']
+        for mon in mons:
+            if mon['name'] == FLAGS.host:
+                mon_id = mon['rank']
 
         # Try to start monitor service.
         if mon_id:
             LOG.info('>> start the monitor id: %s' % mon_id)
             if node_type and node_type.find('monitor') != -1:
                 self.start_mon_daemon(context, mon_id)
+
     def stop_monitor(self, context):
         # Get info from db.
         res = self._conductor_rpcapi.init_node_get_by_host(context, FLAGS.host)
         node_type = res.get('type', None)
         # get mon_id
         mon_id = None
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        for section in config_dict:
-            if section.startswith("mon."):
-                if config_dict[section]['host'] == FLAGS.host:
-                    mon_id = section.replace("mon.", "")
+        monmap = self._get_ceph_mon_map()
+        mons = monmap['mons']
+        for mon in mons:
+            if mon['name'] == FLAGS.host:
+                mon_id = mon['rank']
 
         # Try to stop monitor service.
         if mon_id:
             LOG.info('>> stop the monitor id: %s' % mon_id)
             if node_type and node_type.find('monitor') != -1:
                 self.stop_mon_daemon(context, mon_id)
+
     def start_osd(self, context):
         # Start all the osds on this node.
         osd_list = []
@@ -1618,8 +1920,10 @@ class CephDriver(object):
     def start_server(self, context, node_id):
         """ Start server.
             0. start monitor
-            1. start all osd.
-            2. unset osd noout.
+            1. start mds.
+            2. start all osd.
+            3. unset osd noout.
+            4. reset db server status.
         """
         res = self._conductor_rpcapi.init_node_get_by_id(context, node_id)
         service_id = res.get('service_id', None)
@@ -1628,21 +1932,21 @@ class CephDriver(object):
         host = res.get('host', None)
         LOG.debug('The server info: %s %s %s %s' %
                   (service_id, node_type, host_ip, host))
-        # get mon_id
+
+        # start monitor
         self.start_monitor(context)
+
+        # start mds
         self.start_mds(context)
 
-        # Update status
-        osd_states = self._conductor_rpcapi.\
-                osd_state_get_by_service_id(context, service_id)
+        # get osd list; if there aren't any, update status and return
+        osd_states = self._conductor_rpcapi.osd_state_get_by_service_id(context, service_id)
         if not len(osd_states) > 0:
             LOG.info("There is no osd on node %s" % node_id)
-            self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Active')
+            self._conductor_rpcapi.init_node_update_status_by_id(context, node_id, 'Active')
             return True
 
-        # Begin to start all the OSDs.
+        # async method to start an osd
         def __start_osd(osd_id):
             osd = db.get_zone_hostname_storagegroup_by_osd_id(context, osd_id)[0]
             osd_name = osd['osd_name'].split('.')[-1]
@@ -1651,19 +1955,19 @@ class CephDriver(object):
             #     "host=%s_%s_%s" %(osd['service']['host'],osd['storage_group']['name'],osd['zone']['name']) ,
             #     run_as_root=True)
             values = {'state': FLAGS.osd_in_up, 'osd_name': osd['osd_name']}
-            self._conductor_rpcapi.osd_state_update_or_create(context,
-                                                              values)
+            self._conductor_rpcapi.osd_state_update_or_create(context, values)
 
+        # start osds asynchronously
         thd_list = []
         for item in osd_states:
             osd_id = item['id']
             thd = utils.MultiThread(__start_osd, osd_id=osd_id)
             thd_list.append(thd)
         utils.start_threads(thd_list)
+
         # update init node status
-        ret = self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Active')
+        ret = self._conductor_rpcapi.init_node_update_status_by_id(context, node_id, 'Active')
+
         count = db.init_node_count_by_status(context, 'Stopped')
         if count == 0:
             utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
@@ -1774,35 +2078,31 @@ class CephDriver(object):
         osd_states = self._conductor_rpcapi.\
                 osd_state_get_by_service_id(context, service_id)
         if not len(osd_states) > 0:
-            LOG.info("There is no osd on node %s" % node_id)
-            self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Stopped')
-            return True
+            LOG.info("There is no osd on node %s; skipping osd shutdown." % node_id)
+        else:
+            LOG.info('Step 2. ceph osd set noout')
+            utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
+            for item in osd_states:
+                osd_name = item['osd_name']
+                LOG.info('>> Stop ceph %s' % osd_name)
+                # utils.execute('service', 'ceph', 'stop', osd_name,
+                #                 run_as_root=True)
+                self.stop_osd_daemon(context, osd_name.split(".")[1])
+                # self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
+                values = {'state': 'In-Down', 'osd_name': osd_name}
+                LOG.info('>> update status into db %s' % osd_name)
+                self._conductor_rpcapi.osd_state_update_or_create(context, values)
 
-        LOG.info('Step 2. ceph osd set noout')
-        utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
-        for item in osd_states:
-            osd_name = item['osd_name']
-            LOG.info('>> Stop ceph %s' % osd_name)
-            # utils.execute('service', 'ceph', 'stop', osd_name,
-            #                 run_as_root=True)
-            self.stop_osd_daemon(context, osd_name.split(".")[1])
-            # self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1])
-            values = {'state': 'In-Down', 'osd_name': osd_name}
-            LOG.info('>> update status into db %s' % osd_name)
-            self._conductor_rpcapi.\
-                    osd_state_update_or_create(context, values)
+        # Stop monitor service.
+        self.stop_monitor(context)
 
         # Stop mds service.
-        self.remove_mds(context, node_id)
-        self._conductor_rpcapi.\
-                init_node_update_status_by_id(context, node_id,
-                                                'Stopped')
-        values = {'mds': 'no'}
-        self._conductor_rpcapi.init_node_update(context,
-                                                node_id,
-                                                values)
+        self.stop_mds(context)
+        #We really dont' want to remove mds, right? Just stop it.
+        #values = {'mds': 'no'}
+        #self._conductor_rpcapi.init_node_update(context, node_id, values)
+
+        self._conductor_rpcapi.init_node_update_status_by_id(context, node_id, 'Stopped')
         return True
 
     def ceph_upgrade(self, context, node_id, key_url, pkg_url,restart=True):
@@ -1880,7 +2180,77 @@ class CephDriver(object):
 
         return max_line + 1
 
+    def parse_nvme_output(self, attributes, start_offset=0, end_offset=-1):
+        import string
+
+        att_list = attributes.split('\n')
+        att_list = att_list[start_offset:end_offset]
+        dev_info={}
+        for att in att_list:
+            att_kv = att.split(':')
+            if not att_kv[0]: continue
+            if len(att_kv) > 1:
+                dev_info[string.strip(att_kv[0])] = string.strip(att_kv[1])
+            else:
+                dev_info[string.strip(att_kv[0])] = ''
+
+        return dev_info
+
+    def get_nvme_smart_info(self, device):
+        smart_info_dict = {'basic':{},'smart':{}}
+
+        if "/dev/nvme" in device:
+            LOG.info("This is a nvme device : " + device)
+            dev_info = {}
+            dev_smart_log = {}
+            dev_smart_add_log = {}
+
+            import commands
+
+            # get nvme device meta data
+            attributes, err =  utils.execute('nvme', 'id-ctrl', device, run_as_root=True)
+            if not err:
+                basic_info_dict = self.parse_nvme_output(attributes)
+                LOG.info("basic_info_dict=" + str(basic_info_dict))
+                smart_info_dict['basic']['Drive Family'] = basic_info_dict.get('mn') or ''
+                smart_info_dict['basic']['Serial Number'] = basic_info_dict.get('sn') or ''
+                smart_info_dict['basic']['Firmware Version'] = basic_info_dict.get('fr') or ''
+                smart_info_dict['basic']['Drive Status'] = 'PASSED'
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device identification with error: " + str(err))
+
+            # get nvme devic smart data
+            attributes, err = utils.execute('nvme', 'smart-log', device, run_as_root=True)
+            if not err:
+                dev_smart_log_dict = self.parse_nvme_output(attributes, 1)
+                LOG.info("device smart log=" + str(dev_smart_log_dict))
+                for key in dev_smart_log_dict:
+                    smart_info_dict['smart'][key] = dev_smart_log_dict[key]
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device smart log with error: " + str(err))
+
+            # get nvme device smart additional data
+            attributes, err = utils.execute('nvme', 'smart-log-add', device, run_as_root=True)
+            if not err:
+                dev_smart_log_add_dict = self.parse_nvme_output(attributes, 2)
+                LOG.info("device additional smart log=" + str(dev_smart_log_add_dict))
+                smart_info_dict['smart']['<<< additional smart log'] = ' >>>'
+                for key in dev_smart_log_add_dict:
+                    smart_info_dict['smart'][key] = dev_smart_log_add_dict[key]
+            else:
+                smart_info_dict['basic']['Drive Status'] = 'WARN'
+                LOG.warn("Fail to get device additional (vendor specific) smart log with error: "  + str(err))
+
+        LOG.info(smart_info_dict)
+        return smart_info_dict
+
     def get_smart_info(self, context, device):
+        LOG.info('retrieve device info for ' + str(device))
+        if "/dev/nvme" in device:
+            return self.get_nvme_smart_info(device)
+
         attributes, err = utils.execute('smartctl', '-A', device, run_as_root=True)
         attributes = attributes.split('\n')
         start_line = self.find_attr_start_line(attributes)
@@ -2115,15 +2485,17 @@ class CephDriver(object):
                       run_as_root=True)
         return True
 
-    def ceph_osd_stop(self, context, osd_name, osd_host):
+    def ceph_osd_stop(self, context, osd_name):
         # utils.execute('service',
         #               'ceph',
         #               '-a',
         #               'stop',
         #               osd_name,
         #               run_as_root=True)
-        self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1],
-                                  ssh=True, host=osd_host)
+        osd_id = osd_name.split('.')[-1]
+        self.stop_osd_daemon(context, osd_id)
+        #self._operate_ceph_daemon("stop", "osd", id=osd_name.split(".")[1],
+        #                          ssh=True, host=osd_host)
         #osd_id = osd_name.split('.')[-1]
         #values = {'state': 'Out-Down', 'osd_name': osd_name}
         #ret = self._conductor_rpcapi.\
@@ -2142,7 +2514,7 @@ class CephDriver(object):
         osd=osd[0]
         #stop
         utils.execute('ceph', 'osd', 'set', 'noout', run_as_root=True)
-        self.ceph_osd_stop(context, osd['osd_name'], osd['service']['host'])
+        self.ceph_osd_stop(context, osd['osd_name'])
         #start
         utils.execute('ceph', 'osd', 'unset', 'noout', run_as_root=True)
         self.ceph_osd_start(context, osd['osd_name'])
@@ -2183,7 +2555,8 @@ class CephDriver(object):
         if osd['device']['fs_type']:
             file_system = osd['device']['fs_type']
 
-        mkfs_option = utils.get_fs_options(file_system)[0]
+        cluster = db.cluster_get_all(context)[0]
+        mkfs_option = cluster['mkfs_option']
         utils.execute("mkfs",
                       "-t", file_system,
                       mkfs_option,
@@ -2195,10 +2568,11 @@ class CephDriver(object):
         osd_pth = osd_data_path.replace('$id',osd_inner_id)
         LOG.info('osd restore osd_pth =%s'%osd_pth)
         utils.ensure_tree(osd_pth)
-        fs_opt = utils.get_fs_options(file_system)[1]
+        cluster = db.cluster_get_all(context)[0]
+        mount_option = cluster['mount_option']
         utils.execute("mount",
                       "-t", file_system,
-                      "-o", fs_opt,
+                      "-o", mount_option,
                       osd['device']['name'],
                       osd_pth,
                       run_as_root=True)
@@ -2293,6 +2667,32 @@ class CephDriver(object):
         args= ['ceph', 'osd', 'pool', 'set', pool, 'pgp_num', pgp_num]
         utils.execute(*args, run_as_root=True)
 
+    def get_ec_profiles(self):
+        DEFAULT_PLUGIN_PATH = "/usr/lib/ceph/erasure-code"
+        args = ['ceph', 'osd', 'erasure-code-profile', 'ls']
+        (out, err) = utils.execute(*args, run_as_root=True)
+        profile_names = out.splitlines()
+        profiles = []
+        for profile_name in profile_names:
+            args = ['ceph', 'osd', 'erasure-code-profile', 'get', profile_name]
+            (out, err) = utils.execute(*args, run_as_root=True)
+            profile = {}
+            profile['name'] = profile_name
+            profile['plugin_path'] = DEFAULT_PLUGIN_PATH
+            profile_kv = {}
+            for item in out.splitlines():
+                key, val = item.split('=')
+                if key == 'plugin':
+                    profile['plugin'] = val
+                elif key == 'directory':
+                    profile['plugin_path'] = val
+                else:
+                    profile_kv[key] = val
+            profile['pg_num'] = int(profile_kv['k']) + int(profile_kv['m'])
+            profile['plugin_kv_pair'] = json.dumps(profile_kv)
+            profiles.append(profile)
+        return profiles
+
     def get_osds_status(self):
         args = ['ceph', 'osd', 'dump', '-f', 'json']
         #args = ['hostname', '-I']
@@ -2352,7 +2752,11 @@ class CephDriver(object):
         (out, err) = utils.execute(*cmd, run_as_root=True)
         json_data = None
         if out:
-            json_data = json.loads(out)
+            try:
+                json_data = json.loads(out)
+            except:
+                json_data = None
+                LOG.error('CMD result is invalid.cmd is %s.ret of cmd is %s.'%(cmd,out))
         return json_data
 
     def get_osds_total_num(self):
@@ -2513,6 +2917,10 @@ class CephDriver(object):
             if not sum_dict:
                 sum_dict = self.get_ceph_status()
 
+            # newer versions of 'ceph status' don't display mdsmap - use 'ceph mds dump' instead
+            if not 'mdsmap' in sum_dict:
+                sum_dict['mdsmap'] = self._run_cmd_to_json(['ceph', 'mds', 'dump'])
+
             if sum_dict:
                 if sum_type == FLAGS.summary_type_pg:
                     return self._pg_summary(sum_dict)
@@ -2541,7 +2949,9 @@ class CephDriver(object):
 
     def _mds_summary(self, sum_dict):
         if sum_dict:
-            mdsmap = sum_dict.get('mdsmap')
+            mdsmap = sum_dict.get('mdsmap', '')
+            if not mdsmap:
+                return None
             mds_dict = self.get_mds_dump()
             if mds_dict:
                 mdsmap['failed'] = len(mds_dict['failed'])
@@ -2846,6 +3256,55 @@ class CephDriver(object):
             utils.execute("service", "openstack-cinder-volume", "restart", run_as_root=True)
             LOG.info("Restart openstack-cinder-api and openstack-cinder-volume successfully")
 
+    def create_keyring_and_key_for_rgw(self, context, rgw_instance_name,
+                                       rgw_keyring_path="/etc/ceph"):
+        rgw_keyring = rgw_keyring_path + "/keyring." + rgw_instance_name
+        try:
+            utils.execute("rm", rgw_keyring, run_as_root=True)
+        except:
+            pass
+        utils.execute("ceph-authtool", "--create-keyring", rgw_keyring,
+                      run_as_root=True)
+        utils.execute("chmod", "+r", rgw_keyring, run_as_root=True)
+        try:
+            utils.execute("ceph", "auth", "del", "client." + rgw_instance_name,
+                          run_as_root=True)
+        except:
+            pass
+        utils.execute("ceph-authtool", rgw_keyring, "-n", "client." + rgw_instance_name,
+                      "--gen-key", run_as_root=True)
+        utils.execute("ceph-authtool", "-n", "client." + rgw_instance_name,
+                      "--cap", "osd", "allow rwx", "--cap", "mon", "allow rw",
+                      rgw_keyring, run_as_root=True)
+        utils.execute("ceph", "-k", FLAGS.keyring_admin, "auth", "add",
+                      "client." + rgw_instance_name, "-i", rgw_keyring,
+                      run_as_root=True)
+
+    def add_rgw_conf_into_ceph_conf(self, context, server_name, rgw_instance_name):
+        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        rgw_section = "client." + str(rgw_instance_name)
+        host = server_name
+        keyring = "/etc/ceph/keyring." + str(rgw_instance_name)
+        rsp = "/var/run/ceph/radosgw.sock"
+        log_file = "/var/log/ceph/radosgw.log"
+        rgw_frontends = "\"civetweb port=80\""
+        config.add_rgw(rgw_section, host, keyring, rsp, log_file, rgw_frontends)
+        config.save_conf(rgw=True)
+        LOG.info("+++++++++++++++end add_rgw_conf_into_ceph_conf")
+
+    def create_default_pools_for_rgw(self, context):
+        utils.execute("ceph", "osd", "pool", "create", ".rgw", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".rgw.control", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".rgw.gc", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".log", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".intent-log", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".usage", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.email", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.swift", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.uid", 100, 100, run_as_root=True)
+
+
 class DbDriver(object):
     """Executes commands relating to TestDBs."""
     def __init__(self, execute=utils.execute, *args, **kwargs):
@@ -3068,7 +3527,8 @@ class CreateCrushMapDriver(object):
                   "tunable choose_local_fallback_tries 0\n" \
                   "tunable choose_total_tries 50\n" \
                   "tunable chooseleaf_descend_once 1\n" \
-                  "tunable chooseleaf_vary_r 1\n"
+                  "tunable chooseleaf_vary_r 1\n" \
+                  "tunable straw_calc_version 1\n"
         self._write_to_crushmap(optimal)
 
     def _gen_device_osd(self, osd_num):
@@ -3146,7 +3606,8 @@ class CreateCrushMapDriver(object):
                         weight = weight + 1
                 dic["weight"] = (weight != 0 and weight or FLAGS.default_weight)
                 dic["item"] = items
-                host.append(dic)
+                if len(items) > 0:
+                    host.append(dic)
         return host, num
 
     def _get_zone_dic(self, node_info, hosts, zones, storage_groups, num):
@@ -3169,7 +3630,9 @@ class CreateCrushMapDriver(object):
                 dic["item"] = items
                 num = num - 1
                 dic["id"] = num
-                zone_bucket.append(dic)
+                if len(items) > 0:
+                    zone_bucket.append(dic)
+        #LOG.info('zone_bucket----%s'%zone_bucket)
         return zone_bucket, num
 
     def _get_storage_group_bucket(self, storage_groups, zones, num):
@@ -3190,7 +3653,8 @@ class CreateCrushMapDriver(object):
             dic["item"] = items
             num = num - 1
             dic["id"] = num
-            storage_group_bucket.append(dic)
+            if len(items) > 0:
+                storage_group_bucket.append(dic)
         return storage_group_bucket, num
 
     def _get_root_bucket(self, storage_groups, num):
@@ -3253,8 +3717,10 @@ class CreateCrushMapDriver(object):
         return dic['rule_id']
 
     def _generate_rule(self, context, zone_tag):
-        storage_groups = self.conductor_api.storage_group_get_all(context)
-        if storage_groups is None:
+        osds = self.conductor_api.osd_state_get_all(context)
+        storage_groups = [ osd['storage_group']['id'] for osd in osds if osd['storage_group']]
+        storage_groups = list(set(storage_groups))
+        if not storage_groups :#is None:
             LOG.info("Error in getting storage_groups")
             try:
                 raise exception.GetNoneError
@@ -3263,8 +3729,8 @@ class CreateCrushMapDriver(object):
             return False
         LOG.info("DEBUG in generate rule begin")
         LOG.info("DEBUG storage_groups from conductor %s " % storage_groups)
-        sorted_storage_groups = sorted(storage_groups, key=self._key_for_sort)
-        LOG.info("DEBUG storage_groups after sorted %s" % sorted_storage_groups)
+        #sorted_storage_groups = sorted(storage_groups, key=self._key_for_sort)
+        #LOG.info("DEBUG storage_groups after sorted %s" % sorted_storage_groups)
         sting_common = """    type replicated
     min_size 0
     max_size 10
@@ -3279,7 +3745,8 @@ class CreateCrushMapDriver(object):
     step emit
 }
 """
-        for storage_group in sorted_storage_groups:
+        for storage_group_id in storage_groups:
+            storage_group = db.storage_group_get(context,storage_group_id)
             storage_group_name = storage_group["name"]
             rule_id = storage_group["rule_id"]
             string = ""
@@ -3703,9 +4170,3 @@ def get_crushmap_json_format(keyring=None):
         json_crushmap,err = utils.execute('ceph', 'osd', 'crush', 'dump', run_as_root=True)
     crushmap = CrushMap(json_context=json_crushmap)
     return crushmap
-
-
-
-
-
-

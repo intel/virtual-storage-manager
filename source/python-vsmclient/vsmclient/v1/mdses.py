@@ -13,31 +13,21 @@
 #    under the License.
 
 """
-MDSs interface (1.1 extension).
+MDSes interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class Mds(base.Resource):
-    """A mds is an extra block level storage to the OpenStack instances."""
+    """A mds stores metadata on behalf of the Ceph Filesystem."""
     def __repr__(self):
         return "<MDS: %s>" % self.id
 
     def delete(self):
         """Delete this mds."""
         self.manager.delete(self)
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this mds."""
-        self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified mds ignoring its current state.
-
-        :param mds: The UUID of the mds to force-delete.
-        """
-        self.manager.force_delete(self)
 
 class MdsesManager(base.ManagerWithFind):
     """

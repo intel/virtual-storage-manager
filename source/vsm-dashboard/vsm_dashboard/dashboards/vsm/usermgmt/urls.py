@@ -20,11 +20,15 @@ from .views import CreateView
 from .views import UpdateView
 from .views import update_pwd
 from .views import create_user
+from .views import UserSettingsView
+from .views import user_setting
 
 urlpatterns = patterns('',
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^update/(?P<user_id>[^/]+)/$', UpdateView.as_view(), name='update'),
+    url(r'^setting/$', UserSettingsView.as_view(), name='setting'),
     url(r'^create/$', CreateView.as_view(), name='create'),
     url(r'^update_pwd/$', update_pwd, name='update_pwd'),
-    url(r'^create_user/$', create_user, name='create_user')
+    url(r'^create_user/$', create_user, name='create_user'),
+    url(r'^user_setting/$', user_setting, name='user_setting')
 )

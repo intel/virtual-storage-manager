@@ -75,7 +75,7 @@ while [ $# -gt 0 ]; do
     -r| --repo-path) shift; REPO_PATH=$1 ;;
     -v| --version) shift; DEPENDENCE_BRANCH=$1 ;;
     -u| --user) shift; USER=$1 ;;
-    -k| --key) shift; keyfile=$1; export SSH='ssh -i $keyfile'; export SCP='scp -i $keyfile' ;;
+    -k| --key) shift; keyfile=$1; export SSH="ssh -i $keyfile -t "; export SCP="scp -i $keyfile" ;;
     --prepare) IS_PREPARE=True ;;
     --controller) shift; IS_CONTROLLER_INSTALL=True; NEW_CONTROLLER_ADDRESS=$1 ;;
     --agent) shift; IS_AGENT_INSTALL=True; NEW_AGENT_IPS=$1 ;;
@@ -182,18 +182,12 @@ function download_dependencies() {
     elif [[ -d $REPO_PATH ]] && [[ $IS_CHECK_DEPENDENCE_PACKAGE == True ]]; then
         cd $REPO_PATH
         for i in `cat $TOPDIR/rpms.lst`; do
-            if [[ `ls |grep $i|wc -l` -eq 0 ]]; then
+            pkg_name=${i%%_*}_
+            if [[ `ls |grep $pkg_name|wc -l` -eq 0 ]]; then
                 wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
             else
-                COUNT=0
-                for j in `ls |grep $i`; do
-                    if [[ $i == $j ]]; then
-                        let COUNT+=1
-                    fi
-                done
-                if [[ $COUNT -eq 0 ]]; then
-                    wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
-                fi
+                rm $pkg_name*
+                wget https://github.com/01org/vsm-dependencies/raw/$DEPENDENCE_BRANCH/centos7/$i
             fi
         done
         $SUDO rm -rf *.rpm.*
@@ -400,13 +394,17 @@ function install_setup_diamond() {
     VSMMYSQL_FILE_PATH="/usr/lib/python$PY_VER/site-packages/vsm/diamond/handlers/vsmmysql.py"
     HANDLER_PATH="/usr/lib/python$PY_VER/site-packages/diamond/handler"
     DIAMOND_CONFIG_PATH="/etc/diamond"
+    DIAMOND_DB_HOST=$CONTROLLER_ADDRESS
+    if [[ $DB_HOST ]] && [[ $DB_USER ]] && [[ $DB_PASSWORD ]]; then
+        DIAMOND_DB_HOST=$DB_HOST
+    fi
 
     $SSH $USER@$1 "$SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH;" \
     "$SUDO sed -i \"s/MySQLHandler/VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/^handlers = *.*ArchiveHandler$/handlers =  diamond.handler.vsmmysql.VSMMySQLHandler/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/host = graphite/host = 127.0.0.1/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
-    "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $CONTROLLER_ADDRESS/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
+    "$SUDO sed -i \"s/^hostname*=*.*/hostname    = $DIAMOND_DB_HOST/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/username    = root/username    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/password*=*.*/password    = $MYSQL_VSM_PASSWORD/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
     "$SUDO sed -i \"s/database    = diamond/database    = vsm/g\" $DIAMOND_CONFIG_PATH/diamond.conf;" \
@@ -488,13 +486,86 @@ function sync_hosts() {
 #            start to install
 #-------------------------------------------------------------------------------
 
+# If you set the OS_TENANT_NAME, OS_USERNAME, OS_PASSWORD, OS_KEYSTONE_HOST and
+# OS_KEYSTONE_ADMIN_TOKEN, you have shared the keystone with openstack cluster.
+# The If you want to share the mysql and rabbitmq with openstack cluster, you can
+# set the others parameters. Then the followed steps will help you to config.
+function _config_mq_controller() {
+    if [[ $MQ_HOST ]] && [[ $MQ_USERID ]] && [[ $MQ_PASSWORD ]] && [[ $MQ_PORT ]]; then
+        if [[ $IS_CONTROLLER -eq 0 ]]; then
+            $SSH $USER@$CONTROLLER_ADDRESS "bash -x -s" <<EOF
+$SUDO sed -i "s/^rabbit_password*=*.*/rabbit_password = $MQ_PASSWORD/g" /etc/vsm/vsm.conf
+$SUDO sed -i "s/^rabbit_host*=*.*/rabbit_host = $MQ_HOST/g" /etc/vsm/vsm.conf
+$SUDO sed -i "s/^rabbit_port*=*.*/rabbit_port = $MQ_PORT/g" /etc/vsm/vsm.conf
+$SUDO sed -i "/^rabbit_port*=*.*/arabbit_userid = $MQ_USERID" /etc/vsm/vsm.conf
+$SUDO service vsm-api restart
+$SUDO service vsm-conductor restart
+$SUDO service vsm-scheduler restart
+$SUDO service rabbitmq-server stop
+exit 0
+EOF
+        else
+            $SUDO sed -i "s/^rabbit_password*=*.*/rabbit_password = $MQ_PASSWORD/g" /etc/vsm/vsm.conf
+            $SUDO sed -i "s/^rabbit_host*=*.*/rabbit_host = $MQ_HOST/g" /etc/vsm/vsm.conf
+            $SUDO sed -i "s/^rabbit_port*=*.*/rabbit_port = $MQ_PORT/g" /etc/vsm/vsm.conf
+            $SUDO sed -i "/^rabbit_port*=*.*/arabbit_userid = $MQ_USERID" /etc/vsm/vsm.conf
+            $SUDO service vsm-api restart
+            $SUDO service vsm-conductor restart
+            $SUDO service vsm-scheduler restart
+            $SUDO service rabbitmq-server stop
+        fi
+    fi
+}
+
+function _config_db_controler() {
+    if [[ $DB_HOST ]] && [[ $DB_USER ]] && [[ $DB_PASSWORD ]]; then
+        if [[ $IS_CONTROLLER -eq 0 ]]; then
+            source /tmp/deployrc
+        else
+            source /etc/vsmdeploy/deployrc
+        fi
+        $SSH $USER@$DB_HOST "bash -x -s" <<EOF
+mysql -u$DB_USER -p$DB_PASSWORD -e "create user '$MYSQL_VSM_USER'@'%' identified by '$MYSQL_VSM_PASSWORD';"
+mysql -u$DB_USER -p$DB_PASSWORD -e "flush privileges;"
+mysql -u$DB_USER -p$DB_PASSWORD -e "create database vsm CHARACTER SET utf8;"
+mysql -u$DB_USER -p$DB_PASSWORD -e "grant all privileges on vsm.* to '$MYSQL_VSM_USER'@'%' identified by '$MYSQL_VSM_PASSWORD';flush privileges;"
+mysql -u$DB_USER -p$DB_PASSWORD -e "grant all privileges on vsm.* to 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD';flush privileges;"
+mysql -u$DB_USER -p$DB_PASSWORD -e "flush privileges;"
+EOF
+        FILE=/etc/vsm/vsm.conf
+        $SSH $USER@$CONTROLLER_ADDRESS "bash -x -s" <<EOF
+$SUDO sed -i "s/^sql_connection*=*.*/sql_connection = mysql:\/\/$MYSQL_VSM_USER:$MYSQL_VSM_PASSWORD@$DB_HOST\/vsm?charset=utf8/g" $FILE
+$SUDO vsm-manage db sync
+$SUDO service vsm-api restart
+$SUDO service vsm-conductor restart
+$SUDO service vsm-scheduler restart
+$SUDO service mariadb stop
+EOF
+    fi
+}
+
+function _scp_vsm_conf_to_agent_from_controller() {
+    if [[ $MQ_HOST ]] && [[ $MQ_USERID ]] && [[ $MQ_PASSWORD ]] && [[ $MQ_PORT ]]; then
+        if [[ $IS_CONTROLLER -eq 0 ]]; then
+            $SCP $USER@$CONTROLLER_ADDRESS:/etc/vsm/vsm.conf $USER@$1:/etc/vsm
+        else
+            $SCP /etc/vsm/vsm.conf $USER@$1:/etc/vsm
+        fi
+        $SSH $USER@$1 "$SUDO service vsm-agent restart;$SUDO service vsm-physical restart"
+    fi
+}
+
+
 if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
+    _config_mq_controller
+    _config_db_controler
 #    generate_token
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
+        _scp_vsm_conf_to_agent_from_controller $ip_or_hostname
     done
 else
     if [[ $IS_PREPARE == True ]]; then
@@ -502,6 +573,8 @@ else
     fi
     if [[ $IS_CONTROLLER_INSTALL == True ]]; then
         install_controller
+        _config_mq_controller
+        _config_db_controler
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
 #        generate_token
@@ -509,6 +582,7 @@ else
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname
+            _scp_vsm_conf_to_agent_from_controller $ip_or_hostname
         done
 
 	# sync up /etc/hosts

@@ -1184,6 +1184,9 @@ def pg_get_all(context, limit=None, marker=None, sort_keys=None,
     return IMPL.pg_get_all(context, limit=limit, marker=marker,
                            sort_keys=sort_keys, sort_dir=sort_dir)
 
+def pg_get(context, id):
+    return IMPL.pg_get(context, id)
+
 def pg_get_by_pgid(context, pgid):
     return IMPL.pg_get_by_pgid(context, pgid)
 
@@ -1200,6 +1203,9 @@ def rbd_create(context, values):
 def rbd_get_all(context, limit=None, marker=None, sort_keys=None, sort_dir=None):
     return IMPL.rbd_get_all(context, limit=limit, marker=marker, sort_keys=sort_keys,
 							sort_dir=sort_dir)
+
+def rbd_get(context, id):
+    return IMPL.rbd_get(context, id)
 
 def rbd_get_by_pool_and_image(context, pool, image):
     return IMPL.rbd_get_by_pool_and_image(context, pool, image)
@@ -1228,6 +1234,9 @@ def mds_create(context, values):
 
 def mds_get_all(context):
     return IMPL.mds_get_all(context)
+
+def mds_get_by_id(context, id):
+    return IMPL.mds_get(context, id)
 
 def mds_get_by_gid(context, gid):
     return IMPL.mds_get_by_gid(context, gid)
@@ -1276,6 +1285,9 @@ def ec_profile_get(context, ec_profile_id):
 def ec_profile_get_by_name(context, name):
     return IMPL.ec_profile_get_by_name(context, name)
 
+def ec_profile_remove(context, ec_profile_id):
+    return IMPL.ec_profile_remove(context, ec_profile_id)
+
 def get_performance_metrics(context, search_opts):
     return IMPL.performance_metrics_query(context, search_opts=search_opts)
 
@@ -1287,6 +1299,15 @@ def get_latency(context, search_opts):
 
 def get_cpu_usage(context, search_opts):
     return IMPL.cpu_data_get_usage(context, search_opts=search_opts)
+
+def get_latency_all_types(context, search_opts):
+    return IMPL.latency_all_types(context, search_opts=search_opts)
+
+def get_iops_all_types(context, search_opts):
+    return IMPL.iops_all_type(context, search_opts=search_opts)
+
+def get_bandwidth_all_types(context, search_opts):
+    return IMPL.bandwidth_all_type(context, search_opts=search_opts)
 
 def clean_performance_history_data(context,days):
     return IMPL.clean_performance_history_data(context,days)

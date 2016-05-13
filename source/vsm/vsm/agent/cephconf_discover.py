@@ -34,7 +34,8 @@ FLAGS = flags.FLAGS
 
 class cephconf_discover():
 
-    def __init__(self, json_file=None):
+    def __init__(self, json_file=None, keyring=None):
+        self._keyring = keyring
         if json_file:
             with open(json_file, 'r') as fh:
                 ceph_report = json.load(fh)
@@ -44,6 +45,7 @@ class cephconf_discover():
 
         self._osds = {}
         self._mons = {}
+        self.ceph_report = ceph_report
         if ceph_report:
             self._osds = ceph_report['osd_metadata']
             self._mons = ceph_report['monmap']['mons']
@@ -52,11 +54,12 @@ class cephconf_discover():
     def _get_report(self):
         report = ""
         stderr = ""
-
         try:
-            (report, stderr) = utils.execute('ceph', 'report', run_as_root=True)
-
-            return report
+            if self._keyring:
+                (report, stderr) = utils.execute('ceph', 'report','--keyring',self._keyring, run_as_root=True)
+            else:
+                (report, stderr) = utils.execute('ceph', 'report', run_as_root=True)
+            return json.loads(report)
         except exception.ProcessExecutionError:
             LOG.warn('Fail to get report from ceph: %s' % stderr)
 
@@ -73,7 +76,7 @@ class cephconf_discover():
     def fixup_osd_settings(self):
         # enumerate osds
         osd_settings = "\n"
-        for osd in discover.get_osds():
+        for osd in self.get_osds():
             osd_settings += '[osd.%s]\n' %osd['id']
             osd_settings += 'host = %s\n' %osd['hostname']
             osd_settings += 'devs = %s\n' %osd['osd_data']
@@ -95,13 +98,56 @@ class cephconf_discover():
         # enumerate mons
         # mon_fields = ['host','mon addr']
         mon_settings = "\n"
-        for mon in discover.get_mons():
+        for mon in self.get_mons():
             mon_settings += '[mon.%s]\n' %mon['rank']
             mon_settings += 'host = %s\n' %mon['name']
             mon_settings += 'mon addr = %s\n\n' %mon['addr']
 
         return mon_settings
 
+    def detect_ceph_conf(self):
+        global_value_dict = {'heartbeat_interval':10,
+        'osd_pool_default_size':self.ceph_report["osdmap"]['pools'][0]['size'],
+        'osd_heartbeat_grace':10,
+        'fsid':self.ceph_report["osdmap"]["fsid"],
+        }
+        global_settings = '''
+[global]
+heartbeat interval = %(heartbeat_interval)s
+osd pool default size = %(osd_pool_default_size)s
+osd heartbeat grace = %(osd_heartbeat_grace)s
+keyring = /etc/ceph/keyring.admin
+fsid = %(fsid)s
+auth supported = cephx
+        '''%(global_value_dict)
+        osd_header_settings ='''
+[osd]
+osd mount options xfs = rw,noatime,inode64,logbsize=256k,delaylog
+osd crush update on start = false
+filestore xattr use omap = true
+keyring = /etc/ceph/keyring.$name
+osd mkfs type = %(mkfs_type)s
+osd data = /var/lib/ceph/osd/osd$id
+osd heartbeat interval = 10
+osd heartbeat grace = 10
+osd mkfs options xfs = -f
+osd journal size = 0
+        '''%({'mkfs_type':self.ceph_report["osd_metadata"][0]['filestore_backend']})
+        mon_header_settings ='''
+[mon]
+mon osd full ratio = .90
+mon data = /var/lib/ceph/mon/mon$id
+mon osd nearfull ratio = .75
+mon clock drift allowed = .200
+        '''
+        osd_settings = self.fixup_osd_settings()
+        mon_settings = self.fixup_mon_settings()
+        cephconf = global_settings + '\n' \
+                    + osd_header_settings + '\n' \
+                    + osd_settings + '\n' \
+                    + mon_header_settings + '\n' \
+                    + mon_settings + '\n'
+        return cephconf
 
 if __name__ == '__main__':
     discover = cephconf_discover("./report.json")

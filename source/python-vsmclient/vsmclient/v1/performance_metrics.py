@@ -13,31 +13,17 @@
 #    under the License.
 
 """
-Server interface (1.1 extension).
+Performance Metrics interface.
 """
 
 import urllib
 from vsmclient import base
 
+
 class PerformanceMetrics(base.Resource):
-    """A vsm is an extra block level storage to the OpenStack instances."""
+    """Performance metrics of ceph cluster and server of cpu, memory and so on."""
     def __repr__(self):
-        return "<PerformanceMetrics:resource object >"
-
-    def delete(self):
-        """Delete this vsm."""
-        self.manager.delete(self)
-
-    def update(self, **kwargs):
-        """Update the display_name or display_description for this vsm."""
-        self.manager.update(self, **kwargs)
-
-    def force_delete(self):
-        """Delete the specified vsm ignoring its current state.
-
-        :param vsm: The UUID of the vsm to force-delete.
-        """
-        self.manager.force_delete(self)
+        return "<PerformanceMetrics: %s>" % self.id
 
 class PerformanceMetricsManager(base.ManagerWithFind):
     """
@@ -82,5 +68,23 @@ class PerformanceMetricsManager(base.ManagerWithFind):
         resp, body = self.api.client.get("/performance_metrics/get_metrics%s" % (query_string))
         return body
 
+    def get_metrics_all_types(self, search_opts=None):
+        """
+        Get a list of metrics by metrics name and timestamp.
+        """
+        if search_opts is None:
+            search_opts = {}
+
+        qparams = {}
+
+        for opt, val in search_opts.iteritems():
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+
+        #ret = self._list("/performance_metrics/get_metrics%s" % (query_string),"metrics")
+        resp, body = self.api.client.get("/performance_metrics/get_metrics_all_types%s" % (query_string))
+        return body
 
 

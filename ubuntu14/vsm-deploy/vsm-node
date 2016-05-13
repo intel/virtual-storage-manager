@@ -19,12 +19,20 @@
 set -e
 set -o xtrace
 
+# setup an EXIT trap; restore original ssh_config on script exit (even if there was no original)
+function cleanup()
+{
+    test -f /etc/ssh/ssh_config.vsmsave && mv /etc/ssh/ssh_config.vsmsave /etc/ssh/ssh_config || rm /etc/ssh/ssh_config
+}
+trap cleanup EXIT
+
+# replace ssh_config with temporary version; replace on exit by calling cleanup as EXIT handler
+test -f /etc/ssh/ssh_config && mv /etc/ssh/ssh_config /etc/ssh/ssh_config.vsmsave
 cat <<"EOF" > /etc/ssh/ssh_config
 UserKnownHostsFile /dev/null
 ConnectTimeout 15
 StrictHostKeyChecking no
 EOF
-service ssh restart
 
 TOPDIR=$(cd $(dirname "$0") && pwd)
 TEMP=`mktemp`; rm -rfv $TEMP >/dev/null; mkdir -p $TEMP;
@@ -122,6 +130,8 @@ cp -rf $TOPDIR/tools/etc/sudoers.d/vsm  /etc/sudoers.d/
 service vsm-agent restart
 update-rc.d vsm-agent defaults
 sed -i '/exit/d' /etc/rc.local
+sed -i "/service vsm-agent restart/d" /etc/rc.local
+sed -i "/service vsm-physical restart/d" /etc/rc.local
 echo "service vsm-agent restart" >> /etc/rc.local
 echo "service vsm-physical restart" >> /etc/rc.local
 echo "exit 0" >> /etc/rc.local

@@ -138,6 +138,18 @@ class CreateClusterView(ModalEditTableMixin, tables.DataTableView):
             else:
                 server['is_storage'] = {"value": False}
                 server['storage'] = "no"
+            if "mds" in _server.type:
+                server['is_mds'] = {"value": True}
+                server['mds'] = "yes"
+            else:
+                server['is_mds'] = {"value": False}
+                server['mds'] = "no"
+            if "rgw" in _server.type:
+                server['is_rgw'] = {"value": True}
+                server['rgw'] = "yes"
+            else:
+                server['is_rgw'] = {"value": False}
+                server['rgw'] = "no"
             if _server.zone_id in zones:
                 server['zone'] = zones[_server.zone_id]
             server['ismonitor'] = ''

@@ -99,15 +99,19 @@ class Controller(wsgi.Controller):
 
     @wsgi.serializers(xml=RBDPoolsTemplate)
     def index(self, req):
-        """Get rbd_pool list."""
-        #search_opts = {}
-        #search_opts.update(req.GET)
+        """Return a list of rbd pools."""
+
         context = req.environ['vsm.context']
-        #remove_invalid_options(context,
-        #                        search_opts,
-        #                        self._get_zone_search_options)
-        #zones = self.conductor_api.get_zone_list(context)
-        rbd_pools = [{}, {}]
+        limit = req.GET.get('limit', None)
+        marker = req.GET.get('marker', None)
+        sort_keys = req.GET.get('sort_keys', None)
+        sort_dir = req.GET.get('sort_dir', None)
+
+        rbd_pools = self.conductor_api.rbd_get_all(context,
+                                                   limit=limit,
+                                                   marker=marker,
+                                                   sort_keys=sort_keys,
+                                                   sort_dir=sort_dir)
         LOG.info('vsm/api/v1/rbd_pool.py rbd_pools:%s' % rbd_pools)
 
         return self._view_builder.index(req, rbd_pools)
@@ -123,7 +127,7 @@ class Controller(wsgi.Controller):
         #                        search_opts,
         #                        self._get_zone_search_options)
         #zones = self.conductor_api.get_zone_list(context)
-	limit = req.GET.get('limit', None)
+        limit = req.GET.get('limit', None)
         marker = req.GET.get('marker', None)
         sort_keys = req.GET.get('sort_keys', None)
         sort_dir = req.GET.get('sort_dir', None)

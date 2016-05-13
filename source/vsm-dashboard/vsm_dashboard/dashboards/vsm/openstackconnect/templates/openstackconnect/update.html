@@ -35,15 +35,33 @@
 		    </fieldset>
 			</div>
 			<div class="right">
-			   <h3>{% trans "Description" %}:</h3>
-   			<p>{% trans "Provide Tenant Name, UserName, Password, Auth Url and Region Name for "%}
-    			{% trans "OpenStack Endpoint to enable VSM to connect pools to OpenStack Cinder. If you have "%}
-    			{% trans "only one region, you can leave a blank of the Region Name." %}</p>
+			    <h3>{% trans "Description" %}:</h3>
+                <p>
+                    {% trans "For Keystone V2.0, An Example AS Followed:" %}<br>
+                    {% trans "Tenant Name: admin" %}<br>
+                    {% trans "UserName: admin" %}<br>
+                    {% trans "Password: ******" %}<br>
+                    {% trans "Auth Url: http://10.0.0.10:5000/v2.0" %}<br>
+                    {% trans "Region Name: RegionOne" %}<br>
+                    {% trans "SSH User Name: root" %}
+                </p>
+                <p>
+                    {% trans "For Keystone V3, An Example AS Followed:" %}<br>
+                    {% trans "Tenant Name: 9b62326e927a4973891d6daed73979f0(ID of Project)" %}<br>
+                    {% trans "UserName: 200c46b79086408e95ce50e617662119(ID of User)" %}<br>
+                    {% trans "Password: ******" %}<br>
+                    {% trans "Auth Url: http://10.0.0.10:35357/v3" %}<br>
+                    {% trans "Region Name: RegionOne" %}<br>
+                    {% trans "SSH User Name: root" %}
+                </p>
+                <p>
+                    {% trans "PS: The Region Name can be blank if you only have one region." %}
+                </p>
 			</div>
 		</form>
 		 <div id="divFormOptions" class="vsm-options-bar">
-	    	<button id="btnUpdate" class="btn btn-primary">Submit</button>
-	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/openstackconnect/">Cancel</a>
+	    	<button id="btnUpdate" class="btn btn-primary">{% trans "Submit" %}</button>
+	    	<a id="btnCancel" class="btn btn-default" href="/dashboard/vsm/openstackconnect/">{% trans "Cancel" %}</a>
 	    </div>
 	</div>
 {% endblock %}

@@ -1,0 +1,1138 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-04-18 07:38+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\dashboard\templates\dashboard\index.html:49
+msgid "Validate"
+msgstr "验证"
+
+#: .\dashboard\templates\dashboard\index.html:50
+msgid "Submit"
+msgstr "提交"
+
+#: .\dashboard\templates\dashboard\index.html:51
+#: .\dashboard\templates\dashboard\index.html:239
+msgid "Update"
+msgstr "更新"
+
+#: .\dashboard\templates\dashboard\index.html:52
+msgid "Cancel"
+msgstr "取消"
+
+#: .\dashboard\templates\dashboard\index.html:53
+msgid "Reset"
+msgstr "重置"
+
+#: .\dashboard\templates\dashboard\index.html:54
+msgid "Description"
+msgstr "描述"
+
+#: .\dashboard\templates\dashboard\index.html:55
+msgid "Notes"
+msgstr "备注"
+
+#: .\dashboard\templates\dashboard\index.html:56
+msgid "Actions"
+msgstr "操作"
+
+#: .\dashboard\templates\dashboard\index.html:59 .\dashboard\views.py:175
+msgid "VSM Status"
+msgstr "VSM 状态"
+
+#: .\dashboard\templates\dashboard\index.html:60
+msgid "VSM Version"
+msgstr "软件版本"
+
+#: .\dashboard\templates\dashboard\index.html:61
+msgid "Uptime"
+msgstr "运行时间"
+
+#: .\dashboard\templates\dashboard\index.html:62 .\dashboard\views.py:61
+msgid "Ceph Version"
+msgstr "集群版本"
+
+#: .\dashboard\templates\dashboard\index.html:64 .\dashboard\views.py:19
+msgid "Cluster Status"
+msgstr "集群状态"
+
+#: .\dashboard\templates\dashboard\index.html:65
+msgid "Used"
+msgstr "已使用"
+
+#: .\dashboard\templates\dashboard\index.html:66
+msgid "Total"
+msgstr "总量"
+
+#: .\dashboard\templates\dashboard\index.html:68
+#: .\dashboard\templates\dashboard\index.html:113
+#: .\dashboard\templates\dashboard\index.html:121
+#: .\dashboard\templates\dashboard\index.html:158 .\dashboard\views.py:103
+#: .\dashboard\views.py:115 .\dashboard\views.py:133 .\dashboard\views.py:149
+#: .\dashboard\views.py:183 .\dashboard\views.py:232
+msgid "Storage Group"
+msgstr "存储组"
+
+#: .\dashboard\templates\dashboard\index.html:69
+#: .\dashboard\templates\dashboard\index.html:76
+#: .\dashboard\templates\dashboard\index.html:87
+#: .\dashboard\templates\dashboard\index.html:91
+#: .\dashboard\templates\dashboard\index.html:100 .\dashboard\views.py:142
+#: .\dashboard\views.py:167 .\dashboard\views.py:184 .\dashboard\views.py:202
+#: .\dashboard\views.py:211 .\dashboard\views.py:224
+msgid "Updated at"
+msgstr "更新于"
+
+#: .\dashboard\templates\dashboard\index.html:70
+#: .\dashboard\templates\dashboard\index.html:81
+msgid "Normal"
+msgstr "正常"
+
+#: .\dashboard\templates\dashboard\index.html:71
+#: .\dashboard\templates\dashboard\index.html:82
+msgid "Near Full"
+msgstr "将满"
+
+#: .\dashboard\templates\dashboard\index.html:72
+#: .\dashboard\templates\dashboard\index.html:83
+msgid "Full"
+msgstr "已满"
+
+#: .\dashboard\templates\dashboard\index.html:74
+msgid "OSD"
+msgstr "对象存储设备"
+
+#: .\dashboard\templates\dashboard\index.html:75
+#: .\dashboard\templates\dashboard\index.html:86
+#: .\dashboard\templates\dashboard\index.html:90
+#: .\dashboard\templates\dashboard\index.html:214
+msgid "Epoch"
+msgstr "版本"
+
+#: .\dashboard\templates\dashboard\index.html:77
+#: .\dashboard\templates\dashboard\index.html:95
+#: .\dashboard\templates\dashboard\index.html:215
+msgid "Up"
+msgstr "Up"
+
+#: .\dashboard\templates\dashboard\index.html:78
+msgid "Down"
+msgstr "Down"
+
+#: .\dashboard\templates\dashboard\index.html:79
+#: .\dashboard\templates\dashboard\index.html:94
+#: .\dashboard\templates\dashboard\index.html:216
+msgid "In"
+msgstr "In"
+
+#: .\dashboard\templates\dashboard\index.html:80
+msgid "Out"
+msgstr "Out"
+
+#: .\dashboard\templates\dashboard\index.html:85 .\dashboard\views.py:63
+msgid "Monitor"
+msgstr "监视器"
+
+#: .\dashboard\templates\dashboard\index.html:89
+msgid "MDS"
+msgstr "MDS"
+
+#: .\dashboard\templates\dashboard\index.html:92
+msgid "Data"
+msgstr "数据"
+
+#: .\dashboard\templates\dashboard\index.html:93
+msgid "Metadata"
+msgstr "元数据"
+
+#: .\dashboard\templates\dashboard\index.html:96
+#: .\dashboard\templates\dashboard\index.html:218
+msgid "Failed"
+msgstr "失败"
+
+#: .\dashboard\templates\dashboard\index.html:97
+#: .\dashboard\templates\dashboard\index.html:219
+msgid "Stopped"
+msgstr "停止"
+
+#: .\dashboard\templates\dashboard\index.html:99
+msgid "PG"
+msgstr "放置组"
+
+#: .\dashboard\templates\dashboard\index.html:102
+msgid "Performance"
+msgstr "性能"
+
+#: .\dashboard\templates\dashboard\index.html:103
+msgid "IOPS"
+msgstr "IOPS"
+
+#: .\dashboard\templates\dashboard\index.html:104
+msgid "Latency (MilliSeconds)"
+msgstr "时延(毫秒)"
+
+#: .\dashboard\templates\dashboard\index.html:105
+msgid "Bandwidth (MB/s)"
+msgstr "带宽(MB/s)"
+
+#: .\dashboard\templates\dashboard\index.html:106
+#, python-format
+msgid "CPU (%%)"
+msgstr "CPU (%)"
+
+#: .\dashboard\templates\dashboard\index.html:110
+msgid "Add New OSD"
+msgstr "新增对象存储设备"
+
+#: .\dashboard\templates\dashboard\index.html:111
+msgid "Select Server"
+msgstr "选择服务器"
+
+#: .\dashboard\templates\dashboard\index.html:112
+#: .\dashboard\templates\dashboard\index.html:122
+msgid "Journal Device"
+msgstr "日志盘"
+
+#: .\dashboard\templates\dashboard\index.html:114
+msgid "OSD Location"
+msgstr "对象存储设备位置"
+
+#: .\dashboard\templates\dashboard\index.html:115
+#: .\dashboard\templates\dashboard\index.html:123
+msgid "Data Device"
+msgstr "数据盘"
+
+#: .\dashboard\templates\dashboard\index.html:116
+#: .\dashboard\templates\dashboard\index.html:120 .\dashboard\views.py:77
+msgid "Weight"
+msgstr "权重"
+
+#: .\dashboard\templates\dashboard\index.html:117
+msgid "Add"
+msgstr "新增"
+
+#: .\dashboard\templates\dashboard\index.html:118
+msgid "Batch Import OSD"
+msgstr "批量导入对象存储设备"
+
+#: .\dashboard\templates\dashboard\index.html:119 .\dashboard\views.py:78
+#: .\dashboard\views.py:182
+msgid "Server"
+msgstr "服务器"
+
+#: .\dashboard\templates\dashboard\index.html:124
+#: .\dashboard\templates\dashboard\index.html:183
+msgid "Action"
+msgstr "操作"
+
+#: .\dashboard\templates\dashboard\index.html:128
+msgid "Manage Cluster"
+msgstr "管理集群"
+
+#: .\dashboard\templates\dashboard\index.html:129
+msgid "From here you can import a cluster"
+msgstr "请导入集群"
+
+#: .\dashboard\templates\dashboard\index.html:130
+msgid "Monitor Host"
+msgstr "监视器主机"
+
+#: .\dashboard\templates\dashboard\index.html:131
+msgid "Auto Detect"
+msgstr "自动检测"
+
+#: .\dashboard\templates\dashboard\index.html:132
+msgid "Monitor Keyring"
+msgstr "监视器钥匙"
+
+#: .\dashboard\templates\dashboard\index.html:133
+msgid "Crushmap"
+msgstr "Crushmap"
+
+#: .\dashboard\templates\dashboard\index.html:137 .\dashboard\views.py:95
+msgid "Add Cache Tier"
+msgstr "添加缓存池"
+
+#: .\dashboard\templates\dashboard\index.html:138 .\dashboard\views.py:118
+msgid "Cache Tier Pool"
+msgstr "缓存池"
+
+#: .\dashboard\templates\dashboard\index.html:139
+msgid "Storage Tier Pool"
+msgstr "存储池"
+
+#: .\dashboard\templates\dashboard\index.html:140
+msgid "Cache Mode"
+msgstr "缓存模式"
+
+#: .\dashboard\templates\dashboard\index.html:141
+msgid "FORCE NONEMPTY"
+msgstr "强制非空"
+
+#: .\dashboard\templates\dashboard\index.html:142
+msgid "Advanced Settings"
+msgstr "高级设置"
+
+#: .\dashboard\templates\dashboard\index.html:143
+msgid "Hit Set Type"
+msgstr "命中集合类型"
+
+#: .\dashboard\templates\dashboard\index.html:144
+msgid "Hit Set Count"
+msgstr "命中集合数量"
+
+#: .\dashboard\templates\dashboard\index.html:145
+msgid "Hit Set Period(s)"
+msgstr "命中集合周期"
+
+#: .\dashboard\templates\dashboard\index.html:146
+msgid "Target Maximum Memory(MB)"
+msgstr "目标最大内存(MB)"
+
+#: .\dashboard\templates\dashboard\index.html:147
+msgid "Target Dirty Ratio"
+msgstr "目标脏数据比率"
+
+#: .\dashboard\templates\dashboard\index.html:148
+msgid "Target Full Ratio"
+msgstr "目标已满标志比率"
+
+#: .\dashboard\templates\dashboard\index.html:149
+msgid "Target Maximum Objects"
+msgstr "目标最大对象数"
+
+#: .\dashboard\templates\dashboard\index.html:150
+msgid "Target Minimum Flush Age(m)"
+msgstr "目标最小刷新年龄(m)"
+
+#: .\dashboard\templates\dashboard\index.html:151
+msgid "Target Minimum Evict Age(m)"
+msgstr "目标最小剔除年龄(m)"
+
+#: .\dashboard\templates\dashboard\index.html:153 .\dashboard\views.py:96
+msgid "Remove Cache Tier"
+msgstr "移除缓存池"
+
+#: .\dashboard\templates\dashboard\index.html:155 .\dashboard\views.py:97
+msgid "Create Replicated Pool"
+msgstr "创建副本池"
+
+#: .\dashboard\templates\dashboard\index.html:156 .\dashboard\views.py:113
+msgid "Pool Name"
+msgstr "存储池名称"
+
+#: .\dashboard\templates\dashboard\index.html:157 .\dashboard\views.py:111
+#: .\dashboard\views.py:114 .\dashboard\views.py:148 .\dashboard\views.py:237
+msgid "Tag"
+msgstr "标签"
+
+#: .\dashboard\templates\dashboard\index.html:159
+msgid "Enable PG Auto-tune"
+msgstr "启用放置组数量自动调整"
+
+#: .\dashboard\templates\dashboard\index.html:160
+msgid "Pool Quota(GB)"
+msgstr "存储池容量配额(GB)"
+
+#: .\dashboard\templates\dashboard\index.html:162
+msgid "Create Erasure Coded Pool"
+msgstr "创建纠删码存储池"
+
+#: .\dashboard\templates\dashboard\index.html:163
+msgid "Enable Pool Quota"
+msgstr "启用存储池配额"
+
+#: .\dashboard\templates\dashboard\index.html:167
+msgid "Create EC Profile"
+msgstr "创建纠删码概要表"
+
+#: .\dashboard\templates\dashboard\index.html:168
+#: .\dashboard\templates\dashboard\index.html:178 .\dashboard\views.py:57
+#: .\dashboard\views.py:75 .\dashboard\views.py:102 .\dashboard\views.py:124
+#: .\dashboard\views.py:147 .\dashboard\views.py:192 .\dashboard\views.py:207
+#: .\dashboard\views.py:231 .\dashboard\views.py:265
+msgid "Name"
+msgstr "名称"
+
+#: .\dashboard\templates\dashboard\index.html:169 .\dashboard\views.py:125
+msgid "Plugin Name"
+msgstr "插件名称"
+
+#: .\dashboard\templates\dashboard\index.html:170 .\dashboard\views.py:126
+msgid "Plugin Path"
+msgstr "插件路径"
+
+#: .\dashboard\templates\dashboard\index.html:171 .\dashboard\views.py:127
+msgid "PG Number"
+msgstr "PG数量"
+
+#: .\dashboard\templates\dashboard\index.html:172
+msgid "Plugin Key_Value Pairs"
+msgstr "插件键值对"
+
+#: .\dashboard\templates\dashboard\index.html:176
+msgid "Storage Group List"
+msgstr "存储组列表"
+
+#: .\dashboard\templates\dashboard\index.html:177
+msgid "Add Storage Group"
+msgstr "新增存储组"
+
+#: .\dashboard\templates\dashboard\index.html:179
+#: .\dashboard\templates\dashboard\index.html:184
+msgid "Class"
+msgstr "类"
+
+#: .\dashboard\templates\dashboard\index.html:180
+msgid "Friendly Name"
+msgstr "别名"
+
+#: .\dashboard\templates\dashboard\index.html:181
+msgid "Take Name(Choose Type, Type Number)"
+msgstr "选择(类型，副本数)"
+
+#: .\dashboard\templates\dashboard\index.html:182
+msgid "Marker"
+msgstr "标记"
+
+#: .\dashboard\templates\dashboard\index.html:185
+msgid "Take"
+msgstr "选择"
+
+#: .\dashboard\templates\dashboard\index.html:189
+msgid "Zone Name"
+msgstr "域名称"
+
+#: .\dashboard\templates\dashboard\index.html:190
+msgid "Parent Zone Name"
+msgstr "父级域名称"
+
+#: .\dashboard\templates\dashboard\index.html:191
+msgid "Parent Zone Type"
+msgstr "父级域种类"
+
+#: .\dashboard\templates\dashboard\index.html:195
+msgid "Threshold"
+msgstr "阈值"
+
+#: .\dashboard\templates\dashboard\index.html:196
+msgid "Capacity Warning Thresholds"
+msgstr "容量报警阈值"
+
+#: .\dashboard\templates\dashboard\index.html:197
+msgid "Storage Group Near Full"
+msgstr "存储组将满"
+
+#: .\dashboard\templates\dashboard\index.html:198
+msgid "Storage Group Full"
+msgstr "存储组已满"
+
+#: .\dashboard\templates\dashboard\index.html:199
+msgid "Ceph OSD Near Full"
+msgstr "对象存储设备将满"
+
+#: .\dashboard\templates\dashboard\index.html:200
+msgid "Ceph OSD Full"
+msgstr "对象存储设备已满"
+
+#: .\dashboard\templates\dashboard\index.html:204
+msgid "Monitor Summary"
+msgstr "监视器概要信息"
+
+#: .\dashboard\templates\dashboard\index.html:205
+msgid "Monmap Epoch"
+msgstr "监视器版本"
+
+#: .\dashboard\templates\dashboard\index.html:206
+msgid "Monitors"
+msgstr "监视器"
+
+#: .\dashboard\templates\dashboard\index.html:207
+msgid "Election Epoch"
+msgstr "选举版本"
+
+#: .\dashboard\templates\dashboard\index.html:208
+msgid "Quorum"
+msgstr "配额"
+
+#: .\dashboard\templates\dashboard\index.html:209
+msgid "Last Updated"
+msgstr "更新于"
+
+#: .\dashboard\templates\dashboard\index.html:213
+msgid "MDS Summary"
+msgstr "元数据服务器概要信息"
+
+#: .\dashboard\templates\dashboard\index.html:217
+msgid "Max"
+msgstr "最大值"
+
+#: .\dashboard\templates\dashboard\index.html:223
+msgid "Object Summary"
+msgstr "对象概要信息"
+
+#: .\dashboard\templates\dashboard\index.html:224
+msgid "Degraded Objects"
+msgstr "已降级对象"
+
+#: .\dashboard\templates\dashboard\index.html:225
+msgid "Degraded Totals"
+msgstr "已降级总数"
+
+#: .\dashboard\templates\dashboard\index.html:226
+msgid "Degraded Ratio"
+msgstr "降级比率"
+
+#: .\dashboard\templates\dashboard\index.html:227
+msgid "Unfound Objects"
+msgstr "未找到对象"
+
+#: .\dashboard\templates\dashboard\index.html:228
+msgid "Unfound Totals"
+msgstr "未找到总数"
+
+#: .\dashboard\templates\dashboard\index.html:229
+msgid "Unfound Ratio"
+msgstr "未找到比率"
+
+#: .\dashboard\templates\dashboard\index.html:231
+msgid "Performance Summary"
+msgstr "性能概要信息"
+
+#: .\dashboard\templates\dashboard\index.html:232
+msgid "Read"
+msgstr "读取"
+
+#: .\dashboard\templates\dashboard\index.html:233
+msgid "Write"
+msgstr "写入"
+
+#: .\dashboard\templates\dashboard\index.html:234
+msgid "Operation"
+msgstr "操作"
+
+#: .\dashboard\templates\dashboard\index.html:236
+msgid "PG Summary"
+msgstr "放置组概要信息"
+
+#: .\dashboard\templates\dashboard\index.html:237
+msgid "PG Map Version"
+msgstr "放置组版本"
+
+#: .\dashboard\templates\dashboard\index.html:238
+msgid "Total PGs"
+msgstr "放置组总数"
+
+#: .\dashboard\templates\dashboard\index.html:241
+msgid "Capacity Summary"
+msgstr "容量概要信息"
+
+#: .\dashboard\templates\dashboard\index.html:242
+msgid "Data Capacity Used"
+msgstr "已用容量"
+
+#: .\dashboard\templates\dashboard\index.html:243
+msgid "Total Capacity Used"
+msgstr "总已用容量"
+
+#: .\dashboard\templates\dashboard\index.html:244
+msgid "Capacity Available"
+msgstr "可用容量"
+
+#: .\dashboard\templates\dashboard\index.html:245
+msgid "Capacity Total"
+msgstr "总容量"
+
+#: .\dashboard\templates\dashboard\index.html:249
+msgid "Current Value"
+msgstr "当前值"
+
+#: .\dashboard\templates\dashboard\index.html:250
+msgid "New Value"
+msgstr "新值"
+
+#: .\dashboard\views.py:8
+msgid "Dashboard"
+msgstr "控制台"
+
+#: .\dashboard\views.py:9
+msgid "Cluster Management"
+msgstr "集群管理"
+
+#: .\dashboard\views.py:10
+msgid "Cluster Monitoring"
+msgstr "集群监控"
+
+#: .\dashboard\views.py:11
+msgid "Server Management"
+msgstr "服务器管理"
+
+#: .\dashboard\views.py:12
+msgid "Openstack Integration"
+msgstr "Openstack 集成"
+
+#: .\dashboard\views.py:13
+msgid "VSM Management"
+msgstr "VSM 管理"
+
+#: .\dashboard\views.py:14
+msgid "VSM"
+msgstr "VSM"
+
+#: .\dashboard\views.py:20
+msgid "Manage Servers"
+msgstr "管理服务器"
+
+#: .\dashboard\views.py:21
+msgid "Manage Devices"
+msgstr "管理设备"
+
+#: .\dashboard\views.py:22
+msgid "Create Cluster"
+msgstr "创建集群"
+
+#: .\dashboard\views.py:23
+msgid "Import Cluster"
+msgstr "导入集群"
+
+#: .\dashboard\views.py:24
+msgid "Ceph Upgrade"
+msgstr "Ceph升级"
+
+#: .\dashboard\views.py:25
+msgid "Manage Pools"
+msgstr "管理存储池"
+
+#: .\dashboard\views.py:26
+msgid "Manage EC Profiles"
+msgstr "管理EC Profiles"
+
+#: .\dashboard\views.py:27
+msgid "Manage Storage Group"
+msgstr "管理存储组"
+
+#: .\dashboard\views.py:28
+msgid "Manage Zones"
+msgstr "管理域"
+
+#: .\dashboard\views.py:29
+msgid "Storage Group Status"
+msgstr "存储组状态"
+
+#: .\dashboard\views.py:30
+msgid "Pool Status"
+msgstr "存储池状态"
+
+#: .\dashboard\views.py:31 .\dashboard\views.py:76 .\dashboard\views.py:176
+msgid "OSD Status"
+msgstr "对象存储设备状态"
+
+#: .\dashboard\views.py:32
+msgid "Monitor Status"
+msgstr "监视器状态"
+
+#: .\dashboard\views.py:33
+msgid "MDS Status"
+msgstr "元数据服务器状态"
+
+#: .\dashboard\views.py:34
+msgid "PG Status"
+msgstr "放置组状态"
+
+#: .\dashboard\views.py:35
+msgid "RBD Status"
+msgstr "存储卷状态"
+
+#: .\dashboard\views.py:36
+msgid "Manage RBD Pools"
+msgstr "管理存储池"
+
+#: .\dashboard\views.py:37
+msgid "Openstack Access"
+msgstr "Openstack接口"
+
+#: .\dashboard\views.py:38
+msgid "Add/Remove User"
+msgstr "新增/移除 用户"
+
+#: .\dashboard\views.py:39
+msgid "Settings"
+msgstr "系统设置"
+
+#: .\dashboard\views.py:43
+msgid "Logged in as"
+msgstr "当前用户"
+
+#: .\dashboard\views.py:44
+msgid "Sign Out"
+msgstr "注销"
+
+#: .\dashboard\views.py:48
+msgid "Add Servers"
+msgstr "新增服务器"
+
+#: .\dashboard\views.py:49
+msgid "Remove Servers"
+msgstr "移除服务器"
+
+#: .\dashboard\views.py:50
+msgid "Add Monitors"
+msgstr "新增监视器"
+
+#: .\dashboard\views.py:51
+msgid "Remove Monitors"
+msgstr "移除监视器"
+
+#: .\dashboard\views.py:52
+msgid "Start Servers"
+msgstr "开启服务器"
+
+#: .\dashboard\views.py:53
+msgid "Stop Servers"
+msgstr "停止服务器"
+
+#: .\dashboard\views.py:55
+msgid "Server List"
+msgstr "服务器列表"
+
+#: .\dashboard\views.py:56 .\dashboard\views.py:101 .\dashboard\views.py:123
+#: .\dashboard\views.py:217 .\dashboard\views.py:230 .\dashboard\views.py:250
+#: .\dashboard\views.py:264
+msgid "ID"
+msgstr "编号"
+
+#: .\dashboard\views.py:58
+msgid "Management Address"
+msgstr "管理网络地址"
+
+#: .\dashboard\views.py:59
+msgid "Public Address"
+msgstr "公用网络地址"
+
+#: .\dashboard\views.py:60
+msgid "Cluster Address"
+msgstr "集群网络地址"
+
+#: .\dashboard\views.py:62
+msgid "OSDs (Data Drives)"
+msgstr "对象存储设备(数据盘)"
+
+#: .\dashboard\views.py:64 .\dashboard\views.py:80
+msgid "Zone"
+msgstr "域"
+
+#: .\dashboard\views.py:65 .\dashboard\views.py:81 .\dashboard\views.py:109
+#: .\dashboard\views.py:141 .\dashboard\views.py:153 .\dashboard\views.py:235
+msgid "Status"
+msgstr "状态"
+
+#: .\dashboard\views.py:69
+msgid "Restart"
+msgstr "重启"
+
+#: .\dashboard\views.py:70
+msgid "Remove"
+msgstr "移除"
+
+#: .\dashboard\views.py:71
+msgid "Restore"
+msgstr "恢复"
+
+#: .\dashboard\views.py:72
+msgid "New"
+msgstr "新增"
+
+#: .\dashboard\views.py:74
+msgid "Device List"
+msgstr "设备列表"
+
+#: .\dashboard\views.py:79
+msgid "Storage Class"
+msgstr "存储类别"
+
+#: .\dashboard\views.py:82
+msgid "Data Device Status"
+msgstr "数据设备状态"
+
+#: .\dashboard\views.py:83
+msgid "Journal Device Status"
+msgstr "日志设备状态"
+
+#: .\dashboard\views.py:84
+msgid "Capacity Status"
+msgstr "容量状态"
+
+#: .\dashboard\views.py:88
+msgid "Package URL"
+msgstr "包 URL"
+
+#: .\dashboard\views.py:89
+msgid "Key URL"
+msgstr "键 URL"
+
+#: .\dashboard\views.py:90
+msgid "Proxy URL"
+msgstr "代理 URL"
+
+#: .\dashboard\views.py:91 .\dashboard\views.py:256
+msgid "SSH User Name"
+msgstr "SSH 用户名"
+
+#: .\dashboard\views.py:98
+msgid "Create EC Pool"
+msgstr "创建纠删码存储池"
+
+#: .\dashboard\views.py:100
+msgid "Storage Pools"
+msgstr "存储池"
+
+#: .\dashboard\views.py:104 .\dashboard\views.py:233
+msgid "Placement Group Count"
+msgstr "放置组数量"
+
+#: .\dashboard\views.py:105 .\dashboard\views.py:150 .\dashboard\views.py:234
+msgid "Size"
+msgstr "大小"
+
+#: .\dashboard\views.py:106
+msgid "Quota (GB)"
+msgstr "配额(GB)"
+
+#: .\dashboard\views.py:107
+msgid "Cache Tier Status"
+msgstr "缓存层状态"
+
+#: .\dashboard\views.py:108
+msgid "Erasure Code Status"
+msgstr "纠删码状态"
+
+#: .\dashboard\views.py:110 .\dashboard\views.py:236
+msgid "Created By"
+msgstr "创建于"
+
+#: .\dashboard\views.py:116
+msgid "Erasure Coded Profile"
+msgstr "纠删吗概要信息"
+
+#: .\dashboard\views.py:117
+msgid "Erasure Coded Failure Domain"
+msgstr "纠删码池的失效域"
+
+#: .\dashboard\views.py:119
+msgid "Select a Cache Tier Pool"
+msgstr "选择缓存池"
+
+#: .\dashboard\views.py:128
+msgid "Key Values Pairs"
+msgstr "键值对"
+
+#: .\dashboard\views.py:129
+msgid "EC Profiles List"
+msgstr "纠删码概要列表"
+
+#: .\dashboard\views.py:134
+msgid "Attached Pools"
+msgstr "已连接池"
+
+#: .\dashboard\views.py:135
+msgid "Capacity Total (GB)"
+msgstr "总容量(GB)"
+
+#: .\dashboard\views.py:136
+msgid "Capacity Used (GB)"
+msgstr "已用容量(GB)"
+
+#: .\dashboard\views.py:137
+msgid "Capacity Available (GB)"
+msgstr "可用容量(GB)"
+
+#: .\dashboard\views.py:138
+msgid "Percent Used Capacity(%)"
+msgstr "容量百分比（%）"
+
+#: .\dashboard\views.py:139
+msgid "Largest Node Capacity Used (GB)"
+msgstr "最大的节点使用容量(GB)"
+
+#: .\dashboard\views.py:140
+msgid "Warning"
+msgstr "警告"
+
+#: .\dashboard\views.py:146 .\dashboard\views.py:173 .\dashboard\views.py:191
+#: .\dashboard\views.py:206
+msgid "Ordinal"
+msgstr "序数"
+
+#: .\dashboard\views.py:151
+msgid "PG Count"
+msgstr "放置组数量"
+
+#: .\dashboard\views.py:152
+msgid "PgP Count"
+msgstr "有效放置组数量"
+
+#: .\dashboard\views.py:154
+msgid "Create By"
+msgstr "创建于"
+
+#: .\dashboard\views.py:155
+msgid "KB Used"
+msgstr "KB　已使用"
+
+#: .\dashboard\views.py:156 .\dashboard\views.py:221
+msgid "Objects"
+msgstr "对象"
+
+#: .\dashboard\views.py:157
+msgid "Clones"
+msgstr "克隆"
+
+#: .\dashboard\views.py:158
+msgid "Degraded"
+msgstr "已降级"
+
+#: .\dashboard\views.py:159
+msgid "Unfound"
+msgstr "未找到"
+
+#: .\dashboard\views.py:160
+msgid "Read Ops"
+msgstr "读取 Ops"
+
+#: .\dashboard\views.py:161
+msgid "Read KB"
+msgstr "读取 Kb"
+
+#: .\dashboard\views.py:162
+msgid "Write Ops"
+msgstr "写入 Ops"
+
+#: .\dashboard\views.py:163
+msgid "Write KB"
+msgstr "写入 KB"
+
+#: .\dashboard\views.py:164
+msgid "Client READ B/S"
+msgstr "客户端读取 B/S"
+
+#: .\dashboard\views.py:165
+msgid "Client Write B/S"
+msgstr "客户端写入 B/S"
+
+#: .\dashboard\views.py:166
+msgid "Client Ops/s"
+msgstr "客户端 Ops/s"
+
+#: .\dashboard\views.py:169
+msgid "Pool List"
+msgstr "存储池列表"
+
+#: .\dashboard\views.py:174
+msgid "OSD Name"
+msgstr "OSD 名称"
+
+#: .\dashboard\views.py:177
+msgid "Crush Weight"
+msgstr "权重"
+
+#: .\dashboard\views.py:178
+msgid "Capacity Total (MB)"
+msgstr "总容量(MB)"
+
+#: .\dashboard\views.py:179
+msgid "Capacity Used (MB)"
+msgstr "已用容量(MB)"
+
+#: .\dashboard\views.py:180
+msgid "Capacity Available (MB)"
+msgstr "可用容量(MB)"
+
+#: .\dashboard\views.py:181
+msgid "Percent Used Capacity"
+msgstr "容量百分比（%）"
+
+#: .\dashboard\views.py:186
+msgid "OSD List"
+msgstr "对象存储设备列表"
+
+#: .\dashboard\views.py:193 .\dashboard\views.py:210
+msgid "Address"
+msgstr "地址"
+
+#: .\dashboard\views.py:194
+msgid "Health"
+msgstr "健康"
+
+#: .\dashboard\views.py:195
+msgid "Detail"
+msgstr "详细"
+
+#: .\dashboard\views.py:196
+msgid "Skew"
+msgstr "偏离"
+
+#: .\dashboard\views.py:197
+msgid "Latency"
+msgstr "延时"
+
+#: .\dashboard\views.py:198
+msgid "MB Total (disk)"
+msgstr "MB 总量 (disk)"
+
+#: .\dashboard\views.py:199
+msgid "MB Used (disk)"
+msgstr "MB 已使用 (disk)"
+
+#: .\dashboard\views.py:200
+msgid "MB Available (disk)"
+msgstr "MB 可用 (disk)"
+
+#: .\dashboard\views.py:201
+msgid "Percent Available"
+msgstr "可用百分比"
+
+#: .\dashboard\views.py:208
+msgid "Gid"
+msgstr "Gid"
+
+#: .\dashboard\views.py:209
+msgid "State"
+msgstr "状态"
+
+#: .\dashboard\views.py:213
+msgid "MDS List"
+msgstr "MDS 列表"
+
+#: .\dashboard\views.py:218
+msgid "Pool"
+msgstr "池"
+
+#: .\dashboard\views.py:219
+msgid "Image Name"
+msgstr "镜像名称"
+
+#: .\dashboard\views.py:220
+msgid "Size(MB)"
+msgstr "大小(MB)"
+
+#: .\dashboard\views.py:222
+msgid "Order"
+msgstr "顺序"
+
+#: .\dashboard\views.py:223
+msgid "Format"
+msgstr "格式化"
+
+#: .\dashboard\views.py:226
+msgid "RBD List"
+msgstr "存储卷列表"
+
+#: .\dashboard\views.py:238
+msgid "Attach Status"
+msgstr "挂载状态"
+
+#: .\dashboard\views.py:239
+msgid "Manage Openstack RBD Pools"
+msgstr "管理供Openstack使用的存储池"
+
+#: .\dashboard\views.py:240
+msgid "Present Pools"
+msgstr "呈献存储池"
+
+#: .\dashboard\views.py:242
+msgid "Replication Factor"
+msgstr "副本数"
+
+#: .\dashboard\views.py:243
+msgid "OpenStack/Region"
+msgstr "Openstack/区域"
+
+#: .\dashboard\views.py:244
+msgid "Cinder Volume Host"
+msgstr "Cinder卷主机"
+
+#: .\dashboard\views.py:245
+msgid "Present RBD Pools"
+msgstr "呈献存储池"
+
+#: .\dashboard\views.py:249
+msgid "Add OpenStack Endpoint"
+msgstr "新增OpenStack端点"
+
+#: .\dashboard\views.py:251
+msgid "Tenant Name"
+msgstr "租户/项目名称"
+
+#: .\dashboard\views.py:252
+msgid "UserName"
+msgstr "用户名"
+
+#: .\dashboard\views.py:253 .\dashboard\views.py:274
+msgid "Password"
+msgstr "密码"
+
+#: .\dashboard\views.py:254
+msgid "Auth Url"
+msgstr "验证 Url"
+
+#: .\dashboard\views.py:255
+msgid "Region Name"
+msgstr "区域名称"
+
+#: .\dashboard\views.py:257
+msgid "Connection Status"
+msgstr "连接状态"
+
+#: .\dashboard\views.py:258
+msgid "LOG INFO"
+msgstr "日志信息"
+
+#: .\dashboard\views.py:260
+msgid "Manage Openstack Access"
+msgstr "管理Openstack接口"
+
+#: .\dashboard\views.py:266
+msgid "Email"
+msgstr "电子邮箱"
+
+#: .\dashboard\views.py:267
+msgid "Enabled"
+msgstr "启用"
+
+#: .\dashboard\views.py:268
+msgid "User List"
+msgstr "用户列表"
+
+#: .\dashboard\views.py:269
+msgid "Change Password"
+msgstr "修改密码"
+
+#: .\dashboard\views.py:270
+msgid "Create User"
+msgstr "创建用户"
+
+#: .\dashboard\views.py:271
+msgid "Update User"
+msgstr "更新用户"
+
+#: .\dashboard\views.py:273
+msgid "User Name"
+msgstr "用户名"
+
+#: .\dashboard\views.py:275
+msgid "Confirm Password"
+msgstr "确认密码"

@@ -488,7 +488,7 @@ vsm_settings_opts = [
                default=600,
                help='update ceph version info(secs)'),
     cfg.IntOpt('ceph_osd_dump',
-               default=600,
+               default=60,
                help='ceph osd dump (secs)'),
     cfg.IntOpt('ceph_pg_dump_osds',
                default=600,
@@ -499,6 +499,9 @@ vsm_settings_opts = [
     cfg.IntOpt('ceph_pg_dump_pgs_brief',
                default=1800,
                help='ceph pg dump pgs brief (secs)'),
+    cfg.IntOpt('ceph_ec_profile_update',
+               default=600,
+               help='ceph osd erasure-code-profile get (secs)'),
     cfg.IntOpt('rbd_ls_-l_{pool_name}',
                default=1800,
                help='rbd ls -l {pool_name} (secs)'),
@@ -517,3 +520,4 @@ vsm_settings_opts = [
 ]
 
 FLAGS.register_opts(vsm_settings_opts)
+

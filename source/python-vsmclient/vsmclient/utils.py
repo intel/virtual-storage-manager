@@ -18,6 +18,7 @@ import os
 import re
 import sys
 import uuid
+import six
 
 import prettytable
 
@@ -129,7 +130,25 @@ def get_service_type(f):
 def pretty_choice_list(l):
     return ', '.join("'%s'" % i for i in l)
 
-def print_list(objs, fields, formatters={}):
+
+def _print(pt, order):
+    if sys.version_info >= (3, 0):
+        print(pt.get_string(sortby=order))
+    else:
+        print(strutils.safe_encode(pt.get_string(sortby=order)))
+
+
+def print_list(objs, fields, formatters=None, sortby_index=0):
+    '''Prints a list of objects.
+
+    @param objs: Objects to print
+    @param fields: Fields on each object to be printed
+    @param formatters: Custom field formatters
+    @param sortby_index: Results sorted against the key in the fields list at
+                         this index; if None then the object order is not
+                         altered
+    '''
+    formatters = formatters or {}
     mixed_case_fields = ['serverId']
     pt = prettytable.PrettyTable([f for f in fields], caching=False)
     pt.aligns = ['l' for f in fields]
@@ -144,18 +163,31 @@ def print_list(objs, fields, formatters={}):
                     field_name = field.replace(' ', '_')
                 else:
                     field_name = field.lower().replace(' ', '_')
-                data = getattr(o, field_name, '')
+                if type(o) == dict and field in o:
+                    data = o[field]
+                else:
+                    data = getattr(o, field_name, '')
+                if data is None or data == "":
+                    try:
+                        data = o.get(field_name)
+                    except:
+                        data = '-'
+                if data is None:
+                    data = '-'
                 row.append(data)
         pt.add_row(row)
 
-    if len(objs) > 0:
-        print strutils.safe_encode(pt.get_string(sortby=fields[0]))
+    if sortby_index is None:
+        order_by = None
+    else:
+        order_by = fields[sortby_index]
+    _print(pt, order_by)
 
 def print_dict(d, property="Property"):
     pt = prettytable.PrettyTable([property, 'Value'], caching=False)
     pt.aligns = ['l', 'l']
-    [pt.add_row(list(r)) for r in d.iteritems()]
-    print strutils.safe_encode(pt.get_string(sortby=property))
+    [pt.add_row(list(r)) for r in six.iteritems(d)]
+    _print(pt, property)
 
 def find_resource(manager, name_or_id):
     """Helper for the _find_* methods."""
@@ -198,6 +230,50 @@ def find_resource(manager, name_or_id):
                " specific." % (manager.resource_class.__name__.lower(),
                                name_or_id))
         raise exceptions.CommandError(msg)
+
+def find_cluster(cs, cluster):
+    """Get a cluster by name or ID."""
+    return find_resource(cs.clusters, cluster)
+
+def find_mds(cs, mds):
+    """Get a mds by name or ID."""
+    return find_resource(cs.mdses, mds)
+
+def find_mon(cs, mon):
+    """Get a mon by name or ID."""
+    return find_resource(cs.monitors, mon)
+
+def find_osd(cs, osd):
+    """Get an osd by name or ID."""
+    return find_resource(cs.osds, osd)
+
+def find_pg(cs, pg):
+    """Get a pg by name or ID."""
+    return find_resource(cs.placement_groups, pg)
+
+def find_rbd(cs, rbd):
+    """Get a rbd by name or ID."""
+    return find_resource(cs.rbd_pools, rbd)
+
+def find_server(cs, server):
+    """Get a server by name or ID."""
+    return find_resource(cs.servers, server)
+
+def find_appnode(cs, appnode):
+    """Get an appnode by name or ID."""
+    return find_resource(cs.appnodes, appnode)
+
+def find_storage_group(cs, storage_group):
+    """Get a storage group by name or ID."""
+    return find_resource(cs.storage_groups, storage_group)
+
+def find_storage_pool(cs, storage_pool):
+    """Get a storage pool by name or ID."""
+    return find_resource(cs.storage_pools, storage_pool)
+
+def find_setting(cs, setting):
+    """Get a setting by name or ID."""
+    return find_resource(cs.vsm_settings, setting)
 
 def _format_servers_list_networks(server):
     output = []

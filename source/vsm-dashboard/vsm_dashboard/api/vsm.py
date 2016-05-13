@@ -252,6 +252,15 @@ def pool_status(request):
 def ec_profiles(request):
     return vsmclient(request).storage_pools.ec_profiles()
 
+def ec_profiles_remove(request,body):
+    return vsmclient(request).ec_profiles.ec_profiles_remove(body=body)
+
+def ec_profile_create(request,body):
+    return vsmclient(request).ec_profiles.ec_profile_create(body=body)
+
+def ec_profile_get_all(request):
+    return vsmclient(request).ec_profiles.list()
+
 #device api
 def device_list(request):
     return vsmclient(request).devices.list()
@@ -289,6 +298,9 @@ def update_setting(request, name, value):
 
 def get_metrics(request,search_opts):
     return vsmclient(request).performance_metrics.get_metrics(search_opts=search_opts)
+
+def get_metrics_all_types(request,search_opts):
+    return vsmclient(request).performance_metrics.get_metrics_all_types(search_opts=search_opts)
 
 def add_osd_from_node_in_cluster(request,osd_states_id):
     return  vsmclient(request).osds.add_osd_from_node_in_cluster(osd_states_id)
@@ -351,3 +363,12 @@ def add_zone_to_crushmap_and_db(request, body):
     :return:
     '''
     return vsmclient(request).zones.add_zone_to_crushmap_and_db(body)
+
+def detect_cephconf(request, body=None):
+    """check_pre_existing_cluster.
+        body : {u'cluster_conf': u'/etc/ceph/ceph.conf',
+        u'monitor_host_name': u'centos-storage1',
+        u'monitor_host_id': u'1',
+         u'monitor_keyring': u'/etc/keying'}
+    """
+    return vsmclient(request).clusters.detect_cephconf(body)

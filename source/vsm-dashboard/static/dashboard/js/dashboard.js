@@ -12,6 +12,7 @@ var cIOPs;
 var cLatency;
 var cBandwidth;
 var cCPU;
+var refreshInterval=15000;
 var IOPs_EndTime = "";
 var Latency_EndTime = "";
 var BandWidth_EndTime = "";
@@ -44,14 +45,14 @@ require(
         loadCapacity();
         setInterval(function(){
             loadCapacity();
-        },15000);
+        },refreshInterval);
 
   
     	//load Capacity
         loadPG();
         setInterval(function(){
             loadPG();
-        },15000);
+        },refreshInterval);
     
 
         //IOPS  
@@ -79,6 +80,7 @@ $(document).ready(function(){
     loadMonitor();
     loadMDS();
     loadStorage();
+    loadPerformanceEnabled();
 
     //Load Interval
     loadInterval();
@@ -91,22 +93,48 @@ function loadInterval(){
         loadMonitor();
         loadMDS();
 	    loadStorage();
-     } ,15000);
+     } ,refreshInterval);
 }
 
 function HidePageHeader(){
     $(".page-header").hide();
 }
 
-function ShowPerformace(){
-    if($("#divPerformanceCantainer")[0].style.display == "none"){
-        $("#divPerformanceCantainer").show();
+function ShowPerformance(){
+    if($("#divPerformanceContainer")[0].style.display == "none"){
+        $("#divPerformanceContainer").show();
         $("#imgExpandCollapse")[0].src = "/static/dashboard/img/collapse.png";
     }
     else{
-        $("#divPerformanceCantainer").hide();
+        $("#divPerformanceContainer").hide();
         $("#imgExpandCollapse")[0].src = "/static/dashboard/img/expand.png";
     }
+}
+
+function loadPerformanceEnabled(){
+    $.ajax({
+    type: "get",
+    url: "/dashboard/vsm/perf_enabled/",
+    data: null,
+    dataType: "json",
+    success: function(data){
+        //console.log(data);
+        if(data.enabled) {
+            $("#divPerformanceDisabledText").hide();
+            if($("#divPerformanceContainer")[0].style.display == "none")
+                ShowPerformance();
+        }
+        else {
+            $("#divPerformanceDisabledText").show();
+            if($("#divPerformanceContainer")[0].style.display != "none")
+                ShowPerformance();
+        }
+        },
+    error: function (XMLHttpRequest, textStatus, errorThrown) {
+            if(XMLHttpRequest.status == 401)
+                window.location.href = "/dashboard/auth/logout/";
+        }
+    });
 }
 
 function loadVersion(){
@@ -334,6 +362,19 @@ function loadStorage(){
     });
 }
 
+function format_data_size(data_size) {
+    if(data_size == 0){
+        return "0";
+    }
+    var units = [" B", " KiB", " MiB", " GiB", " TiB", " PiB", " EiB", " ZiB", " YiB"]
+    var idx = 0;
+    var ds = 1.0 * data_size;
+    while(ds > 1000 && ++idx < units.length){
+        ds /= 1024;
+    }
+    return ds.toFixed(2).toString() + units[idx];
+}
+
 function loadCapacity(){
     $.ajax({
         type: "get",
@@ -343,8 +384,8 @@ function loadCapacity(){
         success: function(data){
             cClusterGague.setOption(GenerateGaugeOption(data.percent));
             //update the capacity value
-            $("#lblCapacityUsed")[0].innerHTML = ((parseInt(data.used)/1024)/1024/1024).toFixed(2).toString() + " GB";
-            $("#lblCapacityTotal")[0].innerHTML = ((parseInt(data.total)/1024)/1024/1024).toFixed(2).toString() + " GB";
+            $("#lblCapacityUsed")[0].innerHTML = format_data_size(parseInt(data.used));
+            $("#lblCapacityTotal")[0].innerHTML = format_data_size(parseInt(data.total));
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             if(XMLHttpRequest.status == 401)
@@ -372,7 +413,7 @@ function loadPG(){
 
 function loadIOP(){
     setTimeout(function (){
-        if($("#divPerformanceCantainer")[0].style.display != "none") {
+        if($("#divPerformanceContainer")[0].style.display != "none") {
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/IOPS/",
@@ -425,13 +466,13 @@ function loadIOP(){
             });
         }
         loadIOP();
-    }, 15000);
+    }, refreshInterval);
 }
 
 
 function loadLatency(){
     setTimeout(function (){
-        if($("#divPerformanceCantainer")[0].style.display != "none") {
+        if($("#divPerformanceContainer")[0].style.display != "none") {
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/latency/",
@@ -484,12 +525,12 @@ function loadLatency(){
             });
         }
         loadLatency();
-    }, 15000);
+    }, refreshInterval);
 }
 
 function loadBandwidth(){
     setTimeout(function (){
-        if($("#divPerformanceCantainer")[0].style.display != "none") {
+        if($("#divPerformanceContainer")[0].style.display != "none") {
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/bandwidth/",
@@ -536,12 +577,12 @@ function loadBandwidth(){
             });
         }
         loadBandwidth();
-    }, 15000);
+    }, refreshInterval);
 }
 
 function loadCPU(){
     setTimeout(function (){
-        if($("#divPerformanceCantainer")[0].style.display != "none") {
+        if($("#divPerformanceContainer")[0].style.display != "none") {
             $.ajax({
                 type: "post",
                 url: "/dashboard/vsm/CPU/",
@@ -599,7 +640,7 @@ function loadCPU(){
             });
         }
         loadCPU();
-    },15000);
+    },refreshInterval);
 }
 
 function GenerateGaugeOption(value) {
@@ -968,26 +1009,53 @@ function GetBandwidthOption(){
 //NAC: not active+clean
 function GetPieOption(AC,NAC){
     var option = {
-	    tooltip : {
-		trigger: 'item',
-		formatter: "{b} : {c} ({d}%)"
-	    },
+            tooltip : {
+                trigger: 'item',
+                formatter: "{b} : {c} ({d}%)",
+                position: function(p) {
+                    return [0, p[1]];
+                }
+            },
+            legend: {
+                x: 'left',
+                y: 'top',
+                orient: 'vertical',
+                textStyle: {
+                    color: 'auto',
+                    fontSize: 14
+                },
+                data: [
+                    {name: 'Active+Clean'},
+                    {name: 'Not Active+Clean'},
+                ]
+            },
             series : [
-		{
-		    name:'PG Summary',
-		    type:'pie',
-		    radius : '60%',
-		    center: ['50%', '50%'],
-		    data:[
-		        {value:AC, name:'Active+Clean'},
-		        {value:NAC, name:'Not Active+Clean'},
-		    ]
-		}
-	    ],
+                {
+                    name:'PG Summary',
+                    type:'pie',
+                    radius : '75%',
+                    center: ['50%', '65%'],
+                    itemStyle: {
+                        normal: {
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            }
+                        }
+                    },
+                    data: [
+                        {value:AC, name: 'Active+Clean'},
+                        {value:NAC, name: 'Not Active+Clean'},
+                    ],
+                }
+            ],
             color:["green","orange"]
- 	};
-                    
-	return option;
+        };
+
+
+    return option;
 }
 
 function InitAxis_X(){

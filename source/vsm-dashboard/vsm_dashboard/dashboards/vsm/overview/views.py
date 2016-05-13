@@ -115,6 +115,9 @@ def CPU(request):
     if request.body:
         return HttpResponse(get_performance_cpu(request))
 
+def perf_enabled(request):
+    return HttpResponse(get_performance_enabled(request))
+
 def get_vsm_version():
     try:
         (status, out) = commands.getstatusoutput('vsm --version')
@@ -315,33 +318,22 @@ def get_PG():
 
 def get_performance_IOPs(request):
     data = json.loads(request.body)
-    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-60
+    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-30
     end_time = None
 
-    ops_r_opts = {
-         "metrics_name": "op_r",
+    ops_opts = {
+         "metrics_name": "iops",
          "timestamp_start": start_time,
          "timestamp_end": end_time,
          "correct_cnt": None,
     }
 
-    ops_w_opts = {
-         "metrics_name": "op_w",
-         "timestamp_start": start_time,
-         "timestamp_end": end_time,
-         "correct_cnt": None,
-    }
-
-    ops_rw_opts = {
-         "metrics_name": "op_rw",
-         "timestamp_start": start_time,
-         "timestamp_end": end_time,
-         "correct_cnt": None,
-    }
-
-    ops_r_data = vsmapi.get_metrics(request,ops_r_opts)["metrics"]
-    ops_w_data = vsmapi.get_metrics(request,ops_w_opts)["metrics"]
-    ops_rw_data = vsmapi.get_metrics(request,ops_rw_opts)["metrics"]
+    #print 'test1111'
+    iops_data = vsmapi.get_metrics_all_types(request,ops_opts)
+    #print 'test222'
+    ops_r_data = iops_data.get('osd_op_r',[])
+    ops_w_data = iops_data.get('osd_op_w',[])
+    ops_rw_data = iops_data.get('osd_op_rw',[])
 
 
     items = {}
@@ -364,32 +356,18 @@ def get_performance_IOPs(request):
 
 def get_performance_Latency(request):
     data = json.loads(request.body)
-    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-60
+    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-30
     end_time = None
-    latency_r_opts = {
-         "metrics_name": "op_r_latency",
+    latency_opts = {
+         "metrics_name": "lantency",
          "timestamp_start": start_time,
          "timestamp_end": end_time,
          "correct_cnt": None,
     }
-
-    latency_w_opts = {
-         "metrics_name": "op_w_latency",
-         "timestamp_start": start_time,
-         "timestamp_end": end_time,
-         "correct_cnt": None,
-    }
-
-    latency_rw_opts = {
-         "metrics_name": "op_rw_latency",
-         "timestamp_start": start_time,
-         "timestamp_end": end_time,
-         "correct_cnt": None,
-    }
-
-    latency_r_data = vsmapi.get_metrics(request,latency_r_opts)["metrics"]
-    latency_w_data = vsmapi.get_metrics(request,latency_w_opts)["metrics"]
-    latency_rw_data = vsmapi.get_metrics(request,latency_rw_opts)["metrics"]
+    lantency_data = vsmapi.get_metrics_all_types(request,latency_opts)
+    latency_r_data = lantency_data.get('osd_op_r_latency',[])
+    latency_w_data = lantency_data.get('osd_op_w_latency',[])
+    latency_rw_data = lantency_data.get('osd_op_rw_latency',[])
 
 
     items = {}
@@ -412,25 +390,18 @@ def get_performance_Latency(request):
 
 def get_performance_Bandwith(request):
     data = json.loads(request.body)
-    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-60
+    start_time = data["timestamp"] and int(data["timestamp"]) or int(time.time())-30
     end_time = None
-    bandwidth_in_opts = {
-         "metrics_name":"op_in_bytes"
+    bandwidth_opts = {
+         "metrics_name":"bandwidth"
         ,"timestamp_start":start_time
         ,"timestamp_end":end_time
         ,"correct_cnt":None
     }
 
-    bandwidth_out_opts = {
-         "metrics_name":"op_out_bytes"
-        ,"timestamp_start":start_time
-        ,"timestamp_end":end_time
-        ,"correct_cnt":None
-    }
-
-
-    bandwidth_in_data = vsmapi.get_metrics(request,bandwidth_in_opts)["metrics"]
-    bandwidth_out_data = vsmapi.get_metrics(request,bandwidth_out_opts)["metrics"]
+    bandwidth_data = vsmapi.get_metrics_all_types(request,bandwidth_opts)
+    bandwidth_in_data = bandwidth_data.get('osd_op_in_bytes',[])
+    bandwidth_out_data = bandwidth_data.get('osd_op_out_bytes',[])
     items = {}
     for in_metric in bandwidth_in_data:
         items[in_metric["timestamp"]] = {"timestamp": in_metric["timestamp"], "in_value": in_metric["metrics_value"] and round(in_metric["metrics_value"],2) or 0, "out_value": 0}
@@ -477,3 +448,11 @@ def get_performance_cpu(request):
         cpu_data_dict['cpus'].append({'name':host_name,'data':data_sort_split})
     cpu_data_json = json.dumps(cpu_data_dict)
     return cpu_data_json
+
+def get_performance_enabled(request):
+    settings = vsmapi.get_settings(request)
+    perf_settings = [setting for setting in settings if setting.name in ('ceph_diamond_collect_interval', 'cpu_diamond_collect_interval')]
+    enabled = any(setting.value != '0' for setting in perf_settings)
+    perf_enabled = { "enabled": enabled }
+    perf_enabled_data = json.dumps(perf_enabled)
+    return perf_enabled_data

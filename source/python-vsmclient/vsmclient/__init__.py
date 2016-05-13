@@ -21,5 +21,5 @@ version_info = version.VersionInfo('python-vsmclient')
 # It's harmless, so deflect it.
 try:
     __version__ = version_info.version_string()
-except AttributeError:
+except (AttributeError, ValueError):
     __version__ = None
