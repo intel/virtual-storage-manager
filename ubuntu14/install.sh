@@ -287,9 +287,8 @@ EOF
     $SSH $USER@$1 "bash -x -s" <<EOF
 $SUDO rm -f /tmp/apt.conf
 test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp
-if [ `grep "APT::Get::AllowUnauthenticated" /etc/apt/apt.conf |wc -l` -eq 0 ]; then
-    echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
-fi
+grep "APT::Get::AllowUnauthenticated" /tmp/apt.conf >/dev/null 2>&1\
+    || echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
 $SUDO mv /tmp/apt.conf /etc/apt
 EOF
 #    $SCP apt.conf $USER@$1:/etc/apt
@@ -307,9 +306,8 @@ function set_local_repo() {
     $SUDO cp -r vsmrepo /opt
     $SUDO rm -f /tmp/apt.conf
     test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp
-    if [ `grep "APT::Get::AllowUnauthenticated" /etc/apt/apt.conf |wc -l` -eq 0 ]; then
-        echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
-    fi
+    grep "APT::Get::AllowUnauthenticated" /tmp/apt.conf >/dev/null 2>&1\
+        || echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
     $SUDO mv /tmp/apt.conf /etc/apt
     $SUDO cp vsm.list /etc/apt/sources.list.d
     $SUDO cp vsm-dep.list /etc/apt/sources.list.d
