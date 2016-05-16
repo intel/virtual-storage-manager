@@ -231,10 +231,20 @@ class ManifestParser(object):
                 if len(seg_list) == 1:
                     return seg_list[0]
 
+        try:
+            mkfs_option = _get_cluster_value('mkfs_option')
+        except:
+            mkfs_option = None
+
+        try:
+            mount_option = _get_cluster_value('mount_option')
+        except:
+            mount_option = None
+
         ret = {'cluster_name': _get_cluster_value('cluster'),
                'file_system': _get_cluster_value('file_system'),
-               'mkfs_option': _get_cluster_value('mkfs_option'),
-               'mount_option': _get_cluster_value('mount_option'),
+               'mkfs_option': mkfs_option,
+               'mount_option': mount_option,
                'public_addr': _get_cluster_value('management_addr'),
                'secondary_public_addr':
                               _get_cluster_value('ceph_public_addr'),
