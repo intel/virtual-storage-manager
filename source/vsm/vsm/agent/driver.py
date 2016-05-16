@@ -1720,8 +1720,8 @@ class CephDriver(object):
         self._operate_ceph_daemon("start", "osd", id=num)
         return True
 
-    def stop_mon_daemon(self, context, num):
-        file_path = '/var/run/ceph/mon.%s.pid' % num
+    def stop_mon_daemon(self, context, name):
+        file_path = '/var/run/ceph/mon.%s.pid' % name
         # no using os.path.exists(), because if the file is owned by ceph
         # user, the result will return false
         try:
@@ -1732,23 +1732,23 @@ class CephDriver(object):
         if out:
             self._kill_by_pid_file(file_path)
         else:
-            LOG.info("Not found pid file for mon.%s" % num)
+            LOG.info("Not found pid file for mon.%s" % name)
             try:
-                LOG.info("Try to stop mon %s daemon by ceph or ceph-mon command" % num)
-                self._operate_ceph_daemon("stop", "mon", id=num)
+                LOG.info("Try to stop mon %s daemon by ceph or ceph-mon command" % name)
+                self._operate_ceph_daemon("stop", "mon", id=name)
             except:
-                LOG.warn("Mon %s has NOT been stopped" % num)
+                LOG.warn("Mon %s has NOT been stopped" % name)
         return True
 
-    def start_mon_daemon(self, context, num):
+    def start_mon_daemon(self, context, name):
         try:
-            self.stop_mon_daemon(context, num)
+            self.stop_mon_daemon(context, name)
         except:
             pass
         # mon_name = 'mon.%s' % num
         # utils.execute('service', 'ceph', 'start', mon_name, run_as_root=True)
         try:
-            self._operate_ceph_daemon("start", "mon", id=num)
+            self._operate_ceph_daemon("start", "mon", id=name)
         except:
             LOG.warn("Monitor has NOT been started!")
         return True
@@ -1805,7 +1805,7 @@ class CephDriver(object):
         mons = monmap['mons']
         for mon in mons:
             if mon['name'] == FLAGS.host:
-                mon_id = mon['rank']
+                mon_id = mon['name']
 
         # Try to start monitor service.
         if mon_id:
@@ -1823,7 +1823,7 @@ class CephDriver(object):
         mons = monmap['mons']
         for mon in mons:
             if mon['name'] == FLAGS.host:
-                mon_id = mon['rank']
+                mon_id = mon['name']
 
         # Try to stop monitor service.
         if mon_id:
