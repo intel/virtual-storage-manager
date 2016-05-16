@@ -239,6 +239,8 @@ class CephConfigParser(manager.Manager):
         fs_type = parser.get('osd', 'osd mkfs type', 'xfs')
         cluster = db.cluster_get_all(self.context)[0]
         mount_option = cluster['mount_option']
+        if not mount_option:
+            mount_option = utils.get_fs_options(fs_type)[1]
         mount_attr = parser.get('osd', 'osd mount options %s' % fs_type, mount_option)
 
         for sec in parser.sections():
@@ -443,6 +445,8 @@ class CephConfigParser(manager.Manager):
         self._parser.set('osd', 'osd mkfs type', dict_kvs['osd_type'])
         cluster = db.cluster_get_all(self.context)[0]
         mount_option = cluster['mount_option']
+        if not mount_option:
+            mount_option = utils.get_fs_options(dict_kvs['osd_type'])[1]
         self._parser.set('osd', 'osd mount options %s' % dict_kvs['osd_type'], mount_option)
 
         # Below is very important for set file system.
