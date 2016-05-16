@@ -360,13 +360,6 @@ function install_controller() {
         $SSH $USER@$CONTROLLER_IP "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond"
         $SSH $USER@$CONTROLLER_IP "$SUDO preinstall controller"
         setup_remote_controller
-        #$SSH $USER@$CONTROLLER_IP "ls /var/cache/apt/archives/*.deb"
-        if [ `$SSH $USER@$CONTROLLER_IP "ls /var/cache/apt/archives/*.deb | wc -l"` -gt 1 ]; then
-            $SCP $USER@$CONTROLLER_IP:/var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
-        fi
-        cd $REPO_PATH
-        dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
-        cd $TOPDIR
     else
         set_local_repo
         $SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond
@@ -386,12 +379,6 @@ function install_controller() {
                 $SUDO vsm-controller
             fi
         fi
-        if [[ `ls /var/cache/apt/archives/*.deb | wc -l` -gt 1 ]]; then
-            cp /var/cache/apt/archives/*.deb $REPO_PATH/vsm-dep-repo
-        fi
-        cd $REPO_PATH
-        dpkg-scanpackages vsm-dep-repo | gzip > vsm-dep-repo/Packages.gz
-        cd $TOPDIR
     fi
 }
 
@@ -490,16 +477,10 @@ function setup_remote_agent() { # setup_remote_agent <node>
     fi
 }
 
-function cleanup_remote_sources_list() # cleanup_remote_sources_list <node>
-{
-    $SSH $USER@$1 "if [[ -f /etc/apt/sources.list.bak ]]; then $SUDO mv /etc/apt/sources.list.bak /etc/apt/sources.list; fi"
-}
-
 function install_agent() { # install_agent <node>
     echo "=== Install agent [$1] start."
     make_me_super $USER $1
     generate_token
-    $SSH $USER@$1 "if [[ -f /etc/apt/sources.list ]]; then $SUDO mv /etc/apt/sources.list /etc/apt/sources.list.bak; fi"
     check_manifest $1
     set_remote_repo $1
     $SSH $USER@$1 "$SUDO apt-get install -y vsm vsm-deploy"
@@ -508,7 +489,6 @@ function install_agent() { # install_agent <node>
 
     setup_remote_agent $1
     install_setup_diamond $1
-    cleanup_remote_sources_list $1
     echo "=== Install agent [$1] complete."
 }
 
@@ -553,7 +533,6 @@ if [[ $IS_AGENT_INSTALL == True ]]; then
         tf=$(mktemp)
         tf_list+=" ${tf}"
         echo "=== Starting asynchronous agent install [$ip_or_hostname] ..."
-        add_on_exit cleanup_remote_sources_list $ip_or_hostname
         ( install_agent $ip_or_hostname >${tf} 2>&1 ) &
         pids+=" $!"
     done
