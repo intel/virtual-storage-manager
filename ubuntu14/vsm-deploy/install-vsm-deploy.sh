@@ -20,6 +20,12 @@ install -g root -o vsm -v -p -D -m 755 tools/etc/vsm/server.manifest $VSM_DEPLOY
 # usr/local/bin/
 #---------------------------
 install -g root -o root -d -m 755 $VSM_DEPLOY_ROOT_PATH/usr/local/bin/
+install -g root -o root -d -m 755 $VSM_DEPLOY_ROOT_PATH/usr/bin
+install -g root -o vsm -v -m 755 -t $VSM_DEPLOY_ROOT_PATH/usr/local/bin/ cluster_manifest
+install -g root -o vsm -v -m 755 -t $VSM_DEPLOY_ROOT_PATH/usr/local/bin/ server_manifest
+install -g root -o vsm -v -m 755 -t $VSM_DEPLOY_ROOT_PATH/usr/bin/ agent-token
+install -g root -o vsm -v -m 755 -t $VSM_DEPLOY_ROOT_PATH/usr/bin/ admin-token
+install -g root -o vsm -v -m 755 -t $VSM_DEPLOY_ROOT_PATH/usr/local/bin/ getip
 install -g root -o vsm -v -m 755 -t $VSM_DEPLOY_ROOT_PATH/usr/local/bin/ __clean-data
 install -g root -o vsm -v -m 755 -t $VSM_DEPLOY_ROOT_PATH/usr/local/bin/ cache-tier-defaults
 install -g root -o vsm -v -m 755 -t $VSM_DEPLOY_ROOT_PATH/usr/local/bin/ clean-data

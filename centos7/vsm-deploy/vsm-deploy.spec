@@ -45,6 +45,11 @@ install -p -D -m 755 tools/etc/vsm/server.manifest %{buildroot}%{_sysconfdir}/ma
 install -d -m 755 %{buildroot}%{_usr}/local/bin/
 install -d -m 755 %{buildroot}%{_usr}/local/bin/tools
 
+install -p -D -m 755 cluster_manifest %{buildroot}%{_usr}/local/bin/cluster_manifest
+install -p -D -m 755 server_manifest  %{buildroot}%{_usr}/local/bin/server_manifest
+install -p -D -m 755 admin-token %{buildroot}%{_bindir}/admin-token
+install -p -D -m 755 agent-token %{buildroot}%{_bindir}/agent-token
+install -p -D -m 755 getip  %{buildroot}%{_usr}/local/bin/getip
 install -p -D -m 755 vsm-controller %{buildroot}%{_usr}/local/bin/vsm-controller
 install -p -D -m 755 vsm-installer %{buildroot}%{_usr}/local/bin/vsm-installer
 install -p -D -m 755 vsm-node %{buildroot}%{_usr}/local/bin/vsm-node
@@ -79,6 +84,11 @@ exit 0
 %files
 %defattr(-,root,root,-)
 %dir %{_usr}
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/cluster_manifest
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/server_manifest
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/admin-token
+%config(noreplace) %attr(-, root, vsm) %{_bindir}/agent-token
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/getip
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/vsm-controller
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/restart-all
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/replace-str
