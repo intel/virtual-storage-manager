@@ -67,8 +67,6 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/auto_key_gen
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/vsm-assist
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/presentpool
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/rbd_ls
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/agent-token
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/admin-token
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/vsm-backup
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/vsm-restore
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/vsm-ceph-upgrade
@@ -81,12 +79,9 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/exp_ceph-mds_upgr
 # usr/local/bin/
 #---------------------------
 install -g root -o root -v -m 755 -d $VSM_ROOT_PATH/usr/local/bin
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/cluster_manifest
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/server_manifest
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/refresh-osd-status
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/refresh-cluster-status
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/check_xtrust_crudini
-install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/getip
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/get_storage
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/spot_info_list
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin tools/vsm-reporter.py
