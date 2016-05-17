@@ -897,6 +897,8 @@ class CephDriver(object):
         def ___fdisk(disk):
             cluster = db.cluster_get_all(context)[0]
             mkfs_option = cluster['mkfs_option']
+            if not mkfs_option:
+                mkfs_option = utils.get_fs_options(file_system)[0]
             utils.execute('mkfs.%s' % file_system,
                           mkfs_option,
                           disk,
@@ -965,6 +967,8 @@ class CephDriver(object):
                               run_as_root=True)
             cluster = db.cluster_get_all(context)[0]
             mount_options = cluster['mount_option']
+            if not mount_options:
+                mount_options = utils.get_fs_options(fs_type)[1]
             utils.execute('mount',
                           '-t', fs_type,
                           '-o', mount_options,
@@ -1263,6 +1267,8 @@ class CephDriver(object):
 
         cluster = db.cluster_get_all(context)[0]
         mkfs_option = cluster['mkfs_option']
+        if not mkfs_option:
+            mkfs_option = utils.get_fs_options(file_system)[0]
         utils.execute("mkfs",
                       "-t", file_system,
                       mkfs_option, osd_conf_dict['dev_name'],
@@ -1271,6 +1277,8 @@ class CephDriver(object):
         # TODO: does not support ext4 for now.
         # Need to use -o user_xattr for ext4
         mount_option = cluster['mount_option']
+        if not mount_option:
+            mount_option = utils.get_fs_options(file_system)[1]
 
         ceph_version = self.get_ceph_version()
         if int(ceph_version.split(".")[0]) > 0:
@@ -2557,6 +2565,8 @@ class CephDriver(object):
 
         cluster = db.cluster_get_all(context)[0]
         mkfs_option = cluster['mkfs_option']
+        if not mkfs_option:
+            mkfs_option = utils.get_fs_options(file_system)[0]
         utils.execute("mkfs",
                       "-t", file_system,
                       mkfs_option,
@@ -2570,6 +2580,8 @@ class CephDriver(object):
         utils.ensure_tree(osd_pth)
         cluster = db.cluster_get_all(context)[0]
         mount_option = cluster['mount_option']
+        if not mount_option:
+            mount_option = utils.get_fs_options(file_system)[1]
         utils.execute("mount",
                       "-t", file_system,
                       "-o", mount_option,
