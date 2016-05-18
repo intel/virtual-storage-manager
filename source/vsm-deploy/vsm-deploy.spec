@@ -78,7 +78,6 @@ install -p -D -m 755 replace-str %{buildroot}%{_usr}/bin/replace-str
 install -p -D -m 755 clean-data %{buildroot}%{_usr}/bin/clean-data
 install -p -D -m 755 __clean-data %{buildroot}%{_usr}/bin/__clean-data
 install -p -D -m 755 downloadrepo  %{buildroot}%{_usr}/bin/downloadrepo
-install -p -D -m 755 start_osd %{buildroot}%{_usr}/bin/start_osd
 install -p -D -m 755 ec-profile %{buildroot}%{_usr}/bin/ec-profile
 install -p -D -m 755 cache-tier-defaults %{buildroot}%{_usr}/bin/cache-tier-defaults
 install -p -D -m 755 reset_status %{buildroot}%{_usr}/bin/reset_status
@@ -106,7 +105,6 @@ install -p -D -m 755 __clean-data %{buildroot}%{_usr}/local/bin/__clean-data
 install -p -D -m 755 downloadrepo  %{buildroot}%{_usr}/local/bin/downloadrepo
 install -p -D -m 755 preinstall %{buildroot}%{_usr}/local/bin/preinstall
 install -p -D -m 755 rpms_list %{buildroot}%{_usr}/local/bin/rpms_list
-install -p -D -m 755 start_osd %{buildroot}%{_usr}/local/bin/start_osd
 install -p -D -m 755 ec-profile %{buildroot}%{_usr}/local/bin/ec-profile
 install -p -D -m 755 cache-tier-defaults %{buildroot}%{_usr}/local/bin/cache-tier-defaults
 install -p -D -m 755 reset_status %{buildroot}%{_usr}/local/bin/reset_status
@@ -149,7 +147,6 @@ exit 0
 %attr(-, root, root) %{_usr}/bin/__clean-data
 %attr(-, root, root) %{_usr}/bin/vsm-installer
 %attr(-, root, root) %{_usr}/bin/downloadrepo
-%attr(-, root, root) %{_usr}/bin/start_osd
 %attr(-, root, root) %{_usr}/bin/ec-profile
 %attr(-, root, root) %{_usr}/bin/cache-tier-defaults
 %attr(-, root, root) %{_usr}/bin/reset_status
@@ -181,7 +178,6 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/downloadrepo
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/preinstall
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/rpms_list
-%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/start_osd
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/ec-profile
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/cache-tier-defaults
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/reset_status
