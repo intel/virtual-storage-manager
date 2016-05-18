@@ -167,6 +167,7 @@ install -p -D -m 755 etc/init.d/vsm-scheduler %{buildroot}%{_initrddir}/vsm-sche
 #---------------------------
 
 install -d -m 755 %{buildroot}%{_bindir}/
+install -p -D -m 755 bin/start_osd %{buildroot}%{_usr}/local/bin/start_osd
 install -p -D -m 755 bin/vsm-api %{buildroot}%{_bindir}/vsm-api
 install -p -D -m 755 bin/vsm-agent %{buildroot}%{_bindir}/vsm-agent
 install -p -D -m 755 bin/vsm-physical %{buildroot}%{_bindir}/vsm-physical
@@ -245,6 +246,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-scheduler
 
 #%dir %{_bindir}
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/start_osd
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-rootwrap
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-physical
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-agent

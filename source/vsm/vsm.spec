@@ -270,6 +270,7 @@ install -p -D -m 755 bin/vsm-backup %{buildroot}%{_bindir}/vsm-backup
 install -p -D -m 755 bin/vsm-restore %{buildroot}%{_bindir}/vsm-restore
 
 %if 0%{?suse_version}
+install -p -D -m 755 bin/start_osd %{buildroot}%{_usr}/bin/start_osd
 install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/bin/refresh-osd-status
 install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/bin/refresh-cluster-status
 install -p -D -m 755 bin/import_ceph_conf  %{buildroot}%{_usr}/bin/import_ceph_conf
@@ -277,12 +278,12 @@ install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
 install -p -D -m 755 bin/vsm-ceph-upgrade %{buildroot}%{_bindir}/vsm-ceph-upgrade
 #install -p -D -m 755 bin/kill_diamond %{buildroot}%{_bindir}/kill_diamond
 
-
 install -p -D -m 755 tools/get_storage %{buildroot}%{_usr}/bin/get_storage
 install -p -D -m 644 tools/spot_info_list %{buildroot}%{_usr}/bin/spot_info_list
 install -p -D -m 755 tools/vsm-reporter.py %{buildroot}%{_usr}/bin/vsm-reporter
 install -p -D -m 755 bin/intergrate-cluster %{buildroot}%{_usr}/bin/intergrate-cluster
 %else
+install -p -D -m 755 bin/start_osd %{buildroot}%{_usr}/local/bin/start_osd
 install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/local/bin/refresh-osd-status
 install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/local/bin/refresh-cluster-status
 install -p -D -m 755 bin/check_xtrust_crudini %{buildroot}%{_usr}/local/bin/check_xtrust_crudini
@@ -417,6 +418,7 @@ exit 0
 
 
 %if 0%{?suse_version}
+%attr(-, root, root) %{_bindir}/start_osd
 %attr(-, root, root) %{_bindir}/vsm-rootwrap
 %attr(-, root, root) %{_bindir}/vsm-physical
 %attr(-, root, root) %{_bindir}/vsm-agent
@@ -461,6 +463,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-backup
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-restore
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/get_smart_info
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/start_osd
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/intergrate-cluster
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/import_ceph_conf
 

@@ -79,6 +79,7 @@ install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/bin bin/exp_ceph-mds_upgr
 # usr/local/bin/
 #---------------------------
 install -g root -o root -v -m 755 -d $VSM_ROOT_PATH/usr/local/bin
+install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/start_osd
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/refresh-osd-status
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/refresh-cluster-status
 install -g root -o vsm -v -m 755 -t $VSM_ROOT_PATH/usr/local/bin bin/check_xtrust_crudini
