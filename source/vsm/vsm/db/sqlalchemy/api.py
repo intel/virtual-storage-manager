@@ -4288,6 +4288,8 @@ def get_poolusage(context, poolusage_id):
         filter_by(id=poolusage_id).\
         first()
     return result
+<<<<<<< HEAD
+=======
 
 def latency_all_types(context, search_opts, session=None):#for latency
     # Get diamond collection interval
@@ -4444,3 +4446,4 @@ def get_metric_timestamp_range(context, search_opts, diamond_collect_interval, m
         if metrics_name:
             timestamp_end = get_max_timestamp_by_metrics_name(context, metrics_name) or timestamp_start
     return timestamp_start, timestamp_end
+>>>>>>> upstream/master

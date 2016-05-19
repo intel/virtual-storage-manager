@@ -1,0 +1,24 @@
+--- /usr/local/bin/vsm-controller	2016-04-25 14:34:51.000000000 +0300
++++ vsm-controller.changed	2016-05-11 11:30:02.361611152 +0300
+@@ -217,7 +217,7 @@
+ # Controller
+ #---------------------------------------------
+ 
+-#HOST_IP=`hostname -I | awk '{print $1}'`
++#HOST_IP=`hostname -I | awk '{print $2}'`
+ HOST_IP=`getip`
+ VSM_CONTROLLER_IP=${VSM_CONTROLLER_IP:-$HOST_IP}
+ 
+@@ -240,7 +240,11 @@
+     set_password KEYSTONE_VSM_SERVICE_PASSWORD
+     set_password MYSQL_DASHBOARD_PASSWORD
+     set_password VSM_HTTPS_PASSWORD
+-    [[ -e /etc/init.d/vsm-agent ]] && service vsm-agent stop
++    #[[ -e /etc/init.d/vsm-agent ]] && service vsm-agent stop
++    vsm_agent_status=$(service vsm-agent status|grep running | wc -l)
++    if [ $vsm_agent_status -gt 0]; then
++       service vsm-agent stop
++    fi
+ fi
+ 
+ if [[ $VSM_ROLE == "allinone" ]]; then

@@ -1,0 +1,13 @@
+--- /usr/local/bin/keys/https	2016-04-25 14:34:51.000000000 +0300
++++ https.changed	2016-05-11 12:09:35.071298404 +0300
+@@ -55,7 +55,9 @@
+     fi
+     sed -i "s,%HOSTNAME%,$host_name,g" /usr/local/bin/keys/exp_csr
+ 
+-    service apache2 restart
++    #service apache2 restart
++    service apache2 stop
++    service apache2 start
+     a2dissite default-ssl
+     rm -rf /etc/apache2/sites-enabled/default-ssl.conf
+     a2enmod ssl
