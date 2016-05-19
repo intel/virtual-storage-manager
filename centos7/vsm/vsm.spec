@@ -167,6 +167,7 @@ install -p -D -m 755 etc/init.d/vsm-scheduler %{buildroot}%{_initrddir}/vsm-sche
 #---------------------------
 
 install -d -m 755 %{buildroot}%{_bindir}/
+install -p -D -m 755 bin/start_osd %{buildroot}%{_usr}/local/bin/start_osd
 install -p -D -m 755 bin/vsm-api %{buildroot}%{_bindir}/vsm-api
 install -p -D -m 755 bin/vsm-agent %{buildroot}%{_bindir}/vsm-agent
 install -p -D -m 755 bin/vsm-physical %{buildroot}%{_bindir}/vsm-physical
@@ -178,16 +179,11 @@ install -p -D -m 755 bin/auto_key_gen %{buildroot}%{_bindir}/auto_key_gen
 install -p -D -m 755 bin/vsm-assist %{buildroot}%{_bindir}/vsm-assist
 install -p -D -m 755 bin/presentpool %{buildroot}%{_bindir}/presentpool
 install -p -D -m 755 bin/rbd_ls %{buildroot}%{_bindir}/rbd_ls
-install -p -D -m 755 bin/agent-token %{buildroot}%{_bindir}/agent-token
-install -p -D -m 755 bin/admin-token %{buildroot}%{_bindir}/admin-token
 install -p -D -m 755 bin/vsm-backup %{buildroot}%{_bindir}/vsm-backup
 install -p -D -m 755 bin/vsm-restore %{buildroot}%{_bindir}/vsm-restore
-install -p -D -m 755 bin/cluster_manifest %{buildroot}%{_usr}/local/bin/cluster_manifest
-install -p -D -m 755 bin/server_manifest  %{buildroot}%{_usr}/local/bin/server_manifest
 install -p -D -m 755 bin/refresh-osd-status %{buildroot}%{_usr}/local/bin/refresh-osd-status
 install -p -D -m 755 bin/refresh-cluster-status %{buildroot}%{_usr}/local/bin/refresh-cluster-status
 install -p -D -m 755 bin/check_xtrust_crudini %{buildroot}%{_usr}/local/bin/check_xtrust_crudini
-install -p -D -m 755 bin/getip  %{buildroot}%{_usr}/local/bin/getip
 install -p -D -m 755 bin/import_ceph_conf  %{buildroot}%{_usr}/local/bin/import_ceph_conf
 install -p -D -m 755 bin/get_smart_info %{buildroot}%{_bindir}/get_smart_info
 install -p -D -m 755 bin/kill_diamond %{buildroot}%{_bindir}/kill_diamond
@@ -250,6 +246,7 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_initrddir}/vsm-scheduler
 
 #%dir %{_bindir}
+%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/start_osd
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-rootwrap
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-physical
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-agent
@@ -263,8 +260,6 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-assist
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/presentpool
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/rbd_ls
-%config(noreplace) %attr(-, root, vsm) %{_bindir}/agent-token
-%config(noreplace) %attr(-, root, vsm) %{_bindir}/admin-token
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-backup
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-restore
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/get_smart_info
@@ -273,9 +268,6 @@ exit 0
 %config(noreplace) %attr(-, root, vsm) %{_bindir}/vsm-ceph-upgrade
 %config(noreplace) %attr(-, root, vsm) %{_usr}/sbin/nvme
 
-%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/getip
-%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/cluster_manifest
-%config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/server_manifest
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/refresh-osd-status
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/refresh-cluster-status
 %config(noreplace) %attr(-, root, vsm) %{_usr}/local/bin/check_xtrust_crudini
