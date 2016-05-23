@@ -82,20 +82,20 @@ AGENT_IPS=""
 IS_CHECK_DEPENDENCE_PACKAGE=False
 
 while [ $# -gt 0 ]; do
-  case "$1" in
-    -h| --help) usage ;;
-    -m| --manifest) shift; MANIFEST_PATH=$1 ;;
-    -r| --repo-path) shift; REPO_PATH=$1 ;;
-    -v| --version) shift; DEPENDENCE_BRANCH=$1 ;;
-    -u| --user) shift; USER=$1 ;;
-    -k| --key) shift; keyfile=$1; export SSH="ssh -i $keyfile -t "; export SCP="scp -i $keyfile" ;;
-    --prepare) IS_PREPARE=True ;;
-    --controller) shift; IS_CONTROLLER_INSTALL=True; CONTROLLER_IP=$1 ;;
-    --agent) shift; IS_AGENT_INSTALL=True; AGENT_IPS=${1//,/ } ;;
-    --check-dependence-package) shift; IS_CHECK_DEPENDENCE_PACKAGE=True ;;
-    *) shift ;;
-  esac
-  shift
+    case "$1" in
+        -h| --help) usage ;;
+        -m| --manifest) shift; MANIFEST_PATH=$1 ;;
+        -r| --repo-path) shift; REPO_PATH=$1 ;;
+        -v| --version) shift; DEPENDENCE_BRANCH=$1 ;;
+        -u| --user) shift; USER=$1 ;;
+        -k| --key) shift; keyfile=$1; export SSH="ssh -i $keyfile -t "; export SCP="scp -i $keyfile" ;;
+        --prepare) IS_PREPARE=True ;;
+        --controller) shift; IS_CONTROLLER_INSTALL=True; CONTROLLER_IP=$1 ;;
+        --agent) shift; IS_AGENT_INSTALL=True; AGENT_IPS=${1//,/ } ;;
+        --check-dependence-package) shift; IS_CHECK_DEPENDENCE_PACKAGE=True ;;
+        *) shift ;;
+    esac
+    shift
 done
 
 set -e
@@ -109,7 +109,7 @@ HOSTIP=`hostname -I`
 
 source $TOPDIR/installrc
 
-if [ -z $MANIFEST_PATH ]; then
+if [[ -z $MANIFEST_PATH ]]; then
     MANIFEST_PATH="manifest"
 fi
 
@@ -131,7 +131,7 @@ fi
 
 IS_CONTROLLER=0
 for ip in $HOSTIP; do
-    if [ $ip == $CONTROLLER_IP ]; then
+    if [[ $ip == $CONTROLLER_IP ]]; then
         IS_CONTROLLER=1
     fi
 done
@@ -140,7 +140,7 @@ if [[ $HOSTNAME == $CONTROLLER_IP ]]; then
     IS_CONTROLLER=1
 fi
 
-if [ $IS_CONTROLLER -eq 0 ]; then
+if [[ $IS_CONTROLLER -eq 0 ]]; then
     echo "[Info]: Running installer on non-cluster server."
 else
     echo "[Info]: Running installer on the controller server."
@@ -171,19 +171,20 @@ function add_on_exit()
 #            prepare
 #-------------------------------------------------------------------------------
 
-# make_me_super <user> <node>
-function make_me_super() {
-    MKMESUPER="$1 ALL=(ALL) NOPASSWD: ALL"
-    if [[ $IS_CONTROLLER -eq 1 && $2 == $CONTROLLER_IP ]]; then
+function make_me_super() {              # make_me_super <user> <node>
+    local user="$1"
+    local node="$2"
+    MKMESUPER="$user ALL=(ALL) NOPASSWD: ALL"
+    if [[ $IS_CONTROLLER -eq 1 && $node == $CONTROLLER_IP ]]; then
         if ! $SUDO -n true; then
-            $SUDO echo '$MKMESUPER' | $SUDO tee /etc/sudoers.d/$1
-            $SUDO chmod 0440 /etc/sudoers.d/$1
+            $SUDO echo '$MKMESUPER' | $SUDO tee /etc/sudoers.d/$user
+            $SUDO chmod 0440 /etc/sudoers.d/$user
         fi
     else
-        $SSH $USER@$2 "bash -x -s" <<EOF
+        $SSH $user@$node "bash -x -s" <<EOF
 if ! $SUDO -n true; then
-    $SUDO echo '$MKMESUPER' | $SUDO tee /etc/sudoers.d/$1
-    $SUDO chmod 0440 /etc/sudoers.d/$1
+    $SUDO echo '$MKMESUPER' | $SUDO tee /etc/sudoers.d/$user
+    $SUDO chmod 0440 /etc/sudoers.d/$user
 fi
 exit 0
 EOF
@@ -192,7 +193,7 @@ EOF
 
 function check_vsm_package() {
     if [[ ! -d vsmrepo ]]; then
-        echo "You must have the vsmrepo folder, please check and try again."
+        echo "[Error]: You must have the vsmrepo folder; please check and try again."
         exit 1
     fi
     cd vsmrepo
@@ -202,16 +203,17 @@ function check_vsm_package() {
     IS_VSM_DEPLOY=`ls|grep vsm-deploy.*.deb|wc -l`
     if [[ $IS_PYTHON_VSMCLIENT -gt 0 ]] && [[ $IS_VSM -gt 0 ]] &&\
         [[ $IS_VSM_DASHBOARD -gt 0 ]] && [[ $IS_VSM_DEPLOY -gt 0 ]]; then
-        echo "The vsm pachages have been already prepared"
+        echo "[Info]: The vsm packages have already been prepared."
     else
-        echo "please check the vsm packages, then try again"
+        echo "[Error]: Please check the vsm packages and try again."
         exit 1
     fi
     cd $TOPDIR
 }
 
-function set_iptables_and_selinux() { # set_iptables_and_selinux <node>
-    $SSH $USER@$1 "bash -x -s" <<EOF
+function set_iptables_and_selinux() {   # set_iptables_and_selinux <node>
+    local node="$1"
+    $SSH $USER@$node "bash -x -s" <<EOF
 service iptables stop
 chkconfig iptables off
 sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
@@ -269,124 +271,102 @@ EOF
 }
 
 function prepare() {
+    echo "[Info]: Preparing for Installation."
     check_vsm_package
-#    set_iptables_and_selinux
+    #set_iptables_and_selinux $CONTROLLER_IP
     download_dependencies
     prepare_repo
-}
-
-function set_remote_repo() {
-    $SSH $USER@$1 "bash -x -s" <<EOF
-$SUDO rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list
-$SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo
-EOF
-    $SCP -r $REPO_PATH/vsm-dep-repo $USER@$1:/tmp
-    $SSH $USER@$1 "$SUDO mv /tmp/vsm-dep-repo /opt"
-    $SCP -r vsmrepo $USER@$1:/tmp
-    $SSH $USER@$1 "$SUDO mv /tmp/vsmrepo /opt"
-    $SSH $USER@$1 "bash -x -s" <<EOF
-$SUDO rm -f /tmp/apt.conf
-test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp
-grep "APT::Get::AllowUnauthenticated" /tmp/apt.conf >/dev/null 2>&1\
-    || echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
-$SUDO mv /tmp/apt.conf /etc/apt
-EOF
-#    $SCP apt.conf $USER@$1:/etc/apt
-    $SCP vsm.list $USER@$1:/tmp
-    $SSH $USER@$1 "$SUDO mv /tmp/vsm.list /etc/apt/sources.list.d"
-    $SCP vsm-dep.list $USER@$1:/tmp
-    $SSH $USER@$1 "$SUDO mv /tmp/vsm-dep.list /etc/apt/sources.list.d"
-    $SSH $USER@$1 "$SUDO apt-get update"
-}
-
-function set_local_repo() {
-    $SUDO rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list
-    $SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo
-    $SUDO cp -r $REPO_PATH/vsm-dep-repo /opt
-    $SUDO cp -r vsmrepo /opt
-    $SUDO rm -f /tmp/apt.conf
-    test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp
-    grep "APT::Get::AllowUnauthenticated" /tmp/apt.conf >/dev/null 2>&1\
-        || echo "APT::Get::AllowUnauthenticated 1 ;" | $SUDO tee --append /tmp/apt.conf >/dev/null
-    $SUDO mv /tmp/apt.conf /etc/apt
-    $SUDO cp vsm.list /etc/apt/sources.list.d
-    $SUDO cp vsm-dep.list /etc/apt/sources.list.d
-    $SUDO apt-get update
-}
-
-function check_manifest() {
-    if [[ $1 == $CONTROLLER_IP ]]; then
-        if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/cluster.manifest ]]; then
-            echo "Please check the manifest, then try again."
-            exit 1
-        fi
-    else
-        if [[ ! -d $MANIFEST_PATH/$1 ]] || [[ ! -f $MANIFEST_PATH/$1/server.manifest ]]; then
-            echo "Please check the manifest, then try again."
-            exit 1
-        fi
-    fi
 }
 
 #-------------------------------------------------------------------------------
 #            controller
 #-------------------------------------------------------------------------------
 
-function setup_remote_controller() {
-    $SSH $USER@$CONTROLLER_IP "$SUDO rm -rf /etc/manifest/cluster_manifest"
-    $SCP $MANIFEST_PATH/$CONTROLLER_IP/cluster.manifest $USER@$CONTROLLER_IP:/tmp
-    $SSH $USER@$CONTROLLER_IP "$SUDO mv /tmp/cluster.manifest /etc/manifest"
-    $SSH $USER@$CONTROLLER_IP "$SUDO chown root:vsm /etc/manifest/cluster.manifest; $SUDO chmod 755 /etc/manifest/cluster.manifest"
-    is_cluster_manifest_error=`$SSH $USER@$CONTROLLER_IP "cluster_manifest|grep error|wc -l"`
-    if [ $is_cluster_manifest_error -gt 0 ]; then
-        echo "please check the cluster.manifest, then try again"
+function execute() {                    # execute "<command>" [[<user>@]<host>]
+    local command="$1"
+    local remote="$2"
+    [[ $remote ]] && eval $SSH $remote "\"$command\"" || eval "$command"
+}
+
+function copy() {                       # copy [-<op1> -<op2> ...] <src> <dst> [[<user>@]<host>]
+    local opt
+    while [[ $1 == -* ]]; do opts+=" $1"; shift; done
+    local src="$1"
+    local dst="$2"
+    local remote="$3"
+    [[ $remote ]] && $SCP$opts $src $remote:$dst || cp$opts $src $dst
+}
+
+function set_repo() {                   # set_repo [[<user>@]<host>]
+    local remote="$1"
+    execute "$SUDO rm -rf /etc/apt/sources.list.d/vsm.list /etc/apt/sources.list.d/vsm-dep.list" $remote
+    execute "$SUDO rm -rf /opt/vsm-dep-repo /opt/vsmrepo" $remote
+    copy -r "$REPO_PATH/vsm-dep-repo" /tmp $remote
+    execute "$SUDO mv /tmp/vsm-dep-repo /opt" $remote
+    copy -r vsmrepo /tmp $remote
+    execute "$SUDO mv /tmp/vsmrepo /opt" $remote
+    execute "$SUDO rm -f /tmp/apt.conf" $remote
+    execute "test -f /etc/apt/apt.conf && $SUDO mv /etc/apt/apt.conf /tmp" $remote
+    execute "grep 'APT::Get::AllowUnauthenticated[[:space:]]*1' /tmp/apt.conf >/dev/null 2>&1 ||
+        echo 'APT::Get::AllowUnauthenticated 1;' | $SUDO tee --append /tmp/apt.conf >/dev/null" $remote
+    execute "$SUDO mv /tmp/apt.conf /etc/apt" $remote
+    copy vsm.list /tmp $remote
+    execute "$SUDO mv /tmp/vsm.list /etc/apt/sources.list.d" $remote
+    copy vsm-dep.list /tmp $remote
+    execute "$SUDO mv /tmp/vsm-dep.list /etc/apt/sources.list.d" $remote
+    execute "$SUDO apt-get update" $remote
+}
+
+function check_manifest() {             # check_manifest [<node>] - no node implies controller
+    local node="$1"
+    local node_type
+    [[ $node ]] && node_type="server" || { node_type="cluster"; node="$CONTROLLER_IP"; }
+    if [[ ! -d $MANIFEST_PATH/$node ]] || [[ ! -f $MANIFEST_PATH/$node/$node_type.manifest ]]; then
+        echo "[Error]: Please check the $node_type manifest for [$node] and try again."
+        exit 1
+    fi
+}
+
+function setup_controller() {           # setup_remote_controller [[<user>@]<host>]
+    local remote="$1"
+    execute "$SUDO rm -rf /etc/manifest/cluster_manifest" $remote
+    copy "$MANIFEST_PATH/$CONTROLLER_IP/cluster.manifest" /tmp $remote
+    execute "$SUDO mv /tmp/cluster.manifest /etc/manifest" $remote
+    execute "$SUDO chown root:vsm /etc/manifest/cluster.manifest" $remote
+    execute "$SUDO chmod 755 /etc/manifest/cluster.manifest" $remote
+    if [[ $(execute "cluster_manifest|grep error|wc -l" $remote) -gt 0 ]]; then
+        echo "[Error]: Please check the cluster.manifest and try again."
         exit 1
     else
         if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
-            $SSH $USER@$CONTROLLER_IP "$SUDO vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN"
-            $SSH $USER@$CONTROLLER_IP "if [[ `$SUDO service keystone status|grep running|wc -l` == 1 ]]; then $SUDO service keystone stop; fi"
+            execute "$SUDO vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN" $remote
+            execute "$SUDO service keystone status >/dev/null 2>&1 && $SUDO service keystone stop" $remote
         else
-            $SSH $USER@$CONTROLLER_IP "$SUDO vsm-controller"
+            execute "$SUDO vsm-controller" $remote
         fi
     fi
 }
 
-function install_controller() {
+function install_controller() {         # install_controller
+    echo "[Info]: Installing Controller."
     make_me_super $USER $CONTROLLER_IP
-    check_manifest $CONTROLLER_IP
+    check_manifest
 
-    if [[ $IS_CONTROLLER -eq 0 ]]; then
-        set_remote_repo $CONTROLLER_IP
-        $SSH $USER@$CONTROLLER_IP "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond"
-        $SSH $USER@$CONTROLLER_IP "$SUDO preinstall controller"
-        setup_remote_controller
-    else
-        set_local_repo
-        $SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond
-        $SUDO preinstall controller
-        $SUDO rm -rf /etc/manifest/cluster.manifest
-        $SUDO cp $MANIFEST_PATH/$CONTROLLER_IP/cluster.manifest /etc/manifest
-        $SUDO chown root:vsm /etc/manifest/cluster.manifest
-        $SUDO chmod 755 /etc/manifest/cluster.manifest
-        if [ `cluster_manifest|grep error|wc -l` -gt 0 ]; then
-            echo "please check the cluster.manifest, then try again"
-            exit 1
-        else
-            if [[ $OS_KEYSTONE_HOST ]] && [[ $OS_KEYSTONE_ADMIN_TOKEN ]]; then
-                $SUDO vsm-controller --keystone-host $OS_KEYSTONE_HOST --keystone-admin-token $OS_KEYSTONE_ADMIN_TOKEN
-                if [[ `$SUDO service keystone status|grep running|wc -l` == 1 ]]; then $SUDO service keystone stop; fi
-            else
-                $SUDO vsm-controller
-            fi
-        fi
-    fi
+    local remote=""
+    [[ $IS_CONTROLLER -eq 0 ]] && remote="$USER@$CONTROLLER_IP"
+
+    set_repo $remote
+    execute "$SUDO apt-get install -y vsm vsm-deploy vsm-dashboard python-vsmclient diamond" $remote
+    execute "$SUDO preinstall controller" $remote
+    setup_controller $remote
 }
 
 #-------------------------------------------------------------------------------
 #            agent
 #-------------------------------------------------------------------------------
 
-function kill_diamond() { # kill_diamond <node>
+function kill_diamond() {               # kill_diamond <node>
+    local node="$1"
     cat <<"EOF" >kill_diamond.sh
 #!/bin/bash
 diamond_pid=`ps -ef|grep diamond|grep -v grep|grep -v bash|grep -v kill_diamond|awk -F " " '{print $2}'`
@@ -395,8 +375,8 @@ for pid in $diamond_pid; do
 done
 exit 0
 EOF
-    $SCP kill_diamond.sh $USER@$1:/tmp
-    $SSH $USER@$1 "bash -x -s" <<EOF
+    $SCP kill_diamond.sh $USER@$node:/tmp
+    $SSH $USER@$node "bash -x -s" <<EOF
 $SUDO chmod 755 /tmp/kill_diamond.sh
 cd /tmp
 ./kill_diamond.sh
@@ -405,9 +385,10 @@ exit 0
 EOF
 }
 
-function install_setup_diamond() {
-#    kill_diamond $1
-    $SSH $USER@$1 "$SUDO apt-get install -y diamond"
+function install_setup_diamond() {      # install_setup_diamond <node>
+    local node="$1"
+#    kill_diamond $node
+    $SSH $USER@$node "$SUDO apt-get install -y diamond"
     DEPLOYRC_FILE="/etc/vsmdeploy/deployrc"
     if [[ $IS_CONTROLLER -eq 0 ]]; then
         $SCP $USER@$CONTROLLER_IP:$DEPLOYRC_FILE /tmp
@@ -415,16 +396,19 @@ function install_setup_diamond() {
     else
         source $DEPLOYRC_FILE
     fi
-    #VSMMYSQL_FILE_PATH=`$SSH $USER@$1 "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
-    #HANDLER_PATH=`$SSH $USER@$1 "$SUDO find / -name handler|grep python"`
-    #DIAMOND_CONFIG_PATH=`$SSH $USER@$1 "$SUDO find / -name diamond|grep /etc/diamond"`
+
+    #local VSMMYSQL_FILE_PATH=`$SSH $USER@$node "$SUDO find / -name vsmmysql.py|grep vsm/diamond"`
+    #local HANDLER_PATH=`$SSH $USER@$node "$SUDO find / -name handler|grep python"`
+    #local DIAMOND_CONFIG_PATH=`$SSH $USER@$node "$SUDO find / -name diamond|grep /etc/diamond"`
+
     PY_VER=`python -V 2>&1 |cut -d' ' -f2 |cut -d. -f1,2`
     echo "Python version: $PY_VER"
-    VSMMYSQL_FILE_PATH="/usr/local/lib/python${PY_VER}/dist-packages/vsm/diamond/handlers/vsmmysql.py"
-    HANDLER_PATH="/usr/lib/pymodules/python${PY_VER}/diamond/handler"
-    DIAMOND_CONFIG_PATH="/etc/diamond"
 
-    $SSH $USER@$1 "bash -x -s" <<EOF
+    local VSMMYSQL_FILE_PATH="/usr/local/lib/python${PY_VER}/dist-packages/vsm/diamond/handlers/vsmmysql.py"
+    local HANDLER_PATH="/usr/lib/pymodules/python${PY_VER}/diamond/handler"
+    local DIAMOND_CONFIG_PATH="/etc/diamond"
+
+    $SSH $USER@$node "bash -x -s" <<EOF
 $SUDO cp $DIAMOND_CONFIG_PATH/diamond.conf.example $DIAMOND_CONFIG_PATH/diamond.conf
 $SUDO cp $VSMMYSQL_FILE_PATH $HANDLER_PATH
 $SUDO sed -i "s/MySQLHandler/VSMMySQLHandler/g" $DIAMOND_CONFIG_PATH/diamond.conf
@@ -457,39 +441,38 @@ exit 0
 EOF
 }
 
-function setup_remote_agent() { # setup_remote_agent <node>
+function setup_remote_agent() {         # setup_remote_agent <node>
+    local node="$1"
     # update /etc/hosts
-    #update_hosts $1 
-    $SSH $USER@$1 "$SUDO rm -rf /etc/manifest/server.manifest"
-    #$SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
-    #old_str=`cat $MANIFEST_PATH/$1/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
-    #$SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$1/server.manifest
+    #update_hosts $node
+    $SSH $USER@$node "$SUDO rm -rf /etc/manifest/server.manifest"
+    #$SUDO sed -i "s/token-tenant/$TOKEN/g" $MANIFEST_PATH/$node/server.manifest
+    #old_str=`cat $MANIFEST_PATH/$node/server.manifest| grep ".*-.*" | grep -v by | grep -v "\["`
+    #$SUDO sed -i "s/$old_str/$TOKEN/g" $MANIFEST_PATH/$node/server.manifest
     TOKEN=`cat ./.token`
-    $SUDO sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$1/server.manifest
-    $SCP $MANIFEST_PATH/$1/server.manifest $USER@$1:/tmp
-    $SSH $USER@$1 "$SUDO mv /tmp/server.manifest /etc/manifest"
-    $SSH $USER@$1 "$SUDO chown root:vsm /etc/manifest/server.manifest; $SUDO chmod 755 /etc/manifest/server.manifest"
-    is_server_manifest_error=`$SSH $USER@$1 "unset http_proxy;server_manifest" |grep ERROR|wc -l`
+    $SUDO sed -i "/^\[auth_key\]$/,/^\[.*\]/ s/^.*-.*$/$TOKEN/" $MANIFEST_PATH/$node/server.manifest
+    $SCP $MANIFEST_PATH/$node/server.manifest $USER@$node:/tmp
+    $SSH $USER@$node "$SUDO mv /tmp/server.manifest /etc/manifest"
+    $SSH $USER@$node "$SUDO chown root:vsm /etc/manifest/server.manifest; $SUDO chmod 755 /etc/manifest/server.manifest"
+    is_server_manifest_error=`$SSH $USER@$node "unset http_proxy;server_manifest" |grep ERROR|wc -l`
     if [ $is_server_manifest_error -gt 0 ]; then
-        echo "[warning]: The server.manifest in $1 is wrong, so fail to setup in $1 storage node"
+        echo "[Warning]: The server.manifest on [$node] is wrong; failed to setup agent on [$node] storage node."
     else
-        $SSH $USER@$1 "unset http_proxy;$SUDO vsm-node"
+        $SSH $USER@$node "unset http_proxy;$SUDO vsm-node"
     fi
 }
 
-function install_agent() { # install_agent <node>
-    echo "=== Install agent [$1] start."
-    make_me_super $USER $1
+function install_agent() {              # install_agent <node>
+    local node="$1"
+    echo "[Info]: Installing Agent on [$node]."
+    make_me_super $USER $node
     generate_token
-    check_manifest $1
-    set_remote_repo $1
-    $SSH $USER@$1 "$SUDO apt-get install -y vsm vsm-deploy"
-    $SSH $USER@$1 "$SUDO preinstall agent"
-#    $SSH $USER@$1 "if [ -r /etc/init/ceph-all.conf ] && [ ! -e /etc/init/ceph.conf ]; then sudo ln -s /etc/init/ceph-all.conf /etc/init/ceph.conf; sudo initctl reload-configuration; fi"
-
-    setup_remote_agent $1
-    install_setup_diamond $1
-    echo "=== Install agent [$1] complete."
+    check_manifest $node
+    set_repo $USER@$node
+    $SSH $USER@$node "$SUDO apt-get install -y vsm vsm-deploy"
+    $SSH $USER@$node "$SUDO preinstall agent"
+    setup_remote_agent $node
+    install_setup_diamond $node
 }
 
 function generate_token() {
@@ -497,16 +480,18 @@ function generate_token() {
     echo -n $TOKEN >./.token
 }
 
-function update_hosts() { # update_hosts <node>
+function update_hosts() {               # update_hosts <node>
+    local node="$1"
     cp /etc/hosts ./.hosts
-    hostname=`$SSH $USER@$1 "hostname" |tr -d '\r'`
-    echo "$1    $hostname" >>./.hosts
+    hostname=`$SSH $USER@$node "hostname" |tr -d '\r'`
+    echo "$node    $hostname" >>./.hosts
     cp ./.hosts /etc/hosts
 }
 
-function sync_hosts() { # sync_hosts <node>
-    $SCP /etc/hosts $USER@$1:~/.hosts
-    $SSH $USER@$1 "$SUDO mv ~/.hosts /etc/hosts"
+function sync_hosts() {                 # sync_hosts <node>
+    local node="$1"
+    $SCP /etc/hosts $USER@$node:~/.hosts
+    $SSH $USER@$node "$SUDO mv ~/.hosts /etc/hosts"
 }
 
 #-------------------------------------------------------------------------------
@@ -516,59 +501,102 @@ function sync_hosts() { # sync_hosts <node>
 exit_code=0
 
 # if --prepare option specified OR no options specified
-if [[ $IS_PREPARE == True ]]; then
-    prepare
+if [[ "${IS_PREPARE}" == True ]]; then
+    set +e
+    ( prepare )
+    prep_error="$?"
+    set -e
+    set +o xtrace
+    if [[ "${prep_error}" -ne 0 ]]; then
+        echo "[Error]: Prepare stage failed with error: ${prep_error}."
+        exit "${prep_error}"
+    fi
+    set -o xtrace
 fi
 
 # if --controller option specified OR no options specified
-if [[ $IS_CONTROLLER_INSTALL == True ]]; then
-    install_controller
+if [[ "${IS_CONTROLLER_INSTALL}" == True ]]; then
+    set +e
+    ( install_controller )
+    ctrl_error="$?"
+    set -e
+    set +o xtrace
+    if [[ "${ctrl_error}" -ne 0 ]]; then
+        echo "[Error]: Controller installation failed with error: $ctrl_error."
+        exit "${ctrl_error}"
+    fi
+    set -o xtrace
 fi
 
 # if --agent option specified OR no options specified
-if [[ $IS_AGENT_INSTALL == True ]]; then
-    pids=""
-    tf_list=""
-    for ip_or_hostname in $AGENT_IPS; do
-        tf=$(mktemp)
-        tf_list+=" ${tf}"
-        echo "=== Starting asynchronous agent install [$ip_or_hostname] ..."
-        ( install_agent $ip_or_hostname >${tf} 2>&1 ) &
-        pids+=" $!"
+if [[ "${IS_AGENT_INSTALL}" == True ]]; then
+    declare -A pids
+    declare -A tf_list
+    echo "[Info]: Starting Async Agent Installation on [${AGENT_IPS}]."
+    for ip_or_hostname in ${AGENT_IPS}; do
+        tf="$(mktemp)"
+        tf_list[${ip_or_hostname}]="${tf}"
+        ( install_agent "${ip_or_hostname}" >${tf} 2>&1 ) &
+        pids[${ip_or_hostname}]="$!"
     done
 
     # wait for agents to complete installing in background
-    for p in $pids; do
-        if ! wait $p; then
+    declare -A errors
+    for ip_or_hostname in ${AGENT_IPS}; do
+        set +e
+        wait "${pids[${ip_or_hostname}]}"
+        errors[${ip_or_hostname}]="$?"
+        set -e
+        if [[ "${errors[${ip_or_hostname}]}" -ne 0 ]]; then
             exit_code=1
         fi
     done
 
     # cat each agent log to the screen in startup order
-    for tf in ${tf_list}; do cat ${tf}; rm -f ${tf}; done
-
-    # sync up /etc/hosts to agents
-    for ip_or_hostname in $AGENT_IP_LIST; do
-        echo "sync /etc/hosts to agents"
-        #sync_hosts $ip_or_hostname
+    # capture the log errors in case of failure
+    for ip_or_hostname in ${AGENT_IPS}; do
+        cat "${tf_list[${ip_or_hostname}]}"
     done
 
-    if [[ $IS_CONTROLLER_INSTALL == False ]]; then
+    # sync up /etc/hosts to agents
+    for ip_or_hostname in ${AGENT_IPS}; do
+        echo "sync /etc/hosts to agents"
+        #sync_hosts "${ip_or_hostname}"
+    done
+
+    if [[ "${IS_CONTROLLER_INSTALL}" == False ]]; then
         # sync up /etc/hosts to controller
         echo "sync /etc/hosts to controller"
-        #sync_hosts $CONTROLLER_IP
+        #sync_hosts "${CONTROLLER_IP}"
     fi
 
-    test ${exit_code} -ne 0 && echo "ERROR: At least one agent failed to install properly."
+    # print last 10 lines of each failing agent's log OR print SUCCESS
+    set +o xtrace
+    if [[ "${exit_code}" -ne 0 ]]; then
+        echo "[Error]: One or more agent installations failed."
+        echo "[Error]: Displaying the last 10 lines of failed agent output:"
+        for ip_or_hostname in ${AGENT_IPS}; do
+            if [[ "${errors[${ip_or_hostname}]}" -ne 0 ]]; then
+                echo "[Error]: Agent [${ip_or_hostname}] failed:"
+                echo "..."
+                tail -n 10 "${tf_list[${ip_or_hostname}]}"
+            fi
+        done
+    fi
+    set -o xtrace
+
+    # delete all temporary agent logs
+    for ip_or_hostname in ${AGENT_IPS}; do
+        rm -f "${tf_list[${ip_or_hostname}]}"
+    done
 fi
 
 #-------------------------------------------------------------------------------
 #            finish auto deploy
 #-------------------------------------------------------------------------------
 
-echo "Finished."
-
 set +o xtrace
 
-exit $exit_code
+echo "[Info]: Finished - exit code: ${exit_code}."
 
+exit "${exit_code}"
