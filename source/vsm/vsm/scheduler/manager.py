@@ -1710,14 +1710,19 @@ class SchedulerManager(manager.Manager):
             try:
                 _update("Start rgw")
                 LOG.info("start rgw service, host = %s" % rgw_node['host'])
-                self._agent_rpcapi.rgw_create(context, host=rgw_node['host'],
-                                              server_name=rgw_node['host'],
-                                              rgw_instance_name="radosgw.gateway",
-                                              is_ssl=False, uid="johndoe",
-                                              display_name="John Doe",
-                                              email="john@example.comjohn@example.com",
-                                              sub_user="johndoe:swift",
-                                              access="full", key_type="swift")
+                self._agent_rpcapi.rgw_create(context,
+                                              name="radosgw.gateway",
+                                              host=rgw_node['host'],
+                                              keyring="/etc/ceph/keyring.radosgw.gateway",
+                                              log_file="/var/log/ceph/radosgw.gateway.log",
+                                              rgw_frontends="civetweb port=80",
+                                              is_ssl=False,
+                                              s3_user_uid="johndoe",
+                                              s3_user_display_name="John Doe",
+                                              s3_user_email="john@example.com",
+                                              swift_user_subuser="johndoe:swift",
+                                              swift_user_access="full",
+                                              swift_user_key_type="swift")
             except:
                 _update("ERROR: rgw")
 
