@@ -3268,53 +3268,45 @@ class CephDriver(object):
             utils.execute("service", "openstack-cinder-volume", "restart", run_as_root=True)
             LOG.info("Restart openstack-cinder-api and openstack-cinder-volume successfully")
 
-    def create_keyring_and_key_for_rgw(self, context, rgw_instance_name,
-                                       rgw_keyring_path="/etc/ceph"):
-        rgw_keyring = rgw_keyring_path + "/keyring." + rgw_instance_name
+    def create_keyring_and_key_for_rgw(self, context, name, keyring):
         try:
-            utils.execute("rm", rgw_keyring, run_as_root=True)
+            utils.execute("rm", keyring, run_as_root=True)
         except:
             pass
-        utils.execute("ceph-authtool", "--create-keyring", rgw_keyring,
+        utils.execute("ceph-authtool", "--create-keyring", keyring,
                       run_as_root=True)
-        utils.execute("chmod", "+r", rgw_keyring, run_as_root=True)
+        utils.execute("chmod", "+r", keyring, run_as_root=True)
         try:
-            utils.execute("ceph", "auth", "del", "client." + rgw_instance_name,
-                          run_as_root=True)
+            utils.execute("ceph", "auth", "del", "client." + name, run_as_root=True)
         except:
             pass
-        utils.execute("ceph-authtool", rgw_keyring, "-n", "client." + rgw_instance_name,
+        utils.execute("ceph-authtool", keyring, "-n", "client." + name,
                       "--gen-key", run_as_root=True)
-        utils.execute("ceph-authtool", "-n", "client." + rgw_instance_name,
+        utils.execute("ceph-authtool", "-n", "client." + name,
                       "--cap", "osd", "allow rwx", "--cap", "mon", "allow rw",
-                      rgw_keyring, run_as_root=True)
+                      keyring, run_as_root=True)
         utils.execute("ceph", "-k", FLAGS.keyring_admin, "auth", "add",
-                      "client." + rgw_instance_name, "-i", rgw_keyring,
-                      run_as_root=True)
+                      "client." + name, "-i", keyring, run_as_root=True)
 
-    def add_rgw_conf_into_ceph_conf(self, context, server_name, rgw_instance_name):
+    def add_rgw_conf_into_ceph_conf(self, context, name, host, keyring,
+                                    log_file, rgw_frontends):
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        rgw_section = "client." + str(rgw_instance_name)
-        host = server_name
-        keyring = "/etc/ceph/keyring." + str(rgw_instance_name)
-        rsp = "/var/run/ceph/radosgw.sock"
-        log_file = "/var/log/ceph/radosgw.log"
-        rgw_frontends = "\"civetweb port=80\""
-        config.add_rgw(rgw_section, host, keyring, rsp, log_file, rgw_frontends)
+        rgw_section = "client." + str(name)
+        config.add_rgw(rgw_section, host, keyring, log_file, rgw_frontends)
         config.save_conf(rgw=True)
         LOG.info("+++++++++++++++end add_rgw_conf_into_ceph_conf")
 
     def create_default_pools_for_rgw(self, context):
-        utils.execute("ceph", "osd", "pool", "create", ".rgw", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".rgw.control", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".rgw.gc", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".log", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".intent-log", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".usage", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".users", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".users.email", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".users.swift", 100, 100, run_as_root=True)
-        utils.execute("ceph", "osd", "pool", "create", ".users.uid", 100, 100, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".rgw", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".rgw.control", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".rgw.gc", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".log", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".intent-log", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".usage", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.email", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.swift", 8, 8, run_as_root=True)
+        utils.execute("ceph", "osd", "pool", "create", ".users.uid", 8, 8, run_as_root=True)
 
 
 class DbDriver(object):
