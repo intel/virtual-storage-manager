@@ -2930,8 +2930,8 @@ class CephDriver(object):
                 sum_dict = self.get_ceph_status()
 
             # newer versions of 'ceph status' don't display mdsmap - use 'ceph mds dump' instead
-            if not 'mdsmap' in sum_dict:
-                sum_dict['mdsmap'] = self._run_cmd_to_json(['ceph', 'mds', 'dump'])
+            # if not 'mdsmap' in sum_dict:
+            sum_dict['mdsmap'] = self._run_cmd_to_json(['ceph', 'mds', 'dump'])
 
             if sum_dict:
                 if sum_type == FLAGS.summary_type_pg:
@@ -2961,20 +2961,16 @@ class CephDriver(object):
 
     def _mds_summary(self, sum_dict):
         if sum_dict:
-            mdsmap = sum_dict.get('mdsmap', '')
-            if not mdsmap:
-                return None
-            mds_dict = self.get_mds_dump()
-            if mds_dict:
-                mdsmap['failed'] = len(mds_dict['failed'])
-                mdsmap['stopped'] = len(mds_dict['stopped'])
-                mdsmap['data_pools'] = mds_dict['data_pools']
-                mdsmap['metadata_pool'] = mds_dict['metadata_pool']
-            else:
-                mdsmap['failed'] = -1
-                mdsmap['stopped'] = -1
-                mdsmap['data_pools'] = []
-                mdsmap['metadata_pool'] = []
+            sum_dict = sum_dict.get("mdsmap")
+            mdsmap = {}
+            mdsmap['max'] = sum_dict['max_mds']
+            mdsmap['up'] = len(sum_dict['up'])
+            mdsmap['epoch'] = sum_dict['epoch']
+            mdsmap['in'] = len(sum_dict['in'])
+            mdsmap['failed'] = len(sum_dict['failed'])
+            mdsmap['stopped'] = len(sum_dict['stopped'])
+            mdsmap['data_pools'] = sum_dict['data_pools']
+            mdsmap['metadata_pool'] = sum_dict['metadata_pool']
             return json.dumps(mdsmap)
         return None
 
