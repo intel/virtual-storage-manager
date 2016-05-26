@@ -2378,27 +2378,19 @@ class AgentManager(manager.Manager):
         LOG.info('get_default_pg_num_by_storage_group:%s'%pg_num_default)
         return pg_num_default
 
-    def rgw_create(self, context, server_name, rgw_instance_name, is_ssl,
-                   uid, display_name, email, sub_user, access, key_type):
-        LOG.info("++++++++++++++++++++++++++rgw_create")
-        self.ceph_driver.create_keyring_and_key_for_rgw(context, rgw_instance_name)
-        self.ceph_driver.add_rgw_conf_into_ceph_conf(context, server_name,
-                                                     rgw_instance_name)
+    def rgw_create(self, context, name, host, keyring, log_file, rgw_frontends,
+                   is_ssl, s3_user_uid, s3_user_display_name, s3_user_email,
+                   swift_user_subuser, swift_user_access, swift_user_key_type):
+        LOG.info("Begin to create radosgw when creating ceph cluster")
+        self.ceph_driver.create_keyring_and_key_for_rgw(context, name, keyring)
+        self.ceph_driver.add_rgw_conf_into_ceph_conf(context, name, host, keyring,
+                                                     log_file, rgw_frontends)
         try:
-            utils.execute("ls", "/var/lib/ceph/radosgw/ceph-" + rgw_instance_name,
-                          run_as_root=True)
+            utils.execute("ls", "/var/lib/ceph/radosgw/ceph-" + name, run_as_root=True)
         except:
-            utils.execute("mkdir", "-p", "/var/lib/ceph/radosgw/ceph-" + rgw_instance_name,
+            utils.execute("mkdir", "-p", "/var/lib/ceph/radosgw/ceph-" + name,
                           run_as_root=True)
-        self.ceph_driver.create_default_pools_for_rgw(context)
-        # utils.execute("sed", "-i", "s/gateway/%s/g" % rgw_instance_name, "/var/www/s3gw.fcgi",
-        #               run_as_root=True)
-        # utils.execute("service", "ceph", "restart", run_as_root=True)
-        # try:
-        #     utils.execute("service", "apache2", "restart", run_as_root=True)
-        #     LOG.info("==========sudo service apache2 restart")
-        # except:
-        #     utils.execute("service", "httpd", "restart", run_as_root=True)
+        # self.ceph_driver.create_default_pools_for_rgw(context)
 
         def _get_os():
             (distro, release, codename) = platform.dist()
@@ -2412,15 +2404,17 @@ class AgentManager(manager.Manager):
             ceph_v = "hammer"
         elif "9.2." in ceph_version:
             ceph_v = "infernalis"
+        elif "10.2" in ceph_version:
+            ceph_v = "jewel"
         distro = _get_os()
         if distro.lower() == "centos":
             if ceph_v != "hammer":
                 try:
                     utils.execute("killall", "radosgw", run_as_root=True)
-                    utils.execute("radosgw", "--id=%s" % rgw_instance_name, run_as_root=True)
+                    utils.execute("radosgw", "--id=%s" % name, run_as_root=True)
                 except:
-                    utils.execute("radosgw", "--id=%s" % rgw_instance_name, run_as_root=True)
-                LOG.info("=======sudo radosgw --id=%s" % rgw_instance_name)
+                    utils.execute("radosgw", "--id=%s" % name, run_as_root=True)
+                LOG.info("=======sudo radosgw --id=%s" % name)
             else:
                 utils.execute("ceph-radosgw", "restart", run_as_root=True)
                 LOG.info("=======sudo /etc/init.d/ceph-radosgw restart")
@@ -2428,14 +2422,33 @@ class AgentManager(manager.Manager):
             utils.execute("radosgw", "restart", run_as_root=True)
             LOG.info("=======sudo /etc/init.d/radosgw restart")
 
-        utils.execute("radosgw-admin", "user", "create", "--uid=%s" % str(uid),
-                      "--display-name=%s" % str(display_name), "--email=%s" % str(email),
+        time.sleep(5)
+        utils.execute("radosgw-admin", "user", "create", "--uid=%s" % str(s3_user_uid),
+                      "--display-name='%s'" % str(s3_user_display_name),
+                      "--email=%s" % str(s3_user_email), run_as_root=True)
+        time.sleep(5)
+        out, err = utils.execute("radosgw-admin", "user", "info", "--uid=%s" % str(s3_user_uid),
+                                 "-f", "json")
+        out = json.loads(out)
+        keys = out['keys']
+        for key in keys:
+            if key['user'] == s3_user_uid:
+                user_secret_key = key['secret_key']
+                user_access_key = key['access_key']
+                LOG.info("=======================user_secret_key: %s" % str(user_secret_key))
+                LOG.info("=======================user_access_key: %s" % str(user_access_key))
+
+        utils.execute("radosgw-admin", "subuser", "create", "--uid=%s" % str(s3_user_uid),
+                      "--subuser=%s" % str(swift_user_subuser), "--access=%s" % swift_user_access,
                       run_as_root=True)
-        utils.execute("service", "ceph", "restart", run_as_root=True)
-        try:
-            utils.execute("service", "apache2", "restart", run_as_root=True)
-            LOG.info("==========sudo service apache2 restart")
-        except:
-            utils.execute("service", "httpd", "restart", run_as_root=True)
-        utils.execute("radosgw", "restart", run_as_root=True)
-        LOG.info("=======sudo /etc/init.d/radosgr restart")
+        utils.execute("radosgw-admin", "key", "create", "--subuser=%s" % str(swift_user_subuser),
+                      "--key-type=%s" % str(swift_user_key_type), "--gen-secret", run_as_root=True)
+        out, err = utils.execute("radosgw-admin", "user", "info", "--uid=%s" % str(s3_user_uid),
+                                 "-f", "json")
+        out = json.loads(out)
+        swift_keys = out['swift_keys']
+        for swift_key in swift_keys:
+            if swift_key['user'] == swift_user_subuser:
+                swift_secret_key = swift_key['secret_key']
+                LOG.info("=======================swift_secret_key: %s" % str(swift_secret_key))
+        LOG.info("Succeed to create a rgw daemon named %s" % name)
