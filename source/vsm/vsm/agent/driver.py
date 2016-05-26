@@ -3108,7 +3108,7 @@ class CephDriver(object):
                                "tier",
                                "cache-mode",
                                cache_pool_name,
-                               "forwart"]
+                               "forward"]
             ceph_version_code = ceph_version_utils.get_ceph_version_code()
             if ceph_version_code == constant.CEPH_JEWEL:
                 cache_mode_args.append("--yes-i-really-mean-it")
