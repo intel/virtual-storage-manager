@@ -23,25 +23,26 @@ Drivers for testdbs.
 
 """
 
-import os
-import time
 import json
-import urllib2
+import operator
+import os
 import platform
+import time
+import urllib2
+
+from vsm.agent import cephconfigparser
+from vsm.agent.crushmap_parser import CrushMap
+from vsm.agent import rpcapi as agent_rpc
+from vsm.common import ceph_version_utils
+from vsm.common import constant
+from vsm import conductor
+from vsm.conductor import rpcapi as conductor_rpcapi
 from vsm import db
 from vsm import exception
 from vsm import flags
 from vsm.openstack.common import log as logging
-from vsm import utils
-from vsm.openstack.common.gettextutils import _
-from vsm import conductor
-from vsm.conductor import rpcapi as conductor_rpcapi
-from vsm.agent import rpcapi as agent_rpc
-from vsm.agent import cephconfigparser
 from vsm.openstack.common.rpc import common as rpc_exc
-import glob
-from crushmap_parser import CrushMap
-import operator
+from vsm import utils
 
 try:
     from novaclient.v1_1 import client as nc
@@ -53,10 +54,10 @@ try:
 except:
     from cinderclient.v2 import client as cc
 
-import re
-
 LOG = logging.getLogger(__name__)
+
 FLAGS = flags.FLAGS
+
 
 class CephDriver(object):
     """Excute commands relating to Ceph."""
@@ -3047,8 +3048,19 @@ class CephDriver(object):
         else:
             utils.execute("ceph", "osd", "tier", "add", storage_pool_name, \
                           cache_pool_name, run_as_root=True)
-        utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool_name, \
-                      cache_mode, run_as_root=True)
+
+        # for the latest ceph version(jewel), it needs the parameter
+        # --yes-i-really-mean-it to do the action.
+        cache_mode_args = ["ceph",
+                           "osd",
+                           "tier",
+                           "cache-mode",
+                           cache_pool_name,
+                           cache_mode]
+        ceph_version_code = ceph_version_utils.get_ceph_version_code()
+        if ceph_version_code == constant.CEPH_JEWEL:
+            cache_mode_args.append("--yes-i-really-mean-it")
+        utils.execute(*cache_mode_args, run_as_root=True)
         if cache_mode == "writeback":
             utils.execute("ceph", "osd", "tier", "set-overlay", storage_pool_name, \
                           cache_pool_name, run_as_root=True)
@@ -3082,12 +3094,21 @@ class CephDriver(object):
         cache_pool_name = cache_pool.get("name")
         storage_pool_name = cache_pool.get("cache_tier_status").split(":")[1].strip()
         LOG.info(cache_pool['name'])
-        LOG.info(cache_pool['cache_mode'])
         cache_mode = cache_pool.get("cache_mode")
         LOG.info(cache_mode)
         if cache_mode == "writeback":
-            utils.execute("ceph", "osd", "tier", "cache-mode", cache_pool_name, \
-                          "forward", run_as_root=True)
+            # for the latest ceph version(jewel), it needs the parameter
+            # --yes-i-really-mean-it to do the action.
+            cache_mode_args = ["ceph",
+                               "osd",
+                               "tier",
+                               "cache-mode",
+                               cache_pool_name,
+                               "forwart"]
+            ceph_version_code = ceph_version_utils.get_ceph_version_code()
+            if ceph_version_code == constant.CEPH_JEWEL:
+                cache_mode_args.append("--yes-i-really-mean-it")
+            utils.execute(*cache_mode_args, run_as_root=True)
             utils.execute("rados", "-p", cache_pool_name, "cache-flush-evict-all", \
                           run_as_root=True)
             utils.execute("ceph", "osd", "tier", "remove-overlay", storage_pool_name, \
