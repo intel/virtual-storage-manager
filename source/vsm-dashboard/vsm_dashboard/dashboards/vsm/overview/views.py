@@ -148,7 +148,7 @@ def get_version():
 def get_cluster():
     cluster_summary = vsmapi.cluster_summary(None)
     cluster_name = vsmapi.get_cluster_list(None)[1]['clusters'][0]['name']
-    #HEALTH_OK HEALTH_WARN  HEALTH_ERROR
+    #HEALTH_OK HEALTH_WARN  HEALTH_ERR
     cluster_status = cluster_summary.health_list[0]
     cluster_note = []
     for note in cluster_summary.health_list[1:]:

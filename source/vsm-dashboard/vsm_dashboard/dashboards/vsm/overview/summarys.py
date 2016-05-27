@@ -240,7 +240,7 @@ class ClusterSummary(SummaryRenderer):
                 self.css_id = "health_ok"
             elif status.find('war') != -1:
                 self.css_id = "health_warning"
-            elif status.find('error') != -1:
+            elif status.find('err') != -1:
                 self.css_id = "health_error"
 
             msg = self.font % (self.css_id, data["Status"])
