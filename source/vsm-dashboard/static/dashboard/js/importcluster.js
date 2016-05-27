@@ -110,8 +110,8 @@ function addDetect(){
 		data: postData,
 		dataType:"json",
 		success: function(data){
-				$("#txtCrushmap")[0].innerHTML += data.message;
-
+				$("#txtCrushmap")[0].innerHTML += data.data.crushmap;
+                $("#txtCrushmap")[0].innerHTML += data.data.cephconf;
 				ctrlServerList.selectedIndex = 0;
 				$("#txtMonitorKeyring").val("")
 				$("#modal_wrapper").modal("hide");
