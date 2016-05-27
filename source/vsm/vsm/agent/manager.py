@@ -1843,7 +1843,7 @@ class AgentManager(manager.Manager):
         device_dict['total_capacity_kb'] = 0
         zone_ref = db.zone_get_by_name(self._context, self._node_info['zone'])
         zone_id = zone_ref['id']
-        if "storage_group_id"  in device_info.keys():
+        if device_info.has_key("storage_group_id"):
             storage_group_ref = db.storage_group_get(context,device_info["storage_group_id"])
         else:
             storage_group_ref = db.storage_group_get_by_name(context,device_info["storage_group_name"])
