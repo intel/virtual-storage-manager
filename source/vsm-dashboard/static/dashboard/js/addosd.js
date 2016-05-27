@@ -358,6 +358,11 @@ function HidePopover(){
 	$(".popover").popover("hide");
 }
 
+$(document).ajaxStart(function(){
+    //load the spin
+    ShowSpin();
+});
+
 function gettext(str){
 	return str;
 }
