@@ -132,7 +132,7 @@ osd heartbeat interval = 10
 osd heartbeat grace = 10
 osd mkfs options xfs = -f
 osd journal size = 0
-        '''%({'mkfs_type':self.ceph_report["osd_metadata"][0]['filestore_backend']})
+        '''%({'mkfs_type':self.ceph_report["osd_metadata"][0].get('filestore_backend','xfs')})
         mon_header_settings ='''
 [mon]
 mon osd full ratio = .90
