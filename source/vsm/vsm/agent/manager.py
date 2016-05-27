@@ -1193,10 +1193,11 @@ class AgentManager(manager.Manager):
             # OSD's remaining in the db_osds list were found in the DB but not in Ceph output
             # They have been removed from the cluster and should be removed from the DB
             LOG.info("OSD removed from cluster: %s" % db_osd.osd_name)
-            osd_id = db_osd.id
-            device_id = db_osd.device_id
-            db.osd_delete(context, osd_id)
-            db.device_delete(context, device_id)
+            if db_osd.osd_name != 'osd.x' and db_osd.operation_status != FLAGS.vsm_status_uninitialized:
+                osd_id = db_osd.id
+                device_id = db_osd.device_id
+                db.osd_delete(context, osd_id)
+                db.device_delete(context, device_id)
 
     @periodic_task(service_topic=FLAGS.agent_topic,
                    spacing=10)
