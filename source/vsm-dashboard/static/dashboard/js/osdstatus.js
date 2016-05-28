@@ -85,10 +85,9 @@ function GenerateData(){
         $("#hfPageCount").val($(".page_count")[1].innerHTML);
         $("#hfPagerIndex").val($(".pager_index")[1].innerHTML);
         $("#hfPagerCount").val($(".pager_count")[1].innerHTML);
-        var page_index = parseInt($(".page_index")[1].innerHTML);
         var pager_index = parseInt($(".pager_index")[1].innerHTML);
         var pager_count = parseInt($(".pager_count")[1].innerHTML);
-        generatePager(page_index,pager_index,pager_count);
+        generatePager(pager_index,pager_count);
     }
     else{
         //hide the paginate
@@ -106,95 +105,85 @@ function FilterOSDList(){
     }
 }
 
-function nextPager(pageIndex){
+function nextPager(){
     var pagerCount = parseInt($("#hfPagerCount").val());
     var pagerIndex = parseInt($("#hfPagerIndex").val());
     pagerIndex ++;
-    generatePager(pageIndex,pagerIndex,pagerCount)
+    generatePager(pagerIndex,pagerCount)
 }
 
-function previousPager(pageIndex){
+function previousPager(){
     var pagerCount = parseInt($("#hfPagerCount").val());
     var pagerIndex = parseInt($("#hfPagerIndex").val());
     pagerIndex --;
-    generatePager(pageIndex,pagerIndex,pagerCount)
+    generatePager(pagerIndex,pagerCount)
 }
 
 var PagerSize = 10;
-function generatePager(pageIndex,pagerIndex,pagerCount){
+function generatePager(pagerIndex,pagerCount){
     //update the hidden feild value
     $("#hfPagerCount").val(pagerCount);
     $("#hfPagerIndex").val(pagerIndex); 
 
     var trNodes = $("#server_list>tbody>tr");
-    var pageCount =parseInt($("#hfPageCount").val());
+    var pageCount = parseInt($("#hfPageCount").val());
+    var pageIndex = parseInt($("#hfPageIndex").val());
 
     var pagerStart = 0;
     var pagerEnd = 0;
     switch(pagerIndex){
         case 1:
-            updatePageLinks(pageIndex,0,PagerSize);
+            // always disable previous pager link on first page
             $("#liPrevious")[0].className = "disabled";
             $("#linkPrevious").removeAttr('href');
-            $("#liNext")[0].className = "";
-            //bind events
             $("#linkPrevious").unbind("click");
-            $("#linkNext").bind("click",function(){
-                 nextPager(pageIndex);
-            });
 
-            //if pageCount <= 5, the next button is disabled
-            if(pageCount<=PagerSize){
+            //if pageCount > PagerSize enable the next link ...
+            if (pageCount>PagerSize){
+                updatePageLinks(pageIndex,0,PagerSize);
+
+                // enable next pager link
+                $("#liNext")[0].className = "";
+                $("#linkNext").unbind("click").click(function(){
+                     nextPager(pageIndex);
+                });
+            } else {    //... else disable it
+                updatePageLinks(pageIndex,0,pageCount);
+
+                // disable next pager link
                 $("#liNext")[0].className = "disabled";
                 $("#linkNext").removeAttr('href');
                 $("#linkNext").unbind("click");
-                $(".pagelink").remove();
-                for(var i=pageCount;i>0;i--){
-                var keyword = $("#txtFilter").val();
-                if(keyword==""){
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"'>"+i+"</a></li>";
-                }
-                else{
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"&keyword="+keyword+"'>"+i+"</a></li>";
-                }
-                $("#liPrevious").after(link);
-                }
             }
             break;
         case pagerCount:
-            pagerStart = (pagerIndex - 1) * PagerSize;
-            pagerEnd = pageCount;
-            updatePageLinks(pageIndex,pagerStart,pagerEnd);
+            updatePageLinks(pageIndex,(pagerIndex-1)*PagerSize,pageCount);
+
+            // disable next link
             $("#liNext")[0].className = "disabled";
             $("#linkNext").removeAttr('href');
-            $("#liPrevious")[0].className = "";
-            //bind event
             $("#linkNext").unbind('click');
-            $("#linkPrevious").bind("click",function(){
+
+            // enable previous link
+            $("#liPrevious")[0].className = "";
+            $("#linkPrevious").unbind("click").click(function(){
                  previousPager(pageIndex);
             });
-            
             break;
         default:
-            $(".pagelink").remove();
-            pagerStart = (pagerIndex - 1) * PagerSize;
-            pagerEnd = pagerStart + PagerSize;
-            updatePageLinks(pageIndex,pagerStart,pagerEnd);
+            pagerStart = (pagerIndex-1)*PagerSize;
+            updatePageLinks(pageIndex,pagerStart,pagerStart+PagerSize);
+
+            // enable both next and previous links
             $("#liNext")[0].className = "";
             $("#liPrevious")[0].className = "";
-               
-            $("#linkNext").unbind("click");
-            $("#linkPrevious").unbind("click");
-
-             //bind event
-            $("#linkNext").bind('click',function(){
+            $("#linkNext").unbind('click').click(function(){
                  nextPager(pageIndex);
             });
-            $("#linkPrevious").bind("click",function(){
+            $("#linkPrevious").unbind("click").click(function(){
                  previousPager(pageIndex);
             });
-
-            break; 
+            break;
     }    
 }
 
