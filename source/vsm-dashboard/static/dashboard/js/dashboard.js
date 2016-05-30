@@ -731,7 +731,16 @@ function GenerateLineOption(){
                 //max:15,
                 axisLabel:{
                     show:true,
-                    interval:'auto'
+                    interval: 'auto',
+                    formatter: function(value) {
+                        var units = ["", "K", "M", "G", "T"]
+                        var intval = +value
+                        var idx = 0;
+                        while(intval >= 1000 && ++idx < units.length){
+                            intval /= 1000;
+                        }
+                        return intval + units[idx];
+                    }
                 },
                 name : '',
                 boundaryGap: [0.5, 0.5]
