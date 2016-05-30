@@ -209,11 +209,11 @@ function chown_ceph() {
         cat /etc/ceph/ceph.conf | while read line; do
             str1=${line:0:4}
             str2=${line:0:11}
-            if [[ $str1 == "devs" ]]; then
+            if [[ $str1 == "devs" && -e ${line:7} ]]; then
                 data_partition=${line:7}
                 chown ceph:ceph $data_partition
             fi
-            if [[ $str2 == "osd journal" ]]; then
+            if [[ $str2 == "osd journal" && -e ${line:14} ]]; then
                 if [[ ${line:15:-5} == "dev" ]]; then
                     journal_partition=${line:14}
                     chown ceph:ceph $journal_partition

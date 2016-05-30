@@ -98,7 +98,7 @@ class PerformanceMetricsController(wsgi.Controller):
         return {"metrics": metrics}
 
     def get_metrics_all_types(self, req):
-        LOG.info('time333-metrics===%s'%time.time())
+        #LOG.info('time333-metrics===%s'%time.time())
         search_opts = {}
         search_opts.update(req.GET)
         metrics_name = search_opts['metrics_name']
@@ -113,7 +113,7 @@ class PerformanceMetricsController(wsgi.Controller):
             result = self.get_cpu_usage(req)
         else:
             result = {"metrics":"no metric named %s data in DB"%metrics_name}
-        LOG.info('time4444-metrics===%s'%time.time())
+        #LOG.info('time4444-metrics===%s'%time.time())
         return result
 
     def get_cpu_usage(self, req):
