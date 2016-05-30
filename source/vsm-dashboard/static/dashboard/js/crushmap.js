@@ -104,6 +104,7 @@ function addAction(){
 	$("#divStorageGroupForm").show();
     $("#btnAddStorageGroup").show();
     $("#btnUpdateStorageGroup").hide();
+    $("#txtName").removeAttr("disabled");
 }
 
 function updateAction(id){
@@ -118,6 +119,7 @@ function updateAction(id){
 	var tr = $("#"+trID);
 
 	$("#txtName").val(tr.find(".name")[0].innerHTML.trim());
+	$("#txtName").attr("disabled","disabled");
 	$("#txtClass").val(tr.find(".class")[0].innerHTML.trim());
 	$("#txtFriendlyName").val(tr.find(".friendly_name")[0].innerHTML.trim());
 	$("#txtMarker")[0].value = rgb2hex(tr.find(".marker-circle")[0].getAttribute("fill"))
