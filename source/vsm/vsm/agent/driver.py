@@ -1483,11 +1483,17 @@ class CephDriver(object):
 
         # step 2
         LOG.info('>> removing ceph mon step 2')
-        utils.execute("ceph",
-                      "mon",
-                      "remove",
-                      mon_id,
-                      run_as_root=True)
+        # fix the issue of ceph jewel version when remove the monitor,
+        # it will throw the Error EINVAL, but the monitor remove successfully.
+        try:
+            utils.execute("ceph",
+                          "mon",
+                          "remove",
+                          mon_id,
+                          run_as_root=True)
+        except:
+            LOG.warn("Ceph throws out an error, but monitor has been remove successfully")
+            pass
         if not is_stop:
             config.remove_mon(mon_id)
         # step 3
