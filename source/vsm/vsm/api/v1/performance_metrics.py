@@ -32,6 +32,8 @@ from vsm import utils
 from vsm import conductor
 from vsm import scheduler
 from vsm.scheduler import rpcapi as scheduler_rpcapi
+from vsm import db
+import time
 
 LOG = logging.getLogger(__name__)
 
@@ -60,6 +62,7 @@ class PerformanceMetricsController(wsgi.Controller):
 
 
     def get_metrics(self, req):
+        LOG.info('time11111-metrics===%s'%time.time())
         search_opts = {}
         search_opts.update(req.GET)
         metrics_name =  search_opts['metrics_name']
@@ -71,6 +74,7 @@ class PerformanceMetricsController(wsgi.Controller):
             result = self.get_cpu_usage(req)
         else:
             result = {"metrics":"no metric named %s data in DB"%metrics_name}
+        LOG.info('time222-metrics===%s'%time.time())
         return result
 
     def get_iops_or_banwidth(self, req):
@@ -79,7 +83,7 @@ class PerformanceMetricsController(wsgi.Controller):
         search_opts.update(req.GET)
         context = req.environ['vsm.context']
         search_opts ['metrics_name'] = 'osd_%s'%search_opts['metrics_name']
-        metrics = self.conductor_api.get_sum_performance_metrics(context, search_opts=search_opts)
+        metrics = db.get_sum_performance_metrics(context, search_opts=search_opts)
         LOG.info("CEPH_LOG get performance metrics  iops or banwidth  by search opts: %s" % search_opts)
         return {"metrics": metrics}
 
@@ -89,9 +93,28 @@ class PerformanceMetricsController(wsgi.Controller):
         search_opts.update(req.GET)
         context = req.environ['vsm.context']
         search_opts ['metrics_name'] = 'osd_%s'%search_opts['metrics_name']
-        metrics = self.conductor_api.get_latency(context, search_opts=search_opts)
+        metrics = db.get_latency(context, search_opts=search_opts)
         LOG.info("CEPH_LOG get performance metrics  latency  by search opts: %s" % search_opts)
         return {"metrics": metrics}
+
+    def get_metrics_all_types(self, req):
+        #LOG.info('time333-metrics===%s'%time.time())
+        search_opts = {}
+        search_opts.update(req.GET)
+        metrics_name = search_opts['metrics_name']
+        context = req.environ['vsm.context']
+        if metrics_name == 'iops':
+            result = db.get_iops_all_types(context, search_opts=search_opts)
+        elif metrics_name == 'lantency':
+            result = db.get_latency_all_types(context, search_opts=search_opts)
+        elif  metrics_name == 'bandwidth':
+            result = db.get_bandwidth_all_types(context, search_opts=search_opts)
+        elif  metrics_name in ["cpu_usage"]:
+            result = self.get_cpu_usage(req)
+        else:
+            result = {"metrics":"no metric named %s data in DB"%metrics_name}
+        #LOG.info('time4444-metrics===%s'%time.time())
+        return result
 
     def get_cpu_usage(self, req):
         """get_cpu_usage"""
