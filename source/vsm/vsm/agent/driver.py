@@ -559,7 +559,8 @@ class CephDriver(object):
                 uuid,
                 glance_host,
                 os_controller_host,
-                pool_name
+                pool_name,
+                run_as_root=True
             )
             LOG.info("present pool on glance-api host logs = %s" % out)
         except:

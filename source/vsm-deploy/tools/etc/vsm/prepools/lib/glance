@@ -46,7 +46,7 @@ function configure_glance() {
 
         _set_default_glance show_image_direct_url=True
 
-        chown -R glance:glance /etc/glance
+        chown -R root:glance /etc/glance
         if [[ `is_service_running openstack-glance-api` -gt 0 ]]; then
             service openstack-glance-api restart
         fi
