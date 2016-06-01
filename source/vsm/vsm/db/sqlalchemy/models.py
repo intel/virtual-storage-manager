@@ -699,6 +699,8 @@ class StoragePoolUsage(BASE, VsmBase):
                            primaryjoin='and_('
                            'StoragePoolUsage.vsmapp_id == Vsmapp.id,'
                            'StoragePoolUsage.deleted == False)')
+    as_glance_store_pool = Column(Boolean, default=False)
+
 
 class Summary(BASE, VsmBase):
     """ ceph summary report """

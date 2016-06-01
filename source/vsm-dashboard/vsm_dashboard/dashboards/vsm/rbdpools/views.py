@@ -14,27 +14,28 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+import json
 import logging
-from django.utils.translation import ugettext_lazy as _
+
 from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponse
+from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
-from horizon import tables
 from horizon import forms
+from horizon import tables
 
 from vsm_dashboard.api import vsm as vsmapi
-from vsm_dashboard.dashboards.vsm.poolsmanagement import utils
 from .form import CreatePool
 from .tables import ListPoolTable
 from .tables import ListPresentPoolTable
 from .utils import list_cinder_service
 from .utils import from_keystone_v2
 from .utils import from_keystone_v3
-import os
 
-import json
-from django.http import HttpResponse
 LOG = logging.getLogger(__name__)
+
 
 class ModalEditTableMixin(object):
     def get_template_names(self):
@@ -129,13 +130,26 @@ def PoolsAction(request, action):
     data = json.loads(request.body)
     msg = ""
     status = ""
+    # glance only need to present one pool
+    as_glance_store_pool_num = 0
+    for info in data:
+        if info["as_glance_store_pool"] == True:
+            as_glance_store_pool_num += 1
+    if as_glance_store_pool_num > 1:
+        msg = "more than one pool as glance backend"
+        status = "error"
+
+    pool_usages = vsmapi.pool_usages(request)
+    for pool_usage in pool_usages:
+        if pool_usage['as_glance_store_pool']:
+            msg = "there is one pool as glance backend now"
+            status = "error"
+
     if not len(data):
         status = "error"
         msg = "No pool selected"
     else:
         # TODO add cluster_id in data
-        # for i in range(0, len(data)):
-        #     data[i]['cluster_id'] = 1
 
         if action == "present":
             print data
@@ -145,7 +159,10 @@ def PoolsAction(request, action):
                 if cinder_volume_host == "" or cinder_volume_host == None:
                     status = "error"
                     msg = "The Cinder Volume Host is null"
-                pools.append({'pool_id': x['id'], 'cinder_volume_host': cinder_volume_host, 'appnode_id': x['appnode_id']})
+                pools.append({'pool_id': x['id'],
+                              'cinder_volume_host': cinder_volume_host,
+                              'appnode_id': x['appnode_id'],
+                              'as_glance_store_pool': x['as_glance_store_pool']})
             if msg == "" and status == "":
                 print "========Start Present Pools==========="
                 result = vsmapi.present_pool(request, pools)

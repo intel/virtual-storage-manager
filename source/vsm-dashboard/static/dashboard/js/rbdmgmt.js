@@ -25,6 +25,8 @@ $(function(){
 
     //LoadOpenStackRegionSelected()
     LoadOpenStackRegionSelected();
+
+    addGlanceCheckBox();
 });
 
 
@@ -42,6 +44,15 @@ function OpenTableCheckbox(){
         })
     }
 }
+
+function addGlanceCheckBox(){
+    $(".glance").each(function(index, element){
+        if(index!=0){
+            element.innerHTML = "<input class=\"chkGlance\" type=\"checkbox\" />";
+        }
+    });
+}
+
 
 function LoadSelected(){
     $.ajax({
@@ -144,6 +155,7 @@ $("#btnSubmit").click(function(){
         var checkbox = $("#"+tr_id).find(".table-row-multi-select");
         if(checkbox[0].checked){
             id = checkbox.val();
+            var as_glance_store_pool = $("#"+tr_id).find(".chkGlance")[0].checked;
             var sel_index = $("#"+tr_id).find(".cinder_volume_host").val();
             var cinder_volume_host = null;
             if(sel_index != null)
@@ -151,7 +163,7 @@ $("#btnSubmit").click(function(){
 
             var appnode_id = $("#"+tr_id).find("select[class='openstack_region']").val();
 
-            data = {id:id, cinder_volume_host:cinder_volume_host,appnode_id:appnode_id};
+            data = {id:id, cinder_volume_host:cinder_volume_host,appnode_id:appnode_id,as_glance_store_pool:as_glance_store_pool};
             data_list.push(data);
         }
     })

@@ -16,30 +16,33 @@
 # under the License.
 
 
-function glance_prepare() {
-    _del_pool ${AUTH_GLANCE_POOL}
-    _create_pool ${AUTH_GLANCE_POOL}
-    _del_user ${AUTH_GLANCE_USER}
-}
-
 function create_glance() {
     local file=/tmp/glance.keyring
     rm -rf $file
 
-    glance_prepare
+    _a="allow class-read object_prefix rbd_children, "
+    _b="allow rwx pool=${AUTH_GLANCE_POOL}"
+    str=${_a}${_b}
 
-    ceph auth get-or-create ${AUTH_GLANCE_USER} \
-        mon 'allow r' \
-        osd "allow class-read object_prefix rbd_children, allow rwx pool=${AUTH_GLANCE_POOL}"
+    if [[ `ceph auth list|grep ${AUTH_GLANCE_USER}|wc -l` -eq 1 ]]; then
+        old_str=`ceph auth get ${AUTH_GLANCE_USER}|grep "caps osd"|awk -F "\"" '{print $2}'|awk -F "allow class-read object_prefix rbd_children" '{print $2}'`
+        str=${str}${old_str}
+        ceph auth caps ${AUTH_GLANCE_USER} \
+            mon 'allow r' \
+            osd "$str"
+    else
+        ceph auth get-or-create ${AUTH_GLANCE_USER} \
+            mon 'allow r' \
+            osd "$str"
+    fi
 
     ceph auth get-or-create ${AUTH_GLANCE_USER} -o $file
 
     mkdir -p $TOPDIR/files/glance/
     cp -rf /etc/ceph/ceph.conf $TOPDIR/files/glance/
-    sed -i "s,keyring = /etc/ceph/keyring.admin,,g" $TOPDIR/files/glance/ceph.conf
     mv $file $TOPDIR/files/glance/
 
-cat <<"EOF">>$TOPDIR/files/glance/ceph.conf
+cat <<"EOF" >>$TOPDIR/files/glance/ceph.conf
 [%AUTH_GLANCE_USER%]
 keyring=/etc/glance/glance.keyring
 EOF

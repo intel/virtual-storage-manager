@@ -3474,6 +3474,7 @@ def sp_usage_create(context, pools, session=None):
             'appnode_id': pool['appnode_id'],
             'cinder_volume_host': pool['cinder_volume_host'],
             'attach_status': 'starting',
+            "as_glance_store_pool": pool['as_glance_store_pool'],
             'attach_at': timeutils.utcnow(),
             'deleted': 0
         }

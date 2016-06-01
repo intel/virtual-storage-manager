@@ -14,19 +14,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from django.template.defaultfilters import filesizeformat
+import logging
+
 from django.utils.translation import ugettext_lazy as _
 
-#from vsm_dashboard.dashboards.admin.instances.tables import \
-#        AdminUpdateRow
-
-from django import forms
-
-from horizon import tables
 from horizon import messages
+from horizon import tables
+
 from vsm_dashboard.api import vsm as vsmapi
-import logging
+
 LOG = logging.getLogger(__name__)
+
 
 class PresentPoolAction(tables.BatchAction):
     name = "presentpools"
@@ -145,15 +143,19 @@ class ListPresentPoolTable(tables.DataTable):
     storageType = tables.Column("storageGroup", verbose_name=_("Storage Group"))
     pgNum = tables.Column("pgNum", verbose_name=_("Placement Group Count"))
     size = tables.Column("size", verbose_name=_("Replication Factor"))
-    openstack_region = tables.Column("openstack_region", verbose_name=_("OpenStack/Region"),
+    openstack_region = tables.Column("openstack_region",
+                                     verbose_name=_("OpenStack/Region"),
                                      classes=("openstack_region",))
-    cinder_volume_host = tables.Column("cinder_volume_host", verbose_name=_("Cinder Volume Host"),
-        classes=("zone",))
+    cinder_volume_host = tables.Column("cinder_volume_host",
+                                       verbose_name=_("Cinder Volume Host"),
+                                       classes=("zone",))
+    as_glance_store_pool = tables.Column("as_glance_store_pool",
+                                         verbose_name=_("As Glance Store Pool"),
+                                         classes=("glance",))
     status = tables.Column("status", verbose_name=_("Status"))
     createdBy = tables.Column("createdBy", verbose_name=_("Created By"))
     tag = tables.Column("tag", verbose_name=_("Tag"))
     attach_status = tables.Column("attach_status", verbose_name=_("Attach Status"))
-#    cluster = tables.Column("clusterName", verbose_name=_("Cluster"))
 
     class Meta:
         name = "tPools"
