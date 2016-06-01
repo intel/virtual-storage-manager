@@ -68,5 +68,23 @@ class PerformanceMetricsManager(base.ManagerWithFind):
         resp, body = self.api.client.get("/performance_metrics/get_metrics%s" % (query_string))
         return body
 
+    def get_metrics_all_types(self, search_opts=None):
+        """
+        Get a list of metrics by metrics name and timestamp.
+        """
+        if search_opts is None:
+            search_opts = {}
+
+        qparams = {}
+
+        for opt, val in search_opts.iteritems():
+            if val:
+                qparams[opt] = val
+
+        query_string = "?%s" % urllib.urlencode(qparams) if qparams else ""
+
+        #ret = self._list("/performance_metrics/get_metrics%s" % (query_string),"metrics")
+        resp, body = self.api.client.get("/performance_metrics/get_metrics_all_types%s" % (query_string))
+        return body
 
 

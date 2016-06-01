@@ -486,13 +486,86 @@ function sync_hosts() {
 #            start to install
 #-------------------------------------------------------------------------------
 
+# If you set the OS_TENANT_NAME, OS_USERNAME, OS_PASSWORD, OS_KEYSTONE_HOST and
+# OS_KEYSTONE_ADMIN_TOKEN, you have shared the keystone with openstack cluster.
+# The If you want to share the mysql and rabbitmq with openstack cluster, you can
+# set the others parameters. Then the followed steps will help you to config.
+function _config_mq_controller() {
+    if [[ $MQ_HOST ]] && [[ $MQ_USERID ]] && [[ $MQ_PASSWORD ]] && [[ $MQ_PORT ]]; then
+        if [[ $IS_CONTROLLER -eq 0 ]]; then
+            $SSH $USER@$CONTROLLER_ADDRESS "bash -x -s" <<EOF
+$SUDO sed -i "s/^rabbit_password*=*.*/rabbit_password = $MQ_PASSWORD/g" /etc/vsm/vsm.conf
+$SUDO sed -i "s/^rabbit_host*=*.*/rabbit_host = $MQ_HOST/g" /etc/vsm/vsm.conf
+$SUDO sed -i "s/^rabbit_port*=*.*/rabbit_port = $MQ_PORT/g" /etc/vsm/vsm.conf
+$SUDO sed -i "/^rabbit_port*=*.*/arabbit_userid = $MQ_USERID" /etc/vsm/vsm.conf
+$SUDO service vsm-api restart
+$SUDO service vsm-conductor restart
+$SUDO service vsm-scheduler restart
+$SUDO service rabbitmq-server stop
+exit 0
+EOF
+        else
+            $SUDO sed -i "s/^rabbit_password*=*.*/rabbit_password = $MQ_PASSWORD/g" /etc/vsm/vsm.conf
+            $SUDO sed -i "s/^rabbit_host*=*.*/rabbit_host = $MQ_HOST/g" /etc/vsm/vsm.conf
+            $SUDO sed -i "s/^rabbit_port*=*.*/rabbit_port = $MQ_PORT/g" /etc/vsm/vsm.conf
+            $SUDO sed -i "/^rabbit_port*=*.*/arabbit_userid = $MQ_USERID" /etc/vsm/vsm.conf
+            $SUDO service vsm-api restart
+            $SUDO service vsm-conductor restart
+            $SUDO service vsm-scheduler restart
+            $SUDO service rabbitmq-server stop
+        fi
+    fi
+}
+
+function _config_db_controler() {
+    if [[ $DB_HOST ]] && [[ $DB_USER ]] && [[ $DB_PASSWORD ]]; then
+        if [[ $IS_CONTROLLER -eq 0 ]]; then
+            source /tmp/deployrc
+        else
+            source /etc/vsmdeploy/deployrc
+        fi
+        $SSH $USER@$DB_HOST "bash -x -s" <<EOF
+mysql -u$DB_USER -p$DB_PASSWORD -e "create user '$MYSQL_VSM_USER'@'%' identified by '$MYSQL_VSM_PASSWORD';"
+mysql -u$DB_USER -p$DB_PASSWORD -e "flush privileges;"
+mysql -u$DB_USER -p$DB_PASSWORD -e "create database vsm CHARACTER SET utf8;"
+mysql -u$DB_USER -p$DB_PASSWORD -e "grant all privileges on vsm.* to '$MYSQL_VSM_USER'@'%' identified by '$MYSQL_VSM_PASSWORD';flush privileges;"
+mysql -u$DB_USER -p$DB_PASSWORD -e "grant all privileges on vsm.* to 'root'@'%' identified by '$MYSQL_ROOT_PASSWORD';flush privileges;"
+mysql -u$DB_USER -p$DB_PASSWORD -e "flush privileges;"
+EOF
+        FILE=/etc/vsm/vsm.conf
+        $SSH $USER@$CONTROLLER_ADDRESS "bash -x -s" <<EOF
+$SUDO sed -i "s/^sql_connection*=*.*/sql_connection = mysql:\/\/$MYSQL_VSM_USER:$MYSQL_VSM_PASSWORD@$DB_HOST\/vsm?charset=utf8/g" $FILE
+$SUDO vsm-manage db sync
+$SUDO service vsm-api restart
+$SUDO service vsm-conductor restart
+$SUDO service vsm-scheduler restart
+$SUDO service mariadb stop
+EOF
+    fi
+}
+
+function _scp_vsm_conf_to_agent_from_controller() {
+    if [[ $MQ_HOST ]] && [[ $MQ_USERID ]] && [[ $MQ_PASSWORD ]] && [[ $MQ_PORT ]]; then
+        if [[ $IS_CONTROLLER -eq 0 ]]; then
+            $SCP $USER@$CONTROLLER_ADDRESS:/etc/vsm/vsm.conf $USER@$1:/etc/vsm
+        else
+            $SCP /etc/vsm/vsm.conf $USER@$1:/etc/vsm
+        fi
+        $SSH $USER@$1 "$SUDO service vsm-agent restart;$SUDO service vsm-physical restart"
+    fi
+}
+
+
 if [[ $IS_PREPARE == False ]] && [[ $IS_CONTROLLER_INSTALL == False ]] \
     && [[ $IS_AGENT_INSTALL == False ]]; then
     prepare
     install_controller
+    _config_mq_controller
+    _config_db_controler
 #    generate_token
     for ip_or_hostname in $AGENT_ADDRESS_LIST; do
         install_agent $ip_or_hostname
+        _scp_vsm_conf_to_agent_from_controller $ip_or_hostname
     done
 else
     if [[ $IS_PREPARE == True ]]; then
@@ -500,6 +573,8 @@ else
     fi
     if [[ $IS_CONTROLLER_INSTALL == True ]]; then
         install_controller
+        _config_mq_controller
+        _config_db_controler
     fi
     if [[ $IS_AGENT_INSTALL == True ]]; then
 #        generate_token
@@ -507,6 +582,7 @@ else
         AGENT_IP_LIST=${NEW_AGENT_IPS//,/ }
         for ip_or_hostname in $AGENT_IP_LIST; do
             install_agent $ip_or_hostname
+            _scp_vsm_conf_to_agent_from_controller $ip_or_hostname
         done
 
 	# sync up /etc/hosts
