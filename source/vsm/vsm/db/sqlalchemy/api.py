@@ -2710,15 +2710,15 @@ def init_node_create(context, values, session=None):
         session = get_session()
 
     with session.begin(subtransactions=True):
-        if values['primary_public_ip']:
+        if values.has_key('primary_public_ip'):
             init_node_ref = init_node_get_by_primary_public_ip(context,
                         values['primary_public_ip'],
                         session=session)
-        elif values['secondary_public_ip']:
+        elif values.has_key('secondary_public_ip'):
             init_node_ref = init_node_get_by_secondary_public_ip(context,
                         values['secondary_public_ip'],
                         session=session)
-        elif values['cluster_ip']:
+        elif values.has_key('cluster_ip'):
             init_node_ref = init_node_get_by_cluster_ip(context,
                         values['cluster_ip'],
                         session=session)
@@ -4098,7 +4098,11 @@ def ec_profile_update(context, profile_id, values, session=None):
         convert_datetimes(values, 'created_at', 'deleted_at', 'updated_at')
         ec_profile_ref.update(values)
         ec_profile_ref.save(session=session)
-    return ec_profile_ref 
+    return ec_profile_ref
+
+def ec_profile_remove(context, ec_profile_id):
+    values = {"deleted":1,"deleted_at":timeutils.utcnow()}
+    ec_profile_update(context, ec_profile_id,values)
 
 def ec_profile_update_or_create(context, values, session=None):
     if not session:
@@ -4135,7 +4139,10 @@ def ec_profile_get_by_name(context, name, session=None):
 
 def get_max_timestamp_by_metrics_name(context, metrics_name, session=None):
     session = get_session()
-    sql_str = "select max(timestamp) from metrics where metric='%s'"%metrics_name
+    if "cpu" in metrics_name:
+        sql_str = "select timestamp from metrics where metric like 'cpu%' order by timestamp desc limit 1;"
+    else:
+        sql_str = "select timestamp from metrics where metric='%s' order by timestamp desc limit 1;"%metrics_name
     sql_ret = session.execute(sql_str).fetchall()
     return sql_ret[0][0]
 
@@ -4158,23 +4165,17 @@ def performance_metrics_query(context, search_opts, session=None):
     return metrics_query.all()
 
 def sum_performance_metrics(context, search_opts, session=None):#for iops bandwidth
+    # Get diamond collection_interval
+    diamond_collect_interval = get_diamond_interval_value('ceph_diamond_collect_interval', context, session=session)
+    if diamond_collect_interval == 0:
+        return []
+    # Get timestamps for metric interval
     metrics_name =  search_opts['metrics_name']
-    timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
-    timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
-    correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
-    setting_ref = vsm_settings_get_by_name(context, 'ceph_diamond_collect_interval', session=session)
-    if setting_ref:
-        diamond_collect_interval = int(setting_ref['value'])
-    else:
-        diamond_collect_interval = 15
-        vsm_settings_update_or_create(context, {'name':'ceph_diamond_collect_interval','value':diamond_collect_interval}, session=session)
-    if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - diamond_collect_interval
-    elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + diamond_collect_interval
-        timestamp_end = get_max_timestamp_by_metrics_name(context, metrics_name) or timestamp_start
-    if timestamp_start > timestamp_end : timestamp_start = timestamp_end - diamond_collect_interval
+    timestamp_start, timestamp_end = get_metric_timestamp_range(context, search_opts, diamond_collect_interval, metrics_name=metrics_name)
+    if timestamp_start > timestamp_end:
+        return []
     ret_list = []
+    correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
     timestamp_cur = timestamp_start
     session = get_session()
     while timestamp_cur<timestamp_end:
@@ -4204,23 +4205,17 @@ def sum_performance_metrics(context, search_opts, session=None):#for iops bandwi
     return ret_list
 
 def latency_performance_metrics(context, search_opts, session=None):#for latency
+    # Get diamond collection interval
+    diamond_collect_interval = get_diamond_interval_value('ceph_diamond_collect_interval', context, session=session)
+    if diamond_collect_interval == 0:
+        return []
+    # Get timestamps for metric interval
     metrics_name = search_opts['metrics_name']
-    latency_type = metrics_name.split('_')[2]
-    timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
-    timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
-    setting_ref = vsm_settings_get_by_name(context, 'ceph_diamond_collect_interval', session=session)
-    if setting_ref:
-        diamond_collect_interval = int(setting_ref['value'])
-    else:
-        diamond_collect_interval = 15
-        vsm_settings_update_or_create(context, {'name':'ceph_diamond_collect_interval','value':diamond_collect_interval}, session=session)
-    if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - diamond_collect_interval
-    elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + diamond_collect_interval
-        timestamp_end = get_max_timestamp_by_metrics_name(context, '%s_sum'%metrics_name) or timestamp_start
-    if timestamp_start > timestamp_end : timestamp_start = timestamp_end - diamond_collect_interval
+    timestamp_start, timestamp_end = get_metric_timestamp_range(context, search_opts, diamond_collect_interval, metrics_name='%s_sum' % metrics_name)
+    if timestamp_start > timestamp_end:
+        return []
     ret_list = []
+    latency_type = metrics_name.split('_')[2]
     timestamp_cur = timestamp_start
     session = get_session()
     while timestamp_cur < timestamp_end:
@@ -4255,27 +4250,28 @@ def latency_performance_metrics(context, search_opts, session=None):#for latency
     return ret_list
 
 def cpu_data_get_usage(context, search_opts, session=None):#for cpu_usage
+    # Get diamond collection interval
+    diamond_collect_interval = get_diamond_interval_value('cpu_diamond_collect_interval', context, session=session)
+    if diamond_collect_interval == 0:
+        return []
+    # Get timestamps for metric interval
     metrics_name = search_opts['metrics_name']
-    timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
-    timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
-    setting_ref = vsm_settings_get_by_name(context, 'cpu_diamond_collect_interval', session=session)
-    if setting_ref:
-        diamond_collect_interval = int(setting_ref['value'])
-    else:
-        diamond_collect_interval = 15
-        vsm_settings_update_or_create(context, {'name':'cpu_diamond_collect_interval','value':diamond_collect_interval}, session=session)
-    if timestamp_start is None and timestamp_end:
-        timestamp_start = timestamp_end - diamond_collect_interval
-    elif timestamp_start  and  timestamp_end is None:
-        timestamp_start = timestamp_start + diamond_collect_interval
+    timestamp_start, timestamp_end = get_metric_timestamp_range(context, search_opts, diamond_collect_interval, metrics_name=metrics_name)
+    if timestamp_start > timestamp_end:
+        return []
     ret_list = []
     session = get_session()
     if timestamp_start :
-        sql_str = '''select timestamp, hostname, sum(value) as metric_value from metrics where instance='cpu_total' and metric in ('user','system') and timestamp>=%(start_time)s  group by timestamp,hostname
+        sql_str = '''select timestamp, hostname, sum(value) as metric_value, count(value) as cpu_count from metrics where instance='idle' and timestamp>=%(start_time)s  group by timestamp,hostname
             '''%{'start_time':timestamp_start}
         sql_ret = session.execute(sql_str).fetchall()
+        #LOG.info("======================sql_ret: %s" % sql_ret)
         for cell in sql_ret:
-            metrics_value = cell[2] or 0
+            cpu_total_idle = int(cell[2]) or 0
+            cpu_total_count = int(cell[3])
+            #LOG.info("=================cpu_total_idle: %s" % str(cpu_total_idle))
+            #LOG.info("=================cpu_total_count: %s" % str(cpu_total_count))
+            metrics_value = 100 - round(cpu_total_idle/cpu_total_count, 1)
             timestamp = cell[0]/diamond_collect_interval*diamond_collect_interval
             ret_list.append({'host':cell[1], 'timestamp':timestamp, 'metrics_value':metrics_value,'metrics':metrics_name,})
     return ret_list
@@ -4292,3 +4288,159 @@ def get_poolusage(context, poolusage_id):
         filter_by(id=poolusage_id).\
         first()
     return result
+
+def latency_all_types(context, search_opts, session=None):#for latency
+    # Get diamond collection interval
+    diamond_collect_interval = get_diamond_interval_value('ceph_diamond_collect_interval', context, session=session)
+    if diamond_collect_interval == 0:
+        return {}
+    # Get timestamps for metric interval
+    #metrics_name = search_opts['metrics_name']
+    timestamp_start, timestamp_end = get_metric_timestamp_range(context, search_opts, diamond_collect_interval, metrics_name='osd_op_r_latency_sum')
+    if timestamp_start > timestamp_end:
+        return {}
+    metrics_names = ['osd_op_r_latency','osd_op_w_latency','osd_op_rw_latency']
+    all_ret_list = {}
+    for metrics_name in metrics_names:
+        latency_type = metrics_name.split('_')[2]
+        ret_list = []
+        timestamp_cur = timestamp_start
+        session = get_session()
+        while timestamp_cur < timestamp_end:
+            sql_str = '''
+                     select case when avgcount_a<>0 then sum_a*1000/avgcount_a else 0 end as latency_value from \
+                     (select sum(la_sum_cur-la_sum_pre) as sum_a from
+                        (
+                         (select instance,hostname,value as la_sum_cur from metrics where metric ='%(metric_name)s_sum' and timestamp>=%(start_time)d and timestamp<%(end_time)d )  as d
+                         left join
+                         (select instance,hostname,max(value) as la_sum_pre from metrics where metric ='%(metric_name)s_sum' and timestamp>=%(start_time)d-2*%(interval)d  and timestamp<%(end_time)d-%(interval)d  group by instance,hostname ) as d_pre
+                         on d.instance=d_pre.instance and d.hostname=d_pre.hostname
+                         )
+                      ) as a \
+                     inner join
+                     (select sum(la_avgcount_cur-la_avgcount_pre) as avgcount_a from
+                        (
+                         (select instance,hostname,value as la_avgcount_cur from metrics where metric ='%(metric_name)s_avgcount' and timestamp>=%(start_time)d and timestamp<%(end_time)d )  as e
+                         left join
+                         (select instance,hostname,max(value) as la_avgcount_pre from metrics where metric ='%(metric_name)s_avgcount' and timestamp>=%(start_time)d-2*%(interval)d and timestamp<%(end_time)d-%(interval)d  group by instance,hostname ) as e_pre
+                         on e.instance=e_pre.instance and e.hostname=e_pre.hostname
+                         )
+                     ) as b \
+                '''%{'latency_type':latency_type,'metric_name':metrics_name,'start_time':timestamp_cur-(diamond_collect_interval-1),'end_time':timestamp_cur+1,'interval':diamond_collect_interval}
+            sql_ret = session.execute(sql_str).fetchall()
+            #LOG.info('latency--sql-str===%s'%sql_str)
+            for cell in sql_ret:
+                if cell is None or cell[0] is None:
+                    continue
+                metrics_value = cell[0] or 0
+                ret_list.append({'instance':'', 'timestamp':str(timestamp_cur), 'metrics_value':metrics_value,'metrics':metrics_name,})
+            timestamp_cur = timestamp_cur + diamond_collect_interval
+            all_ret_list[metrics_name] = ret_list
+    return all_ret_list
+
+def iops_all_type(context, search_opts, session=None):#for iops
+    # Get diamond collection interval
+    diamond_collect_interval = get_diamond_interval_value('ceph_diamond_collect_interval', context, session=session)
+    if diamond_collect_interval == 0:
+        return {}
+    # Get timestamps for metric interval
+    #metrics_name =  search_opts['metrics_name']
+    timestamp_start, timestamp_end = get_metric_timestamp_range(context, search_opts, diamond_collect_interval, metrics_name='osd_op_rw')
+    if timestamp_start > timestamp_end:
+        return {}
+    all_ret_list = {}
+    correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
+    metrics_names = ['osd_op_r','osd_op_w','osd_op_rw']
+    for metrics_name in metrics_names:
+        ret_list = []
+        timestamp_cur = timestamp_start
+        session = get_session()
+        while timestamp_cur<timestamp_end:
+            sql_str = '''
+                SELECT   sum(metrics_join.value_real) AS sum_1, count(metrics_join.value_real) AS count_1,metrics_join.instance_real AS metrics_instance
+                FROM
+                (select m.value-m_pre.value_pre as value_real ,m.instance as instance_real
+                  from (select instance,hostname,value from metrics WHERE metrics.metric = '%(metrics_name)s' AND metrics.timestamp >= %(time_1)s AND metrics.timestamp < %(time_2)s) as m
+                  left join (select instance,hostname,max(value) as value_pre from metrics WHERE metrics.metric = '%(metrics_name)s' AND metrics.timestamp >= %(time_1)s-2*%(interval)d  AND metrics.timestamp < %(time_2)s-%(interval)d  group by instance,hostname ) as m_pre
+                  on  m.instance=m_pre.instance and m.hostname=m_pre.hostname
+                ) as metrics_join
+            '''%{'metrics_name':metrics_name,'time_1':timestamp_cur-(diamond_collect_interval-1),'time_2':timestamp_cur+1,'interval':diamond_collect_interval}
+            sql_ret_set = session.execute(sql_str).fetchall()
+            for cell in sql_ret_set:
+                if cell is None or cell[0] is None:
+                    continue
+                if correct_cnt:
+                    metrics_value = cell[0]/cell[1]*correct_cnt
+                else:
+                    metrics_value = cell[0]/diamond_collect_interval
+                if metrics_name in ['osd_op_in_bytes','osd_op_out_bytes']:
+                    metrics_value = metrics_value and metrics_value*1.0/1024/1024/diamond_collect_interval or 0
+                sql_ret_dict = {'instance': cell[2], 'timestamp': str(timestamp_cur), 'metrics_value': metrics_value, 'metrics': metrics_name,}
+                ret_list.append(sql_ret_dict)
+            timestamp_cur = timestamp_cur + diamond_collect_interval
+        all_ret_list[metrics_name] = ret_list
+    return all_ret_list
+
+def bandwidth_all_type(context, search_opts, session=None):#for iops
+    # Get diamond collection interval
+    diamond_collect_interval = get_diamond_interval_value('ceph_diamond_collect_interval', context, session=session)
+    if diamond_collect_interval == 0:
+        return {}
+    # Get timestamps for metric interval
+    #metrics_name =  search_opts['metrics_name']
+    timestamp_start, timestamp_end = get_metric_timestamp_range(context, search_opts, diamond_collect_interval, metrics_name='osd_op_out_bytes')
+    if timestamp_start > timestamp_end:
+        return {}
+    all_ret_list = {}
+    correct_cnt = search_opts.has_key('correct_cnt') and int(search_opts['correct_cnt']) or None
+    metrics_names = ['osd_op_in_bytes','osd_op_out_bytes']
+    for metrics_name in metrics_names:
+        ret_list = []
+        timestamp_cur = timestamp_start
+        session = get_session()
+        while timestamp_cur<timestamp_end:
+            sql_str = '''
+                SELECT   sum(metrics_join.value_real) AS sum_1, count(metrics_join.value_real) AS count_1,metrics_join.instance_real AS metrics_instance
+                FROM
+                (select m.value-m_pre.value_pre as value_real ,m.instance as instance_real
+                  from (select instance,hostname,value from metrics WHERE metrics.metric = '%(metrics_name)s' AND metrics.timestamp >= %(time_1)s AND metrics.timestamp < %(time_2)s) as m
+                  left join (select instance,hostname,max(value) as value_pre from metrics WHERE metrics.metric = '%(metrics_name)s' AND metrics.timestamp >= %(time_1)s-2*%(interval)d  AND metrics.timestamp < %(time_2)s-%(interval)d  group by instance,hostname ) as m_pre
+                  on  m.instance=m_pre.instance and m.hostname=m_pre.hostname
+                ) as metrics_join
+            '''%{'metrics_name':metrics_name,'time_1':timestamp_cur-(diamond_collect_interval-1),'time_2':timestamp_cur+1,'interval':diamond_collect_interval}
+            sql_ret_set = session.execute(sql_str).fetchall()
+            for cell in sql_ret_set:
+                if cell is None or cell[0] is None:
+                    continue
+                if correct_cnt:
+                    metrics_value = cell[0]/cell[1]*correct_cnt
+                else:
+                    metrics_value = cell[0]/diamond_collect_interval
+                if metrics_name in ['osd_op_in_bytes','osd_op_out_bytes']:
+                    metrics_value = metrics_value and metrics_value*1.0/1024/1024/diamond_collect_interval or 0
+                sql_ret_dict = {'instance': cell[2], 'timestamp': str(timestamp_cur), 'metrics_value': metrics_value, 'metrics': metrics_name,}
+                ret_list.append(sql_ret_dict)
+            timestamp_cur = timestamp_cur + diamond_collect_interval
+        all_ret_list[metrics_name] = ret_list
+    return all_ret_list
+
+def get_diamond_interval_value(interval_name, context, session=None):
+    setting_ref = vsm_settings_get_by_name(context, interval_name, session=session)
+    if setting_ref:
+        diamond_collect_interval = int(setting_ref['value'])
+    else:
+        diamond_collect_interval = 0
+        vsm_settings_update_or_create(context, {'name':interval_name, 'value':diamond_collect_interval}, session=session)
+    return diamond_collect_interval
+
+def get_metric_timestamp_range(context, search_opts, diamond_collect_interval, metrics_name=None):
+    timestamp_start = search_opts.has_key('timestamp_start') and int(search_opts['timestamp_start']) or None
+    timestamp_end = search_opts.has_key('timestamp_end') and int(search_opts['timestamp_end']) or None
+
+    if timestamp_start is None and timestamp_end:
+        timestamp_start = timestamp_end - diamond_collect_interval
+    elif timestamp_start and timestamp_end is None:
+        timestamp_start = timestamp_start + diamond_collect_interval
+        if metrics_name:
+            timestamp_end = get_max_timestamp_by_metrics_name(context, metrics_name) or timestamp_start
+    return timestamp_start, timestamp_end
