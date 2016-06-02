@@ -1191,13 +1191,30 @@ class AgentManager(manager.Manager):
                 osd_state_update(context, values)
         for db_osd in db_osds:
             # OSD's remaining in the db_osds list were found in the DB but not in Ceph output
-            # They have been removed from the cluster and should be removed from the DB
+            # They have been removed from the ceph cluster but still not changed from the vsm db.
             LOG.info("OSD removed from cluster: %s" % db_osd.osd_name)
             if db_osd.osd_name != 'osd.x' and db_osd.operation_status != FLAGS.vsm_status_uninitialized:
                 osd_id = db_osd.id
                 device_id = db_osd.device_id
-                db.osd_delete(context, osd_id)
-                db.device_delete(context, device_id)
+
+                # Do the same action like removing osd through vsm
+                # Update the osd and device on DB.
+                value= {}
+                value['id'] = osd_id
+                value['osd_name'] = 'osd.x'
+                value['state'] = 'Out-Down'
+                value['operation_status'] = FLAGS.vsm_status_removed
+                db.osd_state_update(context, osd_id, value)
+
+                value = {}
+                value['id'] = device_id
+                value['total_capacity_kb'] = 0
+                value['used_capacity_kb'] = 0
+                value['avail_capacity_kb'] = 0
+                db.device_update(context, device_id, value)
+
+                # db.osd_delete(context, osd_id)
+                # db.device_delete(context, device_id)
 
     @periodic_task(service_topic=FLAGS.agent_topic,
                    spacing=10)
