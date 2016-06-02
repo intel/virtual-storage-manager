@@ -5524,6 +5524,10 @@ a.link-popover {
       background-color: #fff;
       border: 1px solid #ddd;
       margin-left: -1px; }
+      .pagination > li > a.linkDisabled {
+        color: #000;
+        background-color: #e5e5e5;
+        pointer-events:none; }
       .pagination > li:first-child > a, .pagination > li:first-child > span {
         margin-left: 0;
         border-bottom-left-radius: 4px;

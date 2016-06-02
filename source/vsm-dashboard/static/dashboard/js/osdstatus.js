@@ -12,8 +12,6 @@ $(function(){
      GenerateData();
 })
 
-
-
 //CheckFilterStatus
 function LoadFilterTextbox(){
     var filterRow = ""
@@ -73,7 +71,15 @@ function GenerateData(){
         }
     })
 
-    //Get the paginate data
+    //get the keyword (must be done first, as pagination assumes keyword is set)
+    var queryStr = window.location.href.split("?");
+    var GETs = window.location.href.split("&");
+    if(GETs.length == 2){
+        var keyword = GETs[1].split("=")[1];
+        $("#txtFilter").val(keyword);
+    }
+
+    //get the paginate data
     if($(".page_index").length>1){
         $("#hfPageIndex").val($(".page_index")[1].innerHTML);
         $("#hfPageCount").val($(".page_count")[1].innerHTML);
@@ -87,14 +93,6 @@ function GenerateData(){
         //hide the paginate
         $("#navPagination").hide();
     }
-
-    //get the keyword
-    var queryStr = window.location.href.split("?");
-    var GETs = window.location.href.split("&");
-    if(GETs.length == 2){
-        var keyword = GETs[1].split("=")[1];
-        $("#txtFilter").val(keyword);
-    }   
 }
 
 function FilterOSDList(){
@@ -106,8 +104,6 @@ function FilterOSDList(){
         window.location.href = "/dashboard/vsm/osd-status/?pagerIndex=1&keyword="+keyword;
     }
 }
-
-
 
 function nextPager(){
     var pagerCount = parseInt($("#hfPagerCount").val());
@@ -130,103 +126,79 @@ function generatePager(pagerIndex,pagerCount){
     $("#hfPagerIndex").val(pagerIndex); 
 
     var trNodes = $("#server_list>tbody>tr");
-    var pageCount =parseInt($("#hfPageCount").val());
+    var pageCount = parseInt($("#hfPageCount").val());
+    var pageIndex = parseInt($("#hfPageIndex").val());
 
     var pagerStart = 0;
     var pagerEnd = 0;
     switch(pagerIndex){
         case 1:
-            $(".pagelink").remove();
-            for(var i=PagerSize;i>0;i--){
-                var keyword = $("#txtFilter").val();
-                if(keyword==""){
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"'>"+i+"</a></li>";
-                }
-                else{
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"&keyword="+keyword+"'>"+i+"</a></li>";
-                }
-                $("#liPrevious").after(link);
-            }
+            // always disable previous pager link on first page
             $("#liPrevious")[0].className = "disabled";
             $("#linkPrevious").removeAttr('href');
-            $("#liNext")[0].className = "";
-            //bind events
             $("#linkPrevious").unbind("click");
-            $("#linkNext").bind("click",function(){
-                 nextPager();
-            });
-            
-           
-            //if pageCount <= 5, the next button is disabled
-            if(pageCount<=PagerSize){
+
+            //if pageCount > PagerSize enable the next link ...
+            if (pageCount>PagerSize){
+                updatePageLinks(pageIndex,0,PagerSize);
+
+                // enable next pager link
+                $("#liNext")[0].className = "";
+                $("#linkNext").unbind("click").click(function(){
+                     nextPager(pageIndex);
+                });
+            } else {    //... else disable it
+                updatePageLinks(pageIndex,0,pageCount);
+
+                // disable next pager link
                 $("#liNext")[0].className = "disabled";
                 $("#linkNext").removeAttr('href');
                 $("#linkNext").unbind("click");
-                $(".pagelink").remove();
-                for(var i=pageCount;i>0;i--){
-                var keyword = $("#txtFilter").val();
-                if(keyword==""){
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"'>"+i+"</a></li>";
-                }
-                else{
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"&keyword="+keyword+"'>"+i+"</a></li>";
-                }
-                $("#liPrevious").after(link);
-                }
             }
             break;
         case pagerCount:
-            $(".pagelink").remove();
-            pagerStart = (pagerIndex-1)*PagerSize;
-            pagerEnd = pageCount;
-            for(var i=pageCount;i>pagerStart;i--){
-               var keyword = $("#txtFilter").val();
-                if(keyword==""){
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"'>"+i+"</a></li>";
-                }
-                else{
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"&keyword="+keyword+"'>"+i+"</a></li>";
-                }
-                $("#liPrevious").after(link);
-            }
+            updatePageLinks(pageIndex,(pagerIndex-1)*PagerSize,pageCount);
+
+            // disable next link
             $("#liNext")[0].className = "disabled";
             $("#linkNext").removeAttr('href');
-            $("#liPrevious")[0].className = "";
-            //bind event
             $("#linkNext").unbind('click');
-            $("#linkPrevious").bind("click",function(){
-                 previousPager();
+
+            // enable previous link
+            $("#liPrevious")[0].className = "";
+            $("#linkPrevious").unbind("click").click(function(){
+                 previousPager(pageIndex);
             });
-            
             break;
         default:
-         $(".pagelink").remove();
             pagerStart = (pagerIndex-1)*PagerSize;
-            pagerEnd = pagerStart+PagerSize;
-            for(var i=pagerEnd;i>pagerStart;i--){
-                var keyword = $("#txtFilter").val();
-                if(keyword==""){
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"'>"+i+"</a></li>";
-                }
-                else{
-                    var link = "<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+"&keyword="+keyword+"'>"+i+"</a></li>";
-                }
-                $("#liPrevious").after(link);
-            }
+            updatePageLinks(pageIndex,pagerStart,pagerStart+PagerSize);
+
+            // enable both next and previous links
             $("#liNext")[0].className = "";
             $("#liPrevious")[0].className = "";
-               
-            $("#linkNext").unbind("click");
-            $("#linkPrevious").unbind("click");
-
-             //bind event
-            $("#linkNext").bind('click',function(){
-                 nextPager();
+            $("#linkNext").unbind('click').click(function(){
+                 nextPager(pageIndex);
             });
-            $("#linkPrevious").bind("click",function(){
-                 previousPager();
+            $("#linkPrevious").unbind("click").click(function(){
+                 previousPager(pageIndex);
             });
-
-            break; 
+            break;
     }    
+}
+
+function updatePageLinks(pageIndex,pagerStart,pagerEnd){
+    $(".pagelink").remove();
+    for(var i=pagerEnd;i>pagerStart;i--){
+        var classText = "";
+        if(i==pageIndex){
+            classText += " class='linkDisabled'";
+        }
+        var keyword = $("#txtFilter").val();
+        var keywordText = "";
+        if(keyword != ""){
+            keywordText = "&keyword="+keyword;
+        }
+        $("#liPrevious").after("<li class='pagelink'><a href='/dashboard/vsm/osd-status/?pagerIndex="+i+keywordText+"'"+classText+">"+i+"</a></li>");
+    }
 }

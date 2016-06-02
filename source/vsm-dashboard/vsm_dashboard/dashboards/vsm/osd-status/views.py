@@ -80,9 +80,13 @@ def get_datasource(page_index,keyword):
     #get the paginate
     paginate = calculate_paginate(page_index,len(datasource))
 
-    #orgnize the data
+    #organize the data
     osd_data = {"osd_list":[],"paginate":paginate}
+    index = 0
     for item in datasource:
+        index += 1
+        if index <= paginate['data_start_index'] or index > paginate['data_end_index']:
+            continue
         capacity_total =  0 if not item.device['total_capacity_kb'] else int(item.device['total_capacity_kb']/1024)
         capacity_used = 0 if not item.device['used_capacity_kb'] else int(item.device['used_capacity_kb']/1024)
         capacity_avail = 0 if not item.device['avail_capacity_kb'] else int(item.device['avail_capacity_kb']/1024)
