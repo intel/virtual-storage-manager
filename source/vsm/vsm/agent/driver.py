@@ -359,6 +359,26 @@ class CephDriver(object):
         auth_response = urllib2.urlopen(auth_request)
         return auth_response
 
+    def _keystone_v2(self, tenant_name, username, password,
+                     auth_url, region_name):
+        auth_url = auth_url + "/tokens"
+        auth_data = {
+            "auth": {
+                "tenantName": tenant_name,
+                "passwordCredentials": {
+                    "username": username,
+                    "password": password
+                }
+            }
+        }
+        auth_request = urllib2.Request(auth_url)
+        auth_request.add_header("content-type", "application/json")
+        auth_request.add_header('Accept', 'application/json')
+        auth_request.add_header('User-Agent', 'python-mikeyp')
+        auth_request.add_data(json.dumps(auth_data))
+        auth_response = urllib2.urlopen(auth_request)
+        return auth_response
+
     def _config_cinder_conf(self, **kwargs):
         LOG.info("_config_cinder_conf")
         uuid = kwargs.pop('uuid', None)
@@ -476,6 +496,76 @@ class CephDriver(object):
                 LOG.info("Failed to present pool on nova-compute host")
                 pass
 
+    def _config_glance_conf(self, **kwargs):
+        LOG.info("_config_glance_conf")
+        uuid = kwargs.pop('uuid', "")
+        pool_name = kwargs.pop('pool_name', "")
+        os_controller_host = kwargs.pop('os_controller_host', "")
+        tenant_name = kwargs.pop('tenant_name', "")
+        username = kwargs.pop('username', "")
+        password = kwargs.pop('password', "")
+        auth_url = kwargs.pop('auth_url', "")
+        region_name = kwargs.pop('region_name', "")
+        ssh_user = kwargs.pop('ssh_user', "")
+
+        _url = None
+        if "v3" in auth_url:
+            connection = self._keystone_v3(tenant_name, username, password, auth_url, region_name)
+            response_data = json.loads(connection.read())
+            services_list = response_data['token']['catalog']
+            endpoints_list = []
+            for service in services_list:
+                service_type = service['type']
+                service_name = service['name']
+                if service_type == "image" and service_name == "glance":
+                    endpoints_list = service['endpoints']
+                    break
+            for endpoint in endpoints_list:
+                interface = endpoint['interface']
+                region_id = endpoint['region_id']
+                if region_name:
+                    if interface == "public" and region_id == region_name:
+                        _url = endpoint['url']
+                        break
+                else:
+                    if len(endpoints_list) == 3:
+                        _url = endpoint['url']
+                        break
+            pass
+        elif "v2.0" in auth_url:
+            connection = self._keystone_v2(tenant_name, username, password, auth_url, region_name)
+            response_data = json.loads(connection.read())
+            services_list = response_data['access']['serviceCatalog']
+            endpoints_list = []
+            for service in services_list:
+                service_type = service['type']
+                service_name = service['name']
+                if service_type == "image" and service_name == "glance":
+                    endpoints_list = service['endpoints']
+                    break
+            for endpoint in endpoints_list:
+                region = endpoint['region']
+                if region == region_name:
+                    _url = endpoint['publicURL']
+                    break
+        glance_host = _url.split("/")[2].split(":")[0]
+        LOG.info("uuid = %s, glance_host = %s, pool_name = %s, os_controller_host = %s, "
+                 "ssh_user = %s" % (uuid, glance_host, pool_name, os_controller_host, ssh_user))
+        try:
+            out, err = utils.execute(
+                'presentpool',
+                'glance',
+                ssh_user,
+                uuid,
+                glance_host,
+                os_controller_host,
+                pool_name,
+                run_as_root=True
+            )
+            LOG.info("present pool on glance-api host logs = %s" % out)
+        except:
+            LOG.info("Failed to present pool on glance-api host")
+            pass
 
     def present_storage_pools(self, context, info):
         LOG.info('agent present_storage_pools()')
@@ -483,6 +573,7 @@ class CephDriver(object):
 
         regions = {}
         for pool in info:
+            as_glance_store_pool = pool['as_glance_store_pool']
             appnode_id = pool['appnode_id']
             appnode = db.appnodes_get_by_id(context, appnode_id)
             volume_host = pool['cinder_volume_host']
@@ -497,13 +588,28 @@ class CephDriver(object):
             uuid = appnode['uuid']
             ssh_user = appnode['ssh_user']
 
+            # if is_glance_store_pool, present pool for openstack glance
+            if as_glance_store_pool:
+                self._config_glance_conf(uuid=uuid,
+                                         pool_name=pool_name,
+                                         os_controller_host=os_controller_host,
+                                         username=username,
+                                         password=password,
+                                         tenant_name=tenant_name,
+                                         auth_url=auth_url,
+                                         region_name=region_name,
+                                         ssh_user=ssh_user)
+
+            if not volume_host:
+                return
+
             # present pool for openstack cinder
-            self._config_cinder_conf(uuid = uuid,
-                                     volume_host = volume_host,
-                                     pool_type = pool_type,
-                                     pool_name = pool_name,
-                                     ssh_user = ssh_user,
-                                     os_controller_host = os_controller_host
+            self._config_cinder_conf(uuid=uuid,
+                                     volume_host=volume_host,
+                                     pool_type=pool_type,
+                                     pool_name=pool_name,
+                                     ssh_user=ssh_user,
+                                     os_controller_host=os_controller_host
                                      )
 
             # only config nova.conf at the first time
@@ -511,14 +617,14 @@ class CephDriver(object):
                 region_name in regions.keys() and
                             os_controller_host != regions.get(region_name)):
                 regions.update({region_name: os_controller_host})
-                self._config_nova_conf(uuid = uuid,
-                                       username = username,
-                                       password = password,
-                                       tenant_name = tenant_name,
-                                       auth_url = auth_url,
-                                       region_name = region_name,
-                                       ssh_user = ssh_user,
-                                       os_controller_host = os_controller_host
+                self._config_nova_conf(uuid=uuid,
+                                       username=username,
+                                       password=password,
+                                       tenant_name=tenant_name,
+                                       auth_url=auth_url,
+                                       region_name=region_name,
+                                       ssh_user=ssh_user,
+                                       os_controller_host=os_controller_host
                                        )
 
             volume_type = pool_type + "-" + pool_name

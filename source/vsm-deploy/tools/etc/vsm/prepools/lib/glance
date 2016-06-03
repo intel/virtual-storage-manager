@@ -22,6 +22,11 @@ function _set_default_glance() {
     crudini --set /etc/glance/glance-api.conf DEFAULT $key $value
 }
 
+function _set_glance_store() {
+    local key=`echo $@ | awk -F "=" '{print $1}'`
+    local value=`echo $@ | awk -F "=" '{print $2}'`
+    crudini --set /etc/glance/glance-api.conf glance_store $key $value
+}
 function configure_glance() {
     local glance_file=/etc/glance/glance-api.conf
     local ceph_file=/etc/glance/ceph.conf
@@ -32,28 +37,23 @@ function configure_glance() {
 
     if [[ -e $glance_file ]]; then
         cp -rf $TOPDIR/files/glance/* /etc/glance/
-        _set_default_glance default_store=rbd
-        _set_default_glance rbd_store_ceph_conf=$ceph_file
-        _set_default_glance rbd_store_user=${AUTH_GLANCE_USER#*.}
-        _set_default_glance rbd_store_pool=${AUTH_GLANCE_POOL}
-        _set_default_glance rbd_store_chunk_size=8
+        _set_glance_store default_store=rbd
+        _set_glance_store stores=rbd
+        _set_glance_store rbd_store_pool=${AUTH_GLANCE_POOL}
+        _set_glance_store rbd_store_user=${AUTH_GLANCE_USER#*.}
+        _set_glance_store rbd_store_ceph_conf=$ceph_file
+        _set_glance_store rbd_store_chunk_size=8
+
         _set_default_glance show_image_direct_url=True
 
-        chown -R glance:glance /etc/glance
+        chown -R root:glance /etc/glance
         if [[ `is_service_running openstack-glance-api` -gt 0 ]]; then
             service openstack-glance-api restart
-        fi
-
-        if [[ `is_service_running openstack-glance-registry` -gt 0 ]]; then
-            service openstack-glance-registry restart
         fi
 
         if [[ `is_service_running glance-api` -gt 0 ]]; then
             service glance-api restart
         fi
 
-        if [[ `is_service_running glance-registry` -gt 0 ]]; then
-            service glance-registry restart
-        fi
     fi
 }

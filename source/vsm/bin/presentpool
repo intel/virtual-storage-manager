@@ -39,8 +39,15 @@ elif [[ $1 == "nova" ]]; then
 <compute_host> <os_controller_host>"
         exit 0
     fi
+elif [[ $1 == "glance" ]]; then
+    if [[ $# -lt 6 ]]; then
+        echo "The number of parameters can't less than 4."
+        echo "Usage: sudo presentpool <type> <ssh_user> <uuid> \
+<glance_host> <os_controller_host> <pool_name>"
+        exit 0
+    fi
 else
-    echo "The first parameter should be cinder or nova."
+    echo "The first parameter should be cinder, nova or glance."
     exit 0
 fi
 
@@ -61,6 +68,16 @@ fi
 if [[ $1 == "nova" ]]; then
     source $TOPDIR/server/presentpool-nova
     setup_nova $@
+    exit 0
+fi
+
+#------------------------------------------
+# Usage: present pools for glance
+#------------------------------------------
+
+if [[ $1 == "glance" ]]; then
+    source $TOPDIR/server/presentpool-glance
+    setup_glance $@
     exit 0
 fi
 

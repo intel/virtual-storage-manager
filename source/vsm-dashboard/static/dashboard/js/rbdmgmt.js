@@ -25,6 +25,8 @@ $(function(){
 
     //LoadOpenStackRegionSelected()
     LoadOpenStackRegionSelected();
+
+    addGlanceCheckBox();
 });
 
 
@@ -42,6 +44,15 @@ function OpenTableCheckbox(){
         })
     }
 }
+
+function addGlanceCheckBox(){
+    $(".glance").each(function(index, element){
+        if(index!=0){
+            element.innerHTML = "<input class=\"chkGlance\" type=\"checkbox\" />";
+        }
+    });
+}
+
 
 function LoadSelected(){
     $.ajax({
@@ -115,10 +126,14 @@ function SelectRegion(obj){
         success: function (data) {
             console.log(data.host);
             $("select[name='"+select_name+"']")[1].options.length = 0;
-            for(var i=0;i<data.host.length;i++) {
+            var _option = new Option();
+            _option.value = 0;
+            _option.text = "";
+            $("select[name='" + select_name + "']")[1].options.add(_option);
+            for(var i=1;i<=data.host.length;i++) {
                 var _option = new Option();
                 _option.value = i;
-                _option.text = data.host[i];
+                _option.text = data.host[i-1];
                 $("select[name='" + select_name + "']")[1].options.add(_option);
             }
         },
@@ -144,6 +159,7 @@ $("#btnSubmit").click(function(){
         var checkbox = $("#"+tr_id).find(".table-row-multi-select");
         if(checkbox[0].checked){
             id = checkbox.val();
+            var as_glance_store_pool = $("#"+tr_id).find(".chkGlance")[0].checked;
             var sel_index = $("#"+tr_id).find(".cinder_volume_host").val();
             var cinder_volume_host = null;
             if(sel_index != null)
@@ -151,15 +167,15 @@ $("#btnSubmit").click(function(){
 
             var appnode_id = $("#"+tr_id).find("select[class='openstack_region']").val();
 
-            data = {id:id, cinder_volume_host:cinder_volume_host,appnode_id:appnode_id};
+            data = {id:id, cinder_volume_host:cinder_volume_host,appnode_id:appnode_id,as_glance_store_pool:as_glance_store_pool};
             data_list.push(data);
         }
     })
 
-    if(data_list.length==0)
-    {
-        return false;
-    }
+    //if(data_list.length==0)
+    //{
+    //    return false;
+    //}
 
     var data_list_json = JSON.stringify(data_list);
     token = $("input[name=csrfmiddlewaretoken]").val();
