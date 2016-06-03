@@ -28,16 +28,16 @@ from sqlalchemy import ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship, backref, object_mapper
 
 from vsm.db.sqlalchemy.session import get_session
-
 from vsm import exception
 from vsm import flags
+from vsm.openstack.common import log as logging
 from vsm.openstack.common import timeutils
 
-from vsm.openstack.common import log as logging
 LOG = logging.getLogger(__name__)
 
 FLAGS = flags.FLAGS
 BASE = declarative_base()
+
 
 class VsmBase(object):
     """Base class for Vsm Models."""
@@ -682,7 +682,7 @@ class StoragePoolUsage(BASE, VsmBase):
                        ForeignKey(Vsmapp.id),
                        nullable=False)
     appnode_id = Column(Integer, nullable=False)
-    cinder_volume_host = Column(String(length=255), nullable=False)
+    cinder_volume_host = Column(String(length=255), nullable=True)
     attach_status = Column(String(length=255), nullable=False)
     pools = relationship(StoragePool,
                          backref=backref('storage_pool_usage'),

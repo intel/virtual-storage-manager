@@ -138,12 +138,18 @@ def PoolsAction(request, action):
     if as_glance_store_pool_num > 1:
         msg = "more than one pool as glance backend"
         status = "error"
+        resp = dict(message=msg, status=status, data="")
+        resp = json.dumps(resp)
+        return HttpResponse(resp)
 
     pool_usages = vsmapi.pool_usages(request)
     for pool_usage in pool_usages:
         if pool_usage['as_glance_store_pool']:
             msg = "there is one pool as glance backend now"
             status = "error"
+            resp = dict(message=msg, status=status, data="")
+            resp = json.dumps(resp)
+            return HttpResponse(resp)
 
     if not len(data):
         status = "error"
@@ -156,9 +162,9 @@ def PoolsAction(request, action):
             pools = []
             for x in data:
                 cinder_volume_host = x['cinder_volume_host']
-                if cinder_volume_host == "" or cinder_volume_host == None:
+                if (not cinder_volume_host) and (not x['as_glance_store_pool']):
                     status = "error"
-                    msg = "The Cinder Volume Host is null"
+                    msg = "The Cinder Volume Host and As Glance Store Pool are all null"
                 pools.append({'pool_id': x['id'],
                               'cinder_volume_host': cinder_volume_host,
                               'appnode_id': x['appnode_id'],

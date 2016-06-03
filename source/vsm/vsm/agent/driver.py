@@ -600,6 +600,9 @@ class CephDriver(object):
                                          region_name=region_name,
                                          ssh_user=ssh_user)
 
+            if not volume_host:
+                return
+
             # present pool for openstack cinder
             self._config_cinder_conf(uuid=uuid,
                                      volume_host=volume_host,
