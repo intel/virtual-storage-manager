@@ -186,7 +186,7 @@ function loadClusterStatus(){
                     statusClass = "cluster-tip cluster-tip-warning";
                     noteClass = "alert alert-warning";
                     break;
-                case "HEALTH_ERROR": //error
+                case "HEALTH_ERR": //error
                     statusTip = "error";
                     statusClass = "cluster-tip cluster-tip-error";
                     noteClass = "alert alert-danger";
