@@ -2042,7 +2042,7 @@ class AgentManager(manager.Manager):
             ceph_conf = body.get('ceph_conf')
             ceph_conf_file_new = '%s-import'%FLAGS.ceph_conf
             utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
-            config_content = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new))._parser.as_str()
+            config_content = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new)).content()
             osd_info = self.ceph_driver.get_ceph_osd_info()
             mon_info = self.ceph_driver._get_ceph_mon_map()
             self._modify_init_nodes_from_config_to_db(context,osd_info,mon_info,crushmap)
