@@ -115,17 +115,17 @@ class CephConfigParser(manager.Manager):
         super(CephConfigParser, self).__init__(*args, **kwargs)
         self._parser = ConfigParser.ConfigParser()
         self._parser.optionxform = lambda optname: optname.lower().replace(' ', '_')
+        self._load_ceph_conf_from_db()
 
         # NOTE: fp can be a file name in str or unicode format OR a dictionary of dictionaries
 
-        if fp is None:
-            self._load_ceph_conf_from_db()
-        elif isinstance(fp, str) or isinstance(fp, unicode):
-            self._parser.read(fp)
-        elif isinstance(fp, dict):
-            self._load_ceph_conf_from_dict(fp)
-        else:
-            raise TypeError("'fp' must be a string or dictionary")
+        if fp is not None:
+            if isinstance(fp, str) or isinstance(fp, unicode):
+                self._parser.read(fp)
+            elif isinstance(fp, dict):
+                self._load_ceph_conf_from_dict(fp)
+            else:
+                raise TypeError("'fp' must be a string or dictionary")
 
     # NOTE: The following methods are obsolete since ceph.conf files no longer contain [mon.X], [mds.X], and [ods.X] sections
 
