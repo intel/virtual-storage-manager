@@ -641,7 +641,8 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
 
     def rgw_create(self, context, name, host, keyring, log_file, rgw_frontends,
                    is_ssl, s3_user_uid, s3_user_display_name, s3_user_email,
-                   swift_user_subuser, swift_user_access, swift_user_key_type):
+                   swift_user_subuser, swift_user_access, swift_user_key_type,
+                   multiple_hosts=None):
         topic = rpc.queue_get_for(context, self.topic, host)
         res = self.call(context, self.make_msg('rgw_create',
                                                name=name,
@@ -655,6 +656,7 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                                                s3_user_email=s3_user_email,
                                                swift_user_subuser=swift_user_subuser,
                                                swift_user_access=swift_user_access,
-                                               swift_user_key_type=swift_user_key_type),
+                                               swift_user_key_type=swift_user_key_type,
+                                               multiple_hosts=multiple_hosts),
                         topic, version='1.0', timeout=6000)
         return res

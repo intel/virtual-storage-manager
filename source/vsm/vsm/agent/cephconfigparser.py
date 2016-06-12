@@ -514,11 +514,23 @@ class CephConfigParser(manager.Manager):
     def remove_mds(self, mds_id):
         return self._remove_section('mds', mds_id)
 
-    def add_rgw(self, rgw_sec, host, keyring, log_file, rgw_frontends):
+    def add_rgw(self, rgw_sec, host, keyring, log_file, rgw_frontends,
+                rgw_region=None, rgw_zone=None, rgw_zone_root_pool=None):
         if self._parser.has_section(rgw_sec):
             self._parser.remove_section(rgw_sec)
         self._parser.add_section(rgw_sec)
+        if rgw_region:
+            self._parser.set(rgw_sec, "rgw region", rgw_region)
+        if rgw_zone:
+            self._parser.set(rgw_sec, "rgw zone", rgw_zone)
+        if rgw_zone_root_pool:
+            self._parser.set(rgw_sec, "rgw zone root pool", rgw_zone_root_pool)
         self._parser.set(rgw_sec, "host", host)
         self._parser.set(rgw_sec, "keyring", keyring)
         self._parser.set(rgw_sec, "log file", log_file)
         self._parser.set(rgw_sec, "rgw frontends", rgw_frontends)
+
+    def add_k_v_for_section(self, section, key, value):
+        if not self._parser.has_section(section):
+            self._parser.add_section(section)
+        self._parser.set(section, key, value)
