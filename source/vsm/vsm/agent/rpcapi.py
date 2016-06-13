@@ -148,12 +148,6 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
                         self.make_msg('get_ceph_config',),
                         topic, version='1.0', timeout=6000)
 
-    def save_ceph_config(self, context, config, host):
-        topic = rpc.queue_get_for(context, self.topic, host)
-        return self.call(context,
-                        self.make_msg('save_ceph_config', config=config),
-                    topic, version='1.0', timeout=6000)
-
     def get_ceph_admin_keyring(self, context, host,):
         topic = rpc.queue_get_for(context, self.topic, host)
         return self.call(context,
@@ -407,7 +401,6 @@ class AgentAPI(vsm.openstack.common.rpc.proxy.RpcProxy):
     def update_ceph_conf(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)
         self.cast(context, self.make_msg('update_ceph_conf'), topic)
-
 
     def start_monitor(self, context, host):
         topic = rpc.queue_get_for(context, self.topic, host)

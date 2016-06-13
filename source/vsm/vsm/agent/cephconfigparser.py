@@ -41,61 +41,32 @@ LOG = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
 
 class CephConfigParser(manager.Manager):
-    cluster_id = None
-    context = vsm_context.get_admin_context()
-    _agent_rpcapi = agent_rpc.AgentAPI()
+    """
+    Wrap and extend an instance of python config parser to manage configuration data parsed from a ceph
+    configuration file (normally found in /etc/ceph/$cluster.conf - where $cluster is often 'ceph').
+    """
 
-    def _get_cluster_id(self):
-        cluster_id_file = os.path.join(FLAGS.state_path, 'cluster_id')
-        if not os.path.exists(cluster_id_file):
-            return None
+    class ClusterIdAccessor():
+        """
+        Read and cache the cluster id from /opt/stack/data/vsm/cluster_id the first
+        time get_cluster_id() is called; thereafter, retrieve the cached value.
+        """
+        _cluster_id = None
 
-        cid = utils.read_file_as_root(cluster_id_file)
-        cid = cid.strip()
-        self.cluster_id = cid
-        return self.cluster_id
+        def get_cluster_id(self):
+            """
+            Cache and return the cluster id. If the local copy is not yet set, read it from the
+            cluster_id file, and then cache and return it, else just return the cached copy.
+            :return: the cluster id found in /opt/stack/data/vsm/cluster_id.
+            """
+            if not self._cluster_id:
+                cluster_id_file = os.path.join(FLAGS.state_path, 'cluster_id')
+                if os.path.exists(cluster_id_file):
+                    self._cluster_id = utils.read_file_as_root(cluster_id_file).strip()
+            return self._cluster_id
 
-    def _update_etc_fstab(self):
-
-        # NOTE: This routine fails as it relies on [TYP.X] sections, which are no longer required or configured.
-
-        utils.execute('sed', '-i', '/forvsmosd/d', '/etc/fstab', run_as_root=True)
-        parser = ConfigParser.ConfigParser()
-        parser.optionxform = self._parser.optionxform
-        parser.read(FLAGS.ceph_conf)
-        fs_type = parser.get('osd', 'osd mkfs type', 'xfs')
-        cluster = db.cluster_get_all(self.context)[0]
-        mount_option = cluster['mount_option']
-        if not mount_option:
-            mount_option = utils.get_fs_options(fs_type)[1]
-        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type, mount_option)
-
-        for sec in parser.sections():
-            if sec.find('osd.') != -1:
-                osd_id = sec.split('.')[1]
-                mount_path = os.path.join(FLAGS.osd_data_path, "osd%s" % osd_id)
-                mount_disk = parser.get(sec, 'devs')
-                mount_host = parser.get(sec, 'host')
-                if FLAGS.host == mount_host:
-                    line = mount_disk + ' ' + mount_path
-                    line = line + ' ' + fs_type
-                    line = line + ' ' + mount_attr + ' 0 0'
-                    line = line + ' ' + '## forvsmosd'
-                    utils.write_file_as_root('/etc/fstab', line)
-
-    def _load_ceph_conf_from_db(self):
-        if not self.cluster_id:
-            if not self._get_cluster_id():
-                LOG.debug('Can not get cluster_id; unable to load ceph conf from db')
-                return
-
-        ceph_conf = db.cluster_get_ceph_conf(self.context, self.cluster_id)
-        if not ceph_conf:
-            return
-
-        utils.write_file_as_root(FLAGS.ceph_conf, ceph_conf, 'w')
-
-        self._update_etc_fstab()
+    _cluster_id_accessor = ClusterIdAccessor()
+    _context = vsm_context.get_admin_context()
 
     def _load_ceph_conf_from_dict(self, dict_cfg):
         """
@@ -115,7 +86,6 @@ class CephConfigParser(manager.Manager):
         super(CephConfigParser, self).__init__(*args, **kwargs)
         self._parser = ConfigParser.ConfigParser()
         self._parser.optionxform = lambda optname: optname.lower().replace(' ', '_')
-        self._load_ceph_conf_from_db()
 
         # NOTE: fp can be a file name in str or unicode format OR a dictionary of dictionaries
 
@@ -147,7 +117,7 @@ class CephConfigParser(manager.Manager):
 
     # NOTE: End of obsolete code section (see previous note).
 
-    def as_sections(self):
+    def as_dict(self):
 
         # NOTE: There is no equivalent to this routine in python's ConfigParser; calling code should be reworked
         # to call another routine that's more efficient relative to ConfigParser, and a new method should be added
@@ -157,12 +127,6 @@ class CephConfigParser(manager.Manager):
         for section in self._parser.sections():
             sections[section] = dict(self._parser.items(section))
         return sections
-
-    def as_dict(self):
-
-        # NOTE: This method is redundant, returning the same content as as_sections above.
-
-        return self.as_sections()
 
     def add_global(self, dict_kvs={}):
 
@@ -239,25 +203,28 @@ class CephConfigParser(manager.Manager):
                 self._parser.set(section, key, str(value))
 
     def _update_ceph_conf_into_db(self, content):
-        if not self.cluster_id:
-            if not self._get_cluster_id():
-                LOG.debug('Can not get cluster_id; unable to save ceph.conf to db')
-                return
+        cluster_id = self._cluster_id_accessor.get_cluster_id()
+        if not cluster_id:
+            LOG.debug('Can not get cluster_id; unable to save ceph.conf to db')
+            return
 
-        db.cluster_update_ceph_conf(self.context, self.cluster_id, content)
-        server_list = db.init_node_get_all(self.context)
+        db.cluster_update_ceph_conf(self._context, cluster_id, content)
+
+    def _push_db_conf_to_all_agents(self):
+        server_list = db.init_node_get_all(self._context)
         for ser in server_list:
-            self._agent_rpcapi.update_ceph_conf(self.context, ser['host'])
+            agent_rpc.AgentAPI().update_ceph_conf(self._context, ser['host'])
 
     def content(self):
         sfp = StringIO()
         self._parser.write(sfp)
         return sfp.getvalue()
 
-    def save_conf(self, file_path=FLAGS.ceph_conf, rgw=False):
+    def save_conf(self, file_path=FLAGS.ceph_conf):
         content = self.content()
         utils.write_file_as_root(file_path, content)
         self._update_ceph_conf_into_db(content)
+        self._push_db_conf_to_all_agents()
 
     def add_mon(self, hostname, ip, mon_id):
 
@@ -311,7 +278,7 @@ class CephConfigParser(manager.Manager):
         self._parser.set(section, 'osd heartbeat interval', str(dict_kvs['osd_heartbeat_interval']))
         self._parser.set(section, 'osd heartbeat grace', str(dict_kvs['osd_heartbeat_grace']))
         self._parser.set(section, 'osd mkfs type', dict_kvs['osd_type'])
-        cluster = db.cluster_get_all(self.context)[0]
+        cluster = db.cluster_get_all(self._context)[0]
         mount_option = cluster['mount_option']
         if not mount_option:
             mount_option = utils.get_fs_options(dict_kvs['osd_type'])[1]
