@@ -1152,8 +1152,7 @@ class SchedulerManager(manager.Manager):
         """
         """
         LOG.info('import ceph conf from %s to db '%ceph_conf_path)#ceph_conf_path!=FLAG.ceph_conf
-        ceph_conf_parser = cephconfigparser.CephConfigParser(str(ceph_conf_path))._parser
-        ceph_conf_str = ceph_conf_parser.as_str()
+        ceph_conf_str = cephconfigparser.CephConfigParser(ceph_conf_path).content()
         db.cluster_update_ceph_conf(context, cluster_id, ceph_conf_str)
         server_list = db.init_node_get_all(context)
         LOG.info('import ceph conf from db to ceph nodes ')
@@ -1226,8 +1225,7 @@ class SchedulerManager(manager.Manager):
         ceph_conf = body.get('ceph_conf')
         ceph_conf_file_new = '%s-check'%FLAGS.ceph_conf
         utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
-        config = cephconfigparser.CephConfigParser(fp=ceph_conf_file_new)
-        config_dict = config.as_dict()
+        config_dict = cephconfigparser.CephConfigParser(ceph_conf_file_new).as_dict()
         if config_dict is None:
             message['code'].append('-26')
             message['error'].append('the format of ceph_conf error.')

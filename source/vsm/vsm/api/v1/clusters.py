@@ -139,9 +139,8 @@ class ClusterController(wsgi.Controller):
         cluster_name = body["cluster"]["cluster_name"]
         cluster = db.cluster_get_by_name(context,cluster_name)
         if cluster:
-            ceph_conf_dict_old = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)._parser.as_dict()
-            ceph_conf_parser = cephconfigparser.CephConfigParser(ceph_conf_path)._parser
-            ceph_conf_dict = ceph_conf_parser.as_dict()
+            ceph_conf_dict_old = cephconfigparser.CephConfigParser(FLAGS.ceph_conf).as_dict()
+            ceph_conf_dict = cephconfigparser.CephConfigParser(ceph_conf_path).as_dict()
             check_ret = check_ceph_conf(ceph_conf_dict_old,ceph_conf_dict)
             if check_ret:
                 return {"message":"%s"%check_ret}
