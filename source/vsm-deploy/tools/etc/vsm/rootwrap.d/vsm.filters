@@ -48,8 +48,10 @@ umount: CommandFilter, /bin/umount, root
 ceph-radosgw: CommandFilter, /etc/init.d/ceph-radosgw, root
 radosgw-admin: CommandFilter, /usr/bin/radosgw-admin, root
 radosgw: CommandFilter, /usr/bin/radosgw, root
+radosgw-agent: CommandFilter, /usr/bin/radosgw-agent, root
 
 #common
+su: CommandFilter, /usr/bin/su, root
 ssh: CommandFilter, /usr/bin/ssh, root
 sed: CommandFilter, /bin/sed, root
 touch: CommandFilter, /bin/touch, root
@@ -57,8 +59,8 @@ echo: CommandFilter, /bin/echo, root
 cp: CommandFilter, /bin/cp, root
 scp: CommandFilter, /usr/bin/scp, root
 service: CommandFilter, /usr/sbin/service, root
-mkdir: CommandFilter, /bin/mkdir, root
 systemctl: CommandFilter, /usr/bin/systemctl, root
+mkdir: CommandFilter, /bin/mkdir, root
 hostname: CommandFilter, /bin/hostname, root
 ls: CommandFilter, /bin/ls, root
 pgrep: CommandFilter, /usr/bin/pgrep, root

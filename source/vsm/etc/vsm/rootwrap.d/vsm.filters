@@ -48,6 +48,7 @@ umount: CommandFilter, /bin/umount, root
 ceph-radosgw: CommandFilter, /etc/init.d/ceph-radosgw, root
 radosgw-admin: CommandFilter, /usr/bin/radosgw-admin, root
 radosgw: CommandFilter, /usr/bin/radosgw, root
+radosgw-agent: CommandFilter, /usr/bin/radosgw-agent, root
 
 #common
 su: CommandFilter, /usr/bin/su, root
@@ -109,7 +110,7 @@ cat: CommandFilter, /bin/cat, root
 diamond: CommandFilter, /usr/bin/diamond, root
 smartctl: CommandFilter, /usr/sbin/smartctl, root
 nvme: CommandFilter, /usr/sbin/nvme, root
-kill_diamond: CommandFilter, /usr/local/bin/kill_diamond, root
+kill_diamond: CommandFilter, /usr/bin/kill_diamond, root
 vsm-ceph-upgrade: CommandFilter, /usr/bin/vsm-ceph-upgrade, root
 add_disk: CommandFilter, /usr/local/bin/tools/hooks/add_disk, root
 blockdev:CommandFilter, /sbin/blockdev, root
