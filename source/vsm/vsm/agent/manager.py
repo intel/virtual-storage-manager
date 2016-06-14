@@ -83,7 +83,7 @@ class AgentManager(manager.Manager):
         super(AgentManager, self).__init__(*args, **kwargs)
         self._context = context.get_admin_context()
         self._driver = driver.DbDriver()
-        self.ceph_driver = driver.CephDriver()
+        self.ceph_driver = driver.CephDriver(self._context)
         self.crushmap_driver = driver.CreateCrushMapDriver()
         self.crushmap_manager_driver = driver.ManagerCrushMapDriver()
         self.diamond_driver= driver.DiamondDriver()
@@ -466,7 +466,7 @@ class AgentManager(manager.Manager):
 
     def update_ceph_conf(self, context):
         LOG.info('agent/manager.py update ceph.conf from db.')
-        cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        self.ceph_driver.sync_db_to_ceph_config_file(context)
         LOG.info('agent/manager.py update ceph.conf from db. OVER')
 
     def get_ceph_admin_keyring(self, context):
@@ -686,9 +686,6 @@ class AgentManager(manager.Manager):
 
     def get_ceph_config(self, context):
         return self.ceph_driver.get_ceph_config(context)
-
-    def save_ceph_config(self, context, config):
-        return self.ceph_driver.save_ceph_config(context, config)
 
     def start_monitor(self, context):
         # Start all the monitors
@@ -2042,7 +2039,7 @@ class AgentManager(manager.Manager):
             ceph_conf = body.get('ceph_conf')
             ceph_conf_file_new = '%s-import'%FLAGS.ceph_conf
             utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
-            config_content = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new))._parser.as_str()
+            config_content = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new)).content()
             osd_info = self.ceph_driver.get_ceph_osd_info()
             mon_info = self.ceph_driver._get_ceph_mon_map()
             self._modify_init_nodes_from_config_to_db(context,osd_info,mon_info,crushmap)

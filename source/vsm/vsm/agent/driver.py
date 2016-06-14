@@ -61,13 +61,14 @@ FLAGS = flags.FLAGS
 
 class CephDriver(object):
     """Excute commands relating to Ceph."""
-    def __init__(self):
+    def __init__(self, context):
         self._crushmap_mgmt = CreateCrushMapDriver()
         self._conductor_api = conductor.API()
         self._conductor_rpcapi = conductor_rpcapi.ConductorAPI()
         self._agent_rpcapi = agent_rpc.AgentAPI()
         try:
-            cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+            self.sync_db_to_ceph_config_file(context)
+            self.update_etc_fstab(context)
         except:
             pass
 
@@ -220,9 +221,47 @@ class CephDriver(object):
         args = ['ceph', 'daemon','mon.%s'%mon_id ,'config','show']
         return self._run_cmd_to_json(args)
 
+    def sync_db_to_ceph_config_file(self, context):
+        """
+        Write the database version of ceph conf out to /etc/ceph/ceph.conf on this host.
+        :param context: the context to use when reading the ceph conf from the database.
+        """
+        cluster_id_file = os.path.join(FLAGS.state_path, 'cluster_id')
+        if not os.path.exists(cluster_id_file):
+            return
 
+        cluster_id = utils.read_file_as_root(cluster_id_file).strip()
+        ceph_conf = db.cluster_get_ceph_conf(context, cluster_id)
+        if not ceph_conf:
+            return
 
+        utils.write_file_as_root(FLAGS.ceph_conf, ceph_conf, 'w')
 
+    def update_etc_fstab(self, context):
+
+        # NOTE: This routine fails as it relies on [TYP.X] sections, which are no longer required or configured.
+
+        utils.execute('sed', '-i', '/forvsmosd/d', '/etc/fstab', run_as_root=True)
+        parser = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        fs_type = parser.get('osd', 'osd mkfs type', 'xfs')
+        cluster = db.cluster_get_all(context)[0]
+        mount_option = cluster['mount_option']
+        if not mount_option:
+            mount_option = utils.get_fs_options(fs_type)[1]
+        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type, mount_option)
+
+        for sec in parser.sections():
+            if sec.find('osd.') != -1:
+                osd_id = sec.split('.')[1]
+                mount_path = os.path.join(FLAGS.osd_data_path, "osd%s" % osd_id)
+                mount_disk = parser.get(sec, 'devs')
+                mount_host = parser.get(sec, 'host')
+                if FLAGS.host == mount_host:
+                    line = mount_disk + ' ' + mount_path
+                    line = line + ' ' + fs_type
+                    line = line + ' ' + mount_attr + ' 0 0'
+                    line = line + ' ' + '## forvsmosd'
+                    utils.write_file_as_root('/etc/fstab', line)
 
     def create_storage_pool(self, context, body):
         pool_name = body["name"]
@@ -761,15 +800,6 @@ class CephDriver(object):
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf).as_dict()
         LOG.info("ceph config %s" % config)
         return config
-
-    def save_ceph_config(self, context, config):
-        """
-        config: dict
-        """
-        config = cephconfigparser.CephConfigParser(config)
-        #with open(FLAGS.ceph_conf, 'w') as ceph_conf:
-        config.save_conf(FLAGS.ceph_conf)
-        return True
 
     def inital_ceph_osd_db_conf(self, context, server_list, file_system, ceph_conf_in_cluster_manifest=None):
         config = cephconfigparser.CephConfigParser()
@@ -1993,7 +2023,7 @@ class CephDriver(object):
         init_node_ref = db.init_node_get_by_host(context, FLAGS.host)
         hostip = init_node_ref['secondary_public_ip']
         config.add_mds(FLAGS.host, hostip, mds_id)
-        config.save_conf()
+        config.save_conf(FLAGS.ceph_conf)
 
         values = {'mds': 'yes'}
         db.init_node_update(context, init_node_ref['id'], values)
@@ -2192,7 +2222,8 @@ class CephDriver(object):
            4. service ceph stop osd.$num
         """
         LOG.info('agent/driver.py stop_server')
-        cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        self.sync_db_to_ceph_config_file(context)       # not sure why these two calls are here; we haven't done
+        self.update_etc_fstab(context)                  # anything yet to change the state of the system...
         LOG.info('Step 1. Scan the osds in db.')
         res = self._conductor_rpcapi.init_node_get_by_id(context, node_id)
         service_id = res.get('service_id', None)
@@ -3422,7 +3453,7 @@ class CephDriver(object):
         config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
         rgw_section = "client." + str(name)
         config.add_rgw(rgw_section, host, keyring, log_file, rgw_frontends)
-        config.save_conf(rgw=True)
+        config.save_conf(FLAGS.ceph_conf)
         LOG.info("+++++++++++++++end add_rgw_conf_into_ceph_conf")
 
     def create_default_pools_for_rgw(self, context):
