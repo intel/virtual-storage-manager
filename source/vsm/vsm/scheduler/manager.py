@@ -1509,7 +1509,7 @@ class SchedulerManager(manager.Manager):
         pool_default_size = int(pool_default_size.value)
         nums = len(server_list)
         mds_node = None
-        rgw_node = None
+        rgw_node = []
         if nums >= pool_default_size:
             count = 0
             rest_mon_num = 0
@@ -1519,7 +1519,7 @@ class SchedulerManager(manager.Manager):
                 if ser['is_mds'] == True:
                     mds_node = ser
                 if ser['is_rgw'] == True:
-                    rgw_node = ser
+                    rgw_node.append(ser)
             if count < pool_default_size:
                 rest_mon_num = pool_default_size - count
             if rest_mon_num > 0:
@@ -1700,17 +1700,19 @@ class SchedulerManager(manager.Manager):
         except:
             _update('ERROR: set crushmap')
 
-        # add rgw service
-        # TODO hardcode list as followed:
-        # [rgw_instance_name, is_ssl, uid, display_name,
-        # email, sub_user, access, key_type]
-        if rgw_node:
+        # Add RGW Instance(s)
+        # One is simple configuration, another is federated configuration.
+        # TODO Something Hardcode if Add RGW Instance(s) when created cluster.
+        # Simple configuration:
+        # Federated configuration:
+
+        if len(rgw_node) == 1:
             try:
-                _update("Start rgw")
-                LOG.info("start rgw service, host = %s" % rgw_node['host'])
+                _update("Creating Simple RGW")
+                LOG.info("Start creating rgw instance, host = %s" % rgw_node[0]['host'])
                 self._agent_rpcapi.rgw_create(context,
                                               name="radosgw.gateway",
-                                              host=rgw_node['host'],
+                                              host=rgw_node[0]['host'],
                                               keyring="/etc/ceph/keyring.radosgw.gateway",
                                               log_file="/var/log/ceph/radosgw.gateway.log",
                                               rgw_frontends="civetweb port=80",
@@ -1721,6 +1723,29 @@ class SchedulerManager(manager.Manager):
                                               swift_user_subuser="johndoe:swift",
                                               swift_user_access="full",
                                               swift_user_key_type="swift")
+            except:
+                _update("ERROR: rgw")
+        elif len(rgw_node) > 1:
+            try:
+                _update("Creating Multiple RGWs")
+                hosts = []
+                for rgw in rgw_node:
+                    LOG.info("Start creating rgw instance, host = %s" % rgw['host'])
+                    hosts.append(rgw['host'])
+                self._agent_rpcapi.rgw_create(context,
+                                              name="",
+                                              host=rgw_node[0]['host'],
+                                              keyring="",
+                                              log_file="",
+                                              rgw_frontends="civetweb port=80",
+                                              is_ssl=False,
+                                              s3_user_uid="",
+                                              s3_user_display_name="",
+                                              s3_user_email="",
+                                              swift_user_subuser="",
+                                              swift_user_access="",
+                                              swift_user_key_type="",
+                                              multiple_hosts=hosts)
             except:
                 _update("ERROR: rgw")
 

@@ -20,39 +20,38 @@
 """
 Agent Service
 """
-import random
-import re
-import os
+
+import copy
+import glob
 import json
-import time
-import socket
+import operator
+import os
 import platform
-from vsm import db
+import socket
+import time
+
+from vsm.agent import cephconfigparser
+from vsm.agent.cephconf_discover import cephconf_discover
+from vsm.agent.crushmap_parser import CrushMap
+from vsm.agent import driver
+from vsm.agent import rpcapi as agent_rpc
+from vsm.common import ceph_version_utils
+from vsm.common import constant
+from vsm.conductor import rpcapi as conductor_rpcapi
 from vsm import context
+from vsm import db
+from vsm import exception
 from vsm import flags
 from vsm import manager
-from vsm import utils
-from vsm import exception
-from decorator import decorator
-from vsm.openstack.common import log as logging
-from vsm.openstack.common import timeutils
-from vsm.conductor import rpcapi as conductor_rpcapi
-from vsm.agent import driver
-from vsm.agent import cephconfigparser
 from vsm.manifest.parser import ManifestParser
 from vsm.manifest import sys_info
+from vsm.openstack.common import log as logging
 from vsm.openstack.common.periodic_task import periodic_task
+from vsm.openstack.common import timeutils
 from vsm.openstack.common.rpc import common as rpc_exc
-from vsm.agent import rpcapi as agent_rpc
-from vsm import context
-from cephconf_discover import cephconf_discover
+from vsm import utils
 
-
-import operator
-from crushmap_parser import CrushMap
-import glob
 CTXT = context.get_admin_context()
-
 LOG = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
 
@@ -2393,10 +2392,9 @@ class AgentManager(manager.Manager):
         LOG.info('get_default_pg_num_by_storage_group:%s'%pg_num_default)
         return pg_num_default
 
-    def rgw_create(self, context, name, host, keyring, log_file, rgw_frontends,
-                   is_ssl, s3_user_uid, s3_user_display_name, s3_user_email,
-                   swift_user_subuser, swift_user_access, swift_user_key_type):
-        LOG.info("Begin to create radosgw when creating ceph cluster")
+    def _rgw_simple_create(self, context, name, host, keyring, log_file, rgw_frontends,
+                           is_ssl, s3_user_uid, s3_user_display_name, s3_user_email,
+                           swift_user_subuser, swift_user_access, swift_user_key_type):
         self.ceph_driver.create_keyring_and_key_for_rgw(context, name, keyring)
         self.ceph_driver.add_rgw_conf_into_ceph_conf(context, name, host, keyring,
                                                      log_file, rgw_frontends)
@@ -2407,23 +2405,10 @@ class AgentManager(manager.Manager):
                           run_as_root=True)
         # self.ceph_driver.create_default_pools_for_rgw(context)
 
-        def _get_os():
-            (distro, release, codename) = platform.dist()
-            return distro
-
-        ceph_version = self.ceph_driver.get_ceph_version()
-        ceph_v = "firefly"
-        if "0.80." in ceph_version:
-            ceph_v = "firefly"
-        elif "0.94." in ceph_version:
-            ceph_v = "hammer"
-        elif "9.2." in ceph_version:
-            ceph_v = "infernalis"
-        elif "10.2" in ceph_version:
-            ceph_v = "jewel"
-        distro = _get_os()
+        ceph_version_code = ceph_version_utils.get_ceph_version_code()
+        (distro, release, codename) = platform.dist()
         if distro.lower() == "centos":
-            if ceph_v != "hammer":
+            if ceph_version_code != constant.CEPH_HAMMER:
                 try:
                     utils.execute("killall", "radosgw", run_as_root=True)
                     utils.execute("radosgw", "--id=%s" % name, run_as_root=True)
@@ -2467,3 +2452,337 @@ class AgentManager(manager.Manager):
                 swift_secret_key = swift_key['secret_key']
                 LOG.info("=======================swift_secret_key: %s" % str(swift_secret_key))
         LOG.info("Succeed to create a rgw daemon named %s" % name)
+
+    def _rgw_federated_create(self, context, multiple_hosts):
+        """
+        One region(master) with multiple zones.
+
+        :param context:
+        :param multiple_hosts:
+        :return:
+        """
+
+        # region_names_list = ["us"]
+        # zone_names_list = ["east", "west"]
+
+        LOG.info("Create multiple rgw instances with federated configuration")
+        LOG.info("Hosts are %s" % str(multiple_hosts))
+
+        half_hosts_num = len(multiple_hosts) / 2
+        if len(multiple_hosts) % 2:
+            half_hosts_num = half_hosts_num + 1
+        zone_east_hosts = multiple_hosts[0:half_hosts_num]
+        zone_west_hosts = multiple_hosts[half_hosts_num:]
+        LOG.info("Hosts in east zone are %s" % str(zone_east_hosts))
+        LOG.info("Hosts in west zone are %s" % str(zone_west_hosts))
+        rgw_east_info = []
+        rgw_west_info = []
+        while len(zone_east_hosts) > 0:
+            rgw_instance = "client.radosgw." + "us" + "-east-" + str(len(zone_east_hosts))
+            host = zone_east_hosts.pop()
+            rgw_east_info.append({
+                "host": host,
+                "rgw_instance": rgw_instance
+            })
+        while len(zone_west_hosts) > 0:
+            rgw_instance = "client.radosgw." + "us" + "-west-" + str(len(zone_west_hosts))
+            host = zone_west_hosts.pop()
+            rgw_west_info.append({
+                "host": host,
+                "rgw_instance": rgw_instance
+            })
+
+        rgw_info = rgw_east_info + rgw_west_info
+        LOG.info("RGW of east are %s" % str(rgw_east_info))
+        LOG.info("RGW of west are %s" % str(rgw_west_info))
+        LOG.info("RGW are %s" % str(rgw_info))
+
+        pool_names = [
+            ".us-east.rgw.root",
+            ".us-east.rgw.control",
+            ".us-east.rgw.gc",
+            ".us-east.rgw.buckets",
+            ".us-east.rgw.buckets.index",
+            ".us-east.rgw.buckets.extra",
+            ".us-east.log",
+            ".us-east.intent-log",
+            ".us-east.usage",
+            ".us-east.users",
+            ".us-east.users.email",
+            ".us-east.users.swift",
+            ".us-east.users.uid",
+            ".us-east.domain.rgw",
+            ".us-west.rgw.root",
+            ".us-west.rgw.control",
+            ".us-west.rgw.gc",
+            ".us-west.rgw.buckets",
+            ".us-west.rgw.buckets.index",
+            ".us-west.rgw.buckets.extra",
+            ".us-west.log",
+            ".us-west.intent-log",
+            ".us-west.usage",
+            ".us-west.users",
+            ".us-west.users.email",
+            ".us-west.users.swift",
+            ".us-west.users.uid",
+            ".us-west.domain.rgw",
+        ]
+
+        # Create Pools
+        LOG.info("Create Pools")
+        for pool_name in pool_names:
+            cmds = ["ceph", "osd", "pool", "create", pool_name, 8, 8]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+
+        # Create Keyring
+        LOG.info("Create keyring")
+        keyring = "/etc/ceph/ceph.client.radosgw.keyring"
+        cmds = ["rm", "-rf", keyring]
+        LOG.info("Running commands %s" % str(cmds))
+        utils.execute(*cmds, run_as_root=True)
+        cmds = ["ceph-authtool", "--create-keyring", keyring]
+        LOG.info("Running commands %s" % str(cmds))
+        utils.execute(*cmds, run_as_root=True)
+        cmds = ["chmod", "+r", keyring]
+        LOG.info("Running commands %s" % str(cmds))
+        utils.execute(*cmds, run_as_root=True)
+        for rgw in rgw_info:
+            cmds = ["ceph-authtool", keyring, "-n", rgw['rgw_instance'], "--gen-key"]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+        for rgw in rgw_info:
+            cmds = ["ceph-authtool", "-n", rgw['rgw_instance'], "--cap", "osd",
+                    "allow rwx", "--cap", "mon", "allow rwx", keyring]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+        for rgw in rgw_info:
+            cmds = ["ceph", "-k", FLAGS.keyring_admin, "auth", "add",
+                    rgw['rgw_instance'], "-i", keyring]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+
+        for host in multiple_hosts:
+            cmds = ["su", "-s", "/bin/bash", "-c", "exec scp %s %s:%s" % (keyring, host, keyring)]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+            cmds = ["su", "-s", "/bin/bash", "-c", "exec ssh %s chown ceph:ceph %s" % (host, keyring)]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+
+        # Add Instance to Ceph Config File
+        LOG.info("Add Instances to Ceph Config File")
+        log_path = "/var/log/ceph/"
+        rgw_frontends = '"civetweb port=80"'
+        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        config.add_k_v_for_section("global", "rgw region root pool", ".us.rgw.root")
+        for rgw in rgw_east_info:
+            config.add_rgw(rgw['rgw_instance'], rgw['host'], keyring,
+                           log_path + rgw['rgw_instance'] + ".log", rgw_frontends,
+                           "us", "us-east", ".us-east.rgw.root")
+        for rgw in rgw_west_info:
+            config.add_rgw(rgw['rgw_instance'], rgw['host'], keyring,
+                           log_path + rgw['rgw_instance'] + ".log", rgw_frontends,
+                           "us", "us-west", ".us-west.rgw.root")
+        config.save_conf(rgw=True)
+
+        # Create a Region
+        LOG.info("Create a Region")
+        line_east_endpoints = ''
+        for rgw in rgw_east_info:
+            line_east_endpoints = line_east_endpoints + '"http:\/\/%s:80\/",' % rgw['host']
+        line_east_endpoints = line_east_endpoints[:-1]
+        line_west_endpoints = ''
+        for rgw in rgw_west_info:
+            line_west_endpoints = line_west_endpoints + '"http:\/\/%s:80\/",' % rgw['host']
+        line_west_endpoints = line_west_endpoints[:-1]
+
+        us_json = '{"name": "us",\n' \
+                  '"api_name": "us",\n' \
+                  '"is_master": "true",\n' \
+                  '"endpoints": [\n'
+        us_json = us_json + line_east_endpoints
+        us_json = us_json + '],\n' \
+                            '"master_zone": "us-east",\n' \
+                            '"zones": [\n' \
+                            '{"name": "us-east",\n' \
+                            '"endpoints": [\n'
+        us_json = us_json + line_east_endpoints
+        us_json = us_json + '],\n' \
+                            '"log_meta": "true",\n' \
+                            '"log_data": "true"},\n' \
+                            '{"name": "us-west",\n' \
+                            '"endpoints": [\n'
+        us_json = us_json + line_west_endpoints
+        us_json = us_json + '],\n' \
+                            '"log_meta": "true",\n' \
+                            '"log_data": "true"}],\n' \
+                            '"placement_targets": [\n' \
+                            '{\n' \
+                            '"name": "default-placement",\n' \
+                            '"tags": []\n' \
+                            '}\n' \
+                            '],\n' \
+                            '"default_placement": "default-placement"}\n'
+        LOG.info("us.json is %s" % us_json)
+        us_json_path = "/var/lib/vsm/us.json"
+        utils.write_file_as_root(us_json_path, us_json, open_type="w")
+
+        for rgw in rgw_info:
+            rgw_instance = rgw['rgw_instance']
+            cmds = ["radosgw-admin", "region", "set", "--infile",
+                    us_json_path, "--name", rgw_instance]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+            cmds = ["radosgw-admin", "regionmap", "update",
+                    "--name", rgw_instance]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+
+        # Create Zones
+        us_east_json = '{ "domain_root": ".us-east.domain.rgw",\n' \
+                       '  "control_pool": ".us-east.rgw.control",\n' \
+                       '  "gc_pool": ".us-east.rgw.gc",\n' \
+                       '  "log_pool": ".us-east.log",\n' \
+                       '  "intent_log_pool": ".us-east.intent-log",\n' \
+                       '  "usage_log_pool": ".us-east.usage",\n' \
+                       '  "user_keys_pool": ".us-east.users",\n' \
+                       '  "user_email_pool": ".us-east.users.email",\n' \
+                       '  "user_swift_pool": ".us-east.users.swift",\n' \
+                       '  "user_uid_pool": ".us-east.users.uid",\n' \
+                       '  "system_key": { "access_key": "", "secret_key": ""},\n' \
+                       '  "placement_pools": [\n' \
+                       '    { "key": "default-placement",\n' \
+                       '      "val": { "index_pool": ".us-east.rgw.buckets.index",\n' \
+                       '               "data_pool": ".us-east.rgw.buckets"}\n' \
+                       '    }\n' \
+                       '  ]\n' \
+                       '}\n'
+        LOG.info("us_east.json is %s" % us_east_json)
+        us_east_json_path = "/var/lib/vsm/us_east.json"
+        utils.write_file_as_root(us_east_json_path, us_east_json, open_type="w")
+        for rgw in rgw_info:
+            cmds = ["radosgw-admin", "zone", "set", "--rgw-zone=us-east",
+                    "--infile", us_east_json_path, "--name", rgw['rgw_instance']]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+        us_west_json = us_east_json.replace("us-east", "us-west")
+        us_west_json_path = "/var/lib/vsm/us_west.json"
+        utils.write_file_as_root(us_west_json_path, us_west_json, open_type="w")
+        for rgw in rgw_info:
+            cmds = ["radosgw-admin", "zone", "set", "--rgw-zone=us-west",
+                    "--infile", us_west_json_path, "--name", rgw['rgw_instance']]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+        for rgw in rgw_info:
+            cmds = ["radosgw-admin", "regionmap", "update", "--name", rgw['rgw_instance']]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+
+        # Create Zone Users
+        cmds = ["radosgw-admin", "user", "create", "--uid=us-east",
+                "--display-name='Region-US Zone-East'", "--name",
+                rgw_east_info[0]['rgw_instance'], "--system"]
+        LOG.info("Running commands %s" % str(cmds))
+        out, err = utils.execute("radosgw-admin", "user", "create", "--uid=%s" % "us-east",
+                                 "--display-name='%s'" % "Region-US Zone-East", "--name",
+                                 rgw_east_info[0]['rgw_instance'], "--system", run_as_root=True)
+        LOG.info(out)
+        out = json.loads(out)
+        keys = out['keys']
+        for key in keys:
+            if key['user'] == "us-east":
+                east_user_secret_key = key['secret_key']
+                east_user_access_key = key['access_key']
+                LOG.info("=======================zone: us-east, user_secret_key: %s" % str(east_user_secret_key))
+                LOG.info("=======================zone: us-east, user_access_key: %s" % str(east_user_access_key))
+
+        cmds = ["radosgw-admin", "user", "create", "--uid=us-west",
+                "--display-name='Region-US Zone-West'", "--name",
+                rgw_west_info[0]['rgw_instance'], "--system"]
+        LOG.info("Running commands %s" % str(cmds))
+        out, err = utils.execute(*cmds, run_as_root=True)
+        LOG.info(out)
+        out = json.loads(out)
+        keys = out['keys']
+        for key in keys:
+            if key['user'] == "us-west":
+                west_user_secret_key = key['secret_key']
+                west_user_access_key = key['access_key']
+                LOG.info("=======================zone: us-west, user_secret_key: %s" % str(west_user_secret_key))
+                LOG.info("=======================zone: us-west, user_access_key: %s" % str(west_user_access_key))
+
+        # Update Zone Configurations
+        us_east_json = us_east_json.replace("\"access_key\": \"\"",
+                                            "\"access_key\": \"%s\"" % east_user_access_key)
+        us_east_json = us_east_json.replace("\"secret_key\": \"\"",
+                                            "\"secret_key\": \"%s\"" % east_user_secret_key)
+        utils.write_file_as_root(us_east_json_path, us_east_json, open_type="w")
+        for rgw in rgw_info:
+            cmds = ["radosgw-admin", "zone", "set", "--rgw-zone=us-east",
+                    "--infile", us_east_json_path, "--name", rgw['rgw_instance']]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+        us_west_json = us_west_json.replace("\"access_key\": \"\"",
+                                            "\"access_key\": \"%s\"" % west_user_access_key)
+        us_west_json = us_west_json.replace("\"secret_key\": \"\"",
+                                            "\"secret_key\": \"%s\"" % west_user_secret_key)
+        utils.write_file_as_root(us_west_json_path, us_west_json, open_type="w")
+        for rgw in rgw_info:
+            cmds = ["radosgw-admin", "zone", "set", "--rgw-zone=us-west",
+                    "--infile", us_west_json_path, "--name", rgw['rgw_instance']]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+
+        # Restart Services
+        for rgw in rgw_info:
+            host = rgw['host']
+            rgw_instance = rgw['rgw_instance']
+            cmds = ["su", "-s", "/bin/bash", "-c",
+                    "exec ssh %s mkdir -p /var/lib/ceph/radosgw/%s" % (host, rgw_instance)]
+            LOG.info("Running commands %s" % str(cmds))
+            utils.execute(*cmds, run_as_root=True)
+            (distro, release, codename) = platform.dist()
+            if distro.lower() == "centos":
+                cmds = ["su", "-s", "/bin/bash", "-c",
+                        "exec ssh %s service ceph-radosgw restart" % host]
+                LOG.info("Running commands %s" % str(cmds))
+                utils.execute(*cmds, run_as_root=True)
+            elif distro.lower() == "ubuntu":
+                cmds = ["su", "-s", "/bin/bash", "-c",
+                        "exec ssh %s service radosgw restart" % host]
+                LOG.info("Running commands %s" % str(cmds))
+                utils.execute(*cmds, run_as_root=True)
+
+        # Multi-Site Data Replication
+        # destination = "http://" + rgw_west_info[0]['rgw_instance'] + ":80"
+        # log_file = "/var/log/radosgw/radosgw-sync-us-east-west.log"
+        # region_data_sync_conf = "src_access_key: %s\n" \
+        #                         "src_secret_key: %s\n" \
+        #                         "destination: %s\n" \
+        #                         "dest_access_key: %s\n" \
+        #                         "dest_secret_key: %s\n" \
+        #                         "log_file: %s\n" % (east_user_access_key,
+        #                                             east_user_secret_key,
+        #                                             destination,
+        #                                             west_user_access_key,
+        #                                             west_user_secret_key,
+        #                                             log_file)
+        # region_data_sync_conf_path = "/etc/ceph/region-data-sync.conf"
+        # utils.write_file_as_root(region_data_sync_conf_path, region_data_sync_conf, open_type="w")
+        # cmds = ["radosgw-agent", "-c", region_data_sync_conf_path, ">/dev/null", "2>&1", "&"]
+        # LOG.info("Running commands %s" % str(cmds))
+        # utils.execute(*cmds, run_as_root=True)
+
+
+    def rgw_create(self, context, name, host, keyring, log_file, rgw_frontends,
+                   is_ssl, s3_user_uid, s3_user_display_name, s3_user_email,
+                   swift_user_subuser, swift_user_access, swift_user_key_type,
+                   multiple_hosts):
+        LOG.info("Begin to create radosgw when creating ceph cluster")
+        if multiple_hosts:
+            self._rgw_federated_create(context, multiple_hosts)
+        else:
+            self._rgw_simple_create(context, name, host, keyring, log_file, rgw_frontends,
+                                    is_ssl, s3_user_uid, s3_user_display_name, s3_user_email,
+                                    swift_user_subuser, swift_user_access, swift_user_key_type)

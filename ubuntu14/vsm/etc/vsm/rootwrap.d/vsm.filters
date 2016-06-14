@@ -47,6 +47,7 @@ mount: CommandFilter, /bin/mount, root
 umount: CommandFilter, /bin/umount, root
 radosgw: CommandFilter, /etc/init.d/radosgw, root
 radosgw-admin: CommandFilter, /usr/bin/radosgw-admin, root
+radosgw-agent: CommandFilter, /usr/bin/radosgw-agent, root
 
 #common
 su: CommandFilter, /bin/su, root
@@ -111,6 +112,7 @@ vsm-ceph-upgrade: CommandFilter, /usr/bin/vsm-ceph-upgrade, root
 add_disk: CommandFilter, /usr/local/bin/tools/hooks/add_disk, root
 blockdev:CommandFilter, /sbin/blockdev, root
 pvs:CommandFilter, /sbin/pvs, root
+
 # vsm/storage/nfs.py
 stat: CommandFilter, /usr/bin/stat, root
 mount: CommandFilter, /bin/mount, root

@@ -88,10 +88,10 @@
             alert("Warning: More than one mds selected!");
             return false;
         }
-        if (rgw_count.length > 1){
-            alert("Warning: More than one rgw selected!");
-            return false;
-        }
+        //if (rgw_count.length > 1){
+        //    alert("Warning: More than one rgw selected!");
+        //    return false;
+        //}
 
         if (zone_id_all.length>zone_id_has_monitor_list.length){
             alert("Warning:there is some zone which no monitor in!");
