@@ -1743,6 +1743,10 @@ class AgentManager(manager.Manager):
                 raise exception.ExeCmdError
             except exception.ExeCmdError, e:
                 LOG.error("%s:%s" % (e.code, e.message))
+                
+    @periodic_task(service_topic=FLAGS.agent_topic, spacing=_get_interval_time('ceph_status'))
+    def check_for_external_ceph_conf_updates(self, context):
+        CephConfigSynchronizer().sync_before_read(FLAGS.ceph_conf)
 
     @periodic_task(service_topic=FLAGS.agent_topic, spacing=_get_interval_time('ceph_status'))
     def update_ceph_status(self, context):
