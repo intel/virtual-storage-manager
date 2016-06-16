@@ -33,7 +33,7 @@ from vsm import utils
 from vsm import conductor
 from vsm import scheduler
 from vsm import db
-from vsm.agent import cephconfigparser
+from vsm.agent.cephconfigutils import CephConfigParser
 
 LOG = logging.getLogger(__name__)
 
@@ -144,8 +144,8 @@ class ClusterController(wsgi.Controller):
         cluster_name = body["cluster"]["cluster_name"]
         cluster = db.cluster_get_by_name(context,cluster_name)
         if cluster:
-            ceph_conf_dict_old = cephconfigparser.CephConfigParser(FLAGS.ceph_conf).as_dict()
-            ceph_conf_dict = cephconfigparser.CephConfigParser(ceph_conf_path).as_dict()
+            ceph_conf_dict_old = CephConfigParser(FLAGS.ceph_conf, sync=False).as_dict()
+            ceph_conf_dict = CephConfigParser(ceph_conf_path, sync=False).as_dict()
             check_ret = check_ceph_conf(ceph_conf_dict_old,ceph_conf_dict)
             if check_ret:
                 return {"message":"%s"%check_ret}

@@ -828,6 +828,9 @@ def cluster_update_ceph_conf(context, cluster_id, ceph_conf):
 def cluster_get_ceph_conf(context, cluster_id):
     return IMPL.cluster_get_ceph_conf(context, cluster_id)
 
+def cluster_get_ceph_conf_metadata(context, cluster_id):
+    return IMPL.cluster_get_ceph_conf_metadata(context, cluster_id)
+
 def cluster_get_deleted_times(context, cluster_id):
     return IMPL.cluster_get_deleted_times(context, cluster_id)
 

@@ -520,6 +520,8 @@ class Cluster(BASE, VsmBase):
     deleted_times = Column(Integer, default=0)
     info_dict = Column(Text, nullable=True)
     ceph_conf = Column(String(length=10485760), nullable=True)
+    ceph_conf_md5sum = Column(String(length=64), nullable=True)
+    ceph_conf_luts = Column(Integer, default=0)
     #osd_heartbeat_interval = Column(Integer, nullable=True)
     #osd_heartbeat_grace=Column(Integer, nullable=True)
 

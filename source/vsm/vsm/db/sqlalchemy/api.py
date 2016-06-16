@@ -21,6 +21,7 @@ import json
 import datetime
 import uuid
 import warnings
+import hashlib
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload, joinedload_all
@@ -2425,7 +2426,9 @@ def cluster_update_ceph_conf(context, cluster_id, ceph_conf, session=None):
         session = get_session()
 
     with session.begin(subtransactions=True):
-        values = {'ceph_conf': ceph_conf}
+        luts = timeutils.utcnow_ts()
+        md5sum = hashlib.md5(ceph_conf).hexdigest()
+        values = {'ceph_conf': ceph_conf, 'ceph_conf_md5sum': md5sum, 'ceph_conf_luts': luts}
         values['updated_at'] = timeutils.utcnow()
         convert_datetimes(values, 'created_at', 'deleted_at', 'updated_at')
         cluster_ref = cluster_get(context, cluster_id, session=session)
@@ -2465,6 +2468,14 @@ def cluster_get_ceph_conf(context, cluster_id, session=None):
     cluster_ref = cluster_get(context, cluster_id, session)
     return cluster_ref['ceph_conf']
 
+def cluster_get_ceph_conf_metadata(context, cluster_id, session=None):
+    if not session:
+        session = get_session()
+
+    cluster_ref = cluster_get(context, cluster_id, session)
+    return {'ceph_conf_md5sum': cluster_ref['ceph_conf_md5sum'],
+            'ceph_conf_luts': cluster_ref['ceph_conf_luts']}
+
 @require_admin_context
 def cluster_info_dict_get_by_id(context, cluster_id, session=None):
     if not session:
@@ -2492,6 +2503,8 @@ def cluster_create(context, values, session=None):
 
     if not values.get('ceph_conf', None):
         values['ceph_conf'] = ""
+        values['ceph_conf_md5sum'] = ""
+        values['ceph_conf_luts'] = 0
 
     if not session:
         session = get_session()
