@@ -30,7 +30,7 @@ import platform
 import time
 import urllib2
 
-from vsm.agent import cephconfigparser
+from vsm.agent.cephconfigutils import CephConfigSynchronizer, CephConfigParser
 from vsm.agent.crushmap_parser import CrushMap
 from vsm.agent import rpcapi as agent_rpc
 from vsm.common import ceph_version_utils
@@ -67,7 +67,7 @@ class CephDriver(object):
         self._conductor_rpcapi = conductor_rpcapi.ConductorAPI()
         self._agent_rpcapi = agent_rpc.AgentAPI()
         try:
-            self.sync_db_to_ceph_config_file(context)
+            CephConfigSynchronizer().sync_before_read(FLAGS.ceph_conf)
             self.update_etc_fstab(context)
         except:
             pass
@@ -129,8 +129,8 @@ class CephDriver(object):
         LOG.info("Operate %s type %s, id %s" % (operate, type, id))
         is_systemctl = self._is_systemctl()
 
-        ceph_config_parser = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        data_dir = ceph_config_parser._parser.get(type, type + " data")
+        config = CephConfigParser(FLAGS.ceph_conf)
+        data_dir = config.get(type, type + " data")
         if not data_dir:
             data_dir = DEFAULT_OSD_DATA_DIR if type == "osd" else DEFAULT_MON_DATA_DIR
         # path = os.path.dirname(data_dir)
@@ -221,41 +221,25 @@ class CephDriver(object):
         args = ['ceph', 'daemon','mon.%s'%mon_id ,'config','show']
         return self._run_cmd_to_json(args)
 
-    def sync_db_to_ceph_config_file(self, context):
-        """
-        Write the database version of ceph conf out to /etc/ceph/ceph.conf on this host.
-        :param context: the context to use when reading the ceph conf from the database.
-        """
-        cluster_id_file = os.path.join(FLAGS.state_path, 'cluster_id')
-        if not os.path.exists(cluster_id_file):
-            return
-
-        cluster_id = utils.read_file_as_root(cluster_id_file).strip()
-        ceph_conf = db.cluster_get_ceph_conf(context, cluster_id)
-        if not ceph_conf:
-            return
-
-        utils.write_file_as_root(FLAGS.ceph_conf, ceph_conf, 'w')
-
     def update_etc_fstab(self, context):
 
         # NOTE: This routine fails as it relies on [TYP.X] sections, which are no longer required or configured.
 
         utils.execute('sed', '-i', '/forvsmosd/d', '/etc/fstab', run_as_root=True)
-        parser = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        fs_type = parser.get('osd', 'osd mkfs type', 'xfs')
+        config = CephConfigParser(FLAGS.ceph_conf)
+        fs_type = config.get('osd', 'osd mkfs type', 'xfs')
         cluster = db.cluster_get_all(context)[0]
         mount_option = cluster['mount_option']
         if not mount_option:
             mount_option = utils.get_fs_options(fs_type)[1]
-        mount_attr = parser.get('osd', 'osd mount options %s' % fs_type, mount_option)
+        mount_attr = config.get('osd', 'osd mount options %s' % fs_type, mount_option)
 
-        for sec in parser.sections():
+        for sec in config.sections():
             if sec.find('osd.') != -1:
                 osd_id = sec.split('.')[1]
                 mount_path = os.path.join(FLAGS.osd_data_path, "osd%s" % osd_id)
-                mount_disk = parser.get(sec, 'devs')
-                mount_host = parser.get(sec, 'host')
+                mount_disk = config.get(sec, 'devs')
+                mount_host = config.get(sec, 'host')
                 if FLAGS.host == mount_host:
                     line = mount_disk + ' ' + mount_path
                     line = line + ' ' + fs_type
@@ -797,12 +781,10 @@ class CephDriver(object):
             val, create=False)
 
     def get_ceph_config(self, context):
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf).as_dict()
-        LOG.info("ceph config %s" % config)
-        return config
+        return CephConfigParser(FLAGS.ceph_conf).as_dict()
 
     def inital_ceph_osd_db_conf(self, context, server_list, file_system, ceph_conf_in_cluster_manifest=None):
-        config = cephconfigparser.CephConfigParser()
+        config = CephConfigParser(sync=False)      # building ceph.conf for the first time, no file, no initial sync
         osd_num = db.device_get_count(context)
         LOG.info("osd_num:%d" % osd_num)
         settings = db.vsm_settings_get_all(context)
@@ -882,11 +864,15 @@ class CephDriver(object):
                     # validate fs type
                     if fs_type in ['xfs', 'ext3', 'ext4', 'btrfs']:
                         #config.add_osd_header(osd_type=fs_type)
+                        cluster = db.cluster_get_all(context)[0]
+                        mount_options = cluster['mount_option']
+                        if not mount_options:
+                            mount_options = utils.get_fs_options(fs_type)[1]
                         osd_header_kvs = {
                             'osd_type':fs_type,
                             'osd_heartbeat_interval':osd_heartbeat_interval,
                             'osd_heartbeat_grace':osd_heartbeat_grace,
-
+                            'osd_mount_options_'+fs_type:mount_options,
                         }
                         if ceph_conf_in_cluster_manifest:
                             for cell in ceph_conf_in_cluster_manifest:
@@ -1495,7 +1481,7 @@ class CephDriver(object):
 
     def _add_ceph_osd_to_config(self, context, strg, osd_id):
         LOG.info('>>>> _add_ceph_osd_to_config start')
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        config = CephConfigParser(FLAGS.ceph_conf)
         ip = strg['secondary_public_ip']
 
         config.add_osd(strg['host'], ip, strg['cluster_ip'],
@@ -1549,13 +1535,20 @@ class CephDriver(object):
             "--monmap", monitor_map_pth,
             "--keyring", monitor_key_pth,
             run_as_root=True)
+
+        def __add_ceph_mon_to_config(context, host, host_ip, mon_id):
+            config = CephConfigParser(FLAGS.ceph_conf)
+            config.add_mon(host, host_ip, mon_id=mon_id)
+            config.save_conf(FLAGS.ceph_conf)
+            return True
+
         ## step 6
         #LOG.info('>> add mon step 6 ')
         #host = ":".join([host_ip, port])
         #utils.execute("ceph", "mon", "add", mon_id, host, run_as_root=True)
         ## step 7
         #LOG.info('>> add mon step 7 ')
-        #self._add_ceph_mon_to_config(context, ser['host'], host_ip, mon_id=mon_id)
+        #__add_ceph_mon_to_config(context, ser['host'], host_ip, mon_id=mon_id)
         #utils.execute("ceph-mon", "-i", mon_id, "--public-addr", host,
         #                run_as_root=True)
 
@@ -1563,7 +1556,7 @@ class CephDriver(object):
         # step 6
         LOG.info('>> add mon step 6 ')
         host = ":".join([host_ip.split(',')[0], port])
-        self._add_ceph_mon_to_config(context, ser['host'], host_ip, mon_id=mon_id)
+        __add_ceph_mon_to_config(context, ser['host'], host_ip, mon_id=mon_id)
         #utils.execute("ceph-mon", "-i", mon_id, "--public-addr", host,
         #                run_as_root=True)
 
@@ -1582,14 +1575,13 @@ class CephDriver(object):
 
         # get config
         LOG.info('>> removing ceph mon')
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
+        config = CephConfigParser(FLAGS.ceph_conf)
 
         # get mon_id
         mon_id = None
-        for section in config_dict:
+        for section in config.sections():
             if section.startswith("mon."):
-                if config_dict[section]['host'] == host:
+                if config.get(section, 'host') == host:
                     mon_id = section.replace("mon.", "")
         if not mon_id:
             LOG.info('>> removing ceph mon not found')
@@ -1680,13 +1672,8 @@ class CephDriver(object):
             except rpc_exc.Timeout, rpc_exc.RemoteError:
                 return False
 
-        def __config_dict():
-            config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-            cdict = config.as_dict()
-            return cdict
-
         def __config_remove_mds(mds_id):
-            config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+            config = CephConfigParser(FLAGS.ceph_conf)
             config.remove_mds_header()
             config.remove_mds(mds_id)
             config.save_conf(FLAGS.ceph_conf)
@@ -1739,23 +1726,13 @@ class CephDriver(object):
             except rpc_exc.Timeout, rpc_exc.RemoteError:
                 return False
 
-        def __config_dict():
-            config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-            cdict = config.as_dict()
-            return cdict
-
-        def __config_remove_osd(osd_id):
-            config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-            config.remove_osd(osd_id)
-            config.save_conf(FLAGS.ceph_conf)
-
         LOG.info('>> remove ceph osds on hostid(%s) start' % host_id)
         node = self._conductor_rpcapi.init_node_get_by_id(context, host_id)
         host = node['host']
         host_is_running = __is_host_running(host)
         LOG.info('host_is_running===osd==%s'%host_is_running)
         # get config
-        config_dict = __config_dict()
+        config_dict = self.get_ceph_config(context)
 
         # get osd_ids
         osd_id_list = []
@@ -1789,12 +1766,6 @@ class CephDriver(object):
         if not host_is_running:
             val = {'deleted': 1}
             self._conductor_rpcapi.init_node_update(context, host_id, val)
-        return True
-
-    def _add_ceph_mon_to_config(self, context, host, host_ip, mon_id):
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config.add_mon(host, host_ip, mon_id=mon_id)
-        config.save_conf(FLAGS.ceph_conf)
         return True
 
     def _kill_by_pid_file(self, pid_file):
@@ -1919,16 +1890,12 @@ class CephDriver(object):
 
     def get_mds_id(self, host=FLAGS.host):
         """Stop mds service on this host."""
-        def __config_dict():
-            config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-            cdict = config.as_dict()
-            return cdict
-        config_dict = __config_dict()
+        config = CephConfigParser(FLAGS.ceph_conf)
         # get osd_ids
         mds_id = None
-        for section in config_dict:
+        for section in config.sections():
             if section.startswith("mds."):
-                if config_dict[section]['host'] == host:
+                if config.get(section, 'host') == host:
                     mds_id = section.replace("mds.", "")
         return mds_id
 
@@ -1985,12 +1952,10 @@ class CephDriver(object):
     def start_osd(self, context):
         # Start all the osds on this node.
         osd_list = []
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-
-        for section in config_dict:
+        config = CephConfigParser(FLAGS.ceph_conf)
+        for section in config.sections():
             if section.startswith("osd."):
-                if config_dict[section]['host'] == FLAGS.host:
+                if config.get(section, 'host') == FLAGS.host:
                     osd_id = section.replace("osd.", "")
                     osd_list.append(osd_id)
 
@@ -2016,7 +1981,7 @@ class CephDriver(object):
         # Change /etc/ceph.conf file.
         # Add new mds service.
         LOG.info('add_mds begin to create new mds.')
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
+        config = CephConfigParser(FLAGS.ceph_conf)
         config.add_mds_header()
         mds_id = config.get_mds_num()
         LOG.info('create new mds_id = %s' % mds_id)
@@ -2050,8 +2015,7 @@ class CephDriver(object):
         self.start_mds(context)
 
     def start_mds(self, context):
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
+        config_dict = self.get_ceph_config(context)
         # mds_id
         mds_id = None
         for section in config_dict:
@@ -2222,8 +2186,8 @@ class CephDriver(object):
            4. service ceph stop osd.$num
         """
         LOG.info('agent/driver.py stop_server')
-        self.sync_db_to_ceph_config_file(context)       # not sure why these two calls are here; we haven't done
-        self.update_etc_fstab(context)                  # anything yet to change the state of the system...
+        CephConfigSynchronizer().sync_before_read(FLAGS.ceph_conf)  # not sure why these two calls are here; we haven't done
+        self.update_etc_fstab(context)                              # anything yet to change the state of the system...
         LOG.info('Step 1. Scan the osds in db.')
         res = self._conductor_rpcapi.init_node_get_by_id(context, node_id)
         service_id = res.get('service_id', None)
@@ -2529,7 +2493,7 @@ class CephDriver(object):
 
     def refresh_osd_number(self, context):
         LOG.info("Start Refresh OSD number ")
-        config_dict = cephconfigparser.CephConfigParser(FLAGS.ceph_conf).as_dict()
+        config_dict = self.get_ceph_config(context)
         osd_num_dict = {}
 
         for section in config_dict:
@@ -2589,8 +2553,6 @@ class CephDriver(object):
                     LOG.info('Try %s: %s change key = %s to value = %s' % \
                             (try_times, osd_id, key, value))
 
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-
         # Step 1: out this osd.
         LOG.info('>>> remove ceph osd osd_id %s' % osd_id)
         LOG.info('>>> remove ceph osd step0 out osd %s' % osd_id)
@@ -2625,6 +2587,7 @@ class CephDriver(object):
 
         # Step 6: Remove it from ceph.conf
         LOG.info('>>> remove ceph osd step4 osd_id %s' % osd_id)
+        config = CephConfigParser(FLAGS.ceph_conf)
         config.remove_osd(osd_id)
         config.save_conf(FLAGS.ceph_conf)
 
@@ -3450,8 +3413,8 @@ class CephDriver(object):
 
     def add_rgw_conf_into_ceph_conf(self, context, name, host, keyring,
                                     log_file, rgw_frontends):
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
         rgw_section = "client." + str(name)
+        config = CephConfigParser(FLAGS.ceph_conf)
         config.add_rgw(rgw_section, host, keyring, log_file, rgw_frontends)
         config.save_conf(FLAGS.ceph_conf)
         LOG.info("+++++++++++++++end add_rgw_conf_into_ceph_conf")

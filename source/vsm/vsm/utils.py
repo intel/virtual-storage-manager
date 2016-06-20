@@ -1126,7 +1126,7 @@ def read_file_as_root(file_path):
         raise exception.FileNotFound(file_path=file_path)
 
 def write_file_as_root(file_path, content, open_type="a+"):
-    """Secure helper to read file as root."""
+    """Secure helper to write file as root."""
     try:
         out, _err = execute('vsm-assist',
                             'write_file',

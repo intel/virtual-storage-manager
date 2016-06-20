@@ -42,7 +42,7 @@ from vsm.openstack.common.rpc import common as rpc_exc
 from vsm.conductor import rpcapi as conductor_rpcapi
 from vsm.agent import rpcapi as agent_rpc
 from vsm.conductor import api as conductor_api
-from vsm.agent import cephconfigparser
+from vsm.agent.cephconfigutils import CephConfigParser
 from vsm.agent.crushmap_parser import CrushMap
 from vsm.exception import *
 from vsm.manifest.parser import ManifestParser
@@ -1150,14 +1150,23 @@ class SchedulerManager(manager.Manager):
     @utils.single_lock
     def import_ceph_conf(self, context, cluster_id, ceph_conf_path):
         """
+        Import specified ceph conf file into db, then trigger all agents to compare and export db to local ceph.conf.
+
+        NOTE: It might be nice to integrate this functionality into CephConfigSynchronizer since that class already does
+        all of this stuff - we'd have to add a mechanism for exposing import from that class directly that would always
+        treat the specified config file as newer than the db contents.
+
+        :param context: the command auth context to use.
+        :param cluster_id: the cluster id for the target cluster to which the config file should be imported.
+        :param ceph_conf_path: the file system path to the target ceph configuration file on the controller.
         """
         LOG.info('import ceph conf from %s to db '%ceph_conf_path)#ceph_conf_path!=FLAG.ceph_conf
-        ceph_conf_str = cephconfigparser.CephConfigParser(ceph_conf_path).content()
+        ceph_conf_str = CephConfigParser(ceph_conf_path, sync=False).as_str()
         db.cluster_update_ceph_conf(context, cluster_id, ceph_conf_str)
         server_list = db.init_node_get_all(context)
         LOG.info('import ceph conf from db to ceph nodes ')
         for ser in server_list:
-            LOG.info('import ceph conf from db to ceph nodes %s '%ser['host'])
+            LOG.info('import ceph conf from db to ceph node %s '%ser['host'])
             self._agent_rpcapi.update_ceph_conf(context, ser['host'])
         LOG.info('import ceph conf from db to ceph nodes success ')
         return {"message":"success"}
@@ -1225,7 +1234,7 @@ class SchedulerManager(manager.Manager):
         ceph_conf = body.get('ceph_conf')
         ceph_conf_file_new = '%s-check'%FLAGS.ceph_conf
         utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
-        config_dict = cephconfigparser.CephConfigParser(ceph_conf_file_new).as_dict()
+        config_dict = CephConfigParser(ceph_conf_file_new, sync=False).as_dict()
         if config_dict is None:
             message['code'].append('-26')
             message['error'].append('the format of ceph_conf error.')

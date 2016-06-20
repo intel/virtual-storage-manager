@@ -30,7 +30,7 @@ import platform
 import socket
 import time
 
-from vsm.agent import cephconfigparser
+from vsm.agent.cephconfigutils import CephConfigParser, CephConfigSynchronizer
 from vsm.agent.cephconf_discover import cephconf_discover
 from vsm.agent.crushmap_parser import CrushMap
 from vsm.agent import driver
@@ -464,8 +464,12 @@ class AgentManager(manager.Manager):
         return 'test'
 
     def update_ceph_conf(self, context):
+        """
+        Explicit check and update (called from config parser on another agent).
+        :param context: the auth context passed by the client (not used here)
+        """
         LOG.info('agent/manager.py update ceph.conf from db.')
-        self.ceph_driver.sync_db_to_ceph_config_file(context)
+        CephConfigSynchronizer().sync_before_read(FLAGS.ceph_conf)
         LOG.info('agent/manager.py update ceph.conf from db. OVER')
 
     def get_ceph_admin_keyring(self, context):
@@ -739,11 +743,10 @@ class AgentManager(manager.Manager):
     def _get_mon_id(self):
         # Get monitor id
         mon_id = None
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        for section in config_dict:
+        config = CephConfigParser(FLAGS.ceph_conf)
+        for section in config.sections():
             if section.startswith("mon."):
-                if config_dict[section]['host'] == FLAGS.host:
+                if config.get(section, 'host') == FLAGS.host:
                     mon_id = section.replace("mon.", "")
         return mon_id
 
@@ -860,11 +863,10 @@ class AgentManager(manager.Manager):
     def _get_osd_id(self, host=FLAGS.host):
         # Get monitor id
         osd_id_list = []
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        for section in config_dict:
+        config = CephConfigParser(FLAGS.ceph_conf)
+        for section in config.sections():
             if section.startswith("osd."):
-                if config_dict[section]['host'] == host:
+                if config.get(section, 'host') == host:
                     osd_id = section.replace("osd.", "")
                     osd_id_list.append(osd_id)
 
@@ -1074,10 +1076,8 @@ class AgentManager(manager.Manager):
 
     def sync_osd_states_from_ceph(self, context):
         osd_json = self.ceph_driver.get_osds_status()
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config_dict = config.as_dict()
-        osd_for_all = config_dict.get("osd")
-        osds_mount_point =  osd_for_all["osd data"]
+        config = CephConfigParser(FLAGS.ceph_conf)
+        osds_mount_point =  config.get("osd", "osd data")
         if osd_json is None:
             return None
         osd_dict = json.loads(osd_json)
@@ -1100,12 +1100,12 @@ class AgentManager(manager.Manager):
             values = {}
             values['osd_name'] = osd_name
             values['state'] = osd_status
-            node = db.init_node_get_by_host(context , config_dict.get(osd_name)["host"])
+            node = db.init_node_get_by_host(context , config.get(osd_name, "host"))
             values['service_id'] = node["service_id"]
-            values['cluster_ip'] = config_dict.get(osd_name)["cluster addr"]
-            values['public_ip'] = config_dict.get(osd_name)["public addr"]
+            values['cluster_ip'] = config.get(osd_name, "cluster addr")
+            values['public_ip'] = config.get(osd_name, "public addr")
 
-            device = db.device_get_by_name(context,config_dict.get(osd_name)["devs"])
+            device = db.device_get_by_name(context, config.get(osd_name, "devs"))
             values['device_id'] = device["id"]
 
             cluster_id = node['cluster_id']
@@ -1743,6 +1743,10 @@ class AgentManager(manager.Manager):
                 raise exception.ExeCmdError
             except exception.ExeCmdError, e:
                 LOG.error("%s:%s" % (e.code, e.message))
+                
+    @periodic_task(service_topic=FLAGS.agent_topic, spacing=_get_interval_time('ceph_status'))
+    def check_for_external_ceph_conf_updates(self, context):
+        CephConfigSynchronizer().sync_before_read(FLAGS.ceph_conf)
 
     @periodic_task(service_topic=FLAGS.agent_topic, spacing=_get_interval_time('ceph_status'))
     def update_ceph_status(self, context):
@@ -2038,7 +2042,7 @@ class AgentManager(manager.Manager):
             ceph_conf = body.get('ceph_conf')
             ceph_conf_file_new = '%s-import'%FLAGS.ceph_conf
             utils.write_file_as_root(ceph_conf_file_new, ceph_conf, 'w')
-            config_content = cephconfigparser.CephConfigParser(fp=str(ceph_conf_file_new)).content()
+            config_content = CephConfigParser(fp=ceph_conf_file_new, sync=False).as_str()
             osd_info = self.ceph_driver.get_ceph_osd_info()
             mon_info = self.ceph_driver._get_ceph_mon_map()
             self._modify_init_nodes_from_config_to_db(context,osd_info,mon_info,crushmap)
@@ -2256,8 +2260,7 @@ class AgentManager(manager.Manager):
         ceph_conf = body.get('ceph_conf')
         ceph_conf_path = '%s-check'%FLAGS.ceph_conf
         utils.write_file_as_root(ceph_conf_path, ceph_conf, 'w')
-        config = cephconfigparser.CephConfigParser(fp=str(ceph_conf_path))
-        config_dict = config.as_dict()
+        config_dict = CephConfigParser(fp=ceph_conf_path).as_dict()
         osd_list = []
         osd_header = {}
         mon_list = []
@@ -2574,8 +2577,8 @@ class AgentManager(manager.Manager):
         LOG.info("Add Instances to Ceph Config File")
         log_path = "/var/log/ceph/"
         rgw_frontends = '"civetweb port=80"'
-        config = cephconfigparser.CephConfigParser(FLAGS.ceph_conf)
-        config.add_k_v_for_section("global", "rgw region root pool", ".us.rgw.root")
+        config = CephConfigParser(FLAGS.ceph_conf)
+        config.set("global", "rgw region root pool", ".us.rgw.root")
         for rgw in rgw_east_info:
             config.add_rgw(rgw['rgw_instance'], rgw['host'], keyring,
                            log_path + rgw['rgw_instance'] + ".log", rgw_frontends,
@@ -2584,7 +2587,7 @@ class AgentManager(manager.Manager):
             config.add_rgw(rgw['rgw_instance'], rgw['host'], keyring,
                            log_path + rgw['rgw_instance'] + ".log", rgw_frontends,
                            "us", "us-west", ".us-west.rgw.root")
-        config.save_conf(rgw=True)
+        config.save_conf(FLAGS.ceph_conf)
 
         # Create a Region
         LOG.info("Create a Region")
