@@ -17,14 +17,16 @@
 
 # Defaults
 REMOVE_CEPH_PKGS=1
+AUTO_REMOVE_DEPS=1
 
 # Parse command line options to change defaults
 OPTIND=1
-while getopts "h?kmadc" opt; do
+while getopts "h?kmadcr" opt; do
     case "$opt" in
     h|\?)
         echo "Uninstall VSM and other components and clean up any remaining file system items and processes."
         echo "By default: Uninstall VSM, RabbitMQ, Diamond, and Ceph components."
+        echo "By default: Autoremove secondary package dependencies."
         echo "By default: Do NOT uninstall MySQL/MariaDB components."
         echo "By default: Do NOT uninstall Apache2 server components."
         echo "By default: Do NOT uninstall Keystone components."
@@ -37,6 +39,7 @@ while getopts "h?kmadc" opt; do
         echo "   -a  Uninstall Apache2 server components."
         echo "   -d  Uninstall all VSM dependency packages on controller."
         echo "   -c  Suppress removal of Ceph cluster and components."
+        echo "   -r  Suppress auto-remove of secondary dependencies."
         exit 0
         ;;
     k)  REMOVE_KEYSTONE_PKGS=1
@@ -48,6 +51,8 @@ while getopts "h?kmadc" opt; do
     d)  REMOVE_VSM_DEP_PKGS=1
         ;;
     c)  unset REMOVE_CEPH_PKGS
+        ;;
+    r)  unset AUTO_REMOVE_DEPS
         ;;
     esac
 done
@@ -108,7 +113,9 @@ fi
 if [ -n "${REMOVE_VSM_DEP_PKGS}" ]; then
     sudo apt-get purge --yes ${VSM_DEP_PKGS}
 fi
-sudo apt-get autoremove --yes
+if [ -n "${AUTO_REMOVE_DEPS}" ]; then
+    sudo apt-get autoremove --yes
+fi
 sudo apt-get autoclean --yes
 sudo rm -rf /etc/vsm /etc/vsm-dashboard /etc/vsmdeploy /var/lib/vsm /var/log/vsm
 sudo rm -rf /opt/vsmrepo /opt/vsm-dep-repo
@@ -133,7 +140,9 @@ if [ -n "${REMOVE_MYSQL_PKGS}" ]; then
     sudo apt-get purge --yes libdbd-mysql-perl libmysqlclient18:amd64 mysql-common python-mysqldb
     sudo rm -rf /etc/mysql
 fi
-sudo apt-get autoremove --yes
+if [ -n "${AUTO_REMOVE_DEPS}" ]; then
+    sudo apt-get autoremove --yes
+fi
 sudo apt-get autoclean --yes
 sudo rm -rf /var/lib/vsm /var/log/vsm /etc/vsm
 sudo rm -rf /opt/vsmrepo /opt/vsm-dep-repo
