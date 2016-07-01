@@ -154,7 +154,7 @@ declare -a on_exit_items
 function on_exit()
 {
     for i in "${on_exit_items[@]}"; do
-        eval $i
+        eval $i || :
     done
 }
 
@@ -285,7 +285,11 @@ function prepare() {
 function execute() {                    # execute "<command>" [[<user>@]<host>]
     local command="$1"
     local remote="$2"
-    [[ $remote ]] && eval $SSH $remote "\"$command\"" || eval "$command"
+    if [ ! -z "$remote" ]; then
+        $SSH $remote "set -e; $command; true"
+    else
+        eval "$command; true"
+    fi
 }
 
 function copy() {                       # copy [-<op1> -<op2> ...] <src> <dst> [[<user>@]<host>]
