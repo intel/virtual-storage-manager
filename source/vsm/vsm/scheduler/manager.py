@@ -444,7 +444,7 @@ class SchedulerManager(manager.Manager):
                 self._conductor_api.init_node_update_status_by_id(context,
                     ser['id'], 'ERROR: remove_monitor')
         if error_num > 1:
-            LOG.error('there are some error occured in remove_monitor')
+            LOG.error('there are some error occurred in remove_monitor')
             raise
         return True
 
