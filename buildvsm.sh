@@ -93,6 +93,7 @@ function create_release() {
         bash +x builddeb
         cp ubuntu14/install.sh release/$BUILD
         cp ubuntu14/uninstall.sh release/$BUILD
+        cp ubuntu14/upgrade.sh release/$BUILD
         cp ubuntu14/debs.lst release/$BUILD
     elif [[ $OS == "CentOS" && $OS_VERSION =~ "7" ]]; then
         cp -rf centos7/python-vsmclient ./source
