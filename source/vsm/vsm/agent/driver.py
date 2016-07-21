@@ -1367,8 +1367,11 @@ class CephDriver(object):
         #osd_keyring_pth = "%s/keyring" % osd_pth
         #osd_pth = '/var/lib/ceph/osd/osd%s' % osd_id
         #osd_keyring_pth = '/etc/ceph/keyring.osd.%s' % osd_id
-        osd_data_path = self.get_ceph_config(context)['osd']['osd data']
-        osd_pth = osd_data_path.replace('$id',osd_id)
+        try:
+            osd_data_path = self.get_ceph_config(context)['osd']['osd data']
+            osd_pth = osd_data_path.replace('$id',osd_id)
+        except:
+            osd_pth = os.path.join(FLAGS.osd_data_path, "osd" + osd_id)
         LOG.info('osd add osd_pth =%s'%osd_pth)
         osd_keyring_pth = self.get_ceph_config(context)['osd']['keyring']
         osd_keyring_pth = osd_keyring_pth.replace('$id',osd_id).replace('$name','osd.%s'%osd_id)
@@ -2681,8 +2684,11 @@ class CephDriver(object):
                       run_as_root=True)
 
         #osd_pth = '%sceph-%s' % (FLAGS.osd_data_path, osd_inner_id)
-        osd_data_path = self.get_ceph_config(context)['osd']['osd data']
-        osd_pth = osd_data_path.replace('$id',osd_inner_id)
+        try:
+            osd_data_path = self.get_ceph_config(context)['osd']['osd data']
+            osd_pth = osd_data_path.replace('$id',osd_inner_id)
+        except:
+            osd_pth = os.path.join(FLAGS.osd_data_path, "osd" + osd_id)
         LOG.info('osd restore osd_pth =%s'%osd_pth)
         utils.ensure_tree(osd_pth)
         cluster = db.cluster_get_all(context)[0]
