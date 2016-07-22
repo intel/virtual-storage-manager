@@ -73,18 +73,18 @@ class ECProfileController(wsgi.Controller):
         context = req.environ['vsm.context']
         for profile in body.get('ec_profiles'):
             db.ec_profile_update_or_create(context,profile)
-        return {'message':{'error_code':'','error_msg':'','info':'Add rbd group success!'}}
+        return {'message':{'error_code':'','error_msg':'','info':'Add EC Profile success!'}}
 
     def ec_profile_update(self, req, body=None):
         LOG.info('CEPH_LOG ec_profile_update body %s ' % body)
         context = req.environ['vsm.context']
         for profile in body.get('ec_profiles'):
             db.ec_profile_update_or_create(context,profile)
-        return {'message':{'error_code':'','error_msg':'','info':'Add rbd group success!'}}
+        return {'message':{'error_code':'','error_msg':'','info':'Update EC Profile success!'}}
 
 
     def ec_profiles_remove(self, req, body=None):
-        LOG.info('CEPH_LOG rbd_group_remove body %s ' % body)
+        LOG.info('CEPH_LOG ec_profile_remove body %s ' % body)
         context = req.environ['vsm.context']
         message = {'message':{'error_code':'','error_msg':'','info':''}}
         success_ids = []
