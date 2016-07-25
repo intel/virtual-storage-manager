@@ -95,8 +95,8 @@ def add_appnodes(request, auth_openstack):
 def del_appnode(request, appnode_id):
     return vsmclient(request).AppNodeManager.delete(appnode_id)
 
-def update_appnode(request, appnode, **kwargs):
-    return vsmclient(request).AppNodeManager.update(appnode, **kwargs)
+def update_appnode(request, appnode, appnode_info):
+    return vsmclient(request).AppNodeManager.update(appnode, appnode_info)
 
 def appnode_list(request,):
     return vsmclient(request).AppNodeManager.list()

@@ -153,16 +153,19 @@ def update_action(request):
         os_auth_url = data.pop('os_auth_url')
         os_region_name = data.pop('os_region_name')
         ssh_user = data.pop('ssh_user')
+        appnode_info = {
+            "os_tenant_name": os_tenant_name,
+            "os_username": os_username,
+            "os_password": os_password,
+            "os_auth_url": os_auth_url,
+            "os_region_name": os_region_name,
+            "ssh_user": ssh_user,
+            "ssh_status": "",
+            "log_info": ""
+        }
         vsmapi.update_appnode(
             request, id,
-            os_tenant_name=os_tenant_name,
-            os_username=os_username,
-            os_password=os_password,
-            os_auth_url=os_auth_url,
-            os_region_name=os_region_name,
-            ssh_user=ssh_user,
-            ssh_status="",
-            log_info=""
+            appnode_info
         )
         status = "OK"
         msg = "Update Openstack Access Successfully!"
