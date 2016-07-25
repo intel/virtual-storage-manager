@@ -257,7 +257,11 @@ def get_select_data(request):
                     if len(cinder_volume_down_list) == 0:
                         for cinder in cinder_service_list:
                             if cinder["binary"] == "cinder-volume":
-                                service_list.append(cinder["host"])
+                                if  "@" not in cinder["host"]:
+                                    service_list.append(cinder["host"])
+                                else:
+                                    host = cinder["host"].split("@")[0]
+                                    service_list.append(host)
                     else:
                         for cinder in cinder_service_list:
                             if cinder["binary"] == "cinder-volume" and \
@@ -268,6 +272,7 @@ def get_select_data(request):
                             elif cinder["binary"] == "cinder-volume" and \
                                             "@" not in cinder["host"]:
                                 service_list.append(cinder["host"])
+                    service_list = list(set(service_list))
                     print service_list
                 except:
                     service_list = []
