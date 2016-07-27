@@ -1452,7 +1452,7 @@ class CephDriver(object):
         #          run_as_root=True)
 
         all_osd_in_host = db.osd_state_get_by_service_id(context,osd_state['service_id'])
-        other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id'] and osd['state'] != 'Uninitialized']
+        # other_osd_in_host = [osd['osd_name'] for osd in all_osd_in_host if osd['device_id'] != osd_state['device_id'] and osd['state'] != 'Uninitialized']
         crushmap = self.get_crushmap_json_format()
         LOG.info("osd_location_direct=======%s"%osd_state.get('osd_location'))
         osd_location_direct = osd_state.get('osd_location')
@@ -1461,9 +1461,9 @@ class CephDriver(object):
                 osd_location_str = osd_location_direct
             else:
                 osd_location_str = "%s=%s"%(crushmap._types[1]['name'],osd_location_direct)
-        elif len(other_osd_in_host) > 0:
-            osd_location = crushmap._get_location_by_osd_name(other_osd_in_host[0])
-            osd_location_str = "%s=%s"%(osd_location['type_name'],osd_location['name'])
+        # elif len(other_osd_in_host) > 0:
+        #     osd_location = crushmap._get_location_by_osd_name(other_osd_in_host[0])
+        #     osd_location_str = "%s=%s"%(osd_location['type_name'],osd_location['name'])
         else:
             osd_location = crush_dict['host']
             osd_location_str = "%s=%s"%(crushmap._types[1]['name'],osd_location)

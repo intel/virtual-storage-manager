@@ -813,7 +813,7 @@ class SchedulerManager(manager.Manager):
                 "osd_name": "osd.%s" % str(FLAGS.vsm_status_uninitialized),
                 "osd_location": "",
                 "deleted": False,
-                "operation_status": "Present",
+                # "operation_status": "Present",
                 "state": str(FLAGS.vsm_status_uninitialized)
             }
             LOG.info("update deleted osd to uninited")
