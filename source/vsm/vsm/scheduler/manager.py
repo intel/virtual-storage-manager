@@ -809,16 +809,24 @@ class SchedulerManager(manager.Manager):
 
             LOG.info("start to remove storage")
             self.remove_osd(context, server_list)
-            values = {'osd_name': "osd.%s"%FLAGS.vsm_status_uninitialized,
-                      'osd_location':'',
-                      'deleted':0,
-                      'state':FLAGS.vsm_status_uninitialized,}
+            values = {
+                "osd_name": "osd.%s" % str(FLAGS.vsm_status_uninitialized),
+                "osd_location": "",
+                "deleted": False,
+                "operation_status": "Present",
+                "state": str(FLAGS.vsm_status_uninitialized)
+            }
             LOG.info("update deleted osd to uninited")
             for server in server_list:
                 service_id = server['service_id']
-                db.update_deleted_osd_state_by_service_id(context,service_id,values)
+                osd_states = db.osd_state_get_by_service_id(context, service_id)
+                while True:
+                    if osd_states[0].state == "Out-Down":
+                        break
+                    osd_states = db.osd_state_get_by_service_id(context, service_id)
+                    time.sleep(5)
+                db.update_deleted_osd_state_by_service_id(context, service_id, values)
             LOG.info("update deleted osd to uninited over")
-
 
             if need_change_mds:
                 LOG.info("start to remove mds")

@@ -1750,7 +1750,7 @@ class CephDriver(object):
             # step 5
             LOG.info('>>> remove ceph osd step5 osd_id %s' % osd_id)
             osd_name = 'osd.%s' % osd_id
-            val = { 'osd_name': osd_name, 'deleted': 1 }
+            val = { 'osd_name': osd_name, 'deleted': 0 }
             self._conductor_rpcapi.osd_state_update(context, val)
             LOG.info('>>> remove ceph osd step 1-5 osd_id %s' % osd_id)
 
