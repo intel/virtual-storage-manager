@@ -1198,7 +1198,7 @@ class AgentManager(manager.Manager):
                 value= {}
                 value['id'] = osd_id
                 value['osd_name'] = 'osd.x'
-                value['state'] = 'Out-Down'
+                value['state'] = str(FLAGS.vsm_status_uninitialized)
                 value['operation_status'] = FLAGS.vsm_status_removed
                 db.osd_state_update(context, osd_id, value)
 
