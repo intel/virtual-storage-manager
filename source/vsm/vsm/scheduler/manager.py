@@ -2089,6 +2089,7 @@ class SchedulerManager(manager.Manager):
         cluster_id = body.get('cluster_id',None)
         active_monitor = self._get_active_monitor(context, cluster_id=cluster_id)
         LOG.info('sync call to host = %s' % active_monitor['host'])
+        flag = 0
         for storage_group in storage_groups:
 
             rule_info = storage_group['rule_info']
@@ -2112,9 +2113,15 @@ class SchedulerManager(manager.Manager):
                 }
                 #LOG.info('take==444444444=====%s'%storage_group_to_db)
                 db.storage_group_update_or_create(context, storage_group_to_db)
+                flag +=1
                 take_order += 1
-        message = {'info':'Add storage group %s success!'%(','.join([ storage_group['name'] for storage_group in storage_groups])),
-                   'error_code':'','error_msg':''}
+        message = {}
+        if flag >0:
+            message['status'] = 'success'
+            message['info'] = 'Add storage group %s success!'%(','.join([ storage_group['name'] for storage_group in storage_groups]))
+        else:
+            message['status'] = 'error'
+            message['error_msg'] = 'Add Storage Group Failed!'
         return message
 
     def update_storage_group_to_crushmap_and_db(self, context, body):
