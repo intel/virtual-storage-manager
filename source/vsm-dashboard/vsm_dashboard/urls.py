@@ -34,6 +34,7 @@ urlpatterns = patterns('',
     url(r'^license_cancel/', 'vsm_dashboard.views.license_cancel',
         name='license_cancel'),
     url(r'^home/', RedirectView.as_view(url='/dashboard/vsm/')),
+    url(r'^i18n/', include('django.conf.urls.i18n'), name='set_language'),
     url(r'', include(horizon.urls))
 )
 
