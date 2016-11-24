@@ -1,0 +1,188 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-11-11 05:35+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: static/dashboard/js/950120883c68.js:737
+#: static/dashboard/js/950120883c68.js:780
+#: static/dashboard/js/950120883c68.js:815
+msgid "Loading"
+msgstr "Загрузка..."
+
+#: static/dashboard/js/950120883c68.js:747
+msgid "Filter"
+msgstr "Фильтр"
+
+#: static/dashboard/js/950120883c68.js:754
+#: static/dashboard/js/950120883c68.js:920
+msgid "There was a problem communicating with the server, please try again."
+msgstr "Не удается соединиться с сервером, пожалуйста, попробуйте снова."
+
+#: static/dashboard/js/950120883c68.js:762
+msgid "Could not read the file"
+msgstr "Не удается прочитать файл"
+
+#: static/dashboard/js/950120883c68.js:763
+#: static/dashboard/js/950120883c68.js:764
+msgid "Could not decrypt the password"
+msgstr "Не удается расшифровать пароль"
+
+#: static/dashboard/js/950120883c68.js:766
+msgid "Danger: "
+msgstr "Опасность:"
+
+#: static/dashboard/js/950120883c68.js:766
+msgid "Warning: "
+msgstr "Внимание:"
+
+#: static/dashboard/js/950120883c68.js:766
+msgid "Notice: "
+msgstr "Примечание:"
+
+#: static/dashboard/js/950120883c68.js:766
+msgid "Success: "
+msgstr "Успешно:"
+
+#: static/dashboard/js/950120883c68.js:766
+msgid "Error: "
+msgstr "Ошибка:"
+
+#: static/dashboard/js/950120883c68.js:767
+msgid "Cancel"
+msgstr "Отмена"
+
+#: static/dashboard/js/950120883c68.js:775
+#: static/dashboard/js/950120883c68.js:801
+msgid "Working"
+msgstr "В процессе"
+
+#: static/dashboard/js/950120883c68.js:777
+msgid "There was an error submitting the form. Please try again."
+msgstr "Произошла ошибка при отправке формы. Пожалуйста, попробуйте снова."
+
+#: static/dashboard/js/950120883c68.js:781
+#: static/dashboard/js/950120883c68.js:811
+#: static/dashboard/js/950120883c68.js:815
+#: static/dashboard/js/950120883c68.js:889
+msgid "An error occurred. Please try again later."
+msgstr "Возникла ошибка. Пожалуйста, повторите позже."
+
+#: static/dashboard/js/950120883c68.js:792
+#: static/dashboard/js/950120883c68.js:809
+msgid "No items to display."
+msgstr "Нет элементов для отображения."
+
+#: static/dashboard/js/950120883c68.js:793
+#: static/dashboard/js/950120883c68.js:797
+msgid "An error occurred while updating."
+msgstr "Возникла ошибка при обновлении."
+
+#: static/dashboard/js/950120883c68.js:799
+#, c-format
+msgid "You have selected %s. "
+msgstr "Вы выбрали %s."
+
+#: static/dashboard/js/950120883c68.js:800
+#, c-format
+msgid "Confirm %s"
+msgstr "Подтвердите %s"
+
+#: static/dashboard/js/950120883c68.js:800
+msgid "Please confirm your selection. This action cannot be undone."
+msgstr "Пожалуйста, подтвердите. Это действие не может быть отменено."
+
+#: static/dashboard/js/950120883c68.js:809
+#, c-format
+msgid "Displaying %s item"
+msgid_plural "Displaying %s items"
+msgstr[0] "Отображение элемента %s"
+msgstr[1] "Отображение элементов %s"
+
+#: static/dashboard/js/950120883c68.js:810
+#: static/dashboard/js/950120883c68.js:814
+msgid "Not authorized to do this operation."
+msgstr "Недостаточно прав для выполнения этой операции"
+
+#: static/dashboard/js/950120883c68.js:816
+msgid "Passwords do not match."
+msgstr "Пароли не совпадают"
+
+#: static/dashboard/js/950120883c68.js:823
+msgid "No roles"
+msgstr "Роли не заданы"
+
+#: static/dashboard/js/950120883c68.js:825
+msgid "Roles"
+msgstr "Роли"
+
+#: static/dashboard/js/950120883c68.js:844
+#: static/dashboard/js/950120883c68.js:845
+msgid "None"
+msgstr "Отсутств."
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "Delete"
+msgstr "Удалить"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "STATUS"
+msgstr "СТАТУС"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "ID"
+msgstr ""
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "Interfaces"
+msgstr "Интерфейсы"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "Delete Interface"
+msgstr "Удалить интерфейс"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "Open Console"
+msgstr "Открыть консоль"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "View Details"
+msgstr "Отобразить детали"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "Delete Router"
+msgstr "Удалить роутер"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "View Router Details"
+msgstr "Отбразить детали роутера"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "Add Interface"
+msgstr "Добавить интерфейс"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "Terminate Instance"
+msgstr "Удалить интерфейс"
+
+#: static/dashboard/js/950120883c68.js:846
+msgid "View Instance Details"
+msgstr "Отобразить детали экземпляра"
+
+#: static/dashboard/js/950120883c68.js:889
+msgid "No data available."
+msgstr "Нет данных."
