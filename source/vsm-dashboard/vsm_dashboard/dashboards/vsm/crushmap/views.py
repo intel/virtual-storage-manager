@@ -103,7 +103,7 @@ def create_storage_group(request):
     try:
         http_response_code,ret = vsmapi.storage_group_create_with_takes(request, body=body)
         print '---ret====',ret
-        if len(ret.get('error_code')) > 0:
+        if ret.get('status') == 'error':
             status = "Failed"
             msg = ret.get('error_msg')
         else:
