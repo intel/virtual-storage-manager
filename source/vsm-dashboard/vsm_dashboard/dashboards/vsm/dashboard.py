@@ -47,7 +47,7 @@ class OpenstackMgmt(horizon.PanelGroup):
 class UserMgmt(horizon.PanelGroup):
     slug = "usermgmt"
     name = _("VSM Management")
-    panels = ("usermgmt", 'settings')
+    panels = ('language', "usermgmt", 'settings')
 
 class VizDash(horizon.Dashboard):
     name = _("VSM")
