@@ -180,6 +180,7 @@ LANGUAGES = (
     ('pl', gettext_noop('Polish')),
     ('pt', gettext_noop('Portuguese')),
     ('pt-br', gettext_noop('Portuguese (Brazil)')),
+    ('ru', gettext_noop('Russian')),
     ('zh-cn', gettext_noop('Simplified Chinese')),
     ('zh-tw', gettext_noop('Traditional Chinese')),
 )

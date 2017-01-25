@@ -1,0 +1,2739 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-11-16 09:46+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: api/keystone.py:55
+#, python-format
+msgid "%(type)s (%(backend)s backend)"
+msgstr ""
+
+#: common/horizon/tables/__init__.py:35 common/horizon/tables/mixin.py:32
+msgid "N/A"
+msgstr ""
+
+#: common/horizon/tables/__init__.py:71 common/horizon/tables/mixin.py:68
+#, python-format
+msgid "Unable to %(action)s: %(objs)s"
+msgstr "Невозможно  %(action)s: %(objs)s"
+
+#: common/horizon/tables/__init__.py:77 common/horizon/tables/mixin.py:74
+#, python-format
+msgid "%(action)s: %(objs)s"
+msgstr ""
+
+#: dashboards/vsm/ceph-server-management/panel.py:23
+msgid "Ceph Server Management"
+msgstr "Управление серверами Ceph"
+
+#: dashboards/vsm/ceph-server-management/tables.py:53
+#: dashboards/vsm/flocking/tables.py:38
+#: dashboards/vsm/monitorpools/tables.py:53
+#: dashboards/vsm/osd-maintain/tables.py:52
+#: dashboards/vsm/presentingpools/tables.py:52
+#: dashboards/vsm/recipe/tables.py:53
+msgid "Host"
+msgstr "Сервер"
+
+#: dashboards/vsm/ceph-server-management/tables.py:54
+#: dashboards/vsm/flocking/tables.py:39
+#: dashboards/vsm/monitorpools/tables.py:54
+#: dashboards/vsm/osd-maintain/tables.py:53
+#: dashboards/vsm/presentingpools/tables.py:53
+#: dashboards/vsm/recipe/tables.py:54
+msgid "Tenant"
+msgstr "Тенант"
+
+#: dashboards/vsm/ceph-server-management/tables.py:55
+#: dashboards/vsm/flocking/tables.py:40
+#: dashboards/vsm/monitorpools/tables.py:55
+#: dashboards/vsm/osd-maintain/tables.py:54
+#: dashboards/vsm/presentingpools/tables.py:54
+#: dashboards/vsm/recipe/tables.py:55
+msgid "user"
+msgstr "Пользователь"
+
+#: dashboards/vsm/ceph-server-management/tables.py:56
+#: dashboards/vsm/flocking/tables.py:41
+#: dashboards/vsm/monitorpools/tables.py:56
+#: dashboards/vsm/osd-maintain/tables.py:55
+#: dashboards/vsm/presentingpools/tables.py:55
+#: dashboards/vsm/recipe/tables.py:56
+#: templates/horizon/common/_limit_summary.html:14 usage/tables.py:33
+msgid "VCPUs"
+msgstr ""
+
+#: dashboards/vsm/ceph-server-management/tables.py:57
+#: dashboards/vsm/flocking/tables.py:42
+#: dashboards/vsm/monitorpools/tables.py:57
+#: dashboards/vsm/osd-maintain/tables.py:56
+#: dashboards/vsm/presentingpools/tables.py:56
+#: dashboards/vsm/recipe/tables.py:57
+msgid "Memory"
+msgstr "Память"
+
+#: dashboards/vsm/ceph-server-management/tables.py:62
+#: dashboards/vsm/flocking/tables.py:47
+#: dashboards/vsm/monitorpools/tables.py:62
+#: dashboards/vsm/osd-maintain/tables.py:61
+#: dashboards/vsm/presentingpools/tables.py:61
+#: dashboards/vsm/recipe/tables.py:62
+#: templates/horizon/common/_limit_summary.html:7
+msgid "Instances"
+msgstr "Инстансы"
+
+#: dashboards/vsm/ceph-server-management/tables.py:67
+#: dashboards/vsm/monitorpools/tables.py:67
+#: dashboards/vsm/osd-maintain/tables.py:66
+#: dashboards/vsm/presentingpools/tables.py:66
+#: dashboards/vsm/recipe/tables.py:67
+#: dashboards/vsm/templates/vsm/flocking/_create.html:40
+msgid "Create Pool"
+msgstr "Создать пул"
+
+#: dashboards/vsm/ceph-server-management/tables.py:72
+#: dashboards/vsm/monitorpools/tables.py:72
+#: dashboards/vsm/osd-maintain/tables.py:71
+#: dashboards/vsm/poolsmanagement/tables.py:60
+#: dashboards/vsm/presentingpools/tables.py:71
+#: dashboards/vsm/recipe/tables.py:72
+msgid "StoragePool"
+msgstr "Пул хранилища"
+
+#: dashboards/vsm/ceph-server-management/tables.py:73
+#: dashboards/vsm/monitorpools/tables.py:73
+#: dashboards/vsm/osd-maintain/tables.py:72
+#: dashboards/vsm/poolsmanagement/tables.py:61
+#: dashboards/vsm/presentingpools/tables.py:72
+#: dashboards/vsm/recipe/tables.py:73
+msgid "StoragePools"
+msgstr "Пулы хранилища"
+
+#: dashboards/vsm/ceph-server-management/tables.py:74
+#: dashboards/vsm/monitorpools/tables.py:74
+#: dashboards/vsm/osd-maintain/tables.py:73
+#: dashboards/vsm/poolsmanagement/tables.py:62
+#: dashboards/vsm/presentingpools/tables.py:73
+#: dashboards/vsm/recipe/tables.py:74
+msgid "Scheduled deletion of"
+msgstr "Запланировано удаление"
+
+#: dashboards/vsm/ceph-server-management/tables.py:82
+#: dashboards/vsm/monitorpools/tables.py:82
+#: dashboards/vsm/osd-maintain/tables.py:81
+#: dashboards/vsm/poolsmanagement/tables.py:70
+#: dashboards/vsm/presentingpools/tables.py:81
+#: dashboards/vsm/recipe/tables.py:82
+#, python-format
+msgid "Unable to delete volume \"%s\". One or more snapshots depend on it."
+msgstr ""
+"Невозможно удалить том \"%s\". Один или более снапшотов зависит от него."
+
+#: dashboards/vsm/ceph-server-management/tables.py:93
+#: dashboards/vsm/cluster-import/tables.py:43
+#: dashboards/vsm/clustermgmt/tables.py:93
+#: dashboards/vsm/clustermgmt/tables.py:146
+#: dashboards/vsm/configuration/forms.py:35
+#: dashboards/vsm/configuration/forms.py:75
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:36
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:105
+#: dashboards/vsm/ecprofiles-management/tables.py:44
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:37
+#: dashboards/vsm/mds-status/tables.py:81
+#: dashboards/vsm/monitor-status/tables.py:81
+#: dashboards/vsm/monitorpools/tables.py:93
+#: dashboards/vsm/osd-maintain/tables.py:92
+#: dashboards/vsm/pool-status/tables.py:81
+#: dashboards/vsm/poolsmanagement/tables.py:83
+#: dashboards/vsm/presentingpools/tables.py:92
+#: dashboards/vsm/rbdpools/tables.py:110 dashboards/vsm/rbdpools/tables.py:142
+#: dashboards/vsm/recipe/tables.py:93
+#: dashboards/vsm/settings/templates/settings/index.html:40
+#: dashboards/vsm/storage-group-management/tables.py:47
+#: dashboards/vsm/storageservermgmt/tables.py:142
+#: dashboards/vsm/storageservermgmt/tables.py:193
+#: dashboards/vsm/storageservermgmt/tables.py:269
+#: dashboards/vsm/storageservermgmt/tables.py:300
+#: dashboards/vsm/usermgmt/tables.py:98
+msgid "Name"
+msgstr "Имя"
+
+#: dashboards/vsm/ceph-server-management/tables.py:94
+#: dashboards/vsm/cluster-import/tables.py:42
+#: dashboards/vsm/clustermgmt/tables.py:92
+#: dashboards/vsm/clustermgmt/tables.py:145
+#: dashboards/vsm/ecprofiles-management/tables.py:43
+#: dashboards/vsm/monitorpools/tables.py:94
+#: dashboards/vsm/openstackconnect/forms.py:117
+#: dashboards/vsm/openstackconnect/tables.py:61
+#: dashboards/vsm/osd-maintain/tables.py:93
+#: dashboards/vsm/poolsmanagement/tables.py:82
+#: dashboards/vsm/presentingpools/tables.py:93
+#: dashboards/vsm/rbd-status/tables.py:79
+#: dashboards/vsm/rbdpools/tables.py:109 dashboards/vsm/rbdpools/tables.py:141
+#: dashboards/vsm/recipe/tables.py:94
+#: dashboards/vsm/storage-group-management/tables.py:45
+#: dashboards/vsm/storageservermgmt/tables.py:141
+#: dashboards/vsm/storageservermgmt/tables.py:188
+#: dashboards/vsm/storageservermgmt/tables.py:268
+#: dashboards/vsm/storageservermgmt/tables.py:299
+#: dashboards/vsm/usermgmt/forms.py:90 dashboards/vsm/usermgmt/tables.py:97
+msgid "ID"
+msgstr ""
+
+#: dashboards/vsm/ceph-server-management/tables.py:95
+#: dashboards/vsm/monitorpools/tables.py:95
+#: dashboards/vsm/osd-maintain/tables.py:94
+#: dashboards/vsm/presentingpools/tables.py:94
+#: dashboards/vsm/recipe/tables.py:95
+msgid "UpdateTime"
+msgstr "Посл. обновление"
+
+#: dashboards/vsm/ceph-server-management/tables.py:96
+#: dashboards/vsm/monitorpools/tables.py:96
+#: dashboards/vsm/osd-maintain/tables.py:95
+#: dashboards/vsm/presentingpools/tables.py:95
+#: dashboards/vsm/recipe/tables.py:96
+msgid "Pg_number"
+msgstr "Число PG"
+
+#: dashboards/vsm/ceph-server-management/tables.py:97
+#: dashboards/vsm/monitorpools/tables.py:97
+#: dashboards/vsm/osd-maintain/tables.py:96
+#: dashboards/vsm/presentingpools/tables.py:96
+#: dashboards/vsm/recipe/tables.py:97
+msgid "crush_ruleset"
+msgstr "CRUSH правило"
+
+#: dashboards/vsm/ceph-server-management/tables.py:102
+#: dashboards/vsm/monitorpools/tables.py:102
+#: dashboards/vsm/osd-maintain/tables.py:101
+#: dashboards/vsm/presentingpools/tables.py:101
+#: dashboards/vsm/recipe/tables.py:102
+msgid "recipe"
+msgstr ""
+
+#: dashboards/vsm/ceph-server-management/tabs.py:27
+#: dashboards/vsm/cluster-import/tabs.py:27
+#: dashboards/vsm/clustermgmt/tabs.py:27 dashboards/vsm/flocking/tabs.py:26
+#: dashboards/vsm/mds-status/tabs.py:27
+#: dashboards/vsm/monitor-status/tabs.py:27
+#: dashboards/vsm/monitorpools/tabs.py:27
+#: dashboards/vsm/openstackconnect/tabs.py:27
+#: dashboards/vsm/osd-maintain/tabs.py:27 dashboards/vsm/osd-status/tabs.py:27
+#: dashboards/vsm/overview/tabs.py:27
+#: dashboards/vsm/overview/templates/overview/index.html:206
+#: dashboards/vsm/pg-status/tabs.py:27 dashboards/vsm/pool-status/tabs.py:27
+#: dashboards/vsm/presentingpools/tabs.py:27
+#: dashboards/vsm/rbd-status/tabs.py:27 dashboards/vsm/recipe/tabs.py:27
+#: dashboards/vsm/storage-group-management/tabs.py:27
+#: dashboards/vsm/storage-group-status/tabs.py:27
+#: dashboards/vsm/storageservermgmt/tabs.py:27
+#: dashboards/vsm/usermgmt/tabs.py:27 dashboards/vsm/zonemgmt/tabs.py:27
+msgid "Data"
+msgstr "Данные"
+
+#: dashboards/vsm/ceph-server-management/tabs.py:39
+#: dashboards/vsm/ceph-server-management/tabs.py:49
+#: dashboards/vsm/ceph-server-management/views.py:45
+#: dashboards/vsm/cluster-import/tabs.py:39
+#: dashboards/vsm/cluster-import/tabs.py:49
+#: dashboards/vsm/clustermgmt/tabs.py:39 dashboards/vsm/clustermgmt/tabs.py:49
+#: dashboards/vsm/flocking/tabs.py:38 dashboards/vsm/flocking/views.py:43
+#: dashboards/vsm/mds-status/tabs.py:39 dashboards/vsm/mds-status/tabs.py:49
+#: dashboards/vsm/monitor-status/tabs.py:39
+#: dashboards/vsm/monitor-status/tabs.py:49
+#: dashboards/vsm/monitorpools/tabs.py:39
+#: dashboards/vsm/monitorpools/tabs.py:49
+#: dashboards/vsm/monitorpools/views.py:45
+#: dashboards/vsm/openstackconnect/tabs.py:39
+#: dashboards/vsm/openstackconnect/tabs.py:49
+#: dashboards/vsm/osd-maintain/tabs.py:39
+#: dashboards/vsm/osd-maintain/tabs.py:49
+#: dashboards/vsm/osd-maintain/views.py:45
+#: dashboards/vsm/osd-status/tabs.py:39 dashboards/vsm/osd-status/tabs.py:49
+#: dashboards/vsm/overview/tabs.py:39 dashboards/vsm/overview/tabs.py:49
+#: dashboards/vsm/pg-status/tabs.py:39 dashboards/vsm/pg-status/tabs.py:49
+#: dashboards/vsm/pool-status/tabs.py:39 dashboards/vsm/pool-status/tabs.py:49
+#: dashboards/vsm/presentingpools/tabs.py:39
+#: dashboards/vsm/presentingpools/tabs.py:49
+#: dashboards/vsm/presentingpools/views.py:45
+#: dashboards/vsm/rbd-status/tabs.py:39 dashboards/vsm/rbd-status/tabs.py:49
+#: dashboards/vsm/recipe/tabs.py:39 dashboards/vsm/recipe/tabs.py:49
+#: dashboards/vsm/recipe/views.py:45
+#: dashboards/vsm/storage-group-management/tabs.py:39
+#: dashboards/vsm/storage-group-management/tabs.py:49
+#: dashboards/vsm/storage-group-status/tabs.py:39
+#: dashboards/vsm/storage-group-status/tabs.py:49
+#: dashboards/vsm/storageservermgmt/tabs.py:39
+#: dashboards/vsm/storageservermgmt/tabs.py:49
+#: dashboards/vsm/usermgmt/tabs.py:39 dashboards/vsm/usermgmt/tabs.py:49
+#: dashboards/vsm/zonemgmt/tabs.py:39 dashboards/vsm/zonemgmt/tabs.py:49
+msgid "Unable to retrieve instance list."
+msgstr "Невозможно получить список инстансов."
+
+#: dashboards/vsm/ceph-server-management/tabs.py:53
+#: dashboards/vsm/cluster-import/tabs.py:53
+#: dashboards/vsm/clustermgmt/tabs.py:53 dashboards/vsm/mds-status/tabs.py:53
+#: dashboards/vsm/monitor-status/tabs.py:53
+#: dashboards/vsm/monitorpools/tabs.py:53
+#: dashboards/vsm/openstackconnect/tabs.py:53
+#: dashboards/vsm/osd-maintain/tabs.py:53 dashboards/vsm/osd-status/tabs.py:53
+#: dashboards/vsm/overview/tabs.py:53 dashboards/vsm/pg-status/tabs.py:53
+#: dashboards/vsm/pool-status/tabs.py:53
+#: dashboards/vsm/presentingpools/tabs.py:53
+#: dashboards/vsm/rbd-status/tabs.py:53 dashboards/vsm/recipe/tabs.py:53
+#: dashboards/vsm/storage-group-management/tabs.py:53
+#: dashboards/vsm/storage-group-status/tabs.py:53
+#: dashboards/vsm/storageservermgmt/tabs.py:53
+#: dashboards/vsm/usermgmt/tabs.py:53 dashboards/vsm/zonemgmt/tabs.py:53
+msgid "Capacity"
+msgstr "Емкость"
+
+#: dashboards/vsm/ceph-server-management/utils.py:35
+#: dashboards/vsm/cluster-import/utils.py:35
+#: dashboards/vsm/clustermgmt/utils.py:35 dashboards/vsm/flocking/utils.py:35
+#: dashboards/vsm/mds-status/utils.py:35
+#: dashboards/vsm/monitor-status/utils.py:35
+#: dashboards/vsm/monitorpools/utils.py:35
+#: dashboards/vsm/openstackconnect/utils.py:35
+#: dashboards/vsm/osd-maintain/utils.py:35
+#: dashboards/vsm/osd-status/utils.py:35 dashboards/vsm/pg-status/utils.py:35
+#: dashboards/vsm/pool-status/utils.py:35
+#: dashboards/vsm/poolsmanagement/utils.py:35
+#: dashboards/vsm/presentingpools/utils.py:35
+#: dashboards/vsm/rbd-status/utils.py:35 dashboards/vsm/rbdpools/utils.py:37
+#: dashboards/vsm/recipe/utils.py:35
+#: dashboards/vsm/storage-group-management/utils.py:35
+#: dashboards/vsm/storage-group-status/utils.py:35
+#: dashboards/vsm/storageservermgmt/utils.py:37
+#: dashboards/vsm/usermgmt/utils.py:42 dashboards/vsm/zonemgmt/utils.py:35
+msgid "Unable to retrieve instance tenant information."
+msgstr "Невозможно получить информацию о тенанте."
+
+#: dashboards/vsm/ceph-server-management/utils.py:49
+#: dashboards/vsm/cluster-import/utils.py:49
+#: dashboards/vsm/clustermgmt/utils.py:49 dashboards/vsm/flocking/utils.py:49
+#: dashboards/vsm/mds-status/utils.py:49
+#: dashboards/vsm/monitor-status/utils.py:49
+#: dashboards/vsm/monitorpools/utils.py:49
+#: dashboards/vsm/openstackconnect/utils.py:49
+#: dashboards/vsm/osd-maintain/utils.py:49
+#: dashboards/vsm/osd-status/utils.py:49 dashboards/vsm/pg-status/utils.py:49
+#: dashboards/vsm/pool-status/utils.py:49
+#: dashboards/vsm/poolsmanagement/utils.py:49
+#: dashboards/vsm/presentingpools/utils.py:49
+#: dashboards/vsm/rbd-status/utils.py:49 dashboards/vsm/rbdpools/utils.py:51
+#: dashboards/vsm/recipe/utils.py:49
+#: dashboards/vsm/storage-group-management/utils.py:49
+#: dashboards/vsm/storage-group-status/utils.py:49
+#: dashboards/vsm/storageservermgmt/utils.py:51
+#: dashboards/vsm/usermgmt/utils.py:56 dashboards/vsm/zonemgmt/utils.py:49
+msgid "Unable to retrieve instance size information."
+msgstr "Невозможно получить информацию о размере инстанса."
+
+#: dashboards/vsm/ceph-server-management/utils.py:64
+#: dashboards/vsm/cluster-import/utils.py:64
+#: dashboards/vsm/clustermgmt/utils.py:64 dashboards/vsm/flocking/utils.py:64
+#: dashboards/vsm/mds-status/utils.py:64
+#: dashboards/vsm/monitor-status/utils.py:64
+#: dashboards/vsm/monitorpools/utils.py:64
+#: dashboards/vsm/openstackconnect/utils.py:64
+#: dashboards/vsm/osd-maintain/utils.py:64
+#: dashboards/vsm/osd-status/utils.py:64 dashboards/vsm/pg-status/utils.py:64
+#: dashboards/vsm/pool-status/utils.py:64
+#: dashboards/vsm/poolsmanagement/utils.py:64
+#: dashboards/vsm/presentingpools/utils.py:64
+#: dashboards/vsm/rbd-status/utils.py:64 dashboards/vsm/rbdpools/utils.py:66
+#: dashboards/vsm/recipe/utils.py:64
+#: dashboards/vsm/storage-group-management/utils.py:64
+#: dashboards/vsm/storage-group-status/utils.py:64
+#: dashboards/vsm/storageservermgmt/utils.py:66
+#: dashboards/vsm/usermgmt/utils.py:71 dashboards/vsm/zonemgmt/utils.py:64
+msgid "Unable to retrieve instance user information."
+msgstr "Невозможно получить информацию о пользователе."
+
+#: dashboards/vsm/cephupgrade/form.py:29
+msgid "Package URL"
+msgstr "URL репозитария"
+
+#: dashboards/vsm/cephupgrade/form.py:34 dashboards/vsm/cephupgrade/form.py:42
+#: dashboards/vsm/clustermgmt/form.py:39 dashboards/vsm/clustermgmt/form.py:49
+#: dashboards/vsm/clustermgmt/form.py:104
+#: dashboards/vsm/clustermgmt/form.py:114
+#: dashboards/vsm/configuration/forms.py:39
+#: dashboards/vsm/configuration/forms.py:48
+#: dashboards/vsm/configuration/forms.py:55
+#: dashboards/vsm/configuration/forms.py:79
+#: dashboards/vsm/configuration/forms.py:88
+#: dashboards/vsm/configuration/forms.py:95
+#: dashboards/vsm/openstackconnect/forms.py:34
+#: dashboards/vsm/openstackconnect/forms.py:42
+#: dashboards/vsm/openstackconnect/forms.py:51
+#: dashboards/vsm/openstackconnect/forms.py:59
+#: dashboards/vsm/openstackconnect/forms.py:73
+#: dashboards/vsm/openstackconnect/forms.py:124
+#: dashboards/vsm/openstackconnect/forms.py:132
+#: dashboards/vsm/openstackconnect/forms.py:141
+#: dashboards/vsm/openstackconnect/forms.py:149
+#: dashboards/vsm/openstackconnect/forms.py:163
+#: dashboards/vsm/poolsmanagement/form.py:40
+#: dashboards/vsm/poolsmanagement/form.py:48
+#: dashboards/vsm/rbdpools/form.py:39 dashboards/vsm/rbdpools/form.py:56
+#: dashboards/vsm/storage-group-management/forms.py:40
+#: dashboards/vsm/storage-group-management/forms.py:48
+#: dashboards/vsm/storage-group-management/forms.py:56
+#: dashboards/vsm/usermgmt/forms.py:58
+msgid "This field is required."
+msgstr "Обязательное поле"
+
+#: dashboards/vsm/cephupgrade/form.py:37
+msgid "Key URL"
+msgstr "URL публичного ключа"
+
+#: dashboards/vsm/cephupgrade/form.py:44
+msgid "Proxy URL"
+msgstr "Прокси-сервер"
+
+#: dashboards/vsm/cephupgrade/form.py:49
+#: dashboards/vsm/openstackconnect/forms.py:69
+#: dashboards/vsm/openstackconnect/forms.py:159
+#: dashboards/vsm/openstackconnect/tables.py:67
+msgid "SSH User Name"
+msgstr "Пользователь (SSH)"
+
+#: dashboards/vsm/cephupgrade/panel.py:23
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:20
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:23
+#: dashboards/vsm/storageservermgmt/tables.py:122
+msgid "Ceph Upgrade"
+msgstr "Обновление Ceph"
+
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:38
+#: dashboards/vsm/cluster-import/templates/cluster-import/import_cluster.html:83
+#: dashboards/vsm/configuration/templates/configuration/create.html:39
+#: dashboards/vsm/configuration/templates/configuration/update.html:40
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:74
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:38
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:38
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:165
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_erasure_coded_pool.html:48
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:79
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/remove_cache_tier.html:39
+#: dashboards/vsm/storage-group-management/templates/storage-group-management/createstoragegroup.html:38
+#: dashboards/vsm/templates/vsm/flocking/_add_cache_tier.html:34
+#: dashboards/vsm/templates/vsm/flocking/_addhost.html:34
+#: dashboards/vsm/templates/vsm/flocking/_create.html:34
+#: dashboards/vsm/templates/vsm/flocking/_create_ec_pool.html:34
+#: dashboards/vsm/templates/vsm/flocking/_createstoragegroup.html:34
+#: dashboards/vsm/templates/vsm/flocking/_createuser.html:34
+#: dashboards/vsm/templates/vsm/flocking/_createzone.html:34
+#: dashboards/vsm/templates/vsm/flocking/_openstackconnect.html:34
+#: dashboards/vsm/templates/vsm/flocking/_remove_cache_tier.html:34
+#: dashboards/vsm/usermgmt/templates/usermgmt/create.html:44
+#: dashboards/vsm/usermgmt/templates/usermgmt/settings.html:45
+#: dashboards/vsm/usermgmt/templates/usermgmt/update.html:45
+msgid "Description"
+msgstr "Описание"
+
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:39
+msgid ""
+"From here you can upgrade ceph.Before submit,please make sure the Controller "
+"can access the package and key url."
+msgstr ""
+"Здесь вы можете обновить Ceph. Прежде чем продолжить, пожалуйста, "
+"убедитесь, что у контроллера есть доступ к пакетам в репозитории"
+
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:40
+#: dashboards/vsm/zonemgmt/templates/zonemgmt/index.html:69
+msgid "Notes"
+msgstr "Примечание"
+
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:41
+msgid "- Proxy URL looks like 'proxy=http://username:password@proxy_ip:port/'"
+msgstr ""
+"- Прокси-сервер должен быть в виде 'proxy=http://username:password@proxy_ip:port/'"
+
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:42
+msgid "- Make sure the ssh user has made mutual trust with all ceph nodes."
+msgstr "- Требуется беспарольный ssh доступ до всех нод кластера"
+
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:48
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:176
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:79
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:63
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:63
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:170
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_erasure_coded_pool.html:53
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:84
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/remove_cache_tier.html:44
+#: dashboards/vsm/rbdpools/templates/rbdpools/rbdsaction.html:30
+#: dashboards/vsm/storageservermgmt/templates/storageservermgmt/serversaction.html:30
+#: templates/horizon/common/_usage_summary.html:10
+msgid "Submit"
+msgstr "Начать"
+
+#: dashboards/vsm/cephupgrade/templates/cephupgrade/ceph_upgrade.html:49
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:80
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:64
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:64
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:171
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_erasure_coded_pool.html:54
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:85
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/remove_cache_tier.html:45
+#: dashboards/vsm/rbdpools/templates/rbdpools/rbdsaction.html:31
+#: dashboards/vsm/storageservermgmt/templates/storageservermgmt/serversaction.html:31
+#: dashboards/vsm/templates/vsm/flocking/_add_cache_tier.html:41
+#: dashboards/vsm/templates/vsm/flocking/_addhost.html:41
+#: dashboards/vsm/templates/vsm/flocking/_addmonitors.html:34
+#: dashboards/vsm/templates/vsm/flocking/_addservers.html:34
+#: dashboards/vsm/templates/vsm/flocking/_create.html:41
+#: dashboards/vsm/templates/vsm/flocking/_create_ec_pool.html:41
+#: dashboards/vsm/templates/vsm/flocking/_createstoragegroup.html:41
+#: dashboards/vsm/templates/vsm/flocking/_createuser.html:43
+#: dashboards/vsm/templates/vsm/flocking/_createzone.html:41
+#: dashboards/vsm/templates/vsm/flocking/_openstackconnect.html:43
+#: dashboards/vsm/templates/vsm/flocking/_rbdsaction.html:34
+#: dashboards/vsm/templates/vsm/flocking/_remove_cache_tier.html:41
+#: dashboards/vsm/templates/vsm/flocking/_removemonitors.html:34
+#: dashboards/vsm/templates/vsm/flocking/_removeservers.html:34
+#: dashboards/vsm/templates/vsm/flocking/_serversaction.html:37
+#: dashboards/vsm/templates/vsm/flocking/createcluster.html:33
+#: dashboards/vsm/usermgmt/templates/usermgmt/create.html:54
+#: dashboards/vsm/usermgmt/templates/usermgmt/update.html:56
+#: templates/horizon/common/_workflow.html:47
+msgid "Cancel"
+msgstr "Отмена"
+
+#: dashboards/vsm/cluster-import/form.py:33
+msgid "Monitor Host"
+msgstr "Сервер монитора"
+
+#: dashboards/vsm/cluster-import/form.py:35
+msgid "Monitor Keyring"
+msgstr "Keyring монитора"
+
+#: dashboards/vsm/cluster-import/form.py:39
+msgid "Cluster Conf"
+msgstr "Конфиг кластера"
+
+#: dashboards/vsm/cluster-import/form.py:53
+msgid "Failed to get server_list."
+msgstr "Не удается получить server_list."
+
+#: dashboards/vsm/cluster-import/panel.py:23
+#: dashboards/vsm/cluster-import/tables.py:29
+#: dashboards/vsm/cluster-import/templates/cluster-import/import_cluster.html:23
+#: dashboards/vsm/cluster-import/templates/cluster-import/index.html:3
+#: dashboards/vsm/cluster-import/templates/cluster-import/index.html:6
+msgid "Import Cluster"
+msgstr "Импортировать кластер"
+
+#: dashboards/vsm/cluster-import/tables.py:44
+#: dashboards/vsm/clustermgmt/tables.py:94
+#: dashboards/vsm/clustermgmt/tables.py:147
+#: dashboards/vsm/storageservermgmt/tables.py:143
+#: dashboards/vsm/storageservermgmt/tables.py:198
+#: dashboards/vsm/storageservermgmt/tables.py:270
+#: dashboards/vsm/storageservermgmt/tables.py:301
+msgid "Management Address"
+msgstr "Адрес управления"
+
+#: dashboards/vsm/cluster-import/tables.py:45
+#: dashboards/vsm/clustermgmt/tables.py:95
+#: dashboards/vsm/clustermgmt/tables.py:149
+#: dashboards/vsm/storageservermgmt/tables.py:144
+#: dashboards/vsm/storageservermgmt/tables.py:203
+#: dashboards/vsm/storageservermgmt/tables.py:272
+#: dashboards/vsm/storageservermgmt/tables.py:302
+msgid "Public Address"
+msgstr "Публичный адрес"
+
+#: dashboards/vsm/cluster-import/tables.py:46
+#: dashboards/vsm/clustermgmt/tables.py:96
+#: dashboards/vsm/clustermgmt/tables.py:150
+#: dashboards/vsm/storageservermgmt/tables.py:145
+#: dashboards/vsm/storageservermgmt/tables.py:208
+#: dashboards/vsm/storageservermgmt/tables.py:273
+#: dashboards/vsm/storageservermgmt/tables.py:303
+msgid "Cluster Address"
+msgstr "Кластерный адрес"
+
+#: dashboards/vsm/cluster-import/tables.py:47
+#: dashboards/vsm/clustermgmt/tables.py:97
+msgid "OSDs"
+msgstr "Кол-во OSD"
+
+#: dashboards/vsm/cluster-import/tables.py:48
+#: dashboards/vsm/clustermgmt/tables.py:98
+#: dashboards/vsm/clustermgmt/tables.py:153
+#: dashboards/vsm/clustermgmt/tables.py:157
+#: dashboards/vsm/overview/templates/overview/index.html:169
+#: dashboards/vsm/storageservermgmt/tables.py:148
+#: dashboards/vsm/storageservermgmt/tables.py:223
+#: dashboards/vsm/storageservermgmt/tables.py:275
+#: dashboards/vsm/storageservermgmt/tables.py:306
+#: dashboards/vsm/storageservermgmt/tables.py:307
+#: dashboards/vsm/storageservermgmt/tables.py:346
+msgid "Monitor"
+msgstr "Мониторы"
+
+#: dashboards/vsm/cluster-import/tables.py:49
+#: dashboards/vsm/clustermgmt/form.py:55
+#: dashboards/vsm/clustermgmt/form.py:120
+#: dashboards/vsm/clustermgmt/tables.py:99
+#: dashboards/vsm/clustermgmt/tables.py:151
+#: dashboards/vsm/devices-management/tables.py:118
+#: dashboards/vsm/osd-status/tables.py:67
+#: dashboards/vsm/storageservermgmt/tables.py:149
+#: dashboards/vsm/storageservermgmt/tables.py:228
+#: dashboards/vsm/storageservermgmt/tables.py:304
+msgid "Zone"
+msgstr "Зона"
+
+#: dashboards/vsm/cluster-import/tables.py:53
+#: dashboards/vsm/clustermgmt/tables.py:103
+#: dashboards/vsm/pool-status/tables.py:87
+#: dashboards/vsm/poolsmanagement/tables.py:91
+#: dashboards/vsm/rbdpools/tables.py:114 dashboards/vsm/rbdpools/tables.py:155
+#: dashboards/vsm/storage-group-status/tables.py:103
+#: dashboards/vsm/storageservermgmt/tables.py:153
+#: dashboards/vsm/storageservermgmt/tables.py:236
+msgid "Status"
+msgstr "Статус"
+
+#: dashboards/vsm/cluster-import/tables.py:57
+#: dashboards/vsm/clustermgmt/tables.py:108
+#: dashboards/vsm/clustermgmt/tables.py:165
+#: dashboards/vsm/storageservermgmt/tables.py:241
+msgid "Server List"
+msgstr "Список серверов"
+
+#: dashboards/vsm/cluster-import/templates/cluster-import/import_cluster.html:84
+msgid "From here you can import a cluster."
+msgstr "Здесь вы можете импортировать кластер."
+
+#: dashboards/vsm/cluster-import/views.py:28
+#: dashboards/vsm/clustermgmt/tables.py:36
+#: dashboards/vsm/clustermgmt/views.py:63
+#: dashboards/vsm/clustermgmt/views.py:108
+#: dashboards/vsm/clustermgmt/views.py:176
+#: dashboards/vsm/clustermgmt/views.py:253
+#: dashboards/vsm/mds-status/tables.py:41
+#: dashboards/vsm/mds-status/views.py:56
+#: dashboards/vsm/monitor-status/tables.py:41
+#: dashboards/vsm/pg-status/tables.py:41 dashboards/vsm/pg-status/views.py:64
+#: dashboards/vsm/pool-status/tables.py:41
+#: dashboards/vsm/pool-status/views.py:48
+#: dashboards/vsm/rbd-status/tables.py:41
+#: dashboards/vsm/rbd-status/views.py:53
+#: dashboards/vsm/storage-group-management/views.py:51
+#: dashboards/vsm/storage-group-status/tables.py:41
+#: dashboards/vsm/storage-group-status/views.py:57
+#: dashboards/vsm/storageservermgmt/tables.py:37
+#: dashboards/vsm/storageservermgmt/utils.py:117
+#: dashboards/vsm/storageservermgmt/utils.py:168
+#: dashboards/vsm/storageservermgmt/utils.py:180
+#: dashboards/vsm/storageservermgmt/utils.py:190
+msgid "Unable to retrieve sever list. "
+msgstr "Не удается получить список серверов."
+
+#: dashboards/vsm/clustermgmt/form.py:35
+#: dashboards/vsm/clustermgmt/form.py:100
+msgid "Host name"
+msgstr "Имя хоста"
+
+#: dashboards/vsm/clustermgmt/form.py:40 dashboards/vsm/clustermgmt/form.py:50
+#: dashboards/vsm/clustermgmt/form.py:105
+#: dashboards/vsm/clustermgmt/form.py:115
+#: dashboards/vsm/poolsmanagement/form.py:41
+#: dashboards/vsm/rbdpools/form.py:40 dashboards/vsm/rbdpools/form.py:57
+msgid "The string may only contain ASCII characters and numbers."
+msgstr "Строка должна содержать только ASCII символы и цифры"
+
+#: dashboards/vsm/clustermgmt/form.py:44
+#: dashboards/vsm/clustermgmt/form.py:109
+#: dashboards/vsm/openstackconnect/forms.py:46
+#: dashboards/vsm/openstackconnect/forms.py:136
+#: dashboards/vsm/openstackconnect/tables.py:64
+#: dashboards/vsm/usermgmt/forms.py:62 dashboards/vsm/usermgmt/forms.py:93
+msgid "Password"
+msgstr "Пароль"
+
+#: dashboards/vsm/clustermgmt/form.py:54
+#: dashboards/vsm/clustermgmt/form.py:119
+msgid "Server Type"
+msgstr "Тип сервера"
+
+#: dashboards/vsm/clustermgmt/form.py:83
+#: dashboards/vsm/clustermgmt/form.py:148 dashboards/vsm/rbdpools/form.py:95
+#, python-format
+msgid "Successfully created storage pool: %s"
+msgstr "Пул создан успешно: %s"
+
+#: dashboards/vsm/clustermgmt/form.py:87
+#: dashboards/vsm/clustermgmt/form.py:152 dashboards/vsm/rbdpools/form.py:99
+#, python-format
+msgid "Because %s, failed to create storage pool"
+msgstr "Не удалось добавить пул: %s"
+
+#: dashboards/vsm/clustermgmt/form.py:94
+#: dashboards/vsm/clustermgmt/form.py:159 dashboards/vsm/rbdpools/form.py:106
+msgid "Unable to create storage pool."
+msgstr "Невозможно создать пул."
+
+#: dashboards/vsm/clustermgmt/panel.py:23
+#: dashboards/vsm/clustermgmt/tables.py:69
+#: dashboards/vsm/templates/vsm/flocking/_createcluster.html:24
+#: dashboards/vsm/templates/vsm/flocking/createcluster.html:31
+msgid "Create Cluster"
+msgstr "Создать кластер"
+
+#: dashboards/vsm/clustermgmt/tables.py:78
+msgid "Integrate Cluster"
+msgstr "Интегрировать кластер"
+
+#: dashboards/vsm/clustermgmt/tables.py:152
+#: dashboards/vsm/storageservermgmt/tables.py:147
+#: dashboards/vsm/storageservermgmt/tables.py:218
+#: dashboards/vsm/storageservermgmt/tables.py:274
+#: dashboards/vsm/storageservermgmt/tables.py:305
+msgid "OSDs (Data Drives)"
+msgstr "Количество OSD"
+
+#: dashboards/vsm/clustermgmt/tables.py:155
+#: dashboards/vsm/overview/templates/overview/index.html:190
+msgid "MDS"
+msgstr ""
+
+#: dashboards/vsm/clustermgmt/tables.py:156
+msgid "RGW"
+msgstr ""
+
+#: dashboards/vsm/clustermgmt/tables.py:159
+#: dashboards/vsm/storageservermgmt/tables.py:308
+#: dashboards/vsm/storageservermgmt/tables.py:329
+#: dashboards/vsm/storageservermgmt/tables.py:349
+msgid "Storage"
+msgstr "Хранилище"
+
+#: dashboards/vsm/clustermgmt/tables.py:161
+#: dashboards/vsm/storageservermgmt/tables.py:73
+#: dashboards/vsm/storageservermgmt/tables.py:277
+#: dashboards/vsm/storageservermgmt/tables.py:309
+msgid "Server Status"
+msgstr "Статус"
+
+#: dashboards/vsm/clustermgmt/templates/clustermgmt/index.html:20
+#: dashboards/vsm/clustermgmt/templates/clustermgmt/index.html:23
+#: dashboards/vsm/templates/vsm/flocking/createcluster.html:23
+msgid "Manage Cluster"
+msgstr "Управление кластером"
+
+#: dashboards/vsm/configuration/forms.py:40
+#: dashboards/vsm/configuration/forms.py:80
+msgid "Please enter a vaild name"
+msgstr "Пожалуйста, введите валидное имя"
+
+#: dashboards/vsm/configuration/forms.py:42
+#: dashboards/vsm/configuration/forms.py:82
+msgid "Section"
+msgstr "Секция"
+
+#: dashboards/vsm/configuration/forms.py:44
+#: dashboards/vsm/configuration/forms.py:84
+msgid "Default Value"
+msgstr "Значение по умолчанию"
+
+#: dashboards/vsm/configuration/forms.py:49
+#: dashboards/vsm/configuration/forms.py:89
+msgid "Please enter a vaild default value"
+msgstr "Пожалуйста, введите валидное имя по умолчанию"
+
+#: dashboards/vsm/configuration/forms.py:51
+#: dashboards/vsm/configuration/forms.py:91
+#: dashboards/vsm/settings/templates/settings/index.html:41
+msgid "Current Value"
+msgstr "Текущее значение"
+
+#: dashboards/vsm/configuration/forms.py:56
+#: dashboards/vsm/configuration/forms.py:96
+msgid "Please enter a vaild current value"
+msgstr "Пожалуйста, введите валидное текущее значение"
+
+#: dashboards/vsm/configuration/forms.py:61
+#: dashboards/vsm/configuration/forms.py:101
+msgid "Select a section"
+msgstr "Выберите секцию"
+
+#: dashboards/vsm/configuration/forms.py:62
+#: dashboards/vsm/configuration/forms.py:102
+msgid "global"
+msgstr ""
+
+#: dashboards/vsm/configuration/forms.py:63
+#: dashboards/vsm/configuration/forms.py:103
+msgid "mon"
+msgstr ""
+
+#: dashboards/vsm/configuration/forms.py:64
+#: dashboards/vsm/configuration/forms.py:104
+msgid "osd"
+msgstr ""
+
+#: dashboards/vsm/configuration/forms.py:65
+#: dashboards/vsm/configuration/forms.py:105
+msgid "mds"
+msgstr ""
+
+#: dashboards/vsm/configuration/panel.py:23
+msgid "Configuration"
+msgstr "Настройка"
+
+#: dashboards/vsm/configuration/templates/configuration/create.html:23
+msgid "Create Configuration"
+msgstr ""
+
+#: dashboards/vsm/configuration/templates/configuration/index.html:20
+#: dashboards/vsm/configuration/templates/configuration/index.html:23
+#: dashboards/vsm/language/templates/language/index.html:20
+#: dashboards/vsm/language/templates/language/index.html:23
+#: dashboards/vsm/settings/panel.py:23
+#: dashboards/vsm/settings/templates/settings/index.html:20
+#: dashboards/vsm/settings/templates/settings/index.html:23
+msgid "Settings"
+msgstr "Настройки"
+
+#: dashboards/vsm/configuration/templates/configuration/update.html:23
+msgid "Update Configuration"
+msgstr "Обновить настройки"
+
+#: dashboards/vsm/crushmap/panel.py:23
+#: dashboards/vsm/storage-group-management/panel.py:23
+msgid "Manage Storage Group"
+msgstr "Управление группами хранения"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:3
+#: dashboards/vsm/overview/panel.py:23
+#: dashboards/vsm/overview/templates/overview/index.html:3
+#: dashboards/vsm/overview/templates/overview/index.html:39
+msgid "Cluster Status"
+msgstr "Состояние кластера"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:6
+msgid "Crushmap"
+msgstr "CRUSH карта"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:23
+#: dashboards/vsm/storage-group-management/tables.py:53
+#: dashboards/vsm/storage-group-status/tables.py:108
+msgid "Storage Group List"
+msgstr "Список групп хранения"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:25
+#: dashboards/vsm/storage-group-management/tables.py:39
+msgid "Add Storage Group"
+msgstr "Добавить группу хранения"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:39
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:113
+msgid "Class"
+msgstr "Класс хранилища"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:42
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:128
+#: dashboards/vsm/storage-group-management/tables.py:49
+#: dashboards/vsm/storage-group-status/tables.py:88
+msgid "Friendly Name"
+msgstr "Описание"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:45
+msgid "Take Name(Choose Type, Type Number)"
+msgstr ""
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:48
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:136
+msgid "Marker"
+msgstr ""
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:51
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:139
+#: dashboards/vsm/settings/templates/settings/index.html:43
+msgid "Action"
+msgstr "Действие"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:148
+msgid "Take"
+msgstr ""
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:158
+#: dashboards/vsm/devices-management/tables.py:63
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:107
+#: dashboards/vsm/zonemgmt/templates/zonemgmt/index.html:75
+msgid "Add"
+msgstr "Добавить"
+
+#: dashboards/vsm/crushmap/templates/crushmap/index.html:159
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:90
+#: dashboards/vsm/settings/templates/settings/index.html:66
+msgid "Update"
+msgstr "Посл. обновление"
+
+#: dashboards/vsm/dashboard.py:23
+#: dashboards/vsm/overview/templates/overview/index.html:6
+msgid "Dashboard"
+msgstr "Панель управления"
+
+#: dashboards/vsm/dashboard.py:28
+msgid "Cluster Management"
+msgstr "Управление кластером"
+
+#: dashboards/vsm/dashboard.py:33
+msgid "Cluster Monitoring"
+msgstr "Мониторинг кластера"
+
+#: dashboards/vsm/dashboard.py:39
+msgid "Server Management"
+msgstr "Управление серверами"
+
+#: dashboards/vsm/dashboard.py:44
+msgid "OpenStack Integration"
+msgstr "Интеграция OpenStack"
+
+#: dashboards/vsm/dashboard.py:49
+msgid "VSM Management"
+msgstr "Управление VSM"
+
+#: dashboards/vsm/dashboard.py:53
+msgid "VSM"
+msgstr ""
+
+#: dashboards/vsm/devices-management/panel.py:23
+#: dashboards/vsm/devices-management/templates/devices-management/index.html:20
+#: dashboards/vsm/devices-management/templates/devices-management/index.html:23
+msgid "Manage Devices"
+msgstr "Управление дисками"
+
+#: dashboards/vsm/devices-management/tables.py:42
+msgid "Restart"
+msgstr "Перезагрузить"
+
+#: dashboards/vsm/devices-management/tables.py:49
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:155
+#: dashboards/vsm/ecprofiles-management/tables.py:36
+msgid "Remove"
+msgstr "Удалить"
+
+#: dashboards/vsm/devices-management/tables.py:56
+msgid "Restore"
+msgstr "Восстановить"
+
+#: dashboards/vsm/devices-management/tables.py:64
+msgid "Scheduled add of"
+msgstr "Запланировать добавление"
+
+#: dashboards/vsm/devices-management/tables.py:65
+msgid "Osd"
+msgstr ""
+
+#: dashboards/vsm/devices-management/tables.py:66
+msgid "Osds"
+msgstr ""
+
+#: dashboards/vsm/devices-management/tables.py:73
+#, python-format
+msgid "Only osd with VSM status \"%s\" will be added"
+msgstr "Только osd со статусом \"%s\" будут добавлены"
+
+#: dashboards/vsm/devices-management/tables.py:84
+#, python-format
+msgid "Error adding %s."
+msgstr "Ошибка при добавлении %s"
+
+#: dashboards/vsm/devices-management/tables.py:97
+#: dashboards/vsm/ecprofiles-management/tables.py:30
+msgid "New"
+msgstr "Новый"
+
+#: dashboards/vsm/devices-management/tables.py:106
+#: dashboards/vsm/overview/templates/overview/index.html:103
+msgid "OSD"
+msgstr ""
+
+#: dashboards/vsm/devices-management/tables.py:111
+#: dashboards/vsm/osd-status/tables.py:58
+#: dashboards/vsm/overview/templates/overview/index.html:22
+msgid "VSM Status"
+msgstr "Статус в кластере"
+
+#: dashboards/vsm/devices-management/tables.py:113
+#: dashboards/vsm/osd-status/panel.py:23
+#: dashboards/vsm/osd-status/tables.py:59
+#: dashboards/vsm/osd-status/templates/osd-status/index.html:20
+msgid "OSD Status"
+msgstr "Статус"
+
+#: dashboards/vsm/devices-management/tables.py:114
+msgid "OSD Weight"
+msgstr "Вес"
+
+#: dashboards/vsm/devices-management/tables.py:115
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:134
+#: dashboards/vsm/osd-status/tables.py:65
+msgid "Server"
+msgstr "Сервер"
+
+#: dashboards/vsm/devices-management/tables.py:117
+#: dashboards/vsm/storage-group-management/forms.py:52
+#: dashboards/vsm/storage-group-management/tables.py:48
+msgid "Storage Class"
+msgstr "Класс хранилища"
+
+#: dashboards/vsm/devices-management/tables.py:120
+msgid "Data Device Path"
+msgstr "Путь к устройству данных"
+
+#: dashboards/vsm/devices-management/tables.py:122
+msgid "Data Device Status"
+msgstr "Статус устройства"
+
+#: dashboards/vsm/devices-management/tables.py:124
+msgid "Data Device Capacity (MB)"
+msgstr "Емкость (MB)"
+
+#: dashboards/vsm/devices-management/tables.py:126
+msgid "Data Device Used (MB)"
+msgstr "Использовано (MB)"
+
+#: dashboards/vsm/devices-management/tables.py:128
+msgid "Data Device Available (MB)"
+msgstr "Доступно (MB)"
+
+#: dashboards/vsm/devices-management/tables.py:130
+msgid "Journal Device Path"
+msgstr "Путь к устройству журнала"
+
+#: dashboards/vsm/devices-management/tables.py:132
+msgid "Journal Device Status"
+msgstr "Статус журнала"
+
+#: dashboards/vsm/devices-management/tables.py:134
+msgid "Used(%)"
+msgstr "Использовано(%)"
+
+#: dashboards/vsm/devices-management/tables.py:136
+msgid "Used Wran"
+msgstr ""
+
+#: dashboards/vsm/devices-management/tables.py:138
+msgid "Capacity Status"
+msgstr "Свободное пространство"
+
+#: dashboards/vsm/devices-management/tables.py:142
+msgid "Device List"
+msgstr "Список устройств"
+
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:20
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:23
+msgid "Add New OSD"
+msgstr "Добавить новую OSD"
+
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:33
+msgid "Select Server"
+msgstr "Выбрать сервер"
+
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:49
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:137
+msgid "Journal Device"
+msgstr "Устройство журнала"
+
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:61
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:136
+#: dashboards/vsm/osd-status/tables.py:66
+#: dashboards/vsm/overview/templates/overview/index.html:70
+#: dashboards/vsm/pool-status/tables.py:83
+#: dashboards/vsm/poolsmanagement/form.py:49
+#: dashboards/vsm/poolsmanagement/tables.py:84
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:51
+#: dashboards/vsm/rbdpools/form.py:43 dashboards/vsm/rbdpools/tables.py:111
+#: dashboards/vsm/rbdpools/tables.py:143
+#: dashboards/vsm/storage-group-status/tables.py:87
+msgid "Storage Group"
+msgstr "Группа хранения"
+
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:74
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:138
+msgid "Data Device"
+msgstr "Устройство данных"
+
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:87
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:136
+msgid "OSD Location"
+msgstr "Расположение OSD"
+
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:98
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:135
+msgid "Weight"
+msgstr "Вес"
+
+#: dashboards/vsm/devices-management/templates/devices-management/add_osd.html:115
+msgid "Batch Import OSD"
+msgstr "Импортировать группу OSD"
+
+#: dashboards/vsm/devices-management/views.py:59
+msgid "Unable to retrieve osds. "
+msgstr "Не удается получить список OSD"
+
+#: dashboards/vsm/ecprofiles-management/panel.py:23
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/index.html:19
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/index.html:22
+msgid "Manage EC Profiles"
+msgstr "Управление EC профайлами"
+
+#: dashboards/vsm/ecprofiles-management/tables.py:45
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:44
+msgid "Plugin Name"
+msgstr "Плагин"
+
+#: dashboards/vsm/ecprofiles-management/tables.py:46
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:51
+msgid "Plugin Path"
+msgstr "Путь к плагину"
+
+#: dashboards/vsm/ecprofiles-management/tables.py:47
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:58
+msgid "PG Number"
+msgstr "Кол-во PG"
+
+#: dashboards/vsm/ecprofiles-management/tables.py:48
+msgid "Key Values Pairs"
+msgstr ""
+
+#: dashboards/vsm/ecprofiles-management/tables.py:51
+msgid "EC Profiles List"
+msgstr "Список EC профайлов"
+
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:20
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:23
+msgid "Create EC Profile"
+msgstr "Создать EC профайл"
+
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:65
+msgid "Plugin Key_Value Pairs"
+msgstr ""
+
+#: dashboards/vsm/ecprofiles-management/templates/ecprofiles-management/add_ec_profile.html:75
+msgid "From here you can create a ec profile."
+msgstr "Здесь вы можете создать EC профайл."
+
+#: dashboards/vsm/flocking/panel.py:23
+msgid "Flocking"
+msgstr ""
+
+#: dashboards/vsm/flocking/tabs.py:42
+msgid "Visualization"
+msgstr "Визуализация"
+
+#: dashboards/vsm/language/panel.py:23
+msgid "Language"
+msgstr "Язык интерфейса"
+
+#: dashboards/vsm/mds-status/panel.py:23
+#: dashboards/vsm/mds-status/templates/mds-status/index.html:20
+msgid "MDS Status"
+msgstr "Статус MDS"
+
+#: dashboards/vsm/mds-status/tables.py:80
+#: dashboards/vsm/monitor-status/tables.py:80
+#: dashboards/vsm/osd-status/tables.py:52
+#: dashboards/vsm/pool-status/tables.py:80
+msgid "ordinal"
+msgstr "Номер"
+
+#: dashboards/vsm/mds-status/tables.py:82
+msgid "Gid"
+msgstr ""
+
+#: dashboards/vsm/mds-status/tables.py:83
+#: dashboards/vsm/pg-status/tables.py:81
+msgid "State"
+msgstr "Состояние"
+
+#: dashboards/vsm/mds-status/tables.py:84
+#: dashboards/vsm/monitor-status/tables.py:82
+msgid "Address"
+msgstr "Адрес"
+
+#: dashboards/vsm/mds-status/tables.py:85
+#: dashboards/vsm/monitor-status/tables.py:91
+#: dashboards/vsm/osd-status/tables.py:68
+#: dashboards/vsm/overview/templates/overview/index.html:75
+#: dashboards/vsm/overview/templates/overview/index.html:111
+#: dashboards/vsm/overview/templates/overview/index.html:178
+#: dashboards/vsm/overview/templates/overview/index.html:199
+#: dashboards/vsm/overview/templates/overview/index.html:261
+#: dashboards/vsm/pool-status/tables.py:101
+#: dashboards/vsm/rbd-status/tables.py:86
+#: dashboards/vsm/storage-group-status/tables.py:104
+msgid "Updated at"
+msgstr "Посл. обновление"
+
+#: dashboards/vsm/mds-status/tables.py:89
+msgid "MDS List"
+msgstr "Список MDS"
+
+#: dashboards/vsm/mds-status/templates/mds-status/index.html:30
+msgid "MDS Summary"
+msgstr "Информация по MDS"
+
+#: dashboards/vsm/mds-status/templates/mds-status/index.html:33
+#: dashboards/vsm/overview/templates/overview/index.html:108
+#: dashboards/vsm/overview/templates/overview/index.html:175
+#: dashboards/vsm/overview/templates/overview/index.html:196
+msgid "Epoch"
+msgstr "Версия карты"
+
+#: dashboards/vsm/mds-status/templates/mds-status/index.html:37
+#: dashboards/vsm/overview/templates/overview/index.html:118
+#: dashboards/vsm/overview/templates/overview/index.html:212
+#: dashboards/vsm/pg-status/tables.py:82
+msgid "Up"
+msgstr ""
+
+#: dashboards/vsm/mds-status/templates/mds-status/index.html:41
+#: dashboards/vsm/overview/templates/overview/index.html:122
+#: dashboards/vsm/overview/templates/overview/index.html:209
+msgid "In"
+msgstr ""
+
+#: dashboards/vsm/mds-status/templates/mds-status/index.html:45
+msgid "Max"
+msgstr ""
+
+#: dashboards/vsm/mds-status/templates/mds-status/index.html:49
+#: dashboards/vsm/overview/templates/overview/index.html:231
+msgid "Failed"
+msgstr ""
+
+#: dashboards/vsm/mds-status/templates/mds-status/index.html:53
+#: dashboards/vsm/overview/templates/overview/index.html:234
+msgid "Stopped"
+msgstr ""
+
+#: dashboards/vsm/monitor-status/panel.py:23
+#: dashboards/vsm/monitor-status/templates/monitor-status/index.html:20
+msgid "Monitor Status"
+msgstr "Статус мониторов"
+
+#: dashboards/vsm/monitor-status/tables.py:83
+msgid "Health"
+msgstr "Состояние"
+
+#: dashboards/vsm/monitor-status/tables.py:84
+msgid "Detail"
+msgstr "Подробности"
+
+#: dashboards/vsm/monitor-status/tables.py:85
+msgid "Skew"
+msgstr "Отставание"
+
+#: dashboards/vsm/monitor-status/tables.py:86
+msgid "Latency"
+msgstr "Латентность"
+
+#: dashboards/vsm/monitor-status/tables.py:87
+msgid "MB Total (disk)"
+msgstr "Всего МБ (диск)"
+
+#: dashboards/vsm/monitor-status/tables.py:88
+msgid "MB Used (disk)"
+msgstr "Использовано МБ (диск)"
+
+#: dashboards/vsm/monitor-status/tables.py:89
+msgid "MB Available (disk)"
+msgstr "Доступно МБ (диск)"
+
+#: dashboards/vsm/monitor-status/tables.py:90
+msgid "Percent Available"
+msgstr "Доступно %"
+
+#: dashboards/vsm/monitor-status/tables.py:95
+msgid "Monitor List"
+msgstr "Список мониторов"
+
+#: dashboards/vsm/monitor-status/templates/monitor-status/index.html:30
+msgid "Monitor Summary"
+msgstr "Информацию по мониторам"
+
+#: dashboards/vsm/monitor-status/templates/monitor-status/index.html:33
+msgid "Monmap Epoch"
+msgstr "Версия карты"
+
+#: dashboards/vsm/monitor-status/templates/monitor-status/index.html:37
+msgid "Monitors"
+msgstr "Количество"
+
+#: dashboards/vsm/monitor-status/templates/monitor-status/index.html:41
+msgid "Election Epoch"
+msgstr "Версия кворума"
+
+#: dashboards/vsm/monitor-status/templates/monitor-status/index.html:45
+msgid "Quorum"
+msgstr "Кворум"
+
+#: dashboards/vsm/monitor-status/templates/monitor-status/index.html:49
+msgid "Last Updated"
+msgstr "Посл. обновление"
+
+#: dashboards/vsm/monitor-status/views.py:60
+msgid "Unable to retrieve mon list. "
+msgstr "Не удается получить список мониторов."
+
+#: dashboards/vsm/monitorpools/panel.py:23
+msgid "Monitor Pools"
+msgstr "Монитор пулов"
+
+#: dashboards/vsm/openstackconnect/forms.py:30
+#: dashboards/vsm/openstackconnect/forms.py:120
+#: dashboards/vsm/openstackconnect/tables.py:62
+msgid "Tenant Name"
+msgstr "Имя тенанта"
+
+#: dashboards/vsm/openstackconnect/forms.py:38
+#: dashboards/vsm/openstackconnect/forms.py:128
+#: dashboards/vsm/openstackconnect/tables.py:63
+msgid "UserName"
+msgstr "Имя пользователя"
+
+#: dashboards/vsm/openstackconnect/forms.py:55
+#: dashboards/vsm/openstackconnect/forms.py:145
+#: dashboards/vsm/openstackconnect/tables.py:65
+msgid "Auth Url"
+msgstr ""
+
+#: dashboards/vsm/openstackconnect/forms.py:63
+#: dashboards/vsm/openstackconnect/forms.py:153
+#: dashboards/vsm/openstackconnect/tables.py:66
+msgid "Region Name"
+msgstr ""
+
+#: dashboards/vsm/openstackconnect/panel.py:24
+msgid "Openstack Access"
+msgstr "Доступ к OpenStack"
+
+#: dashboards/vsm/openstackconnect/tables.py:29
+#: dashboards/vsm/templates/vsm/flocking/_openstackconnect.html:24
+#: dashboards/vsm/templates/vsm/flocking/openstackconnect.html:23
+msgid "Add OpenStack Endpoint"
+msgstr "Добавить доступ"
+
+#: dashboards/vsm/openstackconnect/tables.py:52
+msgid "Edit"
+msgstr "Редактировать"
+
+#: dashboards/vsm/openstackconnect/tables.py:68
+msgid "Connection Status"
+msgstr "Статус соединения"
+
+#: dashboards/vsm/openstackconnect/tables.py:69
+msgid "LOG INFO"
+msgstr "Журнал"
+
+#: dashboards/vsm/openstackconnect/tables.py:73
+msgid "Manage Openstack Access"
+msgstr "Управление доступом к OpenStack"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/addhosts.html:20
+#: dashboards/vsm/poolsmanagement/tables.py:98
+#: dashboards/vsm/rbdpools/templates/poolsmanagement/index.html:20
+#: dashboards/vsm/storage-group-management/templates/storage-group-management/addhosts.html:20
+#: dashboards/vsm/usermgmt/templates/usermgmt/addhosts.html:20
+msgid "Storage Pools"
+msgstr "Список пулы"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/addhosts.html:23
+#: dashboards/vsm/storage-group-management/templates/storage-group-management/addhosts.html:23
+#: dashboards/vsm/storage-group-management/templates/storage-group-management/index.html:23
+#: dashboards/vsm/usermgmt/templates/usermgmt/addhosts.html:23
+msgid "All Clusters"
+msgstr "Все кластеры"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:23
+msgid "Add OpenStack Access"
+msgstr "Добавить доступ к OpenStack"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:40
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:40
+msgid "For Keystone V2.0, An Example AS Followed:"
+msgstr "Для 2й версии Keystone:"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:41
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:41
+msgid "Tenant Name: admin"
+msgstr "Имя тенанта: admin"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:42
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:42
+msgid "UserName: admin"
+msgstr "Имя пользователя: admin"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:43
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:52
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:43
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:52
+msgid "Password: ******"
+msgstr "Пароль: ******"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:44
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:44
+msgid "Auth Url: http://10.0.0.10:5000/v2.0"
+msgstr ""
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:45
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:54
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:45
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:54
+msgid "Region Name: RegionOne"
+msgstr ""
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:46
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:55
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:46
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:55
+msgid "SSH User Name: root"
+msgstr "Пользователь(SSH): root"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:49
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:49
+msgid "For Keystone V3, An Example AS Followed:"
+msgstr "Для 3й версии Keystone:"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:50
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:50
+msgid "Tenant Name: 9b62326e927a4973891d6daed73979f0(ID of Project)"
+msgstr ""
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:51
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:51
+msgid "UserName: 200c46b79086408e95ce50e617662119(ID of User)"
+msgstr ""
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:53
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:53
+msgid "Auth Url: http://10.0.0.10:35357/v3"
+msgstr ""
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/create.html:58
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:58
+msgid "PS: The Region Name can be blank if you only have one region."
+msgstr "PS: Имя региона может быть пустым, если у вас только один регион."
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/index.html:20
+msgid "OpenStack Access"
+msgstr "Управление доступом"
+
+#: dashboards/vsm/openstackconnect/templates/openstackconnect/update.html:23
+msgid "Update OpenStack Access"
+msgstr "Обновить доступ к OpenStack"
+
+#: dashboards/vsm/openstackconnect/views.py:48
+msgid "Unable to retrieve openstack endpoint list. "
+msgstr "Не удается получить список endpoint'ов OpenStack'а"
+
+#: dashboards/vsm/openstackconnect/views.py:88
+msgid "Unable to Edit OpenStack Access."
+msgstr "Не удается изменить параметры доступа к OpenStack'у"
+
+#: dashboards/vsm/osd-maintain/panel.py:23
+msgid "Osd Maintain"
+msgstr ""
+
+#: dashboards/vsm/osd-status/tables.py:53
+msgid "OSD Name"
+msgstr "Имя"
+
+#: dashboards/vsm/osd-status/tables.py:60
+msgid "Crush Weight"
+msgstr "CRUSH вес"
+
+#: dashboards/vsm/osd-status/tables.py:61
+msgid "Capacity Total (MB)"
+msgstr "Полная ёмкость (МБ)"
+
+#: dashboards/vsm/osd-status/tables.py:62
+msgid "Capacity Used (MB)"
+msgstr "Использовано (МБ)"
+
+#: dashboards/vsm/osd-status/tables.py:63
+msgid "Capacity Available (MB)"
+msgstr "Доступно (МБ)"
+
+#: dashboards/vsm/osd-status/tables.py:64
+msgid "Percent Used Capacity"
+msgstr "Процент использованной емкости"
+
+#: dashboards/vsm/osd-status/tables.py:69
+msgid "deviceInfo"
+msgstr "Статус устройства"
+
+#: dashboards/vsm/osd-status/tables.py:70
+msgid "page_index"
+msgstr ""
+
+#: dashboards/vsm/osd-status/tables.py:71
+msgid "page_count"
+msgstr ""
+
+#: dashboards/vsm/osd-status/tables.py:72
+msgid "pager_index"
+msgstr ""
+
+#: dashboards/vsm/osd-status/tables.py:73
+msgid "pager_count"
+msgstr ""
+
+#: dashboards/vsm/osd-status/tables.py:77
+msgid "OSD List"
+msgstr "Список OSD"
+
+#: dashboards/vsm/overview/templates/overview/index.html:25
+msgid "VSM Version"
+msgstr "Версия"
+
+#: dashboards/vsm/overview/templates/overview/index.html:28 usage/tables.py:71
+msgid "Uptime"
+msgstr "Время работы"
+
+#: dashboards/vsm/overview/templates/overview/index.html:31
+#: dashboards/vsm/storageservermgmt/tables.py:146
+#: dashboards/vsm/storageservermgmt/tables.py:213
+msgid "Ceph Version"
+msgstr "Версия Ceph"
+
+#: dashboards/vsm/overview/templates/overview/index.html:55
+msgid "Used"
+msgstr "Использовано"
+
+#: dashboards/vsm/overview/templates/overview/index.html:59
+msgid "Total"
+msgstr "Всего"
+
+#: dashboards/vsm/overview/templates/overview/index.html:81
+#: dashboards/vsm/overview/templates/overview/index.html:145
+msgid "Normal"
+msgstr "ОК"
+
+#: dashboards/vsm/overview/templates/overview/index.html:82
+#: dashboards/vsm/overview/templates/overview/index.html:146
+msgid "Near Full"
+msgstr "Почти полные"
+
+#: dashboards/vsm/overview/templates/overview/index.html:83
+#: dashboards/vsm/overview/templates/overview/index.html:147
+msgid "Full"
+msgstr "Полные"
+
+#: dashboards/vsm/overview/templates/overview/index.html:119
+msgid "Down"
+msgstr ""
+
+#: dashboards/vsm/overview/templates/overview/index.html:131
+msgid "Out"
+msgstr ""
+
+#: dashboards/vsm/overview/templates/overview/index.html:228
+msgid "Metadata"
+msgstr ""
+
+#: dashboards/vsm/overview/templates/overview/index.html:256
+msgid "PG"
+msgstr ""
+
+#: dashboards/vsm/overview/templates/overview/index.html:274
+msgid "Performance"
+msgstr "Производительность"
+
+#: dashboards/vsm/overview/templates/overview/index.html:279
+msgid "Disabled:"
+msgstr "Отключено:"
+
+#: dashboards/vsm/overview/templates/overview/index.html:280
+msgid "Performance graphs are disabled. Enable in VSM settings"
+msgstr "Графики производительности отключены. Включите их в настройках VSM"
+
+#: dashboards/vsm/overview/templates/overview/index.html:284
+msgid "IOPS"
+msgstr ""
+
+#: dashboards/vsm/overview/templates/overview/index.html:291
+msgid "Latency (MilliSeconds)"
+msgstr "Задержка (мс)"
+
+#: dashboards/vsm/overview/templates/overview/index.html:298
+msgid "Bandwidth (MB/s)"
+msgstr "Траффик (МБ/сек)"
+
+#: dashboards/vsm/overview/templates/overview/index.html:305
+#, python-format
+msgid "CPU (%%)"
+msgstr ""
+
+#: dashboards/vsm/pg-status/panel.py:23
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:20
+msgid "PG Status"
+msgstr "Статус PG"
+
+#: dashboards/vsm/pg-status/tables.py:80
+msgid "PG ID"
+msgstr ""
+
+#: dashboards/vsm/pg-status/tables.py:83
+msgid "Acting"
+msgstr ""
+
+#: dashboards/vsm/pg-status/tables.py:87
+msgid "PG List"
+msgstr "Список PG"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:29
+msgid "Object Summary"
+msgstr ""
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:32
+msgid "Degraded Objects"
+msgstr ""
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:36
+msgid "Degraded Totals"
+msgstr ""
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:40
+msgid "Degraded Ratio"
+msgstr ""
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:44
+msgid "Unfound Objects"
+msgstr ""
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:48
+msgid "Unfound Totals"
+msgstr ""
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:52
+msgid "Unfound Ratio"
+msgstr ""
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:60
+msgid "Performance Summary"
+msgstr "Информация по производительности"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:63
+msgid "Read"
+msgstr "Чтение"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:67
+msgid "Write"
+msgstr "Запись"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:71
+msgid "Operation"
+msgstr "IOPS"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:79
+msgid "PG Summary"
+msgstr "Информация по PG"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:82
+msgid "PG Map Version"
+msgstr "Версия PGmap"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:86
+msgid "Total PGs"
+msgstr "Всего PG"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:99
+msgid "Capacity Summary"
+msgstr "Информация по свободному месту"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:102
+msgid "Data Capacity Used"
+msgstr "Использовано"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:106
+msgid "Total Capacity Used"
+msgstr "Использовано всего"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:110
+msgid "Capacity Available"
+msgstr "Доступно"
+
+#: dashboards/vsm/pg-status/templates/pg-status/index.html:114
+msgid "Capacity Total"
+msgstr "Доступно всего"
+
+#: dashboards/vsm/pool-status/panel.py:23
+#: dashboards/vsm/pool-status/templates/pool-status/index.html:20
+msgid "Pool Status"
+msgstr "Статус пула"
+
+#: dashboards/vsm/pool-status/tables.py:82
+#: dashboards/vsm/poolsmanagement/form.py:44
+#: dashboards/vsm/poolsmanagement/tables.py:93
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:43
+#: dashboards/vsm/rbdpools/form.py:52 dashboards/vsm/rbdpools/tables.py:116
+#: dashboards/vsm/rbdpools/tables.py:157
+msgid "Tag"
+msgstr "Тэг"
+
+#: dashboards/vsm/pool-status/tables.py:84
+#: dashboards/vsm/poolsmanagement/tables.py:87
+#: dashboards/vsm/rbdpools/tables.py:113
+msgid "Size"
+msgstr "Размер"
+
+#: dashboards/vsm/pool-status/tables.py:85
+msgid "PG Count"
+msgstr "Кол-во PG"
+
+#: dashboards/vsm/pool-status/tables.py:86
+msgid "PgP Count"
+msgstr "Кол-во PgP"
+
+#: dashboards/vsm/pool-status/tables.py:88
+msgid "Create By"
+msgstr "Создан"
+
+#: dashboards/vsm/pool-status/tables.py:89
+msgid "KB Used"
+msgstr "Использовано (KB)"
+
+#: dashboards/vsm/pool-status/tables.py:90
+#: dashboards/vsm/rbd-status/tables.py:83
+msgid "Objects"
+msgstr "Объектов"
+
+#: dashboards/vsm/pool-status/tables.py:91
+msgid "Clones"
+msgstr "Клонов"
+
+#: dashboards/vsm/pool-status/tables.py:92
+msgid "Degraded"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:93
+msgid "Unfound"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:94
+msgid "Read Ops"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:95
+msgid "Read KB"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:96
+msgid "Write Ops"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:97
+msgid "Write KB"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:98
+msgid "Client READ B/S"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:99
+msgid "Client Write B/S"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:100
+msgid "Client Ops/s"
+msgstr ""
+
+#: dashboards/vsm/pool-status/tables.py:105
+msgid "Pool List"
+msgstr "Список пулов"
+
+#: dashboards/vsm/poolsmanagement/form.py:36
+#: dashboards/vsm/rbdpools/form.py:35
+msgid "Pool name"
+msgstr "Имя пула"
+
+#: dashboards/vsm/poolsmanagement/form.py:50
+msgid "Erasure Coded Profile"
+msgstr "EC профайл"
+
+#: dashboards/vsm/poolsmanagement/form.py:51
+msgid "Erasure Coded Failure Domain"
+msgstr "Домен отказоустойчивости EC"
+
+#: dashboards/vsm/poolsmanagement/form.py:66
+#: dashboards/vsm/rbdpools/form.py:69
+msgid "Failed to get storage_group_list."
+msgstr "Не удается получить storage_group_list."
+
+#: dashboards/vsm/poolsmanagement/form.py:83
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:35
+msgid "Cache Tier Pool"
+msgstr "Кэш пул"
+
+#: dashboards/vsm/poolsmanagement/panel.py:23
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/index.html:20
+msgid "Manage Pools"
+msgstr "Интеграция пулов"
+
+#: dashboards/vsm/poolsmanagement/tables.py:37
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:20
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:23
+#: dashboards/vsm/templates/vsm/flocking/_create.html:24
+#: dashboards/vsm/templates/vsm/flocking/create.html:23
+msgid "Create Replicated Pool"
+msgstr "Создать реплицируемый пул"
+
+#: dashboards/vsm/poolsmanagement/tables.py:43
+msgid "Create EC Pool"
+msgstr "Создать EC пул"
+
+#: dashboards/vsm/poolsmanagement/tables.py:49
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:20
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:23
+#: dashboards/vsm/templates/vsm/flocking/_add_cache_tier.html:24
+#: dashboards/vsm/templates/vsm/flocking/add_cache_tier.html:23
+msgid "Add Cache Tier"
+msgstr "Добавить кэш пул"
+
+#: dashboards/vsm/poolsmanagement/tables.py:55
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/remove_cache_tier.html:20
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/remove_cache_tier.html:23
+#: dashboards/vsm/templates/vsm/flocking/_remove_cache_tier.html:24
+#: dashboards/vsm/templates/vsm/flocking/_remove_cache_tier.html:40
+#: dashboards/vsm/templates/vsm/flocking/remove_cache_tier.html:23
+msgid "Remove Cache Tier"
+msgstr "Удалить кэш пул"
+
+#: dashboards/vsm/poolsmanagement/tables.py:86
+#: dashboards/vsm/rbdpools/tables.py:112 dashboards/vsm/rbdpools/tables.py:144
+msgid "Placement Group Count"
+msgstr "Количество PG"
+
+#: dashboards/vsm/poolsmanagement/tables.py:88
+msgid "Quota (GB)"
+msgstr "Квота (ГБ)"
+
+#: dashboards/vsm/poolsmanagement/tables.py:89
+msgid "Cache Tier Status"
+msgstr "Статус кэш пула"
+
+#: dashboards/vsm/poolsmanagement/tables.py:90
+msgid "Erasure Code Status"
+msgstr "EC"
+
+#: dashboards/vsm/poolsmanagement/tables.py:92
+#: dashboards/vsm/rbdpools/tables.py:115 dashboards/vsm/rbdpools/tables.py:156
+msgid "Created By"
+msgstr "Создан пользователем"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:46
+msgid "Storage Tier Pool"
+msgstr "Пул данных"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:57
+msgid "Cache Mode"
+msgstr "Режим кэширования"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:68
+msgid "FORCE NONEMPTY"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:73
+msgid "Advanced Settings"
+msgstr "Продвинутые настройки"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:79
+msgid "Hit Set Type"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:91
+msgid "Hit Set Count"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:99
+msgid "Hit Set Period(s)"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:108
+msgid "Target Maximum Memory(MB)"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:118
+msgid "Target Dirty Ratio"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:128
+msgid "Target Full Ratio"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:137
+msgid "Target Maximum Objects"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:146
+msgid "Target Minimum Flush Age(m)"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:154
+msgid "Target Minimum Evict Age(m)"
+msgstr ""
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/add_cache_tier.html:166
+#: dashboards/vsm/templates/vsm/flocking/_add_cache_tier.html:35
+#: dashboards/vsm/templates/vsm/flocking/_remove_cache_tier.html:35
+msgid "From here you can create cache tiers"
+msgstr "Здесь вы можете создать кэш пул"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_erasure_coded_pool.html:20
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_erasure_coded_pool.html:23
+#: dashboards/vsm/templates/vsm/flocking/_create_ec_pool.html:24
+#: dashboards/vsm/templates/vsm/flocking/_create_ec_pool.html:40
+#: dashboards/vsm/templates/vsm/flocking/create_ec_pool.html:23
+msgid "Create Erasure Coded Pool"
+msgstr "Создать EC пул"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_erasure_coded_pool.html:38
+msgid "Enable Pool Quota"
+msgstr "Активировать квоту пула"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_erasure_coded_pool.html:49
+#: dashboards/vsm/templates/vsm/flocking/_create_ec_pool.html:35
+msgid "From here you can create an erasure coded pool"
+msgstr "Здесь вы можете создать EC пул"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:36
+msgid "Pool Name"
+msgstr "Имя пула"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:60
+msgid "Enable PG Auto-tune"
+msgstr "Включить PG Auto-tune"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:69
+msgid "Pool Quota(GB)"
+msgstr "Квота пула"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/create_replicated_pool.html:80
+#: dashboards/vsm/templates/vsm/flocking/_create.html:35
+msgid "From here you can create a new pool."
+msgstr "Здесь вы можете создать новый пул"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/index.html:23
+#: dashboards/vsm/rbdpools/templates/poolsmanagement/index.html:23
+msgid "All Pools"
+msgstr "Начать пулы"
+
+#: dashboards/vsm/poolsmanagement/templates/poolsmanagement/remove_cache_tier.html:40
+msgid "From here you can remove cache tiers"
+msgstr "Здесь вы можете удалить кэш пул"
+
+#: dashboards/vsm/poolsmanagement/views.py:51
+#: dashboards/vsm/rbdpools/views.py:75 dashboards/vsm/rbdpools/views.py:106
+msgid "Unable to retrieve storage pool list. "
+msgstr "Не удается получить список пулов данных"
+
+#: dashboards/vsm/presentingpools/panel.py:23
+msgid "Presenting Pools"
+msgstr ""
+
+#: dashboards/vsm/rbd-status/panel.py:23
+#: dashboards/vsm/rbd-status/templates/rbd-status/index.html:20
+msgid "RBD Status"
+msgstr "Статус RBD"
+
+#: dashboards/vsm/rbd-status/tables.py:80
+msgid "Pool"
+msgstr "Пул"
+
+#: dashboards/vsm/rbd-status/tables.py:81
+msgid "Image Name"
+msgstr "Имя образа"
+
+#: dashboards/vsm/rbd-status/tables.py:82
+msgid "Size(MB)"
+msgstr "Размер (МБ)"
+
+#: dashboards/vsm/rbd-status/tables.py:84
+msgid "Order"
+msgstr "Порядок"
+
+#: dashboards/vsm/rbd-status/tables.py:85
+msgid "Format"
+msgstr "Формат"
+
+#: dashboards/vsm/rbd-status/tables.py:90
+msgid "RBD List"
+msgstr "Список томов"
+
+#: dashboards/vsm/rbdpools/form.py:44 dashboards/vsm/rbdpools/tables.py:147
+msgid "OpenStack/Region"
+msgstr ""
+
+#: dashboards/vsm/rbdpools/form.py:45 dashboards/vsm/rbdpools/tables.py:150
+msgid "Cinder Volume Host"
+msgstr ""
+
+#: dashboards/vsm/rbdpools/form.py:46 dashboards/vsm/rbdpools/tables.py:145
+msgid "Replication Factor"
+msgstr "Фактор репликации"
+
+#: dashboards/vsm/rbdpools/form.py:48
+msgid "The replication required to set as an integer,the default number is 3"
+msgstr "Фактор репликации (по умолчанию - 3)"
+
+#: dashboards/vsm/rbdpools/form.py:63
+msgid "Select a storage group"
+msgstr "Выберите группу хранения"
+
+#: dashboards/vsm/rbdpools/panel.py:23
+#: dashboards/vsm/rbdpools/templates/rbdpools/index.html:20
+msgid "Manage RBD Pools"
+msgstr "Управление пулами"
+
+#: dashboards/vsm/rbdpools/tables.py:31
+msgid "Add Pool to OpenStack"
+msgstr "Добавить пул к OpenStack'у"
+
+#: dashboards/vsm/rbdpools/tables.py:32
+msgid "Scheduled Present Pools"
+msgstr "Запланировать предоставление пулов"
+
+#: dashboards/vsm/rbdpools/tables.py:76
+msgid "Present Pools"
+msgstr "Интегрировать пулы"
+
+#: dashboards/vsm/rbdpools/tables.py:117 dashboards/vsm/rbdpools/tables.py:158
+msgid "Attach Status"
+msgstr "Статус интерграции"
+
+#: dashboards/vsm/rbdpools/tables.py:122
+msgid "Manage Openstack RBD Pools"
+msgstr "Управление RBD пулами OpenStack'а"
+
+#: dashboards/vsm/rbdpools/tables.py:153
+msgid "As Glance Store Pool"
+msgstr "Как пул Glance'а"
+
+#: dashboards/vsm/rbdpools/tables.py:162
+#: dashboards/vsm/rbdpools/templates/rbdpools/rbdsaction.html:20
+msgid "Present RBD Pools"
+msgstr "Предоставить RBD пулы"
+
+#: dashboards/vsm/recipe/panel.py:23
+msgid "Recipe"
+msgstr "Рецепт"
+
+#: dashboards/vsm/settings/templates/settings/index.html:42
+msgid "New Value"
+msgstr "Новое значение"
+
+#: dashboards/vsm/storage-group-management/forms.py:36
+msgid "Storage Group name"
+msgstr "Имя группы"
+
+#: dashboards/vsm/storage-group-management/forms.py:41
+#: dashboards/vsm/storage-group-management/forms.py:49
+#: dashboards/vsm/storage-group-management/forms.py:57
+msgid "The string may only contain letters ,numbers, dot and underline"
+msgstr "Строка может содержать только буквы, номера, точку и почеркивание"
+
+#: dashboards/vsm/storage-group-management/forms.py:44
+msgid "Storage Group Friendly name"
+msgstr "Описание"
+
+#: dashboards/vsm/storage-group-management/forms.py:80
+#, python-format
+msgid "Successfully created Storage Group: %s"
+msgstr ""
+
+#: dashboards/vsm/storage-group-management/templates/storage-group-management/createstoragegroup.html:23
+#: dashboards/vsm/templates/vsm/flocking/_createstoragegroup.html:24
+#: dashboards/vsm/templates/vsm/flocking/createstoragegroup.html:23
+#: dashboards/vsm/templates/vsm/flocking/createzone.html:23
+msgid "Create Storage Group"
+msgstr "Создать группу хранения"
+
+#: dashboards/vsm/storage-group-management/templates/storage-group-management/createstoragegroup.html:39
+#: dashboards/vsm/templates/vsm/flocking/_createstoragegroup.html:35
+msgid "From here you can create a new storage group"
+msgstr "Здесь вы можете создать группу хранения"
+
+#: dashboards/vsm/storage-group-management/templates/storage-group-management/index.html:20
+#: dashboards/vsm/zonemgmt/panel.py:23
+#: dashboards/vsm/zonemgmt/templates/zonemgmt/index.html:20
+#: dashboards/vsm/zonemgmt/templates/zonemgmt/index.html:23
+msgid "Manage Zones"
+msgstr "Управление зонами"
+
+#: dashboards/vsm/storage-group-status/panel.py:23
+#: dashboards/vsm/storage-group-status/templates/storage-group-status/index.html:20
+msgid "Storage Group Status"
+msgstr "Статус групп хранения"
+
+#: dashboards/vsm/storage-group-status/tables.py:90
+msgid "Attached Pools"
+msgstr "Пулы"
+
+#: dashboards/vsm/storage-group-status/tables.py:91
+msgid "Capacity Total (GB)"
+msgstr "Полная ёмкость (ГБ)"
+
+#: dashboards/vsm/storage-group-status/tables.py:92
+msgid "Capacity Used (GB)"
+msgstr "Использовано (ГБ)"
+
+#: dashboards/vsm/storage-group-status/tables.py:93
+msgid "Capacity Available (GB)"
+msgstr "Доступно (ГБ)"
+
+#: dashboards/vsm/storage-group-status/tables.py:95
+msgid "Percent Used Capacity(%)"
+msgstr "Использовано %"
+
+#: dashboards/vsm/storage-group-status/tables.py:98
+msgid "Largest Node Capacity Used (GB)"
+msgstr "Использование наибольшей ноды (ГБ)"
+
+#: dashboards/vsm/storage-group-status/tables.py:101
+msgid "Warning"
+msgstr "Предупреждения"
+
+#: dashboards/vsm/storage-group-status/templates/storage-group-status/index.html:29
+msgid "Threshold"
+msgstr "Порог"
+
+#: dashboards/vsm/storage-group-status/templates/storage-group-status/index.html:34
+msgid "Capacity Warning Thresholds"
+msgstr "Пороги предупреждения по емкости"
+
+#: dashboards/vsm/storage-group-status/templates/storage-group-status/index.html:39
+msgid "Storage Group Near Full"
+msgstr "Группа хранения почти полная(%)"
+
+#: dashboards/vsm/storage-group-status/templates/storage-group-status/index.html:43
+msgid "Storage Group Full"
+msgstr "Группа хранения полная(%)"
+
+#: dashboards/vsm/storage-group-status/templates/storage-group-status/index.html:47
+msgid "Ceph OSD Near Full"
+msgstr "OSD почти полная(%)"
+
+#: dashboards/vsm/storage-group-status/templates/storage-group-status/index.html:51
+msgid "Ceph OSD Full"
+msgstr "OSD полная(%)"
+
+#: dashboards/vsm/storageservermgmt/panel.py:23
+#: dashboards/vsm/storageservermgmt/templates/storageservermgmt/addservers.html:20
+#: dashboards/vsm/storageservermgmt/templates/storageservermgmt/index.html:20
+#: dashboards/vsm/storageservermgmt/templates/storageservermgmt/index.html:23
+#: dashboards/vsm/storageservermgmt/templates/storageservermgmt/serversaction.html:20
+#: dashboards/vsm/storageservermgmt/templates/storageservermgmt/serversaction.html:23
+msgid "Manage Servers"
+msgstr "Управление серверами"
+
+#: dashboards/vsm/storageservermgmt/tables.py:71
+msgid "Reset"
+msgstr "Сброс"
+
+#: dashboards/vsm/storageservermgmt/tables.py:72
+msgid "Status Rested"
+msgstr ""
+
+#: dashboards/vsm/storageservermgmt/tables.py:74
+msgid "Servers Status"
+msgstr "Статус серверов"
+
+#: dashboards/vsm/storageservermgmt/tables.py:86
+#: dashboards/vsm/storageservermgmt/tables.py:282
+#: dashboards/vsm/storageservermgmt/templates/storageservermgmt/addservers.html:23
+#: dashboards/vsm/templates/vsm/flocking/_addservers.html:24
+#: dashboards/vsm/templates/vsm/flocking/_addservers.html:33
+msgid "Add Servers"
+msgstr "Добавить серверы"
+
+#: dashboards/vsm/storageservermgmt/tables.py:92
+#: dashboards/vsm/storageservermgmt/tables.py:314
+#: dashboards/vsm/templates/vsm/flocking/_removeservers.html:24
+#: dashboards/vsm/templates/vsm/flocking/_removeservers.html:33
+msgid "Remove Servers"
+msgstr "Удалить серверы"
+
+#: dashboards/vsm/storageservermgmt/tables.py:98
+#: dashboards/vsm/storageservermgmt/tables.py:342
+#: dashboards/vsm/templates/vsm/flocking/_addmonitors.html:24
+#: dashboards/vsm/templates/vsm/flocking/_addmonitors.html:33
+#: dashboards/vsm/templates/vsm/flocking/addmonitors.html:23
+msgid "Add Monitors"
+msgstr "Добавить мониторы"
+
+#: dashboards/vsm/storageservermgmt/tables.py:104
+#: dashboards/vsm/storageservermgmt/tables.py:354
+#: dashboards/vsm/templates/vsm/flocking/_removemonitors.html:24
+#: dashboards/vsm/templates/vsm/flocking/_removemonitors.html:33
+#: dashboards/vsm/templates/vsm/flocking/removemonitors.html:23
+msgid "Remove Monitors"
+msgstr "Удалить мониторы"
+
+#: dashboards/vsm/storageservermgmt/tables.py:110
+#: dashboards/vsm/storageservermgmt/tables.py:361
+msgid "Start Servers"
+msgstr "Запустить серверы"
+
+#: dashboards/vsm/storageservermgmt/tables.py:116
+#: dashboards/vsm/storageservermgmt/tables.py:368
+msgid "Stop Servers"
+msgstr "Остановить серверы"
+
+#: dashboards/vsm/storageservermgmt/tables.py:128
+msgid "Shell"
+msgstr ""
+
+#: dashboards/vsm/storageservermgmt/tables.py:160
+msgid "Cluster Server List"
+msgstr "Список серверов кластера"
+
+#: dashboards/vsm/storageservermgmt/tables.py:334
+msgid "Servers"
+msgstr "Серверы"
+
+#: dashboards/vsm/storageservermgmt/tables.py:338
+msgid "isMonitor"
+msgstr "Монитор"
+
+#: dashboards/vsm/templates/vsm/flocking/_add_cache_tier.html:40
+msgid "Create Cache Tier"
+msgstr "Добавить кэш пул"
+
+#: dashboards/vsm/templates/vsm/flocking/_addhost.html:24
+#: dashboards/vsm/templates/vsm/flocking/addhost.html:23
+msgid "Add Host"
+msgstr "Добавить хост"
+
+#: dashboards/vsm/templates/vsm/flocking/_addhost.html:35
+msgid "From here you can add a new host"
+msgstr "Здесь вы можете добавить хост"
+
+#: dashboards/vsm/templates/vsm/flocking/_addhost.html:40
+msgid "Create Storage Pool"
+msgstr "Создать пул данных"
+
+#: dashboards/vsm/templates/vsm/flocking/_createstoragegroup.html:40
+msgid "Create Storge Group"
+msgstr "Создать группу хранения"
+
+#: dashboards/vsm/templates/vsm/flocking/_createuser.html:24
+#: dashboards/vsm/templates/vsm/flocking/_createuser.html:42
+#: dashboards/vsm/templates/vsm/flocking/createuser.html:23
+#: dashboards/vsm/usermgmt/tables.py:81
+#: dashboards/vsm/usermgmt/templates/usermgmt/create.html:23
+#: dashboards/vsm/usermgmt/templates/usermgmt/create.html:53
+msgid "Create User"
+msgstr "Создать пользователя"
+
+#: dashboards/vsm/templates/vsm/flocking/_createuser.html:35
+#: dashboards/vsm/usermgmt/templates/usermgmt/create.html:45
+msgid "From here you can create a user "
+msgstr "Здесь вы можете создать пользователя"
+
+#: dashboards/vsm/templates/vsm/flocking/_createuser.html:36
+#: dashboards/vsm/usermgmt/templates/usermgmt/create.html:46
+msgid "Your user name must be combination of letter,number ,'@', '.' and '_' "
+msgstr ""
+"Имя пользователя должно содержать буквы, цифры, @, точку и подчеркивание"
+
+#: dashboards/vsm/templates/vsm/flocking/_createuser.html:37
+#: dashboards/vsm/usermgmt/templates/usermgmt/create.html:47
+#, python-format
+msgid ""
+"Your password must be at least 8 characters long, and contain at least one "
+"number, one upper case letter, one lower case letter, and  one of the "
+"special characters !@#$%%^&*(){}[]<>?"
+msgstr ""
+"Пароль должен состоять из минимум 8 символов, и содежать цифры, заглавные и "
+"прописные буквы и хотя один символ из списка !@#$%%^&*(){}[]<>?"
+
+#: dashboards/vsm/templates/vsm/flocking/_createzone.html:24
+#: dashboards/vsm/templates/vsm/flocking/_createzone.html:40
+msgid "Create Zone"
+msgstr "Создать зону"
+
+#: dashboards/vsm/templates/vsm/flocking/_createzone.html:35
+msgid "From here you can create a new zone"
+msgstr "Здесь вы можете создать зону"
+
+#: dashboards/vsm/templates/vsm/flocking/_openstackconnect.html:35
+msgid "Provide Tenant Name, UserName, Password, Auth Url and Region Name for "
+msgstr ""
+
+#: dashboards/vsm/templates/vsm/flocking/_openstackconnect.html:36
+msgid ""
+"OpenStack Endpoint to enable VSM to connect pools to OpenStack Cinder. If "
+"you have "
+msgstr ""
+
+#: dashboards/vsm/templates/vsm/flocking/_openstackconnect.html:37
+msgid "only one region, you can leave a blank of the Region Name."
+msgstr ""
+
+#: dashboards/vsm/templates/vsm/flocking/_openstackconnect.html:42
+msgid "Add IP"
+msgstr "Добавить IP"
+
+#: dashboards/vsm/templates/vsm/flocking/addservers.html:23
+msgid "Add Hosts"
+msgstr "Добавить хосты"
+
+#: dashboards/vsm/templates/vsm/flocking/createcluster.html:32
+msgid "integrateCluster"
+msgstr ""
+
+#: dashboards/vsm/templates/vsm/flocking/index.html:20
+msgid "Storage Pool"
+msgstr "Пул хранения"
+
+#: dashboards/vsm/templates/vsm/flocking/index.html:28
+msgid "Storage Pool Management"
+msgstr "Управление пулами"
+
+#: dashboards/vsm/templates/vsm/flocking/removeservers.html:23
+msgid "Remove Hosts"
+msgstr "Удалить хосты"
+
+#: dashboards/vsm/usermgmt/forms.py:48
+msgid "Passwords do not match."
+msgstr "Пароли не совпадают"
+
+#: dashboards/vsm/usermgmt/forms.py:54
+msgid "User name"
+msgstr "Имя пользователя"
+
+#: dashboards/vsm/usermgmt/forms.py:59
+msgid "Please enter a vaild User Name"
+msgstr "Пожалуйста введите корректное имя пользователя"
+
+#: dashboards/vsm/usermgmt/forms.py:70 dashboards/vsm/usermgmt/forms.py:100
+msgid "Confirm Password"
+msgstr "Подтверждение пароля"
+
+#: dashboards/vsm/usermgmt/forms.py:116
+msgid "Items Per Page"
+msgstr "Элементов на страницу"
+
+#: dashboards/vsm/usermgmt/panel.py:23
+msgid "Add/Remove User"
+msgstr "Создать/удалить пользователя"
+
+#: dashboards/vsm/usermgmt/tables.py:30
+msgid "Delete"
+msgstr "Удалить"
+
+#: dashboards/vsm/usermgmt/tables.py:31
+msgid "Deleted"
+msgstr "Удалено"
+
+#: dashboards/vsm/usermgmt/tables.py:32 dashboards/vsm/usermgmt/tables.py:46
+#: dashboards/vsm/usermgmt/tables.py:60
+msgid "User"
+msgstr "Пользователь"
+
+#: dashboards/vsm/usermgmt/tables.py:33 dashboards/vsm/usermgmt/tables.py:47
+#: dashboards/vsm/usermgmt/tables.py:61
+#: dashboards/vsm/usermgmt/templates/usermgmt/index.html:23
+msgid "Users"
+msgstr "Пользователи"
+
+#: dashboards/vsm/usermgmt/tables.py:72
+msgid "Change Password"
+msgstr "Поменять пароль"
+
+#: dashboards/vsm/usermgmt/tables.py:90
+msgid "Setting"
+msgstr "Настройки"
+
+#: dashboards/vsm/usermgmt/tables.py:99
+msgid "Email"
+msgstr "Эл. почта"
+
+#: dashboards/vsm/usermgmt/tables.py:104
+msgid "User List"
+msgstr "Список пользователей"
+
+#: dashboards/vsm/usermgmt/templates/usermgmt/index.html:20
+msgid "Add/Remove Users"
+msgstr "Добавить/удалить пользователей"
+
+#: dashboards/vsm/usermgmt/templates/usermgmt/settings.html:20
+#: dashboards/vsm/usermgmt/templates/usermgmt/settings.html:24
+msgid "User Setting"
+msgstr "Настройки пользователя"
+
+#: dashboards/vsm/usermgmt/templates/usermgmt/settings.html:46
+msgid "Modify dashboard settings for your user."
+msgstr ""
+
+#: dashboards/vsm/usermgmt/templates/usermgmt/update.html:20
+#: dashboards/vsm/usermgmt/templates/usermgmt/update.html:24
+#: dashboards/vsm/usermgmt/templates/usermgmt/update.html:55
+msgid "Update User"
+msgstr "Обновить пользователя"
+
+#: dashboards/vsm/usermgmt/templates/usermgmt/update.html:46
+msgid "From here you can edit the user's details."
+msgstr "Здесь вы можете редактировать информацию о пользователе."
+
+#: dashboards/vsm/usermgmt/templates/usermgmt/update.html:47
+#, python-format
+msgid ""
+"Your Password Must contain at least one number, one uppercase character, one "
+"lowercase character and one special character (eg @#$%%^&*.:;~\\|[]{} )."
+msgstr ""
+"Пароль должен состоять из минимум 8 символов, и содежать цифры, заглавные и "
+"прописные буквы и хотя один символ из списка !@#$%%^&*(){}[]<>?"
+
+#: dashboards/vsm/usermgmt/views.py:92
+msgid "Unable to update user."
+msgstr "Не удалось обновить пользователя."
+
+#: dashboards/vsm/zonemgmt/templates/zonemgmt/index.html:41
+msgid "Zone Name"
+msgstr "Имя"
+
+#: dashboards/vsm/zonemgmt/templates/zonemgmt/index.html:50
+msgid "Parent Zone Name"
+msgstr "Родительской зона"
+
+#: dashboards/vsm/zonemgmt/templates/zonemgmt/index.html:59
+msgid "Parent Zone Type"
+msgstr "Тип родительской зоны"
+
+#: settings.py:171
+msgid "Bulgarian (Bulgaria)"
+msgstr ""
+
+#: settings.py:172
+msgid "Czech"
+msgstr ""
+
+#: settings.py:173
+msgid "English"
+msgstr "Английский"
+
+#: settings.py:174
+msgid "Spanish"
+msgstr ""
+
+#: settings.py:175
+msgid "French"
+msgstr ""
+
+#: settings.py:176
+msgid "Italiano"
+msgstr ""
+
+#: settings.py:177
+msgid "Japanese"
+msgstr ""
+
+#: settings.py:178
+msgid "Korean (Korea)"
+msgstr ""
+
+#: settings.py:179
+msgid "Dutch (Netherlands)"
+msgstr ""
+
+#: settings.py:180
+msgid "Polish"
+msgstr ""
+
+#: settings.py:181
+msgid "Portuguese"
+msgstr ""
+
+#: settings.py:182
+msgid "Portuguese (Brazil)"
+msgstr ""
+
+#: settings.py:183
+msgid "Russian"
+msgstr "Русский"
+
+#: settings.py:184
+msgid "Simplified Chinese"
+msgstr ""
+
+#: settings.py:185
+msgid "Traditional Chinese"
+msgstr ""
+
+#: templates/403.html:21 templates/403.html.py:26
+msgid "Forbidden"
+msgstr "Запрещено"
+
+#: templates/403.html:37 templates/404.html:36 templates/500.html:89
+msgid "Overview"
+msgstr "Обзор"
+
+#: templates/404.html:21
+msgid "Page Not Found"
+msgstr "Страница не найдена"
+
+#: templates/404.html:26
+msgid "The page you were looking for doesn't exist"
+msgstr "Запрашиваемой страницы не существует"
+
+#: templates/404.html:27
+msgid "You may have mistyped the address or the page may have moved."
+msgstr "Возможно, вы ошиблись или данная страница была удалена."
+
+#: templates/500.html:36
+msgid "Server error"
+msgstr "Ошибка сервера"
+
+#: templates/500.html:83
+msgid "Something went wrong!"
+msgstr "Что-то пошло не так!"
+
+#: templates/500.html:84
+msgid "An unexpected error has occurred. Try using the \\"
+msgstr "Возникла непредвиденная ошибка. Попробуйте добавить \\ к URL"
+
+#: templates/_header.html:3
+msgid "Logged in as"
+msgstr "Вы вошли как"
+
+#: templates/_header.html:4
+msgid "Sign Out"
+msgstr "Выход"
+
+#: templates/auth/_login.html:5
+msgid "Log In"
+msgstr "Вход"
+
+#: templates/auth/_login.html:15
+msgid "You do not have permission to access the resource:"
+msgstr "Недостаточно прав на ресурс:"
+
+#: templates/auth/_login.html:17
+#, python-format
+msgid ""
+"Login as different user or go back to <a href=\"%(home_url)s\"> home page</a>"
+msgstr ""
+"Войдите как другой пользователь или вернитесь на <a href=\"%(home_url)s\"> "
+"home page</a>"
+
+#: templates/auth/_login.html:32
+msgid "Sign In"
+msgstr "Вход"
+
+#: templates/auth/login.html:4 templates/splash.html:8
+msgid "Login"
+msgstr "Имя пользователя"
+
+#: templates/horizon/_messages.html:7
+msgid "Info: "
+msgstr "Информация: "
+
+#: templates/horizon/_messages.html:13
+msgid "Warning: "
+msgstr ""
+
+#: templates/horizon/_messages.html:19
+msgid "Success: "
+msgstr ""
+
+#: templates/horizon/_messages.html:25
+msgid "Error: "
+msgstr ""
+
+#: templates/horizon/common/_data_table.html:54
+msgid "Summary"
+msgstr ""
+
+#: templates/horizon/common/_data_table.html:63
+#, python-format
+msgid "Displaying %(counter)s item"
+msgid_plural "Displaying %(counter)s items"
+msgstr[0] "Отображен %(counter)s объект"
+msgstr[1] "Отображены %(counter)s объектов"
+
+#: templates/horizon/common/_data_table_row_actions.html:10
+msgid "More"
+msgstr "Больше"
+
+#: templates/horizon/common/_data_table_table_actions.html:13
+#: templates/horizon/common/_data_table_table_actions.html:23
+#: templates/horizon/common/_workflow_step_update_members.html:11
+#: templates/horizon/common/_workflow_step_update_members.html:17
+msgid "Filter"
+msgstr "Фильтровать"
+
+#: templates/horizon/common/_formset_table.html:35
+msgid "Add a row"
+msgstr ""
+
+#: templates/horizon/common/_limit_summary.html:4
+msgid "Limit Summary"
+msgstr ""
+
+#: templates/horizon/common/_limit_summary.html:8
+#: templates/horizon/common/_limit_summary.html:15
+#: templates/horizon/common/_limit_summary.html:22
+#: templates/horizon/common/_limit_summary.html:29
+#: templates/horizon/common/_limit_summary.html:36
+#: templates/horizon/common/_limit_summary.html:43
+#: templates/horizon/common/_limit_summary.html:50
+#, python-format
+msgid "Used <span> %(used)s </span> of <span> %(available)s </span>"
+msgstr ""
+
+#: templates/horizon/common/_limit_summary.html:21 usage/tables.py:36
+msgid "RAM"
+msgstr ""
+
+#: templates/horizon/common/_limit_summary.html:28
+msgid "Floating IPs"
+msgstr ""
+
+#: templates/horizon/common/_limit_summary.html:35
+msgid "Security Groups"
+msgstr ""
+
+#: templates/horizon/common/_limit_summary.html:42
+msgid "Volumes"
+msgstr ""
+
+#: templates/horizon/common/_limit_summary.html:49
+msgid "Volume Storage"
+msgstr ""
+
+#: templates/horizon/common/_resource_browser.html:10
+#, python-format
+msgid "Displaying %(nav_items)s item"
+msgid_plural "Displaying %(nav_items)s items"
+msgstr[0] "Отображен %(nav_items)s объект"
+msgstr[1] "Отображены %(nav_items)s объектов"
+
+#: templates/horizon/common/_resource_browser.html:11
+#, python-format
+msgid "Displaying %(content_items)s item"
+msgid_plural "Displaying %(content_items)s items"
+msgstr[0] "Отображен %(content_items)s объект"
+msgstr[1] "Отображены %(content_items)s объектов"
+
+#: templates/horizon/common/_usage_summary.html:3 usage/tables.py:53
+#: usage/tables.py:79
+msgid "Usage Summary"
+msgstr ""
+
+#: templates/horizon/common/_usage_summary.html:7
+msgid "Select a period of time to query its usage"
+msgstr ""
+
+#: templates/horizon/common/_usage_summary.html:9
+#, python-format
+msgid "<span>From: %(start)s </span><span>To: %(end)s </span>"
+msgstr ""
+
+#: templates/horizon/common/_usage_summary.html:11
+msgid "The date should be in YYYY-mm-dd format."
+msgstr ""
+
+#: templates/horizon/common/_usage_summary.html:16
+msgid "Active Instances"
+msgstr ""
+
+#: templates/horizon/common/_usage_summary.html:17
+msgid "Active RAM"
+msgstr ""
+
+#: templates/horizon/common/_usage_summary.html:18
+msgid "This Period's VCPU-Hours"
+msgstr ""
+
+#: templates/horizon/common/_usage_summary.html:19
+msgid "This Period's GB-Hours"
+msgstr ""
+
+#: templates/horizon/common/_workflow.html:38
+msgid "Back"
+msgstr "Назад"
+
+#: templates/horizon/common/_workflow.html:41
+msgid "Next"
+msgstr "Следующее"
+
+#: test/settings.py:64
+msgid "Password must be between 8 and 18 characters."
+msgstr "Пароль должен быть от 8 до 18 символов."
+
+#: usage/base.py:111
+msgid "Unable to retrieve usage information."
+msgstr ""
+
+#: usage/base.py:114
+msgid "You are viewing data for the future, which may or may not exist."
+msgstr ""
+
+#: usage/base.py:128
+msgid "Unable to retrieve quota information."
+msgstr ""
+
+#: usage/tables.py:26
+msgid "Download CSV Summary"
+msgstr ""
+
+#: usage/tables.py:34
+msgid "Disk"
+msgstr ""
+
+#: usage/tables.py:39
+msgid "VCPU Hours"
+msgstr ""
+
+#: usage/tables.py:43
+msgid "Project Name"
+msgstr ""
+
+#: usage/tables.py:45
+msgid "Disk GB Hours"
+msgstr ""
+
+#: usage/tables.py:68
+msgid "Instance Name"
+msgstr ""
+
+#: utils/validators.py:24
+msgid "Enter a valid User name! "
+msgstr ""
+
+#: utils/validators.py:29 utils/validators.py:35
+msgid "Enter a valid Zone name! "
+msgstr ""
+
+#: utils/validators.py:32
+msgid "Enter a valid Pool name! "
+msgstr ""
