@@ -1212,7 +1212,7 @@ class AgentManager(manager.Manager):
                 # db.osd_delete(context, osd_id)
                 # db.device_delete(context, device_id)
 
-    @periodic_task(service_topic=FLAGS.agent_topic,
+    @periodic_task(run_immediately=True,service_topic=FLAGS.agent_topic,
                    spacing=10)
     def clean_performance_history_data(self, context):
         key = 'keep_performance_data_days'
