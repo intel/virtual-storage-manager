@@ -2,7 +2,6 @@
 
 function preinstall_controller() {
     yum install -y ceph httpd librbd1 MariaDB-client MariaDB-devel MariaDB-server memcached ntp openssh-server openssl openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse smartmontools
-    yum install -y ceph httpd librbd1 MariaDB-client MariaDB-devel MariaDB-server memcached ntp openssh-server openssl openstack-keystone openstack-utils python-devel rabbitmq-server rbd-fuse smartmontools
 }
 
 function preinstall_agent() {
